@@ -1,0 +1,8 @@
+version: '3.7'
+
+services:
+  api:
+    volumes:
+      - ./api:/opt/app
+    environment:
+      - "DEBUG=1"
