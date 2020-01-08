@@ -70,18 +70,37 @@ services:
 
       - "traefik.http.services.api.loadbalancer.server.port=5000"
 
-      # Public router without auth
-      - "traefik.http.routers.api-public.rule=Host(`${DOMAIN}`) && PathPrefix(`/public/`)"
-      - "traefik.http.routers.api-public.entrypoints=https"
-      - "traefik.http.routers.api-public.tls.certresolver=tls"
-      - "traefik.http.middlewares.api-public.redirectscheme.scheme=https"
-      
       # private route with auth
       - "traefik.http.routers.api-private.rule=Host(`${DOMAIN}`) && PathPrefix(`/private/`)"
       - "traefik.http.routers.api-private.entrypoints=https"
       - "traefik.http.routers.api-private.tls.certresolver=tls"
       - "traefik.http.middlewares.api-private.redirectscheme.scheme=https"
       - "traefik.http.routers.api-private.middlewares=traefik-auth@docker"
+
+      # Public router without auth
+      - "traefik.http.routers.api-public.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.api-public.entrypoints=https"
+      - "traefik.http.routers.api-public.tls.certresolver=tls"
+      - "traefik.http.middlewares.api-public.redirectscheme.scheme=https"
+
+  redis:
+    image: redis:5
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - traefik-proxy
+    volumes:
+      - "redis_data:/data"
+    labels:
+      - "traefik.enable=false"
+
+  worker:
+    build: api
+    command: rq worker -u redis://redis
+    networks:
+      - traefik-proxy
+    labels:
+      - "traefik.enable=false"
 
 
 networks:
@@ -91,5 +110,6 @@ networks:
 
 volumes:
   traefik_data:
+  redis_data:
   db_data:
   
