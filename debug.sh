@@ -2,6 +2,7 @@
 
 cd $(dirname $(realpath $0))
 
+
 load_env() {
     # Just make sure that .env gets loaded right
     if [ -f .env ]; then
@@ -17,7 +18,6 @@ check_env() {
         ACME_EMAIL                 # email for lets encrypt cert
         MYSQL_ROOT_PASSWORD        # mysql database password
         AUTH                       # htpasswd for basic auth
-        GF_SECURITY_ADMIN_PASSWORD # grafana password
         DOMAIN                     # domain
     )
 
@@ -36,7 +36,7 @@ check_env() {
     for var_name in ${required_env_vars[@]}; do
         if ! env | grep "^${var_name}=" &> /dev/null; then
             # if var not defined
-            echo "ERROR ${var_name} is not defined! This variable is optional." 1>&2
+            echo "WARN ${var_name} is not defined! This variable is optional." 1>&2
         fi
     done
 }
