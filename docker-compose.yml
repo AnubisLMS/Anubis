@@ -6,10 +6,7 @@ services:
     command:
       - "--api.insecure=true"
 
-      - "--metrics.prometheus=true"
-
       - "--providers.docker=true"
-      - "--providers.docker.swarmmode=true"
       - "--providers.docker.watch"
       - "--providers.docker.exposedbydefault=false"
 
@@ -21,43 +18,29 @@ services:
       - "--certificatesresolvers.tls.acme.email=${ACME_EMAIL}"
       - "--certificatesresolvers.tls.acme.storage=/letsencrypt/acme.json"
     ports:
-      - target: 80
-        published: 80
-        mode: host
-      - target: 443
-        published: 443
-        mode: host
+      - "80:80"
+      - "443:443"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "traefik_data:/letsencrypt"
     networks:
       - traefik-proxy
-    deploy:
-      mode: global
-      placement:
-        constraints:
-          - node.role == manager
-      update_config:
-        parallelism: 1
-        delay: 10s
-      restart_policy:
-        condition: on-failure
-      labels:
-        - "traefik.enable=true"
-
-        - "traefik.http.middlewares.traefik-auth.basicauth.users=${AUTH}"
-        - "traefik.http.middlewares.traefik-auth.basicauth.removeheader=true"
-
-        - "traefik.http.routers.traefik.rule=Host(`traefik.nyu.singles`)"
-        - "traefik.http.routers.traefik.entrypoints=https"
-        - "traefik.http.routers.traefik.tls.certresolver=tls"
-        - "traefik.http.routers.traefik.middlewares=traefik-auth@docker"
-        - "traefik.http.middlewares.traefik.redirectscheme.scheme=https"
-        #- "traefik.http.routers.traefik.service=api@internal"
-        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-
-        - "traefik.http.middlewares.redirect.redirectregex.regex=^http://(.*)"
-        - "traefik.http.middlewares.redirect.redirectregex.replacement=https://$$1"
+    labels:
+      - "traefik.enable=true"
+      
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${AUTH}"
+      - "traefik.http.middlewares.traefik-auth.basicauth.removeheader=true"
+    
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.traefik.entrypoints=https"
+      - "traefik.http.routers.traefik.tls.certresolver=tls"
+      - "traefik.http.routers.traefik.middlewares=traefik-auth@docker"
+      - "traefik.http.middlewares.traefik.redirectscheme.scheme=https"
+      #- "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+    
+      - "traefik.http.middlewares.redirect.redirectregex.regex=^http://(.*)"
+      - "traefik.http.middlewares.redirect.redirectregex.replacement=https://$$1"
 
   db:
     build: ./db
@@ -71,121 +54,34 @@ services:
       - "db_data:/var/lib/mysql"
     networks:
       - traefik-proxy
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      restart_policy:
-        condition: on-failure
-      labels:
-        - "traefik.enable=false"
+    labels:
+      - "traefik.enable=false"
 
   api:
     build: api
-    environment:
-      NODE_ENV: prod
     networks:
       - traefik-proxy
-    deploy:
-      replicas: 2
-      restart_policy:
-        condition: on-failure
-      labels:
-        - "traefik.enable=true"
+    labels:
+      - "traefik.enable=true"
       
-        - "traefik.http.routers.jaime-api-http.rule=Host(`nyu.singles`)"
-        - "traefik.http.routers.jaime-api-http.entrypoints=http"
-        - "traefik.http.routers.jaime-api-http.middlewares=redirect"      
+      - "traefik.http.routers.api-http.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.api-http.entrypoints=http"
+      - "traefik.http.routers.api-http.middlewares=redirect"      
 
-        - "traefik.http.routers.jaime-api.rule=Host(`nyu.singles`)"
-        - "traefik.http.routers.jaime-api.entrypoints=https"
-        - "traefik.http.routers.jaime-api.tls.certresolver=tls"
-        - "traefik.http.services.jaime-api.loadbalancer.server.port=4000"
-        - "traefik.http.middlewares.jaime-api.redirectscheme.scheme=https"
+      - "traefik.http.services.api.loadbalancer.server.port=5000"
 
-  
-  # node-exporter:
-  #   image: prom/node-exporter:latest
-  #   # ports:
-  #   #   - '9100:9100'
-  #   volumes:
-  #     - /sys:/host/sys:ro
-  #     - /:/rootfs:ro
-  #     - /proc:/host/proc:ro
-  #   networks:
-  #     - traefik-proxy
-  
-  # prometheus:
-  #   image: prom/prometheus
-  #   volumes:
-  #     - ./prometheus-grafana/prometheus/:/etc/prometheus/
-  #     - prometheus_data:/prometheus
-  #   command:
-  #     - '--config.file=/etc/prometheus/prometheus.yml'
-  #     - '--storage.tsdb.path=/prometheus'
-  #     - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-  #     - '--web.console.templates=/usr/share/prometheus/consoles'
-  #   networks:
-  #     - traefik-proxy
-  #   deploy:
-  #     restart_policy:
-  #       condition: on-failure
-  #     labels:
-  #       - "traefik.enable=true"
-        
-  #       - "traefik.http.routers.prometheus-http.rule=Host(`prometheus.nyu.singles`)"
-  #       - "traefik.http.routers.prometheus-http.entrypoints=http"
-  #       - "traefik.http.routers.prometheus-http.middlewares=redirect"
-        
-  #       - "traefik.http.routers.prometheus.rule=Host(`prometheus.nyu.singles`)"
-  #       - "traefik.http.routers.prometheus.service=prometheus"
-  #       - "traefik.http.routers.prometheus.entrypoints=https"
-  #       - "traefik.http.routers.prometheus.tls.certresolver=tls"
-  #       #- "traefik.http.routers.prometheus.middlewares=traefik-auth@docker"
-
-  #       # individual IPs should be whitelisted here
-  #       - "traefik.http.middlewares.prometheus.ipwhitelist.sourcerange=172.0.0.0/8"
-
-  #       - "traefik.http.middlewares.prometheus.redirectscheme.scheme=https"
-
-  #       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
-        
-  #       - "traefik.docker.network=traefik-proxy"
-  
-  # grafana:
-  #   image: grafana/grafana
-  #   depends_on:
-  #     - prometheus
-  #   volumes:
-  #     - grafana_data:/var/lib/grafana
-  #     - ./prometheus-grafana/grafana/provisioning/:/etc/grafana/provisioning/
-  #   networks:
-  #     - traefik-proxy
-  #   environment:
-  #     - "GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}"
-  #     - "GF_USERS_ALLOW_SIGN_UP=false"
-  #     - "GF_INSTALL_PLUGINS=grafana-piechart-panel"
-  #   user: "104"
-  #   deploy:
-  #     restart_policy:
-  #       condition: on-failure
-  #     labels:
-  #       - "traefik.enable=true"
-        
-  #       - "traefik.http.routers.grafana-http.rule=Host(`grafana.nyu.singles`)"
-  #       - "traefik.http.routers.grafana-http.entrypoints=http"
-  #       - "traefik.http.routers.grafana-http.middlewares=redirect"
-        
-  #       - "traefik.http.routers.grafana.rule=Host(`grafana.nyu.singles`)"
-  #       - "traefik.http.routers.grafana.service=grafana"
-  #       - "traefik.http.routers.grafana.entrypoints=https"
-  #       - "traefik.http.routers.grafana.tls.certresolver=tls"
-
-  #       - "traefik.http.middlewares.grafana.redirectscheme.scheme=https"
-        
-  #       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
-
-  #       - "traefik.docker.network=traefik-proxy"
+      # Public router without auth
+      - "traefik.http.routers.api-public.rule=Host(`${DOMAIN}`) && PathPrefix(`/public/`)"
+      - "traefik.http.routers.api-public.entrypoints=https"
+      - "traefik.http.routers.api-public.tls.certresolver=tls"
+      - "traefik.http.middlewares.api-public.redirectscheme.scheme=https"
+      
+      # private route with auth
+      - "traefik.http.routers.api-private.rule=Host(`${DOMAIN}`) && PathPrefix(`/private/`)"
+      - "traefik.http.routers.api-private.entrypoints=https"
+      - "traefik.http.routers.api-private.tls.certresolver=tls"
+      - "traefik.http.middlewares.api-private.redirectscheme.scheme=https"
+      - "traefik.http.routers.api-private.middlewares=traefik-auth@docker"
 
 
 networks:
@@ -194,8 +90,6 @@ networks:
 
 
 volumes:
-  prometheus_data:
-  grafana_data:
   traefik_data:
   db_data:
   

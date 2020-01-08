@@ -18,6 +18,7 @@ check_env() {
         MYSQL_ROOT_PASSWORD        # mysql database password
         AUTH                       # htpasswd for basic auth
         GF_SECURITY_ADMIN_PASSWORD # grafana password
+        DOMAIN                     # domain
     )
 
     for var_name in ${required_env_vars[@]}; do
@@ -29,7 +30,7 @@ check_env() {
     done
 
     optional_env_vars=(
-        API_ROOT_PASSWORD     # password to be set for root user of webui
+
     )
 
     for var_name in ${required_env_vars[@]}; do
@@ -45,7 +46,8 @@ main() {
     load_env
     check_env
 
-    docker-compose up -d --force-recreate db
+    docker-compose up -d traefik db
+    docker-compose up -d --force-recreate api
 }
 
 
