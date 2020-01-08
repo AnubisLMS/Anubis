@@ -46,8 +46,8 @@ main() {
     load_env
     check_env
 
-    docker-compose up -d traefik db
-    docker-compose up -d --force-recreate api
+    docker-compose up -d traefik db redis
+    docker-compose up -d --force-recreate --scale worker=3 api worker
 }
 
 
