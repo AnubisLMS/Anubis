@@ -13,4 +13,4 @@ USER os3224
 
 COPY . .
 
-CMD gunicorn -b 0.0.0.0:5000 -w 8 app:app
+CMD gunicorn -b 0.0.0.0:5000 -w 8 src:app
