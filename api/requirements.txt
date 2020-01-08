@@ -2,3 +2,5 @@ flask
 flask-sqlalchemy
 pymysql
 gunicorn
+redis
+rq
