@@ -17,8 +17,10 @@ build_build_image() {
 build_assignment_images() {
     # builds all the test images
     for assignment in $(ls assignments); do
-        docker build -t "os3224-test-${assignment}" "assignments/${asignment}" &> /dev/null
-        echo "./${assignment} os3224-test-${assignment}"
+        if [ -d "./assignments/${assignment}" ]; then
+            docker build -t "os3224-test-${assignment}" "assignments/${asignment}" &> /dev/null
+            echo "./assignments/${assignment} os3224-test-${assignment}"
+        fi
     done
 }
 
