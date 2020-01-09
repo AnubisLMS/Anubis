@@ -4,3 +4,4 @@ pymysql
 gunicorn
 redis
 rq
+docker
