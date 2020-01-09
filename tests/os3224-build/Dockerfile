@@ -6,10 +6,12 @@ FROM ubuntu:14.04
 ENV TOOLPREFIX=""
 
 RUN apt update \
-  && apt install -y make gcc libc6-i386 qemu-system-x86 \
+  && apt install -y git make gcc libc6-i386 qemu-system-x86 \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp/build
 
-COPY ./build.sh /usr/local/bin/build.sh
-RUN chmod +x /usr/local/bin/build.sh
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+CMD /entrypoint.sh
