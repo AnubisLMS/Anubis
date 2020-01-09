@@ -1,5 +1,21 @@
 # Anubis
 
+## Deploy
+You should just need to configure a few environment vars to get this up and running.
+The easiest way to store these would be a `.env` file.
+
+- ACME_EMAIL - email for let encrypt cert
+- MYSQL_ROOT_PASSWORD - root password for database
+- AUTH - http basic auth for traefik and private api
+- DOMAIN - dns domain that the server resides on
+
+#### Generating AUTH
+To generate the AUTH environment variable you can just use: 
+
+```bash
+docker run -it httpd htpasswd -Bbn '<username>' '<password>' 
+```
+
 ## Debugging
 This project requires envrionment variables to be deployed. You can store those in
 a `.env` file to keep things simple. Here is an example `.env` file for debugging.
@@ -9,7 +25,6 @@ a `.env` file to keep things simple. Here is an example `.env` file for debuggin
 ```
 ACME_EMAIL=john.doe@email.com
 MYSQL_ROOT_PASSWORD=password
-GF_SECURITY_ADMIN_PASSWORD=password
 AUTH='root:$2y$05$2VCT7LSzWh7ULSHtQHHxBeTu89WoE5W995MDXc5XVygYCqI3Rn8am'
 DOMAIN=localhost
 ```
