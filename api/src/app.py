@@ -17,5 +17,3 @@ from .routes import public, private
 app.register_blueprint(public)
 app.register_blueprint(private)
 
-
-db.create_all()

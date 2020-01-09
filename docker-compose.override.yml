@@ -4,9 +4,9 @@ services:
   api:
     volumes:
       - ./api:/opt/app
-    command: gunicorn -b 0.0.0.0:5000 -w 1 --reload src:app
     environment:
-      - "DEBUG=1"
+      GUNICORN_OPTIONS: '--reload'
+      DEBUG: 1
 
   worker:
     volumes:
