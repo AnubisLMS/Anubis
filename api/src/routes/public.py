@@ -15,12 +15,19 @@ def webhook():
     """
     This route should be hit by the github when a push happens.
     We should take the the github repo url and enqueue it as a job.
+
+    TODO: add checks to validate request
+    TODO: pull out assignment name and netid from the request
+    TODO: add per student ratelimiting on this endpoint
     """
+
 
     if request.headers['Content-Type'] == 'application/json':
         received_data = request.json
         repo_url = Config.REPO_SKELETAL + received_data["sender"]["login"]
-        enqueue_webhook_job(repo_url)
+        netid='test'
+        assignment_name='test'
+        enqueue_webhook_job(repo_url, netid, assignment_name)
 
     return dumps({
         'success': True

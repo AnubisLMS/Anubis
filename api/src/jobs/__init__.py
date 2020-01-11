@@ -5,8 +5,11 @@ so these functions must reside in a seperate file.
 """
 
 
-def test_repo(*args):
+def test_repo(repo_url, netid, assignment_name):
     """
-    Yet to be implemented
+    This function should launch the apropriate testing container
+    for the assignment, passing along the function arguments.
+
+    TODO: implemented this
     """
-    print(*args)
+    print(repo_url, netid, assignment_name)
