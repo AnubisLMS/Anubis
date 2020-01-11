@@ -59,7 +59,7 @@ def report_all(netid, assignment):
     }
 
     requests.post(
-        'http://api/private/report',
+        'http://api:5000/private/report',
         headers={
             'Content-Type': 'application/json',
         },
