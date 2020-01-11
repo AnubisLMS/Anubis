@@ -25,13 +25,13 @@ def enqueue(func, args):
         q.enqueue(func, args)
 
 
-def enqueue_webhook_job(repo_url):
+def enqueue_webhook_job(*args):
     """
     Enqueues a test job
 
     :repo_url str: github repo url (eg https://github.com/os3224/...)
     """
-    enqueue(test_repo, repo_url)
+    enqueue(test_repo, args)
 
 
 def get_request_ip():
