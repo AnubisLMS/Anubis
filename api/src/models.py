@@ -9,7 +9,7 @@ class Submissions(db.Model):
     __tablename__ = 'submissions'
     id = db.Column(db.Integer, primary_key=True)
     netid = db.Column(db.String(128), index=True)
-    grade = db.Column(db.Integer)
+    assignment = db.Column(db.Text, index=True)
     timestamp = db.Column(db.DateTime, default=datetime.now)
 
 
@@ -19,7 +19,8 @@ class Results(db.Model):
     """
     __tablename__ = 'results'
     id = db.Column(db.Integer, primary_key=True)
-    submissionid = db.Column(db.Integer, db.ForeignKey('submissions.id'), index=True)
+    submissionid = db.Column(db.Integer, db.ForeignKey('submissions.id'))
+    testname = db.Column(db.String(128), index=True)
     stdout = db.Column(db.Text)
     errors = db.Column(db.Text)
     passed = db.Column(db.Boolean)

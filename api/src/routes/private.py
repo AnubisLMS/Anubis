@@ -30,24 +30,25 @@ def handle_report():
     The report json should follow this structure:
 
     report = {
-      netid
+      netid: str
+      assignment: str
       results: [
+        testname: str
         errors: str
         stdout: str
         passed: true
       ]
-      grade: int
     }
     """
     report=request.json
 
     submission=Submissions(
         netid=report['netid'],
-        grade=report['grade'],
     )
 
     results=[
         Results(
+            testname=result['testname'],
             stdout=result['stdout'],
             errors=result['errors'],
             passed=result['passed'],
@@ -63,7 +64,7 @@ def handle_report():
             db.session.add(results)
         db.session.commit()
     except IntegrityError as e:
-        print('ERROR unable to process report {}'.format(report['netid']))
+        print('ERROR unable to process report for {}'.format(report['netid']))
         return dumps({
             'success': False,
             'errors': [ 'unable to process report' ]
