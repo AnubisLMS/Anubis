@@ -6,7 +6,13 @@ FROM ubuntu:14.04
 ENV TOOLPREFIX=""
 
 RUN apt update \
-  && apt install -y git make gcc libc6-i386 qemu-system-x86 \
+  && apt install -y git \
+                    make \
+                    gcc \
+                    libc6-i386 \
+                    qemu-system-x86 \
+                    python3 \
+                    python3-pip \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp/build
