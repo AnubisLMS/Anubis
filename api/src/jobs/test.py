@@ -1,8 +1,7 @@
 import docker
-from sqlalchemy.exc import IntegrityError
 
 
-def test(client, repo_url, netid, assignemtn, submission, mount_location):
+def test(client, repo_url, netid, assignment, submission, mount_location):
     """
     Unlike the build container, not so many extra precautions
     need to be taken to ensure unintended behaviour. The
@@ -21,8 +20,8 @@ def test(client, repo_url, netid, assignemtn, submission, mount_location):
 
     try:
         client.containers.run(
-            'os3224-{}'.format(assignment),
-            [repo_url, netid, assignment, submission.id],
+            'os3224-assignment-{}'.format(assignment),
+            command=['/entrypoint.sh', repo_url, netid, assignment, str(submission.id)],
             network_mode='none',
             privileged=True,
             volumes={

@@ -1,6 +1,9 @@
 from sqlalchemy.exc import IntegrityError
-from ..models import Builds
 import git
+import docker
+
+from ..models import Builds
+from ..app import db
 
 
 def clone(repo_url, path):
@@ -35,8 +38,8 @@ def build(client, repo_url, netid, assignment, submission, mount_location):
 
     try:
         stdout=client.containers.run(
-            'os3224-build'
-            [repo_url, netid, assignment, submission.id],
+            'os3224-build',
+            command=['/entrypoint.sh', repo_url, netid, assignment, str(submission.id)],
             remove=True,
             network_mode='none',
             volumes={

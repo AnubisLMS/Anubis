@@ -7,7 +7,7 @@ from ..models import Submissions
 from .build import build
 from .test import test
 from .utils import report_results, report_error
-
+from ..app import db
 
 """
 This is where we should implement any and all job function for the
