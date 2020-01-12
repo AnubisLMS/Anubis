@@ -19,11 +19,18 @@ def notify_student(submission):
 def index():
     return 'super secret'
 
+@private.route('/report-error', methods=['POST'])
+@log_event('ERROR-REPORT', lambda: 'error report from worker submitted')
+def handle_report_error():
+    pass
+
 
 @private.route('/report', methods=['POST'])
 @log_event('REPORT', lambda: 'report from worker submitted for {}'.format(request.json['netid']))
 def handle_report():
     """
+    TODO redocument and reformat this
+
     This endpoint should only ever be hit by the rq workers. This is where
     they should be posting report jsons. We should document the results,
     then notify the student.

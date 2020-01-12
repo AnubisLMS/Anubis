@@ -13,6 +13,16 @@ class Submissions(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.now)
 
 
+class Build(db.Model):
+    __tablename__ = 'submissions'
+    id = db.Column(db.Integer, primary_key=True)
+    submissionid = db.Column(db.Integer, db.ForeignKey('submissions.id'), index=True)
+
+    stdout=db.Column(db.Text)
+
+    submission = db.relationship('Submissions', backref='builds')
+
+
 class Results(db.Model):
     """
     Results
