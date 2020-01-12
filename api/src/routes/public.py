@@ -32,3 +32,19 @@ def webhook():
     return dumps({
         'success': True
     })
+
+@public.route('/test', methods=['POST'])
+def test_route():
+    repo = 'https://gitlab.com/b1g_J/xv6-public.git'
+    netid = 'test123'
+    assignment = '1'
+
+    enqueue_webhook_job(
+        repo,
+        netid,
+        assignment
+    )
+
+    return dumps({
+        'sucess': True,
+    })
