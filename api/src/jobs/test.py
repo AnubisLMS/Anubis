@@ -2,7 +2,7 @@ import docker
 from sqlalchemy.exc import IntegrityError
 
 
-def test(client, repo_url, netid, assignemtn, submission):
+def test(client, repo_url, netid, assignemtn, submission, mount_location):
     """
     Unlike the build container, not so many extra precautions
     need to be taken to ensure unintended behaviour. The
@@ -16,7 +16,9 @@ def test(client, repo_url, netid, assignemtn, submission):
     :netid str: netid of student
     :assignment: name of assignment being tested
     :submission Submissions: committed submission object
+    :mount_location str: path to persistent job mount
     """
+
     try:
         client.containers.run(
             'os3224-{}'.format(assignment),
@@ -25,9 +27,7 @@ def test(client, repo_url, netid, assignemtn, submission):
             privileged=True,
             volumes={
                 '/mnt/submission': {
-                    'bind': '/tmp/submission-{}'.format(
-                        submission.id,
-                    ),
+                    'bind': mount_location,
                     'mode': 'rw',
                 },
             },

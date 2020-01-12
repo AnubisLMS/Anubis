@@ -10,9 +10,6 @@ RUN apt update \
                     make \
                     gcc \
                     libc6-i386 \
-                    qemu-system-x86 \
-                    python3 \
-                    python3-pip \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp/build

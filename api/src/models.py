@@ -13,8 +13,8 @@ class Submissions(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.now)
 
 
-class Build(db.Model):
-    __tablename__ = 'submissions'
+class Builds(db.Model):
+    __tablename__ = 'builds'
     id = db.Column(db.Integer, primary_key=True)
     submissionid = db.Column(db.Integer, db.ForeignKey('submissions.id'), index=True)
 

@@ -6,6 +6,8 @@ import os
 from ..models import Submissions
 from .build import build
 from .test import test
+from .utils import report_results, report_error
+
 
 """
 This is where we should implement any and all job function for the
@@ -21,6 +23,10 @@ def test_repo(repo_url, netid, assignment):
     """
     This function should launch the apropriate testing container
     for the assignment, passing along the function arguments.
+
+    :repo_url str: url for student repo
+    :netid str: netid of student
+    :assignment str: name of assignment
     """
 
     client=docker.from_env()
@@ -35,20 +41,22 @@ def test_repo(repo_url, netid, assignment):
         db.session.commit()
     except IntegrityError as e:
         # TODO handle integ err
-        return print(e)
+        print('Unable to create submission', e)
+        return False
 
-    mount_path='/tmp/submission-{}'.format(
+    mount_location='/tmp/submission-{}'.format(
         submission.id,
     )
 
-    os.makedirs(mount_path, exist_ok=True)
+    os.makedirs(mount_location, exist_ok=True)
 
-    b=build(
+    build(
         client,
         repo_url,
         netid,
         assignment,
-        submission
+        submission,
+        mount_location
     )
 
     test(
@@ -56,8 +64,16 @@ def test_repo(repo_url, netid, assignment):
         repo_url,
         netid,
         assignment,
-        submission
+        submission,
+        mount_location
     )
 
-    shutil.rmtree(mount_path)
+    report_results(
+        mount_location,
+        netid,
+        assignment,
+        submission.id,
+    )
+
+    shutil.rmtree(mount_location)
 

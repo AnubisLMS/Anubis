@@ -34,10 +34,8 @@ exit_with_failure() {
 
 
 build() {
-    # clone the repo then build the xv6.img file and move it to a more convientent place
+    # build the xv6.img file and move it to a more convientent place
 
-    # clone
-    git clone ${REPO_URL} xv6-public
     cd xv6-public
 
     # build

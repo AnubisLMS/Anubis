@@ -1,8 +1,19 @@
 from sqlalchemy.exc import IntegrityError
-from ..models import Build
+from ..models import Builds
+import git
 
 
-def build(client, repo_url, netid, assignment, submission):
+def clone(repo_url, path):
+    """
+    clone repo to path
+
+    :repo_url str: url for repo
+    :path str: path to clone repo to
+    """
+    git.Git(path).clone(repo_url)
+
+
+def build(client, repo_url, netid, assignment, submission, mount_location):
     """
     Since we are running code that the students wrote,
     we need to take extra steps to prevent them from
@@ -17,7 +28,11 @@ def build(client, repo_url, netid, assignment, submission):
     :netid str: netid of student
     :assignment: name of assignment being tested
     :submission Submissions: committed submission object
+    :mount_location str: path to persistent job mount
     """
+
+    clone(repo_url, mount_location)
+
     try:
         stdout=client.containers.run(
             'os3224-build'
@@ -26,9 +41,7 @@ def build(client, repo_url, netid, assignment, submission):
             network_mode='none',
             volumes={
                 '/mnt/submission': {
-                    'bind': '/tmp/submission-{}'.format(
-                        submission.id,
-                    ),
+                    'bind': mount_location,
                     'mode': 'rw',
                 },
             },
@@ -37,7 +50,7 @@ def build(client, repo_url, netid, assignment, submission):
         # TODO handle this error
         return print('build crashed', e)
 
-    b=Build(
+    b=Builds(
         stdout=stdout,
         submission=submission
     )
