@@ -4,6 +4,7 @@ from json import dumps
 
 from ..app import db
 from ..models import Submissions, Results, Events
+from ..utils import log_event
 
 private = Blueprint('private', __name__, url_prefix='/private')
 

@@ -24,16 +24,17 @@ build:
 	docker-compose build --pull --parallel
 
 debug: build
-	docker-compose up -d traefik redis
+	docker-compose up -d traefik redis db
 	docker-compose up -d --force-recreate --scale worker=3 api worker
 
 deploy: build
-	docker-compose -f ./docker-compose.yml up -d traefik redis
+	docker-compose -f ./docker-compose.yml up -d traefik redis db
 	docker-compose -f ./docker-compose.yml up -d --force-recreate --scale worker=3 api worker
 
 clean:
+	docker-compose kill
 	if [ -n "$(RUNNING_CONTAINERS)" ]; then \
-		docker-compose rm -f $(RUNNING_CONTAINERS); \
+		docker rm -f $(RUNNING_CONTAINERS); \
 	fi
 
 	if [ -n "$(IMAGES)" ]; then \

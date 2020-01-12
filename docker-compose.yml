@@ -61,6 +61,7 @@ services:
     build: api
     networks:
       - traefik-proxy
+    depends_on: [db]
     labels:
       - "traefik.enable=true"
       
