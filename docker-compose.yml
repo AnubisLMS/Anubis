@@ -98,6 +98,7 @@ services:
   worker:
     build: api
     command: rq worker -u redis://redis
+    user: root
     networks:
       - traefik-proxy
     volumes:
