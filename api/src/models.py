@@ -10,6 +10,7 @@ class Submissions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     netid = db.Column(db.String(128), index=True)
     assignment = db.Column(db.Text, index=True)
+    commit = db.Column(db.String(128))
     timestamp = db.Column(db.DateTime, default=datetime.now)
 
 
@@ -33,11 +34,11 @@ class Tests(db.Model):
     submission = db.relationship('Submissions', backref='tests')
 
 
-class Results(db.Model):
+class Reports(db.Model):
     """
     Results
     """
-    __tablename__ = 'results'
+    __tablename__ = 'reports'
     id = db.Column(db.Integer, primary_key=True)
     submissionid = db.Column(db.Integer, db.ForeignKey('submissions.id'))
     testname = db.Column(db.String(128), index=True)
@@ -45,7 +46,7 @@ class Results(db.Model):
     errors = db.Column(db.Text)
     passed = db.Column(db.Boolean)
 
-    submission = db.relationship('Submissions', backref='results')
+    submission = db.relationship('Submissions', backref='reports')
 
 
 class Events(db.Model):

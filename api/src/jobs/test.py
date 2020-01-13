@@ -5,7 +5,7 @@ from ..models import Tests
 from ..app import db
 
 
-def test(client, repo_url, netid, assignment, submission, mount_location):
+def test(client, repo_url, netid, assignment, submission, volume_name):
     """
     Unlike the build container, not so many extra precautions
     need to be taken to ensure unintended behaviour. The
@@ -19,7 +19,7 @@ def test(client, repo_url, netid, assignment, submission, mount_location):
     :netid str: netid of student
     :assignment: name of assignment being tested
     :submission Submissions: committed submission object
-    :mount_location str: path to persistent job mount
+    :volume_name str: name of persistent volume
     """
 
     try:
@@ -27,18 +27,17 @@ def test(client, repo_url, netid, assignment, submission, mount_location):
             'os3224-assignment-{}'.format(assignment),
             command=['/entrypoint.sh', repo_url, netid, assignment, str(submission.id)],
             network_mode='none',
-            #remove=True,
+            remove=True,
             privileged=True,
             volumes={
-                mount_location: {
+                volume_name: {
                     'bind': '/mnt/submission',
                     'mode': 'rw',
                 },
             },
         ).decode()
     except docker.errors.ContainerError as e:
-        print('test crashed', e)
-        # TODO handle this error 
+        raise report_error('test failure', netid, assignment, submission.id)
 
     t=Tests(
         stdout=stdout,

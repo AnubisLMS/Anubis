@@ -13,5 +13,3 @@ services:
     volumes:
       - ./api:/opt/app
 
-  db:
-    volumes: []

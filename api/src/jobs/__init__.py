@@ -1,13 +1,17 @@
 from sqlalchemy.exc import IntegrityError
 import docker
-import shutil
-import os
+
 
 from ..models import Submissions
+from ..app import db
+
+
+from .clone import clone
 from .build import build
 from .test import test
-from .utils import report_results, report_error
-from ..app import db
+from .report import report
+from .utils import report_error
+
 
 """
 This is where we should implement any and all job function for the
@@ -44,11 +48,16 @@ def test_repo(repo_url, netid, assignment):
         print('Unable to create submission', e)
         return False
 
-    mount_location='/tmp/submission-{}'.format(
-        submission.id,
-    )
+    volume_name=client.volumes.create(
+        name='submission-{}'.format(submission.id),
+        driver='local',
+    ).name
 
-    os.makedirs(mount_location, exist_ok=True)
+    clone(
+        client,
+        repo_url,
+        volume_name
+    )
 
     build(
         client,
@@ -56,21 +65,24 @@ def test_repo(repo_url, netid, assignment):
         netid,
         assignment,
         submission,
-        mount_location
+        volume_name
     )
 
-    t=test(
+    test(
         client,
         repo_url,
         netid,
         assignment,
         submission,
-        mount_location
+        volume_name
     )
 
-    report_results(
-        mount_location,
+    report(
+        client,
         netid,
         assignment,
         submission.id,
+        volume_name,
     )
+
+    client.volumes.prune()

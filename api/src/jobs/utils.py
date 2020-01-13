@@ -3,13 +3,8 @@ import json
 import os
 
 
-def echo(msg):
-    return requests.post(
-        'http://api:5000/private/echo',
-        headers={'Content-Type':'application/json'},
-        json=msg
-    )
-
+class PipelineException(Exception):
+    pass
 
 
 def report_error(error, netid, assignment, submission_id):
@@ -23,7 +18,7 @@ def report_error(error, netid, assignment, submission_id):
     :assignment str: name of assignment
     :submission_id int: id for submission (possibly null)
     """
-    return requests.post(
+    requests.post(
         'http://api:5000/private/report-error',
         headers={
             'Content-Type': 'application/json',
@@ -36,70 +31,7 @@ def report_error(error, netid, assignment, submission_id):
         }
     )
 
+    return PipelineException(error)
 
-def report_results(working_dir, netid, assignment, submission_id):
-    """
-    This function should load all the results into a single report, and
-    send it off to the api.
-
-    This expects the individual report jsons to already exist in the current
-    directory. Those jsons should end with -report.json.
-
-    The report should be a json with the following shape:
-
-    report = {
-      netid: str
-      assignment: str
-      submission_id: int
-      results: [
-        testname: str
-        errors: str
-        stdout: str
-        passed: true
-      ]
-    }
-
-    :working_dir str: path to where report jsons are
-    :netid str: netid of student
-    :assignment str: name of assignement
-    :submisssion_id: id of submission
-    """
-
-    old_working_dir=os.getcwd()
-    os.chdir(working_dir)
-
-    reports = []
-    for filename in os.listdir('.'):
-        if filename.endswith('-report.json'):
-            reports.append(json.load(open(filename)))
-
-    echo([
-        working_dir,
-        os.listdir('.'),
-        os.listdir(working_dir)
-    ])
-
-    report = {
-        'netid': netid,
-        'assignment': assignment,
-        'reports': reports,
-    }
-
-    res = requests.post(
-        'http://api:5000/private/report',
-        headers={
-            'Content-Type': 'application/json',
-        },
-        json=report,
-    )
-
-    if res.status_code != 200 or not res.json['success']:
-        os.chdir(old_working_dir)
-        print('Error reporting to api')
-        return False
-
-    os.chdir(old_working_dir)
-
-    return res.json
 
 

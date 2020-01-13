@@ -3,9 +3,8 @@ from sqlalchemy.exc import IntegrityError
 from json import dumps
 
 from ..app import db
-from ..models import Submissions, Results, Events
+from ..models import Submissions, Reports, Events
 from ..utils import log_event
-
 private = Blueprint('private', __name__, url_prefix='/private')
 
 
@@ -19,17 +18,12 @@ def notify_student(submission):
 def index():
     return 'super secret'
 
-@private.route('/echo', methods=['POST'])
-def echo():
-    print(dumps(request.json, indent=2), flush=True)
-    return {'success':True}
-
-
 
 @private.route('/report-error', methods=['POST'])
 @log_event('ERROR-REPORT', lambda: 'error report from worker submitted')
 def handle_report_error():
-    pass
+    print(dumps(request.json, indent=2), flush=True)
+    return {'success':True}
 
 
 @private.route('/report', methods=['POST'])
@@ -63,20 +57,20 @@ def handle_report():
     )
 
     results=[
-        Results(
-            testname=result['testname'],
+        Reports(
+            testname=result['name'],
             errors=result['errors'],
             passed=result['passed'],
             submission=submission,
         )
-        for result in report['results']
+        for result in report['reports']
     ]
 
 
     try:
         db.session.add(submission)
         for result in results:
-            db.session.add(results)
+            db.session.add(result)
         db.session.commit()
     except IntegrityError as e:
         print('ERROR unable to process report for {}'.format(report['netid']))
@@ -87,6 +81,6 @@ def handle_report():
 
     notify_student(submission)
 
-    return dumps({
+    return {
         'success': True
-    })
+    }

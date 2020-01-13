@@ -5,4 +5,3 @@ gunicorn
 redis
 rq
 docker
-GitPython

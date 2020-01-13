@@ -1,27 +1,13 @@
 from sqlalchemy.exc import IntegrityError
 import subprocess
 import docker
-import git
 
+from .utils import report_error
 from ..models import Builds
 from ..app import db
 
 
-def clone(repo_url, path):
-    """
-    clone repo to path
-
-    :repo_url str: url for repo
-    :path str: path to clone repo to
-    """
-    return subprocess.check_call([
-        'git',
-        'clone',
-        repo_url,
-        path
-    ])
-
-def build(client, repo_url, netid, assignment, submission, mount_location):
+def build(client, repo_url, netid, assignment, submission, volume_name):
     """
     Since we are running code that the students wrote,
     we need to take extra steps to prevent them from
@@ -36,27 +22,24 @@ def build(client, repo_url, netid, assignment, submission, mount_location):
     :netid str: netid of student
     :assignment: name of assignment being tested
     :submission Submissions: committed submission object
-    :mount_location str: path to persistent job mount
+    :volume_name str: name of persistent volume
     """
-
-    clone(repo_url, mount_location+'/xv6-public')
 
     try:
         stdout=client.containers.run(
             'os3224-build',
             command=['/entrypoint.sh', repo_url, netid, assignment, str(submission.id)],
-            #remove=True,
+            remove=True,
             network_mode='none',
             volumes={
-                mount_location: {
+                volume_name: {
                     'bind': '/mnt/submission',
                     'mode': 'rw',
                 },
             },
         ).decode()
     except docker.errors.ContainerError as e:
-        # TODO handle this error
-        return print('build crashed', e)
+        raise report_error('build failure', netid, assignment, submission.id)
 
     b=Builds(
         stdout=stdout,
