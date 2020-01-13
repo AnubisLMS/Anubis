@@ -4,10 +4,14 @@ services:
   api:
     volumes:
       - ./api:/opt/app
+    command: 'make docker-debug'
     environment:
-      GUNICORN_OPTIONS: '--reload'
+      GUNICORN_OPTIONS: '--reload --capture-output --enable-stdio-inheritance --log-level debug'
       DEBUG: 1
 
   worker:
     volumes:
       - ./api:/opt/app
+
+  db:
+    volumes: []

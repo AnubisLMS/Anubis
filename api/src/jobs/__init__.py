@@ -59,7 +59,7 @@ def test_repo(repo_url, netid, assignment):
         mount_location
     )
 
-    test(
+    t=test(
         client,
         repo_url,
         netid,
@@ -74,6 +74,3 @@ def test_repo(repo_url, netid, assignment):
         assignment,
         submission.id,
     )
-
-    shutil.rmtree(mount_location)
-

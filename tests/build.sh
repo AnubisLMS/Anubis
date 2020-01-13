@@ -21,7 +21,7 @@ build_assignment_images() {
 
     for assignment in $(ls assignments); do
         if [ -d "./assignments/${assignment}" ]; then
-            docker build -t "os3224-assignment-${assignment}" "assignments/${asignment}" &> /dev/null
+            docker build -t "os3224-assignment-${assignment}" "assignments/${assignment}" &> /dev/null
             echo "./assignments/${assignment} os3224-assignment-${assignment}"
         fi
     done

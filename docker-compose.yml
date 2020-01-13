@@ -3,6 +3,7 @@ version: '3.7'
 services:
   traefik:
     image: "traefik:v2.0.0-rc3"
+    restart: on-failure
     command:
       - "--api.insecure=true"
 
@@ -44,12 +45,13 @@ services:
 
   db:
     build: ./db
+    restart: on-failure
     dns: [8.8.8.8]
+    ports:
+      - "127.0.0.1:3306:3306"
     environment:
       - "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}"
       - "MYSQL_DATABASE=os"
-    ports:
-      - "127.0.0.1:3306:3306"
     volumes:
       - "db_data:/var/lib/mysql"
     networks:
@@ -59,6 +61,7 @@ services:
 
   api:
     build: api
+    restart: on-failure
     networks:
       - traefik-proxy
     depends_on: [db]
@@ -86,6 +89,7 @@ services:
 
   redis:
     image: redis:5
+    restart: on-failure
     ports:
       - "127.0.0.1:6379:6379"
     networks:
@@ -97,6 +101,7 @@ services:
 
   worker:
     build: api
+    restart: on-failure
     command: rq worker -u redis://redis
     user: root
     networks:

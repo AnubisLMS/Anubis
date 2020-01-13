@@ -10,6 +10,11 @@ BUILT_IMAGES := $(shell \
 
 RUNNING_CONTAINERS := $(shell docker-compose ps -q)
 
+API_IP := $(shell docker network inspect traefik-proxy | \
+	jq '.[0].Containers | .[] | select(.Name == "anubis_api_1") | .IPv4Address' -r | \
+	awk '{print substr($$0, 1, index($$0, "/")-1)}' \
+)
+
 
 all: check debug
 
@@ -22,6 +27,7 @@ check:
 
 build:
 	docker-compose build --pull --parallel
+	./tests/build.sh
 
 debug: build
 	docker-compose up -d traefik redis db
@@ -30,6 +36,9 @@ debug: build
 deploy: build
 	docker-compose -f ./docker-compose.yml up -d traefik redis db
 	docker-compose -f ./docker-compose.yml up -d --force-recreate --scale worker=3 api worker
+
+test:
+	curl "http://$(API_IP):5000/public/test"
 
 clean:
 	docker-compose kill

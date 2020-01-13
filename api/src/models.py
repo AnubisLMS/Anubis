@@ -23,6 +23,16 @@ class Builds(db.Model):
     submission = db.relationship('Submissions', backref='builds')
 
 
+class Tests(db.Model):
+    __tablename__ = 'tests'
+    id = db.Column(db.Integer, primary_key=True)
+    submissionid = db.Column(db.Integer, db.ForeignKey('submissions.id'), index=True)
+
+    stdout=db.Column(db.Text)
+
+    submission = db.relationship('Submissions', backref='tests')
+
+
 class Results(db.Model):
     """
     Results

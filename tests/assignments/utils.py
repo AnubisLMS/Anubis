@@ -6,21 +6,16 @@ This file contains some utility methods for reporting
 
 
 import json
-import requests
-import sys
-import os
 
-
-def save_results(testname, errors, stdout, passed):
+def save_results(name, errors, passed):
     assert isinstance(name, str)
-    assert isinstance(errors, list)
+    assert isinstance(errors, list) or errors is None
     assert isinstance(passed, bool)
 
-    with open(name + '-report.json', 'w') as f:
+    with open('/mnt/submission/' + name + '-report.json', 'w') as f:
         json.dump({
-            'name': testname,
+            'name': name,
             'errors': errors,
             'passed': passed,
-            'stdout': stdout,
         }, f)
 

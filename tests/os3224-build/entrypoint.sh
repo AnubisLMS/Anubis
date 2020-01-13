@@ -8,6 +8,8 @@
 # The entrypoint for the assignment test images should not be changed.
 # The assignment images should just add their test scripts to the image.
 
+set -e
+
 if (( $# < 3 )); then
     echo "xv6 repo is required" 1>&2
     echo "docker run -it os3224-build <git repo url>" 1>&2
@@ -36,7 +38,7 @@ exit_with_failure() {
 build() {
     # build the xv6.img file and move it to a more convientent place
 
-    cd xv6-public
+    cd /mnt/submission/xv6-public
 
     # build
     make xv6.img
@@ -47,7 +49,7 @@ build() {
 
     # move
     cd ../
-    mv ./xv6-public/xv6.img ./
+    mv ./xv6-public/xv6.img ../
 
     # clean
     rm -rf xv6-public
@@ -58,9 +60,6 @@ build() {
 main() {
     # Build that image
     build
-
-    # Move image to mount location
-    mv xv6.img /mnt/submission/xv6.img
 
     # report success
     echo

@@ -33,7 +33,8 @@ def webhook():
         'success': True
     })
 
-@public.route('/test', methods=['POST'])
+
+@public.route('/test')
 def test_route():
     repo = 'https://gitlab.com/b1g_J/xv6-public.git'
     netid = 'test123'
@@ -46,5 +47,5 @@ def test_route():
     )
 
     return dumps({
-        'sucess': True,
+        'success': True,
     })

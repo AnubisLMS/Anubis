@@ -1,4 +1,8 @@
+from sqlalchemy.exc import IntegrityError
 import docker
+
+from ..models import Tests
+from ..app import db
 
 
 def test(client, repo_url, netid, assignment, submission, mount_location):
@@ -19,21 +23,35 @@ def test(client, repo_url, netid, assignment, submission, mount_location):
     """
 
     try:
-        client.containers.run(
+        stdout=client.containers.run(
             'os3224-assignment-{}'.format(assignment),
             command=['/entrypoint.sh', repo_url, netid, assignment, str(submission.id)],
             network_mode='none',
+            #remove=True,
             privileged=True,
             volumes={
-                '/mnt/submission': {
-                    'bind': mount_location,
+                mount_location: {
+                    'bind': '/mnt/submission',
                     'mode': 'rw',
                 },
             },
-        )
+        ).decode()
     except docker.errors.ContainerError as e:
         print('test crashed', e)
+        # TODO handle this error 
+
+    t=Tests(
+        stdout=stdout,
+        submission=submission,
+    )
+    try:
+        db.session.add(t)
+        db.session.commit()
+    except IntegrityError as e:
+        print('unable to document test', e)
         # TODO handle this error
+
+    return t
 
 
 

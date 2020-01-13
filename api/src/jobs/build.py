@@ -1,6 +1,7 @@
 from sqlalchemy.exc import IntegrityError
-import git
+import subprocess
 import docker
+import git
 
 from ..models import Builds
 from ..app import db
@@ -13,8 +14,12 @@ def clone(repo_url, path):
     :repo_url str: url for repo
     :path str: path to clone repo to
     """
-    git.Git(path).clone(repo_url)
-
+    return subprocess.check_call([
+        'git',
+        'clone',
+        repo_url,
+        path
+    ])
 
 def build(client, repo_url, netid, assignment, submission, mount_location):
     """
@@ -34,17 +39,17 @@ def build(client, repo_url, netid, assignment, submission, mount_location):
     :mount_location str: path to persistent job mount
     """
 
-    clone(repo_url, mount_location)
+    clone(repo_url, mount_location+'/xv6-public')
 
     try:
         stdout=client.containers.run(
             'os3224-build',
             command=['/entrypoint.sh', repo_url, netid, assignment, str(submission.id)],
-            remove=True,
+            #remove=True,
             network_mode='none',
             volumes={
-                '/mnt/submission': {
-                    'bind': mount_location,
+                mount_location: {
+                    'bind': '/mnt/submission',
                     'mode': 'rw',
                 },
             },

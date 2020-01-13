@@ -19,6 +19,13 @@ def notify_student(submission):
 def index():
     return 'super secret'
 
+@private.route('/echo', methods=['POST'])
+def echo():
+    print(dumps(request.json, indent=2), flush=True)
+    return {'success':True}
+
+
+
 @private.route('/report-error', methods=['POST'])
 @log_event('ERROR-REPORT', lambda: 'error report from worker submitted')
 def handle_report_error():
@@ -43,12 +50,13 @@ def handle_report():
       results: [
         testname: str
         errors: str
-        stdout: str
         passed: true
       ]
     }
     """
     report=request.json
+
+    print(dumps(report, indent=2), flush=True)
 
     submission=Submissions(
         netid=report['netid'],
@@ -57,7 +65,6 @@ def handle_report():
     results=[
         Results(
             testname=result['testname'],
-            stdout=result['stdout'],
             errors=result['errors'],
             passed=result['passed'],
             submission=submission,

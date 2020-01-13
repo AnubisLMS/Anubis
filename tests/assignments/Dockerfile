@@ -7,7 +7,7 @@ RUN apt update \
 WORKDIR /mnt/
 
 COPY ./entrypoint.sh /entrypoint.sh
-COPY utils.py /mnt/utils.py
+COPY utils.py ./utils.py
 RUN chmod +x /entrypoint.sh
 
 CMD /entrypoint.sh

@@ -3,6 +3,15 @@ import json
 import os
 
 
+def echo(msg):
+    return requests.post(
+        'http://api:5000/private/echo',
+        headers={'Content-Type':'application/json'},
+        json=msg
+    )
+
+
+
 def report_error(error, netid, assignment, submission_id):
     """
     If at any point in the build/test cycle an error occurs,
@@ -26,7 +35,6 @@ def report_error(error, netid, assignment, submission_id):
             'error': error
         }
     )
-
 
 
 def report_results(working_dir, netid, assignment, submission_id):
@@ -64,6 +72,12 @@ def report_results(working_dir, netid, assignment, submission_id):
     for filename in os.listdir('.'):
         if filename.endswith('-report.json'):
             reports.append(json.load(open(filename)))
+
+    echo([
+        working_dir,
+        os.listdir('.'),
+        os.listdir(working_dir)
+    ])
 
     report = {
         'netid': netid,

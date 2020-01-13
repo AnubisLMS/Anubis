@@ -5,7 +5,9 @@ run_tests() {
     # all the tests should generate report jsons
     for testscript in $(ls test-*.py); do
         python3 ${testscript}
-    fi
+    done
 }
 
+ls
+pwd
 run_tests
