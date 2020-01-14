@@ -11,11 +11,11 @@ An example `Dockerfile`:
 
 ```Dockerfile
 # Import from the build image
-FROM os3224-build
+FROM os3224-assignment-base
 
 # copy over your tests
-COPY test-0.sh test-0.sh
-COPY test-1.sh test-1.sh
-COPY test-2.sh test-2.sh
-COPY test-3.sh test-3.sh
+COPY test-0.py test-0.py
+COPY test-1.py test-1.py
+COPY test-2.py test-2.py
+COPY test-3.py test-3.py
 ```

@@ -1,12 +1,14 @@
 #!/bin/bash
 
-# docker run -it os3224-assignment-n <repo url> <netid> <assignment name>
+# docker run -it os3224-assignment-n <repo url> <netid> <assignment name> <submission_id>
 
 # This is the entrypoint for the test images. It expects that there are test scripts
 # in the working directory (/tmp/build)
 
 # The entrypoint for the assignment test images should not be changed.
 # The assignment images should just add their test scripts to the image.
+
+set -e
 
 if (( $# < 3 )); then
     echo "xv6 repo is required" 1>&2
@@ -19,50 +21,50 @@ REPO_URL="${1}"
 NETID="${2}"
 ASSIGNMENT="${3}"
 
-build() {
-    # clone the repo then build the xv6.img file and move it to a more convientent place
 
-    # clone
-    git clone ${REPO_URL} xv6-public
-    cd xv6-public
+exit_with_failure() {
+    # exit_with_failure <msg>
+
+    echo
+    echo 'Failed to build xv6.img'
+    echo
+
+    echo "${@}" > /mnt/submission/FAIL
+
+    exit 0
+}
+
+
+build() {
+    # build the xv6.img file and move it to a more convientent place
+
+    cd /mnt/submission/xv6-public
 
     # build
     make xv6.img
 
+    if (( $! != 0 )); then
+        exit_with_failure 'Failed to build xv6.img'
+    fi
+
     # move
     cd ../
-    mv ./xv6-public/xv6.img ./
+    mv ./xv6-public/xv6.img ../
 
     # clean
     rm -rf xv6-public
-
-    echo 'built xv6.img'
 }
 
-
-run_test() {
-    # run each of the test scripts (all scripts matching test-*.sh)
-    for test_script in $(ls test-*.py | sort); do
-        python3 ${test_script}
-    done
-}
-
-
-report_results() {
-    # Report results to api
-    python3 report.py ${NETID} ${ASSIGNMENT}
-}
 
 
 main() {
     # Build that image
     build
 
-    # Run those tests
-    run_tests
-
-    # Report those results
-    report_results
+    # report success
+    echo
+    echo 'Successfully built xv6.img!'
+    echo
 }
 
 main

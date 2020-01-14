@@ -1,21 +1,18 @@
 from sqlalchemy.exc import IntegrityError
-import subprocess
 import docker
 
-from .utils import report_error
-from ..models import Builds
+from ..models import Tests
 from ..app import db
 
 
-def build(client, repo_url, netid, assignment, submission, volume_name):
+def test(client, repo_url, netid, assignment, submission, volume_name):
     """
-    Since we are running code that the students wrote,
-    we need to take extra steps to prevent them from
-    doing malicous stuff. The build container cant
-    run in privileged mode, since that would be handing
-    them a docker escape. Along with this, we need to
-    make sure they cant becon or phone home. To prevent
-    this, we can just run this in network_mode=none.
+    Unlike the build container, not so many extra precautions
+    need to be taken to ensure unintended behaviour. The
+    containers need to run in privileged mode to leverage
+    the host KVM. We still want to be careful to not
+    let them phone home, so we will have them also run
+    without networking capabilities.
 
     :client docker.client: docker client
     :repo_url str: url for student repo
@@ -27,10 +24,11 @@ def build(client, repo_url, netid, assignment, submission, volume_name):
 
     try:
         stdout=client.containers.run(
-            'os3224-build',
+            'os3224-assignment-{}'.format(assignment),
             command=['/entrypoint.sh', repo_url, netid, assignment, str(submission.id)],
-            remove=True,
             network_mode='none',
+            remove=True,
+            privileged=True,
             volumes={
                 volume_name: {
                     'bind': '/mnt/submission',
@@ -39,20 +37,20 @@ def build(client, repo_url, netid, assignment, submission, volume_name):
             },
         ).decode()
     except docker.errors.ContainerError as e:
-        raise report_error('build failure', netid, assignment, submission.id)
+        raise report_error('test failure', netid, assignment, submission.id)
 
-    b=Builds(
+    t=Tests(
         stdout=stdout,
-        submission=submission
+        submission=submission,
     )
-
     try:
-        db.session.add(b)
+        db.session.add(t)
         db.session.commit()
     except IntegrityError as e:
-        # TODO handle integ err
-        return print(e)
+        print('unable to document test', e)
+        # TODO handle this error
 
-    return b
+    return t
+
 
 

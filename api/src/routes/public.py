@@ -3,7 +3,6 @@ from json import dumps
 
 from ..config import Config
 from ..app import db
-from ..models import Submissions, Results, Events
 from ..utils import enqueue_webhook_job, log_event, get_request_ip
 
 public = Blueprint('public', __name__, url_prefix='/public')
@@ -29,6 +28,23 @@ def webhook():
         assignment_name='test'
         enqueue_webhook_job(repo_url, netid, assignment_name)
 
-    return dumps({
+    return {
         'success': True
-    })
+    }
+
+
+@public.route('/test')
+def test_route():
+    repo = 'https://gitlab.com/b1g_J/xv6-public.git'
+    netid = 'test123'
+    assignment = '1'
+
+    enqueue_webhook_job(
+        repo,
+        netid,
+        assignment
+    )
+
+    return {
+        'success': True,
+    }

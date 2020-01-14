@@ -13,7 +13,7 @@ from .app import db
 """
 We will use rq to enqueue and dequeue jobs.
 """
-def enqueue(func, args):
+def enqueue(func, *args):
     """
     Enqueues a job on the redis cache
 
@@ -22,7 +22,7 @@ def enqueue(func, args):
     """
     with Redis(host='redis') as conn:
         q = Queue(connection=conn)
-        q.enqueue(func, args)
+        q.enqueue(func, *args)
 
 
 def enqueue_webhook_job(*args):
@@ -31,7 +31,11 @@ def enqueue_webhook_job(*args):
 
     :repo_url str: github repo url (eg https://github.com/os3224/...)
     """
-    enqueue(test_repo, args)
+    print(args)
+    enqueue(
+        test_repo,
+        *args
+    )
 
 
 def get_request_ip():

@@ -5,7 +5,7 @@ GUNICORN_OPTIONS := ''
 endif
 
 ifndef GUNICORN_WORKERS
-GUNICORN_WORKERS := 3
+GUNICORN_WORKERS := 1
 endif
 
 .PHONY: all
@@ -16,6 +16,10 @@ all: debug
 deploy: db
 	python3 db.py
 	gunicorn -b 0.0.0.0:5000 -w $(GUNICORN_WORKERS) $(GUNICORN_OPTIONS) src:app
+
+docker-debug: db
+	python3 db.py
+	python3 dev.py
 
 
 .PHONY: debug
