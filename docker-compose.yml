@@ -111,6 +111,9 @@ services:
     labels:
       - "traefik.enable=false"
 
+  smtp:
+    image: namshi/smtp
+
 
 networks:
   traefik-proxy:
