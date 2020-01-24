@@ -46,11 +46,11 @@ db:
 	docker-compose exec db sh -c 'mysql -u root < /docker-entrypoint-initdb.d/init.sql'
 
 debug: build db
-	docker-compose up -d traefik redis
+	docker-compose up -d traefik redis smtp
 	docker-compose up -d --force-recreate --scale worker=3 api worker
 
 deploy: build db
-	docker-compose -f ./docker-compose.yml up -d traefik redis
+	docker-compose -f ./docker-compose.yml up -d traefik redis smtp
 	docker-compose -f ./docker-compose.yml up -d --force-recreate --scale worker=3 api worker
 
 test:
