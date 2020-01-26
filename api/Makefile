@@ -1,11 +1,11 @@
 DB_HOST := $(shell if nslookup db &> /dev/null; then echo db; else echo 127.0.0.1; fi)
 
 ifndef GUNICORN_OPTIONS
-GUNICORN_OPTIONS := ''
+GUNICORN_OPTIONS := --preload
 endif
 
 ifndef GUNICORN_WORKERS
-GUNICORN_WORKERS := 1
+GUNICORN_WORKERS := 8
 endif
 
 .PHONY: all
