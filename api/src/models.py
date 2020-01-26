@@ -48,6 +48,14 @@ class Reports(db.Model):
 
     submission = db.relationship('Submissions', backref='reports')
 
+    def __str__(self):
+        return '{}:\n\nlogs:\n{}\n\nerrors:\n{}\n\npassed: {}\n'.format(
+            self.testname,
+            self.stdout,
+            self.errors,
+            self.passed,
+        )
+
 
 class Events(db.Model):
     """

@@ -1,11 +1,13 @@
 from sqlalchemy.exc import IntegrityError
+import requests
 import docker
 
+from .utils import PipelineException
 from ..models import Tests
 from ..app import db
 
 
-def test(client, repo_url, netid, assignment, submission, volume_name):
+def test(client, repo_url, submission, volume_name):
     """
     Unlike the build container, not so many extra precautions
     need to be taken to ensure unintended behaviour. The
@@ -22,12 +24,24 @@ def test(client, repo_url, netid, assignment, submission, volume_name):
     :volume_name str: name of persistent volume
     """
 
+    netid=submission.netid
+    assignment=submission.assignment
+
+    logs=''
+    name = '{netid}-{commit}-{assignment}-{id}-test'.format(
+        netid=submission.netid,
+        commit=submission.commit,
+        assignment=submission.assignment,
+        id=submission.id,
+    )
+
     try:
-        stdout=client.containers.run(
+        container=client.containers.run(
             'os3224-assignment-{}'.format(assignment),
+            name=name,
             command=['/entrypoint.sh', repo_url, netid, assignment, str(submission.id)],
             network_mode='none',
-            remove=True,
+            detach=True,
             privileged=True,
             volumes={
                 volume_name: {
@@ -35,12 +49,33 @@ def test(client, repo_url, netid, assignment, submission, volume_name):
                     'mode': 'rw',
                 },
             },
-        ).decode()
-    except docker.errors.ContainerError as e:
-        raise report_error('test failure', netid, assignment, submission.id)
+        )
+
+        container.wait(timeout=30)
+        container.reload()
+        logs = container.logs().decode()
+
+        # Check that the container had a successful exit code
+        if container.attrs['State']['ExitCode'] != 0:
+            raise PipelineException('test failue')
+
+    except PipelineException as e:
+        raise report_error(str(e), submission.id)
+
+    except requests.exceptions.ReadTimeout:
+        # Kill container if it has reached its timeout
+        container.kill()
+        raise report_error(
+            'test timeout\n' + container.logs().decode(),
+            submission.id
+        )
+
+    finally:
+        container=client.containers.get(name)
+        container.remove(force=True)
 
     t=Tests(
-        stdout=stdout,
+        stdout=logs,
         submission=submission,
     )
     try:

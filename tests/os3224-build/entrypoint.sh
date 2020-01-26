@@ -61,6 +61,13 @@ main() {
     # Build that image
     build
 
+    # Sanity check that there
+    # are no forged reports
+    forged="$(find . -name '*-report.json')"
+    if [ -n "${forged}" ]; then
+        rm -rf ${forged}
+    fi
+
     # report success
     echo
     echo 'Successfully built xv6.img!'

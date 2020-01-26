@@ -5,8 +5,8 @@ from functools import wraps
 from flask import request
 from smtplib import SMTP
 from redis import Redis
+from os import environ
 from rq import Queue
-
 
 from .jobs import test_repo
 from .models import Events
@@ -34,7 +34,6 @@ def enqueue_webhook_job(*args):
 
     :repo_url str: github repo url (eg https://github.com/os3224/...)
     """
-    print(args)
     enqueue(
         test_repo,
         *args
@@ -118,6 +117,10 @@ def send_noreply_email(msg, subject, to):
     :subject str: subject for email
     :to str: recipient of email (should be their nyu email)
     """
+
+    if environ.get('DEBUG', False):
+        return
+
     msg = MIMEText(msg, "plain")
     msg["Subject"] = subject
 

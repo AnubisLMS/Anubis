@@ -20,7 +20,7 @@ so these functions must reside in a seperate file.
 """
 
 
-def test_repo(repo_url, netid, assignment):
+def test_repo(repo_url, submission_id):
     """
     This function should launch the apropriate testing container
     for the assignment, passing along the function arguments.
@@ -32,18 +32,9 @@ def test_repo(repo_url, netid, assignment):
 
     client=docker.from_env()
 
-    submission=Submissions(
-        netid=netid,
-        assignment=assignment,
-    )
-
-    try:
-        db.session.add(submission)
-        db.session.commit()
-    except IntegrityError as e:
-        # TODO handle integ err
-        print('Unable to create submission', e)
-        return False
+    submission = Submissions.query.filter_by(
+        id=submission_id
+    ).first()
 
     volume_name=client.volumes.create(
         name='submission-{}'.format(submission.id),
@@ -53,14 +44,13 @@ def test_repo(repo_url, netid, assignment):
     clone(
         client,
         repo_url,
-        volume_name
+        submission,
+        volume_name,
     )
 
     build(
         client,
         repo_url,
-        netid,
-        assignment,
         submission,
         volume_name
     )
@@ -68,17 +58,14 @@ def test_repo(repo_url, netid, assignment):
     test(
         client,
         repo_url,
-        netid,
-        assignment,
         submission,
         volume_name
     )
 
     report(
         client,
-        netid,
-        assignment,
-        submission.id,
+        repo_url,
+        submission,
         volume_name,
     )
 

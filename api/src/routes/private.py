@@ -3,15 +3,14 @@ from sqlalchemy.exc import IntegrityError
 from json import dumps
 
 from ..app import db
+from ..config import Config
 from ..models import Submissions, Reports, Events
 from ..utils import log_event, send_noreply_email
+
+from .messages import err_msg, crit_err_msg, success_msg
+
+
 private = Blueprint('private', __name__, url_prefix='/private')
-
-
-def notify_student(submission):
-    """
-    TODO: implement email mechanism for reporting results to students
-    """
 
 
 @private.route('/')
@@ -20,7 +19,54 @@ def index():
 
 
 @private.route('/report-error', methods=['POST'])
-@log_event('ERROR-REPORT', lambda: 'error report from worker ' + dumps(request.json))
+@log_event('PANIC-REPORT', lambda: 'panic was report from worker ' + dumps(request.json))
+def handle_report_panic():
+    """
+    This route will only be hit when there is a panic reported from a worker.
+    The difference between an error and a panic is that a panic is an unexpected error.
+    This could potentially mean that something in the pipeline is broken. This route
+    will notify the admins of the error. We will also let the student know there was an
+    error (not showing them the logs).
+
+    request.json = {
+      submission_id : int - database id for submission that was processed
+      error         : str - description of error encountered
+    }
+    """
+
+    req = request.json
+    submission=Submissions.query.filter_by(
+        id=req['submission_id'],
+    ).first()
+
+
+    msg=crit_err_msg.format(
+        netid=submission.netid,
+        assignment=submission.assignment,
+        commit=submission.commit,
+    )
+
+    # Notify Student (without logs)
+    send_noreply_email(
+        msg,
+        'OS3224 - Anubis Autograder Critical Error', # email subject
+        req['netid'] + '@nyu.edu',   # recipient
+    )
+
+    # Notify Admins (with logs)
+    send_noreply_email(
+        msg + req['error'],
+        'Anubis Panic', # email subject
+        Config.ADMINS,   # recipient
+    )
+
+
+    return {'success':True}
+
+
+
+@private.route('/report-panic', methods=['POST'])
+@log_event('ERROR-REPORT', lambda: 'error was report from worker ' + dumps(request.json))
 def handle_report_error():
     """
     If at any point, a worker in the rq cluster encounters an error
@@ -35,8 +81,6 @@ def handle_report_error():
     The body of the post request should fit the shape:
 
     request.json = {
-      netid         : str - netid of student
-      assignment    : str - name of assignment
       submission_id : int - database id for submission that was processed
       error         : str - description of error encountered
     }
@@ -45,23 +89,21 @@ def handle_report_error():
     through a noreply email.
     """
     req = request.json
-    print(dumps(body, indent=2), flush=True)
+    submission=Submissions.query.filter_by(
+        id=req['submission_id'],
+    ).first()
 
-    msg = """
-    There was an error in grading your recent OS3224 submission.
-
-    netid: {netid}
-    assignment: {assignment}
-    error: {error}
-    """.format(
-        netid=req['netid'],
-        assignment=req['assignment'],
+    msg=err_msg.format(
+        netid=submission.netid,
+        assignment=submission.assignment,
+        commit=submission.commit,
         error=req['error'],
     )
 
+    # Notify Student
     send_noreply_email(
         msg,
-        'OS3224 - Autograder Error', # email subject
+        'OS3224 - Anubis Autograder Error', # email subject
         req['netid'] + '@nyu.edu',   # recipient
     )
     return {'success':True}
@@ -93,11 +135,11 @@ def handle_report():
 
     print(dumps(report, indent=2), flush=True)
 
-    submission=Submissions(
-        netid=report['netid'],
-    )
+    submission=Submissions.query.filter_by(
+        id=report['submission_id']
+    ).first()
 
-    results=[
+    reports=[
         Reports(
             testname=result['name'],
             errors=result['errors'],
@@ -110,7 +152,7 @@ def handle_report():
 
     try:
         db.session.add(submission)
-        for result in results:
+        for result in reports:
             db.session.add(result)
         db.session.commit()
     except IntegrityError as e:
@@ -120,7 +162,17 @@ def handle_report():
             'errors': [ 'unable to process report' ]
         })
 
-    notify_student(submission)
+
+    send_noreply_email(
+        success_msg.format(
+            netid=submission.netid,
+            commit=submission.netid,
+            assignment=submission.assignment,
+            report='\n\n'.join(str(r) for r in reports)
+        ),
+        'OS3224 - Anubis Autograder',
+        submission.netid + '@nyu.edu'
+    )
 
     return {
         'success': True
