@@ -10,6 +10,7 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS=False
     REPO_SKELETAL = 'https://github.com/os3224/helloworld-'
+    ADMINS = os.environ.get('ADMINS', 'jmc1283@nyu.edu')
 
     def __init__(self):
         if os.environ.get('DEBUG', None):

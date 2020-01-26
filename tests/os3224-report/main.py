@@ -50,6 +50,7 @@ def report_results(netid, assignment, submission_id):
 
     report = {
         'netid': netid,
+        'submission_id': submission_id,
         'assignment': assignment,
         'reports': reports,
     }
@@ -62,14 +63,14 @@ def report_results(netid, assignment, submission_id):
         json=report,
     )
 
-    if res.status_code != 200 or not res.json['success']:
+    if res.status_code != 200 or not res.json()['success']:
         os.chdir(old_working_dir)
         print('Error reporting to api')
         return False
 
     os.chdir(old_working_dir)
 
-    return res.json
+    return res.json()
 
 
 def main():

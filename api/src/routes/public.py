@@ -3,6 +3,7 @@ from json import dumps
 
 from ..config import Config
 from ..app import db
+from ..models import Submissions
 from ..utils import enqueue_webhook_job, log_event, get_request_ip
 
 public = Blueprint('public', __name__, url_prefix='/public')
@@ -23,10 +24,29 @@ def webhook():
 
     if request.headers['Content-Type'] == 'application/json':
         received_data = request.json
-        repo_url = Config.REPO_SKELETAL + received_data["sender"]["login"]
+        # repo_url = Config.REPO_SKELETAL + received_data["sender"]["login"]
+        repo_url = 'https://gitlab.com/b1g_J/xv6-public.git'
         netid='test'
-        assignment_name='test'
-        enqueue_webhook_job(repo_url, netid, assignment_name)
+        assignment='1'
+        commit='master'
+
+        submission=Submissions(
+            netid=netid,
+            assignment=assignment,
+            commit=commit,
+        )
+
+        try:
+            db.session.add(submission)
+            db.session.commit()
+        except IntegrityError as e:
+            # TODO handle integ err
+            print('Unable to create submission', e)
+            return {'success': False}
+
+
+        enqueue_webhook_job(repo_url, submission.id)
+
 
     return {
         'success': True

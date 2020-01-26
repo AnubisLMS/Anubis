@@ -1,8 +1,11 @@
 from sqlalchemy.exc import IntegrityError
+from email.mime.text import MIMEText
 from dataclasses import dataclass
 from functools import wraps
 from flask import request
+from smtplib import SMTP
 from redis import Redis
+from os import environ
 from rq import Queue
 
 from .jobs import test_repo
@@ -31,7 +34,6 @@ def enqueue_webhook_job(*args):
 
     :repo_url str: github repo url (eg https://github.com/os3224/...)
     """
-    print(args)
     enqueue(
         test_repo,
         *args
@@ -97,3 +99,34 @@ def log_event(log_type, message_func):
     return decorator
 
 
+def send_noreply_email(msg, subject, to):
+    """
+    Use this function to send a noreply email to a user (ie student).
+
+    * This will only work on the computer that has the dns pointed to it (ie the server)
+
+    If you set up the dns with namecheap, you can really easily just set
+    the email dns setting to private email. Once that is set, it configures
+    all the spf stuff for you. Doing to MX and spf records by hand are super
+    annoying.
+
+    eg:
+    send_noreply_email('this is the message', 'this is the subject', 'netid@nyu.edu')
+
+    :msg str: email body or message to send
+    :subject str: subject for email
+    :to str: recipient of email (should be their nyu email)
+    """
+
+    if environ.get('DEBUG', False):
+        return
+
+    msg = MIMEText(msg, "plain")
+    msg["Subject"] = subject
+
+    msg["From"] = "dev.null@nyu.singles"
+    msg["To"] = to
+
+    s = SMTP("smtp")
+    s.send_message(msg)
+    s.quit()

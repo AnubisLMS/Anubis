@@ -31,3 +31,11 @@ DOMAIN=localhost
 
 This debug environment will let you connect to the api on https://localhost/.
 The creds for all http basic auth is `root` `password`.
+
+
+
+# TODO 
+- Students could potentially forge reports by dropping their own json's at the build phase.
+- Add container timeouts to test cycle containers to prevent stale workers
+- Write assignment tests
+- Restructure assignments to fit cluster workflow
