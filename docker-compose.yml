@@ -113,6 +113,8 @@ services:
 
   smtp:
     image: namshi/smtp
+    networks:
+      - traefik-proxy
 
 
 networks:
