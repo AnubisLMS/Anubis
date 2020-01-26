@@ -16,19 +16,20 @@ def webhook():
     This route should be hit by the github when a push happens.
     We should take the the github repo url and enqueue it as a job.
 
-    TODO: add checks to validate request
-    TODO: pull out assignment name and netid from the request
     TODO: add per student ratelimiting on this endpoint
     """
 
 
-    if request.headers['Content-Type'] == 'application/json':
-        received_data = request.json
-        # repo_url = Config.REPO_SKELETAL + received_data["sender"]["login"]
-        repo_url = 'https://gitlab.com/b1g_J/xv6-public.git'
-        netid='test'
-        assignment='1'
-        commit='master'
+    if request.headers['Content-Type'] == 'application/json' and request.headers['X-GitHub-Event'] == 'push':
+        data = request.json
+        repo_url = data['url']
+
+        if not repo_url.startswith('https://github.com/os3224/xv6-'):
+            return {'success': False}
+
+        netid=data['repository']['name'][len('xv6-'):]
+        assignment=data['ref'][data['ref'].index('/', 5)+1:]
+        commit=data['after']
 
         submission=Submissions(
             netid=netid,
