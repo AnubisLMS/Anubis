@@ -2,8 +2,11 @@
 # These variables control the number of instances of the api and
 # the rq workers get created. Take care to gradually move these values
 # up, and not to overload your system.
+#
+# RQ_WORKER_SCALE will be the max number of assignments anubis can process
+# at any given time.
 API_SCALE := 3
-RQ_WORKER_SCALE := 10
+RQ_WORKER_SCALE := 15
 
 
 CURRENT_DIR := $(shell dirname $(PWD))
