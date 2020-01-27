@@ -44,7 +44,10 @@ def build(client, repo_url, submission, volume_name):
             'os3224-build',
             name=name,
             detach=True,
-            command=['/entrypoint.sh', repo_url, netid, assignment, str(submission.id)],
+            command=[
+                '/entrypoint.sh',
+                submission.commit
+            ],
             network_mode='none',
             volumes={
                 volume_name: {
