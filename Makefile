@@ -58,7 +58,7 @@ db:
 	docker-compose up -d db
 	until docker-compose exec db mysqladmin ping -u root; do sleep 1; done
 	@sleep 1
-	docker-compose exec db sh -c 'mysql -u root < /docker-entrypoint-initdb.d/init.sql'
+	@docker-compose exec db sh -c 'mysql -u root < /docker-entrypoint-initdb.d/init.sql' || true
 
 .PHONY: events       # Get database events (may be a lot)
 events:
