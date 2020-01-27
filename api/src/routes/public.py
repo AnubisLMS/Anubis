@@ -46,26 +46,9 @@ def webhook():
             return {'success': False}
 
 
-        enqueue_webhook_job(repo_url, submission.id)
+        enqueue_webhook_job(submission.id)
 
 
     return {
         'success': True
-    }
-
-
-@public.route('/test')
-def test_route():
-    repo = 'https://gitlab.com/b1g_J/xv6-public.git'
-    netid = 'test123'
-    assignment = '1'
-
-    enqueue_webhook_job(
-        repo,
-        netid,
-        assignment
-    )
-
-    return {
-        'success': True,
     }

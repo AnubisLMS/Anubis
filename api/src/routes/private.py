@@ -1,11 +1,12 @@
-from flask import request, redirect, url_for, flash, render_template, Blueprint
+from flask import request, redirect, url_for, flash, render_template, Blueprint, Response
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import desc
 from json import dumps
 
 from ..app import db
 from ..config import Config
 from ..models import Submissions, Reports, Events
-from ..utils import log_event, send_noreply_email
+from ..utils import enqueue_webhook_job, log_event, send_noreply_email
 
 from .messages import err_msg, crit_err_msg, success_msg
 
@@ -18,7 +19,7 @@ def index():
     return 'super duper secret'
 
 
-@private.route('/report-error', methods=['POST'])
+@private.route('/report-panic', methods=['POST'])
 @log_event('PANIC-REPORT', lambda: 'panic was report from worker ' + dumps(request.json))
 def handle_report_panic():
     """
@@ -38,6 +39,14 @@ def handle_report_panic():
     submission=Submissions.query.filter_by(
         id=req['submission_id'],
     ).first()
+
+    submission.processed=True
+    try:
+        db.session.add(submission)
+        db.session.commit()
+    except IntegrityError:
+        print('ERROR unable to mark submission as processed, continuing to report the panic - {}'.format(submission.id))
+        db.session.rollback()
 
 
     msg=crit_err_msg.format(
@@ -65,7 +74,7 @@ def handle_report_panic():
 
 
 
-@private.route('/report-panic', methods=['POST'])
+@private.route('/report-error', methods=['POST'])
 @log_event('ERROR-REPORT', lambda: 'error was report from worker ' + dumps(request.json))
 def handle_report_error():
     """
@@ -92,6 +101,15 @@ def handle_report_error():
     submission=Submissions.query.filter_by(
         id=req['submission_id'],
     ).first()
+
+
+    submission.processed=True
+    try:
+        db.session.add(submission)
+        db.session.commit()
+    except IntegrityError:
+        print('ERROR unable to mark submission as processed, continuing to report the error')
+        db.session.rollback()
 
     msg=err_msg.format(
         netid=submission.netid,
@@ -133,11 +151,18 @@ def handle_report():
     """
     report=request.json
 
-    print(dumps(report, indent=2), flush=True)
-
     submission=Submissions.query.filter_by(
         id=report['submission_id']
     ).first()
+
+
+    submission.processed=True
+    try:
+        db.session.add(submission)
+        db.session.commit()
+    except IntegrityError:
+        print('ERROR unable to mark submission as processed {}'.format(submission.id))
+        db.session.rollback()
 
     reports=[
         Reports(
@@ -151,11 +176,11 @@ def handle_report():
 
 
     try:
-        db.session.add(submission)
         for result in reports:
             db.session.add(result)
         db.session.commit()
     except IntegrityError as e:
+        db.session.rollback()
         print('ERROR unable to process report for {}'.format(report['netid']))
         return dumps({
             'success': False,
@@ -177,3 +202,78 @@ def handle_report():
     return {
         'success': True
     }
+
+
+@private.route('/ls')
+@log_event('CLI', lambda: 'ls requested')
+def ls():
+    """
+    This route should hand back a json list of all submissions that are marked as
+    not processed. Those submissions should be all activly enqueued or be running in tests.
+    There is a chance that some of the submissions will be stale.
+    """
+
+    active = Submissions.query.filter_by(
+        processed=False,
+    ).all()
+
+    res = Response(dumps([a.json for a in active], indent=2))
+    res.headers['Content-Type'] = 'application/json'
+    return res
+
+
+@private.route('/restart', methods=['POST'])
+@log_event('CLI', lambda: 'restart requested')
+def restart():
+    """
+    This route is used to restart / re-enqueue jobs.
+
+    TODO verify fields that this endpoint is processing
+
+    body = {
+      netid
+    }
+
+    body = {
+      netid
+      assignment
+      commit
+    }
+    """
+    body = request.json
+
+    netid = body['netid']
+
+    if 'commit' in body:
+        # re-enqueue specific submission
+
+        submission = Submissions.query.filter_by(
+            netid=netid,
+            commit=body['commit'],
+        ).first()
+    else:
+        # re-enqueue last submission
+
+        submission = Submissions.query.filter_by(
+            netid=netid,
+        ).order_by(desc(Submissions.timestamp)).first()
+
+    submission.processed = False
+
+    try:
+        db.session.add(submission)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return {
+            'success': False
+        }
+
+
+    enqueue_webhook_job(submission.id)
+
+    return {
+        'success': True
+    }
+
+

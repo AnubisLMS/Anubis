@@ -20,7 +20,7 @@ so these functions must reside in a seperate file.
 """
 
 
-def test_repo(repo_url, submission_id):
+def test_repo(submission_id):
     """
     This function should launch the apropriate testing container
     for the assignment, passing along the function arguments.
@@ -35,6 +35,7 @@ def test_repo(repo_url, submission_id):
     submission = Submissions.query.filter_by(
         id=submission_id
     ).first()
+    repo_url = 'https://github.com/os3224/xv6-' + submission.netid
 
     volume_name=client.volumes.create(
         name='submission-{}'.format(submission.id),
