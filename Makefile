@@ -42,9 +42,9 @@ help:
 
 .PHONY: check        # Checks that env vars are set
 check:
-	@for var in ACME_EMAIL MYSQL_ROOT_PASSWORD AUTH DOMAIN; do \
-		if [ -f .env ] && grep -p "^${var}=" .env &> /dev/null || [ ! -z "${var}" ]; then \
-			echo "ERROR ${var} not defined! this variable is required" 1>&2; \
+	for var in ACME_EMAIL MYSQL_ROOT_PASSWORD AUTH DOMAIN; do \
+		if ([ -f .env ] && ! grep -P "^$${var}=" .env &> /dev/null) && [ ! -z "$${var}" ]; then \
+			echo "ERROR $${var} not defined! this variable is required" 1>&2; \
 		fi; \
 	done
 
@@ -65,8 +65,8 @@ debug: check build db
 	docker-compose up -d traefik redis smtp
 	docker-compose up \
 		-d --force-recreate \
-		--scale worker=$(RQ_WORKER_SCALE) \
-		--scale api=$(API_SCALE) \
+		--scale worker=3 \
+		--scale api=1 \
 		api worker
 
 .PHONY: deploy       # Start the cluster in production mode
@@ -78,17 +78,20 @@ deploy: check build db
 		--scale api=$(API_SCALE) \
 		api worker
 
-.PHONY: test         # Stress test the cluster
-test:
+.PHONY: stress        # Stress test the cluster
+stress:
 	for i in $$(seq 10); do \
 		for k in $$(seq 10); do \
-			curl "http://$(API_IP):5000/public/webhook" \
-				-XPOST -H 'Content-Type: application/json' -H 'X-GITHUB-EVENT: push' \
-				--data '{"ref":"refs/heads/1","url":"https://github.com/os3224/xv6-jmc1283","after":"f3581d3b6ebe8600a8b35d8a782a3eecfa23dbe9","repository":{"name":"xv6-jmc1283"}}' \
-				&> /dev/null; \
+				make test &> /dev/null; \
 			sleep 3; \
 		done; \
 	done
+
+.PHONY: test          # Enqeue test job
+test:
+	curl "http://$(API_IP):5000/public/webhook" \
+		-XPOST -H 'Content-Type: application/json' -H 'X-GITHUB-EVENT: push' \
+		--data '{"ref":"refs/heads/1","url":"https://github.com/os3224/xv6-jmc1283","after":"f3581d3b6ebe8600a8b35d8a782a3eecfa23dbe9","repository":{"name":"xv6-jmc1283"}}'
 
 .PHONY: clean        # Clean up volumes, images and data
 clean:
