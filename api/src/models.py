@@ -1,6 +1,6 @@
 from .app import db
 from datetime import datetime
-
+import json
 
 class Submissions(db.Model):
     """
@@ -11,7 +11,19 @@ class Submissions(db.Model):
     netid = db.Column(db.String(128), index=True)
     assignment = db.Column(db.Text, index=True)
     commit = db.Column(db.String(128))
+    processed = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=datetime.now)
+
+    @property
+    def json(self):
+        return {
+            'id': self.id,
+            'netid': self.netid,
+            'assignment': self.assignment,
+            'commit': self.commit,
+            'processed': self.processed,
+            'timestamp': str(self.timestamp),
+        }
 
 
 class Builds(db.Model):

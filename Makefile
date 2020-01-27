@@ -60,6 +60,10 @@ db:
 	@sleep 1
 	docker-compose exec db sh -c 'mysql -u root < /docker-entrypoint-initdb.d/init.sql'
 
+.PHONY: events       # Get database events (may be a lot)
+events:
+	docker-compose exec -T db mysql -u root os <<< 'select * from events;'
+
 .PHONY: debug        # Start the cluster in debug mode
 debug: check build db
 	docker-compose up -d traefik redis smtp
@@ -78,16 +82,16 @@ deploy: check build db
 		--scale api=$(API_SCALE) \
 		api worker
 
-.PHONY: stress        # Stress test the cluster
+.PHONY: stress       # Stress test the cluster
 stress:
 	for i in $$(seq 10); do \
 		for k in $$(seq 10); do \
 				make test &> /dev/null; \
-			sleep 3; \
+			sleep 0.5; \
 		done; \
 	done
 
-.PHONY: test          # Enqeue test job
+.PHONY: test         # Enqeue test job
 test:
 	curl "http://$(API_IP):5000/public/webhook" \
 		-XPOST -H 'Content-Type: application/json' -H 'X-GITHUB-EVENT: push' \

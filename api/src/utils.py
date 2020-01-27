@@ -85,9 +85,12 @@ def log_event(log_type, message_func):
     def decorator(function):
         @wraps(function)
         def wrapper(*args, **kwargs):
+            prefix='{} :: '.format(
+                get_request_ip(),
+            )
             event = Events(
                 type=log_type,
-                message=message_func()
+                message=prefix + message_func()
             )
             db.session.add(event)
             try:
