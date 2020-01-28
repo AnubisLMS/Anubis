@@ -6,7 +6,7 @@
 # RQ_WORKER_SCALE will be the max number of assignments anubis can process
 # at any given time.
 API_SCALE := 3
-RQ_WORKER_SCALE := 15
+RQ_WORKER_SCALE := 10
 
 
 CURRENT_DIR := $(shell dirname $(PWD))

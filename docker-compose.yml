@@ -113,6 +113,7 @@ services:
 
   smtp:
     image: namshi/smtp
+    restart: on-failure
     networks:
       - traefik-proxy
 
