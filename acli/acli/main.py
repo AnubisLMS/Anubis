@@ -83,7 +83,7 @@ def get_session(args):
     username = input('enter username: ') if not args.username else args.username
     password = getpass.getpass('enter password: ') if not args.password else args.password
     s.auth = (username, password,)
-    s.url = 'https://os3224.nyu.singles' if not args.debug else 'https://localhost'
+    s.url = 'https://os3224.nyu.cool' if not args.debug else 'https://localhost'
     return s
 
 
