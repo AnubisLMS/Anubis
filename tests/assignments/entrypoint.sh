@@ -8,6 +8,4 @@ run_tests() {
     done
 }
 
-ls
-pwd
 run_tests

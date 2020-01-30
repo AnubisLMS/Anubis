@@ -83,7 +83,7 @@ def test(client, repo_url, submission, volume_name):
         db.session.commit()
     except IntegrityError as e:
         print('unable to document test', e)
-        # TODO handle this error
+        raise report_error('error in documenting submission', submission.id)
 
     return t
 
