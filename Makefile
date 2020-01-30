@@ -9,7 +9,7 @@ API_SCALE := 3
 RQ_WORKER_SCALE := 10
 
 
-CURRENT_DIR := $(shell dirname $(PWD))
+CURRENT_DIR := $(shell basename $$(pwd) | tr '[:upper:]' '[:lower:]')
 
 IMAGES := $(shell \
 	ruby -ryaml -rjson -e 'puts JSON.pretty_generate(YAML.load(ARGF))' \
@@ -19,8 +19,8 @@ IMAGES := $(shell \
 
 BUILT_IMAGES := $(shell \
 	docker image ls | \
-	awk 'count=0 {count+=1; if (count > 1) {print $1}}' | \
-	grep -P '^$(CURRENT_DIR)_'\
+	awk '{print $$1}' | \
+	grep -P '^($(CURRENT_DIR)_|os3224-)' \
 	2> /dev/null \
 )
 
@@ -74,13 +74,20 @@ debug: check build db
 		api worker
 
 .PHONY: deploy       # Start the cluster in production mode
-deploy: check build db
+deploy: check build db restart
+
+.PHONY: restart      # Restart the cluster
+restart:
 	docker-compose -f ./docker-compose.yml up -d traefik redis smtp
 	docker-compose -f ./docker-compose.yml up \
 		-d --force-recreate \
 		--scale worker=$(RQ_WORKER_SCALE) \
 		--scale api=$(API_SCALE) \
 		api worker
+
+.PHONY: acli         # Install the cli
+acli:
+	sudo pip3 install ./acli
 
 .PHONY: stress       # Stress test the cluster
 stress:
@@ -96,6 +103,10 @@ test:
 	curl "http://$(API_IP):5000/public/webhook" \
 		-XPOST -H 'Content-Type: application/json' -H 'X-GITHUB-EVENT: push' \
 		--data '{"ref":"refs/heads/1","url":"https://github.com/os3224/xv6-jmc1283","after":"f3581d3b6ebe8600a8b35d8a782a3eecfa23dbe9","repository":{"name":"xv6-jmc1283"}}'
+
+.PHONY: backup       # Backup database to file
+backup:
+	docker-compose exec db mysqldump -u root os > os-dump-$$(date +%s).sql
 
 .PHONY: clean        # Clean up volumes, images and data
 clean:
