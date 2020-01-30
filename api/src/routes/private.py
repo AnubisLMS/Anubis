@@ -187,14 +187,19 @@ def handle_report():
             'errors': [ 'unable to process report' ]
         })
 
+    build = submission.builds[0]
+    msg=success_msg.format(
+        netid=submission.netid,
+        commit=submission.netid,
+        assignment=submission.assignment,
+        report='\n\n'.join(str(r) for r in reports),
+        build=build.stdout
+    )
+
+    print(msg, flush=True)
 
     send_noreply_email(
-        success_msg.format(
-            netid=submission.netid,
-            commit=submission.netid,
-            assignment=submission.assignment,
-            report='\n\n'.join(str(r) for r in reports)
-        ),
+        msg,
         'OS3224 - Anubis Autograder',
         submission.netid + '@nyu.edu'
     )

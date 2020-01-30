@@ -25,5 +25,9 @@ netid: {netid}
 assignment: {assignment}
 commit: {commit}
 
+build log:
+{build}
+
+report log:
 {report}
 """
