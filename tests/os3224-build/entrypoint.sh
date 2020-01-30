@@ -19,19 +19,6 @@ fi
 
 COMMIT="${1}"
 
-exit_with_failure() {
-    # exit_with_failure <msg>
-
-    echo
-    echo 'Failed to build xv6.img'
-    echo
-
-    echo "${@}" > /mnt/submission/FAIL
-
-    exit 1
-}
-
-
 build() {
     # build the xv6.img file and move it to a more convientent place
 
@@ -42,19 +29,14 @@ build() {
     # build
     make xv6.img
 
-    if (( $! != 0 )); then
-        exit_with_failure 'Failed to build xv6.img'
-    fi
-
     # move
     cd ../
-    mv ./xv6-public/xv6.img ../
+    mv ./xv6-public/xv6.img ./
+    mv ./xv6-public/fs.img ./
 
     # clean
     rm -rf xv6-public
 }
-
-
 
 main() {
     # Build that image

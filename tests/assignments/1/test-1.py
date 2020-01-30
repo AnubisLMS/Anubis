@@ -1,7 +1,7 @@
 from utils import save_results
 import os
 
-os.system('timeout -s 5 qemu-system-i386 -serial mon:stdio -drive file=xv6.img,media=disk,index=0,format=raw -drive file=fs.img,index=1,media=disk,format=raw -smp $(CPUS) -m 512 $(QEMUEXTRA) -display none -nographic')
+os.system('timeout 5 qemu-system-i386 -serial mon:stdio -drive file=./submission/xv6.img,media=disk,index=0,format=raw -drive file=./submission/fs.img,media=disk,index=1,format=raw  -smp 1 -m 512 -display none -nographic')
 
 
 save_results(
