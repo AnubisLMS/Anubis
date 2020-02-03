@@ -60,6 +60,15 @@ class Reports(db.Model):
 
     submission = db.relationship('Submissions', backref='reports')
 
+    @property
+    def json(self):
+        return {
+            'testname': self.testname,
+            'stdout': self.stdout,
+            'errors': self.errors,
+            'passed': self.passed,
+        }
+
     def __str__(self):
         return '{}:\n\nlogs:\n{}\n\nerrors:\n{}\n\npassed: {}\n'.format(
             self.testname,

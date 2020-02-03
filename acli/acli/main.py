@@ -4,6 +4,8 @@ import requests
 import urllib3
 import getpass
 import json
+import os
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -27,7 +29,8 @@ def parse_args():
         'command',
         choices=[
             'ls',
-            'restart'
+            'restart',
+            'stats'
         ],
         help='command to run'
     )
@@ -128,6 +131,25 @@ def restart(args):
     return s.post(s.url + '/private/restart', json=body)
 
 
+
+@command
+def stats(args):
+    """
+    Restart a submission job.
+
+    Either specify a assignment or an assignment and a netid
+    to get submission statistics.
+
+    acli stats <assignment>
+    acli stats <assignment> <netid>
+
+    :args: parsed ArgumentParser object
+    """
+    s=get_session(args)
+    s.headers.clear()
+    return s.get(s.url + os.path.join('/private/stats/', *args.argv))
+
+
 def main():
     args=parse_args()
 
@@ -135,6 +157,8 @@ def main():
         ls(args)
     elif args.command == 'restart':
         restart(args)
+    elif args.command == 'stats':
+        stats(args)
     else:
         print('')
         exit(1)

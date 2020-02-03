@@ -282,3 +282,39 @@ def restart():
     }
 
 
+@private.route('/stats/<assignment>')
+@private.route('/stats/<assignment>/<netid>')
+@log_event('CLI', lambda: 'stats request ' + dumps(request.json))
+def stats(assignment, netid=None):
+    netids = list(map(
+        lambda s: s.netid,
+        Submissions.query.distinct(
+            Submissions.netid
+        ).all()
+    )) if netid is None else [netid]
+
+    bests = {}
+
+    for netid in netids:
+        best=None
+        best_count=-1
+        for submission in Submissions.query.filter_by(
+                assignment=assignment,
+                netid=netid,
+        ).all():
+            correct_count = sum(map(
+                lambda rep: 1 if rep.passed else 0,
+                submission.reports
+            ))
+
+            if correct_count >= best_count:
+                best = submission
+        bests[netid] = {
+            'submission': best.json,
+            'reports': [rep.json for rep in best.reports],
+            'total_tests_passed': best_count
+        }
+
+    res = Response(dumps(bests, indent=2))
+    res.headers['Content-Type'] = 'application/json'
+    return res
