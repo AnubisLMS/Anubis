@@ -102,6 +102,8 @@ def handle_report_error():
         id=req['submission_id'],
     ).first()
 
+    print(req)
+
 
     submission.processed=True
     try:
@@ -309,8 +311,10 @@ def stats(assignment, netid=None):
 
             if correct_count >= best_count:
                 best = submission
+        build = best.builds[0].json if len(best.builds) > 0 else None
         bests[netid] = {
             'submission': best.json,
+            'build': build,
             'reports': [rep.json for rep in best.reports],
             'total_tests_passed': best_count
         }

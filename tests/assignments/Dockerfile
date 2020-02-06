@@ -1,7 +1,7 @@
 FROM debian:stretch
 
 RUN apt update \
-  && apt install -y qemu-system-x86 python3 \
+  && apt install -y sudo qemu-system-x86 python3 \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /mnt/

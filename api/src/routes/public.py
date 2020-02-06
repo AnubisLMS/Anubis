@@ -24,8 +24,9 @@ def webhook():
         data = request.json
         repo_url = data['url']
 
-        if not repo_url.startswith('https://github.com/os3224/xv6-'):
-            return {'success': False}
+        if not repo_url.startswith('https://github.com/os3224/xv6-') \
+           and not repo_url.startswith('https://gitlab.com/b1g_J/xv6-'):
+            return {'success': False, 'error': ['invalid repo']}
 
         netid=data['repository']['name'][len('xv6-'):]
         assignment=data['ref'][data['ref'].index('/', 5)+1:]
@@ -35,6 +36,7 @@ def webhook():
             netid=netid,
             assignment=assignment,
             commit=commit,
+            repo=repo_url,
         )
 
         try:
