@@ -102,7 +102,7 @@ stress:
 test:
 	curl "http://$(API_IP):5000/public/webhook" \
 		-XPOST -H 'Content-Type: application/json' -H 'X-GITHUB-EVENT: push' \
-		--data '{"ref":"refs/heads/1","url":"https://github.com/os3224/xv6-jmc1283","after":"f3581d3b6ebe8600a8b35d8a782a3eecfa23dbe9","repository":{"name":"xv6-jmc1283"}}'
+		--data '{"ref":"refs/heads/1","url":"https://gitlab.com/b1g_J/xv6-jmc1283","after":"f3581d3b6ebe8600a8b35d8a782a3eecfa23dbe9","repository":{"name":"xv6-jmc1283"}}'
 
 .PHONY: backup       # Backup database to file
 backup:

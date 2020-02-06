@@ -13,7 +13,7 @@ RUN apt update \
                     python3 \
                     python3-pip \
   && rm -rf /var/lib/apt/lists/* \
-  && sudo pip3 install lorem
+  && pip3 install lorem
 
 WORKDIR /mnt
 

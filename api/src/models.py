@@ -9,6 +9,7 @@ class Submissions(db.Model):
     __tablename__ = 'submissions'
     id = db.Column(db.Integer, primary_key=True)
     netid = db.Column(db.String(128), index=True)
+    repo = db.Column(db.String(128), nullable=False)
     assignment = db.Column(db.Text, index=True)
     commit = db.Column(db.String(128))
     processed = db.Column(db.Boolean, default=False)
@@ -34,6 +35,12 @@ class Builds(db.Model):
     stdout=db.Column(db.Text)
 
     submission = db.relationship('Submissions', backref='builds')
+
+    @property
+    def json(self):
+        return {
+            'stdout': self.stdout,
+        }
 
 
 class Tests(db.Model):
