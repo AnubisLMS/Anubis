@@ -5,3 +5,6 @@ gunicorn
 redis
 rq
 docker
+elasticsearch
+python-geoip-geolite2
+python-geoip-python3

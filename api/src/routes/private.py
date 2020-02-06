@@ -20,7 +20,7 @@ def index():
 
 
 @private.route('/report-panic', methods=['POST'])
-@log_event('PANIC-REPORT', lambda: 'panic was report from worker ' + dumps(request.json))
+@log_event('panic-report', lambda: 'panic was report from worker ' + dumps(request.json))
 def handle_report_panic():
     """
     This route will only be hit when there is a panic reported from a worker.
@@ -75,7 +75,7 @@ def handle_report_panic():
 
 
 @private.route('/report-error', methods=['POST'])
-@log_event('ERROR-REPORT', lambda: 'error was report from worker ' + dumps(request.json))
+@log_event('error-report', lambda: 'error was report from worker ' + dumps(request.json))
 def handle_report_error():
     """
     If at any point, a worker in the rq cluster encounters an error
@@ -128,7 +128,7 @@ def handle_report_error():
 
 
 @private.route('/report', methods=['POST'])
-@log_event('REPORT', lambda: 'report from worker submitted for {}'.format(request.json['netid']))
+@log_event('report', lambda: 'report from worker submitted for {}'.format(request.json['netid']))
 def handle_report():
     """
     TODO redocument and reformat this
@@ -210,7 +210,7 @@ def handle_report():
 
 
 @private.route('/ls')
-@log_event('CLI', lambda: 'ls requested')
+@log_event('cli', lambda: 'ls')
 def ls():
     """
     This route should hand back a json list of all submissions that are marked as
@@ -228,7 +228,7 @@ def ls():
 
 
 @private.route('/restart', methods=['POST'])
-@log_event('CLI', lambda: 'restart requested')
+@log_event('cli', lambda: 'restart')
 def restart():
     """
     This route is used to restart / re-enqueue jobs.
@@ -284,7 +284,7 @@ def restart():
 
 @private.route('/stats/<assignment>')
 @private.route('/stats/<assignment>/<netid>')
-@log_event('CLI', lambda: 'stats request ' + dumps(request.json))
+@log_event('cli', lambda: 'stats ' + dumps(request.json))
 def stats(assignment, netid=None):
     netids = list(map(
         lambda s: s.netid,
