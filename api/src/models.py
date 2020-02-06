@@ -83,14 +83,3 @@ class Reports(db.Model):
             self.errors,
             self.passed,
         )
-
-
-class Events(db.Model):
-    """
-    Events
-    """
-    __tablename__ = 'events'
-    id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.now)
-    type = db.Column(db.String(128))
-    message = db.Column(db.Text)

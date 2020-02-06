@@ -5,8 +5,8 @@ from json import dumps
 
 from ..app import db
 from ..config import Config
-from ..models import Submissions, Reports, Events
-from ..utils import enqueue_webhook_job, log_event, send_noreply_email
+from ..models import Submissions, Reports
+from ..utils import enqueue_webhook_job, log_event, send_noreply_email, esindex
 
 from .messages import err_msg, crit_err_msg, success_msg
 
@@ -59,7 +59,7 @@ def handle_report_panic():
     send_noreply_email(
         msg,
         'OS3224 - Anubis Autograder Critical Error', # email subject
-        req['netid'] + '@nyu.edu',   # recipient
+        submission.netid + '@nyu.edu',   # recipient
     )
 
     # Notify Admins (with logs)
@@ -102,9 +102,6 @@ def handle_report_error():
         id=req['submission_id'],
     ).first()
 
-    print(req)
-
-
     submission.processed=True
     try:
         db.session.add(submission)
@@ -124,7 +121,7 @@ def handle_report_error():
     send_noreply_email(
         msg,
         'OS3224 - Anubis Autograder Error', # email subject
-        req['netid'] + '@nyu.edu',   # recipient
+        submission.netid + '@nyu.edu',   # recipient
     )
     return {'success':True}
 
@@ -169,12 +166,15 @@ def handle_report():
     reports=[
         Reports(
             testname=result['name'],
-            errors=result['errors'],
+            errors=dumps(result['errors']),
             passed=result['passed'],
             submission=submission,
         )
         for result in report['reports']
     ]
+
+    for r in reports:
+        print(r.json, flush=True)
 
 
     try:
@@ -195,10 +195,11 @@ def handle_report():
         commit=submission.netid,
         assignment=submission.assignment,
         report='\n\n'.join(str(r) for r in reports),
-        build=build.stdout
+        test_logs=submission.tests[0].stdout,
+        build=build.stdout,
     )
 
-    print(msg, flush=True)
+    esindex(body={'type':'msg', 'logs': submission.tests[0].stdout})
 
     send_noreply_email(
         msg,

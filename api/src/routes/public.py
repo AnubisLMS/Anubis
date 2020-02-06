@@ -1,4 +1,5 @@
 from flask import request, redirect, url_for, flash, render_template, Blueprint
+from sqlalchemy.exc import IntegrityError
 from json import dumps
 
 from ..config import Config

@@ -12,7 +12,6 @@ from os import environ
 from rq import Queue
 
 from .jobs import test_repo
-from .models import Events
 from .app import db
 
 es = Elasticsearch(['http://elasticsearch:9200'])
@@ -91,25 +90,29 @@ def log_event(log_type, message_func):
         def wrapper(*args, **kwargs):
             ip = get_request_ip()
             location = geolite2.lookup(ip)
-            es.index(index=log_type.lower(), body={
-                'msg':  prefix + message_func(),
+            es.index(index='request', body={
+                'type': log_type.lower(),
+                'msg': message_func(),
                 'location': location,
                 'ip': ip,
                 'timestamp': datetime.now(),
             })
 
-            # event = Events(
-            #     type=log_type,
-            #     message=prefix + message_func()
-            # )
-            # db.session.add(event)
-            # try:
-            #     db.session.commit()
-            # except IntegrityError as e:
-            #     print('EVENT LOG ERROR', e)
             return function(*args, **kwargs)
         return wrapper
     return decorator
+
+
+def esindex(index='error', **kwargs):
+    """
+    Index anything with elasticsearch
+
+    :kwargs dict:
+    """
+    es.index(index=index, body={
+        'timestamp': datetime.now(),
+        **kwargs,
+    })
 
 
 def send_noreply_email(msg, subject, to):
@@ -132,7 +135,7 @@ def send_noreply_email(msg, subject, to):
     """
 
     if environ.get('DEBUG', False):
-        return
+        return print (msg, subject, to, flush=True)
 
     msg = MIMEText(msg, "plain")
     msg["Subject"] = subject

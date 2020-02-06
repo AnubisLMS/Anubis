@@ -1,10 +1,8 @@
 from sqlalchemy.exc import IntegrityError
 import docker
 
-
 from ..models import Submissions
 from ..app import db
-
 
 from .clone import clone
 from .build import build
