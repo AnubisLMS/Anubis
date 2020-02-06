@@ -10,7 +10,7 @@ public = Blueprint('public', __name__, url_prefix='/public')
 
 # dont think we need GET here
 @public.route('/webhook', methods=['POST'])
-@log_event('JOB-REQUEST', get_request_ip)
+@log_event('job-request', get_request_ip)
 def webhook():
     """
     This route should be hit by the github when a push happens.

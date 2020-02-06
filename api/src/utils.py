@@ -1,7 +1,10 @@
 from sqlalchemy.exc import IntegrityError
+from elasticsearch import Elasticsearch
 from email.mime.text import MIMEText
 from dataclasses import dataclass
+from datetime import datetime
 from functools import wraps
+from geoip import geolite2
 from flask import request
 from smtplib import SMTP
 from redis import Redis
@@ -12,6 +15,7 @@ from .jobs import test_repo
 from .models import Events
 from .app import db
 
+es = Elasticsearch(['http://elasticsearch:9200'])
 
 """
 We will use rq to enqueue and dequeue jobs.
@@ -85,18 +89,24 @@ def log_event(log_type, message_func):
     def decorator(function):
         @wraps(function)
         def wrapper(*args, **kwargs):
-            prefix='{} :: '.format(
-                get_request_ip(),
-            )
-            event = Events(
-                type=log_type,
-                message=prefix + message_func()
-            )
-            db.session.add(event)
-            try:
-                db.session.commit()
-            except IntegrityError as e:
-                print('EVENT LOG ERROR', e)
+            ip = get_request_ip()
+            location = geolite2.lookup(ip)
+            es.index(index=log_type.lower(), body={
+                'msg':  prefix + message_func(),
+                'location': location,
+                'ip': ip,
+                'timestamp': datetime.now(),
+            })
+
+            # event = Events(
+            #     type=log_type,
+            #     message=prefix + message_func()
+            # )
+            # db.session.add(event)
+            # try:
+            #     db.session.commit()
+            # except IntegrityError as e:
+            #     print('EVENT LOG ERROR', e)
             return function(*args, **kwargs)
         return wrapper
     return decorator

@@ -34,6 +34,9 @@ API_IP := $(shell docker network inspect traefik-proxy | \
 
 VOLUMES := $(shell docker volume ls | awk '{if (match($$2, /^anubis_.*$$/)) {print $$2}}')
 
+PERSISTENT_SERVICES := db traefik kibana elasticsearch redis smtp
+RESTART_ALWAYS_SERVICES := api worker
+
 help:
 	@echo 'For convenience'
 	@echo
@@ -66,24 +69,24 @@ events:
 
 .PHONY: debug        # Start the cluster in debug mode
 debug: check build db
-	docker-compose up -d traefik redis smtp
+	docker-compose up -d $(PERSISTENT_SERVICES)
 	docker-compose up \
 		-d --force-recreate \
 		--scale worker=3 \
 		--scale api=1 \
-		api worker
+		$(RESTART_ALWAYS_SERVICES)
 
 .PHONY: deploy       # Start the cluster in production mode
 deploy: check build db restart
 
 .PHONY: restart      # Restart the cluster
 restart:
-	docker-compose -f ./docker-compose.yml up -d traefik redis smtp
+	docker-compose -f ./docker-compose.yml up -d $(PERSISTENT_SERVICES)
 	docker-compose -f ./docker-compose.yml up \
 		-d --force-recreate \
 		--scale worker=$(RQ_WORKER_SCALE) \
 		--scale api=$(API_SCALE) \
-		api worker
+		$(RESTART_ALWAYS_SERVICES)
 
 .PHONY: acli         # Install the cli
 acli:

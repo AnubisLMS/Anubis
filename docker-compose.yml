@@ -117,6 +117,32 @@ services:
     networks:
       - traefik-proxy
 
+  elasticsearch:
+    image: elasticsearch:7.5.2
+    environment:
+      - "discovery.type=single-node"
+    volumes:
+      - el_data:/usr/share/elasticsearch/data
+    networks:
+      - traefik-proxy
+    labels:
+      - "traefik.enable=false"
+
+  kibana:
+    image: kibana:7.5.2
+    networks:
+      - traefik-proxy
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.services.kibana.loadbalancer.server.port=5601"
+
+      - "traefik.http.routers.kibana.rule=Host(`kibana.${DOMAIN}`)"
+      - "traefik.http.routers.kibana.entrypoints=https"
+      - "traefik.http.routers.kibana.tls.certresolver=tls"
+      - "traefik.http.middlewares.kibana.redirectscheme.scheme=https"
+      - "traefik.http.routers.kibana.middlewares=traefik-auth@docker"
+
 
 networks:
   traefik-proxy:
@@ -127,4 +153,5 @@ volumes:
   traefik_data:
   redis_data:
   db_data:
+  el_data:
   
