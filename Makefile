@@ -6,7 +6,7 @@
 # RQ_WORKER_SCALE will be the max number of assignments anubis can process
 # at any given time.
 API_SCALE := 3
-RQ_WORKER_SCALE := 10
+RQ_WORKER_SCALE := 20
 
 
 CURRENT_DIR := $(shell basename $$(pwd) | tr '[:upper:]' '[:lower:]')
@@ -94,11 +94,9 @@ acli:
 
 .PHONY: stress       # Stress test the cluster
 stress:
-	for i in $$(seq 10); do \
-		for k in $$(seq 10); do \
-				make test &> /dev/null; \
-			sleep 0.5; \
-		done; \
+	while true; do\
+		make test &> /dev/null; \
+		sleep 0.5; \
 	done
 
 .PHONY: test         # Enqeue test job

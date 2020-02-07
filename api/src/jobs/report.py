@@ -49,9 +49,21 @@ def report(client, repo_url, submission, volume_name):
             raise PipelineException('report failue')
 
     except PipelineException as e:
+        utils.esindex(
+            type='report',
+            logs=logs,
+            submission=submission.id,
+            netid=submission.netid,
+        )
         raise report_panic(str(e) + '\n' + logs, submission.id)
 
     except requests.exceptions.ReadTimeout:
+        utils.esindex(
+            type='report-timeout',
+            logs=logs,
+            submission=submission.id,
+            netid=submission.netid,
+        )
         # Kill container if it has reached its timeout
         container.kill()
         raise report_panic('report timeout\n', submission.id)

@@ -173,10 +173,6 @@ def handle_report():
         for result in report['reports']
     ]
 
-    for r in reports:
-        print(r.json, flush=True)
-
-
     try:
         for result in reports:
             db.session.add(result)
@@ -192,14 +188,19 @@ def handle_report():
     build = submission.builds[0]
     msg=success_msg.format(
         netid=submission.netid,
-        commit=submission.netid,
+        commit=submission.commit,
         assignment=submission.assignment,
         report='\n\n'.join(str(r) for r in reports),
         test_logs=submission.tests[0].stdout,
         build=build.stdout,
     )
 
-    esindex(body={'type':'msg', 'logs': submission.tests[0].stdout})
+    esindex(
+        type='email',
+        logs=submission.tests[0].stdout,
+        submission=submission.id,
+        netid=submission.netid,
+    )
 
     send_noreply_email(
         msg,

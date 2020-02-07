@@ -61,7 +61,6 @@ class Reports(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     submissionid = db.Column(db.Integer, db.ForeignKey('submissions.id'))
     testname = db.Column(db.String(128), index=True)
-    stdout = db.Column(db.Text)
     errors = db.Column(db.Text)
     passed = db.Column(db.Boolean)
 
@@ -71,15 +70,13 @@ class Reports(db.Model):
     def json(self):
         return {
             'testname': self.testname,
-            'stdout': self.stdout,
             'errors': self.errors,
             'passed': self.passed,
         }
 
     def __str__(self):
-        return '{}:\n\nlogs:\n{}\n\nerrors:\n{}\n\npassed: {}\n'.format(
+        return 'testname: {}\nerrors: {}\npassed: {}\n'.format(
             self.testname,
-            self.stdout,
             self.errors,
             self.passed,
         )

@@ -68,12 +68,19 @@ def build(client, repo_url, submission, volume_name):
         utils.esindex(
             type='build',
             logs=logs,
-            submission=submission.id
+            submission=submission.id,
+            netid=submission.netid,
         )
         raise report_error(str(e), submission.id)
 
     except requests.exceptions.ReadTimeout:
         # Kill container if it has reached its timeout
+        utils.esindex(
+            type='build-timeout',
+            logs=logs,
+            submission=submission.id,
+            netid=submission.netid,
+        )
         container.kill()
         raise report_error(
             'build timeout\n'+container.logs().decode(),

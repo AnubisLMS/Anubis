@@ -63,12 +63,19 @@ def test(client, repo_url, submission, volume_name):
         utils.esindex(
             type='test',
             logs=logs,
-            submission=submission.id
+            submission=submission.id,
+            netid=submission.netid,
         )
         raise report_error(str(e), submission.id)
 
     except requests.exceptions.ReadTimeout:
         # Kill container if it has reached its timeout
+        utils.esindex(
+            type='test-timeout',
+            logs=logs,
+            submission=submission.id,
+            netid=submission.netid,
+        )
         container.kill()
         raise report_error(
             'test timeout\n' + container.logs().decode(),
