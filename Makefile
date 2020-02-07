@@ -6,7 +6,7 @@
 # RQ_WORKER_SCALE will be the max number of assignments anubis can process
 # at any given time.
 API_SCALE := 3
-RQ_WORKER_SCALE := 10
+RQ_WORKER_SCALE := 20
 
 
 CURRENT_DIR := $(shell basename $$(pwd) | tr '[:upper:]' '[:lower:]')
@@ -94,18 +94,16 @@ acli:
 
 .PHONY: stress       # Stress test the cluster
 stress:
-	for i in $$(seq 10); do \
-		for k in $$(seq 10); do \
-				make test &> /dev/null; \
-			sleep 0.5; \
-		done; \
+	while true; do\
+		make test &> /dev/null; \
+		sleep 0.5; \
 	done
 
 .PHONY: test         # Enqeue test job
 test:
 	curl "http://$(API_IP):5000/public/webhook" \
 		-XPOST -H 'Content-Type: application/json' -H 'X-GITHUB-EVENT: push' \
-		--data '{"ref":"refs/heads/1","url":"https://github.com/os3224/xv6-jmc1283","after":"f3581d3b6ebe8600a8b35d8a782a3eecfa23dbe9","repository":{"name":"xv6-jmc1283"}}'
+		--data '{"ref":"refs/heads/1","url":"https://gitlab.com/b1g_J/xv6-jmc1283","after":"1cdb7192bc1fb4be7c1ccb4a88b3af63f7cbb876","repository":{"name":"xv6-jmc1283"}}'
 
 .PHONY: backup       # Backup database to file
 backup:

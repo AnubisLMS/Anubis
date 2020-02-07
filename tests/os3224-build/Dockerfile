@@ -10,11 +10,15 @@ RUN apt update \
                     make \
                     gcc \
                     libc6-i386 \
-  && rm -rf /var/lib/apt/lists/*
+                    python3 \
+                    python3-pip \
+  && rm -rf /var/lib/apt/lists/* \
+  && pip3 install lorem
 
 WORKDIR /mnt
 
 COPY ./entrypoint.sh /entrypoint.sh
+COPY overwrite.py /overwrite.py
 RUN chmod +x /entrypoint.sh
 
 CMD /entrypoint.sh

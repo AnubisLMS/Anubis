@@ -26,6 +26,9 @@ build() {
 
     git checkout "${COMMIT}"
 
+    # overwrite the README with lorem ipsum
+    python3 /overwrite.py
+
     # build
     make xv6.img
 
@@ -33,6 +36,7 @@ build() {
     cd ../
     mv ./xv6-public/xv6.img ./
     mv ./xv6-public/fs.img ./
+    mv ./xv6-public/README.md ./
 
     # clean
     rm -rf xv6-public

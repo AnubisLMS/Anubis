@@ -7,7 +7,7 @@ import time
 from .utils import report_error, PipelineException
 from ..models import Builds
 from ..app import db
-
+from .. import utils
 
 def build(client, repo_url, submission, volume_name):
     """
@@ -65,10 +65,22 @@ def build(client, repo_url, submission, volume_name):
             raise PipelineException('build failue')
 
     except PipelineException as e:
+        utils.esindex(
+            type='build',
+            logs=logs,
+            submission=submission.id,
+            netid=submission.netid,
+        )
         raise report_error(str(e), submission.id)
 
     except requests.exceptions.ReadTimeout:
         # Kill container if it has reached its timeout
+        utils.esindex(
+            type='build-timeout',
+            logs=logs,
+            submission=submission.id,
+            netid=submission.netid,
+        )
         container.kill()
         raise report_error(
             'build timeout\n'+container.logs().decode(),

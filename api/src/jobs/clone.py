@@ -2,6 +2,7 @@ import requests
 import docker
 
 from .utils import report_error, PipelineException
+from .. import utils
 
 
 def clone(client, repo_url, submission, volume_name):
@@ -40,12 +41,24 @@ def clone(client, repo_url, submission, volume_name):
 
         # Check that the container had a successful exit code
         if container.attrs['State']['ExitCode'] != 0:
-            raise PipelineException('clone failue')
+            raise PipelineException('clone failure')
 
     except PipelineException as e:
+        utils.esindex(
+            type='clone',
+            logs=logs,
+            submission=submission.id,
+            netid=submission.netid,
+        )
         raise report_error(str(e), submission.id)
 
     except requests.exceptions.ReadTimeout:
+        utils.esindex(
+            type='clone-timeout',
+            logs=logs,
+            submission=submission.id,
+            netid=submission.netid,
+        )
         # Kill container if it has reached its timeout
         container.kill()
         raise report_error('clone timeout\n', submission.id)

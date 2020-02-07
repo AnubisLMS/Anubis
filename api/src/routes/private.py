@@ -5,8 +5,8 @@ from json import dumps
 
 from ..app import db
 from ..config import Config
-from ..models import Submissions, Reports, Events
-from ..utils import enqueue_webhook_job, log_event, send_noreply_email
+from ..models import Submissions, Reports
+from ..utils import enqueue_webhook_job, log_event, send_noreply_email, esindex
 
 from .messages import err_msg, crit_err_msg, success_msg
 
@@ -59,7 +59,7 @@ def handle_report_panic():
     send_noreply_email(
         msg,
         'OS3224 - Anubis Autograder Critical Error', # email subject
-        req['netid'] + '@nyu.edu',   # recipient
+        submission.netid + '@nyu.edu',   # recipient
     )
 
     # Notify Admins (with logs)
@@ -102,7 +102,6 @@ def handle_report_error():
         id=req['submission_id'],
     ).first()
 
-
     submission.processed=True
     try:
         db.session.add(submission)
@@ -122,7 +121,7 @@ def handle_report_error():
     send_noreply_email(
         msg,
         'OS3224 - Anubis Autograder Error', # email subject
-        req['netid'] + '@nyu.edu',   # recipient
+        submission.netid + '@nyu.edu',   # recipient
     )
     return {'success':True}
 
@@ -167,13 +166,12 @@ def handle_report():
     reports=[
         Reports(
             testname=result['name'],
-            errors=result['errors'],
+            errors=dumps(result['errors']),
             passed=result['passed'],
             submission=submission,
         )
         for result in report['reports']
     ]
-
 
     try:
         for result in reports:
@@ -190,13 +188,19 @@ def handle_report():
     build = submission.builds[0]
     msg=success_msg.format(
         netid=submission.netid,
-        commit=submission.netid,
+        commit=submission.commit,
         assignment=submission.assignment,
         report='\n\n'.join(str(r) for r in reports),
-        build=build.stdout
+        test_logs=submission.tests[0].stdout,
+        build=build.stdout,
     )
 
-    print(msg, flush=True)
+    esindex(
+        type='email',
+        logs=submission.tests[0].stdout,
+        submission=submission.id,
+        netid=submission.netid,
+    )
 
     send_noreply_email(
         msg,
@@ -309,8 +313,10 @@ def stats(assignment, netid=None):
 
             if correct_count >= best_count:
                 best = submission
+        build = best.builds[0].json if len(best.builds) > 0 else None
         bests[netid] = {
             'submission': best.json,
+            'build': build,
             'reports': [rep.json for rep in best.reports],
             'total_tests_passed': best_count
         }

@@ -2,10 +2,10 @@ from sqlalchemy.exc import IntegrityError
 import requests
 import docker
 
-from .utils import PipelineException
+from .utils import PipelineException, report_error
 from ..models import Tests
 from ..app import db
-
+from .. import utils
 
 def test(client, repo_url, submission, volume_name):
     """
@@ -60,10 +60,22 @@ def test(client, repo_url, submission, volume_name):
             raise PipelineException('test failue')
 
     except PipelineException as e:
+        utils.esindex(
+            type='test',
+            logs=logs,
+            submission=submission.id,
+            netid=submission.netid,
+        )
         raise report_error(str(e), submission.id)
 
     except requests.exceptions.ReadTimeout:
         # Kill container if it has reached its timeout
+        utils.esindex(
+            type='test-timeout',
+            logs=logs,
+            submission=submission.id,
+            netid=submission.netid,
+        )
         container.kill()
         raise report_error(
             'test timeout\n' + container.logs().decode(),

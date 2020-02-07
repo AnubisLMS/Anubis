@@ -10,31 +10,31 @@ cd $(dirname $(realpath $0))
 
 build_build_image() {
     # builds the build image
-    docker build -t os3224-build os3224-build &> /dev/null
+    docker build -t os3224-build os3224-build
     echo './os3224-build os3224-build'
 }
 
 build_clone_image() {
     # build clone image
-    docker build -t os3224-clone os3224-clone &> /dev/null
+    docker build -t os3224-clone os3224-clone
     echo './os3224-clone os3224-clone'
 }
 
 build_report_image() {
     # build report image
-    docker build -t os3224-report os3224-report &> /dev/null
+    docker build -t os3224-report os3224-report
     echo './os3224-report os3224-report'
 }
 
 
 build_assignment_images() {
     # builds all the test images
-    docker build -t os3224-assignment-base assignments &> /dev/null
+    docker build -t os3224-assignment-base assignments
     echo './assignments os3224-assignment-base'
 
     for assignment in $(ls assignments); do
         if [ -d "./assignments/${assignment}" ]; then
-            docker build -t "os3224-assignment-${assignment}" "assignments/${assignment}" &> /dev/null
+            docker build -t "os3224-assignment-${assignment}" "assignments/${assignment}"
             echo "./assignments/${assignment} os3224-assignment-${assignment}"
         fi
     done

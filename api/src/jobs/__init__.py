@@ -1,10 +1,8 @@
 from sqlalchemy.exc import IntegrityError
 import docker
 
-
 from ..models import Submissions
 from ..app import db
-
 
 from .clone import clone
 from .build import build
@@ -35,7 +33,7 @@ def test_repo(submission_id):
     submission = Submissions.query.filter_by(
         id=submission_id
     ).first()
-    repo_url = 'https://github.com/os3224/xv6-' + submission.netid
+    repo_url = submission.repo
 
     volume_name=client.volumes.create(
         name='submission-{}'.format(submission.id),
