@@ -27,7 +27,7 @@ def clone(client, repo_url, submission, volume_name):
             'os3224-clone',
             name=name,
             detach=True,
-            command=['git', 'clone', repo_url, '/mnt/submission/xv6-public'],
+            command=['git', 'clone', repo_url, '/mnt/submission/build'],
             volumes={
                 volume_name: {
                     'bind': '/mnt/submission',

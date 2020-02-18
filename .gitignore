@@ -1,2 +1,3 @@
 .env
 os-dump-*.sql
+__pycache__

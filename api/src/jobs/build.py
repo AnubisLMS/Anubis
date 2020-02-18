@@ -9,6 +9,11 @@ from ..models import Builds
 from ..app import db
 from .. import utils
 
+assingment_files = {
+    '1': ['xv6.img', 'fs.img', 'README.md'],
+    'os3224-assignment-2': ['guess', 'linkedList'],
+}
+
 def build(client, repo_url, submission, volume_name):
     """
     Since we are running code that the students wrote,
