@@ -46,7 +46,7 @@ def report(client, repo_url, submission, volume_name):
 
         # Check that the container had a successful exit code
         if container.attrs['State']['ExitCode'] != 0:
-            raise PipelineException('report failue')
+            raise PipelineException('report failure')
 
     except PipelineException as e:
         utils.esindex(

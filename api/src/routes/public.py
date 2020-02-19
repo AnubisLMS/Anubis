@@ -9,6 +9,10 @@ from ..utils import enqueue_webhook_job, log_event, get_request_ip
 
 public = Blueprint('public', __name__, url_prefix='/public')
 
+
+#netids = loads(open('netids.json').read())
+netids = {'jmc1283':'jmc1283'}
+
 # dont think we need GET here
 @public.route('/webhook', methods=['POST'])
 @log_event('job-request', get_request_ip)
@@ -20,17 +24,20 @@ def webhook():
     TODO: add per student ratelimiting on this endpoint
     """
 
-
-    if request.headers['Content-Type'] == 'application/json' and request.headers['X-GitHub-Event'] == 'push':
+    if request.headers.get('Content-Type', None) == 'application/json' and \
+       request.headers.get('X-GitHub-Event', None) == 'push':
         data = request.json
-        repo_url = data['url']
+        repo_url = data['repository']['ssh_url']
+        if data['before'] == '0000000000000000000000000000000000000000' or data['ref'] != 'refs/heads/master':
+            return {'success': False, 'error': ['initial commit or push to master']}
 
-        if not repo_url.startswith('https://github.com/os3224/xv6-') \
-           and not repo_url.startswith('https://gitlab.com/b1g_J/xv6-'):
+        if not data['repository']['full_name'].startswith('os3224/'):
             return {'success': False, 'error': ['invalid repo']}
 
-        netid=data['repository']['name'][len('xv6-'):]
-        assignment=data['ref'][data['ref'].index('/', 5)+1:]
+        netid=netids[
+            data['repository']['name'].split('-')[-1]
+        ]
+        assignment='-'.join(data['repository']['name'].split('-')[:-1])
         commit=data['after']
 
         submission=Submissions(
@@ -50,7 +57,6 @@ def webhook():
 
 
         enqueue_webhook_job(submission.id)
-
 
     return {
         'success': True

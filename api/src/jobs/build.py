@@ -51,8 +51,8 @@ def build(client, repo_url, submission, volume_name):
             detach=True,
             command=[
                 '/entrypoint.sh',
-                submission.commit
-            ],
+                submission.commit,
+            ] + assingment_files[submission.assignment],
             network_mode='none',
             volumes={
                 volume_name: {
@@ -67,7 +67,7 @@ def build(client, repo_url, submission, volume_name):
 
         # Check that the container had a successful exit code
         if container.attrs['State']['ExitCode'] != 0:
-            raise PipelineException('build failue')
+            raise PipelineException('build failure')
 
     except PipelineException as e:
         utils.esindex(

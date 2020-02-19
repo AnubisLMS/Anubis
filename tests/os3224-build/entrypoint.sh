@@ -10,7 +10,7 @@
 
 set -e
 
-if (( $# != 1 )); then
+if (( $# < 1 )); then
     echo "git commit is required" 1>&2
     echo "docker run -it os3224-build <commit> [<files to copy>]" 1>&2
     exit 1
@@ -27,19 +27,19 @@ build() {
     cd /mnt/submission/build
 
     git checkout "${COMMIT}"
+    rm -rf .git # ah yeet
 
     # overwrite the README with lorem ipsum
     python3 /overwrite.py
 
     # build
-    make clean "${FILES}"
+    make clean ${FILES}
 
     # move
     cd ../
-    mv $/build/{FILES} ./
-    mv ./build/xv6.img ./
-    mv ./build/fs.img ./
-    mv ./build/README.md ./
+    for f in ${FILES}; do
+        mv ./build/$f ./
+    done
 
     # clean
     rm -rf build

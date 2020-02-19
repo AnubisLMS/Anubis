@@ -51,13 +51,13 @@ def test(client, repo_url, submission, volume_name):
             },
         )
 
-        container.wait(timeout=30)
+        container.wait(timeout=60)
         container.reload()
         logs = container.logs().decode()
 
         # Check that the container had a successful exit code
         if container.attrs['State']['ExitCode'] != 0:
-            raise PipelineException('test failue')
+            raise PipelineException('test failure')
 
     except PipelineException as e:
         utils.esindex(

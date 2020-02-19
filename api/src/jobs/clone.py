@@ -33,6 +33,10 @@ def clone(client, repo_url, submission, volume_name):
                     'bind': '/mnt/submission',
                     'mode': 'rw',
                 },
+                '/root/.ssh': {
+                    'bind': '/root/.ssh',
+                    'mode': 'ro',
+                },
             },
         )
         container.wait(timeout=10)
