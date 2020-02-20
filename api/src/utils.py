@@ -93,7 +93,7 @@ def log_event(log_type, message_func):
             es.index(index='request', body={
                 'type': log_type.lower(),
                 'msg': message_func(),
-                'location': location.location,
+                'location': location.location if location is not None else location,
                 'ip': ip,
                 'timestamp': datetime.now(),
             })
