@@ -8,6 +8,7 @@ from functools import wraps
 from geoip import geolite2
 from smtplib import SMTP
 from redis import Redis
+from json import dumps
 from os import environ
 from rq import Queue
 
