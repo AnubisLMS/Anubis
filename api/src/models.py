@@ -2,18 +2,41 @@ from .app import db
 from datetime import datetime
 import json
 
+class Student(db.Model):
+    __tablename__ = 'student'
+    id = db.Column(db.Integer, primary_key=True)
+    netid = db.Column(db.String(128), index=True)
+    github_username = db.Column(db.String(128), index=True)
+    name = db.Column(db.String(128))
+
+    @property
+    def json(self):
+        return {
+            'netid': self.netid,
+            'github_username': self.github_username,
+            'name': self.name,
+        }
+
+
 class Submissions(db.Model):
     """
     Submissions
     """
     __tablename__ = 'submissions'
     id = db.Column(db.Integer, primary_key=True)
-    netid = db.Column(db.String(128), index=True)
+    studentid = db.Column(db.Integer, db.ForeignKey('student.id'), index=True, nullable=True)
+    github_username = db.Column(db.String(128), nullable=False)
     repo = db.Column(db.String(128), nullable=False)
     assignment = db.Column(db.Text, index=True)
     commit = db.Column(db.String(128))
     processed = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=datetime.now)
+
+    student = db.relationship('Student', backref='submissions')
+
+    @property
+    def netid(self):
+        return self.student[0].netid
 
     @property
     def json(self):

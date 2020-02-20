@@ -4,14 +4,12 @@ from json import dumps
 
 from ..config import Config
 from ..app import db
-from ..models import Submissions
-from ..utils import enqueue_webhook_job, log_event, get_request_ip
+from ..models import Submissions, Student
+from ..utils import enqueue_webhook_job, log_event, get_request_ip, esindex
 
 public = Blueprint('public', __name__, url_prefix='/public')
 
 
-#netids = loads(open('netids.json').read())
-netids = {'jmc1283':'jmc1283'}
 
 # dont think we need GET here
 @public.route('/webhook', methods=['POST'])
@@ -28,24 +26,29 @@ def webhook():
        request.headers.get('X-GitHub-Event', None) == 'push':
         data = request.json
         repo_url = data['repository']['ssh_url']
+        github_username=data['pusher']['name']
+        assignment='-'.join(data['repository']['name'].split('-')[:-1])
+        commit=data['after']
+
         if data['before'] == '0000000000000000000000000000000000000000' or data['ref'] != 'refs/heads/master':
             return {'success': False, 'error': ['initial commit or push to master']}
 
         if not data['repository']['full_name'].startswith('os3224/'):
             return {'success': False, 'error': ['invalid repo']}
 
-        netid=netids[
-            data['repository']['name'].split('-')[-1]
-        ]
-        assignment='-'.join(data['repository']['name'].split('-')[:-1])
-        commit=data['after']
-
         submission=Submissions(
-            netid=netid,
             assignment=assignment,
             commit=commit,
             repo=repo_url,
+            github_username=github_username,
         )
+
+        student = Student.query.filter_by(
+            github_username=github_username,
+        ).first()
+
+        if student is not None:
+            submission.studentid=studentid
 
         try:
             db.session.add(submission)
@@ -55,8 +58,16 @@ def webhook():
             print('Unable to create submission', e)
             return {'success': False}
 
-
-        enqueue_webhook_job(submission.id)
+        # if the github username is not found, create a dangling submission
+        if submission.studentid:
+            enqueue_webhook_job(submission.id)
+        else:
+            esindex(
+                type='error',
+                logs='dangling submission by: ' + submission.github_username,
+                submission=submission.id,
+                neitd=None,
+            )
 
     return {
         'success': True

@@ -30,7 +30,9 @@ def parse_args():
         choices=[
             'ls',
             'restart',
-            'stats'
+            'stats',
+            'student',
+            'logout'
         ],
         help='command to run'
     )
@@ -82,12 +84,32 @@ def get_session(args):
     if args.debug:
         s.verify = False
         urllib3.disable_warnings()
+    home=os.environ.get('HOME', '')
+
+    if os.path.exists(os.path.join(home, '.anubis', 'creds.json')):
+        creds = json.load(open(os.path.join(home, '.anubis', 'creds.json')))
+        args.username = creds['username']
+        args.password = creds['password']
 
     username = input('enter username: ') if not args.username else args.username
     password = getpass.getpass('enter password: ') if not args.password else args.password
+
+    os.makedirs(os.path.join(home, '.anubis'), exist_ok=True)
+    json.dump({'username': username, 'password': password}, open(os.path.join(home, '.anubis', 'creds.json'), 'w'))
+
     s.auth = (username, password,)
     s.url = 'https://os3224.nyu.cool' if not args.debug else 'https://localhost'
     return s
+
+
+def logout(_):
+    """
+    Yeet creds
+    """
+    home=os.environ.get('HOME', '')
+    if os.path.exists(os.path.join(home, '.anubis', 'creds.json')):
+        os.remove(os.path.join(home, '.anubis', 'creds.json'))
+    print('logged out')
 
 
 @command
@@ -131,6 +153,23 @@ def restart(args):
     return s.post(s.url + '/private/restart', json=body)
 
 
+@command
+def student(args):
+    """
+    upload, or update studnet values
+    from a json
+
+    acli student <filename.json>
+
+    :args: parserd ArugmentParser object
+    """
+    s=get_session(args)
+    if len(args.argv) != 1:
+        print('acli student <filename.json>')
+        exit(1)
+
+    return s.post(s.url + '/private/student', json=json.load(open(args.argv[0])))
+
 
 @command
 def stats(args):
@@ -153,15 +192,13 @@ def stats(args):
 def main():
     args=parse_args()
 
-    if args.command == 'ls':
-        ls(args)
-    elif args.command == 'restart':
-        restart(args)
-    elif args.command == 'stats':
-        stats(args)
-    else:
-        print('')
-        exit(1)
+    {
+        'ls': ls,
+        'restart': restart,
+        'stats': stats,
+        'student': student,
+        'logout': logout,
+    }[args.command](args)
 
 
 if __name__ == '__main__':
