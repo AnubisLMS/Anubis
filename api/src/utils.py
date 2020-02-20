@@ -1,11 +1,11 @@
 from sqlalchemy.exc import IntegrityError
 from elasticsearch import Elasticsearch
 from email.mime.text import MIMEText
+from flask import request, Response
 from dataclasses import dataclass
 from datetime import datetime
 from functools import wraps
 from geoip import geolite2
-from flask import request
 from smtplib import SMTP
 from redis import Redis
 from os import environ
