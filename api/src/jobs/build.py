@@ -9,6 +9,11 @@ from ..models import Builds
 from ..app import db
 from .. import utils
 
+assingment_files = {
+    '1': ['xv6.img', 'fs.img', 'README.md'],
+    'os3224-assignment-2': ['guess', 'linkedList'],
+}
+
 def build(client, repo_url, submission, volume_name):
     """
     Since we are running code that the students wrote,
@@ -46,8 +51,8 @@ def build(client, repo_url, submission, volume_name):
             detach=True,
             command=[
                 '/entrypoint.sh',
-                submission.commit
-            ],
+                submission.commit,
+            ] + assingment_files[submission.assignment],
             network_mode='none',
             volumes={
                 volume_name: {
@@ -62,7 +67,7 @@ def build(client, repo_url, submission, volume_name):
 
         # Check that the container had a successful exit code
         if container.attrs['State']['ExitCode'] != 0:
-            raise PipelineException('build failue')
+            raise PipelineException('build failure')
 
     except PipelineException as e:
         utils.esindex(

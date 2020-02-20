@@ -10,36 +10,39 @@
 
 set -e
 
-if (( $# != 1 )); then
+if (( $# < 1 )); then
     echo "git commit is required" 1>&2
-    echo "docker run -it os3224-build <commit>" 1>&2
+    echo "docker run -it os3224-build <commit> [<files to copy>]" 1>&2
     exit 1
 fi
 
 
 COMMIT="${1}"
+shift
+FILES="$@"
 
 build() {
     # build the xv6.img file and move it to a more convientent place
 
-    cd /mnt/submission/xv6-public
+    cd /mnt/submission/build
 
     git checkout "${COMMIT}"
+    rm -rf .git # ah yeet
 
     # overwrite the README with lorem ipsum
     python3 /overwrite.py
 
     # build
-    make xv6.img
+    make clean ${FILES}
 
     # move
     cd ../
-    mv ./xv6-public/xv6.img ./
-    mv ./xv6-public/fs.img ./
-    mv ./xv6-public/README.md ./
+    for f in ${FILES}; do
+        mv ./build/$f ./
+    done
 
     # clean
-    rm -rf xv6-public
+    rm -rf build
 }
 
 main() {

@@ -4,10 +4,12 @@ from json import dumps
 
 from ..config import Config
 from ..app import db
-from ..models import Submissions
-from ..utils import enqueue_webhook_job, log_event, get_request_ip
+from ..models import Submissions, Student
+from ..utils import enqueue_webhook_job, log_event, get_request_ip, esindex
 
 public = Blueprint('public', __name__, url_prefix='/public')
+
+
 
 # dont think we need GET here
 @public.route('/webhook', methods=['POST'])
@@ -20,25 +22,33 @@ def webhook():
     TODO: add per student ratelimiting on this endpoint
     """
 
-
-    if request.headers['Content-Type'] == 'application/json' and request.headers['X-GitHub-Event'] == 'push':
+    if request.headers.get('Content-Type', None) == 'application/json' and \
+       request.headers.get('X-GitHub-Event', None) == 'push':
         data = request.json
-        repo_url = data['url']
-
-        if not repo_url.startswith('https://github.com/os3224/xv6-') \
-           and not repo_url.startswith('https://gitlab.com/b1g_J/xv6-'):
-            return {'success': False, 'error': ['invalid repo']}
-
-        netid=data['repository']['name'][len('xv6-'):]
-        assignment=data['ref'][data['ref'].index('/', 5)+1:]
+        repo_url = data['repository']['ssh_url']
+        github_username=data['pusher']['name']
+        assignment='-'.join(data['repository']['name'].split('-')[:-1])
         commit=data['after']
 
+        if data['before'] == '0000000000000000000000000000000000000000' or data['ref'] != 'refs/heads/master':
+            return {'success': False, 'error': ['initial commit or push to master']}
+
+        if not data['repository']['full_name'].startswith('os3224/'):
+            return {'success': False, 'error': ['invalid repo']}
+
         submission=Submissions(
-            netid=netid,
             assignment=assignment,
             commit=commit,
             repo=repo_url,
+            github_username=github_username,
         )
+
+        student = Student.query.filter_by(
+            github_username=github_username,
+        ).first()
+
+        if student is not None:
+            submission.studentid=studentid
 
         try:
             db.session.add(submission)
@@ -48,9 +58,16 @@ def webhook():
             print('Unable to create submission', e)
             return {'success': False}
 
-
-        enqueue_webhook_job(submission.id)
-
+        # if the github username is not found, create a dangling submission
+        if submission.studentid:
+            enqueue_webhook_job(submission.id)
+        else:
+            esindex(
+                type='error',
+                logs='dangling submission by: ' + submission.github_username,
+                submission=submission.id,
+                neitd=None,
+            )
 
     return {
         'success': True

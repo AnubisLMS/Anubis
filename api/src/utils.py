@@ -146,3 +146,12 @@ def send_noreply_email(msg, subject, to):
     s = SMTP("smtp")
     s.send_message(msg)
     s.quit()
+
+
+def jsonify(data):
+    """
+    Wrap a data response to set proper headers for json
+    """
+    res = Response(dumps(data))
+    res.headers['Content-Type'] = 'application/json'
+    return res

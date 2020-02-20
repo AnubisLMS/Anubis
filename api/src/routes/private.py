@@ -5,8 +5,8 @@ from json import dumps
 
 from ..app import db
 from ..config import Config
-from ..models import Submissions, Reports
-from ..utils import enqueue_webhook_job, log_event, send_noreply_email, esindex
+from ..models import Submissions, Reports, Student
+from ..utils import enqueue_webhook_job, log_event, send_noreply_email, esindex, jsonify
 
 from .messages import err_msg, crit_err_msg, success_msg
 
@@ -70,7 +70,7 @@ def handle_report_panic():
     )
 
 
-    return {'success':True}
+    return jsonify({'success':True})
 
 
 
@@ -123,7 +123,7 @@ def handle_report_error():
         'OS3224 - Anubis Autograder Error', # email subject
         submission.netid + '@nyu.edu',   # recipient
     )
-    return {'success':True}
+    return jsonify({'success':True})
 
 
 @private.route('/report', methods=['POST'])
@@ -180,7 +180,7 @@ def handle_report():
     except IntegrityError as e:
         db.session.rollback()
         print('ERROR unable to process report for {}'.format(report['netid']))
-        return dumps({
+        return jsonify({
             'success': False,
             'errors': [ 'unable to process report' ]
         })
@@ -208,9 +208,9 @@ def handle_report():
         submission.netid + '@nyu.edu'
     )
 
-    return {
+    return jsonify({
         'success': True
-    }
+    })
 
 
 @private.route('/ls')
@@ -226,9 +226,7 @@ def ls():
         processed=False,
     ).all()
 
-    res = Response(dumps([a.json for a in active], indent=2))
-    res.headers['Content-Type'] = 'application/json'
-    return res
+    return jsonify([a.json for a in active])
 
 
 @private.route('/restart', methods=['POST'])
@@ -281,9 +279,71 @@ def restart():
 
     enqueue_webhook_job(submission.id)
 
-    return {
+    return jsonify({
         'success': True
-    }
+    })
+
+
+@private.route('/student', methods=['GET', 'POST'])
+@log_event('cli', lambda: 'student')
+def handle_student():
+    """
+    [{netid, github_username, first_name, last_name, email}]
+    """
+    if request.method == 'POST':
+        body = request.json
+        print(body, flush=True)
+        for student in body:
+            s=Student.query.filter_by(netid=student['netid']).first()
+            if s is None:
+                s=Student(
+                    netid=student['netid'],
+                    github_username=student['github_username'],
+                    name=student['first_name'] + ' ' + student['last_name'],
+                )
+            else:
+                s.github_username = student['github_username']
+                s.name = name=student['first_name'] + ' ' + student['last_name'],
+            db.session.add(s)
+            try:
+                db.session.commit()
+            except IntegrityError as e:
+                print('integ err')
+                return jsonify({'success': False, 'errors': ['integ error']})
+    return jsonify({
+        'success': True,
+        'data': list(map(
+            lambda x: x.json,
+            Student.query.all()
+        ))
+    })
+
+
+@private.route('/fix-dangling')
+@log_event('cli', lambda: 'fix-dangling')
+def fix_dangling():
+    """
+    Should iterate through all dangling submissions, and see if
+    student values now exist. Then enqueue them.
+    """
+
+    dangling=Submissions.query.filter_by(
+        studentid=None
+    ).all()
+
+    fixed=[]
+
+    for d in dangling:
+        s=Student.query.filter_by(
+            github_username=d.github_username
+        ).first()
+        if s is not None:
+            fixed.append({
+                'submission': d.json,
+                'student': s.json,
+            })
+            enqueue_webhook_job(d.id)
+    return jsonify(fixed)
 
 
 @private.route('/stats/<assignment>')
@@ -320,7 +380,4 @@ def stats(assignment, netid=None):
             'reports': [rep.json for rep in best.reports],
             'total_tests_passed': best_count
         }
-
-    res = Response(dumps(bests, indent=2))
-    res.headers['Content-Type'] = 'application/json'
-    return res
+    return jsonify(best)
