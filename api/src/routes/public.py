@@ -47,8 +47,10 @@ def webhook():
             github_username=github_username,
         ).first()
 
+        print(github_username, student, flush=True)
+
         if student is not None:
-            submission.studentid=studentid
+            submission.studentid=student.id
 
         try:
             db.session.add(submission)

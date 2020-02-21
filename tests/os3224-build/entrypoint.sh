@@ -26,11 +26,13 @@ build() {
 
     cd /mnt/submission/build
 
-    git checkout "${COMMIT}"
-    rm -rf .git # ah yeet
+    {
+        git checkout "${COMMIT}"
+        rm -rf .git # ah yeet
 
-    # overwrite the README with lorem ipsum
-    python3 /overwrite.py
+        # overwrite the README with lorem ipsum
+        python3 /overwrite.py
+    } &> /dev/null
 
     # build
     make clean ${FILES}
@@ -42,7 +44,7 @@ build() {
     done
 
     # clean
-    rm -rf build
+    rm -rf build # ah yeet
 }
 
 main() {
@@ -58,7 +60,7 @@ main() {
 
     # report success
     echo
-    echo 'Successfully built xv6.img!'
+    echo 'Successfully built!'
     echo
 }
 
