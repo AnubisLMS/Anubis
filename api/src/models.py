@@ -36,7 +36,9 @@ class Submissions(db.Model):
 
     @property
     def netid(self):
-        return self.student[0].netid
+        if self.student is not None:
+            return self.student.netid
+        return 'null'
 
     @property
     def json(self):

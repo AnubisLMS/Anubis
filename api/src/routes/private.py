@@ -14,6 +14,38 @@ from .messages import err_msg, crit_err_msg, success_msg
 private = Blueprint('private', __name__, url_prefix='/private')
 
 
+def fix_dangling():
+    """
+    Should iterate through all dangling submissions, and see if
+    student values now exist. Then enqueue them.
+    """
+
+    dangling=Submissions.query.filter_by(
+        studentid=None
+    ).all()
+
+    fixed=[]
+
+    for d in dangling:
+        s=Student.query.filter_by(
+            github_username=d.github_username
+        ).first()
+        d.student=s
+        db.session.add(d)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            return None
+        if s is not None:
+            fixed.append({
+                'submission': d.json,
+                'student': s.json,
+            })
+            enqueue_webhook_job(d.id)
+    return fixed
+
+
 @private.route('/')
 def index():
     return 'super duper secret'
@@ -251,18 +283,25 @@ def restart():
 
     netid = body['netid']
 
+    student = Student.query.filter_by(netid=netid).first()
+    if student is None:
+        return jsonify({
+            'success': False,
+            'errors': ['Student does not exist']
+        })
+
     if 'commit' in body:
         # re-enqueue specific submission
 
         submission = Submissions.query.filter_by(
-            netid=netid,
+            studentid=student.id,
             commit=body['commit'],
         ).first()
     else:
         # re-enqueue last submission
 
         submission = Submissions.query.filter_by(
-            netid=netid,
+            studentid=student.id,
         ).order_by(desc(Submissions.timestamp)).first()
 
     submission.processed = False
@@ -315,35 +354,15 @@ def handle_student():
         'data': list(map(
             lambda x: x.json,
             Student.query.all()
-        ))
+        )),
+        'dangling': fix_dangling()
     })
 
 
 @private.route('/fix-dangling')
 @log_event('cli', lambda: 'fix-dangling')
-def fix_dangling():
-    """
-    Should iterate through all dangling submissions, and see if
-    student values now exist. Then enqueue them.
-    """
-
-    dangling=Submissions.query.filter_by(
-        studentid=None
-    ).all()
-
-    fixed=[]
-
-    for d in dangling:
-        s=Student.query.filter_by(
-            github_username=d.github_username
-        ).first()
-        if s is not None:
-            fixed.append({
-                'submission': d.json,
-                'student': s.json,
-            })
-            enqueue_webhook_job(d.id)
-    return jsonify(fixed)
+def fix_dangling_route():
+    return jsonify(fix_dangling())
 
 
 @private.route('/stats/<assignment>')
