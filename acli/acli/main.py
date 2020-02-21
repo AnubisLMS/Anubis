@@ -32,7 +32,8 @@ def parse_args():
             'restart',
             'stats',
             'student',
-            'logout'
+            'logout',
+            'dangling'
         ],
         help='command to run'
     )
@@ -122,6 +123,16 @@ def ls(args):
     s=get_session(args)
     return s.get(s.url + '/private/ls')
 
+@command
+def dangling(args):
+    """
+    Lists the currently dangling submissions.
+
+    :args: parsed ArgumentParser object
+    """
+    s=get_session(args)
+    return s.get(s.url + '/private/dangling')
+
 
 @command
 def restart(args):
@@ -164,11 +175,15 @@ def student(args):
     :args: parserd ArugmentParser object
     """
     s=get_session(args)
-    if len(args.argv) != 1:
+    if len(args.argv) == 1:
+        return s.post(s.url + '/private/student', json=json.load(open(args.argv[0])))
+    elif len(args.argv) == 0:
+        return s.get(s.url + '/private/student')
+    else:
+        print('acli student')
         print('acli student <filename.json>')
         exit(1)
 
-    return s.post(s.url + '/private/student', json=json.load(open(args.argv[0])))
 
 
 @command
@@ -194,6 +209,7 @@ def main():
 
     {
         'ls': ls,
+        'dangling': dangling,
         'restart': restart,
         'stats': stats,
         'student': student,

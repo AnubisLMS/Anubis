@@ -87,6 +87,14 @@ def handle_report_panic():
         commit=submission.commit,
     )
 
+    esindex(
+        'email',
+        type='panic',
+        msg=msg,
+        submission=submission.id,
+        netid=submission.netid,
+    )
+
     # Notify Student (without logs)
     send_noreply_email(
         msg,
@@ -147,6 +155,14 @@ def handle_report_error():
         assignment=submission.assignment,
         commit=submission.commit,
         error=req['error'],
+    )
+
+    esindex(
+        'email',
+        type='error',
+        msg=msg,
+        submission=submission.id,
+        netid=submission.netid,
     )
 
     # Notify Student
@@ -228,8 +244,9 @@ def handle_report():
     )
 
     esindex(
-        type='email',
-        logs=submission.tests[0].stdout,
+        'email',
+        type='submission',
+        msg=msg,
         submission=submission.id,
         netid=submission.netid,
     )
@@ -254,11 +271,35 @@ def ls():
     There is a chance that some of the submissions will be stale.
     """
 
-    active = Submissions.query.filter_by(
-        processed=False,
+    active = Submissions.query.filter(
+        Submissions.studentid!=None,
+        Submissions.processed==False,
     ).all()
 
     return jsonify([a.json for a in active])
+
+
+@private.route('/dangling')
+@log_event('cli', lambda: 'dangling')
+def dangling():
+    """
+    This route should hand back a json list of all submissions that are dangling.
+    Dangling being that we have no netid to match to the github username that
+    submitted the assignment.
+    """
+
+    dangling = Submissions.query.filter(
+        Submissions.studentid==None,
+    ).all()
+    dangling = [a.json for a in dangling]
+
+    return jsonify({
+        "success": True,
+        "data": {
+            "dangling": dangling,
+            "count": len(dangling)
+        }
+    })
 
 
 @private.route('/restart', methods=['POST'])
@@ -369,21 +410,27 @@ def fix_dangling_route():
 @private.route('/stats/<assignment>/<netid>')
 @log_event('cli', lambda: 'stats ' + dumps(request.json))
 def stats(assignment, netid=None):
-    netids = list(map(
-        lambda s: s.netid,
-        Submissions.query.distinct(
-            Submissions.netid
-        ).all()
-    )) if netid is None else [netid]
+    students = list(
+        Student.query.all()
+    ) if netid is None else [
+        Student.query.filter_by(
+            netid=netid
+        ).first()
+    ]
 
     bests = {}
 
-    for netid in netids:
+    for student in students:
+        if student is None:
+            return jsonify({
+                "success": False,
+                "erorr":"student does not exist",
+            })
         best=None
         best_count=-1
         for submission in Submissions.query.filter_by(
                 assignment=assignment,
-                netid=netid,
+                studentid=student.id,
         ).all():
             correct_count = sum(map(
                 lambda rep: 1 if rep.passed else 0,
@@ -392,11 +439,18 @@ def stats(assignment, netid=None):
 
             if correct_count >= best_count:
                 best = submission
-        build = best.builds[0].json if len(best.builds) > 0 else None
-        bests[netid] = {
-            'submission': best.json,
-            'build': build,
-            'reports': [rep.json for rep in best.reports],
-            'total_tests_passed': best_count
-        }
-    return jsonify(best)
+        if best is None:
+            # no submission
+            bests[student.netid] = None
+        else:
+            build = best.builds[0].json if len(best.builds) > 0 else None
+            bests[student.netid] = {
+                'submission': best.json,
+                'build': build,
+                'reports': [rep.json for rep in best.reports],
+                'total_tests_passed': best_count
+            }
+    return jsonify({
+        "success": True,
+        "data": bests
+    })

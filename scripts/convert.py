@@ -7,13 +7,18 @@ convert it to the json form for acli to be able to ingest.
 
 import json
 import csv
+import sys
 
-filename= './github IDs - Responses.csv'
+filename = sys.argv[1]
 
 students=[]
 with open(filename, newline='') as csvfile:
     reader=csv.DictReader(csvfile)
+    first=True
     for row in reader:
+        if first:
+            first=False
+            continue
         students.append({
             'netid': row['User Name'],
             'first_name': row['First Name'],
