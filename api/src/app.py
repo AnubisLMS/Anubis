@@ -17,3 +17,6 @@ from .routes import public, private
 app.register_blueprint(public)
 app.register_blueprint(private)
 
+
+from .utils import add_global_error_handler
+add_global_error_handler(app)

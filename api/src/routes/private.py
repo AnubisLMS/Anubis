@@ -372,7 +372,6 @@ def handle_student():
     """
     if request.method == 'POST':
         body = request.json
-        print(body, flush=True)
         for student in body:
             s=Student.query.filter_by(netid=student['netid']).first()
             if s is None:

@@ -11,6 +11,7 @@ from redis import Redis
 from json import dumps
 from os import environ
 from rq import Queue
+import traceback
 
 from .jobs import test_repo
 from .app import db
@@ -156,3 +157,16 @@ def jsonify(data):
     res = Response(dumps(data))
     res.headers['Content-Type'] = 'application/json'
     return res
+
+
+def add_global_error_handler(app):
+    @app.errorhandler(Exception)
+    def global_err_handler(error):
+        tb = traceback.format_exc() # get traceback string
+        esindex(
+            'error',
+            type='global-handler',
+            logs=tb,
+            submission=None,
+            netid=None,
+        )
