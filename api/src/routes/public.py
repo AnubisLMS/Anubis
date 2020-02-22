@@ -10,10 +10,15 @@ from ..utils import enqueue_webhook_job, log_event, get_request_ip, esindex
 public = Blueprint('public', __name__, url_prefix='/public')
 
 
+def webhook_log_msg():
+    if request.headers.get('Content-Type', None) == 'application/json' and \
+       request.headers.get('X-GitHub-Event', None) == 'push':
+        return request.json['pusher']['name']
+    return None
 
 # dont think we need GET here
 @public.route('/webhook', methods=['POST'])
-@log_event('job-request', get_request_ip)
+@log_event('job-request', webhook_log_msg)
 def webhook():
     """
     This route should be hit by the github when a push happens.
@@ -46,8 +51,6 @@ def webhook():
         student = Student.query.filter_by(
             github_username=github_username,
         ).first()
-
-        print(github_username, student, flush=True)
 
         if student is not None:
             submission.studentid=student.id
