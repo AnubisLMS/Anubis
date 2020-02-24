@@ -166,7 +166,8 @@ def add_global_error_handler(app):
         esindex(
             'error',
             type='global-handler',
-            logs=tb,
+            logs=request.url + ' - ' + get_request_ip() + '\n' + tb,
             submission=None,
             netid=None,
         )
+        return 'err'
