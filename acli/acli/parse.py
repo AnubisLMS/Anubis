@@ -77,21 +77,21 @@ def add_student_parser(subparsers):
 
 def add_dangling_parser(subparsers):
     # Dangling
-    dangling_parser = subparsers.add_parser('dangling')
+    dangling_parser = subparsers.add_parser('dangling', help='attempt to repair dangling submissions')
     dangling_subparser = dangling_parser.add_subparsers(dest='subcommand')
     return dangling_parser
 
 
 def add_logout_parser(subparsers):
     # Logout
-    logout_parser = subparsers.add_parser('logout')
+    logout_parser = subparsers.add_parser('logout', help='delete credentials')
     logout_subparser = logout_parser.add_subparsers(dest='subcommand')
     return logout_parser
 
 
 def add_ls_parser(subparsers):
     # Ls
-    ls_parser = subparsers.add_parser('ls')
+    ls_parser = subparsers.add_parser('ls', help='list currently running / pending submissions')
     ls_subparser = ls_parser.add_subparsers(dest='subcommand')
     return ls_parser
 
