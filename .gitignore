@@ -1,3 +1,4 @@
 .env
-os-dump-*.sql
+os-dump-*.sql.gz
+es-dump-*.tar.gz
 __pycache__

@@ -35,20 +35,20 @@ try:
     for index in range(len(lines)):
         lines[index] = lines[index].strip()
 
-    if any(l.lower() == 'Hello world' for l in lines):
-        print('your lines:', '\n'.join(lines), sep='\n')
-        print('we expected:', '\n'.join(['Hello world']), sep='\n')
-        save_results(
-            'test-0',
-            ['Did not recieve exepected output'],
-            False
-        )
-    else:
+    if any('hello' in l.lower() or 'world' in l.lower() for l in lines):
         print('test passed, we recieved the expected output')
         save_results(
             'test-0',
             [],
             True
+        )
+    else:
+        print('your lines:', '\n'.join(lines), sep='\n')
+        print('we expected:', '\n'.join(['hello world']), sep='\n')
+        save_results(
+            'test-0',
+            ['Did not recieve exepected output'],
+            False
         )
 except:
     save_results(
