@@ -378,11 +378,11 @@ def handle_student():
                 s=Student(
                     netid=student['netid'],
                     github_username=student['github_username'],
-                    name=student['first_name'] + ' ' + student['last_name'],
+                    name=student['name'] if 'name' in student else student['first_name'] + ' ' + student['last_name'],
                 )
             else:
                 s.github_username = student['github_username']
-                s.name = name=student['first_name'] + ' ' + student['last_name'],
+                s.name = student['name'] if 'name' in student else student['first_name'] + ' ' + student['last_name'],
             db.session.add(s)
             try:
                 db.session.commit()
@@ -442,10 +442,11 @@ def stats(assignment, netid=None):
             # no submission
             bests[student.netid] = None
         else:
-            build = best.builds[0].json if len(best.builds) > 0 else None
+            build = len(best.builds) > 0
+            best_count = sum(map(lambda x: 1 if x.passed else 0, best.reports))
             bests[student.netid] = {
                 'submission': best.json,
-                'build': build,
+                'builds': build,
                 'reports': [rep.json for rep in best.reports],
                 'total_tests_passed': best_count
             }
