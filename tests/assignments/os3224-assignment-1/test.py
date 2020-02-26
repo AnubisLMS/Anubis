@@ -49,4 +49,4 @@ def test(num, cmd):
             ['an unexpected error occured, admins will be notified'],
             False
         )
-        exit(1)
+        #exit(1)

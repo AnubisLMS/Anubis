@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 run_tests() {
     # run all the tests here
