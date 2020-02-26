@@ -72,7 +72,7 @@ debug: check build db
 	docker-compose up -d $(PERSISTENT_SERVICES)
 	docker-compose up \
 		-d --force-recreate \
-		--scale worker=3 \
+		--scale worker=30 \
 		--scale api=1 \
 		$(RESTART_ALWAYS_SERVICES)
 
