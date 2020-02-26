@@ -10,7 +10,7 @@ from ..app import db
 from .. import utils
 
 assingment_files = {
-    '1': ['xv6.img', 'fs.img', 'README.md'],
+    'os3224-assignment-1': ['xv6.img', 'fs.img', 'README.md'],
     'os3224-assignment-2': ['guess', 'linkedList'],
 }
 
