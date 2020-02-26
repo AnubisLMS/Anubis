@@ -107,7 +107,8 @@ test:
 
 .PHONY: backup       # Backup database to file
 backup:
-	docker-compose exec db mysqldump -u root os > os-dump-$$(date +%s).sql
+	docker-compose exec db mysqldump -u root --password=password os | gzip - > os-dump-$$(date +%s).sql.gz
+	docker run --rm --volumes-from anubis_elasticsearch_1 -v $$(pwd):/backup alpine tar czf /backup/es-dump-$$(date +%s).tar.gz /usr/share/elasticsearch/data
 
 .PHONY: clean        # Clean up volumes, images and data
 clean:

@@ -1,4 +1,4 @@
 from test import test
 
-print('Running: uniq -d README.md')
+print('Running: uniq -d short')
 test(3, 'uniq -d')

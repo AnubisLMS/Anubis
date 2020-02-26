@@ -7,18 +7,21 @@ import time
 def test_lines(lines, expexted):
     return all(l.startswith(e) for l, e in zip (lines, expexted))
 
-def test(num, cmd):
+def test(num, cmd, filename='short'):
     try:
         print()
         print('Running test for: {}'.format(cmd))
         qemu_cmd = 'timeout 5 qemu-system-i386 -serial mon:stdio -drive file=./submission/xv6.img,media=disk,index=0,format=raw -drive file=./submission/fs.img,media=disk,index=1,format=raw -smp 1 -m 512 -display none -nographic'
 
         with open('test-{}.in'.format(num), 'w') as f:
-            f.write('\n{} README.md\n'.format(cmd))
+            f.write('\n{} {}\n'.format(cmd, filename))
             f.close()
 
         qemu = subprocess.Popen(qemu_cmd + ' < test-{}.in'.format(num), stdout=subprocess.PIPE, shell=True)
-        expected = subprocess.check_output(cmd + ' ./submission/README.md', shell=True).decode().strip().split('\n')
+        expected = subprocess.check_output(
+            cmd + ' ./submission/{}'.format(filename),
+            shell=True
+        ).decode().strip().split('\n')
         qemu.wait()
         stdout, err = qemu.communicate()
         stdout = stdout.decode().split('\n')
