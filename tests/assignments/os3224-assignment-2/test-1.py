@@ -6,8 +6,8 @@ import random
 
 
 
-l1 = [random.randint(0, 20) for _ in range(random.randint(5, 10))]
-l2 = [random.randint(0, 20) for _ in range(random.randint(5, 10))]
+l1 = list(sorted(random.randint(0, 20) for _ in range(random.randint(5, 10))))
+l2 = list(sorted(random.randint(0, 20) for _ in range(random.randint(5, 10))))
 
 ans = list(sorted(l1 + l2))
 
