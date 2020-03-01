@@ -43,13 +43,14 @@ def test():
                 ['expected result was found'],
                 True
             )
+        else:
+            save_results(
+                'test-1',
+                ['expected result was not found'],
+                False
+            )
     except:
         pass
 
-    save_results(
-        'test-1',
-        ['expected result was not found'],
-        False
-    )
 
 test()
