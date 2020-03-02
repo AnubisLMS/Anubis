@@ -54,6 +54,7 @@ def build(client, repo_url, submission, volume_name):
                 submission.commit,
             ] + assingment_files[submission.assignment],
             network_mode='none',
+            mem_limit='100m',
             volumes={
                 volume_name: {
                     'bind': '/mnt/submission',
