@@ -522,6 +522,7 @@ def stats(assignment_name, netid=None):
         for submission in Submissions.query.filter_by(
                 assignment=assignment,
                 studentid=student.id,
+                processed=True,
         ).all():
             correct_count = sum(map(
                 lambda rep: 1 if rep.passed else 0,
@@ -544,6 +545,7 @@ def stats(assignment_name, netid=None):
                 'builds': build,
                 'reports': [rep.json for rep in best.reports],
                 'total_tests_passed': best_count,
+                'repo_url': best.repo,
                 'late': late
             }
     return jsonify({
