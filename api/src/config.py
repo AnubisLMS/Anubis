@@ -9,6 +9,8 @@ class Config:
         os.environ.get('DB_HOST', 'db')
     )
     SQLALCHEMY_POOL_PRE_PING=True
+    SQLALCHEMY_POOL_SIZE=100
+    SQLALCHEMY_POOL_RECYCLE=280
     SQLALCHEMY_TRACK_MODIFICATIONS=False
     ADMINS = os.environ.get('ADMINS', 'jmc1283@nyu.edu')
 
