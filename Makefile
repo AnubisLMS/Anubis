@@ -5,8 +5,8 @@
 #
 # RQ_WORKER_SCALE will be the max number of assignments anubis can process
 # at any given time.
-API_SCALE := 3
-RQ_WORKER_SCALE := 20
+API_SCALE := 1
+RQ_WORKER_SCALE := 5
 
 
 CURRENT_DIR := $(shell basename $$(pwd) | tr '[:upper:]' '[:lower:]')
