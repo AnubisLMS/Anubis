@@ -1,5 +1,5 @@
 #!/usr/bin/python3
 
-from acli import main
+from anubis import main
 
 main()

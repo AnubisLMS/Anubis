@@ -15,7 +15,7 @@ setuptools.setup(
     python_requires='>=3.6',
     entry_points={
         "console_scripts": {
-            'anubis=acli:main'
+            'anubis=anubis:main'
         }
     }
 )
