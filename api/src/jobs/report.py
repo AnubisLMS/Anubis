@@ -17,12 +17,12 @@ def report(client, repo_url, submission, volume_name):
     """
 
     netid=submission.netid
-    assignment=submission.assignment
+    assignment_name=submission.assignment.name
 
     name = '{netid}-{commit}-{assignment}-{id}-report'.format(
         netid=submission.netid,
         commit=submission.commit,
-        assignment=submission.assignment,
+        assignment=assignment_name,
         id=submission.id,
     )
 
@@ -30,7 +30,7 @@ def report(client, repo_url, submission, volume_name):
         container=client.containers.run(
             'os3224-report',
             name=name,
-            command=['python3', 'main.py', netid, assignment, str(submission.id)],
+            command=['python3', 'main.py', netid, assignment_name, str(submission.id)],
             network='traefik-proxy',
             detach=True,
             volumes={

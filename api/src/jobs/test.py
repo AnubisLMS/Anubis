@@ -25,21 +25,21 @@ def test(client, repo_url, submission, volume_name):
     """
 
     netid=submission.netid
-    assignment=submission.assignment
+    assignment_name=submission.assignment.name
 
     logs=''
     name = '{netid}-{commit}-{assignment}-{id}-test'.format(
         netid=submission.netid,
         commit=submission.commit,
-        assignment=submission.assignment,
+        assignment=assignment_name,
         id=submission.id,
     )
 
     try:
         container=client.containers.run(
-            'os3224-assignment-{}'.format(assignment),
+            'os3224-assignment-{}'.format(assignment_name),
             name=name,
-            command=['/entrypoint.sh', repo_url, netid, assignment, str(submission.id)],
+            command=['/entrypoint.sh', repo_url, netid, assignment_name, str(submission.id)],
             network_mode='none',
             detach=True,
             privileged=True,

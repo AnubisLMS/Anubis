@@ -18,7 +18,7 @@ def clone(client, repo_url, submission, volume_name):
     name = '{netid}-{commit}-{assignment}-{id}-clone'.format(
         netid=submission.netid,
         commit=submission.commit,
-        assignment=submission.assignment,
+        assignment=submission.assignment.name,
         id=submission.id,
     )
 

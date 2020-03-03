@@ -54,7 +54,7 @@ check:
 .PHONY: build        # Build all docker images
 build:
 	docker-compose build --pull --parallel
-	./tests/build.sh
+	./assignments/build.sh
 
 .PHONY: db           # Start and initialize the database service
 db:
@@ -88,22 +88,9 @@ restart:
 		--scale api=$(API_SCALE) \
 		$(RESTART_ALWAYS_SERVICES)
 
-.PHONY: acli         # Install the cli
-acli:
-	sudo pip3 install ./acli
-
-.PHONY: stress       # Stress test the cluster
-stress:
-	while true; do\
-		make test &> /dev/null; \
-		sleep 0.5; \
-	done
-
-.PHONY: test         # Enqeue test job
-test:
-	curl "http://$(API_IP):5000/public/webhook" \
-		-XPOST -H 'Content-Type: application/json' -H 'X-GITHUB-EVENT: push' \
-		--data '{"ref":"refs/heads/1","url":"https://gitlab.com/b1g_J/xv6-jmc1283","after":"1cdb7192bc1fb4be7c1ccb4a88b3af63f7cbb876","repository":{"name":"xv6-jmc1283"}}'
+.PHONY: cli         # Install the cli
+cli:
+	sudo pip3 install ./cli
 
 .PHONY: backup       # Backup database to file
 backup:
