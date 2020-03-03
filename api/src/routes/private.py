@@ -503,6 +503,7 @@ def stats(assignment_name, netid=None):
     ]
 
     bests = {}
+    eastern = timezone('US/Eastern')
 
     assignment = Assignment.query.filter_by(name=assignment_name).first()
     if assignment is None:
@@ -535,7 +536,6 @@ def stats(assignment_name, netid=None):
             # no submission
             bests[student.netid] = None
         else:
-            eastern = timezone('US/Eastern')
             build = len(best.builds) > 0
             best_count = sum(map(lambda x: 1 if x.passed else 0, best.reports))
             late = 'past due' if eastern.localize(assignment.due_date) < eastern.localize(submission.timestamp) else False
