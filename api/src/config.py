@@ -8,8 +8,8 @@ class Config:
     SQLALCHEMY_DATABASE_URI='mysql+pymysql://root:password@{}/os'.format(
         os.environ.get('DB_HOST', 'db')
     )
+    SQLALCHEMY_POOL_PRE_PING=True
     SQLALCHEMY_TRACK_MODIFICATIONS=False
-    REPO_SKELETAL = 'https://github.com/os3224/helloworld-'
     ADMINS = os.environ.get('ADMINS', 'jmc1283@nyu.edu')
 
     def __init__(self):

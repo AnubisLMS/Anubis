@@ -2,10 +2,13 @@ from flask import request, redirect, url_for, flash, render_template, Blueprint,
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc
 from json import dumps
+from datetime import datetime
+from pytz import timezone
+import dateutil.parser
 
 from ..app import db
 from ..config import Config
-from ..models import Submissions, Reports, Student
+from ..models import Submissions, Reports, Student, Assignment
 from ..utils import enqueue_webhook_job, log_event, send_noreply_email, esindex, jsonify
 
 from .messages import err_msg, crit_err_msg, success_msg
@@ -92,6 +95,7 @@ def handle_report_panic():
         type='panic',
         msg=msg,
         submission=submission.id,
+        assignment=submission.assignment.name,
         netid=submission.netid,
     )
 
@@ -162,6 +166,7 @@ def handle_report_error():
         type='error',
         msg=msg,
         submission=submission.id,
+        assignment=submission.assignment.name,
         netid=submission.netid,
     )
 
@@ -248,6 +253,7 @@ def handle_report():
         type='submission',
         msg=msg,
         submission=submission.id,
+        assignment=submission.assignment.name,
         netid=submission.netid,
     )
 
@@ -316,7 +322,6 @@ def restart():
 
     body = {
       netid
-      assignment
       commit
     }
     """
@@ -346,6 +351,13 @@ def restart():
         ).order_by(desc(Submissions.timestamp)).first()
 
     submission.processed = False
+    reports = submission.reports
+    builds = submission.builds
+
+    for report in reports:
+        db.session.delete(report)
+    for build in builds:
+        db.session.delete(build)
 
     try:
         db.session.add(submission)
@@ -405,10 +417,83 @@ def fix_dangling_route():
     return jsonify(fix_dangling())
 
 
-@private.route('/stats/<assignment>')
-@private.route('/stats/<assignment>/<netid>')
-@log_event('cli', lambda: 'stats ' + dumps(request.json))
-def stats(assignment, netid=None):
+@private.route('/assignment', methods=['POST'])
+@log_event('cli', lambda: 'assignment')
+def handle_assignment():
+    """
+    body = {
+      action
+      data {
+        name
+        due_date
+        grace_date
+      }
+    }
+    """
+    data=request.json
+    action=data['action']
+    data=data['data']
+    if action == 'add':
+        a = Assignment(
+            name=data['name'],
+            due_date=dateutil.parser.parse(data['due_date']),
+            grace_date=dateutil.parser.parse(data['grace_date'])
+        )
+        db.session.add(a)
+        try:
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            return jsonify({
+                'success': False,
+                'error': ['unable to commit']
+            })
+        return jsonify({
+            'success': True,
+            'msg': 'assignment created',
+            'data': a.json
+        })
+    elif action == 'modify':
+        a = Assignment.query.filter_by(name=data['name']).first()
+        if a is None:
+            return jsonify({
+                'success': False,
+                'error': ['assignment does not exist']
+            })
+
+        a.due_date=dateutil.parser.parse(data['due_date']),
+        a.grace_date=dateutil.parser.parse(data['grace_date'])
+
+        try:
+            db.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            return jsonify({
+                'success': False,
+                'error': ['unable to delete']
+            })
+
+        return jsonify({
+            'success': True,
+            'msg': 'Assignment updated',
+            'data': a.json,
+        })
+    elif action == 'ls':
+        assignments = Assignment.query.all()
+        return jsonify({
+            'success': True,
+            'data': list(map(lambda x: x.json, assignments))
+        })
+    return jsonify({
+        'success': False,
+        'error': ['invalid action']
+    })
+
+
+@private.route('/stats/<assignment_name>')
+@private.route('/stats/<assignment_name>/<netid>')
+@log_event('cli', lambda: 'stats')
+def stats(assignment_name, netid=None):
     students = list(
         Student.query.all()
     ) if netid is None else [
@@ -418,6 +503,13 @@ def stats(assignment, netid=None):
     ]
 
     bests = {}
+
+    assignment = Assignment.query.filter_by(name=assignment_name).first()
+    if assignment is None:
+        return jsonify({
+            'success': False,
+            'error': ['assignment does not exist']
+        })
 
     for student in students:
         if student is None:
@@ -442,13 +534,17 @@ def stats(assignment, netid=None):
             # no submission
             bests[student.netid] = None
         else:
+            eastern = timezone('US/Eastern')
             build = len(best.builds) > 0
             best_count = sum(map(lambda x: 1 if x.passed else 0, best.reports))
+            late = 'past due' if eastern.localize(assignment.due_date) < eastern.localize(submission.timestamp) else False
+            late = 'past grace' if eastern.localize(assignment.grace_date) < eastern.localize(submission.timestamp) else late
             bests[student.netid] = {
                 'submission': best.json,
                 'builds': build,
                 'reports': [rep.json for rep in best.reports],
-                'total_tests_passed': best_count
+                'total_tests_passed': best_count,
+                'late': late
             }
     return jsonify({
         "success": True,

@@ -9,6 +9,8 @@ from .auth import get_session
 from .utils import command
 
 
+parsers = None
+
 def logout(_):
     """
     Yeet creds
@@ -97,8 +99,35 @@ def stats(args):
         return s.get(s.url + os.path.join('/private/stats/', args.assignment))
     return s.get(s.url + os.path.join('/private/stats/', args.assignment, args.netid))
 
+@command
+def assignment(args):
+    """
+    Add or edit an assignment.
+    Datetimes should be in format: '2020-03-02 23:40:58'
+
+    anubis assignment add 'assignment name' 'due date' 'grace date'
+    anubis assignment modify 'assignment name' 'new due date' 'new grace date'
+
+    :args: parsed ArgumentParser object
+    """
+
+    if not args.subcommand:
+        parsers['assignment'].print_help()
+        exit(0)
+
+    s=get_session(args)
+    return s.post(s.url + '/private/assignment', json={
+        'data': {
+            'name': args.name if 'name' in args else None,
+            'due_date': args.due_date if 'due_date' in args else None,
+            'grace_date':args.grace_date if 'grace_date' in args else None,
+        },
+        'action': args.subcommand,
+    })
+
 
 def main(*argv):
+    global parsers
     args, parsers = parse_args(argv)
 
     if not args.command:
@@ -116,6 +145,7 @@ def main(*argv):
         'stats': stats,
         'student': student,
         'logout': logout,
+        'assignment': assignment,
     }[args.command](args)
 
 

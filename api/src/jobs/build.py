@@ -33,14 +33,14 @@ def build(client, repo_url, submission, volume_name):
     """
 
     netid=submission.netid
-    assignment=submission.assignment
+    assignment=submission.assignment.name
 
 
     logs=''
     name = '{netid}-{commit}-{assignment}-{id}-build'.format(
         netid=submission.netid,
         commit=submission.commit,
-        assignment=submission.assignment,
+        assignment=submission.assignment.name,
         id=submission.id,
     )
 
@@ -52,7 +52,7 @@ def build(client, repo_url, submission, volume_name):
             command=[
                 '/entrypoint.sh',
                 submission.commit,
-            ] + assingment_files[submission.assignment],
+            ] + assingment_files[submission.assignment.name],
             network_mode='none',
             mem_limit='100m',
             volumes={

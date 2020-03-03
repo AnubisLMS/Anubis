@@ -18,6 +18,7 @@ def parse_args(argv):
     restart_parser = add_restart_parser(subparsers)
     stats_parser = add_stats_parser(subparsers)
     dangling_parser = add_dangling_parser(subparsers)
+    assignment_parser = add_assignment_parser(subparsers)
 
     return parser.parse_args(argv), {
         'main': parser,
@@ -26,8 +27,35 @@ def parse_args(argv):
         'student': student_parser,
         'restart': restart_parser,
         'dangling': dangling_parser,
-        'stats': stats_parser
+        'stats': stats_parser,
+        'assignment': assignment_parser,
     }
+
+
+
+def add_assignment_parser(subparsers):
+    # Assignment
+    assignment_parser = subparsers.add_parser(
+        'assignment',
+        help='assignment/re-enqueue submission jobs',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+
+    assignment_subparser = assignment_parser.add_subparsers(dest='subcommand')
+
+    add = assignment_subparser.add_parser('add', help='add an assignment')
+    add.add_argument('name', help='name of assignment')
+    add.add_argument('due_date', help='due date of assignment (in est)')
+    add.add_argument('grace_date', help='grace date of assignment (in est)')
+
+    modify = assignment_subparser.add_parser('modify', help='change an assignment due date and grace date')
+    modify.add_argument('name', help='name of assignment')
+    modify.add_argument('due_date', help='new due date of assignment (in est)')
+    modify.add_argument('grace_date', help='new grace date of assignment (in est)')
+
+    ls = assignment_subparser.add_parser('ls', help='list all assignment')
+
+    return assignment_parser
 
 
 

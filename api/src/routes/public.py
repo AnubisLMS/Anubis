@@ -4,7 +4,7 @@ from json import dumps
 
 from ..config import Config
 from ..app import db
-from ..models import Submissions, Student
+from ..models import Submissions, Student, Assignment
 from ..utils import enqueue_webhook_job, log_event, get_request_ip, esindex
 
 public = Blueprint('public', __name__, url_prefix='/public')
@@ -30,10 +30,17 @@ def webhook():
     if request.headers.get('Content-Type', None) == 'application/json' and \
        request.headers.get('X-GitHub-Event', None) == 'push':
         data = request.json
+
+        esindex('webhook', data=dumps(data))
+
         repo_url = data['repository']['ssh_url']
         github_username=data['pusher']['name']
-        assignment='-'.join(data['repository']['name'].split('-')[:-1])
         commit=data['after']
+        assignment_name='-'.join(data['repository']['name'].split('-')[:-1])
+        assignment=Assignment.query.filter_by(name=assignment_name).first()
+
+        if assignment is None:
+            return {'success': False, 'error': ['assignment not found']}
 
         if data['before'] == '0000000000000000000000000000000000000000' or data['ref'] != 'refs/heads/master':
             return {'success': False, 'error': ['initial commit or push to master']}

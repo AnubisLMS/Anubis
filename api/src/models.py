@@ -25,14 +25,15 @@ class Submissions(db.Model):
     __tablename__ = 'submissions'
     id = db.Column(db.Integer, primary_key=True)
     studentid = db.Column(db.Integer, db.ForeignKey('student.id'), index=True, nullable=True)
+    assignmentid = db.Column(db.Integer, db.ForeignKey('assignments.id'), index=True, nullable=False)
     github_username = db.Column(db.String(128), nullable=False)
     repo = db.Column(db.String(128), nullable=False)
-    assignment = db.Column(db.Text, index=True)
     commit = db.Column(db.String(128))
     processed = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=datetime.now)
 
     student = db.relationship('Student', backref='submissions')
+    assignment = db.relationship('Assignment', backref='submissions')
 
     @property
     def netid(self):
@@ -45,7 +46,7 @@ class Submissions(db.Model):
         return {
             'id': self.id,
             'netid': self.netid,
-            'assignment': self.assignment,
+            'assignment': self.assignment.name,
             'commit': self.commit,
             'processed': self.processed,
             'timestamp': str(self.timestamp),
@@ -105,3 +106,22 @@ class Reports(db.Model):
             self.errors,
             self.passed,
         )
+
+
+class Assignment(db.Model):
+    __tablename__ = 'assignments'
+    id=db.Column(db.Integer, primary_key=True)
+    name=db.Column(db.Text, nullable=False, unique=True)
+    due_date=db.Column(db.DateTime, nullable=False)
+    grace_date=db.Column(db.DateTime, nullable=False)
+
+    @property
+    def json(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'due_date': str(self.due_date),
+            'grace_date': str(self.grace_date),
+        }
+
+
