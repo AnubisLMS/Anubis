@@ -3,7 +3,7 @@ version: '3.7'
 services:
   traefik:
     image: "traefik:v2.0.0-rc3"
-    restart: on-failure
+    restart: always
     command:
       - "--api.insecure=true"
 
@@ -45,7 +45,7 @@ services:
 
   db:
     build: ./db
-    restart: on-failure
+    restart: always
     dns: [8.8.8.8]
     ports:
       - "127.0.0.1:3306:3306"
@@ -61,7 +61,7 @@ services:
 
   api:
     build: api
-    restart: on-failure
+    restart: always
     networks:
       - traefik-proxy
     depends_on: [db]
@@ -89,7 +89,7 @@ services:
 
   redis:
     image: redis:5
-    restart: on-failure
+    restart: always
     ports:
       - "127.0.0.1:6379:6379"
     networks:
@@ -101,7 +101,7 @@ services:
 
   worker:
     build: api
-    restart: on-failure
+    restart: always
     command: rq worker -u redis://redis
     user: root
     networks:
@@ -113,12 +113,13 @@ services:
 
   smtp:
     image: namshi/smtp
-    restart: on-failure
+    restart: always
     networks:
       - traefik-proxy
 
   elasticsearch:
     image: elasticsearch:7.5.2
+    restart: always
     environment:
       - "discovery.type=single-node"
     volumes:
@@ -130,6 +131,7 @@ services:
 
   kibana:
     image: kibana:7.5.2
+    restart: always
     networks:
       - traefik-proxy
     labels:
