@@ -112,7 +112,7 @@ def esindex(index='error', **kwargs):
     :kwargs dict:
     """
     es.index(index=index, body={
-        'timestamp': datetime.now(),
+        'timestamp': datetime.utcnow(),
         **kwargs,
     })
 
