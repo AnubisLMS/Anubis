@@ -436,8 +436,8 @@ def handle_assignment():
     if action == 'add':
         a = Assignment(
             name=data['name'],
-            due_date=dateutil.parser.parse(data['due_date']),
-            grace_date=dateutil.parser.parse(data['grace_date'])
+            due_date=dateutil.parser.parse(data['due_date'], ignoretz=False),
+            grace_date=dateutil.parser.parse(data['grace_date'], ignoretz=False)
         )
         db.session.add(a)
         try:
@@ -461,11 +461,11 @@ def handle_assignment():
                 'error': ['assignment does not exist']
             })
 
-        a.due_date=dateutil.parser.parse(data['due_date']),
-        a.grace_date=dateutil.parser.parse(data['grace_date'])
+        a.due_date=dateutil.parser.parse(data['due_date'], ignoretz=False),
+        a.grace_date=dateutil.parser.parse(data['grace_date'], ignoretz=False)
 
         try:
-            db.commit()
+            db.session.commit()
         except IntegrityError as e:
             db.session.rollback()
             return jsonify({
@@ -538,8 +538,8 @@ def stats(assignment_name, netid=None):
         else:
             build = len(best.builds) > 0
             best_count = sum(map(lambda x: 1 if x.passed else 0, best.reports))
-            late = 'past due' if eastern.localize(assignment.due_date) < eastern.localize(submission.timestamp) else False
-            late = 'past grace' if eastern.localize(assignment.grace_date) < eastern.localize(submission.timestamp) else late
+            late = 'past due' if assignment.due_date < submission.timestamp else False
+            late = 'past grace' if assignment.grace_date < submission.timestamp else late
             bests[student.netid] = {
                 'submission': best.json,
                 'builds': build,

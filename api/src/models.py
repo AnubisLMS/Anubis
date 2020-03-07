@@ -30,7 +30,7 @@ class Submissions(db.Model):
     repo = db.Column(db.String(128), nullable=False)
     commit = db.Column(db.String(128))
     processed = db.Column(db.Boolean, default=False)
-    timestamp = db.Column(db.DateTime, default=datetime.now)
+    timestamp = db.Column(db.DateTime(True), default=datetime.now)
 
     student = db.relationship('Student', backref='submissions')
     assignment = db.relationship('Assignment', backref='submissions')
@@ -112,8 +112,8 @@ class Assignment(db.Model):
     __tablename__ = 'assignments'
     id=db.Column(db.Integer, primary_key=True)
     name=db.Column(db.Text, nullable=False, unique=True)
-    due_date=db.Column(db.DateTime, nullable=False)
-    grace_date=db.Column(db.DateTime, nullable=False)
+    due_date=db.Column(db.DateTime(True), nullable=False)
+    grace_date=db.Column(db.DateTime(True), nullable=False)
 
     @property
     def json(self):
