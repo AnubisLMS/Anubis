@@ -62,6 +62,8 @@ services:
   api:
     build: api
     restart: always
+    volumes:
+      - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
     networks:
       - traefik-proxy
     depends_on: [db]
