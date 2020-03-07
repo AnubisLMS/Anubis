@@ -126,6 +126,7 @@ services:
       - "discovery.type=single-node"
     volumes:
       - el_data:/usr/share/elasticsearch/data
+      - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
     networks:
       - traefik-proxy
     labels:
@@ -136,6 +137,8 @@ services:
     restart: always
     networks:
       - traefik-proxy
+    volumes:
+      - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
     labels:
       - "traefik.enable=true"
 
