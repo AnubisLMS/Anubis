@@ -31,18 +31,23 @@ def webhook():
        request.headers.get('X-GitHub-Event', None) == 'push':
         data = request.json
 
-        esindex('webhook', data=dumps(data))
 
         repo_url = data['repository']['ssh_url']
         github_username=data['pusher']['name']
         commit=data['after']
-        assignment_name='-'.join(data['repository']['name'].split('-')[:-1])
+        assignment_name=data['repository']['name'][:-(len(github_username)+1)]
         assignment=Assignment.query.filter_by(name=assignment_name).first()
 
         if assignment is None:
             return {'success': False, 'error': ['assignment not found']}
 
         if data['before'] == '0000000000000000000000000000000000000000' or data['ref'] != 'refs/heads/master':
+            esindex(
+                'new-repo',
+                github_username=github_username,
+                repo_url=repo_url,
+                assignment=str(assignment)
+            )
             return {'success': False, 'error': ['initial commit or push to master']}
 
         if not data['repository']['full_name'].startswith('os3224/'):
@@ -61,6 +66,15 @@ def webhook():
 
         if student is not None:
             submission.studentid=student.id
+            esindex(
+                'submission',
+                submission=submission.json,
+            )
+        else:
+            esindex(
+                'dangling',
+                submission=submission.json,
+            )
 
         try:
             db.session.add(submission)
