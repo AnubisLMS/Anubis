@@ -14,4 +14,4 @@ COPY . .
 RUN yarn run build \
   && rm -rf node_modules src public package.json yarn.lock
 
-CMD serve -s build
+CMD serve -s build -l 3000
