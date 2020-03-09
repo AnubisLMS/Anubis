@@ -13,3 +13,11 @@ services:
     volumes:
       - ./api:/opt/app
 
+  web:
+    command: 'yarn run start'
+    environment:
+      NODE_ENV: development
+      REACT_APP_DEV: dev
+    volumes:
+      - ./web:/opt/app
+

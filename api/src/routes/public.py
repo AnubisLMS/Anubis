@@ -5,7 +5,7 @@ from json import dumps
 from ..config import Config
 from ..app import db
 from ..models import Submissions, Student, Assignment
-from ..utils import enqueue_webhook_job, log_event, get_request_ip, esindex
+from ..utils import enqueue_webhook_job, log_event, get_request_ip, esindex, jsonify
 
 public = Blueprint('public', __name__, url_prefix='/public')
 
@@ -15,6 +15,22 @@ def webhook_log_msg():
        request.headers.get('X-GitHub-Event', None) == 'push':
         return request.json['pusher']['name']
     return None
+
+
+@public.route('/submissions')
+@log_event('submission-request', lambda: 'submissions requested')
+def handle_submissions():
+    submissions = Submissions.query.all()
+    return jsonify({
+        'data': [
+            {
+                'timestamp': s.timestamp,
+                'commit': s.commit,
+            }
+            for s in submissions
+        ],
+        'success': True
+    })
 
 # dont think we need GET here
 @public.route('/webhook', methods=['POST'])

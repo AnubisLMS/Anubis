@@ -70,21 +70,21 @@ services:
     labels:
       - "traefik.enable=true"
       
-      - "traefik.http.routers.api-http.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.api-http.rule=Host(`api.${DOMAIN}`)"
       - "traefik.http.routers.api-http.entrypoints=http"
       - "traefik.http.routers.api-http.middlewares=redirect"      
 
       - "traefik.http.services.api.loadbalancer.server.port=5000"
 
       # private route with auth
-      - "traefik.http.routers.api-private.rule=Host(`${DOMAIN}`) && PathPrefix(`/private/`)"
+      - "traefik.http.routers.api-private.rule=Host(`api.${DOMAIN}`) && PathPrefix(`/private/`)"
       - "traefik.http.routers.api-private.entrypoints=https"
       - "traefik.http.routers.api-private.tls.certresolver=tls"
       - "traefik.http.middlewares.api-private.redirectscheme.scheme=https"
       - "traefik.http.routers.api-private.middlewares=traefik-auth@docker"
 
       # Public router without auth
-      - "traefik.http.routers.api-public.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.api-public.rule=Host(`api.${DOMAIN}`)"
       - "traefik.http.routers.api-public.entrypoints=https"
       - "traefik.http.routers.api-public.tls.certresolver=tls"
       - "traefik.http.middlewares.api-public.redirectscheme.scheme=https"
@@ -142,6 +142,10 @@ services:
     labels:
       - "traefik.enable=true"
 
+      - "traefik.http.routers.kibana-http.rule=Host(`kibana.${DOMAIN}`)"
+      - "traefik.http.routers.kibana-http.entrypoints=http"
+      - "traefik.http.routers.kibana-http.middlewares=redirect"      
+
       - "traefik.http.services.kibana.loadbalancer.server.port=5601"
 
       - "traefik.http.routers.kibana.rule=Host(`kibana.${DOMAIN}`)"
@@ -149,6 +153,25 @@ services:
       - "traefik.http.routers.kibana.tls.certresolver=tls"
       - "traefik.http.middlewares.kibana.redirectscheme.scheme=https"
       - "traefik.http.routers.kibana.middlewares=traefik-auth@docker"
+
+  web:
+    build: ./web
+    restart: always
+    networks:
+      - traefik-proxy
+    labels:
+      - "traefik.enable=true"
+      
+      - "traefik.http.routers.web-http.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.web-http.entrypoints=http"
+      - "traefik.http.routers.web-http.middlewares=redirect"      
+
+      - "traefik.http.services.web.loadbalancer.server.port=3000"
+
+      - "traefik.http.routers.web-public.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.web-public.entrypoints=https"
+      - "traefik.http.routers.web-public.tls.certresolver=tls"
+      - "traefik.http.middlewares.web-public.redirectscheme.scheme=https"
 
 
 networks:
