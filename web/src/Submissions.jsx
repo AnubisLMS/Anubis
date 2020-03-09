@@ -1,27 +1,29 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
+import React, {Fragment, useState} from 'react';
 import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
-import { makeStyles } from '@material-ui/core/styles';
-import SearchIcon from '@material-ui/icons/Search';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import {makeStyles} from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import Divider from '@material-ui/core/Divider';
 import {api} from './utils';
+import {ListItemText} from "@material-ui/core";
+import {Link,Redirect} from "react-router-dom";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import LinkIcon from "@material-ui/icons/Link";
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import SearchIcon from '@material-ui/icons/Search';
+import Grid from '@material-ui/core/Grid';
 
 const useStyles = makeStyles(theme => ({
   paper: {
     maxWidth: 936,
     margin: 'auto',
-    overflow: 'hidden',
+    // overflow: 'hidden',
   },
   searchBar: {
     borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
@@ -38,48 +40,136 @@ const useStyles = makeStyles(theme => ({
   contentWrapper: {
     margin: '40px 16px',
   },
+  toolbar: {
+    backgroundColor: theme.palette.primary
+  },
+  card: {
+    // minWidth: 275,
+    margin: theme.spacing(2),
+  },
+  searchButton: {
+    margin: theme.spacing(1)
+  },
+  searchbar: {
+    justify: 'flex-end',
+    alignItems: 'center',
+  },
 }));
 
-export default function Submissions(props) {
+function SearchSubmissions() {
   const classes = useStyles();
-  const data = api.get('/submissions');
+  const [commit, setCommit] = useState('');
+  const [search, setSearch] = useState(false);
+
+  if (search) {
+    return <Redirect to={`/submissions/${commit.trim()}`}/>
+  }
 
   return (
-    <Paper className={classes.paper}>
-      <AppBar className={classes.searchBar} position="static" color="default" elevation={0}>
-        <Toolbar>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item>
-              <SearchIcon className={classes.block} color="inherit"/>
-            </Grid>
-            <Grid item xs>
-              <TextField
-                fullWidth
-                placeholder="Search by email address, phone number, or user UID"
-                InputProps={{
-                  disableUnderline: true,
-                  className: classes.searchInput,
-                }}
-              />
-            </Grid>
-            <Grid item>
-              <Button variant="contained" color="primary" className={classes.addUser}>
-                Add user
-              </Button>
-              <Tooltip title="Reload">
-                <IconButton>
-                  <RefreshIcon className={classes.block} color="inherit"/>
-                </IconButton>
-              </Tooltip>
-            </Grid>
-          </Grid>
-        </Toolbar>
-      </AppBar>
-      <div className={classes.contentWrapper}>
-        <Typography color="textSecondary" align="center">
-          No users for this project yet
+    <Card className={classes.card}>
+      <CardContent>
+        <Typography variant={'h6'} gutterBottom>
+          Search for past submission
         </Typography>
-      </div>
-    </Paper>
+        <Grid
+          container
+          direction={"row"}
+          align={'center'}
+          justify={'center'}
+        >
+          <Grid item xs={12} sm={10}>
+            <TextField
+              required
+              autoFocus
+              fullWidth
+              variant={'outlined'}
+              label={'commit hash'}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><SearchIcon/></InputAdornment>,
+              }}
+              onChange={e => setCommit(e.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12} sm={2}>
+            <Button
+              variant={"contained"}
+              color={"primary"}
+              className={classes.searchButton}
+              onClick={() => setSearch(true)}
+            >
+              Search
+            </Button>
+          </Grid>
+        </Grid>
+      </CardContent>
+    </Card>
+  );
+}
+
+function RecentSubmissions({data}) {
+  const classes = useStyles();
+  return (
+    <Card className={classes.card}>
+      <CardContent>
+        <Typography variant={'h6'}>
+          Recent Submissions
+        </Typography>
+        <Typography variant={"body2"} color={"textSecondary"}>
+          Last updated at: {data.timestamp}
+        </Typography>
+        <Typography variant={"body2"} color={"textSecondary"}>
+          Updates every 30 seconds
+        </Typography>
+        <List>
+          {data.success ? data.data.map(({timestamp, commit}) => (
+            <Fragment>
+              <ListItem alignItems={"flex-start"}>
+                <ListItemIcon>
+                  <IconButton component={Link} to={`/submissions/${commit}`}>
+                    <Tooltip title={'link'}>
+                      <LinkIcon color={"primary"}/>
+                    </Tooltip>
+                  </IconButton>
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <React.Fragment>
+                      <Typography
+                        component={Link}
+                        variant={"body2"}
+                        className={classes.inline}
+                        color={"textPrimary"}
+                        to={`/submissions/${commit}`}
+                      >
+                        {commit}
+                      </Typography>
+                    </React.Fragment>
+                  }
+                  secondary={timestamp}
+                >
+                </ListItemText>
+              </ListItem>
+              <Divider variant="middle" color={"primary"}/>
+            </Fragment>
+          )) : null}
+        </List>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function Submissions() {
+  const [data, setData] = useState([]);
+
+  if (data.length === 0)
+    api.get('/submissions').then(res => setData(res.data));
+
+  if (!data || !data.success) return <div/>;
+
+  return (
+    <Fragment>
+      <SearchSubmissions/>
+      <RecentSubmissions data={data}/>
+    </Fragment>
   );
 }

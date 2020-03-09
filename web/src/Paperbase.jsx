@@ -3,23 +3,24 @@ import PropTypes from 'prop-types';
 import {createMuiTheme, ThemeProvider, withStyles} from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Hidden from '@material-ui/core/Hidden';
-import Typography from '@material-ui/core/Typography';
 import Navigator from './Navigator';
 import Submissions from './Submissions';
-import {BrowserRouter as Router, Link, Route, Switch} from "react-router-dom";
+import View from './View';
+import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
+import {SnackbarProvider} from 'notistack';
 
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
+// function Copyright() {
+//   return (
+//     <Typography variant="body2" color="textSecondary" align="center">
+//       {'Copyright © '}
+//       <Link color="inherit" to="https://material-ui.com/">
+//         Your Website
+//       </Link>{' '}
+//       {new Date().getFullYear()}
+//       {'.'}
+//     </Typography>
+//   );
+// }
 
 let theme = createMuiTheme({
   palette: {
@@ -28,6 +29,7 @@ let theme = createMuiTheme({
       main: '#009be5',
       dark: '#006db3',
     },
+    type: "dark"
   },
   typography: {
     h5: {
@@ -152,11 +154,11 @@ const styles = {
   main: {
     flex: 1,
     padding: theme.spacing(6, 4),
-    background: '#eaeff1',
+    // background: '#eaeff1',
   },
   footer: {
     padding: theme.spacing(2),
-    background: '#eaeff1',
+    // background: '#eaeff1',
   },
 };
 
@@ -171,38 +173,43 @@ function Paperbase(props) {
   return (
     <ThemeProvider theme={theme}>
       <div className={classes.root}>
-        <Router>
-          <CssBaseline/>
-          <nav className={classes.drawer}>
-            <Hidden smUp implementation="js">
-              <Navigator
-                PaperProps={{style: {width: drawerWidth}}}
-                variant="temporary"
-                open={mobileOpen}
-                onClose={handleDrawerToggle}
-              />
-            </Hidden>
-            <Hidden xsDown implementation="css">
-              <Navigator PaperProps={{style: {width: drawerWidth}}}/>
-            </Hidden>
-          </nav>
-          <div className={classes.app}>
-            <main className={classes.main}>
-              <Switch>
-                <Route exact path={"/"}>
-                  {/*<Header onDrawerToggle={handleDrawerToggle} />*/}
-                  <Submissions/>
-                </Route>
-                <Route exact path={"/submissions"}>
-                  <Submissions/>
-                </Route>
-              </Switch>
-            </main>
-            <footer className={classes.footer}>
-              <Copyright/>
-            </footer>
-          </div>
-        </Router>
+        <SnackbarProvider maxSnack={5}>
+          <Router>
+            <CssBaseline/>
+            <nav className={classes.drawer}>
+              <Hidden smUp implementation="js">
+                <Navigator
+                  PaperProps={{style: {width: drawerWidth}}}
+                  variant="temporary"
+                  open={mobileOpen}
+                  onClose={handleDrawerToggle}
+                />
+              </Hidden>
+              <Hidden xsDown implementation="css">
+                <Navigator PaperProps={{style: {width: drawerWidth}}}/>
+              </Hidden>
+            </nav>
+            <div className={classes.app}>
+              <main className={classes.main}>
+                <Switch>
+                  <Route exact path={"/"}>
+                    {/*<Header onDrawerToggle={handleDrawerToggle} />*/}
+                    <Submissions/>
+                  </Route>
+                  <Route exact path={"/submissions"}>
+                    <Submissions/>
+                  </Route>
+                  <Route exact path={'/submissions/:commit'}>
+                    <View/>
+                  </Route>
+                </Switch>
+              </main>
+              <footer className={classes.footer}>
+                {/*<Copyright/>*/}
+              </footer>
+            </div>
+          </Router>
+        </SnackbarProvider>
       </div>
     </ThemeProvider>
   );

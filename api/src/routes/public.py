@@ -1,9 +1,11 @@
-from flask import request, redirect, url_for, flash, render_template, Blueprint
+from flask import request, redirect, url_for, flash, render_template, Blueprint, Response
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import desc
 from json import dumps
+from datetime import datetime
 
 from ..config import Config
-from ..app import db
+from ..app import db, cache
 from ..models import Submissions, Student, Assignment
 from ..utils import enqueue_webhook_job, log_event, get_request_ip, esindex, jsonify
 
@@ -19,16 +21,53 @@ def webhook_log_msg():
 
 @public.route('/submissions')
 @log_event('submission-request', lambda: 'submissions requested')
+@cache.cached(timeout=30, key_prefix='web-submissions')
 def handle_submissions():
-    submissions = Submissions.query.all()
+    timestamp = datetime.now()
+    submissions = Submissions.query.order_by(desc(Submissions.timestamp)).limit(10).all()
     return jsonify({
         'data': [
             {
-                'timestamp': s.timestamp,
+                'timestamp': str(s.timestamp),
                 'commit': s.commit,
             }
             for s in submissions
         ],
+        'timestamp': str(timestamp),
+        'success': True
+    })
+
+
+@public.route('/submissions/<commit>/<netid>')
+@log_event('submission-request', lambda: 'specifc submission requests')
+@cache.cached(timeout=10, key_prefix='web-submission-student')
+def handle_submission(commit=None, netid=None):
+    if commit is None or netid is None:
+        return jsonify({
+            'success': False,
+            'error': 'missing commit or netid',
+        })
+    submission = Submissions.query.filter_by(
+        commit=commit
+    ).first()
+    if submission is None:
+        return jsonify({
+            'success': False,
+            'error': 'invalid commit hash or netid',
+        })
+    if submission.netid != netid:
+        return jsonify({
+            'success': False,
+            'error': 'invalid commit hash or netid'
+        })
+    return jsonify({
+        'data': {
+            'submission': submission.json,
+            'reports': [r.json for r in submission.reports],
+            'tests': submission.tests[0].stdout if len(submission.tests) > 0 else False,
+            'build': submission.builds[0].stdout if len(submission.builds) > 0 else False,
+            'errors': submission.errors[0].message if len(submission.errors) > 0 else False,
+        },
         'success': True
     })
 

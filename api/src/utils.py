@@ -156,6 +156,7 @@ def jsonify(data):
     """
     res = Response(dumps(data))
     res.headers['Content-Type'] = 'application/json'
+    res.headers['Access-Control-Allow-Origin'] = 'https://nyu.cool' if not environ.get('DEBUG', False) else 'https://localhost'
     return res
 
 
