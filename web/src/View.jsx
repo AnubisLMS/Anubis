@@ -141,6 +141,7 @@ function Auth(props) {
           variant={'outlined'}
           label={'netid'}
           onChange={e => setNetid(e.target.value)}
+          onKeyPress={e => e.key === 'Enter' ? verify() : null}
         />
       </DialogContent>
       <DialogActions>
@@ -155,42 +156,42 @@ function Auth(props) {
 function Submission({data, processed}) {
   const classes = useStyles();
   if (!data) return <div/>;
-  const {commit, timestamp} = data;
+  const {assignment, commit, timestamp} = data;
 
   return (
     <Card className={classes.card}>
       <CardContent>
-        <Typography className={classes.title} color="textSecondary" gutterBottom>
-          Submission
-        </Typography>
-        <Typography variant="h6" component="h2">
-          {commit}
+        <Typography variant={'h6'} component={'h2'}>
+          {`${assignment} Submission`}
         </Typography>
         <Typography className={classes.pos} color="textSecondary">
           {timestamp}
         </Typography>
-        {!processed ? (
-          <div className={classes.wrapper}>
-            <Button
-              variant="contained"
-              color="primary"
-              disabled
-            >
-              Processing
-            </Button>
-            <CircularProgress size={24} className={classes.buttonProgress}/>
-          </div>
-        ) : (
-          <div className={classes.wrapper}>
-            <Button
-              variant="contained"
-              color="primary"
-            >
-              Processed
-            </Button>
-            <CheckIcon size={24} className={classes.buttonProgress}/>
-          </div>
-        )}
+        <Typography color="textSecondary">
+          {commit}
+        </Typography>
+        <List>
+          <ListItem>
+            <ListItemIcon>
+              {
+                processed ? (
+                  <Tooltip title={'processed'}>
+                    <IconButton>
+                      <CheckIcon color={'primary'}/>
+                    </IconButton>
+                  </Tooltip>
+                ) : (
+                  <IconButton>
+                    <Tooltip title={'processing'}>
+                      <CircularProgress color={"primary"}/>
+                    </Tooltip>
+                  </IconButton>
+                )
+              }
+            </ListItemIcon>
+            <ListItemText primary={processed ? 'processed' : 'processing'}/>
+          </ListItem>
+        </List>
       </CardContent>
     </Card>
   );
@@ -217,17 +218,21 @@ function Reports({data}) {
     <Card className={classes.card}>
       <CardContent>
         <List className={classes.list}>
-          {data.map(({testname, passed}) => (
+          {data.map(({testname, passed, errors}) => (
             <ListItem>
               <ListItemIcon>
                 {passed ? (
-                  <Tooltip title={'passed'}>
+                  <Tooltip title={
+                    (JSON.parse(errors).length > 0) ? JSON.parse(errors)[0] : 'passed'
+                  }>
                     <IconButton>
                       <CheckIcon color={'primary'}/>
                     </IconButton>
                   </Tooltip>
                 ) : (
-                  <Tooltip title={'failed'}>
+                  <Tooltip title={
+                    (JSON.parse(errors).length > 0) ? JSON.parse(errors)[0] : 'failed'
+                  }>
                     <IconButton>
                       <CloseIcon color={'secondary'}/>
                     </IconButton>
@@ -378,7 +383,7 @@ export default function View() {
         </React.Fragment>
       ) : (
         <Grid item xs={12}>
-          <Error data={errors} />
+          <Error data={errors}/>
         </Grid>
       )}
     </Grid>

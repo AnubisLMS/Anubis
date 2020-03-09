@@ -88,6 +88,7 @@ function SearchSubmissions() {
                 startAdornment: <InputAdornment position="start"><SearchIcon/></InputAdornment>,
               }}
               onChange={e => setCommit(e.target.value)}
+              onKeyPress={e => e.key === 'Enter' ? setSearch(true) : null}
             />
           </Grid>
           <Grid item xs={12} sm={2}>
