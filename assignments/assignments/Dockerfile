@@ -1,7 +1,7 @@
 FROM debian:stretch
 
 RUN apt update \
-  && apt install -y sudo qemu-system-x86 python3 \
+  && apt install -y sudo qemu-system-x86 python3 python3-pip \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /mnt/

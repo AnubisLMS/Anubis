@@ -43,7 +43,7 @@ def test(client, repo_url, submission, volume_name):
             network_mode='none',
             detach=True,
             privileged=True,
-            mem_limit='100m',
+            mem_limit='1024m',
             volumes={
                 volume_name: {
                     'bind': '/mnt/submission',

@@ -10,6 +10,7 @@ def test_lines(lines, expexted):
 def test(num, cmd):
     try:
         print()
+        print('test-0:')
         print('Testing if xv6 starts'.format(cmd))
         qemu_cmd = 'timeout 5 qemu-system-i386 -serial mon:stdio -drive file=./submission/xv6.img,media=disk,index=0,format=raw -drive file=./submission/fs.img,media=disk,index=1,format=raw -smp 1 -m 512 -display none -nographic'
 
@@ -23,18 +24,15 @@ def test(num, cmd):
         stdout = stdout.decode().split('\n')
         lines = stdout[stdout.index('init: starting sh')+1:]
 
-        print(lines)
-        
+
         while lines[-1].startswith('$') or len(lines[-1].strip()) == 0:
             lines.pop()
 
         if lines[0].startswith('$'):
             lines[0] = lines[0].lstrip('$').strip()
-            
+
         for index in range(len(lines)):
             lines[index] = lines[index].strip()
-
-        print(lines)
 
         if len(lines) > 0:
             print('xv6 does start correctly')

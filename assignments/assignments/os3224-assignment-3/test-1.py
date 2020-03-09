@@ -2,39 +2,42 @@ from utils import save_results
 import os
 import subprocess
 import time
+import json
 from parse import compile
 
 def test_fork(lines):
     if len(lines) == 0:
         return False, 'no lines parsed'
 
-    if lines[0].startswith('fork test'):
-        lines.pop(0)
-
-    if len(lines) != 120:
-        return False, 'line count is not correct'
-
+    print('$ schedtest')
     print(*lines, sep='\n')
 
-    p = compile('im {:d} and my child had pid {:d}')
-    c = compile('my pid is {:d}')
+    if lines[0].startswith('sched test'):
+        lines.pop(0)
 
-    last_ppid = None
+    for line in lines:
+        if 'panic' in lines:
+            return False, 'panic parsed'
+
+    if len(lines) != 20:
+        return False, 'line count is not correct'
+
+    s = compile('start {:d}')
+    e = compile('end {:d}')
 
     for i in range(0, len(lines), 2):
-        pline = lines[i]
-        cline = lines[i+1]
+        start = s.parse(lines[i])
+        end = e.parse(lines[i+1])
 
-        ppid, cpid = p.parse(pline)
-        ccpid = c.parse(cline).fixed[0]
+        if start is None or end is None:
+            return False, 'unexpected line order, or parse error'
 
-        if cpid != ccpid:
-            return False, 'mismatched output lines'
+        start = start.fixed[0]
+        end = end.fixed[0]
 
-        if last_ppid is not None:
-            if last_ppid != ppid:
-                return False, 'mismatched output lines'
-        last_ppid = cpid
+        if start != end:
+            return False, 'schedule order unexpected'
+
     return True, 'expected output was found'
 
 
@@ -42,8 +45,9 @@ def test_fork(lines):
 def test(num, cmd):
     try:
         print()
-        print('Testing first come first serve using forktest')
-        qemu_cmd = 'timeout 5 qemu-system-i386 -serial mon:stdio -drive file=./submission/xv6.img,media=disk,index=0,format=raw -drive file=./submission/fs.img,media=disk,index=1,format=raw -smp 1 -m 512 -display none -nographic'
+        print('test-1:')
+        print('Testing first come first serve using schedtest')
+        qemu_cmd = 'timeout 28 qemu-system-i386 -serial mon:stdio -drive file=./submission/xv6.img,media=disk,index=0,format=raw -drive file=./submission/fs.img,media=disk,index=1,format=raw -smp 1 -m 512 -display none -nographic'
 
         with open('test-{}.in'.format(num), 'w') as f:
             f.write('\n{}\n'.format(cmd))
@@ -64,6 +68,12 @@ def test(num, cmd):
         for index in range(len(lines)):
             lines[index] = lines[index].strip()
 
+        passed, err = test_fork(lines)
+
+        if passed:
+            print('test passed:', err)
+        else:
+            print('test failed:', err)
 
         save_results(
             'test-{}'.format(num),
@@ -71,14 +81,37 @@ def test(num, cmd):
             passed
         )
     except:
-        pass
-        # print('xv6 did not start correctly')
-        # save_results(
-        #     'test-{}'.format(num),
-        #     ['xv6 did not start correctly'],
-        #     False
-        # )
-    passed, err = test_fork(lines)
-    print(passed, err)
+        print('error while testing first come first serve scheduling')
+        save_results(
+            'test-{}'.format(num),
+            ['error while testing first come first serve scheduling'],
+            False
+        )
 
-test(0, 'forktest')
+test(1, 'schedtest')
+
+# lines = [
+#     "start 13",
+# "end 13",
+# "start 12",
+# "end 12",
+# "start 11",
+# "end 11",
+# "start 10",
+# "end 10",
+# "start 9",
+# "end 9",
+# "start 8",
+# "end 8",
+# "start 7",
+# "end 7",
+# "start 6",
+# "end 6",
+# "start 5",
+# "end 5",
+# "start 4",
+# "end 4",
+# ]
+
+# passed, err = test_fork(lines)
+# print (passed, err)

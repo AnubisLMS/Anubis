@@ -8,4 +8,4 @@ curl \
     -XPOST -k \
     -H 'content-type: application/json' \
     -H 'X-GitHub-Event: push' \
-    --data "$(cat ./webhook2.json)"
+    --data "$(cat ./webhook3.json)"
