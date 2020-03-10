@@ -97,7 +97,7 @@ def log_event(log_type, message_func):
                 'msg': message_func(),
                 'location': location.location if location is not None else location,
                 'ip': ip,
-                'timestamp': datetime.now(),
+                'timestamp': datetime.utcnow(),
             })
 
             return function(*args, **kwargs)
