@@ -16,7 +16,12 @@ function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
-      <Link color="primay" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+      <Link color="primay" href={
+        (process.env.REACT_APP_DEV ?
+          'https://api.localhost/public/credits' :
+          'https://api.nyu.cool/public/credits'
+        )
+      }>
         NYU OS 3224
       </Link>{' '}
       {new Date().getFullYear()}
