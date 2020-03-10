@@ -123,7 +123,7 @@ function RecentSubmissions({data}) {
         </Typography>
         <List>
           {data.success ? data.data.map(({timestamp, commit}) => (
-            <Fragment>
+            <Fragment key={commit}>
               <ListItem alignItems={"flex-start"}>
                 <ListItemIcon>
                   <IconButton component={Link} to={`/submissions/${commit}`}>

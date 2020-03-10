@@ -70,7 +70,11 @@ function Navigator(props) {
   return (
     <Drawer variant="permanent" {...other}>
       <List disablePadding>
-        <ListItem className={clsx(classes.firebase, classes.item, classes.itemCategory)}>
+        <ListItem
+          className={clsx(classes.firebase, classes.item, classes.itemCategory)}
+          component={Link}
+          to={'/'}
+        >
           Anubis autograder
         </ListItem>
         {categories.map(({id, children}) => (

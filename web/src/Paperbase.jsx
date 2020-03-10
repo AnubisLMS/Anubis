@@ -3,24 +3,27 @@ import PropTypes from 'prop-types';
 import {createMuiTheme, ThemeProvider, withStyles} from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Hidden from '@material-ui/core/Hidden';
-import Navigator from './Navigator';
-import Submissions from './Submissions';
-import View from './View';
+import Typography from '@material-ui/core/Typography';
+import Link from '@material-ui/core/Link';
 import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 import {SnackbarProvider} from 'notistack';
 
-// function Copyright() {
-//   return (
-//     <Typography variant="body2" color="textSecondary" align="center">
-//       {'Copyright © '}
-//       <Link color="inherit" to="https://material-ui.com/">
-//         Your Website
-//       </Link>{' '}
-//       {new Date().getFullYear()}
-//       {'.'}
-//     </Typography>
-//   );
-// }
+import Navigator from './Navigator';
+import Submissions from './Submissions';
+import View from './View';
+
+function Copyright() {
+  return (
+    <Typography variant="body2" color="textSecondary" align="center">
+      {'Copyright © '}
+      <Link color="primay" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+        NYU OS 3224
+      </Link>{' '}
+      {new Date().getFullYear()}
+      {'.'}
+    </Typography>
+  );
+}
 
 let theme = createMuiTheme({
   palette: {
@@ -138,6 +141,7 @@ const drawerWidth = 256;
 const styles = {
   root: {
     display: 'flex',
+    width: '100%',
     minHeight: '100vh',
   },
   drawer: {
@@ -150,10 +154,12 @@ const styles = {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
+    width: '100%'
   },
   main: {
     flex: 1,
     padding: theme.spacing(6, 4),
+    width: '100%'
     // background: '#eaeff1',
   },
   footer: {
@@ -205,7 +211,7 @@ function Paperbase(props) {
                 </Switch>
               </main>
               <footer className={classes.footer}>
-                {/*<Copyright/>*/}
+                <Copyright/>
               </footer>
             </div>
           </Router>
