@@ -110,12 +110,12 @@ def handle_report_panic():
         netid=submission.netid,
     )
 
-    # Notify Student (without logs)
-    send_noreply_email(
-        msg,
-        'OS3224 - Anubis Autograder Critical Error', # email subject
-        submission.netid + '@nyu.edu',   # recipient
-    )
+    # # Notify Student (without logs)
+    # send_noreply_email(
+    #     msg,
+    #     'OS3224 - Anubis Autograder Critical Error', # email subject
+    #     submission.netid + '@nyu.edu',   # recipient
+    # )
 
     # Notify Admins (with logs)
     send_noreply_email(
@@ -192,12 +192,12 @@ def handle_report_error():
         netid=submission.netid,
     )
 
-    # Notify Student
-    send_noreply_email(
-        msg,
-        'OS3224 - Anubis Autograder Error', # email subject
-        submission.netid + '@nyu.edu',   # recipient
-    )
+    # # Notify Student
+    # send_noreply_email(
+    #     msg,
+    #     'OS3224 - Anubis Autograder Error', # email subject
+    #     submission.netid + '@nyu.edu',   # recipient
+    # )
     return jsonify({'success':True})
 
 
@@ -279,11 +279,11 @@ def handle_report():
         netid=submission.netid,
     )
 
-    send_noreply_email(
-        msg,
-        'OS3224 - Anubis Autograder',
-        submission.netid + '@nyu.edu'
-    )
+    # send_noreply_email(
+    #     msg,
+    #     'OS3224 - Anubis Autograder',
+    #     submission.netid + '@nyu.edu'
+    # )
 
     return jsonify({
         'success': True
