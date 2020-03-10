@@ -172,3 +172,35 @@ def add_global_error_handler(app):
             netid=None,
         )
         return 'err'
+
+
+def reset_submission(submission):
+    """
+    This function will reset all the data for a submission,
+    putting it in a pending state. To re-enqueue this submission
+    as a job, use the enqueue_webhook_job function.
+
+    :submission Submissions: submission object
+    :return: bool indicating success
+    """
+    if not submission.processed:
+        return False
+
+    submission.processed = False
+
+    for report in submission.reports:
+        db.session.delete(report)
+    for build in submission.builds:
+        db.session.delete(build)
+    for test in submission.tests:
+        db.session.delete(test)
+    for error in submission.errors:
+        db.session.delete(error)
+
+    try:
+        # db.session.add(submission)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return False
+    return True

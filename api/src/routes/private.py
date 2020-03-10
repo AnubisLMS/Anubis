@@ -9,7 +9,7 @@ import dateutil.parser
 from ..app import db, cache
 from ..config import Config
 from ..models import Submissions, Reports, Student, Assignment, Errors
-from ..utils import enqueue_webhook_job, log_event, send_noreply_email, esindex, jsonify
+from ..utils import enqueue_webhook_job, log_event, send_noreply_email, esindex, jsonify, reset_submission
 
 from .messages import err_msg, crit_err_msg, success_msg
 
@@ -348,7 +348,6 @@ def restart():
     }
     """
     body = request.json
-
     netid = body['netid']
 
     student = Student.query.filter_by(netid=netid).first()
@@ -372,24 +371,10 @@ def restart():
             studentid=student.id,
         ).order_by(desc(Submissions.timestamp)).first()
 
-    submission.processed = False
-    reports = submission.reports
-    builds = submission.builds
-
-    for report in reports:
-        db.session.delete(report)
-    for build in builds:
-        db.session.delete(build)
-
-    try:
-        db.session.add(submission)
-        db.session.commit()
-    except IntegrityError:
-        db.session.rollback()
-        return {
+    if not reset_submission(submission):
+        return jsonify({
             'success': False
-        }
-
+        })
 
     enqueue_webhook_job(submission.id)
 

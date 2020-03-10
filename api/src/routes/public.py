@@ -7,7 +7,7 @@ from datetime import datetime
 from ..config import Config
 from ..app import db, cache
 from ..models import Submissions, Student, Assignment
-from ..utils import enqueue_webhook_job, log_event, get_request_ip, esindex, jsonify
+from ..utils import enqueue_webhook_job, log_event, get_request_ip, esindex, jsonify, reset_submission
 
 public = Blueprint('public', __name__, url_prefix='/public')
 
@@ -17,6 +17,57 @@ def webhook_log_msg():
        request.headers.get('X-GitHub-Event', None) == 'push':
         return request.json['pusher']['name']
     return None
+
+
+@public.route('/regrade/<commit>/<netid>')
+@log_event('regrade-request', lambda: 'submission regrade request')
+def handle_regrade(commit=None, netid=None):
+    """
+    This route will get hit whenever someone clicks the regrade button on a
+    processed assignment. It should do some validity checks on the commit and
+    netid, then reset the submission and re-enqueue the submission job.
+    """
+    if commit is None or netid is None:
+        return jsonify({
+            'success': False,
+            'error': 'incomplete request',
+        })
+
+    student = Student.query.filter_by(netid=netid).first()
+    if student is None:
+        return jsonify({
+            'success': False,
+            'errors': 'invalid commit hash or netid'
+        })
+
+    submission = Submissions.query.filter_by(
+        studentid=student.id,
+        commit=commit,
+    ).first()
+
+    if submission is None:
+        return jsonify({
+            'success': False,
+            'error': 'invalid commit hash or netid'
+        })
+
+    if not submission.processed:
+        return jsonify({
+            'success': False,
+            'error': 'submission currently being processed'
+        })
+
+    if not reset_submission(submission):
+        return jsonify({
+            'success': False,
+            'error': 'error regrading'
+        })
+
+    enqueue_webhook_job(submission.id)
+
+    return jsonify({
+        'success': True
+    })
 
 
 @public.route('/submissions')
