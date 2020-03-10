@@ -22,7 +22,6 @@ def webhook_log_msg():
 @public.route('/credits')
 @log_event('rick-roll', lambda: 'rick-roll')
 def handle_memes():
-    esindex('rick-roll')
     return redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
 
 @public.route('/regrade/<commit>/<netid>')
