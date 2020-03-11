@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import Grid from '@material-ui/core/Grid';
 import {Redirect, useParams} from "react-router-dom";
 import {useSnackbar} from 'notistack';
+import Grow from '@material-ui/core/Grow';
 
 import {api} from './utils';
 import Submission from './Submission';
@@ -14,9 +15,9 @@ import Tests from './Tests';
 export default function View() {
   const [data, setData] = useState(null);
   const [authOpen, setAuth] = useState(true);
-  const [processed, setProcessed] = React.useState(true);
-  const [netid, setNetid] = useState('');
-  const {commit} = useParams();
+  const [processed, setProcessed] = useState(true);
+  const [redirect, setRedirect] = useState('');
+  const {commit, netid} = useParams();
   const {enqueueSnackbar} = useSnackbar();
   const timer = React.useRef();
 
@@ -43,21 +44,36 @@ export default function View() {
           api.get(`/submissions/${commit}/${netid}`).then(handler)
         ), 5000);
         handler(res);
+      } else if (res.data && !res.data.success) {
+        enqueueSnackbar(res.data.error, {variant: 'error'});
+        setRedirect('/');
       }
     }).catch(err => null);
   };
 
-  if (data === null) return (
-    <Auth
-      open={authOpen}
-      onClose={() => setAuth(false)}
-      verify={verify}
-      commit={commit}
-      setNetid={setNetid}
-    />
-  );
+  if (redirect)
+    return <Redirect to={redirect} />;
+
+  if (!commit) {
+    enqueueSnackbar('invalid commit', {variant: 'error'});
+    return <Redirect to={'/'} />;
+  }
+
+  if (!netid)
+    return (
+      <Auth
+        open={authOpen}
+        onClose={() => setAuth(false)}
+        commit={commit}
+      />
+    );
 
   let submission, reports, build, tests, errors;
+
+  if (!data) {
+    verify();
+    return <div/>;
+  }
 
   if (data.success) {
     submission = data.data.submission;

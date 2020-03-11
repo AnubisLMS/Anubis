@@ -54,7 +54,7 @@ export default function SearchSubmissions() {
               InputProps={{
                 startAdornment: <InputAdornment position="start"><SearchIcon/></InputAdornment>,
               }}
-              onChange={e => setCommit(e.target.value)}
+              onChange={e => setCommit(e.target.value.trim())}
               onKeyPress={e => e.key === 'Enter' ? setSearch(true) : null}
             />
           </Grid>
@@ -78,7 +78,7 @@ export default function SearchSubmissions() {
     return (
       <React.Fragment>
         {searchbar}
-        <Redirect to={`/submissions/${commit.trim()}`}/>
+        <Redirect to={`/view/${commit.trim()}`}/>
       </React.Fragment>
     )
   }
