@@ -17,7 +17,7 @@ def test_lines(lines, expected):
 def test(num, cmd, n):
     try:
         print()
-        print('test-2:')
+        print('test-3:')
         print('Testing subto program')
         qemu_cmd = 'timeout 5 qemu-system-i386 -serial mon:stdio -drive file=./submission/xv6.img,media=disk,index=0,format=raw -drive file=./submission/fs.img,media=disk,index=1,format=raw -smp 1 -m 512 -display none -nographic'
 
@@ -70,4 +70,4 @@ def test(num, cmd, n):
             False
         )
 
-test(0, 'sumto', random.randint(0, 100))
+test(3, 'sumto', random.randint(0, 100))
