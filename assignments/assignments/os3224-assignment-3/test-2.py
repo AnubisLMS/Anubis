@@ -28,7 +28,7 @@ def test_expected(lines):
 
     return True, 'valid output parsed'
 
-def test(num, cmd, n):
+def test(num, cmd):
     try:
         print()
         print('test-{}:'.format(num))
@@ -36,7 +36,6 @@ def test(num, cmd, n):
         qemu_cmd = 'timeout 5 qemu-system-i386 -serial mon:stdio -drive file=./submission/xv6.img,media=disk,index=0,format=raw -drive file=./submission/fs.img,media=disk,index=1,format=raw -smp 1 -m 512 -display none -nographic'
 
         print('running: {}'.format(cmd))
-        print('expecting output: {}'.format(expected))
 
         with open('test-{}.in'.format(num), 'w') as f:
             f.write('\n{}\n'.format(cmd))
@@ -61,7 +60,7 @@ def test(num, cmd, n):
 
         passed, err = test_expected(lines)
         if passed:
-            print('wstattest to work: test passed')
+            print('wstattest works: test passed')
             save_results(
                 'test-{}'.format(num),
                 [err],
