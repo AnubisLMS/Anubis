@@ -10,4 +10,4 @@ python-geoip-geolite2
 python-geoip-python3
 pytz
 python-dateutil
-
+Flask-Caching

@@ -5,7 +5,7 @@
 #
 # RQ_WORKER_SCALE will be the max number of assignments anubis can process
 # at any given time.
-API_SCALE := 1
+API_SCALE := 3
 RQ_WORKER_SCALE := 5
 
 
@@ -35,7 +35,7 @@ API_IP := $(shell docker network inspect traefik-proxy | \
 VOLUMES := $(shell docker volume ls | awk '{if (match($$2, /^anubis_.*$$/)) {print $$2}}')
 
 PERSISTENT_SERVICES := db traefik kibana elasticsearch redis smtp
-RESTART_ALWAYS_SERVICES := api worker
+RESTART_ALWAYS_SERVICES := api worker web
 
 help:
 	@echo 'For convenience'

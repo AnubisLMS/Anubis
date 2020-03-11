@@ -6,10 +6,10 @@ from datetime import datetime
 from pytz import timezone
 import dateutil.parser
 
-from ..app import db
+from ..app import db, cache
 from ..config import Config
-from ..models import Submissions, Reports, Student, Assignment
-from ..utils import enqueue_webhook_job, log_event, send_noreply_email, esindex, jsonify
+from ..models import Submissions, Reports, Student, Assignment, Errors
+from ..utils import enqueue_webhook_job, log_event, send_noreply_email, esindex, jsonify, reset_submission
 
 from .messages import err_msg, crit_err_msg, success_msg
 
@@ -90,6 +90,17 @@ def handle_report_panic():
         commit=submission.commit,
     )
 
+    e=Errors(
+        message=msg,
+        submission=submission,
+    )
+
+    db.session.add(e)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+
     esindex(
         'email',
         type='panic',
@@ -99,12 +110,12 @@ def handle_report_panic():
         netid=submission.netid,
     )
 
-    # Notify Student (without logs)
-    send_noreply_email(
-        msg,
-        'OS3224 - Anubis Autograder Critical Error', # email subject
-        submission.netid + '@nyu.edu',   # recipient
-    )
+    # # Notify Student (without logs)
+    # send_noreply_email(
+    #     msg,
+    #     'OS3224 - Anubis Autograder Critical Error', # email subject
+    #     submission.netid + '@nyu.edu',   # recipient
+    # )
 
     # Notify Admins (with logs)
     send_noreply_email(
@@ -161,6 +172,17 @@ def handle_report_error():
         error=req['error'],
     )
 
+    e=Errors(
+        message=msg,
+        submission=submission,
+    )
+
+    db.session.add(e)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+
     esindex(
         'email',
         type='error',
@@ -170,12 +192,12 @@ def handle_report_error():
         netid=submission.netid,
     )
 
-    # Notify Student
-    send_noreply_email(
-        msg,
-        'OS3224 - Anubis Autograder Error', # email subject
-        submission.netid + '@nyu.edu',   # recipient
-    )
+    # # Notify Student
+    # send_noreply_email(
+    #     msg,
+    #     'OS3224 - Anubis Autograder Error', # email subject
+    #     submission.netid + '@nyu.edu',   # recipient
+    # )
     return jsonify({'success':True})
 
 
@@ -257,11 +279,11 @@ def handle_report():
         netid=submission.netid,
     )
 
-    send_noreply_email(
-        msg,
-        'OS3224 - Anubis Autograder',
-        submission.netid + '@nyu.edu'
-    )
+    # send_noreply_email(
+    #     msg,
+    #     'OS3224 - Anubis Autograder',
+    #     submission.netid + '@nyu.edu'
+    # )
 
     return jsonify({
         'success': True
@@ -326,7 +348,6 @@ def restart():
     }
     """
     body = request.json
-
     netid = body['netid']
 
     student = Student.query.filter_by(netid=netid).first()
@@ -350,24 +371,10 @@ def restart():
             studentid=student.id,
         ).order_by(desc(Submissions.timestamp)).first()
 
-    submission.processed = False
-    reports = submission.reports
-    builds = submission.builds
-
-    for report in reports:
-        db.session.delete(report)
-    for build in builds:
-        db.session.delete(build)
-
-    try:
-        db.session.add(submission)
-        db.session.commit()
-    except IntegrityError:
-        db.session.rollback()
-        return {
+    if not reset_submission(submission):
+        return jsonify({
             'success': False
-        }
-
+        })
 
     enqueue_webhook_job(submission.id)
 
@@ -490,6 +497,25 @@ def handle_assignment():
     })
 
 
+@cache.cached(timeout=30, key_prefix='student-stats')
+def stats_for(student, assignment):
+    best=None
+    best_count=-1
+    for submission in Submissions.query.filter_by(
+            assignment=assignment,
+            studentid=student.id,
+            processed=True,
+    ).order_by(desc(Submissions.timestamp)).all():
+        correct_count = sum(map(
+            lambda rep: 1 if rep.passed else 0,
+            submission.reports
+        ))
+
+        if correct_count >= best_count:
+            best = submission
+    return best
+
+
 @private.route('/stats/<assignment_name>')
 @private.route('/stats/<assignment_name>/<netid>')
 @log_event('cli', lambda: 'stats')
@@ -518,20 +544,7 @@ def stats(assignment_name, netid=None):
                 "success": False,
                 "erorr":"student does not exist",
             })
-        best=None
-        best_count=-1
-        for submission in Submissions.query.filter_by(
-                assignment=assignment,
-                studentid=student.id,
-                processed=True,
-        ).all():
-            correct_count = sum(map(
-                lambda rep: 1 if rep.passed else 0,
-                submission.reports
-            ))
-
-            if correct_count >= best_count:
-                best = submission
+        best=stats_for(student, assignment)
         if best is None:
             # no submission
             bests[student.netid] = None

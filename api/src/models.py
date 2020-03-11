@@ -78,6 +78,12 @@ class Tests(db.Model):
 
     submission = db.relationship('Submissions', backref='tests')
 
+    @property
+    def json(self):
+        return {
+            'stdout': self.stdout
+        }
+
 
 class Reports(db.Model):
     """
@@ -125,3 +131,17 @@ class Assignment(db.Model):
         }
 
 
+class Errors(db.Model):
+    __tablename__ = 'errors'
+    id = db.Column(db.Integer, primary_key=True)
+    submissionid = db.Column(db.Integer, db.ForeignKey('submissions.id'), index=True)
+
+    message=db.Column(db.Text)
+
+    submission = db.relationship('Submissions', backref='errors')
+
+    @property
+    def json(self):
+        return {
+            'message': self.message,
+        }

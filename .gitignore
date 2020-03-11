@@ -3,3 +3,5 @@ os-dump-*.sql.gz
 es-dump-*.tar.gz
 __pycache__
 dump.sql
+.idea
+os-dump-*.sql

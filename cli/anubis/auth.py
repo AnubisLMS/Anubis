@@ -30,5 +30,5 @@ def get_session(args):
     json.dump({'username': username, 'password': password}, open(os.path.join(home, '.anubis', 'creds.json'), 'w'))
 
     s.auth = (username, password,)
-    s.url = 'https://os3224.nyu.cool' if not args.debug else 'https://localhost'
+    s.url = 'https://api.nyu.cool' if not args.debug else 'https://api.localhost'
     return s

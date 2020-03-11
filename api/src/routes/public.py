@@ -1,11 +1,13 @@
-from flask import request, redirect, url_for, flash, render_template, Blueprint
+from flask import request, redirect, url_for, flash, render_template, Blueprint, Response
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import desc
 from json import dumps
+from datetime import datetime
 
 from ..config import Config
-from ..app import db
+from ..app import db, cache
 from ..models import Submissions, Student, Assignment
-from ..utils import enqueue_webhook_job, log_event, get_request_ip, esindex
+from ..utils import enqueue_webhook_job, log_event, get_request_ip, esindex, jsonify, reset_submission
 
 public = Blueprint('public', __name__, url_prefix='/public')
 
@@ -15,6 +17,96 @@ def webhook_log_msg():
        request.headers.get('X-GitHub-Event', None) == 'push':
         return request.json['pusher']['name']
     return None
+
+
+@public.route('/credits')
+@log_event('rick-roll', lambda: 'rick-roll')
+def handle_memes():
+    return redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+
+@public.route('/regrade/<commit>/<netid>')
+@log_event('regrade-request', lambda: 'submission regrade request')
+def handle_regrade(commit=None, netid=None):
+    """
+    This route will get hit whenever someone clicks the regrade button on a
+    processed assignment. It should do some validity checks on the commit and
+    netid, then reset the submission and re-enqueue the submission job.
+    """
+    if commit is None or netid is None:
+        return jsonify({
+            'success': False,
+            'error': 'incomplete request',
+        })
+
+    student = Student.query.filter_by(netid=netid).first()
+    if student is None:
+        return jsonify({
+            'success': False,
+            'errors': 'invalid commit hash or netid'
+        })
+
+    submission = Submissions.query.filter_by(
+        studentid=student.id,
+        commit=commit,
+    ).first()
+
+    if submission is None:
+        return jsonify({
+            'success': False,
+            'error': 'invalid commit hash or netid'
+        })
+
+    if not submission.processed:
+        return jsonify({
+            'success': False,
+            'error': 'submission currently being processed'
+        })
+
+    if not reset_submission(submission):
+        return jsonify({
+            'success': False,
+            'error': 'error regrading'
+        })
+
+    enqueue_webhook_job(submission.id)
+
+    return jsonify({
+        'success': True
+    })
+
+
+@public.route('/submissions/<commit>/<netid>')
+@log_event('submission-request', lambda: 'specifc submission requests')
+@cache.cached(timeout=10, key_prefix='web-submission-student')
+def handle_submission(commit=None, netid=None):
+    if commit is None or netid is None:
+        return jsonify({
+            'success': False,
+            'error': 'missing commit or netid',
+        })
+    submission = Submissions.query.filter_by(
+        commit=commit
+    ).first()
+    if submission is None:
+        return jsonify({
+            'success': False,
+            'error': 'invalid commit hash or netid',
+        })
+    if submission.netid != netid:
+        return jsonify({
+            'success': False,
+            'error': 'invalid commit hash or netid'
+        })
+    return jsonify({
+        'data': {
+            'submission': submission.json,
+            'reports': [r.json for r in submission.reports],
+            'tests': submission.tests[0].stdout if len(submission.tests) > 0 else False,
+            'build': submission.builds[0].stdout if len(submission.builds) > 0 else False,
+            'errors': submission.errors[0].message if len(submission.errors) > 0 else False,
+        },
+        'success': True
+    })
 
 # dont think we need GET here
 @public.route('/webhook', methods=['POST'])

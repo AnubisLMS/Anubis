@@ -3,6 +3,7 @@ from elasticsearch import Elasticsearch
 from email.mime.text import MIMEText
 from flask import request, Response
 from dataclasses import dataclass
+from werkzeug import exceptions
 from datetime import datetime
 from functools import wraps
 from geoip import geolite2
@@ -95,9 +96,9 @@ def log_event(log_type, message_func):
             es.index(index='request', body={
                 'type': log_type.lower(),
                 'msg': message_func(),
-                'location': location.location if location is not None else location,
+                'location': location.location[::-1] if location is not None else location,
                 'ip': ip,
-                'timestamp': datetime.now(),
+                'timestamp': datetime.utcnow(),
             })
 
             return function(*args, **kwargs)
@@ -156,6 +157,7 @@ def jsonify(data):
     """
     res = Response(dumps(data))
     res.headers['Content-Type'] = 'application/json'
+    res.headers['Access-Control-Allow-Origin'] = 'https://nyu.cool' if not environ.get('DEBUG', False) else 'https://localhost'
     return res
 
 
@@ -170,4 +172,38 @@ def add_global_error_handler(app):
             submission=None,
             netid=None,
         )
+        if isinstance(error, exceptions.NotFound):
+            return '404', 404
         return 'err'
+
+
+def reset_submission(submission):
+    """
+    This function will reset all the data for a submission,
+    putting it in a pending state. To re-enqueue this submission
+    as a job, use the enqueue_webhook_job function.
+
+    :submission Submissions: submission object
+    :return: bool indicating success
+    """
+    if not submission.processed:
+        return False
+
+    submission.processed = False
+
+    for report in submission.reports:
+        db.session.delete(report)
+    for build in submission.builds:
+        db.session.delete(build)
+    for test in submission.tests:
+        db.session.delete(test)
+    for error in submission.errors:
+        db.session.delete(error)
+
+    try:
+        # db.session.add(submission)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return False
+    return True
