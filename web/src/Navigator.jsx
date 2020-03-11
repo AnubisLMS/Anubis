@@ -17,7 +17,7 @@ const categories = [
   {
     id: 'OS 3224',
     children: [
-      {id: 'Submissions', icon: <PublicIcon/>, path: '/submissions'},
+      {id: 'Submissions', icon: <PublicIcon/>, path: '/'},
     ],
   },
 ];

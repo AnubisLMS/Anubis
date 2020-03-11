@@ -9,8 +9,8 @@ import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 import {SnackbarProvider} from 'notistack';
 
 import Navigator from './Navigator';
-import Submissions from './Submissions';
 import View from './View';
+import SearchSubmissions from "./SearchSubmissions";
 
 function Copyright() {
   return (
@@ -202,14 +202,8 @@ function Paperbase(props) {
             </nav>
             <div className={classes.app}>
               <main className={classes.main}>
+                <SearchSubmissions/>
                 <Switch>
-                  <Route exact path={"/"}>
-                    {/*<Header onDrawerToggle={handleDrawerToggle} />*/}
-                    <Submissions/>
-                  </Route>
-                  <Route exact path={"/submissions"}>
-                    <Submissions/>
-                  </Route>
                   <Route exact path={'/submissions/:commit'}>
                     <View/>
                   </Route>

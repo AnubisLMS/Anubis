@@ -3,6 +3,7 @@ from elasticsearch import Elasticsearch
 from email.mime.text import MIMEText
 from flask import request, Response
 from dataclasses import dataclass
+from werkzeug import exceptions
 from datetime import datetime
 from functools import wraps
 from geoip import geolite2
@@ -171,6 +172,8 @@ def add_global_error_handler(app):
             submission=None,
             netid=None,
         )
+        if isinstance(error, exceptions.NotFound):
+            return '404', 404
         return 'err'
 
 

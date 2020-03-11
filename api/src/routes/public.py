@@ -75,25 +75,6 @@ def handle_regrade(commit=None, netid=None):
     })
 
 
-@public.route('/submissions')
-@log_event('submission-request', lambda: 'submissions requested')
-@cache.cached(timeout=30, key_prefix='web-submissions')
-def handle_submissions():
-    timestamp = datetime.now()
-    submissions = Submissions.query.order_by(desc(Submissions.timestamp)).limit(10).all()
-    return jsonify({
-        'data': [
-            {
-                'timestamp': str(s.timestamp),
-                'commit': s.commit,
-            }
-            for s in submissions
-        ],
-        'timestamp': str(timestamp),
-        'success': True
-    })
-
-
 @public.route('/submissions/<commit>/<netid>')
 @log_event('submission-request', lambda: 'specifc submission requests')
 @cache.cached(timeout=10, key_prefix='web-submission-student')
