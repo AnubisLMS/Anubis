@@ -6,34 +6,23 @@ import random
 import parse
 
 
-def test_expected(lines):
-    if lines[0].strip() == 'exec wstattest failed':
-        return False, 'wstat not properly implemented'
+def sumto(n):
+    if n <= 1:
+        return 1
+    return sumto(n-1) + n
 
-    if len(lines) != 20:
-        return False, 'unexpected number of lines'
-
-    for index in range(10):
-        if lines[index].strip() != 'child exiting':
-            return False, 'unexpected output'
-
-    for index in range(10, 20):
-        p = parse.parse(
-            'wtime : {}, rtime: {}, iotime: {}, pid {}',
-            lines[index].strip()
-        )
-
-        if p is None:
-            return False, 'invalid output parsed'
-
-    return True, 'valid output parsed'
+def test_lines(lines, expected):
+    return any(l.strip() == expected.strip() for l in lines)
 
 def test(num, cmd, n):
     try:
         print()
-        print('test-{}:'.format(num))
-        print('Testing wstattest program')
+        print('test-2:')
+        print('Testing subto program')
         qemu_cmd = 'timeout 5 qemu-system-i386 -serial mon:stdio -drive file=./submission/xv6.img,media=disk,index=0,format=raw -drive file=./submission/fs.img,media=disk,index=1,format=raw -smp 1 -m 512 -display none -nographic'
+
+        cmd = '{} {}'.format(cmd, n)
+        expected = 'sum: {}'.format(sumto(n))
 
         print('running: {}'.format(cmd))
         print('expecting output: {}'.format(expected))
@@ -59,19 +48,18 @@ def test(num, cmd, n):
 
         print('lines parsed:', lines)
 
-        passed, err = test_expected(lines)
-        if passed:
-            print('wstattest to work: test passed')
+        if test_lines(lines, expected):
+            print('sumto works: test passed')
             save_results(
                 'test-{}'.format(num),
-                [err],
+                ['sumto works'],
                 True
             )
         else:
-            print('wstattest does not work: test failed')
+            print('sumto does not work: test failed')
             save_results(
                 'test-{}'.format(num),
-                [err],
+                ['sumto does not work'],
                 False
             )
     except:
@@ -82,4 +70,4 @@ def test(num, cmd, n):
             False
         )
 
-test(2, 'wstattest')
+test(0, 'sumto', random.randint(0, 100))
