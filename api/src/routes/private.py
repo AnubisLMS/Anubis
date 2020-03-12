@@ -513,7 +513,7 @@ def stats_for(student, assignment):
 
         if correct_count >= best_count:
             best = submission
-    return best
+    return best.id
 
 
 @private.route('/stats/<assignment_name>')
@@ -544,21 +544,24 @@ def stats(assignment_name, netid=None):
                 "success": False,
                 "erorr":"student does not exist",
             })
-        best=stats_for(student, assignment)
-        if best is None:
+        submissionid=stats_for(student, assignment)
+        if submissionid is None:
             # no submission
             bests[student.netid] = None
         else:
-            build = len(best.builds) > 0
-            best_count = sum(map(lambda x: 1 if x.passed else 0, best.reports))
+            submission = Submissions.query.filter_by(
+                id=submissionid
+            ).first()
+            build = len(submission.builds) > 0
+            best_count = sum(map(lambda x: 1 if x.passed else 0, submission.reports))
             late = 'past due' if assignment.due_date < submission.timestamp else False
             late = 'past grace' if assignment.grace_date < submission.timestamp else late
             bests[student.netid] = {
-                'submission': best.json,
+                'submission': submission.json,
                 'builds': build,
-                'reports': [rep.json for rep in best.reports],
+                'reports': [rep.json for rep in submission.reports],
                 'total_tests_passed': best_count,
-                'repo_url': best.repo,
+                'repo_url': submission.repo,
                 'late': late
             }
     return jsonify({
