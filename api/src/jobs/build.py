@@ -12,7 +12,7 @@ from .. import utils
 assingment_files = {
     'os3224-assignment-1': ['xv6.img', 'fs.img', 'short', 'long'],
     'os3224-assignment-2': ['guess', 'linkedList'],
-    'os3224-assignment-3': ['xv6.img', 'fs.img', 'short', 'long'],
+    'os3224-assignment-3': ['xv6.img', 'fs.img'],
 }
 
 def build(client, repo_url, submission, volume_name):
@@ -88,7 +88,10 @@ def build(client, repo_url, submission, volume_name):
             submission=submission.id,
             netid=submission.netid,
         )
-        container.kill()
+        try:
+            container.kill()
+        except:
+            pass
         raise report_error(
             'build timeout\n'+container.logs().decode(),
             submission.id
