@@ -204,7 +204,10 @@ function Paperbase(props) {
               <main className={classes.main}>
                 <SearchSubmissions/>
                 <Switch>
-                  <Route exact path={'/submissions/:commit'}>
+                  <Route exact path={'/view/:commit'}>
+                    <View/>
+                  </Route>
+                  <Route exact path={'/view/:commit/:netid'}>
                     <View/>
                   </Route>
                 </Switch>
