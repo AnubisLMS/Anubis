@@ -497,15 +497,15 @@ def handle_assignment():
     })
 
 
-@cache.cached(timeout=30, key_prefix='student-stats')
-def stats_for(student, assignment):
+@cache.memoize(timeout=30)
+def stats_for(studentid, assignmentid):
     best=None
     best_count=-1
     for submission in Submissions.query.filter_by(
-            assignment=assignment,
-            studentid=student.id,
+            assignmentid=assignmentid,
+            studentid=studentid,
             processed=True,
-    ).order_by(desc(Submissions.timestamp)).all():
+    ).all():
         correct_count = sum(map(
             lambda rep: 1 if rep.passed else 0,
             submission.reports
@@ -513,7 +513,7 @@ def stats_for(student, assignment):
 
         if correct_count >= best_count:
             best = submission
-    return best.id
+    return best.id if best is not None else None
 
 
 @private.route('/stats/<assignment_name>')
@@ -544,7 +544,7 @@ def stats(assignment_name, netid=None):
                 "success": False,
                 "erorr":"student does not exist",
             })
-        submissionid=stats_for(student, assignment)
+        submissionid = stats_for(student.id, assignment.id)
         if submissionid is None:
             # no submission
             bests[student.netid] = None
