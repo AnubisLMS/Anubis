@@ -70,7 +70,7 @@ services:
     labels:
       - "traefik.enable=true"
       
-      - "traefik.http.routers.api-http.rule=Host(`api.${DOMAIN}`)"
+      - "traefik.http.routers.api-http.rule=Host(`api.${DOMAIN}`) || Host(`os3224.${DOMAIN}`)"
       - "traefik.http.routers.api-http.entrypoints=http"
       - "traefik.http.routers.api-http.middlewares=redirect"      
 
