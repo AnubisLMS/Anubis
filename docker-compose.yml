@@ -89,6 +89,19 @@ services:
       - "traefik.http.routers.api-public.tls.certresolver=tls"
       - "traefik.http.middlewares.api-public.redirectscheme.scheme=https"
 
+      # private route with auth
+      - "traefik.http.routers.os3224-private.rule=Host(`os3224.${DOMAIN}`) && PathPrefix(`/private/`)"
+      - "traefik.http.routers.os3224-private.entrypoints=https"
+      - "traefik.http.routers.os3224-private.tls.certresolver=tls"
+      - "traefik.http.middlewares.os3224-private.redirectscheme.scheme=https"
+      - "traefik.http.routers.os3224-private.middlewares=traefik-auth@docker"
+
+      # Public router without auth
+      - "traefik.http.routers.os3224-public.rule=Host(`os3224.${DOMAIN}`)"
+      - "traefik.http.routers.os3224-public.entrypoints=https"
+      - "traefik.http.routers.os3224-public.tls.certresolver=tls"
+      - "traefik.http.middlewares.os3224-public.redirectscheme.scheme=https"
+
   redis:
     image: redis:5
     restart: always
