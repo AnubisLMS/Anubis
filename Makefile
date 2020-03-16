@@ -88,14 +88,17 @@ restart:
 		--scale api=$(API_SCALE) \
 		$(RESTART_ALWAYS_SERVICES)
 
-.PHONY: cli         # Install the cli
+.PHONY: cli          # Install the cli
 cli:
 	sudo pip3 install ./cli
 
 .PHONY: backup       # Backup database to file
 backup:
-	docker-compose exec db mysqldump -u root --password=password os | gzip - > os-dump-$$(date +%s).sql.gz
-	docker run --rm --volumes-from anubis_elasticsearch_1 -v $$(pwd):/backup alpine tar czf /backup/es-dump-$$(date +%s).tar.gz /usr/share/elasticsearch/data
+	./scripts/backup.sh
+
+.PHONY: restore      # Restore to most recent backup
+restore:
+	./scripts/restore.sh
 
 .PHONY: clean        # Clean up volumes, images and data
 clean:
