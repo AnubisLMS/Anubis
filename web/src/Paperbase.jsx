@@ -5,12 +5,13 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Hidden from '@material-ui/core/Hidden';
 import Typography from '@material-ui/core/Typography';
 import Link from '@material-ui/core/Link';
-import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
+import {BrowserRouter as Router, Route, Switch, Redirect} from "react-router-dom";
 import {SnackbarProvider} from 'notistack';
 
 import Navigator from './Navigator';
 import View from './View';
 import SearchSubmissions from "./SearchSubmissions";
+import NotFound from "./NotFound";
 
 function Copyright() {
   return (
@@ -18,11 +19,11 @@ function Copyright() {
       {'Copyright © '}
       <Link color="primay" href={
         (process.env.REACT_APP_DEV ?
-          'https://api.localhost/public/credits' :
-          'https://api.nyu.cool/public/credits'
+            'https://api.localhost/public/memes' :
+            'https://api.nyu.cool/public/memes'
         )
       }>
-        NYU OS 3224
+        Memes
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -148,6 +149,8 @@ const styles = {
     display: 'flex',
     width: '100%',
     minHeight: '100vh',
+    backgroundImage: `url(/curvylines.png)`,
+    // backgroundColor: theme.palette.secondary.dark,
   },
   drawer: {
     [theme.breakpoints.up('sm')]: {
@@ -187,35 +190,49 @@ function Paperbase(props) {
         <SnackbarProvider maxSnack={5}>
           <Router>
             <CssBaseline/>
-            <nav className={classes.drawer}>
-              <Hidden smUp implementation="js">
-                <Navigator
-                  PaperProps={{style: {width: drawerWidth}}}
-                  variant="temporary"
-                  open={mobileOpen}
-                  onClose={handleDrawerToggle}
-                />
-              </Hidden>
-              <Hidden xsDown implementation="css">
-                <Navigator PaperProps={{style: {width: drawerWidth}}}/>
-              </Hidden>
-            </nav>
-            <div className={classes.app}>
-              <main className={classes.main}>
-                <SearchSubmissions/>
-                <Switch>
-                  <Route exact path={'/view/:commit'}>
-                    <View/>
-                  </Route>
-                  <Route exact path={'/view/:commit/:netid'}>
-                    <View/>
-                  </Route>
-                </Switch>
-              </main>
-              <footer className={classes.footer}>
-                <Copyright/>
-              </footer>
-            </div>
+            <Switch>
+              <Route exact path={'/'}>
+                <Redirect to={'/view'} />
+              </Route>
+              <Route path={'/view'}>
+                <nav className={classes.drawer}>
+                  <Hidden smUp implementation="js">
+                    <Navigator
+                      PaperProps={{style: {width: drawerWidth}}}
+                      variant="temporary"
+                      open={mobileOpen}
+                      onClose={handleDrawerToggle}
+                    />
+                  </Hidden>
+                  <Hidden xsDown implementation="css">
+                    <Navigator PaperProps={{style: {width: drawerWidth}}}/>
+                  </Hidden>
+                </nav>
+                <div className={classes.app}>
+                  <main className={classes.main}>
+                    <SearchSubmissions/>
+                    <Switch>
+                      <Route exact path={'/view/:commit'}>
+                        <View/>
+                      </Route>
+                      <Route exact path={'/view/:commit/:netid'}>
+                        <View/>
+                      </Route>
+                    </Switch>
+                  </main>
+                  <footer className={classes.footer}>
+                    <Copyright/>
+                  </footer>
+                </div>
+              </Route>
+              <Route>
+                <div className={classes.app}>
+                  <main className={classes.main}>
+                    <NotFound/>
+                  </main>
+                </div>
+              </Route>
+            </Switch>
           </Router>
         </SnackbarProvider>
       </div>
