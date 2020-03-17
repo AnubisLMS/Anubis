@@ -64,7 +64,10 @@ def clone(client, repo_url, submission, volume_name):
             netid=submission.netid,
         )
         # Kill container if it has reached its timeout
-        container.kill()
+        try:
+            container.kill()
+        except:
+            pass
         raise report_error('clone timeout\n', submission.id)
 
     finally:

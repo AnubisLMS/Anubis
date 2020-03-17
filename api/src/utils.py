@@ -173,7 +173,7 @@ def add_global_error_handler(app):
             netid=None,
         )
         if isinstance(error, exceptions.NotFound):
-            return '404', 404
+            return '', 404
         return 'err'
 
 

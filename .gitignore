@@ -5,3 +5,4 @@ __pycache__
 dump.sql
 .idea
 os-dump-*.sql
+.backups

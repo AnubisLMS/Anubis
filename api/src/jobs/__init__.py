@@ -29,6 +29,7 @@ def test_repo(submission_id):
     """
 
     client=docker.from_env()
+    client.volumes.prune()
 
     submission = Submissions.query.filter_by(
         id=submission_id

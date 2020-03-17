@@ -36,6 +36,10 @@ class Submissions(db.Model):
     assignment = db.relationship('Assignment', backref='submissions')
 
     @property
+    def url(self):
+        return 'https://nyu.cool/view/{}/{}'.format(self.commit, self.netid)
+
+    @property
     def netid(self):
         if self.student is not None:
             return self.student.netid
@@ -47,6 +51,7 @@ class Submissions(db.Model):
             'id': self.id,
             'netid': self.netid,
             'assignment': self.assignment.name,
+            'url': self.url,
             'commit': self.commit,
             'processed': self.processed,
             'timestamp': str(self.timestamp),
