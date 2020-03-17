@@ -130,9 +130,6 @@ def webhook():
         assignment_name=data['repository']['name'][:-(len(github_username)+1)]
         assignment=Assignment.query.filter_by(name=assignment_name).first()
 
-        if assignment is None:
-            return {'success': False, 'error': ['assignment not found']}
-
         if data['before'] == '0000000000000000000000000000000000000000' or data['ref'] != 'refs/heads/master':
             esindex(
                 'new-repo',
@@ -141,6 +138,9 @@ def webhook():
                 assignment=str(assignment)
             )
             return {'success': False, 'error': ['initial commit or push to master']}
+
+        if assignment is None:
+            return {'success': False, 'error': ['assignment not found']}
 
         if not data['repository']['full_name'].startswith('os3224/'):
             return {'success': False, 'error': ['invalid repo']}
