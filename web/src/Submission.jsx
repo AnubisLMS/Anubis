@@ -108,6 +108,7 @@ export default function Submission({data, processed, verify}) {
                     <IconButton onClick={() => {
                       api.get(`/regrade/${commit}/${netid}`).then(res => {
                         if (res.data && res.data.success) {
+                          enqueueSnackbar('regrading', {variant: 'success'});
                           verify();
                         } else {
                           enqueueSnackbar(res.data.error || 'unable to regrade', {variant: 'error'})

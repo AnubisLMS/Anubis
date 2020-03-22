@@ -80,7 +80,7 @@ export default function Build({data}) {
       <div/>
     );
   } else {
-    enqueueSnackbar('Build succeeded', {variant: 'success'});
+    // enqueueSnackbar('Build succeeded', {variant: 'success', preventDuplicate: true});
   }
 
   return (
@@ -89,13 +89,14 @@ export default function Build({data}) {
         <Typography variant="h5" component="h2">
           Build Logs
         </Typography>
-        {data ? data.trim().split('\n').map(line => (
+        {data ? data.trim().split('\n').map((line, index) => (
           <Typography
             className={classes.pos}
             // component="pre"
             variant={"body1"}
             color={"textSecondary"}
             width={100}
+            key={`line-${index}`}
           >
             {line}
           </Typography>

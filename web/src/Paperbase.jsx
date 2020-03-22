@@ -5,31 +5,13 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Hidden from '@material-ui/core/Hidden';
 import Typography from '@material-ui/core/Typography';
 import Link from '@material-ui/core/Link';
-import {BrowserRouter as Router, Route, Switch, Redirect} from "react-router-dom";
+import {BrowserRouter as Router, Redirect, Route, Switch} from "react-router-dom";
 import {SnackbarProvider} from 'notistack';
 
 import Navigator from './Navigator';
 import View from './View';
 import SearchSubmissions from "./SearchSubmissions";
 import NotFound from "./NotFound";
-
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="primay" href={
-        (process.env.REACT_APP_DEV ?
-            'https://api.localhost/public/memes' :
-            'https://api.nyu.cool/public/memes'
-        )
-      }>
-        Memes
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
 
 let theme = createMuiTheme({
   palette: {
@@ -176,6 +158,24 @@ const styles = {
   },
 };
 
+function Copyright() {
+  return (
+    <Typography variant="body2" color="textSecondary" align="center">
+      {'Copyright © '}
+      <Link href={
+        (process.env.REACT_APP_DEV ?
+            'https://api.localhost/public/memes' :
+            'https://api.nyu.cool/public/memes'
+        )
+      }>
+        Memes
+      </Link>{' '}
+      {new Date().getFullYear()}
+      {'.'}
+    </Typography>
+  );
+}
+
 function Paperbase(props) {
   const {classes} = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -192,7 +192,7 @@ function Paperbase(props) {
             <CssBaseline/>
             <Switch>
               <Route exact path={'/'}>
-                <Redirect to={'/view'} />
+                <Redirect to={'/view'}/>
               </Route>
               <Route path={'/view'}>
                 <nav className={classes.drawer}>
