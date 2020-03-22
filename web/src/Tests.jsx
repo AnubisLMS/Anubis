@@ -88,13 +88,15 @@ export default function Tests({tests, reports}) {
       <div/>
     );
   } else {
-    for (const r of reports) {
-      enqueueSnackbar(
-        `${r.testname} ${r.passed ? 'passed' : 'failed'}`,
-        {variant: r.passed ? 'success' : 'error'}
-      )
-    }
+    // for (const r of reports) {
+    //   enqueueSnackbar(
+    //     `${r.testname} ${r.passed ? 'passed' : 'failed'}`,
+    //     {variant: r.passed ? 'success' : 'error', preventDuplicate: true}
+    //   )
+    // }
   }
+
+
   return (
     <Card className={classes.card}>
       <CardContent>
@@ -130,13 +132,18 @@ export default function Tests({tests, reports}) {
         <Typography variant={'h5'} component={'h2'}>
           Logs
         </Typography>
-        <Typography
-          className={classes.pos}
-          component="pre"
-          color={"textSecondary"}
-        >
-          {tests ? tests.trim() : null}
-        </Typography>
+        {tests ? tests.trim().split('\n').map((line, index) => (
+          <Typography
+            className={classes.pos}
+            // component="pre"
+            variant={"body1"}
+            color={"textSecondary"}
+            width={100}
+            key={`line-${index}`}
+          >
+            {line}
+          </Typography>
+        )) : null}
       </CardContent>
     </Card>
   );

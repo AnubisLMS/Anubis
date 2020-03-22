@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import Grid from '@material-ui/core/Grid';
 import {Redirect, useParams} from "react-router-dom";
 import {useSnackbar} from 'notistack';
-import Grow from '@material-ui/core/Grow';
 
 import {api} from './utils';
 import Submission from './Submission';
@@ -38,25 +37,29 @@ export default function View() {
   };
 
   const verify = () => {
+    if (processed) {
+      setData(null);
+      setProcessed(false);
+    }
     api.get(`/submissions/${commit}/${netid}`).then(res => {
       if (res.data && res.data.success) {
         timer.current = setInterval(() => (
           api.get(`/submissions/${commit}/${netid}`).then(handler)
-        ), 5000);
+        ), 3000);
         handler(res);
       } else if (res.data && !res.data.success) {
-        enqueueSnackbar(res.data.error, {variant: 'error'});
+        enqueueSnackbar(res.data.error, {variant: 'error', preventDuplicate: true});
         setRedirect('/');
       }
     }).catch(err => null);
   };
 
   if (redirect)
-    return <Redirect to={redirect} />;
+    return <Redirect to={redirect}/>;
 
   if (!commit) {
-    enqueueSnackbar('invalid commit', {variant: 'error'});
-    return <Redirect to={'/'} />;
+    enqueueSnackbar('invalid commit', {variant: 'error', preventDuplicate: true});
+    return <Redirect to={'/'}/>;
   }
 
   if (!netid)
@@ -65,6 +68,7 @@ export default function View() {
         open={authOpen}
         onClose={() => setAuth(false)}
         commit={commit}
+        key={`auth-${commit}-${netid}`}
       />
     );
 
@@ -84,32 +88,36 @@ export default function View() {
   }
 
   if (!data.success) {
-    enqueueSnackbar(data.error, {variant: 'error'});
+    enqueueSnackbar(data.error, {variant: 'error', preventDuplicate: true});
     return (
       <Redirect to={'/'}/>
     );
   }
 
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12}>
+    <Grid container spacing={2} key={`grid-${processed}`}>
+      <Grid item xs={12} key={`submission-${commit}-${netid}-${processed}`}>
         <Submission
           data={submission}
           processed={processed}
           verify={verify}
         />
       </Grid>
-      {processed && !errors ? (
+      {!errors ? (
         <React.Fragment>
-          <Grid item xs={12}>
-            <Tests tests={tests} reports={reports}/>
-          </Grid>
-          <Grid item xs={12}>
-            <Build data={build}/>
-          </Grid>
+          {tests && reports ?
+            <Grid item xs={12} key={`test-${commit}-${netid}-${processed}`}>
+              <Tests tests={tests} reports={reports}/>
+            </Grid> : null
+          }
+          {build ?
+            <Grid item xs={12} key={`build-${commit}-${netid}-${processed}`}>
+              <Build data={build}/>
+            </Grid> : null
+          }
         </React.Fragment>
       ) : errors ? (
-        <Grid item xs={12}>
+        <Grid item xs={12} key={`error-${commit}-${netid}-${processed}`}>
           <Error data={errors}/>
         </Grid>
       ) : null

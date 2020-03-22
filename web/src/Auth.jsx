@@ -28,7 +28,7 @@ export default function Auth(props) {
 
   if (redirect) {
     return (
-      <Redirect to={`/view/${commit}/${netid}`} />
+      <Redirect to={`/view/${commit}/${netid}`}/>
     );
   }
 
