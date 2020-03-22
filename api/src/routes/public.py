@@ -77,7 +77,7 @@ def handle_regrade(commit=None, netid=None):
 
 @public.route('/submissions/<commit>/<netid>')
 @log_event('submission-request', lambda: 'specifc submission requests')
-@cache.cached(timeout=10, key_prefix='web-submission-student')
+@cache.memoize(timeout=2, key_prefix='web-submission-student')
 def handle_submission(commit=None, netid=None):
     if commit is None or netid is None:
         return jsonify({
