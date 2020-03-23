@@ -1,0 +1,15 @@
+bombs
+*.o
+
+log.txt
+log-status.txt
+scores.txt
+requestd.log
+
+acme.json
+bomblab-scoreboard.html
+
+__pycache__
+
+.mysql
+

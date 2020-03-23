@@ -1,0 +1,17 @@
+FROM python:3.8
+
+WORKDIR /opt/app
+
+RUN apt update \
+  && apt install -y make libc6-i386 gcc-multilib \
+  && rm -rf /var/lib/apt/lists/ \
+  && pip3 install \
+  flask \
+  gunicorn \
+  python-geoip-geolite2 \
+  python-geoip-python3 \
+  elasticsearch
+
+COPY . .
+
+CMD gunicorn -b 0.0.0.0:443 -w 20 bomblab-requestd:app

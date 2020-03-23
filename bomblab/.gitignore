@@ -1,0 +1,13 @@
+.env
+acme.json
+log.txt
+log-status.txt
+scores.txt
+bomblab-scoreboard.html
+__pycache__
+requestd.log
+
+*.json
+.mysql
+*.log
+log
