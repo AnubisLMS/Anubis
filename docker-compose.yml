@@ -194,6 +194,9 @@ services:
       context: ./bomblab
       dockerfile: Dockerfile.reportd
     restart: 'always'
+    environment:
+      - "DOMAIN=${BOMBLAB_DOMAIN}"
+      - "MAIN_DOMAIN=${DOMAIN}"
     volumes:
       - './bomblab/bombs:/opt/app/bombs'
       - './bomblab/bomblab-scoreboard.html:/opt/app/bomblab-scoreboard.html'
@@ -231,6 +234,7 @@ services:
       - "traefik.http.services.request-router.loadbalancer.server.port=443"
     environment:
       - "DOMAIN=${BOMBLAB_DOMAIN}"
+      - "MAIN_DOMAIN=${DOMAIN}"
     networks:
       - traefik-proxy
 
@@ -240,6 +244,9 @@ services:
       dockerfile: Dockerfile.resultd
     volumes:
       - './bomblab/log/resultd.log:/opt/app/resultd.log'
+    environment:
+      - "DOMAIN=${BOMBLAB_DOMAIN}"
+      - "MAIN_DOMAIN=${DOMAIN}"
     restart: 'always'
     labels:
       - "traefik.enable=true"
@@ -279,6 +286,7 @@ services:
       - "traefik.http.services.bomb-router.loadbalancer.server.port=5000"
     environment:
       - "DOMAIN=bombs.${BOMBLAB_DOMAIN}"
+      - "MAIN_DOMAIN=${DOMAIN}"
     networks:
       - traefik-proxy
 

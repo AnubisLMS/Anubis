@@ -212,8 +212,9 @@ foreach $bombid (sort {$RESULTS{$b}[2] <=> $RESULTS{$a}[2] ||
 #
 # Print the page epilogue information
 #
+my $domain = $ENV{"MAIN_DOMAIN"};
 print WEB "</table>\n";
-print WEB "<br/> <a href=\"https://memes.nyu.cool/\" style=\"font-size: xx-small; color: #D3D3D3\">come get some quality memes</a>\n";
+print WEB "<br/> <a href=\"https://api.$domain/public/memes\" style=\"font-size: xx-small; color: #D3D3D3\">come get some quality memes</a>\n";
 print WEB "$bf <p>Summary [phase:cnt]  $ef\n";
 for ($i = 1; $i <= $Bomblab::NUMPHASES+1; $i++) {
 
