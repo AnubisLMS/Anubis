@@ -78,7 +78,7 @@ debug: check build db
 		$(BOMBLAB_SERVICES)
 
 .PHONY: deploy       # Start the cluster in production mode
-deploy: check build db restart bomblab
+deploy: check build db restart
 
 .PHONY: bomblab
 bomblab:
