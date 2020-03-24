@@ -1,15 +1,6 @@
-CREATE DATABASE IF NOT EXISTS `os`;
-
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'password';
-FLUSH PRIVILEGES;
-
-SET GLOBAL time_zone = 'America/New_York';
-SET time_zone = 'America/New_York';
-
-
 CREATE DATABASE IF NOT EXISTS bomblab;
 
-CREATE TABLE IF NOT EXISTS bomblab.Submission (
+CREATE TABLE IF NOT EXISTS Submission (
        id INTEGER PRIMARY KEY AUTO_INCREMENT,
        ip VARCHAR(128),
        `date` VARCHAR(128),

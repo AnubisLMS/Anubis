@@ -1,0 +1,105 @@
+#######################################
+# CS:APP Bomb Lab
+# Directions for Building Binary Bombs
+#######################################
+
+This directory contains the files and scripts that are needed to build
+binary bombs. You only need to worry about anything in this directory
+if you are building your bombs manually. Most instructors can safely
+ignore it.
+
+***********
+1. Overview
+***********
+
+To build a bomb manually, follow the following steps:
+
+Step 1: modify the following variables in the Makefile:
+
+# The CFLAGS variable sets the compiler flags when building bombs.
+CFLAGS = -Wall -O1
+
+# Default result server name and port (not needed for non-notifying bombs)
+SERVERNAME = changeme.edu
+SERVERPORT = 15214
+
+# If -DNOTIFY, then send an HTTP message to the result server, which
+# is running on host SERVERNAME listening on port SERVERPORT, on every
+# explosion and defusion. The default selected here is not to notify.
+BOMBFLAGS = -DNONOTIFY 
+
+# IF BOMPHASES is not defined, then the makephases.pl script chooses 
+# a random variant for each phase. Otherwise, use -p to indicate
+# the variant you want for each phase. The default selected here 
+# chooses variant 'a' for all six phases. 
+BOMBPHASES = -p aaaaaa  
+
+# A BOMBID of zero denotes a generic bomb, nonzero a custom
+# bomb. The default shown here selects a generic bomb, which are
+# not allowed to notify.
+BOMBID = 0
+
+Step 2: After modifying these variables, type
+
+	unix> make
+
+This will build the bomb (./bomb) and its quiet non-notifying
+counterpart (./bomb-quiet), which is used by the autograder when it
+validates students solutions.
+
+Typing 
+
+	unix> make solution.txt
+
+will build the bomb's solution. Typing
+
+	unix> ./bomb solution.txt	
+
+will test your bomb. Typing
+
+	unix> ./rtest.pl -n <num>
+
+will create and test <num> bombs for correctness. 
+
+As the student solves each phase, they can store the solution
+strings to each phase in a file. When the bomb is run with a command
+line argument
+
+	unix> ./bomb psol.txt
+
+it reads solution strings from psol.txt until EOF, and then switches
+over to stdin. This way, the students don't have to keep retyping 
+solution strings to stdin.
+
+If the bomb is called with a command line argument (psol.txt) and the
+environment variable GRADE_BOMB is set, then the bomb will read
+solution strings from psol.txt until EOF, and then terminate with a
+succesfull status. This feature allows us to validate and grade
+partial solutions.
+
+********
+2. Files
+********
+config.h	- Bomb config file
+makephases.pl	- Perl script that generates the phases.c file
+rtest.pl	- Regression tester that builds and tests a bunch of bombs.
+bomb.c		- Main bomb routine and the only source file the students get
+bomb-solve.c	- Main routine for generating the bomb solution
+driverlib.{c,h}	- Package for sending autoresult strings to the server
+support.{c,h}	- Bomb support routines
+phases.h	- Fixed header file
+phases.c	- Bomb phase source (generated automatically by makephases.pl)
+phases/		- bomb phase templates
+
+**************
+3. Bomb phases
+**************
+
+The source code for all phases can be found in the directory ./phases.
+
+The first 6 phases each have three variants. 
+
+There is additional secret phase 7, which users can access by appending the
+string SECRET_PHASE (defined in support.h) to the phase 4 input. 
+
+

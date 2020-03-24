@@ -36,6 +36,7 @@ VOLUMES := $(shell docker volume ls | awk '{if (match($$2, /^anubis_.*$$/)) {pri
 
 PERSISTENT_SERVICES := db traefik kibana elasticsearch redis smtp
 RESTART_ALWAYS_SERVICES := api worker web
+BOMBLAB_SERVICES := bomblab-report bomblab-request bomblab-result bomblab-bombs
 
 help:
 	@echo 'For convenience'
@@ -61,11 +62,10 @@ db:
 	docker-compose up -d db
 	until docker-compose exec db mysqladmin ping -u root; do sleep 1; done
 	@sleep 1
-	@docker-compose exec db sh -c 'mysql -u root < /docker-entrypoint-initdb.d/init.sql' || true
-
-.PHONY: events       # Get database events (may be a lot)
-events:
-	docker-compose exec -T db mysql -u root os <<< 'select * from events;'
+	@docker-compose exec db \
+		sh -c 'mysql -u root < /docker-entrypoint-initdb.d/init.sql' || true
+	@docker-compose exec db \
+		sh -c 'mysql -u root --password=password < /docker-entrypoint-initdb.d/init.sql' || true
 
 .PHONY: debug        # Start the cluster in debug mode
 debug: check build db
@@ -74,10 +74,18 @@ debug: check build db
 		-d --force-recreate \
 		--scale worker=3 \
 		--scale api=1 \
-		$(RESTART_ALWAYS_SERVICES)
+		$(RESTART_ALWAYS_SERVICES) \
+		$(BOMBLAB_SERVICES)
 
 .PHONY: deploy       # Start the cluster in production mode
 deploy: check build db restart
+
+.PHONY: bomblab
+bomblab:
+	./bomblab/check.sh
+	docker-compose -f ./docker-compose.yml up \
+		-d --force-recreate \
+		$(BOMBLAB_SERVICES)
 
 .PHONY: restart      # Restart the cluster
 restart:
@@ -86,7 +94,7 @@ restart:
 		-d --force-recreate \
 		--scale worker=$(RQ_WORKER_SCALE) \
 		--scale api=$(API_SCALE) \
-		$(RESTART_ALWAYS_SERVICES)
+		$(RESTART_ALWAYS_SERVICES) \
 
 .PHONY: cli          # Install the cli
 cli:

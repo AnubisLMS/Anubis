@@ -1,0 +1,8 @@
+CS:APP Bomb Lab
+Bomb Phase Templates
+
+Files:
+
+phase<i>{a,b,c}.c	- templates for bomb phase i
+phasehead.c		- constant header for phase.c
+
