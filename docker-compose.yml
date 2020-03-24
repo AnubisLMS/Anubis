@@ -272,7 +272,7 @@ services:
       - "traefik.enable=true"
 
       - "traefik.http.middlewares.bomb-redir.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.bomb-auth.basicauth.users=${BOMB_AUTH}"
+      - "traefik.http.middlewares.bomb-auth.basicauth.users=${AUTH}"
       - "traefik.http.middlewares.bomb-auth.basicauth.removeheader=true"
 
       - "traefik.http.routers.bomb-router-http.rule=Host(`bombs.${BOMBLAB_DOMAIN}`)"

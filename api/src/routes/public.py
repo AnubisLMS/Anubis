@@ -115,8 +115,6 @@ def webhook():
     """
     This route should be hit by the github when a push happens.
     We should take the the github repo url and enqueue it as a job.
-
-    TODO: add per student ratelimiting on this endpoint
     """
 
     if request.headers.get('Content-Type', None) == 'application/json' and \
