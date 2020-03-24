@@ -428,6 +428,12 @@ def fix_dangling_route():
 @log_event('cli', lambda: 'assignment')
 def handle_assignment():
     """
+    This route is a catchall endpoint for creating, modifying or listing assignment data.
+    Anubis needs assignment metadata for the due dates and grace dates of assignments. This
+    endpoint should be hit by the api to create and modify those values. All timezones should
+    be EST. The dateutil parser is used for paring datetime values, so the accepted datetime
+    format is quite flexable.
+
     body = {
       action
       data {
