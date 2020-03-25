@@ -12,6 +12,7 @@ class Student(db.Model):
     @property
     def json(self):
         return {
+            'id': self.id,
             'netid': self.netid,
             'github_username': self.github_username,
             'name': self.name,
