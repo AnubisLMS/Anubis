@@ -46,7 +46,7 @@ help:
 
 .PHONY: check        # Checks that env vars are set
 check:
-	for var in ACME_EMAIL MYSQL_ROOT_PASSWORD AUTH DOMAIN; do \
+	for var in ACME_EMAIL AUTH DOMAIN; do \
 		if ([ -f .env ] && ! grep -P "^$${var}=" .env &> /dev/null) && [ ! -z "$${var}" ]; then \
 			echo "ERROR $${var} not defined! this variable is required" 1>&2; \
 		fi; \
