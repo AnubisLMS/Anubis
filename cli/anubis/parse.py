@@ -15,7 +15,6 @@ def parse_args(argv):
     logout_parser = add_logout_parser(subparsers)
     ls_parser = add_ls_parser(subparsers)
     student_parser = add_student_parser(subparsers)
-    restart_parser = add_restart_parser(subparsers)
     stats_parser = add_stats_parser(subparsers)
     dangling_parser = add_dangling_parser(subparsers)
     assignment_parser = add_assignment_parser(subparsers)
@@ -25,7 +24,6 @@ def parse_args(argv):
         'ls': ls_parser,
         'logout': logout_parser,
         'student': student_parser,
-        'restart': restart_parser,
         'dangling': dangling_parser,
         'stats': stats_parser,
         'assignment': assignment_parser,
@@ -56,22 +54,6 @@ def add_assignment_parser(subparsers):
     ls = assignment_subparser.add_parser('ls', help='list all assignment')
 
     return assignment_parser
-
-
-
-def add_restart_parser(subparsers):
-    # Restart
-    restart_parser = subparsers.add_parser(
-        'restart',
-        help='restart/re-enqueue submission jobs',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-
-    restart_parser.add_argument('netid', help='netid of student to restart')
-    restart_parser.add_argument('commit', nargs='?', default=None, help='git commit hash to re-enqueue')
-
-    return restart_parser
-
 
 
 def add_stats_parser(subparsers):

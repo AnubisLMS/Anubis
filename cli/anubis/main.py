@@ -43,28 +43,6 @@ def dangling(args):
 
 
 @command
-def restart(args):
-    """
-    Restart a submission job.
-
-    Either specify a netid to restart the most recent submission,
-    or specify a netid and a commit hash for a specific 
-
-    acli restart <netid>
-    acli restart <netid> <commit>
-
-    :args: parsed ArgumentParser object
-    """
-    s=get_session(args)
-    body={
-        'netid': args.netid,
-    }
-    if args.commit is not None:
-        body['commit'] = args.commit
-    return s.post(s.url + '/private/restart', json=body)
-
-
-@command
 def student(args):
     """
     upload, or update studnet values
@@ -134,14 +112,9 @@ def main(*argv):
         parsers['main'].print_help()
         exit()
 
-    # if not args.subcommand:
-    #     parsers[args.command].print_help()
-    #     exit()
-
     {
         'ls': ls,
         'dangling': dangling,
-        'restart': restart,
         'stats': stats,
         'student': student,
         'logout': logout,
