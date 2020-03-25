@@ -43,28 +43,6 @@ def dangling(args):
 
 
 @command
-def restart(args):
-    """
-    Restart a submission job.
-
-    Either specify a netid to restart the most recent submission,
-    or specify a netid and a commit hash for a specific 
-
-    acli restart <netid>
-    acli restart <netid> <commit>
-
-    :args: parsed ArgumentParser object
-    """
-    s=get_session(args)
-    body={
-        'netid': args.netid,
-    }
-    if args.commit is not None:
-        body['commit'] = args.commit
-    return s.post(s.url + '/private/restart', json=body)
-
-
-@command
 def student(args):
     """
     upload, or update studnet values
@@ -94,7 +72,23 @@ def stats(args):
     :args: parsed ArgumentParser object
     """
     s=get_session(args)
+    netids=None
     s.headers.clear()
+    if args.file is not None:
+        if args.file.endswith('.json'):
+            netids = json.load(open(args.file, 'r'))
+        else:
+            netids = [
+                l.strip()
+                for l in open(args.file, 'r').readlines()
+            ]
+    if netids is not None:
+        return s.get(
+            s.url + os.path.join('/private/stats/', args.assignment),
+            params={
+                'netids': json.dumps(netids)
+            }
+        )
     if args.netid is None:
         return s.get(s.url + os.path.join('/private/stats/', args.assignment))
     return s.get(s.url + os.path.join('/private/stats/', args.assignment, args.netid))
@@ -134,14 +128,9 @@ def main(*argv):
         parsers['main'].print_help()
         exit()
 
-    # if not args.subcommand:
-    #     parsers[args.command].print_help()
-    #     exit()
-
     {
         'ls': ls,
         'dangling': dangling,
-        'restart': restart,
         'stats': stats,
         'student': student,
         'logout': logout,

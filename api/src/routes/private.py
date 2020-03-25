@@ -1,8 +1,8 @@
 from flask import request, redirect, url_for, flash, render_template, Blueprint, Response
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import desc
-from json import dumps
+from json import dumps, loads
 from datetime import datetime
+from sqlalchemy import desc
 from pytz import timezone
 import dateutil.parser
 
@@ -110,13 +110,6 @@ def handle_report_panic():
         netid=submission.netid,
     )
 
-    # # Notify Student (without logs)
-    # send_noreply_email(
-    #     msg,
-    #     'OS3224 - Anubis Autograder Critical Error', # email subject
-    #     submission.netid + '@nyu.edu',   # recipient
-    # )
-
     # Notify Admins (with logs)
     send_noreply_email(
         msg + req['error'],
@@ -192,12 +185,6 @@ def handle_report_error():
         netid=submission.netid,
     )
 
-    # # Notify Student
-    # send_noreply_email(
-    #     msg,
-    #     'OS3224 - Anubis Autograder Error', # email subject
-    #     submission.netid + '@nyu.edu',   # recipient
-    # )
     return jsonify({'success':True})
 
 
@@ -278,12 +265,6 @@ def handle_report():
         assignment=submission.assignment.name,
         netid=submission.netid,
     )
-
-    # send_noreply_email(
-    #     msg,
-    #     'OS3224 - Anubis Autograder',
-    #     submission.netid + '@nyu.edu'
-    # )
 
     return jsonify({
         'success': True
@@ -516,20 +497,32 @@ def stats_for(studentid, assignmentid):
     return best.id if best is not None else None
 
 
+@cache.cached(timeout=30)
+def get_students():
+    return [s.json for s in Student.query.all()]
+
 @private.route('/stats/<assignment_name>')
 @private.route('/stats/<assignment_name>/<netid>')
 @log_event('cli', lambda: 'stats')
+@cache.memoize(timeout=5, unless=lambda: request.args.get('netids', None) is not None)
 def stats(assignment_name, netid=None):
-    students = list(
-        Student.query.all()
-    ) if netid is None else [
-        Student.query.filter_by(
-            netid=netid
-        ).first()
-    ]
+    netids = request.args.get('netids', None)
+
+    if netids is not None:
+        netids = loads(netids)
+    elif netid is not None:
+        netids = [netid]
+    else:
+        netids = list(map(lambda x: x['netid'], get_students()))
+
+
+    students = get_students()
+    students = filter(
+        lambda x: x['netid'] in netids,
+        students
+    )
 
     bests = {}
-    eastern = timezone('US/Eastern')
 
     assignment = Assignment.query.filter_by(name=assignment_name).first()
     if assignment is None:
@@ -539,15 +532,11 @@ def stats(assignment_name, netid=None):
         })
 
     for student in students:
-        if student is None:
-            return jsonify({
-                "success": False,
-                "erorr":"student does not exist",
-            })
-        submissionid = stats_for(student.id, assignment.id)
+        submissionid = stats_for(student['id'], assignment.id)
+        netid = student['netid']
         if submissionid is None:
             # no submission
-            bests[student.netid] = None
+            bests[netid] = None
         else:
             submission = Submissions.query.filter_by(
                 id=submissionid
@@ -556,7 +545,7 @@ def stats(assignment_name, netid=None):
             best_count = sum(map(lambda x: 1 if x.passed else 0, submission.reports))
             late = 'past due' if assignment.due_date < submission.timestamp else False
             late = 'past grace' if assignment.grace_date < submission.timestamp else late
-            bests[student.netid] = {
+            bests[netid] = {
                 'submission': submission.json,
                 'builds': build,
                 'reports': [rep.json for rep in submission.reports],

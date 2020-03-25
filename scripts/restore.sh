@@ -37,7 +37,7 @@ restorees() {
 restoredb() {
     gzip -d db.sql.gz
     docker-compose exec -T db mysql -u root --password=password os < db.sql
-    rm -rf db.sql
+    gzip db.sql
 }
 
 
