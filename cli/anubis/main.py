@@ -72,7 +72,23 @@ def stats(args):
     :args: parsed ArgumentParser object
     """
     s=get_session(args)
+    netids=None
     s.headers.clear()
+    if args.file is not None:
+        if args.file.endswith('.json'):
+            netids = json.load(open(args.file, 'r'))
+        else:
+            netids = [
+                l.strip()
+                for l in open(args.file, 'r').readlines()
+            ]
+    if netids is not None:
+        return s.get(
+            s.url + os.path.join('/private/stats/', args.assignment),
+            params={
+                'netids': json.dumps(netids)
+            }
+        )
     if args.netid is None:
         return s.get(s.url + os.path.join('/private/stats/', args.assignment))
     return s.get(s.url + os.path.join('/private/stats/', args.assignment, args.netid))

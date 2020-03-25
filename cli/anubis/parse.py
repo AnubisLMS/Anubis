@@ -66,6 +66,7 @@ def add_stats_parser(subparsers):
 
     stats_parser.add_argument('assignment', help='name of assignment')
     stats_parser.add_argument('netid', nargs='?', default=None, help='netid to view')
+    stats_parser.add_argument('--file', '-f', dest='file', default=None, help='.txt or .json file containing netids')
 
     return stats_parser
 
