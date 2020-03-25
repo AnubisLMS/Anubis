@@ -22,6 +22,25 @@ The only thing you will need to have installed on the server is the latest versi
 - A trick for installing docker very easily on any system is to run this: `curl https://get.docker.com/ | sh`.
 - If you are deploying on ubuntu (or any debian distro for that matter), you will want to `sudo pip3 install docker-compose` instead of apt installing it. The debian package for docker-compose is way too out of date to work.
 
+Assuming you are on a debian distro (ubuntu-server or some such), you can run these commands to get up and running.
+You will need to restart for some of the docker stuff to take effect.
+
+```shell script
+# Install docker and docker-compose
+curl https://get.docker.com/ | sh
+sudo pip3 install docker-compose
+
+# Enable docker on reboot, and start docker engine
+sudo systemctl enable docker
+sudo systemctl start docker
+
+# Add current user to the docker group
+sudo usermod -aG docker ${USER}
+
+# Get jq installed
+sudo apt update && sudo apt upgrade && sudo apt install -y jq 
+```
+
 ## Configuration
 
 Most of the configuration for deploying Anubis is made to be done through the environment variables. My 
