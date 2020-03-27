@@ -31,3 +31,14 @@ docker run \
        alpine \
        tar czf /backup/${BASE}/es.tar.gz \
        /usr/share/elasticsearch/data
+
+if docker-compose ps | grep bomblab-request | grep Up &> /dev/null; then
+    docker run \
+           --rm \
+           --volumes-from anubis_bomblab-request_1 \
+           -w /opt/app \
+           -v $(pwd):/backup \
+           alpine \
+           tar czf /backup/${BASE}/bomb.tar.gz \
+           DATA
+fi

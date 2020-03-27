@@ -40,8 +40,20 @@ restoredb() {
     gzip db.sql
 }
 
+restorebomb() {
+    if docker-compose ps | grep bomblab-request | grep Up &> /dev/null; then
+        docker run \
+               --rm \
+               --volumes-from anubis_bomblab-request_1 \
+               -v $(pwd):/backup \
+               -w /opt/app \
+               alpine \
+               tar xzf /backup/bomb.tar.gz
+    fi
+}
 
 cd ${LOC}
 
 restorees
 restoredb
+restorebomb

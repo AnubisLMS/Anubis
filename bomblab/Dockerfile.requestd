@@ -10,8 +10,9 @@ RUN apt update \
   gunicorn \
   python-geoip-geolite2 \
   python-geoip-python3 \
-  elasticsearch
+  elasticsearch \
+  pymysql
 
 COPY . .
 
-CMD gunicorn -b 0.0.0.0:443 -w 20 bomblab-requestd:app
+CMD gunicorn -b 0.0.0.0:5000 -w 8 bomblab-requestd:app

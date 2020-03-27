@@ -198,10 +198,7 @@ services:
       - "DOMAIN=${BOMBLAB_DOMAIN}"
       - "MAIN_DOMAIN=${DOMAIN}"
     volumes:
-      - './bomblab/bombs:/opt/app/bombs'
-      - './bomblab/bomblab-scoreboard.html:/opt/app/bomblab-scoreboard.html'
-      - './bomblab/log.txt:/opt/app/log.txt'
-      - './bomblab/scores.txt:/opt/app/scores.txt'
+      - 'bomb_data:/opt/app/DATA'
     networks:
       - traefik-proxy
 
@@ -211,10 +208,7 @@ services:
       dockerfile: Dockerfile.requestd
     restart: 'always'
     volumes:
-      - './bomblab/bombs:/opt/app/bombs'
-      - './bomblab/log/requestd.log:/opt/app/requestd.log'
-      - './bomblab/bomblab-scoreboard.html:/opt/app/scoreboard.html'
-      - './bomblab/netids.json:/opt/app/netids.json'
+      - 'bomb_data:/opt/app/DATA'
     labels:
       - "traefik.http.middlewares.redirect.redirectregex.regex=^http://(.*)"
       - "traefik.http.middlewares.redirect.redirectregex.replacement=https://$$1"
@@ -231,7 +225,7 @@ services:
       - "traefik.http.routers.request-router.tls.certresolver=tls"
       - "traefik.http.routers.request-router.middlewares=request-redir@docker"
 
-      - "traefik.http.services.request-router.loadbalancer.server.port=443"
+      - "traefik.http.services.request-router.loadbalancer.server.port=5000"
     environment:
       - "DOMAIN=${BOMBLAB_DOMAIN}"
       - "MAIN_DOMAIN=${DOMAIN}"
@@ -243,7 +237,7 @@ services:
       context: ./bomblab
       dockerfile: Dockerfile.resultd
     volumes:
-      - './bomblab/log/resultd.log:/opt/app/resultd.log'
+      - 'bomb_data:/opt/app/DATA'
     environment:
       - "DOMAIN=${BOMBLAB_DOMAIN}"
       - "MAIN_DOMAIN=${DOMAIN}"
@@ -254,7 +248,7 @@ services:
       - "traefik.http.routers.result-router-http.rule=Host(`result.${BOMBLAB_DOMAIN}`)"
       - "traefik.http.routers.result-router-http.entrypoints=http"
 
-      - "traefik.http.services.result-router.loadbalancer.server.port=80"
+      - "traefik.http.services.result-router.loadbalancer.server.port=5000"
     networks:
       - traefik-proxy
 
@@ -262,12 +256,7 @@ services:
     build: ./bomblab/bombs
     restart: 'always'
     volumes:
-      - './bomblab/bombs:/opt/app/bombs:ro'
-      - './bomblab/bomblab-scoreboard.html:/opt/app/bomblab-scoreboard.html:ro'
-      - './bomblab/log.txt:/opt/app/log.txt:ro'
-      - './bomblab/log-status.txt:/opt/app/log-status.txt:ro'
-      - './bomblab/scores.txt:/opt/app/scores.txt:ro'
-      - './bomblab/log:/opt/app/log:ro'
+      - 'bomb_data:/opt/app/DATA'
     labels:
       - "traefik.enable=true"
 
@@ -302,4 +291,4 @@ volumes:
   redis_data:
   db_data:
   el_data:
-  
+  bomb_data:

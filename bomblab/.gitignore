@@ -11,3 +11,5 @@ requestd.log
 .mysql
 *.log
 log
+
+bomb*.tar
