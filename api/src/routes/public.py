@@ -25,7 +25,7 @@ def handle_memes():
     return redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
 
 @public.route('/regrade/<commit>/<netid>')
-@log_event('regrade-request', lambda: 'submission regrade request')
+@log_event('regrade-request', lambda: 'submission regrade request ' + request.path)
 def handle_regrade(commit=None, netid=None):
     """
     This route will get hit whenever someone clicks the regrade button on a
@@ -76,7 +76,7 @@ def handle_regrade(commit=None, netid=None):
 
 
 @public.route('/submissions/<commit>/<netid>')
-@log_event('submission-request', lambda: 'specifc submission requests')
+@log_event('submission-request', lambda: 'specifc submission request ' + request.path)
 @cache.memoize(timeout=2)
 def handle_submission(commit=None, netid=None):
     if commit is None or netid is None:
@@ -97,6 +97,7 @@ def handle_submission(commit=None, netid=None):
             'success': False,
             'error': 'invalid commit hash or netid'
         })
+
     return jsonify({
         'data': {
             'submission': submission.json,
