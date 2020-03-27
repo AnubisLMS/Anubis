@@ -5,6 +5,7 @@ from functools import wraps
 from flask import request, Response
 from werkzeug import exceptions
 import traceback
+import pymysql.cursors
 
 
 es = Elasticsearch(['http://elasticsearch:9200'])
@@ -99,3 +100,29 @@ def log_event(log_type, message_func, onlyif=None):
         return wrapper
     return decorator
 
+
+
+def get_netids():
+    """
+    Gets all distinct netid's from the database. It does
+    rely on the database student data to be up to date. Use
+    the anubis cli student command for checking, and updating
+    student data.
+    """
+    connection = pymysql.connect(
+        host='db',
+        user='root',
+        password='password',
+        db='os',
+        charset='utf8mb4',
+    )
+
+    with connection.cursor() as cursor:
+        # Create a new record
+        sql = "select distinct netid from student;"
+        cursor.execute(sql)
+        data = cursor.fetchall()
+
+    connection.close()
+
+    return list(map(lambda x: x[0], data))

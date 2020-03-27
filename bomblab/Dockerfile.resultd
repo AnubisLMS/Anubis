@@ -9,4 +9,4 @@ RUN pip3 install flask flask-mysql pymysql gunicorn \
 
 COPY . .
 
-CMD gunicorn -b 0.0.0.0:80 -w 10 bomblab-resultd:app
+CMD gunicorn -b 0.0.0.0:5000 -w 10 bomblab-resultd:app

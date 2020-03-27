@@ -107,7 +107,7 @@ $BOMBSRC = "./src";    # Directory containing bomb source files
 
 # Class scoreboard web page and score file for update script
 $SCOREFILE = "./scores.txt";
-$SCOREBOARDPAGE = "./bomblab-scoreboard.html";
+$SCOREBOARDPAGE = "./DATA/bomblab-scoreboard.html";
 
 # If true, redirect output to logfile instead of stdout.
 $QUIET = 1;                       

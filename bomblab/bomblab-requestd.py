@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
 from flask import Flask, Response, request, render_template, send_from_directory, send_file
+from os import system, makedirs
 from datetime import datetime
 from makebomb import makebomb
 from random import randint
 from os.path import isdir
-from os import system
+import pymysql.cursors
 import logging
 import string
 import json
@@ -18,18 +19,19 @@ USERNAME_CHARSET = string.ascii_letters + string.digits
 app = Flask(__name__)
 utils.add_global_error_handler(app)
 
+makedirs('/opt/app/DATA/bombs', exist_ok=True)
+
 """
 This will forward all the lovely flask logging to the requestd.log file.
 That file will be mounted back to ./log/requestd.log
 """
-logging.basicConfig(filename='requestd.log', level=logging.DEBUG)
+logging.basicConfig(filename='/opt/app/DATA/requestd.log', level=logging.DEBUG)
 
 """
 Someone figured out that we weren't checking netids, so we added a check
 to make sure people are putting in valid netids.
 """
-netids = json.load(open('./netids.json'))
-
+netids = utils.get_netids()
 
 def validate(netid):
     return netid in netids
@@ -40,7 +42,7 @@ def gen_bomb_num():
     which is good enough for me
     """
     bombnum = randint(0, 0xffffff)
-    return bombnum if not isdir('bombs/bomb{num}'.format(num=bombnum)) else gen_bomb_num()
+    return bombnum if not isdir('DATA/bombs/bomb{num}'.format(num=bombnum)) else gen_bomb_num()
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -93,14 +95,14 @@ def index():
         users in a tarball file.
         """
         assert system(
-            f'cd bombs; tar cf - bomb{bombnum}/README bomb{bombnum}/bomb.c bomb{bombnum}/bomb > bomb{bombnum}.tar'
+            f'cd DATA/bombs; tar cf - bomb{bombnum}/README bomb{bombnum}/bomb.c bomb{bombnum}/bomb > bomb{bombnum}.tar'
         ) == 0
 
         """
         Since this is a tarball we are returning and not a plaintext html file we need to set some
         extra headers to let the users browser know they need to handle it differently.
         """
-        with open(f'bombs/bomb{bombnum}.tar', 'rb') as f:
+        with open(f'DATA/bombs/bomb{bombnum}.tar', 'rb') as f:
             resp = Response(f.read())
             resp.headers['Content-Type'] = 'application/x-tar'
             resp.headers['Content-Disposition'] = f'file; filename=bomb{bombnum}.tar'
@@ -110,7 +112,7 @@ def index():
         """
         Clean up the tarball, as we don't need it anymore
         """
-        system(f'rm bombs/bomb{bombnum}.tar')
+        system(f'rm DATA/bombs/bomb{bombnum}.tar')
 
         """
         Log the successful event
@@ -129,12 +131,12 @@ def index():
 @app.route('/scoreboard')
 @utils.log_event('bomblab', lambda: 'scoreboard requested', lambda: True)
 def scoreboard():
-    return send_file('scoreboard.html')
+    return send_file('/opt/app/DATA/bomblab-scoreboard.html')
 
 
 if __name__ == '__main__':
     app.run(
         '0.0.0.0',
-        5000,
+        443,
         debug=True,
     )

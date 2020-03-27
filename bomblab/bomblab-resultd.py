@@ -14,7 +14,7 @@ class Config:
     MYSQL_DATABASE_DB='bomblab'
 
 app = Flask(__name__)
-logging.basicConfig(filename='resultd.log', level=logging.DEBUG)
+logging.basicConfig(filename='/opt/app/DATA/resultd.log', level=logging.DEBUG)
 
 app.config.from_object(Config())
 

@@ -82,7 +82,6 @@ deploy: check build db restart
 
 .PHONY: bomblab
 bomblab:
-	./bomblab/check.sh
 	docker-compose -f ./docker-compose.yml up \
 		-d --force-recreate \
 		$(BOMBLAB_SERVICES)

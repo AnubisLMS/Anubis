@@ -39,7 +39,7 @@ def makebomb(bombnum, username, app):
 
     phases = get_phases() # this will return something like "-p abacac"
     userpass = get_userpass() # gernate random password for the api to verify reported events
-    bombdir = 'bombs/bomb{}'.format(bombnum)
+    bombdir = 'DATA/bombs/bomb{}'.format(bombnum)
     makedirs(bombdir)
 
     if system(f'cp -r ./src /tmp/src{bombnum}; cd /tmp/src{bombnum}; make -s cleanall') != 0:
