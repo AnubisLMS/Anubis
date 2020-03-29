@@ -9,7 +9,7 @@ import dateutil.parser
 from ..app import db, cache
 from ..config import Config
 from ..models import Submissions, Reports, Student, Assignment, Errors
-from ..utils import enqueue_webhook_job, log_event, send_noreply_email, esindex, jsonify, reset_submission
+from ..utils import enqueue_webhook_job, log_event, send_noreply_email, esindex, json, reset_submission, regrade_submission
 
 from .messages import err_msg, crit_err_msg, success_msg
 
@@ -56,6 +56,7 @@ def index():
 
 @private.route('/report-panic', methods=['POST'])
 @log_event('panic-report', lambda: 'panic was report from worker ' + dumps(request.json))
+@json
 def handle_report_panic():
     """
     This route will only be hit when there is a panic reported from a worker.
@@ -80,7 +81,9 @@ def handle_report_panic():
         db.session.add(submission)
         db.session.commit()
     except IntegrityError:
-        print('ERROR unable to mark submission as processed, continuing to report the panic - {}'.format(submission.id))
+        print('ERROR unable to mark submission as processed, continuing to report the panic - {}'.format(
+            submission.id
+        ))
         db.session.rollback()
 
 
@@ -117,13 +120,23 @@ def handle_report_panic():
         Config.ADMINS,   # recipient
     )
 
+    esindex(
+        index='submission',
+        processed=1,
+        error=2,
+        netid=submission.netid,
+        commit=submission.commit,
+        assignment=submission.assignment.name,
+        report=str(req['error']),
+        passed=0
+    )
 
-    return jsonify({'success':True})
-
+    return {'success':True}
 
 
 @private.route('/report-error', methods=['POST'])
 @log_event('error-report', lambda: 'error was report from worker ' + dumps(request.json))
+@json
 def handle_report_error():
     """
     If at any point, a worker in the rq cluster encounters an error
@@ -165,6 +178,17 @@ def handle_report_error():
         error=req['error'],
     )
 
+    esindex(
+        index='submission',
+        processed=1,
+        error=1,
+        netid=submission.netid,
+        commit=submission.commit,
+        assignment=submission.assignment.name,
+        report=str(req['error']),
+        passed=0
+    )
+
     e=Errors(
         message=msg,
         submission=submission,
@@ -176,20 +200,14 @@ def handle_report_error():
     except IntegrityError:
         db.session.rollback()
 
-    esindex(
-        'email',
-        type='error',
-        msg=msg,
-        submission=submission.id,
-        assignment=submission.assignment.name,
-        netid=submission.netid,
-    )
-
-    return jsonify({'success':True})
+    return {
+        'success': True
+    }
 
 
 @private.route('/report', methods=['POST'])
 @log_event('report', lambda: 'report from worker submitted for {}'.format(request.json['netid']))
+@json
 def handle_report():
     """
     TODO redocument and reformat this
@@ -242,10 +260,10 @@ def handle_report():
     except IntegrityError as e:
         db.session.rollback()
         print('ERROR unable to process report for {}'.format(report['netid']))
-        return jsonify({
+        return {
             'success': False,
             'errors': [ 'unable to process report' ]
-        })
+        }
 
     build = submission.builds[0]
     msg=success_msg.format(
@@ -258,21 +276,24 @@ def handle_report():
     )
 
     esindex(
-        'email',
-        type='submission',
-        msg=msg,
-        submission=submission.id,
-        assignment=submission.assignment.name,
+        index='submission',
+        processed=1,
+        error=0,
         netid=submission.netid,
+        commit=submission.commit,
+        assignment=submission.assignment.name,
+        report='\n\n'.join(str(r) for r in reports),
+        passed=sum(1 if r.passed else 0 for r in reports)
     )
 
-    return jsonify({
+    return {
         'success': True
-    })
+    }
 
 
 @private.route('/ls')
 @log_event('cli', lambda: 'ls')
+@json
 def ls():
     """
     This route should hand back a json list of all submissions that are marked as
@@ -285,11 +306,12 @@ def ls():
         Submissions.processed==False,
     ).all()
 
-    return jsonify([a.json for a in active])
+    return [a.json for a in active]
 
 
 @private.route('/dangling')
 @log_event('cli', lambda: 'dangling')
+@json
 def dangling():
     """
     This route should hand back a json list of all submissions that are dangling.
@@ -302,18 +324,19 @@ def dangling():
     ).all()
     dangling = [a.json for a in dangling]
 
-    return jsonify({
+    return {
         "success": True,
         "data": {
             "dangling": dangling,
             "count": len(dangling)
         }
-    })
+    }
 
 
-@private.route('/restart', methods=['POST'])
-@log_event('cli', lambda: 'restart')
-def restart():
+@private.route('/regrade/<assignment_name>')
+@log_event('cli', lambda: 'regrade')
+@json
+def regrade_all(assignment_name):
     """
     This route is used to restart / re-enqueue jobs.
 
@@ -328,44 +351,40 @@ def restart():
       commit
     }
     """
-    body = request.json
-    netid = body['netid']
+    assignment = Assignment.query.filter_by(
+        name=assignment_name
+    ).first()
 
-    student = Student.query.filter_by(netid=netid).first()
-    if student is None:
-        return jsonify({
+    if assignment is None:
+        return {
             'success': False,
-            'errors': ['Student does not exist']
+            'error': ['cant find assignment']
+        }
+
+    submission = Submissions.query.filter_by(
+        assignment=assignment
+    ).all()
+
+    response = []
+
+    for s in submission:
+        res = regrade_submission(s)
+        response.append({
+            'submission': s.id,
+            'commit': s.commit,
+            'netid': s.netid,
+            'success': res['success'],
         })
 
-    if 'commit' in body:
-        # re-enqueue specific submission
-
-        submission = Submissions.query.filter_by(
-            studentid=student.id,
-            commit=body['commit'],
-        ).first()
-    else:
-        # re-enqueue last submission
-
-        submission = Submissions.query.filter_by(
-            studentid=student.id,
-        ).order_by(desc(Submissions.timestamp)).first()
-
-    if not reset_submission(submission):
-        return jsonify({
-            'success': False
-        })
-
-    enqueue_webhook_job(submission.id)
-
-    return jsonify({
-        'success': True
-    })
+    return {
+        'success': True,
+        'data': response
+    }
 
 
 @private.route('/student', methods=['GET', 'POST'])
 @log_event('cli', lambda: 'student')
+@json
 def handle_student():
     """
     [{netid, github_username, first_name, last_name, email}]
@@ -388,25 +407,30 @@ def handle_student():
                 db.session.commit()
             except IntegrityError as e:
                 print('integ err')
-                return jsonify({'success': False, 'errors': ['integ error']})
-    return jsonify({
+                return {
+                    'success': False,
+                    'errors': ['integ error']
+                }
+    return {
         'success': True,
         'data': list(map(
             lambda x: x.json,
             Student.query.all()
         )),
         'dangling': fix_dangling()
-    })
+    }
 
 
 @private.route('/fix-dangling')
 @log_event('cli', lambda: 'fix-dangling')
+@json
 def fix_dangling_route():
-    return jsonify(fix_dangling())
+    return fix_dangling()
 
 
 @private.route('/assignment', methods=['POST'])
 @log_event('cli', lambda: 'assignment')
+@json
 def handle_assignment():
     """
     body = {
@@ -432,22 +456,22 @@ def handle_assignment():
             db.session.commit()
         except IntegrityError as e:
             db.session.rollback()
-            return jsonify({
+            return {
                 'success': False,
                 'error': ['unable to commit']
-            })
-        return jsonify({
+            }
+        return {
             'success': True,
             'msg': 'assignment created',
             'data': a.json
-        })
+        }
     elif action == 'modify':
         a = Assignment.query.filter_by(name=data['name']).first()
         if a is None:
-            return jsonify({
+            return {
                 'success': False,
                 'error': ['assignment does not exist']
-            })
+            }
 
         a.due_date=dateutil.parser.parse(data['due_date'], ignoretz=False),
         a.grace_date=dateutil.parser.parse(data['grace_date'], ignoretz=False)
@@ -456,26 +480,26 @@ def handle_assignment():
             db.session.commit()
         except IntegrityError as e:
             db.session.rollback()
-            return jsonify({
+            return {
                 'success': False,
                 'error': ['unable to delete']
-            })
+            }
 
-        return jsonify({
+        return {
             'success': True,
             'msg': 'Assignment updated',
             'data': a.json,
-        })
+        }
     elif action == 'ls':
         assignments = Assignment.query.all()
-        return jsonify({
+        return {
             'success': True,
             'data': list(map(lambda x: x.json, assignments))
-        })
-    return jsonify({
+        }
+    return {
         'success': False,
         'error': ['invalid action']
-    })
+    }
 
 
 @cache.memoize(timeout=30)
@@ -505,6 +529,7 @@ def get_students():
 @private.route('/stats/<assignment_name>/<netid>')
 @log_event('cli', lambda: 'stats')
 @cache.memoize(timeout=5, unless=lambda: request.args.get('netids', None) is not None)
+@json
 def stats(assignment_name, netid=None):
     netids = request.args.get('netids', None)
 
@@ -526,10 +551,10 @@ def stats(assignment_name, netid=None):
 
     assignment = Assignment.query.filter_by(name=assignment_name).first()
     if assignment is None:
-        return jsonify({
+        return {
             'success': False,
             'error': ['assignment does not exist']
-        })
+        }
 
     for student in students:
         submissionid = stats_for(student['id'], assignment.id)
@@ -553,7 +578,7 @@ def stats(assignment_name, netid=None):
                 'repo_url': submission.repo,
                 'late': late
             }
-    return jsonify({
+    return {
         "success": True,
         "data": bests
-    })
+    }

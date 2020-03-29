@@ -160,6 +160,24 @@ def jsonify(data):
     res.headers['Access-Control-Allow-Origin'] = 'https://nyu.cool' if not environ.get('DEBUG', False) else 'https://localhost'
     return res
 
+def json(func):
+    """
+    Wrap a route so that it always converts data
+    response to proper json.
+
+    @app.route('/')
+    @json
+    def test():
+        return {
+            'success': True
+        }
+    """
+    @wraps(func)
+    def json_wrap(*args, **kwargs):
+        data = func(*args, **kwargs)
+        return jsonify(data)
+    return json_wrap
+
 
 def add_global_error_handler(app):
     @app.errorhandler(Exception)
@@ -176,6 +194,32 @@ def add_global_error_handler(app):
             return '', 404
         return 'err'
 
+
+def regrade_submission(submission):
+    """
+    Regrade a submission
+
+    :param submission: Submissions
+    :return: dict response
+    """
+
+    if not submission.processed:
+        return {
+            'success': False,
+            'error': 'submission currently being processed'
+        }
+
+    if not reset_submission(submission):
+        return {
+            'success': False,
+            'error': 'error regrading'
+        }
+
+    enqueue_webhook_job(submission.id)
+
+    return {
+        'success': True
+    }
 
 def reset_submission(submission):
     """

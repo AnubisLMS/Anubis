@@ -7,7 +7,7 @@ from datetime import datetime
 from ..config import Config
 from ..app import db, cache
 from ..models import Submissions, Student, Assignment
-from ..utils import enqueue_webhook_job, log_event, get_request_ip, esindex, jsonify, reset_submission
+from ..utils import enqueue_webhook_job, log_event, get_request_ip, esindex, regrade_submission, json
 
 public = Blueprint('public', __name__, url_prefix='/public')
 
@@ -26,6 +26,7 @@ def handle_memes():
 
 @public.route('/regrade/<commit>/<netid>')
 @log_event('regrade-request', lambda: 'submission regrade request ' + request.path)
+@json
 def handle_regrade(commit=None, netid=None):
     """
     This route will get hit whenever someone clicks the regrade button on a
@@ -33,17 +34,17 @@ def handle_regrade(commit=None, netid=None):
     netid, then reset the submission and re-enqueue the submission job.
     """
     if commit is None or netid is None:
-        return jsonify({
+        return {
             'success': False,
             'error': 'incomplete request',
-        })
+        }
 
     student = Student.query.filter_by(netid=netid).first()
     if student is None:
-        return jsonify({
+        return {
             'success': False,
             'errors': 'invalid commit hash or netid'
-        })
+        }
 
     submission = Submissions.query.filter_by(
         studentid=student.id,
@@ -51,54 +52,39 @@ def handle_regrade(commit=None, netid=None):
     ).first()
 
     if submission is None:
-        return jsonify({
+        return {
             'success': False,
             'error': 'invalid commit hash or netid'
-        })
+        }
 
-    if not submission.processed:
-        return jsonify({
-            'success': False,
-            'error': 'submission currently being processed'
-        })
-
-    if not reset_submission(submission):
-        return jsonify({
-            'success': False,
-            'error': 'error regrading'
-        })
-
-    enqueue_webhook_job(submission.id)
-
-    return jsonify({
-        'success': True
-    })
+    return regrade_submission(submission)
 
 
 @public.route('/submissions/<commit>/<netid>')
 @log_event('submission-request', lambda: 'specifc submission request ' + request.path)
 @cache.memoize(timeout=2)
+@json
 def handle_submission(commit=None, netid=None):
     if commit is None or netid is None:
-        return jsonify({
+        return {
             'success': False,
             'error': 'missing commit or netid',
-        })
+        }
     submission = Submissions.query.filter_by(
         commit=commit
     ).first()
     if submission is None:
-        return jsonify({
+        return {
             'success': False,
             'error': 'invalid commit hash or netid',
-        })
+        }
     if submission.netid != netid:
-        return jsonify({
+        return {
             'success': False,
             'error': 'invalid commit hash or netid'
-        })
+        }
 
-    return jsonify({
+    return {
         'data': {
             'submission': submission.json,
             'reports': [r.json for r in submission.reports],
@@ -107,11 +93,12 @@ def handle_submission(commit=None, netid=None):
             'errors': submission.errors[0].message if len(submission.errors) > 0 else False,
         },
         'success': True
-    })
+    }
 
 # dont think we need GET here
 @public.route('/webhook', methods=['POST'])
 @log_event('job-request', webhook_log_msg)
+@json
 def webhook():
     """
     This route should be hit by the github when a push happens.
@@ -160,8 +147,14 @@ def webhook():
         if student is not None:
             submission.studentid=student.id
             esindex(
-                'submission',
-                submission=submission.json,
+                index='submission',
+                processed=0,
+                error=-1,
+                passed=-1,
+                netid=submission.netid,
+                commit=submission.commit,
+                assignment=submission.assignment.name,
+                report=submission.url,
             )
         else:
             esindex(
