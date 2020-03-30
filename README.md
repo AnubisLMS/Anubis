@@ -1,41 +1,22 @@
 # Anubis
 
-## Deploy
-You should just need to configure a few environment vars to get this up and running.
-The easiest way to store these would be a `.env` file.
+Anubis is a cluster of services that work together to automatically test and grade OS3224 
+assignment submissions. 
 
-- ACME_EMAIL - email for let encrypt cert
-- MYSQL_ROOT_PASSWORD - root password for database
-- AUTH - http basic auth for traefik and private api
-- DOMAIN - dns domain that the server resides on
+![alt img](docs/img/20200324_195235.jpg)
 
-#### Generating AUTH
-To generate the AUTH environment variable you can just use: 
+## Overview
+The basic flow of a submission (from the students prospective) is as follows:
 
-```bash
-docker run -it httpd htpasswd -Bbn '<username>' '<password>' 
-```
+1. A students use github classroom to get a template repo for an assignment.
+2. Students make changes as necessary, then commit and push their changes to their github repo. 
+(triggering a webhook to Anubis)
+3. The student can then go to the Anubis website in their browser and get live updates and feedback 
+of the tests for that assignment.
+4. From the feedback they got from step 3 they should know if their code passes basic tests. If they
+fail the tests, they should go back to step 2.
 
-## Debugging
-This project requires envrionment variables to be deployed. You can store those in
-a `.env` file to keep things simple. Here is an example `.env` file for debugging.
+This is quite simply a large scale CD/CI for OS3224 assignments with some other metrics, and tracking 
+built in. If you are unfamiliar with what CD/CI is, you can read up on it 
+[here](https://en.wikipedia.org/wiki/CI/CD).
 
-*DO NOT USE THIS ENV IN PROD*
-
-```
-ACME_EMAIL=john.doe@email.com
-MYSQL_ROOT_PASSWORD=password
-AUTH='root:$2y$05$2VCT7LSzWh7ULSHtQHHxBeTu89WoE5W995MDXc5XVygYCqI3Rn8am'
-DOMAIN=localhost
-```
-
-This debug environment will let you connect to the api on https://localhost/.
-The creds for all http basic auth is `root` `password`.
-
-
-
-# TODO 
-- Students could potentially forge reports by dropping their own json's at the build phase.
-- Add container timeouts to test cycle containers to prevent stale workers
-- Write assignment tests
-- Restructure assignments to fit cluster workflow

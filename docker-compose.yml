@@ -50,7 +50,7 @@ services:
     ports:
       - "127.0.0.1:3306:3306"
     environment:
-      - "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}"
+      - "MYSQL_ROOT_PASSWORD=password"
       - "MYSQL_DATABASE=os"
     volumes:
       - "db_data:/var/lib/mysql"
@@ -261,7 +261,7 @@ services:
       - "traefik.enable=true"
 
       - "traefik.http.middlewares.bomb-redir.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.bomb-auth.basicauth.users=${BOMB_AUTH}"
+      - "traefik.http.middlewares.bomb-auth.basicauth.users=${AUTH}"
       - "traefik.http.middlewares.bomb-auth.basicauth.removeheader=true"
 
       - "traefik.http.routers.bomb-router-http.rule=Host(`bombs.${BOMBLAB_DOMAIN}`)"
