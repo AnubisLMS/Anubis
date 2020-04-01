@@ -1,150 +1,105 @@
 import React from 'react';
-import Typography from '@material-ui/core/Typography';
-import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import {useSnackbar} from 'notistack';
 import {makeStyles} from "@material-ui/core/styles";
-import {green} from "@material-ui/core/colors";
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from "@material-ui/core/Tooltip";
 
 const useStyles = makeStyles(theme => ({
-  paper: {
-    maxWidth: 936,
-    margin: theme.spacing(2),
-    padding: theme.spacing(2),
-    overflow: 'hidden',
-  },
-  searchBar: {
-    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-  },
-  searchInput: {
-    fontSize: theme.typography.fontSize,
-  },
-  title: {
-    fontSize: 14,
-  },
-  block: {
-    display: 'block',
-  },
-  addUser: {
-    marginRight: theme.spacing(1),
-  },
-  contentWrapper: {
-    margin: '40px 16px',
-  },
-  card: {
-    minWidth: 275,
-  },
-  list: {
+  root: {
     width: '100%',
   },
-  dialog: {
-    margin: theme.spacing(2),
-    padding: theme.spacing(2)
-  },
-  closeButton: {
-    position: 'absolute',
-    right: theme.spacing(1),
-    top: theme.spacing(1),
-    color: theme.palette.grey[500],
-  },
-  progress: {
-    padding: theme.spacing(1)
-  },
-  fabProgress: {
-    color: green[500],
-    position: 'absolute',
-    top: -6,
-    left: -6,
-    zIndex: 1,
-  },
-  buttonProgress: {
-    color: green[500],
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    marginTop: -12,
-    marginLeft: -12,
-  },
-  wrapper: {
-    margin: theme.spacing(1),
-    position: 'relative',
-  },
+  title: {
+    padding: theme.spacing(0.5),
+  }
 }));
 
 export default function Tests({tests, reports}) {
   const classes = useStyles();
-  const {enqueueSnackbar} = useSnackbar();
 
   if (!tests || !reports) {
     return (
       <div/>
     );
-  } else {
-    // for (const r of reports) {
-    //   enqueueSnackbar(
-    //     `${r.testname} ${r.passed ? 'passed' : 'failed'}`,
-    //     {variant: r.passed ? 'success' : 'error', preventDuplicate: true}
-    //   )
-    // }
   }
 
+  const t = tests.split('\n\n');
+  const r = reports.map((elem) => {
+    elem.logs = t.find(stdout => (
+      stdout.trim().startsWith(elem.testname)
+    ));
+    return elem;
+  }).sort((t1, t2) => t1.testname > t2.testname);
 
   return (
-    <Card className={classes.card}>
-      <CardContent>
-        <Typography variant="h5" component="h2">
-          Tests
-        </Typography>
-        <List className={classes.list}>
-          {reports.map(({testname, passed, errors}) => (
-            <ListItem key={testname}>
-              <ListItemIcon>
-                {passed ? (
-                  <Tooltip title={
-                    (JSON.parse(errors).length > 0) ? JSON.parse(errors)[0] : 'passed'
-                  }>
-                    <IconButton>
-                      <CheckIcon color={'primary'}/>
-                    </IconButton>
-                  </Tooltip>
-                ) : (
-                  <Tooltip title={
-                    (JSON.parse(errors).length > 0) ? JSON.parse(errors)[0] : 'failed'
-                  }>
-                    <IconButton>
-                      <CloseIcon color={'secondary'}/>
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </ListItemIcon>
-              <ListItemText primary={testname}/>
-            </ListItem>
-          ))}
-        </List>
-        <Typography variant={'h5'} component={'h2'}>
-          Logs
-        </Typography>
-        {tests ? tests.trim().split('\n').map((line, index) => (
-          <Typography
-            className={classes.pos}
-            // component="pre"
-            variant={"body1"}
-            color={"textSecondary"}
-            width={100}
-            key={`line-${index}`}
+    <div className={classes.root}>
+      {r.map(({testname, passed, errors, logs}) => (
+        <ExpansionPanel key={testname}>
+          <ExpansionPanelSummary
+            expandIcon={<ExpandMoreIcon/>}
+            aria-label="Expand"
+            aria-controls={`${testname}-content`}
+            id={`${testname}-content-id`}
           >
-            {line}
-          </Typography>
-        )) : null}
-      </CardContent>
-    </Card>
+            <IconButton edge={'start'}>
+              {passed || errors ? (
+                <Tooltip title={'Passed'}>
+                  <CheckIcon
+                    color={'primary'}
+                    className={classes.icon}
+                    fontSize={'small'}
+                  />
+                </Tooltip>
+              ) : (
+                <Tooltip title={''}>
+                  <CloseIcon
+                    color={'secondary'}
+                    className={classes.icon}
+                    fontSize={'small'}
+                  />
+                </Tooltip>
+              )}
+            </IconButton>
+            <Typography className={classes.title} variant={'subtitle1'}>
+              {testname}
+            </Typography>
+          </ExpansionPanelSummary>
+          <ExpansionPanelDetails>
+            <div>
+              {logs.split('\n').map((line, index) => (
+                <Typography
+                  key={index}
+                  variant={'body1'}
+                  color={'textSecondary'}
+                  width={100}
+                >
+                  {line}
+                </Typography>
+              ))}
+            </div>
+          </ExpansionPanelDetails>
+        </ExpansionPanel>
+      ))}
+    </div>
+    // <Typography variant={'h5'} component={'h2'}>
+    //   Logs
+    // </Typography>
+    // {tests ? tests.trim().split('\n').map((line, index) => (
+    //   <Typography
+    //     className={classes.pos}
+    //     // component="pre"
+    //     variant={"body1"}
+    //     color={"textSecondary"}
+    //     width={100}
+    //     key={`line-${index}`}
+    //   >
+    //     {line}
+    //   </Typography>
+    // )) : null}
   );
 }
