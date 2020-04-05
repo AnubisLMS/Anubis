@@ -64,4 +64,4 @@ def test(num):
             False
         )
 
-test(3)
+test(6)
