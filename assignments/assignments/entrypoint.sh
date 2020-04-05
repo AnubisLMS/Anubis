@@ -2,6 +2,11 @@
 
 #set -e
 
+export REPO_URL="$1"
+export NETID="$2"
+export ASSIGNMENT_NAME="$3"
+export SUBMISSION_ID="$4"
+
 run_tests() {
     # run all the tests here
     # all the tests should generate report jsons
