@@ -5,7 +5,7 @@ import time
 
 
 def test_lines(lines, expexted):
-    return all(l.startswith(e) for l, e in zip (lines, expexted))
+    return len(lines) == len(expexted) and all(l.startswith(e) for l, e in zip (lines, expexted))
 
 def test(num, cmd):
     try:
@@ -32,20 +32,23 @@ def test(num, cmd):
         stdout, err = qemu.communicate()
         stdout = stdout.decode().split('\n')
         lines = stdout[stdout.index('init: starting sh')+1:]
-        
-        while lines[-1].startswith('$') or len(lines[-1].strip()) == 0:
+
+        while len(lines) > 0 and (lines[-1].startswith('$') or len(lines[-1].strip()) == 0):
             lines.pop()
 
-        if lines[0].startswith('$'):
+        if len(lines) > 0 and lines[0].startswith('$'):
             lines[0] = lines[0].lstrip('$').strip()
-            
+
         for index in range(len(lines)):
             lines[index] = lines[index].strip()
 
         for index in range(len(expected)):
             expected[index] = expected[index].strip()
 
-        if not test_lines(lines, expected):
+        if len(lines) == 0:
+            print('empty response parsed')
+            save_results('test-{}'.format(num), ['Did not recieve any output'], False)
+        elif not test_lines(lines, expected):
             print('your lines:', '\n'.join(lines), sep='\n')
             print('we expected:', '\n'.join(expected), sep='\n')
             save_results('test-{}'.format(num), ['Did not recieve exepected output'], False)

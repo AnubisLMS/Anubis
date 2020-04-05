@@ -47,7 +47,7 @@ export default function Tests({tests, reports}) {
             id={`${testname}-content-id`}
           >
             <IconButton edge={'start'}>
-              {passed || errors ? (
+              {passed ? (
                 <Tooltip title={'Passed'}>
                   <CheckIcon
                     color={'primary'}
