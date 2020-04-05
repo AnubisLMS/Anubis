@@ -25,7 +25,7 @@ def test(num, cmd):
 
         qemu = subprocess.Popen(qemu_cmd + ' < test-{}.in'.format(num), stdout=subprocess.PIPE, shell=True)
         expected = subprocess.check_output(
-            cmd + ' ./submission/{}'.format(filename),
+            cmd.replace('short', './submission/short').replace('long', './submission/long'),
             shell=True
         ).decode().strip().split('\n')
         qemu.wait()
