@@ -3,7 +3,6 @@ import os
 import subprocess
 import time
 import random
-import parse
 
 
 def test_lines(lines, expected):

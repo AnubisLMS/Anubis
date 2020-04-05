@@ -13,6 +13,7 @@ assingment_files = {
     'os3224-assignment-1': ['xv6.img', 'fs.img', 'short', 'long'],
     'os3224-assignment-2': ['guess', 'linkedList'],
     'os3224-assignment-3': ['xv6.img', 'fs.img'],
+    'midterm': ['xv6.img', 'fs.img', 'short', 'long'],
 }
 
 def build(client, repo_url, submission, volume_name):
