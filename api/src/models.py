@@ -29,7 +29,7 @@ class Submissions(db.Model):
     assignmentid = db.Column(db.Integer, db.ForeignKey('assignments.id'), index=True, nullable=False)
     github_username = db.Column(db.String(128), nullable=False)
     repo = db.Column(db.String(128), nullable=False)
-    commit = db.Column(db.String(128))
+    commit = db.Column(db.String(128), unique=True, index=True, nullable=False)
     processed = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime(True), default=datetime.now)
 

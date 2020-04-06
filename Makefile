@@ -107,6 +107,14 @@ backup:
 restore:
 	./scripts/restore.sh
 
+.PHONY: cleandata    # yeet data
+cleandata:
+	docker-compose kill
+	docker-compose rm -f
+	if [ -n "${VOLUMES}" ]; then \
+		docker volume rm $(VOLUMES); \
+	fi
+
 .PHONY: clean        # Clean up volumes, images and data
 clean:
 	docker-compose kill
