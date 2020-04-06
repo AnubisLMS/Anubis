@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc
 from json import dumps
 from datetime import datetime
+import traceback
 
 from ..config import Config
 from ..app import db, cache
@@ -131,16 +132,38 @@ def webhook():
         if not data['repository']['full_name'].startswith('os3224/'):
             return {'success': False, 'error': ['invalid repo']}
 
-        submission=Submissions(
-            assignment=assignment,
-            commit=commit,
-            repo=repo_url,
-            github_username=github_username,
-        )
+        try:
+            submission=Submissions(
+                assignment=assignment,
+                commit=commit,
+                repo=repo_url,
+                github_username=github_username,
+            )
+        except IntegrityError as e:
+            tb = traceback.format_exc()
+            esindex(
+                'error',
+                type='webhook',
+                logs=tb,
+                submission=None,
+                netid=None,
+            )
+            return {'success': False, 'error': ['integrity error']}
 
-        student = Student.query.filter_by(
-            github_username=github_username,
-        ).first()
+        try:
+            student = Student.query.filter_by(
+                github_username=github_username,
+            ).first()
+        except IntegrityError as e:
+            tb = traceback.format_exc()
+            esindex(
+                'error',
+                type='webhook',
+                logs=tb,
+                submission=None,
+                netid=None,
+            )
+            return {'success': False, 'error': ['integrity error']}
 
         if student is not None:
             submission.studentid=student.id
@@ -164,9 +187,15 @@ def webhook():
             db.session.add(submission)
             db.session.commit()
         except IntegrityError as e:
-            # TODO handle integ err
-            print('Unable to create submission', e)
-            return {'success': False}
+            tb = traceback.format_exc()
+            esindex(
+                'error',
+                type='webhook',
+                logs=tb,
+                submission=None,
+                netid=None,
+            )
+            return {'success': False, errors: ['integrity error']}
 
         # if the github username is not found, create a dangling submission
         if submission.studentid:
