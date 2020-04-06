@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 
-export default function SearchSubmissions() {
+export default function SearchSubmissions({clearData}) {
   const classes = useStyles();
   const [commit, setCommit] = useState('');
   const [search, setSearch] = useState(false);
@@ -75,6 +75,7 @@ export default function SearchSubmissions() {
 
   if (search) {
     setTimeout(() => setSearch(false), 0);
+    clearData();
     return (
       <React.Fragment>
         {searchbar}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import {createMuiTheme, ThemeProvider, withStyles} from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -179,6 +179,7 @@ function Copyright() {
 function Paperbase(props) {
   const {classes} = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [data, setData] = useState(null);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -210,13 +211,13 @@ function Paperbase(props) {
                 </nav>
                 <div className={classes.app}>
                   <main className={classes.main}>
-                    <SearchSubmissions/>
+                    <SearchSubmissions clearData={() => setData(null)}/>
                     <Switch>
                       <Route exact path={'/view/:commit'}>
-                        <View/>
+                        <View data={data} setData={setData}/>
                       </Route>
                       <Route exact path={'/view/:commit/:netid'}>
-                        <View/>
+                        <View data={data} setData={setData}/>
                       </Route>
                     </Switch>
                   </main>

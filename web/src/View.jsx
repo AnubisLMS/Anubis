@@ -11,8 +11,7 @@ import Build from './Build';
 import Tests from './Tests';
 
 
-export default function View() {
-  const [data, setData] = useState(null);
+export default function View({data, setData}) {
   const [authOpen, setAuth] = useState(true);
   const [processed, setProcessed] = useState(true);
   const [redirect, setRedirect] = useState('');
@@ -31,7 +30,11 @@ export default function View() {
       const {submission} = res.data.data;
       const {processed} = submission;
       setProcessed(processed);
-      if (processed) clearInterval(timer.current);
+      if (processed) {
+        clearInterval(timer.current);
+        setData(res.data);
+        return;
+      }
     }
     setData(res.data);
   };
@@ -43,6 +46,7 @@ export default function View() {
     }
     api.get(`/submissions/${commit}/${netid}`).then(res => {
       if (res.data && res.data.success) {
+        clearInterval(timer.current);
         timer.current = setInterval(() => (
           api.get(`/submissions/${commit}/${netid}`).then(handler)
         ), 3000);
