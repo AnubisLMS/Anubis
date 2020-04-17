@@ -534,7 +534,7 @@ def get_students():
 @private.route('/stats/<assignment_name>')
 @private.route('/stats/<assignment_name>/<netid>')
 @log_event('cli', lambda: 'stats')
-@cache.memoize(timeout=5, unless=lambda: request.args.get('netids', None) is not None)
+@cache.memoize(timeout=60, unless=lambda: request.args.get('netids', None) is not None)
 @json
 def stats(assignment_name, netid=None):
     netids = request.args.get('netids', None)
@@ -582,6 +582,10 @@ def stats(assignment_name, netid=None):
                 'reports': [rep.json for rep in submission.reports],
                 'total_tests_passed': best_count,
                 'repo_url': submission.repo,
+                'tree': 'https://github.com/{}/tree/{}'.format(
+                    submission.repo[submission.repo.index(':')+1:-len('.git')],
+                    submission.commit
+                ),
                 'late': late
             }
     return {
