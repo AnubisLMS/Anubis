@@ -582,7 +582,10 @@ def stats(assignment_name, netid=None):
                 'reports': [rep.json for rep in submission.reports],
                 'total_tests_passed': best_count,
                 'repo_url': submission.repo,
-                'tree': 'https://github.com/{}/tree/{}'.format(
+                'master': 'https://github.com/{}'.format(
+                    submission.repo[submission.repo.index(':')+1:-len('.git')],
+                ),
+                'commit_tree': 'https://github.com/{}/tree/{}'.format(
                     submission.repo[submission.repo.index(':')+1:-len('.git')],
                     submission.commit
                 ),
