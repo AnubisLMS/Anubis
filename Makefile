@@ -68,7 +68,7 @@ db:
 		sh -c 'mysql -u root --password=password < /docker-entrypoint-initdb.d/init.sql' || true
 
 .PHONY: debug        # Start the cluster in debug mode
-debug: check build db
+debug: check build db sleep3 seed
 	docker-compose up -d $(PERSISTENT_SERVICES)
 	docker-compose up \
 		-d --force-recreate \
@@ -76,6 +76,12 @@ debug: check build db
 		--scale api=1 \
 		$(RESTART_ALWAYS_SERVICES) \
 		$(BOMBLAB_SERVICES)
+
+sleep3:
+	sleep 3
+
+seed:
+	./tests/init.sh
 
 .PHONY: deploy       # Start the cluster in production mode
 deploy: check build db restart
