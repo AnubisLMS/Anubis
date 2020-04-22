@@ -24,7 +24,7 @@ def test(num, cmd):
         stdout = stdout.decode().split('\n')
         lines = stdout[stdout.index('init: starting sh')+1:]
 
-        if any('unexpected trap' in i for i in lines):
+        if any('unexpected trap' in i or 'cpu0: panic' in i for i in lines):
             raise Exception()
 
         while lines[-1].startswith('$') or len(lines[-1].strip()) == 0:
