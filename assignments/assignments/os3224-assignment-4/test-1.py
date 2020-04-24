@@ -60,4 +60,4 @@ def test(num, cmd):
             False
         )
 
-test(1, 'cat README.md')
+test(1, 'cat README.md | cat')
