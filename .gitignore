@@ -6,3 +6,4 @@ dump.sql
 .idea
 os-dump-*.sql
 .backups
+.backups.*
