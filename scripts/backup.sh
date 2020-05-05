@@ -19,7 +19,7 @@ BASE=".backups/${TIMESTAMP}"
 mkdir -p ${BASE}
 
 
-docker-compose exec db \
+docker-compose exec -T db \
                mysqldump \
                -u root \
                --password=password \
@@ -33,7 +33,7 @@ docker run \
        tar czf /backup/${BASE}/es.tar.gz \
        /usr/share/elasticsearch/data
 
-if docker-compose ps | grep bomblab-request | grep Up &> /dev/null; then
+if docker ps | grep bomblab; then
     docker run \
            --rm \
            --volumes-from anubis_bomblab-request_1 \
