@@ -8,6 +8,8 @@
 
 set -ex
 
+export PATH=/usr/local/bin:$PATH
+
 cd $(dirname $(realpath $0))
 cd ..
 
@@ -22,7 +24,6 @@ docker-compose exec db \
                -u root \
                --password=password \
                os | gzip - > ${BASE}/db.sql.gz
-
 
 docker run \
        --rm \
