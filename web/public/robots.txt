@@ -1,3 +1,6 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow: *
+Allow: /
+Allow: /view
+Disallow: /view/*
+Disallow: /404
