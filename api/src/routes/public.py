@@ -1,21 +1,18 @@
-from flask import request, redirect, url_for, flash, render_template, Blueprint, Response
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy import desc
-from json import dumps
-from datetime import datetime
 import traceback
 
-from ..config import Config
+from flask import request, redirect, Blueprint
+from sqlalchemy.exc import IntegrityError
+
 from ..app import db, cache
 from ..models import Submissions, Student, Assignment
-from ..utils import enqueue_webhook_job, log_event, get_request_ip, esindex, regrade_submission, json
+from ..utils import enqueue_webhook_job, log_event, esindex, regrade_submission, json
 
 public = Blueprint('public', __name__, url_prefix='/public')
 
 
 def webhook_log_msg():
     if request.headers.get('Content-Type', None) == 'application/json' and \
-       request.headers.get('X-GitHub-Event', None) == 'push':
+            request.headers.get('X-GitHub-Event', None) == 'push':
         return request.json['pusher']['name']
     return None
 
@@ -24,6 +21,7 @@ def webhook_log_msg():
 @log_event('rick-roll', lambda: 'rick-roll')
 def handle_memes():
     return redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+
 
 @public.route('/regrade/<commit>/<netid>')
 @log_event('regrade-request', lambda: 'submission regrade request ' + request.path)
@@ -96,6 +94,7 @@ def handle_submission(commit=None, netid=None):
         'success': True
     }
 
+
 # dont think we need GET here
 @public.route('/webhook', methods=['POST'])
 @log_event('job-request', webhook_log_msg)
@@ -107,15 +106,14 @@ def webhook():
     """
 
     if request.headers.get('Content-Type', None) == 'application/json' and \
-       request.headers.get('X-GitHub-Event', None) == 'push':
+            request.headers.get('X-GitHub-Event', None) == 'push':
         data = request.json
 
-
         repo_url = data['repository']['ssh_url']
-        github_username=data['pusher']['name']
-        commit=data['after']
-        assignment_name=data['repository']['name'][:-(len(github_username)+1)]
-        assignment=Assignment.query.filter_by(name=assignment_name).first()
+        github_username = data['pusher']['name']
+        commit = data['after']
+        assignment_name = data['repository']['name'][:-(len(github_username) + 1)]
+        assignment = Assignment.query.filter_by(name=assignment_name).first()
 
         if data['before'] == '0000000000000000000000000000000000000000' or data['ref'] != 'refs/heads/master':
             esindex(
@@ -133,7 +131,7 @@ def webhook():
             return {'success': False, 'error': ['invalid repo']}
 
         try:
-            submission=Submissions(
+            submission = Submissions(
                 assignment=assignment,
                 commit=commit,
                 repo=repo_url,
@@ -166,7 +164,7 @@ def webhook():
             return {'success': False, 'error': ['integrity error']}
 
         if student is not None:
-            submission.studentid=student.id
+            submission.studentid = student.id
             esindex(
                 index='submission',
                 processed=0,
@@ -195,7 +193,7 @@ def webhook():
                 submission=None,
                 netid=None,
             )
-            return {'success': False, errors: ['integrity error']}
+            return {'success': False, 'errors': ['integrity error']}
 
         # if the github username is not found, create a dangling submission
         if submission.studentid:

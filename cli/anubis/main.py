@@ -1,21 +1,18 @@
-import requests
-import urllib3
-import getpass
 import json
 import os
 
-from .parse import parse_args
 from .auth import get_session
+from .parse import parse_args
 from .utils import command
 
-
 parsers = None
+
 
 def logout(_):
     """
     Yeet creds
     """
-    home=os.environ.get('HOME', '')
+    home = os.environ.get('HOME', '')
     if os.path.exists(os.path.join(home, '.anubis', 'creds.json')):
         os.remove(os.path.join(home, '.anubis', 'creds.json'))
     print('logged out')
@@ -28,8 +25,9 @@ def ls(args):
 
     :args: parsed ArgumentParser object
     """
-    s=get_session(args)
+    s = get_session(args)
     return s.get(s.url + '/private/ls')
+
 
 @command
 def dangling(args):
@@ -38,7 +36,7 @@ def dangling(args):
 
     :args: parsed ArgumentParser object
     """
-    s=get_session(args)
+    s = get_session(args)
     return s.get(s.url + '/private/dangling')
 
 
@@ -52,7 +50,7 @@ def student(args):
 
     :args: parserd ArugmentParser object
     """
-    s=get_session(args)
+    s = get_session(args)
     if args.filename is None:
         return s.get(s.url + '/private/student')
     return s.post(s.url + '/private/student', json=json.load(open(args.filename)))
@@ -71,8 +69,8 @@ def stats(args):
 
     :args: parsed ArgumentParser object
     """
-    s=get_session(args)
-    netids=None
+    s = get_session(args)
+    netids = None
     s.headers.clear()
     if args.file is not None:
         if args.file.endswith('.json'):
@@ -93,6 +91,7 @@ def stats(args):
         return s.get(s.url + os.path.join('/private/stats/', args.assignment))
     return s.get(s.url + os.path.join('/private/stats/', args.assignment, args.netid))
 
+
 @command
 def assignment(args):
     """
@@ -109,12 +108,12 @@ def assignment(args):
         parsers['assignment'].print_help()
         exit(0)
 
-    s=get_session(args)
+    s = get_session(args)
     return s.post(s.url + '/private/assignment', json={
         'data': {
             'name': args.name if 'name' in args else None,
             'due_date': args.due_date if 'due_date' in args else None,
-            'grace_date':args.grace_date if 'grace_date' in args else None,
+            'grace_date': args.grace_date if 'grace_date' in args else None,
         },
         'action': args.subcommand,
     })

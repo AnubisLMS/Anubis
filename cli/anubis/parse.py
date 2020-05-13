@@ -1,6 +1,8 @@
 import argparse
 import sys
+
 from .manpages import *
+
 
 def parse_args(argv):
     if len(argv) == 0:
@@ -28,7 +30,6 @@ def parse_args(argv):
         'stats': stats_parser,
         'assignment': assignment_parser,
     }
-
 
 
 def add_assignment_parser(subparsers):
@@ -71,7 +72,6 @@ def add_stats_parser(subparsers):
     return stats_parser
 
 
-
 def add_student_parser(subparsers):
     # Student
     student_parser = subparsers.add_parser(
@@ -105,4 +105,3 @@ def add_ls_parser(subparsers):
     ls_parser = subparsers.add_parser('ls', help='list currently running / pending submissions')
     ls_subparser = ls_parser.add_subparsers(dest='subcommand')
     return ls_parser
-

@@ -1,6 +1,4 @@
-import docker
 import requests
-
 
 from .utils import report_panic, PipelineException
 
@@ -16,8 +14,8 @@ def report(client, repo_url, submission, volume_name):
     :volume_name str: name of persistent volume
     """
 
-    netid=submission.netid
-    assignment_name=submission.assignment.name
+    netid = submission.netid
+    assignment_name = submission.assignment.name
 
     name = '{netid}-{commit}-{assignment}-{id}-report'.format(
         netid=submission.netid,
@@ -27,7 +25,7 @@ def report(client, repo_url, submission, volume_name):
     )
 
     try:
-        container=client.containers.run(
+        container = client.containers.run(
             'os3224-report',
             name=name,
             command=['python3', 'main.py', netid, assignment_name, str(submission.id)],
@@ -69,6 +67,5 @@ def report(client, repo_url, submission, volume_name):
         raise report_panic('report timeout\n', submission.id)
 
     finally:
-        container=client.containers.get(name)
+        container = client.containers.get(name)
         container.remove(force=True)
-

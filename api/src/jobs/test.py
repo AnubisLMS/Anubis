@@ -1,11 +1,11 @@
-from sqlalchemy.exc import IntegrityError
 import requests
-import docker
+from sqlalchemy.exc import IntegrityError
 
 from .utils import PipelineException, report_error
-from ..models import Tests
-from ..app import db
 from .. import utils
+from ..app import db
+from ..models import Tests
+
 
 def test(client, repo_url, submission, volume_name):
     """
@@ -24,10 +24,10 @@ def test(client, repo_url, submission, volume_name):
     :volume_name str: name of persistent volume
     """
 
-    netid=submission.netid
-    assignment_name=submission.assignment.name
+    netid = submission.netid
+    assignment_name = submission.assignment.name
 
-    logs=''
+    logs = ''
     name = '{netid}-{commit}-{assignment}-{id}-test'.format(
         netid=submission.netid,
         commit=submission.commit,
@@ -36,7 +36,7 @@ def test(client, repo_url, submission, volume_name):
     )
 
     try:
-        container=client.containers.run(
+        container = client.containers.run(
             'os3224-assignment-{}'.format(assignment_name),
             name=name,
             command=['/entrypoint.sh', repo_url, netid, assignment_name, str(submission.id)],
@@ -84,10 +84,10 @@ def test(client, repo_url, submission, volume_name):
         )
 
     finally:
-        container=client.containers.get(name)
+        container = client.containers.get(name)
         container.remove(force=True)
 
-    t=Tests(
+    t = Tests(
         stdout=logs,
         submission=submission,
     )
@@ -99,6 +99,3 @@ def test(client, repo_url, submission, volume_name):
         raise report_error('error in documenting submission', submission.id)
 
     return t
-
-
-

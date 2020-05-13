@@ -1,5 +1,4 @@
 import requests
-import docker
 
 from .utils import report_error, PipelineException
 from .. import utils
@@ -14,7 +13,7 @@ def clone(client, repo_url, submission, volume_name):
     :volume_name str: name of docker volume
     """
 
-    logs=''
+    logs = ''
     name = '{netid}-{commit}-{assignment}-{id}-clone'.format(
         netid=submission.netid,
         commit=submission.commit,
@@ -23,7 +22,7 @@ def clone(client, repo_url, submission, volume_name):
     )
 
     try:
-        container=client.containers.run(
+        container = client.containers.run(
             'os3224-clone',
             name=name,
             detach=True,
@@ -71,6 +70,5 @@ def clone(client, repo_url, submission, volume_name):
         raise report_error('clone timeout\n', submission.id)
 
     finally:
-        container=client.containers.get(name)
+        container = client.containers.get(name)
         container.remove(force=True)
-

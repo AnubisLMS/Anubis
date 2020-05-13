@@ -1,27 +1,29 @@
-from sqlalchemy.exc import IntegrityError
-from elasticsearch import Elasticsearch
-from email.mime.text import MIMEText
-from flask import request, Response
-from dataclasses import dataclass
-from werkzeug import exceptions
+import traceback
 from datetime import datetime
+from email.mime.text import MIMEText
 from functools import wraps
-from geoip import geolite2
-from smtplib import SMTP
-from redis import Redis
 from json import dumps
 from os import environ
-from rq import Queue
-import traceback
+from smtplib import SMTP
 
-from .jobs import test_repo
+from elasticsearch import Elasticsearch
+from flask import request, Response
+from geoip import geolite2
+from redis import Redis
+from rq import Queue
+from sqlalchemy.exc import IntegrityError
+from werkzeug import exceptions
+
 from .app import db
+from .jobs import test_repo
 
 es = Elasticsearch(['http://elasticsearch:9200'])
 
 """
 We will use rq to enqueue and dequeue jobs.
 """
+
+
 def enqueue(func, *args):
     """
     Enqueues a job on the redis cache
@@ -53,6 +55,7 @@ def get_request_ip():
     This function will search the expected headers
     to find that ip.
     """
+
     def check(header):
         """get header from request else empty string"""
         return request.headers[
@@ -63,13 +66,13 @@ def get_request_ip():
         """check headers based on ordered piority"""
         if n == len(headers):
             return ''
-        return check(headers[n]) or check_(headers, n+1)
+        return check(headers[n]) or check_(headers, n + 1)
 
     return str(check_([
-        'x-forwarded-for', # highest priority
+        'x-forwarded-for',  # highest priority
         'X-Forwarded-For',
         'x-real-ip',
-        'X-Real-Ip',       # lowest priority
+        'X-Real-Ip',  # lowest priority
     ]) or request.remote_addr or 'N/A')
 
 
@@ -88,6 +91,7 @@ def log_event(log_type, message_func):
     :log_type str: log type to noted in event
     :message_func callable: function to return message to be logged
     """
+
     def decorator(function):
         @wraps(function)
         def wrapper(*args, **kwargs):
@@ -102,7 +106,9 @@ def log_event(log_type, message_func):
             })
 
             return function(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -138,7 +144,7 @@ def send_noreply_email(msg, subject, to):
     """
 
     if environ.get('DEBUG', False):
-        return print (msg, subject, to, flush=True)
+        return print(msg, subject, to, flush=True)
 
     msg = MIMEText(msg, "plain")
     msg["Subject"] = subject
@@ -157,8 +163,10 @@ def jsonify(data):
     """
     res = Response(dumps(data))
     res.headers['Content-Type'] = 'application/json'
-    res.headers['Access-Control-Allow-Origin'] = 'https://nyu.cool' if not environ.get('DEBUG', False) else 'https://localhost'
+    res.headers['Access-Control-Allow-Origin'] = 'https://nyu.cool' if not environ.get('DEBUG',
+                                                                                       False) else 'https://localhost'
     return res
+
 
 def json(func):
     """
@@ -172,17 +180,19 @@ def json(func):
             'success': True
         }
     """
+
     @wraps(func)
     def json_wrap(*args, **kwargs):
         data = func(*args, **kwargs)
         return jsonify(data)
+
     return json_wrap
 
 
 def add_global_error_handler(app):
     @app.errorhandler(Exception)
     def global_err_handler(error):
-        tb = traceback.format_exc() # get traceback string
+        tb = traceback.format_exc()  # get traceback string
         esindex(
             'error',
             type='global-handler',
@@ -220,6 +230,7 @@ def regrade_submission(submission):
     return {
         'success': True
     }
+
 
 def reset_submission(submission):
     """

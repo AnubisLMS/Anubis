@@ -1,8 +1,9 @@
-import requests
-import urllib3
 import getpass
 import json
 import os
+
+import requests
+import urllib3
 
 
 def get_session(args):
@@ -16,7 +17,7 @@ def get_session(args):
     if args.debug:
         s.verify = False
         urllib3.disable_warnings()
-    home=os.environ.get('HOME', '')
+    home = os.environ.get('HOME', '')
 
     if os.path.exists(os.path.join(home, '.anubis', 'creds.json')):
         creds = json.load(open(os.path.join(home, '.anubis', 'creds.json')))

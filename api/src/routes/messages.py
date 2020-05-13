@@ -17,7 +17,6 @@ commit: {commit}
 {error}
 """
 
-
 success_msg = """
 Your recent submission for OS3224 was processed.
 

@@ -1,6 +1,7 @@
-from .app import db
 from datetime import datetime
-import json
+
+from .app import db
+
 
 class Student(db.Model):
     __tablename__ = 'student'
@@ -64,7 +65,7 @@ class Builds(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     submissionid = db.Column(db.Integer, db.ForeignKey('submissions.id'), index=True)
 
-    stdout=db.Column(db.Text)
+    stdout = db.Column(db.Text)
 
     submission = db.relationship('Submissions', backref='builds')
 
@@ -80,7 +81,7 @@ class Tests(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     submissionid = db.Column(db.Integer, db.ForeignKey('submissions.id'), index=True)
 
-    stdout=db.Column(db.Text)
+    stdout = db.Column(db.Text)
 
     submission = db.relationship('Submissions', backref='tests')
 
@@ -122,10 +123,10 @@ class Reports(db.Model):
 
 class Assignment(db.Model):
     __tablename__ = 'assignments'
-    id=db.Column(db.Integer, primary_key=True)
-    name=db.Column(db.Text, nullable=False, unique=True)
-    due_date=db.Column(db.DateTime(True), nullable=False)
-    grace_date=db.Column(db.DateTime(True), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text, nullable=False, unique=True)
+    due_date = db.Column(db.DateTime(True), nullable=False)
+    grace_date = db.Column(db.DateTime(True), nullable=False)
 
     @property
     def json(self):
@@ -142,7 +143,7 @@ class Errors(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     submissionid = db.Column(db.Integer, db.ForeignKey('submissions.id'), index=True)
 
-    message=db.Column(db.Text)
+    message = db.Column(db.Text)
 
     submission = db.relationship('Submissions', backref='errors')
 

@@ -23,9 +23,11 @@ def command(function):
 
     :function: function to wrap
     """
+
     @functools.wraps(function)
     def wrapper(*args, **kwargs):
         res = function(*args, **kwargs)
         display(res)
         return res
+
     return wrapper

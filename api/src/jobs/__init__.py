@@ -1,15 +1,11 @@
-from sqlalchemy.exc import IntegrityError
 import docker
 
-from ..models import Submissions
-from ..app import db
-
-from .clone import clone
 from .build import build
-from .test import test
+from .clone import clone
 from .report import report
+from .test import test
 from .utils import report_error
-
+from ..models import Submissions
 
 """
 This is where we should implement any and all job function for the
@@ -28,7 +24,7 @@ def test_repo(submission_id):
     :assignment str: name of assignment
     """
 
-    client=docker.from_env()
+    client = docker.from_env()
     client.volumes.prune()
 
     submission = Submissions.query.filter_by(
@@ -36,7 +32,7 @@ def test_repo(submission_id):
     ).first()
     repo_url = submission.repo
 
-    volume_name=client.volumes.create(
+    volume_name = client.volumes.create(
         name='submission-{}'.format(submission.id),
         driver='local',
     ).name

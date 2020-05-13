@@ -1,4 +1,4 @@
-student_man="""
+student_man = """
 json file with student data should follow this shape:
 
 [

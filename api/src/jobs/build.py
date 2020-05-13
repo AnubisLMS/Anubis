@@ -1,13 +1,10 @@
-from sqlalchemy.exc import IntegrityError
-import subprocess
 import requests
-import docker
-import time
+from sqlalchemy.exc import IntegrityError
 
 from .utils import report_error, PipelineException
-from ..models import Builds
-from ..app import db
 from .. import utils
+from ..app import db
+from ..models import Builds
 
 assingment_files = {
     'os3224-assignment-1': ['xv6.img', 'fs.img', 'short', 'long'],
@@ -16,6 +13,7 @@ assingment_files = {
     'midterm': ['xv6.img', 'fs.img', 'short', 'long'],
     'os3224-assignment-4': ['xv6.img', 'fs.img'],
 }
+
 
 def build(client, repo_url, submission, volume_name):
     """
@@ -35,11 +33,10 @@ def build(client, repo_url, submission, volume_name):
     :volume_name str: name of persistent volume
     """
 
-    netid=submission.netid
-    assignment=submission.assignment.name
+    netid = submission.netid
+    assignment = submission.assignment.name
 
-
-    logs=''
+    logs = ''
     name = '{netid}-{commit}-{assignment}-{id}-build'.format(
         netid=submission.netid,
         commit=submission.commit,
@@ -48,14 +45,14 @@ def build(client, repo_url, submission, volume_name):
     )
 
     try:
-        container=client.containers.run(
+        container = client.containers.run(
             'os3224-build',
             name=name,
             detach=True,
             command=[
-                '/entrypoint.sh',
-                submission.commit,
-            ] + assingment_files[submission.assignment.name],
+                        '/entrypoint.sh',
+                        submission.commit,
+                    ] + assingment_files[submission.assignment.name],
             network_mode='none',
             mem_limit='100m',
             volumes={
@@ -95,15 +92,15 @@ def build(client, repo_url, submission, volume_name):
         except:
             pass
         raise report_error(
-            'build timeout\n'+container.logs().decode(),
+            'build timeout\n' + container.logs().decode(),
             submission.id
         )
 
     finally:
-        container=client.containers.get(name)
+        container = client.containers.get(name)
         container.remove(force=True)
 
-    b=Builds(
+    b = Builds(
         stdout=logs,
         submission=submission
     )
@@ -116,5 +113,3 @@ def build(client, repo_url, submission, volume_name):
         return print(e)
 
     return b
-
-

@@ -1,18 +1,14 @@
-from flask import request, redirect, url_for, flash, render_template, Blueprint, Response
-from sqlalchemy.exc import IntegrityError
 from json import dumps, loads
-from datetime import datetime
-from sqlalchemy import desc
-from pytz import timezone
-import dateutil.parser
 
+import dateutil.parser
+from flask import request, Blueprint
+from sqlalchemy.exc import IntegrityError
+
+from .messages import err_msg, crit_err_msg, success_msg
 from ..app import db, cache
 from ..config import Config
 from ..models import Submissions, Reports, Student, Assignment, Errors
-from ..utils import enqueue_webhook_job, log_event, send_noreply_email, esindex, json, reset_submission, regrade_submission
-
-from .messages import err_msg, crit_err_msg, success_msg
-
+from ..utils import enqueue_webhook_job, log_event, send_noreply_email, esindex, json, regrade_submission
 
 private = Blueprint('private', __name__, url_prefix='/private')
 
@@ -23,17 +19,17 @@ def fix_dangling():
     student values now exist. Then enqueue them.
     """
 
-    dangling=Submissions.query.filter_by(
+    dangling = Submissions.query.filter_by(
         studentid=None
     ).all()
 
-    fixed=[]
+    fixed = []
 
     for d in dangling:
-        s=Student.query.filter_by(
+        s = Student.query.filter_by(
             github_username=d.github_username
         ).first()
-        d.student=s
+        d.student = s
         db.session.add(d)
         try:
             db.session.commit()
@@ -72,11 +68,11 @@ def handle_report_panic():
     """
 
     req = request.json
-    submission=Submissions.query.filter_by(
+    submission = Submissions.query.filter_by(
         id=req['submission_id'],
     ).first()
 
-    submission.processed=True
+    submission.processed = True
     try:
         db.session.add(submission)
         db.session.commit()
@@ -86,14 +82,13 @@ def handle_report_panic():
         ))
         db.session.rollback()
 
-
-    msg=crit_err_msg.format(
+    msg = crit_err_msg.format(
         netid=submission.netid,
         assignment=submission.assignment,
         commit=submission.commit,
     )
 
-    e=Errors(
+    e = Errors(
         message=msg,
         submission=submission,
     )
@@ -116,8 +111,8 @@ def handle_report_panic():
     # Notify Admins (with logs)
     send_noreply_email(
         msg + req['error'],
-        'Anubis Panic', # email subject
-        Config.ADMINS,   # recipient
+        'Anubis Panic',  # email subject
+        Config.ADMINS,  # recipient
     )
 
     esindex(
@@ -131,7 +126,7 @@ def handle_report_panic():
         passed=0
     )
 
-    return {'success':True}
+    return {'success': True}
 
 
 @private.route('/report-error', methods=['POST'])
@@ -159,11 +154,11 @@ def handle_report_error():
     through a noreply email.
     """
     req = request.json
-    submission=Submissions.query.filter_by(
+    submission = Submissions.query.filter_by(
         id=req['submission_id'],
     ).first()
 
-    submission.processed=True
+    submission.processed = True
     try:
         db.session.add(submission)
         db.session.commit()
@@ -171,7 +166,7 @@ def handle_report_error():
         print('ERROR unable to mark submission as processed, continuing to report the error')
         db.session.rollback()
 
-    msg=err_msg.format(
+    msg = err_msg.format(
         netid=submission.netid,
         assignment=submission.assignment,
         commit=submission.commit,
@@ -189,7 +184,7 @@ def handle_report_error():
         passed=0
     )
 
-    e=Errors(
+    e = Errors(
         message=msg,
         submission=submission,
     )
@@ -228,14 +223,13 @@ def handle_report():
       ]
     }
     """
-    report=request.json
+    report = request.json
 
-    submission=Submissions.query.filter_by(
+    submission = Submissions.query.filter_by(
         id=report['submission_id']
     ).first()
 
-
-    submission.processed=True
+    submission.processed = True
     try:
         db.session.add(submission)
         db.session.commit()
@@ -243,7 +237,7 @@ def handle_report():
         print('ERROR unable to mark submission as processed {}'.format(submission.id))
         db.session.rollback()
 
-    reports=[
+    reports = [
         Reports(
             testname=result['name'],
             errors=dumps(result['errors']),
@@ -262,11 +256,11 @@ def handle_report():
         print('ERROR unable to process report for {}'.format(report['netid']))
         return {
             'success': False,
-            'errors': [ 'unable to process report' ]
+            'errors': ['unable to process report']
         }
 
     build = submission.builds[0]
-    msg=success_msg.format(
+    msg = success_msg.format(
         netid=submission.netid,
         commit=submission.commit,
         assignment=submission.assignment,
@@ -302,8 +296,8 @@ def ls():
     """
 
     active = Submissions.query.filter(
-        Submissions.studentid!=None,
-        Submissions.processed==False,
+        Submissions.studentid != None,
+        Submissions.processed == False,
     ).all()
 
     return [a.json for a in active]
@@ -320,7 +314,7 @@ def dangling():
     """
 
     dangling = Submissions.query.filter(
-        Submissions.studentid==None,
+        Submissions.studentid == None,
     ).all()
     dangling = [a.json for a in dangling]
 
@@ -392,9 +386,9 @@ def handle_student():
     if request.method == 'POST':
         body = request.json
         for student in body:
-            s=Student.query.filter_by(netid=student['netid']).first()
+            s = Student.query.filter_by(netid=student['netid']).first()
             if s is None:
-                s=Student(
+                s = Student(
                     netid=student['netid'],
                     github_username=student['github_username'],
                     name=student['name'] if 'name' in student else student['first_name'] + ' ' + student['last_name'],
@@ -448,9 +442,9 @@ def handle_assignment():
       }
     }
     """
-    data=request.json
-    action=data['action']
-    data=data['data']
+    data = request.json
+    action = data['action']
+    data = data['data']
     if action == 'add':
         a = Assignment(
             name=data['name'],
@@ -479,8 +473,8 @@ def handle_assignment():
                 'error': ['assignment does not exist']
             }
 
-        a.due_date=dateutil.parser.parse(data['due_date'], ignoretz=False),
-        a.grace_date=dateutil.parser.parse(data['grace_date'], ignoretz=False)
+        a.due_date = dateutil.parser.parse(data['due_date'], ignoretz=False),
+        a.grace_date = dateutil.parser.parse(data['grace_date'], ignoretz=False)
 
         try:
             db.session.commit()
@@ -510,8 +504,8 @@ def handle_assignment():
 
 @cache.memoize(timeout=30)
 def stats_for(studentid, assignmentid):
-    best=None
-    best_count=-1
+    best = None
+    best_count = -1
     for submission in Submissions.query.filter_by(
             assignmentid=assignmentid,
             studentid=studentid,
@@ -531,6 +525,7 @@ def stats_for(studentid, assignmentid):
 def get_students():
     return [s.json for s in Student.query.all()]
 
+
 @private.route('/stats/<assignment_name>')
 @private.route('/stats/<assignment_name>/<netid>')
 @log_event('cli', lambda: 'stats')
@@ -545,7 +540,6 @@ def stats(assignment_name, netid=None):
         netids = [netid]
     else:
         netids = list(map(lambda x: x['netid'], get_students()))
-
 
     students = get_students()
     students = filter(
@@ -583,10 +577,10 @@ def stats(assignment_name, netid=None):
                 'total_tests_passed': best_count,
                 'repo_url': submission.repo,
                 'master': 'https://github.com/{}'.format(
-                    submission.repo[submission.repo.index(':')+1:-len('.git')],
+                    submission.repo[submission.repo.index(':') + 1:-len('.git')],
                 ),
                 'commit_tree': 'https://github.com/{}/tree/{}'.format(
-                    submission.repo[submission.repo.index(':')+1:-len('.git')],
+                    submission.repo[submission.repo.index(':') + 1:-len('.git')],
                     submission.commit
                 ),
                 'late': late
