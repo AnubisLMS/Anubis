@@ -3,11 +3,12 @@ from json import dumps, loads
 import dateutil.parser
 from flask import request, Blueprint
 from sqlalchemy.exc import IntegrityError
+import traceback
 
 from .messages import err_msg, crit_err_msg, success_msg
 from ..app import db, cache
 from ..config import Config
-from ..models import Submissions, Reports, Student, Assignment, Errors
+from ..models import Submissions, Reports, Student, Assignment, Errors, FinalQuestions, StudentFinalQuestions
 from ..utils import enqueue_webhook_job, log_event, send_noreply_email, esindex, json, regrade_submission
 
 private = Blueprint('private', __name__, url_prefix='/private')
@@ -588,4 +589,169 @@ def stats(assignment_name, netid=None):
     return {
         "success": True,
         "data": bests
+    }
+
+
+@private.route('/finalquestions', methods=['GET', 'POST'])
+@log_event('cli', lambda: 'finalquestions')
+@cache.memoize(timeout=60, unless=lambda: request.method == 'POST')
+@json
+def priv_finalquestions():
+    """
+    This route should be used by the CLI to both get or modify / add
+    existing questions. If the student final questions table is not
+    populated (ie. uploading for the first time) the entire table will
+    be populated with the existing questions. You will need to manually
+    clear, then ret-rigger this to update student questions once they are
+    populated. This is so that we don't ever overwrite a students questions
+    after they are assigned them.
+
+    response is json of shape:
+
+    {
+      data : {
+        netid : {
+          questions : [
+            {
+              id,
+              content,
+              solution,
+              level
+            },
+            ...
+          ],
+          student : {
+            id,
+            netid,
+            name,
+            github_username
+          },
+          code
+        },
+        ...
+      }
+      success : true
+    }
+
+    or on failure:
+    {
+      success : false
+      error : "..."
+    }
+
+    :return: json of shape specified above
+    """
+
+    # lets save these response messages to stay dry
+    invalid_format = {
+        'success': False,
+        'error': 'invalid format'
+    }
+
+    unable_to_complete = {
+        'success': False,
+        'error': 'unable to complete'
+    }
+
+    # insert new questions and populate (if not already)
+    if request.method == 'POST':
+        if not (isinstance(request.json, list) and len(request.json) > 0):
+            return invalid_format
+
+        try:
+            for question in request.json:
+                print(question, flush=True, )
+                if 'content' not in question or 'level' not in question:
+                    db.session.rollback()
+                    return invalid_format
+                q = FinalQuestions.query.filter_by(content=question['content']).first()
+                if q is not None:
+                    # update level and solution if question exists
+                    q.level = question['level']
+                else:
+                    q = FinalQuestions(
+                        content=question['content'],
+                        level=question['level'],
+                    )
+                if 'solution' in question:
+                    q.solution = question['solution']
+
+                db.session.add(q)
+
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            unable_to_complete['traceback'] = traceback.format_exc()
+            return unable_to_complete
+
+        r = StudentFinalQuestions.populate()
+        if not r['success']:
+            return r
+
+    return {
+        'data': {
+            sfq.student.netid: sfq.json
+            for sfq in StudentFinalQuestions.query.all()
+        },
+        'success': True
+    }
+
+
+@private.route('/overwritefq')
+@log_event('cli', lambda: 'overwritefq')
+@json
+def priv_overwritefq():
+    """
+    Use this route with extreme caution. Hitting this route will trigger all
+    the data from the StudentFinalQuestion table to be repopulated with new
+    values. This will not be callable from the api to avoid someone triggering
+    this by accident.
+
+    response is json of shape:
+
+    {
+      data : {
+        netid : {
+          questions : [
+            {
+              id,
+              content,
+              solution,
+              level
+            },
+            ...
+          ],
+          student : {
+            id,
+            netid,
+            name,
+            github_username
+          },
+          code
+        },
+        ...
+      }
+      success : true
+    }
+
+    or on failure:
+    {
+      success : false
+      error : "..."
+    }
+
+    :return: json of shape specified above
+    """
+
+    r = StudentFinalQuestions.populate(overwrite=True)
+
+    if not r['success']:
+        return r
+
+    return {
+        'data': {
+            sfq.student.netid: sfq.json
+            for sfq in StudentFinalQuestions.query.all()
+        },
+        'success': True
     }
