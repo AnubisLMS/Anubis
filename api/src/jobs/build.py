@@ -12,6 +12,7 @@ assingment_files = {
     'os3224-assignment-3': ['xv6.img', 'fs.img'],
     'midterm': ['xv6.img', 'fs.img', 'short', 'long'],
     'os3224-assignment-4': ['xv6.img', 'fs.img'],
+    'final': ['xv6.img', 'fs.img'],
 }
 
 
