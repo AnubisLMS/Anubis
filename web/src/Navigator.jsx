@@ -8,7 +8,6 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import HomeIcon from '@material-ui/icons/Home';
 import PublicIcon from '@material-ui/icons/Public';
 import {Link, useRouteMatch} from "react-router-dom";
 
@@ -17,7 +16,8 @@ const categories = [
   {
     id: 'OS 3224',
     children: [
-      {id: 'Submissions', icon: <PublicIcon/>, path: '/'},
+      {id: 'Submissions', icon: <PublicIcon/>, path: '/view'},
+      {id: 'Exam Questions', icon: <PublicIcon/>, path: '/fq'},
     ],
   },
 ];

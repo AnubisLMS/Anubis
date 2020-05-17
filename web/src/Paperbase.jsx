@@ -9,9 +9,11 @@ import {BrowserRouter as Router, Redirect, Route, Switch} from "react-router-dom
 import {SnackbarProvider} from 'notistack';
 
 import Navigator from './Navigator';
-import View from './View';
-import SearchSubmissions from "./SearchSubmissions";
+import SubmissionView from './Submissions/View';
+import SearchSubmissions from "./Submissions/SearchSubmissions";
 import NotFound from "./NotFound";
+
+import FinalQuestionView from './FinalQuestions/View';
 
 let theme = createMuiTheme({
   palette: {
@@ -191,49 +193,64 @@ function Paperbase(props) {
         <SnackbarProvider maxSnack={5}>
           <Router>
             <CssBaseline/>
-            <Switch>
-              <Route exact path={'/'}>
-                <Redirect to={'/view'}/>
-              </Route>
-              <Route path={'/view'}>
-                <nav className={classes.drawer}>
-                  <Hidden smUp implementation="js">
-                    <Navigator
-                      PaperProps={{style: {width: drawerWidth}}}
-                      variant="temporary"
-                      open={mobileOpen}
-                      onClose={handleDrawerToggle}
-                    />
-                  </Hidden>
-                  <Hidden xsDown implementation="css">
-                    <Navigator PaperProps={{style: {width: drawerWidth}}}/>
-                  </Hidden>
-                </nav>
-                <div className={classes.app}>
-                  <main className={classes.main}>
+            <Route exact path={'/'}>
+              <Redirect to={'/view'}/>
+            </Route>
+            <nav className={classes.drawer}>
+              <Hidden smUp implementation="js">
+                <Navigator
+                  PaperProps={{style: {width: drawerWidth}}}
+                  variant="temporary"
+                  open={mobileOpen}
+                  onClose={handleDrawerToggle}
+                />
+              </Hidden>
+              <Hidden xsDown implementation="css">
+                <Navigator PaperProps={{style: {width: drawerWidth}}}/>
+              </Hidden>
+            </nav>
+            <div className={classes.app}>
+              <main className={classes.main}>
+                <Switch>
+                  // submission viewing
+                  <Route path={'/view'}>
                     <SearchSubmissions clearData={() => setData(null)}/>
                     <Switch>
                       <Route exact path={'/view/:commit'}>
-                        <View data={data} setData={setData}/>
+                        <SubmissionView data={data} setData={setData}/>
                       </Route>
                       <Route exact path={'/view/:commit/:netid'}>
-                        <View data={data} setData={setData}/>
+                        <SubmissionView data={data} setData={setData}/>
                       </Route>
                     </Switch>
-                  </main>
-                  <footer className={classes.footer}>
-                    <Copyright/>
-                  </footer>
-                </div>
-              </Route>
-              <Route>
-                <div className={classes.app}>
-                  <main className={classes.main}>
-                    <NotFound/>
-                  </main>
-                </div>
-              </Route>
-            </Switch>
+                  </Route>
+
+                  // exam question viewing
+                  <Route path={'/fq'}>
+                    <Switch>
+                      <Route exact path={'/fq'}>
+                        <FinalQuestionView/>
+                      </Route>
+                      <Route exact path={'/fq/:code/:netid'}>
+                        <FinalQuestionView/>
+                      </Route>
+                    </Switch>
+                  </Route>
+
+                  // 404 handling
+                  <Route>
+                    <div className={classes.app}>
+                      <main className={classes.main}>
+                        <NotFound/>
+                      </main>
+                    </div>
+                  </Route>
+                </Switch>
+              </main>
+              <footer className={classes.footer}>
+                <Copyright/>
+              </footer>
+            </div>
           </Router>
         </SnackbarProvider>
       </div>

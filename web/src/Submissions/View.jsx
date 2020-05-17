@@ -3,10 +3,10 @@ import Grid from '@material-ui/core/Grid';
 import {Redirect, useParams} from "react-router-dom";
 import {useSnackbar} from 'notistack';
 
-import {api} from './utils';
+import {api} from '../utils';
 import Submission from './Submission';
 import Auth from './Auth';
-import Error from './Error';
+import Error from '../Error';
 import Build from './Build';
 import Tests from './Tests';
 
