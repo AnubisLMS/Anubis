@@ -37,7 +37,7 @@ def test(num, cmd):
             lines[index] = lines[index].strip()
 
 
-        if not any('init: starting sh' in i for i in lines):
+        if not any('init: starting sh' i for i in lines):
             print('incorrect password was rejected')
             save_results(
                 'test-{}'.format(num),

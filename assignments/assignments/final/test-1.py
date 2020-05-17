@@ -27,8 +27,6 @@ def test(num, cmd):
         if any('unexpected trap' in i or 'cpu0: panic' in i for i in lines):
             raise Exception()
 
-        print(json.dumps(lines, indent=2))
-
         while len(lines) != 0 and (lines[-1].startswith('$') or len(lines[-1].strip()) == 0):
             lines.pop()
 
@@ -37,8 +35,6 @@ def test(num, cmd):
 
         for index in range(len(lines)):
             lines[index] = lines[index].strip()
-
-        print(lines)
 
         if any('No password set. Please choose one.' in i for i in lines) \
            and any('Password successfully set. You may now use it to log in.' in i for i in lines)\
