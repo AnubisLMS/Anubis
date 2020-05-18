@@ -254,6 +254,10 @@ def pub_finalquestions(netid, code):
         'error': 'unable to complete request'
     }
 
+    # Mon May 18 2020 09:00:00 GMT-0400 (Eastern Daylight Time)
+    if int(time.time()) <= 1589806800:
+        return unable_to_complete
+
     if netid is None or code is None:
         return {
             'success': False,
