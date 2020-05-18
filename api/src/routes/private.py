@@ -5,7 +5,7 @@ from flask import request, Blueprint
 from sqlalchemy.exc import IntegrityError
 import traceback
 
-from .messages import err_msg, crit_err_msg, success_msg
+from .messages import err_msg, crit_err_msg, success_msg, code_msg
 from ..app import db, cache
 from ..config import Config
 from ..models import Submissions, Reports, Student, Assignment, Errors, FinalQuestions, StudentFinalQuestions
@@ -660,7 +660,6 @@ def priv_finalquestions():
 
         try:
             for question in request.json:
-                print(question, flush=True, )
                 if 'content' not in question or 'level' not in question:
                     db.session.rollback()
                     return invalid_format
@@ -753,5 +752,31 @@ def priv_overwritefq():
             sfq.student.netid: sfq.json
             for sfq in StudentFinalQuestions.query.all()
         },
+        'success': True
+    }
+
+
+@private.route('/sendcodes')
+@json
+def priv_sendcodes():
+    """
+    Send out all randomly generated codes to students. This should only be triggered once.
+    Once students have their codes, they should not ever change.
+
+    :return: json indicating success for failure
+    """
+
+    for sfq in StudentFinalQuestions.query.all():
+        student_name = sfq.student.name
+        netid = sfq.student.netid
+        code = sfq.code
+
+        msg = code_msg.format(
+            name=student_name.split()[0],
+            code=code
+        )
+        send_noreply_email(msg, 'Anubis OS3224 Exam Code', '{}@nyu.edu'.format(netid))
+
+    return {
         'success': True
     }

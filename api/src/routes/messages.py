@@ -33,3 +33,18 @@ build log:
 test logs:
 {test_logs}
 """
+
+
+code_msg = """
+
+Hello {name},
+
+Here is your Anubis code for your upcoming OS exam. Don't worry, there is nothing you need to do right 
+now. This it just so you can access your materials come test day. Try not to lose this!
+
+{code}
+
+Good luck,
+John 
+
+"""
