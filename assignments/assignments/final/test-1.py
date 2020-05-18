@@ -12,7 +12,7 @@ def test(num, cmd):
         print('test-1:')
         print('Testing if correct password works')
         print('If you this test passes after you follow the instructions for the coding section, you likely implemented password correctly.')
-        qemu_cmd = 'timeout 25 qemu-system-i386 -serial mon:stdio -drive file=./submission/xv6.img,media=disk,index=0,format=raw -drive file=./submission/fs.img,media=disk,index=1,format=raw -smp 1 -m 512 -display none -nographic'
+        qemu_cmd = 'timeout 55 qemu-system-i386 -serial mon:stdio -drive file=./submission/xv6.img,media=disk,index=0,format=raw -drive file=./submission/fs.img,media=disk,index=1,format=raw -smp 1 -m 512 -display none -nographic'
 
         with open('test-{}.in'.format(num), 'w') as f:
             f.write('\n{}\n'.format(cmd))
