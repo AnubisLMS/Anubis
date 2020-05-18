@@ -11,7 +11,7 @@ def test(num, cmd):
     try:
         print()
         print('test-0:')
-        print('Testing if xv6 starts'.format(cmd))
+        print('Testing if xv6 starts and prompts for password'.format(cmd))
         qemu_cmd = 'timeout 5 qemu-system-i386 -serial mon:stdio -drive file=./submission/xv6.img,media=disk,index=0,format=raw -drive file=./submission/fs.img,media=disk,index=1,format=raw -smp 1 -m 512 -display none -nographic'
 
         with open('test-{}.in'.format(num), 'w') as f:

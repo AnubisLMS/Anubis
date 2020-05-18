@@ -10,8 +10,8 @@ def test(num, cmd):
     try:
         print()
         print('test-3:')
-        print('Testing if incorrect password is rejected')
-        print('If you this test passes after you follow the instructions for the coding section, you likely implemented password correctly.')
+        print('Testing if correct password is rejected')
+        print('If this test passes after you follow the instructions for the coding section, you likely implemented password correctly.')
         qemu_cmd = 'timeout 5 qemu-system-i386 -serial mon:stdio -drive file=./submission/xv6.img,media=disk,index=0,format=raw -drive file=./submission/fs.img,media=disk,index=1,format=raw -smp 1 -m 512 -display none -nographic'
 
         with open('test-{}.in'.format(num), 'w') as f:
@@ -36,20 +36,19 @@ def test(num, cmd):
         for index in range(len(lines)):
             lines[index] = lines[index].strip()
 
-
         if any('Enter password:' in i for i in lines) and \
            any('init: starting sh' in i for i in lines):
-            print('correct password was rejected')
+            print('correct password was accepted')
             save_results(
                 'test-{}'.format(num),
-                ['correct password was rejected'],
+                ['correct password was accepted'],
                 True
             )
         else:
-            print('correct password was not rejected')
+            print('correct password was not accepted')
             save_results(
                 'test-{}'.format(num),
-                ['correct password was not rejected'],
+                ['correct password was not accepted'],
                 False
             )
     except:
@@ -60,4 +59,4 @@ def test(num, cmd):
             False
         )
 
-test(3, '\npassword')
+test(3, 'password')
