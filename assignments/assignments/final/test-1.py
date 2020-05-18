@@ -12,7 +12,7 @@ def test(num, cmd):
         print('test-1:')
         print('Testing if correct password works')
         print('If you this test passes after you follow the instructions for the coding section, you likely implemented password correctly.')
-        qemu_cmd = 'timeout 15 qemu-system-i386 -serial mon:stdio -drive file=./submission/xv6.img,media=disk,index=0,format=raw -drive file=./submission/fs.img,media=disk,index=1,format=raw -smp 1 -m 512 -display none -nographic'
+        qemu_cmd = 'timeout 25 qemu-system-i386 -serial mon:stdio -drive file=./submission/xv6.img,media=disk,index=0,format=raw -drive file=./submission/fs.img,media=disk,index=1,format=raw -smp 1 -m 512 -display none -nographic'
 
         with open('test-{}.in'.format(num), 'w') as f:
             f.write('\n{}\n'.format(cmd))
@@ -35,8 +35,6 @@ def test(num, cmd):
 
         for index in range(len(lines)):
             lines[index] = lines[index].strip()
-
-        print(json.dumps(lines, indent=2))
 
         if any('No password set. Please choose one.' in i for i in lines) \
            and any('Password successfully set.' in i for i in lines)\
