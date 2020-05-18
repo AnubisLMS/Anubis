@@ -9,8 +9,8 @@ from parse import compile
 def test(num, cmd):
     try:
         print()
-        print('test-1:')
-        print('Testing if correct password works')
+        print('test-2:')
+        print('Testing if incorrect password is rejected')
         print('If you this test passes after you follow the instructions for the coding section, you likely implemented password correctly.')
         qemu_cmd = 'timeout 5 qemu-system-i386 -serial mon:stdio -drive file=./submission/xv6.img,media=disk,index=0,format=raw -drive file=./submission/fs.img,media=disk,index=1,format=raw -smp 1 -m 512 -display none -nographic'
 
@@ -37,7 +37,7 @@ def test(num, cmd):
             lines[index] = lines[index].strip()
 
 
-        if not any('init: starting sh' i for i in lines):
+        if not any('init: starting sh' in i for i in lines):
             print('incorrect password was rejected')
             save_results(
                 'test-{}'.format(num),
@@ -48,7 +48,7 @@ def test(num, cmd):
             print('incorrect password was not rejected')
             save_results(
                 'test-{}'.format(num),
-                ['correct password was not rejected'],
+                ['incorrect password was not rejected'],
                 False
             )
     except:

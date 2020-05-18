@@ -36,27 +36,29 @@ def test(num, cmd):
         for index in range(len(lines)):
             lines[index] = lines[index].strip()
 
+        print(json.dumps(lines, indent=2))
+
         if any('No password set. Please choose one.' in i for i in lines) \
-           and any('Password successfully set. You may now use it to log in.' in i for i in lines)\
-           and any('Password correct, logging you in.' in i for i in lines):
-            print('init: starting sh')
+           and any('Password successfully set.' in i for i in lines)\
+           and any('init: starting sh' in i for i in lines):
+            print('setting password worked')
             save_results(
                 'test-{}'.format(num),
-                ['correct password worked'],
+                ['setting password worked'],
                 True
             )
         else:
-            print('correct password did not work')
+            print('setting password did not work')
             save_results(
                 'test-{}'.format(num),
-                ['correct password did not work'],
+                ['setting password did not work'],
                 False
             )
     except:
-        print('password check failed')
+        print('setting password check failed')
         save_results(
             'test-{}'.format(num),
-            ['password check failed'],
+            ['setting password check failed'],
             False
         )
 
