@@ -119,6 +119,26 @@ def assignment(args):
     })
 
 
+@command
+def finalquestions(args):
+    """
+    [
+      {
+        content
+        level
+        solution?
+      }
+    ]
+
+    :param args:
+    :return:
+    """
+    s = get_session(args)
+    if args.filename is None:
+        return s.get(s.url + '/private/finalquestions')
+    return s.post(s.url + '/private/finalquestions', json=json.load(open(args.filename)))
+
+
 def main(*argv):
     global parsers
     args, parsers = parse_args(argv)
@@ -134,6 +154,7 @@ def main(*argv):
         'student': student,
         'logout': logout,
         'assignment': assignment,
+        'fq': finalquestions
     }[args.command](args)
 
 

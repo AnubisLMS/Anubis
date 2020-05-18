@@ -20,6 +20,7 @@ def parse_args(argv):
     stats_parser = add_stats_parser(subparsers)
     dangling_parser = add_dangling_parser(subparsers)
     assignment_parser = add_assignment_parser(subparsers)
+    fq_parser = add_fq_parser(subparsers)
 
     return parser.parse_args(argv), {
         'main': parser,
@@ -29,6 +30,7 @@ def parse_args(argv):
         'dangling': dangling_parser,
         'stats': stats_parser,
         'assignment': assignment_parser,
+        'fq': fq_parser,
     }
 
 
@@ -105,3 +107,17 @@ def add_ls_parser(subparsers):
     ls_parser = subparsers.add_parser('ls', help='list currently running / pending submissions')
     ls_subparser = ls_parser.add_subparsers(dest='subcommand')
     return ls_parser
+
+
+def add_fq_parser(subparsers):
+    # final questions
+    fq_parser = subparsers.add_parser(
+        'fq',
+        help='add final questions',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=fq_manpage,
+    )
+
+    fq_parser.add_argument('filename', nargs='?', default=None, help='json file of question data')
+
+    return fq_parser

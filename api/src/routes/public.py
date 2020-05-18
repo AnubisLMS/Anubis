@@ -4,7 +4,7 @@ from flask import request, redirect, Blueprint
 from sqlalchemy.exc import IntegrityError
 
 from ..app import db, cache
-from ..models import Submissions, Student, Assignment
+from ..models import Submissions, Student, Assignment, StudentFinalQuestions
 from ..utils import enqueue_webhook_job, log_event, esindex, regrade_submission, json
 
 public = Blueprint('public', __name__, url_prefix='/public')
@@ -209,3 +209,79 @@ def webhook():
     return {
         'success': True
     }
+
+
+@public.route('/finalquestions/<netid>/<code>')
+@json
+def pub_finalquestions(netid, code):
+    """
+    This is the route that the frontend will hit to get
+    the questions for a given student. Students will enter
+    their netid and the code that was emailed to them to
+    get their questions. Only with the correct netid and
+    code combination will the request be completed.
+
+    response is json of shape:
+
+    {
+      questions : [
+        {
+          content
+          level
+        },
+        ...
+      ],
+      student: {
+        netid
+        name
+      },
+      success: true
+    }
+
+    or on failure:
+
+    {
+      success: false
+      error: "..."
+    }
+
+    :param netid: netid of student
+    :param code: sha256 hash that was emailed to student
+    :return: json specified above
+    """
+    unable_to_complete = {
+        'success': False,
+        'error': 'unable to complete request'
+    }
+
+    if netid is None or code is None:
+        return {
+            'success': False,
+            'error': 'missing fields'
+        }
+
+    student = Student.query.filter_by(netid=netid).first()
+    if student is None:
+        return unable_to_complete
+
+    sfq = StudentFinalQuestions.query.filter_by(
+        student=student,
+        code=code,
+    ).first()
+    if sfq is None:
+        return unable_to_complete
+
+    res = sfq.json
+
+    for i in res['questions']:
+        del i['id']
+        del i['solution']
+
+    del res['code']
+    del res['student']['id']
+    del res['student']['github_username']
+
+    res['success'] = True
+
+    return res
+

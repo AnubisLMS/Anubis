@@ -149,7 +149,7 @@ def send_noreply_email(msg, subject, to):
     msg = MIMEText(msg, "plain")
     msg["Subject"] = subject
 
-    msg["From"] = "dev.null@nyu.cool"
+    msg["From"] = "john@nyu.lol"
     msg["To"] = to
 
     s = SMTP("smtp")

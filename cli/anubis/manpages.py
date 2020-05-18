@@ -14,3 +14,14 @@ Add as many of these as you need to the list. When you
 push that data to anubis, it will atempt to fix dangling
 submissions after adding any new student data.
 """
+
+fq_manpage = """
+
+[
+  {
+    content
+    level
+    solution?
+  }
+]
+"""

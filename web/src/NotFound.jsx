@@ -55,7 +55,7 @@ const quotes = [
   "\"Can I have everybody’s attention?… I have to use the bathroom.\" – Patrick"
 ];
 
-function getQuote () {
+function getQuote() {
   return quotes[Math.floor(Math.random() * quotes.length)];
 }
 

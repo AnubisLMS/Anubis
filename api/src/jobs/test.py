@@ -52,7 +52,7 @@ def test(client, repo_url, submission, volume_name):
             },
         )
 
-        container.wait(timeout=60)
+        container.wait(timeout=300)
         container.reload()
         logs = container.logs().decode()
 
