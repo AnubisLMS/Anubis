@@ -27,15 +27,6 @@ def test(num, cmd):
         if any('unexpected trap' in i or 'cpu0: panic' in i for i in lines):
             raise Exception()
 
-        while len(lines) != 0 and (lines[-1].startswith('$') or len(lines[-1].strip()) == 0):
-            lines.pop()
-
-        if len(lines) != 0 and lines[0].startswith('$'):
-            lines[0] = lines[0].lstrip('$').strip()
-
-        for index in range(len(lines)):
-            lines[index] = lines[index].strip()
-
         if any('Enter password:' in i for i in lines) and \
            any('init: starting sh' in i for i in lines):
             print('correct password was accepted')
