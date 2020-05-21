@@ -27,7 +27,7 @@ def test(num, cmd):
         if any('unexpected trap' in i or 'cpu0: panic' in i for i in lines):
             raise Exception()
 
-        if any('Enter password:' in i for i in lines) and \
+        if any('Enter password:'.lower() in i.lower() for i in lines) and \
            any('init: starting sh' in i for i in lines):
             print('correct password was accepted')
             save_results(
