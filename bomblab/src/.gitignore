@@ -1,6 +1,0 @@
-*.o
-phases.c
-bomb
-bomb-quiet
-bomb-solve
-solution.txt

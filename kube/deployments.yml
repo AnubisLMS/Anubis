@@ -1,0 +1,209 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: anubis
+
+spec:
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      dnsPolicy: ClusterFirst
+      replicas: 3
+      containers:
+      - name: api
+        image: registry.osiris.services/anubis/api:latest
+        imagePullPolicy: Always
+        ports:
+        - name: web
+          containerPort: 5000
+        env:
+        # Gunicorn workers
+        - name: "WORKERS"
+          value: "8"
+        # sqlalchemy uri
+        - name: "DATABASE_URL"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-url
+        livenessProbe:
+          exec:
+            command:
+              - curl
+              - http://localhost:5000/
+          initialDelaySeconds: 30
+          periodSeconds: 5
+
+
+      # Mail container
+      - name: smtp
+        image: namshi/smtp
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: anubis
+
+spec:
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      dnsPolicy: ClusterFirst
+      replicas: 3
+      containers:
+      - name: web
+        image: registry.osiris.services/anubis/web:latest
+        imagePullPolicy: Always
+        ports:
+        - name: web
+          containerPort: 3000
+        livenessProbe:
+          exec:
+            command:
+              - curl
+              - http://localhost:5000/
+          initialDelaySeconds: 30
+          periodSeconds: 5
+
+---
+
+## Logstash
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+  namespace: anubis
+
+spec:
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+      - name: logstash
+        image: registry.osiris.services/anubis/logstash:latest
+        imagePullPolicy: Always
+        ports:
+        - name: web
+          containerPort: 9200
+        env:
+        - name: "discovery.type"
+          value: "single-node"
+        volumeMounts:
+        - name: elastic-data
+          mountPath: /usr/share/elasticsearch/data
+      volumes:
+      - name: elastic-data
+        persistentVolumeClaim:
+          claimName: elastic-data
+
+---
+
+## Elasticsearch
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+  namespace: anubis
+
+spec:
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - name: elasticsearch
+        image: elasticsearch:7.5.2
+        imagePullPolicy: Always
+        ports:
+        - name: web
+          containerPort: 9200
+        env:
+        - name: "discovery.type"
+          value: "single-node"
+        volumeMounts:
+        - name: elastic-data
+          mountPath: /usr/share/elasticsearch/data
+      volumes:
+      - name: elastic-data
+        persistentVolumeClaim:
+          claimName: elastic-data
+---
+## kibana
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: anubis
+
+spec:
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: kibana:7.5.2
+        imagePullPolicy: Always
+        ports:
+        - name: web
+          containerPort: 5601
+
+---
+
+## Redis cache
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache
+  namespace: red-quals
+
+spec:
+  selector:
+    matchLabels:
+      app: cache
+  template:
+    metadata:
+      labels:
+        app: cache
+    spec:
+      containers:
+      - name: cache
+        image: redis:4
+        imagePullPolicy: Always
+        ports:
+        - name: cache
+          containerPort: 6379
+        volumeMounts:
+        - name: cache-data
+          mountPath: /data
+
+      volumes:
+      - name: cache-data
+        persistentVolumeClaim:
+          claimName: cache-data
