@@ -8,17 +8,23 @@ spec:
   selector:
     matchLabels:
       app: api
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  revisionHistoryLimit: 10
   template:
     metadata:
       labels:
         app: api
     spec:
       dnsPolicy: ClusterFirst
-      replicas: 3
       containers:
       - name: api
         image: registry.osiris.services/anubis/api:latest
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - name: web
           containerPort: 5000
@@ -31,7 +37,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: api
-              key: database-url
+              key: database-uri
         livenessProbe:
           exec:
             command:
