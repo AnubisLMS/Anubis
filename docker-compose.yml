@@ -2,17 +2,18 @@ version: '3.7'
 
 services:
   traefik:
-    image: "traefik:v2.0.0-rc3"
-    restart: always
+    image: "traefik:v2.2"
+    restart: on-failure
     command:
       - "--api.insecure=true"
 
       - "--providers.docker=true"
-      - "--providers.docker.watch"
       - "--providers.docker.exposedbydefault=false"
 
       - "--entrypoints.http.address=:80"
       - "--entrypoints.https.address=:443"
+      - "--entrypoints.http.http.redirections.entryPoint.to=https"
+      - "--entrypoints.http.http.redirections.entryPoint.scheme=https"
 
       - "--certificatesresolvers.tls.acme.httpchallenge=true"
       - "--certificatesresolvers.tls.acme.httpchallenge.entrypoint=http"
@@ -27,31 +28,18 @@ services:
     networks:
       - traefik-proxy
     labels:
-      - "traefik.enable=true"
-      
-      - "traefik.http.middlewares.traefik-auth.basicauth.users=${AUTH}"
-      - "traefik.http.middlewares.traefik-auth.basicauth.removeheader=true"
-    
-      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)"
-      - "traefik.http.routers.traefik.entrypoints=https"
-      - "traefik.http.routers.traefik.tls.certresolver=tls"
-      - "traefik.http.routers.traefik.middlewares=traefik-auth@docker"
-      - "traefik.http.middlewares.traefik.redirectscheme.scheme=https"
-      #- "traefik.http.routers.traefik.service=api@internal"
-      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-    
-      - "traefik.http.middlewares.redirect.redirectregex.regex=^http://(.*)"
-      - "traefik.http.middlewares.redirect.redirectregex.replacement=https://$$1"
+      - "traefik.enable=false"
 
   db:
     build: ./db
-    restart: always
+    restart: on-failure
     dns: [8.8.8.8]
     ports:
       - "127.0.0.1:3306:3306"
     environment:
-      - "MYSQL_ROOT_PASSWORD=password"
-      - "MYSQL_DATABASE=os"
+      - "MYSQL_ROOT_PASSWORD=anbis"
+      - "MYSQL_DATABASE=anubis"
+      - "MYSQL_USER=anubis"
     volumes:
       - "db_data:/var/lib/mysql"
     networks:
@@ -60,51 +48,38 @@ services:
       - "traefik.enable=false"
 
   api:
-    build: api
-    restart: always
+    image: registry.osiris.services/anubis/api:latest
+    build: ./api
+    restart: on-failure
     volumes:
       - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
     networks:
       - traefik-proxy
     depends_on: [db]
     labels:
-      - "traefik.enable=true"
-      
-      - "traefik.http.routers.api-http.rule=Host(`api.${DOMAIN}`) || Host(`os3224.${DOMAIN}`)"
-      - "traefik.http.routers.api-http.entrypoints=http"
-      - "traefik.http.routers.api-http.middlewares=redirect"      
+      - "traefik.enable=true" 
+
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${AUTH}"
+      - "traefik.http.middlewares.traefik-auth.basicauth.removeheader=true"
 
       - "traefik.http.services.api.loadbalancer.server.port=5000"
 
       # private route with auth
-      - "traefik.http.routers.api-private.rule=Host(`api.${DOMAIN}`) && PathPrefix(`/private/`)"
+      - "traefik.http.routers.api-private.rule=Host(`api.localhost`) && PathPrefix(`/private/`)"
       - "traefik.http.routers.api-private.entrypoints=https"
       - "traefik.http.routers.api-private.tls.certresolver=tls"
       - "traefik.http.middlewares.api-private.redirectscheme.scheme=https"
       - "traefik.http.routers.api-private.middlewares=traefik-auth@docker"
 
       # Public router without auth
-      - "traefik.http.routers.api-public.rule=Host(`api.${DOMAIN}`)"
+      - "traefik.http.routers.api-public.rule=Host(`api.localhost`)"
       - "traefik.http.routers.api-public.entrypoints=https"
       - "traefik.http.routers.api-public.tls.certresolver=tls"
       - "traefik.http.middlewares.api-public.redirectscheme.scheme=https"
 
-      # private route with auth
-      - "traefik.http.routers.os3224-private.rule=Host(`os3224.${DOMAIN}`) && PathPrefix(`/private/`)"
-      - "traefik.http.routers.os3224-private.entrypoints=https"
-      - "traefik.http.routers.os3224-private.tls.certresolver=tls"
-      - "traefik.http.middlewares.os3224-private.redirectscheme.scheme=https"
-      - "traefik.http.routers.os3224-private.middlewares=traefik-auth@docker"
-
-      # Public router without auth
-      - "traefik.http.routers.os3224-public.rule=Host(`os3224.${DOMAIN}`)"
-      - "traefik.http.routers.os3224-public.entrypoints=https"
-      - "traefik.http.routers.os3224-public.tls.certresolver=tls"
-      - "traefik.http.middlewares.os3224-public.redirectscheme.scheme=https"
-
   redis:
     image: redis:5
-    restart: always
+    restart: on-failure
     ports:
       - "127.0.0.1:6379:6379"
     networks:
@@ -116,7 +91,7 @@ services:
 
   worker:
     build: api
-    restart: always
+    restart: on-failure
     command: rq worker -u redis://redis
     user: root
     networks:
@@ -128,13 +103,13 @@ services:
 
   smtp:
     image: namshi/smtp
-    restart: always
+    restart: on-failure
     networks:
       - traefik-proxy
 
   elasticsearch:
     image: elasticsearch:7.5.2
-    restart: always
+    restart: on-failure
     environment:
       - "discovery.type=single-node"
     volumes:
@@ -145,9 +120,17 @@ services:
     labels:
       - "traefik.enable=false"
 
+  logstash:
+    image: registry.osiris.services/anubis/logstash:latest
+    build: ./logstash
+    networks:
+      - traefik-proxy
+    labels:
+      - "traefik.enable"
+
   kibana:
     image: kibana:7.5.2
-    restart: always
+    restart: on-failure
     networks:
       - traefik-proxy
     volumes:
@@ -155,21 +138,17 @@ services:
     labels:
       - "traefik.enable=true"
 
-      - "traefik.http.routers.kibana-http.rule=Host(`kibana.${DOMAIN}`)"
-      - "traefik.http.routers.kibana-http.entrypoints=http"
-      - "traefik.http.routers.kibana-http.middlewares=redirect"      
-
       - "traefik.http.services.kibana.loadbalancer.server.port=5601"
 
-      - "traefik.http.routers.kibana.rule=Host(`kibana.${DOMAIN}`)"
+      - "traefik.http.routers.kibana.rule=Host(`kibana.localhost`)"
       - "traefik.http.routers.kibana.entrypoints=https"
       - "traefik.http.routers.kibana.tls.certresolver=tls"
       - "traefik.http.middlewares.kibana.redirectscheme.scheme=https"
-      - "traefik.http.routers.kibana.middlewares=traefik-auth@docker"
 
   web:
+    image: registry.osiris.services/anubis/web:latest
     build: ./web
-    restart: always
+    restart: on-failure
     networks:
       - traefik-proxy
     labels:
@@ -186,109 +165,12 @@ services:
       - "traefik.http.routers.web-public.tls.certresolver=tls"
       - "traefik.http.middlewares.web-public.redirectscheme.scheme=https"
 
-  ###################################################################################
-  # Bomblab
-
-  bomblab-report:
-    build:
-      context: ./bomblab
-      dockerfile: Dockerfile.reportd
-    restart: 'always'
-    environment:
-      - "DOMAIN=${BOMBLAB_DOMAIN}"
-      - "MAIN_DOMAIN=${DOMAIN}"
-    volumes:
-      - 'bomb_data:/opt/app/DATA'
-    networks:
-      - traefik-proxy
-
-  bomblab-request:
-    build:
-      context: ./bomblab
-      dockerfile: Dockerfile.requestd
-    restart: 'always'
-    volumes:
-      - 'bomb_data:/opt/app/DATA'
-    labels:
-      - "traefik.http.middlewares.redirect.redirectregex.regex=^http://(.*)"
-      - "traefik.http.middlewares.redirect.redirectregex.replacement=https://$$1"
-
-      - "traefik.enable=true"
-
-      - "traefik.http.middlewares.request-redir.redirectscheme.scheme=https"
-
-      - "traefik.http.routers.request-router-http.rule=Host(`${BOMBLAB_DOMAIN}`)"
-      - "traefik.http.routers.request-router-http.entrypoints=http"
-      - "traefik.http.routers.request-router-http.middlewares=redirect"
-      - "traefik.http.routers.request-router.rule=Host(`${BOMBLAB_DOMAIN}`)"
-      - "traefik.http.routers.request-router.entrypoints=https"
-      - "traefik.http.routers.request-router.tls.certresolver=tls"
-      - "traefik.http.routers.request-router.middlewares=request-redir@docker"
-
-      - "traefik.http.services.request-router.loadbalancer.server.port=5000"
-    environment:
-      - "DOMAIN=${BOMBLAB_DOMAIN}"
-      - "MAIN_DOMAIN=${DOMAIN}"
-    networks:
-      - traefik-proxy
-
-  bomblab-result:
-    build:
-      context: ./bomblab
-      dockerfile: Dockerfile.resultd
-    volumes:
-      - 'bomb_data:/opt/app/DATA'
-    environment:
-      - "DOMAIN=${BOMBLAB_DOMAIN}"
-      - "MAIN_DOMAIN=${DOMAIN}"
-    restart: 'always'
-    labels:
-      - "traefik.enable=true"
-
-      - "traefik.http.routers.result-router-http.rule=Host(`result.${BOMBLAB_DOMAIN}`)"
-      - "traefik.http.routers.result-router-http.entrypoints=http"
-
-      - "traefik.http.services.result-router.loadbalancer.server.port=5000"
-    networks:
-      - traefik-proxy
-
-  bomblab-bombs:
-    build: ./bomblab/bombs
-    restart: 'always'
-    volumes:
-      - 'bomb_data:/opt/app/DATA'
-    labels:
-      - "traefik.enable=true"
-
-      - "traefik.http.middlewares.bomb-redir.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.bomb-auth.basicauth.users=${AUTH}"
-      - "traefik.http.middlewares.bomb-auth.basicauth.removeheader=true"
-
-      - "traefik.http.routers.bomb-router-http.rule=Host(`bombs.${BOMBLAB_DOMAIN}`)"
-      - "traefik.http.routers.bomb-router-http.entrypoints=http"
-      - "traefik.http.routers.bomb-router-http.middlewares=redirect"
-      - "traefik.http.routers.bomb-router.rule=Host(`bombs.${BOMBLAB_DOMAIN}`)"
-      - "traefik.http.routers.bomb-router.entrypoints=https"
-      - "traefik.http.routers.bomb-router.tls.certresolver=tls"
-      - "traefik.http.routers.bomb-router.middlewares=bomb-redir@docker,bomb-auth@docker"
-
-      - "traefik.http.services.bomb-router.loadbalancer.server.port=5000"
-    environment:
-      - "DOMAIN=bombs.${BOMBLAB_DOMAIN}"
-      - "MAIN_DOMAIN=${DOMAIN}"
-    networks:
-      - traefik-proxy
-
-
 
 networks:
-  traefik-proxy:
-    name: traefik-proxy
-
+  traefik-proxy: {}
 
 volumes:
   traefik_data:
   redis_data:
   db_data:
   el_data:
-  bomb_data:

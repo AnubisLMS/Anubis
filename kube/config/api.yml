@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: anubis
+
+spec:
+  selector:
+    matchLabels:
+      app: api
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      dnsPolicy: ClusterFirst
+      containers:
+      - name: api
+        image: registry.osiris.services/anubis/api:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: web
+          containerPort: 5000
+        env:
+        # Gunicorn workers
+        - name: "WORKERS"
+          value: "8"
+        # sqlalchemy uri
+        - name: "DATABASE_URL"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-uri
+        livenessProbe:
+          exec:
+            command:
+              - curl
+              - http://localhost:5000/
+          initialDelaySeconds: 30
+          periodSeconds: 5
+
+
+      # Mail container
+      - name: smtp
+        image: namshi/smtp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: anubis
+  labels:
+    app: api
+spec:
+  type: NodePort
+  selector:
+    app: api
+  ports:
+  - name: web
+    port: 80
+    targetPort: 5000
