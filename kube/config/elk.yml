@@ -106,6 +106,7 @@ metadata:
   labels:
     app: logstash
 spec:
+  type: NodePort
   selector:
     app: logstash
   ports:
@@ -122,6 +123,7 @@ metadata:
   labels:
     app: elasticsearch
 spec:
+  type: NodePort
   selector:
     app: elasticsearch
   ports:

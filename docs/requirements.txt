@@ -12,3 +12,5 @@ pytz
 python-dateutil
 Flask-Caching
 flask-oauthlib
+jinja2
+docutils

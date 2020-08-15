@@ -1,14 +1,176 @@
 version: '3.7'
 
 services:
+  traefik:
+    image: "traefik:v2.2"
+    restart: on-failure
+    command:
+      - "--api.insecure=true"
+
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      - "--entrypoints.http.http.redirections.entryPoint.to=https"
+      - "--entrypoints.http.http.redirections.entryPoint.scheme=https"
+
+      - "--certificatesresolvers.tls.acme.httpchallenge=true"
+      - "--certificatesresolvers.tls.acme.httpchallenge.entrypoint=http"
+      - "--certificatesresolvers.tls.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.tls.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "traefik_data:/letsencrypt"
+    networks:
+      - traefik-proxy
+    labels:
+      - "traefik.enable=false"
+
+  db:
+    build: ./db
+    restart: on-failure
+    dns: [8.8.8.8]
+    ports:
+      - "127.0.0.1:3306:3306"
+    environment:
+      - "MYSQL_ROOT_PASSWORD=anbis"
+      - "MYSQL_DATABASE=anubis"
+      - "MYSQL_USER=anubis"
+    volumes:
+      - "db_data:/var/lib/mysql"
+    networks:
+      - traefik-proxy
+    labels:
+      - "traefik.enable=false"
+
   api:
     image: registry.osiris.services/anubis/api:latest
     build: ./api
+    restart: on-failure
+    volumes:
+      - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
+    networks:
+      - traefik-proxy
+    depends_on: [db]
+    labels:
+      - "traefik.enable=true" 
 
-  web:
-    image: registry.osiris.services/anubis/web:latest
-    build: ./web
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${AUTH}"
+      - "traefik.http.middlewares.traefik-auth.basicauth.removeheader=true"
+
+      - "traefik.http.services.api.loadbalancer.server.port=5000"
+
+      # private route with auth
+      - "traefik.http.routers.api-private.rule=Host(`api.localhost`) && PathPrefix(`/private/`)"
+      - "traefik.http.routers.api-private.entrypoints=https"
+      - "traefik.http.routers.api-private.tls.certresolver=tls"
+      - "traefik.http.middlewares.api-private.redirectscheme.scheme=https"
+      - "traefik.http.routers.api-private.middlewares=traefik-auth@docker"
+
+      # Public router without auth
+      - "traefik.http.routers.api-public.rule=Host(`api.localhost`)"
+      - "traefik.http.routers.api-public.entrypoints=https"
+      - "traefik.http.routers.api-public.tls.certresolver=tls"
+      - "traefik.http.middlewares.api-public.redirectscheme.scheme=https"
+
+  redis:
+    image: redis:5
+    restart: on-failure
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - traefik-proxy
+    volumes:
+      - "redis_data:/data"
+    labels:
+      - "traefik.enable=false"
+
+  worker:
+    build: api
+    restart: on-failure
+    command: rq worker -u redis://redis
+    user: root
+    networks:
+      - traefik-proxy
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:rw"
+    labels:
+      - "traefik.enable=false"
+
+  smtp:
+    image: namshi/smtp
+    restart: on-failure
+    networks:
+      - traefik-proxy
+
+  elasticsearch:
+    image: elasticsearch:7.5.2
+    restart: on-failure
+    environment:
+      - "discovery.type=single-node"
+    volumes:
+      - el_data:/usr/share/elasticsearch/data
+      - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
+    networks:
+      - traefik-proxy
+    labels:
+      - "traefik.enable=false"
 
   logstash:
     image: registry.osiris.services/anubis/logstash:latest
     build: ./logstash
+    networks:
+      - traefik-proxy
+    labels:
+      - "traefik.enable"
+
+  kibana:
+    image: kibana:7.5.2
+    restart: on-failure
+    networks:
+      - traefik-proxy
+    volumes:
+      - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.services.kibana.loadbalancer.server.port=5601"
+
+      - "traefik.http.routers.kibana.rule=Host(`kibana.localhost`)"
+      - "traefik.http.routers.kibana.entrypoints=https"
+      - "traefik.http.routers.kibana.tls.certresolver=tls"
+      - "traefik.http.middlewares.kibana.redirectscheme.scheme=https"
+
+  web:
+    image: registry.osiris.services/anubis/web:latest
+    build: ./web
+    restart: on-failure
+    networks:
+      - traefik-proxy
+    labels:
+      - "traefik.enable=true"
+      
+      - "traefik.http.routers.web-http.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.web-http.entrypoints=http"
+      - "traefik.http.routers.web-http.middlewares=redirect"      
+
+      - "traefik.http.services.web.loadbalancer.server.port=3000"
+
+      - "traefik.http.routers.web-public.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.web-public.entrypoints=https"
+      - "traefik.http.routers.web-public.tls.certresolver=tls"
+      - "traefik.http.middlewares.web-public.redirectscheme.scheme=https"
+
+
+networks:
+  traefik-proxy: {}
+
+volumes:
+  traefik_data:
+  redis_data:
+  db_data:
+  el_data:

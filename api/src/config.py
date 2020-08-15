@@ -5,7 +5,7 @@ class Config:
     SECRET_KEY = os.urandom(32)
 
     # sqlalchemy
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:password@{}/os'.format(
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://anubis:anubis@{}/anubis'.format(
         os.environ.get('DB_HOST', 'db')
     )
     SQLALCHEMY_POOL_PRE_PING = True

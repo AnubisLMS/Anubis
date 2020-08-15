@@ -59,6 +59,7 @@ metadata:
   labels:
     app: api
 spec:
+  type: NodePort
   selector:
     app: api
   ports:

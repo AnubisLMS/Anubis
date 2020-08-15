@@ -1,0 +1,3 @@
+[submodule "docs/m.css"]
+	path = docs/m.css
+	url = git@github.com:mosra/m.css.git
