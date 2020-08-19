@@ -1,140 +1,23 @@
 import hashlib
 import random
 import time
-from datetime import datetime
 
 from sqlalchemy.exc import IntegrityError
 
-from .app import db
-
-
-class Student(db.Model):
-    __tablename__ = 'student'
-    id = db.Column(db.Integer, primary_key=True)
-    netid = db.Column(db.String(128), index=True)
-    github_username = db.Column(db.String(128), index=True)
-    name = db.Column(db.String(128))
-
-    @property
-    def json(self):
-        return {
-            'id': self.id,
-            'netid': self.netid,
-            'github_username': self.github_username,
-            'name': self.name,
-        }
-
-
-class Submissions(db.Model):
-    """
-    Submissions
-    """
-    __tablename__ = 'submissions'
-    id = db.Column(db.Integer, primary_key=True)
-    studentid = db.Column(db.Integer, db.ForeignKey('student.id'), index=True, nullable=True)
-    assignmentid = db.Column(db.Integer, db.ForeignKey('assignments.id'), index=True, nullable=False)
-    github_username = db.Column(db.String(128), nullable=False)
-    repo = db.Column(db.String(128), nullable=False)
-    commit = db.Column(db.String(128), unique=True, index=True, nullable=False)
-    processed = db.Column(db.Boolean, default=False)
-    timestamp = db.Column(db.DateTime(True), default=datetime.now)
-
-    student = db.relationship('Student', backref='submissions')
-    assignment = db.relationship('Assignment', backref='submissions')
-
-    @property
-    def url(self):
-        return 'https://nyu.cool/view/{}/{}'.format(self.commit, self.netid)
-
-    @property
-    def netid(self):
-        if self.student is not None:
-            return self.student.netid
-        return 'null'
-
-    @property
-    def json(self):
-        return {
-            'id': self.id,
-            'netid': self.netid,
-            'assignment': self.assignment.name,
-            'url': self.url,
-            'commit': self.commit,
-            'processed': self.processed,
-            'timestamp': str(self.timestamp),
-        }
-
-
-class Builds(db.Model):
-    __tablename__ = 'builds'
-    id = db.Column(db.Integer, primary_key=True)
-    submissionid = db.Column(db.Integer, db.ForeignKey('submissions.id'), index=True)
-
-    stdout = db.Column(db.Text)
-
-    submission = db.relationship('Submissions', backref='builds')
-
-    @property
-    def json(self):
-        return {
-            'stdout': self.stdout,
-        }
-
-
-class Tests(db.Model):
-    __tablename__ = 'tests'
-    id = db.Column(db.Integer, primary_key=True)
-    submissionid = db.Column(db.Integer, db.ForeignKey('submissions.id'), index=True)
-
-    stdout = db.Column(db.Text)
-
-    submission = db.relationship('Submissions', backref='tests')
-
-    @property
-    def json(self):
-        return {
-            'stdout': self.stdout
-        }
-
-
-class Reports(db.Model):
-    """
-    Results
-    """
-    __tablename__ = 'reports'
-    id = db.Column(db.Integer, primary_key=True)
-    submissionid = db.Column(db.Integer, db.ForeignKey('submissions.id'))
-    testname = db.Column(db.String(128), index=True)
-    errors = db.Column(db.Text)
-    passed = db.Column(db.Boolean)
-
-    submission = db.relationship('Submissions', backref='reports')
-
-    @property
-    def json(self):
-        return {
-            'testname': self.testname,
-            'errors': self.errors,
-            'passed': self.passed,
-        }
-
-    def __str__(self):
-        return 'testname: {}\nerrors: {}\npassed: {}\n'.format(
-            self.testname,
-            self.errors,
-            self.passed,
-        )
+from .user import User
+from .submission import Submission
+from ..app import db
 
 
 class Assignment(db.Model):
-    __tablename__ = 'assignments'
+    __tablename__ = 'assignment'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False, unique=True)
     due_date = db.Column(db.DateTime(True), nullable=False)
     grace_date = db.Column(db.DateTime(True), nullable=False)
 
     @property
-    def json(self):
+    def data(self):
         return {
             'id': self.id,
             'name': self.name,
@@ -143,31 +26,25 @@ class Assignment(db.Model):
         }
 
 
-class Errors(db.Model):
-    __tablename__ = 'errors'
+class AssignmentTest(db.Model):
+    __tablename__ = 'assignment_test'
     id = db.Column(db.Integer, primary_key=True)
-    submissionid = db.Column(db.Integer, db.ForeignKey('submissions.id'), index=True)
-
-    message = db.Column(db.Text)
-
-    submission = db.relationship('Submissions', backref='errors')
-
-    @property
-    def json(self):
-        return {
-            'message': self.message,
-        }
+    submission_id = db.Column(db.Integer, db.ForeignKey(Submission.id))
+    name = db.Column(db.String(128), index=True)
 
 
-class FinalQuestions(db.Model):
-    __tablename__ = 'finalquestions'
+class AssignmentQuestion(db.Model):
+    __tablename__ = 'assignment_question'
     id = db.Column(db.Integer, primary_key=True)
+    assignemnt_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), index=True)
     content = db.Column(db.Text, unique=True, nullable=False)
     solution = db.Column(db.Text, nullable=True)
     level = db.Column(db.Integer, index=True, nullable=False)
 
+    assignment = db.relationship(Assignment, backref='questions')
+
     @property
-    def json(self):
+    def data(self):
         return {
             'id': self.id,
             'content': self.content,
@@ -176,15 +53,16 @@ class FinalQuestions(db.Model):
         }
 
 
-class StudentFinalQuestions(db.Model):
-    studentid = db.Column(db.Integer, db.ForeignKey('student.id'), primary_key=True)
+class StudentQuestion(db.Model):
+    __tablename__ = 'student_question'
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), primary_key=True)
     question1id = db.Column(db.Integer, db.ForeignKey('finalquestions.id'))
     question2id = db.Column(db.Integer, db.ForeignKey('finalquestions.id'))
     question3id = db.Column(db.Integer, db.ForeignKey('finalquestions.id'))
     question4id = db.Column(db.Integer, db.ForeignKey('finalquestions.id'))
     code = db.Column(db.Text, unique=True, nullable=False)
 
-    student = db.relationship('Student', backref='finalquestions')
+    student = db.relationship('Student', backref='assignment_questions')
 
     @staticmethod
     def populate_codes():
@@ -202,9 +80,9 @@ class StudentFinalQuestions(db.Model):
         """
         timestamp = time.time()
         sha256 = lambda s: hashlib.sha256(str(s).encode()).hexdigest()
-        for student in Student.query.all():
+        for student in User.query.all():
             netid = student.netid
-            if StudentFinalQuestions.query.filter_by(studentid=student.id).first() is not None:
+            if StudentQuestion.query.filter_by(studentid=student.id).first() is not None:
                 # skip if student data already present
                 continue
             code = sha256('{}{}{}'.format(
@@ -212,7 +90,7 @@ class StudentFinalQuestions(db.Model):
                 timestamp,
                 random.getrandbits(100)
             ))
-            sfq = StudentFinalQuestions(
+            sfq = StudentQuestion(
                 studentid=student.id,
                 code=code
             )
@@ -249,8 +127,8 @@ class StudentFinalQuestions(db.Model):
         :param overwrite: bool to indicate if we should overwrite existing data
         :return: dict as specified above
         """
-        if len(StudentFinalQuestions.query.all()) == 0:
-            err = StudentFinalQuestions.populate_codes()
+        if len(StudentQuestion.query.all()) == 0:
+            err = StudentQuestion.populate_codes()
             if not err:
                 return {
                     'success': False,
@@ -273,13 +151,13 @@ class StudentFinalQuestions(db.Model):
         """
         questions = {
             level: list(map(
-                lambda q: q.json,
-                FinalQuestions.query.filter_by(level=level).all()
+                lambda q: q.data,
+                AssignmentQuestion.query.filter_by(level=level).all()
             ))
             for level in range(1, 5)
         }
 
-        for sfq in StudentFinalQuestions.query.all():
+        for sfq in StudentQuestion.query.all():
             # don't overwrite existing student questions on accident
             if overwrite or not sfq.is_populated:
                 sfq.question1id = random.choice(questions[1])['id']
@@ -320,14 +198,14 @@ class StudentFinalQuestions(db.Model):
         :return: list of Final question objects
         """
         return [
-            FinalQuestions.query.filter_by(id=self.question1id).first(),
-            FinalQuestions.query.filter_by(id=self.question2id).first(),
-            FinalQuestions.query.filter_by(id=self.question3id).first(),
-            FinalQuestions.query.filter_by(id=self.question4id).first(),
+            AssignmentQuestion.query.filter_by(id=self.question1id).first(),
+            AssignmentQuestion.query.filter_by(id=self.question2id).first(),
+            AssignmentQuestion.query.filter_by(id=self.question3id).first(),
+            AssignmentQuestion.query.filter_by(id=self.question4id).first(),
         ]
 
     @property
-    def json(self):
+    def data(self):
         """
         Returns simple dictionary representation of the object.
 
@@ -336,7 +214,7 @@ class StudentFinalQuestions(db.Model):
 
         final_questions = list(sorted(
             map(
-                lambda q: q.json,
+                lambda q: q.data,
                 self.final_questions
             ),
             key=lambda question: question['level']
@@ -344,6 +222,6 @@ class StudentFinalQuestions(db.Model):
 
         return {
             'questions': final_questions,
-            'student': self.student.json,
+            'student': self.student.data,
             'code': self.code
         }

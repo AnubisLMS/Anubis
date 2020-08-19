@@ -1,10 +1,11 @@
 import requests
 from sqlalchemy.exc import IntegrityError
 
+import api.src.utils.elastic
 from .utils import report_error, PipelineException
 from .. import utils
 from ..app import db
-from ..models import Builds
+from ..models.submission import SubmissionBuild
 
 assingment_files = {
     'os3224-assignment-1': ['xv6.img', 'fs.img', 'short', 'long'],
@@ -72,7 +73,7 @@ def build(client, repo_url, submission, volume_name):
             raise PipelineException('build failure')
 
     except PipelineException as e:
-        utils.esindex(
+        api.src.utils.elastic.esindex(
             type='build',
             logs=logs,
             submission=submission.id,
@@ -82,7 +83,7 @@ def build(client, repo_url, submission, volume_name):
 
     except requests.exceptions.ReadTimeout:
         # Kill container if it has reached its timeout
-        utils.esindex(
+        api.src.utils.elastic.esindex(
             type='build-timeout',
             logs=logs,
             submission=submission.id,
@@ -101,7 +102,7 @@ def build(client, repo_url, submission, volume_name):
         container = client.containers.get(name)
         container.remove(force=True)
 
-    b = Builds(
+    b = SubmissionBuild(
         stdout=logs,
         submission=submission
     )

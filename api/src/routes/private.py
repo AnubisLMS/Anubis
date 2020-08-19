@@ -8,8 +8,14 @@ import traceback
 from .messages import err_msg, crit_err_msg, success_msg, code_msg
 from ..app import db, cache
 from ..config import Config
-from ..models import Submissions, Reports, Student, Assignment, Errors, FinalQuestions, StudentFinalQuestions
-from ..utils import enqueue_webhook_job, log_event, send_noreply_email, esindex, json, regrade_submission
+from ..models.submission import Submission, SubmissionTestResult, SubmissionBuild
+from ..models.assignment import StudentQuestion, Assignment, AssignmentQuestion
+from ..models.user import User
+from ..utils.redis_queue import enqueue_webhook_job
+from ..utils.data import json, regrade_submission, send_noreply_email
+from ..utils.elastic import log_event, esindex
+
+import logging
 
 private = Blueprint('private', __name__, url_prefix='/private')
 
@@ -20,14 +26,14 @@ def fix_dangling():
     student values now exist. Then enqueue them.
     """
 
-    dangling = Submissions.query.filter_by(
+    dangling = Submission.query.filter_by(
         studentid=None
     ).all()
 
     fixed = []
 
     for d in dangling:
-        s = Student.query.filter_by(
+        s = User.query.filter_by(
             github_username=d.github_username
         ).first()
         d.student = s
@@ -40,7 +46,7 @@ def fix_dangling():
         if s is not None:
             fixed.append({
                 'submission': d.json,
-                'student': s.json,
+                'student': d.json,
             })
             enqueue_webhook_job(d.id)
     return fixed
@@ -69,7 +75,7 @@ def handle_report_panic():
     """
 
     req = request.json
-    submission = Submissions.query.filter_by(
+    submission = Submission.query.filter_by(
         id=req['submission_id'],
     ).first()
 
@@ -89,16 +95,7 @@ def handle_report_panic():
         commit=submission.commit,
     )
 
-    e = Errors(
-        message=msg,
-        submission=submission,
-    )
-
-    db.session.add(e)
-    try:
-        db.session.commit()
-    except IntegrityError:
-        db.session.rollback()
+    logging.error(msg, extra={'type': 'panic'})
 
     esindex(
         'email',
@@ -155,7 +152,7 @@ def handle_report_error():
     through a noreply email.
     """
     req = request.json
-    submission = Submissions.query.filter_by(
+    submission = Submission.query.filter_by(
         id=req['submission_id'],
     ).first()
 
@@ -185,16 +182,7 @@ def handle_report_error():
         passed=0
     )
 
-    e = Errors(
-        message=msg,
-        submission=submission,
-    )
-
-    db.session.add(e)
-    try:
-        db.session.commit()
-    except IntegrityError:
-        db.session.rollback()
+    logging.error(msg, extra={'type': 'non-critical'})
 
     return {
         'success': True
@@ -226,7 +214,7 @@ def handle_report():
     """
     report = request.json
 
-    submission = Submissions.query.filter_by(
+    submission = Submission.query.filter_by(
         id=report['submission_id']
     ).first()
 
@@ -239,7 +227,7 @@ def handle_report():
         db.session.rollback()
 
     reports = [
-        Reports(
+        SubmissionTestResult(
             testname=result['name'],
             errors=dumps(result['errors']),
             passed=result['passed'],
@@ -270,6 +258,8 @@ def handle_report():
         build=build.stdout,
     )
 
+    logging.info(msg, extra={'type': 'report'})
+
     esindex(
         index='submission',
         processed=1,
@@ -296,9 +286,9 @@ def ls():
     There is a chance that some of the submissions will be stale.
     """
 
-    active = Submissions.query.filter(
-        Submissions.studentid != None,
-        Submissions.processed == False,
+    active = Submission.query.filter(
+        Submission.student_id != None,
+        Submission.processed == False,
     ).all()
 
     return [a.json for a in active]
@@ -314,10 +304,10 @@ def dangling():
     submitted the assignment.
     """
 
-    dangling = Submissions.query.filter(
-        Submissions.studentid == None,
+    dangling = Submission.query.filter(
+        Submission.student_id == None,
     ).all()
-    dangling = [a.json for a in dangling]
+    dangling = [api.src.utils.data.json for a in dangling]
 
     return {
         "success": True,
@@ -356,7 +346,7 @@ def regrade_all(assignment_name):
             'error': ['cant find assignment']
         }
 
-    submission = Submissions.query.filter_by(
+    submission = Submission.query.filter_by(
         assignment=assignment
     ).all()
 
@@ -387,9 +377,9 @@ def handle_student():
     if request.method == 'POST':
         body = request.json
         for student in body:
-            s = Student.query.filter_by(netid=student['netid']).first()
+            s = User.query.filter_by(netid=student['netid']).first()
             if s is None:
-                s = Student(
+                s = User(
                     netid=student['netid'],
                     github_username=student['github_username'],
                     name=student['name'] if 'name' in student else student['first_name'] + ' ' + student['last_name'],
@@ -410,7 +400,7 @@ def handle_student():
         'success': True,
         'data': list(map(
             lambda x: x.json,
-            Student.query.all()
+            User.query.all()
         )),
         'dangling': fix_dangling()
     }
@@ -489,13 +479,13 @@ def handle_assignment():
         return {
             'success': True,
             'msg': 'Assignment updated',
-            'data': a.json,
+            'data': a.data,
         }
     elif action == 'ls':
         assignments = Assignment.query.all()
         return {
             'success': True,
-            'data': list(map(lambda x: x.json, assignments))
+            'data': list(map(lambda x: x.data, assignments))
         }
     return {
         'success': False,
@@ -507,7 +497,7 @@ def handle_assignment():
 def stats_for(studentid, assignmentid):
     best = None
     best_count = -1
-    for submission in Submissions.query.filter_by(
+    for submission in Submission.query.filter_by(
             assignmentid=assignmentid,
             studentid=studentid,
             processed=True,
@@ -524,7 +514,7 @@ def stats_for(studentid, assignmentid):
 
 @cache.cached(timeout=30)
 def get_students():
-    return [s.json for s in Student.query.all()]
+    return [s.data for s in User.query.all()]
 
 
 @private.route('/stats/<assignment_name>')
@@ -564,7 +554,7 @@ def stats(assignment_name, netid=None):
             # no submission
             bests[netid] = None
         else:
-            submission = Submissions.query.filter_by(
+            submission = Submission.query.filter_by(
                 id=submissionid
             ).first()
             build = len(submission.builds) > 0
@@ -572,9 +562,9 @@ def stats(assignment_name, netid=None):
             late = 'past due' if assignment.due_date < submission.timestamp else False
             late = 'past grace' if assignment.grace_date < submission.timestamp else late
             bests[netid] = {
-                'submission': submission.json,
+                'submission': submission.data,
                 'builds': build,
-                'reports': [rep.json for rep in submission.reports],
+                'reports': [rep.data for rep in submission.reports],
                 'total_tests_passed': best_count,
                 'repo_url': submission.repo,
                 'master': 'https://github.com/{}'.format(
@@ -663,12 +653,12 @@ def priv_finalquestions():
                 if 'content' not in question or 'level' not in question:
                     db.session.rollback()
                     return invalid_format
-                q = FinalQuestions.query.filter_by(content=question['content']).first()
+                q = AssignmentQuestion.query.filter_by(content=question['content']).first()
                 if q is not None:
                     # update level and solution if question exists
                     q.level = question['level']
                 else:
-                    q = FinalQuestions(
+                    q = AssignmentQuestion(
                         content=question['content'],
                         level=question['level'],
                     )
@@ -683,14 +673,14 @@ def priv_finalquestions():
             unable_to_complete['traceback'] = traceback.format_exc()
             return unable_to_complete
 
-        r = StudentFinalQuestions.populate()
+        r = StudentQuestion.populate()
         if not r['success']:
             return r
 
     return {
         'data': {
-            sfq.student.netid: sfq.json
-            for sfq in StudentFinalQuestions.query.all()
+            sfq.student.netid: sfq.data
+            for sfq in StudentQuestion.query.all()
         },
         'success': True
     }
@@ -742,15 +732,15 @@ def priv_overwritefq():
     :return: json of shape specified above
     """
 
-    r = StudentFinalQuestions.populate(overwrite=True)
+    r = StudentQuestion.populate(overwrite=True)
 
     if not r['success']:
         return r
 
     return {
         'data': {
-            sfq.student.netid: sfq.json
-            for sfq in StudentFinalQuestions.query.all()
+            sfq.student.netid: sfq.data
+            for sfq in StudentQuestion.query.all()
         },
         'success': True
     }
@@ -766,7 +756,7 @@ def priv_sendcodes():
     :return: json indicating success for failure
     """
 
-    for sfq in StudentFinalQuestions.query.all():
+    for sfq in StudentQuestion.query.all():
         student_name = sfq.student.name
         netid = sfq.student.netid
         code = sfq.code

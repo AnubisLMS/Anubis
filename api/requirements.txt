@@ -12,3 +12,7 @@ pytz
 python-dateutil
 Flask-Caching
 flask-oauthlib
+python-magic
+sqlalchemy-json
+flask_limiter
+pyjwt

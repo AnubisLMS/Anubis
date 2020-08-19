@@ -4,9 +4,16 @@ import time
 from flask import request, redirect, Blueprint
 from sqlalchemy.exc import IntegrityError
 
+import api.src.utils.data
 from ..app import db, cache
-from ..models import Submissions, Student, Assignment, StudentFinalQuestions
-from ..utils import enqueue_webhook_job, log_event, esindex, regrade_submission, json
+from ..models.user import User
+from ..models.submission import Submission
+from ..models.assignment import StudentQuestion, Assignment
+from ..utils.data import json_response, regrade_submission, enqueue_webhook_job
+from ..utils.elastic import log_event, esindex
+import logging
+from ..utils.http import get_request_ip
+from ..utils.data import error_response, success_response
 
 public = Blueprint('public', __name__, url_prefix='/public')
 
@@ -21,85 +28,65 @@ def webhook_log_msg():
 @public.route('/memes')
 @log_event('rick-roll', lambda: 'rick-roll')
 def handle_memes():
+    logging.info('rick-roll')
     return redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
 
 
-@public.route('/regrade/<commit>/<netid>')
+@public.route('/regrade/<commit>')
 @log_event('regrade-request', lambda: 'submission regrade request ' + request.path)
-@json
-def handle_regrade(commit=None, netid=None):
+@json_response
+def handle_regrade(commit=None):
     """
     This route will get hit whenever someone clicks the regrade button on a
     processed assignment. It should do some validity checks on the commit and
     netid, then reset the submission and re-enqueue the submission job.
     """
-    if commit is None or netid is None:
-        return {
-            'success': False,
-            'error': 'incomplete request',
-        }
+    if commit is None:
+        return error_response('incomplete_request'), 406
 
-    student = Student.query.filter_by(netid=netid).first()
-    if student is None:
-        return {
-            'success': False,
-            'errors': 'invalid commit hash or netid'
-        }
-
-    submission = Submissions.query.filter_by(
-        studentid=student.id,
-        commit=commit,
+    # Find the submission
+    submission: Submission = Submission.query.filter_by(
+        commit=commit
     ).first()
 
-    if submission is None:
-        return {
-            'success': False,
-            'error': 'invalid commit hash or netid'
-        }
+    # Load current user
+    student: User = User.current_user()
 
+    # Verify Ownership
+    if student is None or submission is None or submission.student_id != student.id:
+        return error_response('invalid commit hash or netid'), 406
+
+    # Regrade
     return regrade_submission(submission)
 
 
-@public.route('/submissions/<commit>/<netid>')
+@public.route('/submissions/<commit>')
 @log_event('submission-request', lambda: 'specifc submission request ' + request.path)
-@cache.memoize(timeout=2)
-@json
-def handle_submission(commit=None, netid=None):
-    if commit is None or netid is None:
-        return {
-            'success': False,
-            'error': 'missing commit or netid',
-        }
-    submission = Submissions.query.filter_by(
+@json_response
+def handle_submission(commit=None):
+    if commit is None:
+        return error_response('missing commit or netid')
+    submission = Submission.query.filter_by(
         commit=commit
     ).first()
+    student: User = User.current_user()
     if submission is None:
-        return {
-            'success': False,
-            'error': 'invalid commit hash or netid',
-        }
-    if submission.netid != netid:
-        return {
-            'success': False,
-            'error': 'invalid commit hash or netid'
-        }
+        return error_response('invalid commit hash or netid')
+    if submission.student_id != student.id:
+        return error_response('invalid commit hash or netid')
 
-    return {
-        'data': {
-            'submission': submission.json,
-            'reports': [r.json for r in submission.reports],
-            'tests': submission.tests[0].stdout if len(submission.tests) > 0 else False,
-            'build': submission.builds[0].stdout if len(submission.builds) > 0 else False,
-            'errors': submission.errors[0].message if len(submission.errors) > 0 else False,
-        },
-        'success': True
-    }
+    assignment = submission.assignment
+
+    return success_response({
+        'submission': submission.data,
+        'assignment': assignment.data,
+    })
 
 
 # dont think we need GET here
 @public.route('/webhook', methods=['POST'])
 @log_event('job-request', webhook_log_msg)
-@json
+@json_response
 def webhook():
     """
     This route should be hit by the github when a push happens.
@@ -123,16 +110,16 @@ def webhook():
                 repo_url=repo_url,
                 assignment=str(assignment)
             )
-            return {'success': False, 'error': ['initial commit or push to master']}
+            return error_response('initial commit or push to master')
 
         if assignment is None:
-            return {'success': False, 'error': ['assignment not found']}
+            return error_response('assignment not found')
 
         if not data['repository']['full_name'].startswith('os3224/'):
-            return {'success': False, 'error': ['invalid repo']}
+            return error_response('invalid repo')
 
         try:
-            submission = Submissions(
+            submission = Submission(
                 assignment=assignment,
                 commit=commit,
                 repo=repo_url,
@@ -147,10 +134,10 @@ def webhook():
                 submission=None,
                 netid=None,
             )
-            return {'success': False, 'error': ['integrity error']}
+            return error_response('unable to commit')
 
         try:
-            student = Student.query.filter_by(
+            student = User.query.filter_by(
                 github_username=github_username,
             ).first()
         except IntegrityError as e:
@@ -162,10 +149,10 @@ def webhook():
                 submission=None,
                 netid=None,
             )
-            return {'success': False, 'error': ['integrity error']}
+            return error_response('unable to commit')
 
         if student is not None:
-            submission.studentid = student.id
+            submission.student_id = student.id
             esindex(
                 index='submission',
                 processed=0,
@@ -179,7 +166,7 @@ def webhook():
         else:
             esindex(
                 'dangling',
-                submission=submission.json,
+                submission=submission.data,
             )
 
         try:
@@ -194,10 +181,10 @@ def webhook():
                 submission=None,
                 netid=None,
             )
-            return {'success': False, 'errors': ['integrity error']}
+            return error_response('unable to commit')
 
         # if the github username is not found, create a dangling submission
-        if submission.studentid:
+        if submission.student_id:
             enqueue_webhook_job(submission.id)
         else:
             esindex(
@@ -207,13 +194,13 @@ def webhook():
                 neitd=None,
             )
 
-    return {
-        'success': True
-    }
+    return success_response({
+        'message': 'webhook successful'
+    })
 
 
 @public.route('/finalquestions/<netid>/<code>')
-@json
+@json_response
 def pub_finalquestions(netid, code):
     """
     This is the route that the frontend will hit to get
@@ -250,33 +237,26 @@ def pub_finalquestions(netid, code):
     :param code: sha256 hash that was emailed to student
     :return: json specified above
     """
-    unable_to_complete = {
-        'success': False,
-        'error': 'unable to complete request'
-    }
 
     # Mon May 18 2020 09:00:00 GMT-0400 (Eastern Daylight Time)
     if int(time.time()) <= 1589806800:
-        return unable_to_complete
+        return error_response('unable to complete request')
 
     if netid is None or code is None:
-        return {
-            'success': False,
-            'error': 'missing fields'
-        }
+        return error_response('missing fields')
 
-    student = Student.query.filter_by(netid=netid).first()
+    student = User.query.filter_by(netid=netid).first()
     if student is None:
-        return unable_to_complete
+        return error_response('unable to complete request')
 
-    sfq = StudentFinalQuestions.query.filter_by(
+    sfq: StudentQuestion = StudentQuestion.query.filter_by(
         student=student,
         code=code,
     ).first()
     if sfq is None:
-        return unable_to_complete
+        return error_response('unable to complete request')
 
-    res = sfq.json
+    res = sfq.data
 
     for i in res['questions']:
         del i['id']
@@ -286,7 +266,5 @@ def pub_finalquestions(netid, code):
     del res['student']['id']
     del res['student']['github_username']
 
-    res['success'] = True
-
-    return res
+    return success_response(res)
 
