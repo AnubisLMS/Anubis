@@ -15,7 +15,7 @@ public = Blueprint('public', __name__, url_prefix='/public')
 
 def webhook_log_msg():
     if request.headers.get('Content-Type', None) == 'application/json' and \
-    request.headers.get('X-GitHub-Event', None) == 'push':
+            request.headers.get('X-GitHub-Event', None) == 'push':
         return request.json['pusher']['name']
     return None
 

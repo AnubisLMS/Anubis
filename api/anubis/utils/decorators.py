@@ -4,8 +4,8 @@ from functools import wraps
 from flask import request
 
 from anubis.models import User
-from anubis.utils.data import error_response
 from anubis.utils.auth import current_user
+from anubis.utils.data import error_response
 
 
 def load_from_id(model, verify_owner=True):

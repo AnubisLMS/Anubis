@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 import jwt
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_json import MutableJson
+
 from anubis.config import Config
-from sqlalchemy.exc import IntegrityError
 
 db = SQLAlchemy()
 

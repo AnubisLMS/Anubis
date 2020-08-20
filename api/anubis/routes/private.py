@@ -7,10 +7,10 @@ from flask import request, Blueprint
 from sqlalchemy.exc import IntegrityError
 
 from anubis.config import Config
-from anubis.models import db
-from anubis.models import User
 from anubis.models import Assignment, AssignmentQuestion, AssignedStudentQuestion
 from anubis.models import Submission, SubmissionTestResult
+from anubis.models import User
+from anubis.models import db
 from anubis.routes.messages import err_msg, crit_err_msg, success_msg, code_msg
 from anubis.utils.cache import cache
 from anubis.utils.data import json_response, regrade_submission, send_noreply_email
@@ -57,9 +57,9 @@ def stats_for(studentid, assignmentid):
     best = None
     best_count = -1
     for submission in Submission.query.filter_by(
-    assignmentid=assignmentid,
-    studentid=studentid,
-    processed=True,
+            assignmentid=assignmentid,
+            studentid=studentid,
+            processed=True,
     ).all():
         correct_count = sum(map(
             lambda rep: 1 if rep.passed else 0,
