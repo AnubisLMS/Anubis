@@ -7,7 +7,7 @@ from smtplib import SMTP
 from flask import Response, request
 from sqlalchemy.exc import IntegrityError
 
-from api.src import db
+from api.anubis import db
 from .redis_queue import enqueue_webhook_job
 
 

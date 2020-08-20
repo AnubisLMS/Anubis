@@ -4,7 +4,7 @@ from typing import Union
 import jwt
 from flask import request
 
-from api.src import db
+from api.anubis import db
 
 
 class User(db.Model):
@@ -43,6 +43,7 @@ class User(db.Model):
             return None
 
         try:
+            # TODO update secret key
             decoded = jwt.decode(token, 'secret', algorithms=['HS256'])
         except Exception as e:
             return None
@@ -57,6 +58,7 @@ class User(db.Model):
         return jwt.encode({
             'netid': self.netid,
             # 'exp': datetime.utcnow() + timedelta(weeks=4),
+            # TODO update secret key
         }, 'secret', algorithm='HS256').decode()
 
     @property

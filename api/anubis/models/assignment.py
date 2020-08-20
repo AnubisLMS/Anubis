@@ -31,6 +31,7 @@ class AssignmentTest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     submission_id = db.Column(db.Integer, db.ForeignKey(Submission.id))
     name = db.Column(db.String(128), index=True)
+    #TODO Add relationship
 
 
 class AssignmentQuestion(db.Model):

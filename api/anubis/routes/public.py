@@ -4,7 +4,7 @@ import time
 from flask import request, redirect, Blueprint
 from sqlalchemy.exc import IntegrityError
 
-import api.src.utils.data
+import api.anubis.utils.data
 from ..app import db, cache
 from ..models.user import User
 from ..models.submission import Submission

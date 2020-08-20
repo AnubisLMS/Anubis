@@ -1,7 +1,7 @@
 import requests
 from sqlalchemy.exc import IntegrityError
 
-import api.src.utils.elastic
+import api.anubis.utils.elastic
 from .utils import report_error, PipelineException
 from .. import utils
 from ..app import db
@@ -73,7 +73,7 @@ def build(client, repo_url, submission, volume_name):
             raise PipelineException('build failure')
 
     except PipelineException as e:
-        api.src.utils.elastic.esindex(
+        api.anubis.utils.elastic.esindex(
             type='build',
             logs=logs,
             submission=submission.id,
@@ -83,7 +83,7 @@ def build(client, repo_url, submission, volume_name):
 
     except requests.exceptions.ReadTimeout:
         # Kill container if it has reached its timeout
-        api.src.utils.elastic.esindex(
+        api.anubis.utils.elastic.esindex(
             type='build-timeout',
             logs=logs,
             submission=submission.id,

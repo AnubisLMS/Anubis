@@ -5,7 +5,7 @@ from .clone import clone
 from .report import report
 from .test import test
 from .utils import report_error
-from ..models import Submissions
+from ..models.submission import Submission
 
 """
 This is where we should implement any and all job function for the
@@ -27,7 +27,7 @@ def test_repo(submission_id):
     client = docker.from_env()
     client.volumes.prune()
 
-    submission = Submissions.query.filter_by(
+    submission = Submission.query.filter_by(
         id=submission_id
     ).first()
     repo_url = submission.repo

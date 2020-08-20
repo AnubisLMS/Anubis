@@ -1,7 +1,7 @@
 from redis import Redis
 from rq import Queue
 
-from api.src.jobs import test_repo
+from api.anubis.jobs import test_repo
 
 
 def enqueue(func, *args):
