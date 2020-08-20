@@ -5,6 +5,7 @@ from flask import request, redirect, Blueprint
 from sqlalchemy.exc import IntegrityError
 
 from anubis.models import db, Assignment, Submission, User
+from anubis.utils.auth import current_user
 from anubis.utils.data import error_response, success_response
 from anubis.utils.data import json_response, regrade_submission, enqueue_webhook_job
 from anubis.utils.elastic import log_event, esindex
@@ -44,33 +45,41 @@ def public_regrade_commit(commit=None):
     ).first()
 
     # Load current user
-    student: User = User.current_user()
+    user: User = User.current_user()
 
     # Verify Ownership
-    if student is None or submission is None or submission.student_id != student.id:
+    if user is None or submission is None or submission.owner.id != user.id:
         return error_response('invalid commit hash or netid'), 406
 
     # Regrade
     return regrade_submission(submission)
 
 
-@public.route('/submissions/<commit>')
+@public.route('/submission/<commit>')
 @log_event('submission-request', lambda: 'specifc submission request ' + request.path)
 @json_response
-def public_submissions_commit(commit=None):
-    if commit is None:
-        return error_response('missing commit or netid')
-    submission = Submission.query.filter_by(
-        commit=commit
-    ).first()
-    student: User = User.current_user()
-    if submission is None:
-        return error_response('invalid commit hash or netid')
-    if submission.student_id != student.id:
-        return error_response('invalid commit hash or netid')
+def public_submission_commit(commit):
+    """
+    This endpoint is hit by the frontend when a user clicks on a specific
+    submission. It should provide the basic information about that submission.
 
+    :param commit:
+    :return:
+    """
+    # Verify Commit
+    submission = Submission.query.filter_by(commit=commit).first()
+    if submission is None:
+        return error_response('invalid commit hash or netid'), 406
+
+    # Verify Ownership
+    user: User = User.current_user()
+    if submission.owner.id != user.id:
+        return error_response('invalid commit hash or netid'), 406
+
+    # Get the assignment
     assignment = submission.assignment
 
+    # Return the basic data
     return success_response({
         'submission': submission.data,
         'assignment': assignment.data,
@@ -87,176 +96,124 @@ def public_webhook():
     We should take the the github repo url and enqueue it as a job.
     """
 
-    if request.headers.get('Content-Type', None) == 'application/json' and \
-    request.headers.get('X-GitHub-Event', None) == 'push':
-        data = request.json
+    content_type = request.headers.get('Content-Type', None)
+    x_github_event = request.headers.get('X-GitHub-Event', None)
 
-        repo_url = data['repository']['ssh_url']
-        github_username = data['pusher']['name']
-        commit = data['after']
-        assignment_name = data['repository']['name'][:-(len(github_username) + 1)]
-        assignment = Assignment.query.filter_by(name=assignment_name).first()
+    # Verify some expected headers
+    if not (content_type == 'application/json' and x_github_event == 'push'):
+        return error_response('Unable to verify webhook')
 
-        if data['before'] == '0000000000000000000000000000000000000000' or data['ref'] != 'refs/heads/master':
-            esindex(
-                'new-repo',
-                github_username=github_username,
-                repo_url=repo_url,
-                assignment=str(assignment)
-            )
-            return error_response('initial commit or push to master')
+    webhook = request.json
 
-        if assignment is None:
-            return error_response('assignment not found')
+    # Load the basics from the webhook
+    repo_url = webhook['repository']['ssh_url']
+    github_username = webhook['pusher']['name']
+    commit = webhook['after']
+    assignment_name = webhook['repository']['name'][:-(len(github_username) + 1)]
+    assignment = Assignment.query.filter_by(name=assignment_name).first()
 
-        if not data['repository']['full_name'].startswith('os3224/'):
-            return error_response('invalid repo')
+    # Verify that we can match this push to an assignment
+    if assignment is None:
+        esindex(
+            'error',
+            github_username=github_username,
+            repo_url=repo_url,
+            assignment_name=assignment_name
+        )
+        return error_response('assignment not found')
 
-        try:
-            submission = Submission(
-                assignment=assignment,
-                commit=commit,
-                repo=repo_url,
-                github_username=github_username,
-            )
-        except IntegrityError as e:
-            tb = traceback.format_exc()
-            esindex(
-                'error',
-                type='webhook',
-                logs=tb,
-                submission=None,
-                netid=None,
-            )
-            return error_response('unable to commit')
+    # The before Hash will be all 0s on for the first hash.
+    # We will want to ignore both this first push (the initialization of the repo)
+    # and all branches that are not master.
+    if webhook['before'] == '0000000000000000000000000000000000000000' or webhook['ref'] != 'refs/heads/master':
+        # Record that a new repo was created (and therefore, someone just started their assignment)
+        esindex(
+            'new-repo',
+            github_username=github_username,
+            repo_url=repo_url,
+            assignment=str(assignment)
+        )
+        return success_response('initial commit or push to master')
 
-        try:
-            student = User.query.filter_by(
-                github_username=github_username,
-            ).first()
-        except IntegrityError as e:
-            tb = traceback.format_exc()
-            esindex(
-                'error',
-                type='webhook',
-                logs=tb,
-                submission=None,
-                netid=None,
-            )
-            return error_response('unable to commit')
+    # Make sure that the repo we're about to process actually belongs to our organization
+    if not webhook['repository']['full_name'].startswith('os3224/'):
+        return error_response('invalid repo')
 
-        if student is not None:
-            submission.student_id = student.id
-            esindex(
-                index='submission',
-                processed=0,
-                error=-1,
-                passed=-1,
-                netid=submission.netid,
-                commit=submission.commit,
-                assignment=submission.assignment.name,
-                report=submission.url,
-            )
-        else:
-            esindex(
-                'dangling',
-                submission=submission.data,
-            )
+    # Create a shiny new submission
+    submission = Submission(
+        assignment=assignment,
+        commit=commit,
+        repo=repo_url,
+        github_username=github_username,
+    )
 
-        try:
-            db.session.add(submission)
-            db.session.commit()
-        except IntegrityError as e:
-            tb = traceback.format_exc()
-            esindex(
-                'error',
-                type='webhook',
-                logs=tb,
-                submission=None,
-                netid=None,
-            )
-            return error_response('unable to commit')
+    # Commit submission
+    try:
+        db.session.add(submission)
+        db.session.commit()
+    except IntegrityError:
+        tb = traceback.format_exc()
+        esindex('error', type='webhook', logs=tb, submission=submission, netid=None, )
+        return error_response('unable to commit'), 400
 
-        # if the github username is not found, create a dangling submission
-        if submission.student_id:
-            enqueue_webhook_job(submission.id)
-        else:
-            esindex(
-                type='error',
-                logs='dangling submission by: ' + submission.github_username,
-                submission=submission.id,
-                neitd=None,
-            )
+    # Match the github username in the webhook to
+    # a user in the database (hopefully)
+    user = User.query.filter_by(
+        github_username=github_username,
+    ).first()
 
+    # If a user has not given us their github username
+    # the submission will stay in a "dangling" state
+    if user is None:
+        esindex(
+            type='error',
+            logs='dangling submission by: ' + submission.github_username,
+            submission=submission.id,
+            neitd=None,
+        )
+        return error_response('dangling submission')
+
+    # Associate the submission with the user
+    submission.student_id = user.id
+
+    # Log the submission
+    esindex(
+        index='submission',
+        processed=0,
+        error=-1,
+        passed=-1,
+        netid=submission.netid,
+        commit=submission.commit,
+        assignment=submission.assignment.name,
+        report=submission.url,
+    )
+
+    # Update the submission with the user information
+    try:
+        db.session.add(submission)
+        db.session.commit()
+    except IntegrityError:
+        tb = traceback.format_exc()
+        esindex('error', type='webhook', logs=tb, submission=submission, netid=None)
+        return error_response('unable to commit'), 400
+
+    # if the github username is not found, create a dangling submission
+    enqueue_webhook_job(submission.id)
+
+    return success_response('submission accepted')
+
+
+@public.route('/whoami')
+def public_whoami():
+    """
+    Figure out who you are
+
+    :return:
+    """
+    u: User = current_user()
+    if u is None:
+        return success_response(None)
     return success_response({
-        'message': 'webhook successful'
+        'user': u.data,
+        'classes': list(map(lambda c: c.data, u.classes))
     })
-
-# @public.route('/questions/<str:assignment>')
-# @json_response
-# def public_questions_assignment(assignment):
-#     """
-#     This is the route that the frontend will hit to get
-#     the questions for a given student. Students will enter
-#     their netid and the code that was emailed to them to
-#     get their questions. Only with the correct netid and
-#     code combination will the request be completed.
-#
-#     response is json of shape:
-#
-#     {
-#       questions : [
-#         {
-#           content
-#           level
-#         },
-#         ...
-#       ],
-#       student: {
-#         netid
-#         name
-#       },
-#       success: true
-#     }
-#
-#     or on failure:
-#
-#     {
-#       success: false
-#       error: "..."
-#     }
-#
-#     :param netid: netid of student
-#     :param code: sha256 hash that was emailed to student
-#     :return: json specified above
-#     """
-#
-#     # Mon May 18 2020 09:00:00 GMT-0400 (Eastern Daylight Time)
-#     if int(time.time()) <= 1589806800:
-#         return error_response('unable to complete request')
-#
-#     if netid is None or code is None:
-#         return error_response('missing fields')
-#
-#     student = User.query.filter_by(netid=netid).first()
-#     if student is None:
-#         return error_response('unable to complete request')
-#
-#     sfq: StudentQuestion = StudentQuestion.query.filter_by(
-#         student=student,
-#         code=code,
-#     ).first()
-#     if sfq is None:
-#         return error_response('unable to complete request')
-#
-#     res = sfq.data
-#
-#     for i in res['questions']:
-#         del i['id']
-#         del i['solution']
-#
-#     del res['code']
-#     del res['student']['id']
-#     del res['student']['github_username']
-#
-#     return success_response(res)

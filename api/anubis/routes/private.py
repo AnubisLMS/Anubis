@@ -7,8 +7,10 @@ from flask import request, Blueprint
 from sqlalchemy.exc import IntegrityError
 
 from anubis.config import Config
-from anubis.models import db, Assignment, AssignmentQuestion, AssignmentStudentQuestion, Submission, \
-    SubmissionTestResult, User
+from anubis.models import db
+from anubis.models import User
+from anubis.models import Assignment, AssignmentQuestion, AssignedStudentQuestion
+from anubis.models import Submission, SubmissionTestResult
 from anubis.routes.messages import err_msg, crit_err_msg, success_msg, code_msg
 from anubis.utils.cache import cache
 from anubis.utils.data import json_response, regrade_submission, send_noreply_email
@@ -80,11 +82,11 @@ def private_index():
 
 
 @private.route('/report-panic', methods=['POST'])
-@log_event('panic-report', lambda: 'panic was report from worker ' + dumps(request.json))
+@log_event('panic-report', lambda: 'panic was report from rpc ' + dumps(request.json))
 @json_response
 def private_report_panic():
     """
-    This route will only be hit when there is a panic reported from a worker.
+    This route will only be hit when there is a panic reported from a rpc.
     The difference between an error and a panic is that a panic is an unexpected error.
     This could potentially mean that something in the pipeline is broken. This route
     will notify the admins of the error. We will also let the student know there was an
@@ -150,12 +152,12 @@ def private_report_panic():
 
 
 @private.route('/report-error', methods=['POST'])
-@log_event('error-report', lambda: 'error was report from worker ' + dumps(request.json))
+@log_event('error-report', lambda: 'error was report from rpc ' + dumps(request.json))
 @json_response
 def private_report_error():
     """
-    If at any point, a worker in the rq cluster encounters an error
-    with grading an assignment, the worker should report to this endpoint.
+    If at any point, a rpc in the rq cluster encounters an error
+    with grading an assignment, the rpc should report to this endpoint.
     This does not necessarily mean that something is broken in the cluster.
     errors could include:
 
@@ -212,11 +214,11 @@ def private_report_error():
 
 
 @private.route('/report', methods=['POST'])
-@log_event('report', lambda: 'report from worker submitted for {}'.format(request.json['netid']))
+@log_event('report', lambda: 'report from rpc submitted for {}'.format(request.json['netid']))
 @json_response
 def private_report():
     """
-    TODO redocument and reformat this
+    TODO re-document and reformat this
 
     This endpoint should only ever be hit by the rq workers. This is where
     they should be posting report jsons. We should document the results,
@@ -671,14 +673,14 @@ def private_finalquestions():
             unable_to_complete['traceback'] = traceback.format_exc()
             return unable_to_complete
 
-        r = AssignmentStudentQuestion.populate()
+        r = AssignedStudentQuestion.populate()
         if not r['success']:
             return r
 
     return {
         'data': {
             sfq.student.netid: sfq.data
-            for sfq in AssignmentStudentQuestion.query.all()
+            for sfq in AssignedStudentQuestion.query.all()
         },
         'success': True
     }
@@ -730,7 +732,7 @@ def private_overwrite_final_question():
     :return: json of shape specified above
     """
 
-    r = AssignmentStudentQuestion.populate(overwrite=True)
+    r = AssignedStudentQuestion.populate(overwrite=True)
 
     if not r['success']:
         return r
@@ -738,7 +740,7 @@ def private_overwrite_final_question():
     return {
         'data': {
             sfq.student.netid: sfq.data
-            for sfq in AssignmentStudentQuestion.query.all()
+            for sfq in AssignedStudentQuestion.query.all()
         },
         'success': True
     }
@@ -754,7 +756,7 @@ def private_sendcodes():
     :return: json indicating success for failure
     """
 
-    for sfq in AssignmentStudentQuestion.query.all():
+    for sfq in AssignedStudentQuestion.query.all():
         student_name = sfq.student.name
         netid = sfq.student.netid
         code = sfq.code

@@ -1,7 +1,7 @@
 import requests
 
 from anubis.utils.elastic import esindex
-from anubis.worker.utils import report_panic, PipelineException
+from anubis.rpc.submission_pipeline.utils import report_panic, PipelineException
 
 
 def report(client, repo_url, submission, volume_name):

@@ -25,30 +25,11 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "traefik_data:/letsencrypt"
-    networks:
-      - traefik-proxy
-    labels:
-      - "traefik.enable=false"
-
-  db:
-    build: ./db
-    restart: on-failure
-    dns: [8.8.8.8]
-    ports:
-      - "127.0.0.1:3306:3306"
-    environment:
-      - "MYSQL_ROOT_PASSWORD=anbis"
-      - "MYSQL_DATABASE=anubis"
-      - "MYSQL_USER=anubis"
-    volumes:
-      - "db_data:/var/lib/mysql"
-    networks:
-      - traefik-proxy
     labels:
       - "traefik.enable=false"
 
   api:
-    image: registry.osiris.services/anubis/api:latest
+    image: registry.osiris.services/anubis/api:v2.0.0-alpha
     build: ./api
     restart: on-failure
     command: sh -c "while true; do python3 dev.py; sleep 1; done"
@@ -57,8 +38,6 @@ services:
     volumes:
       - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
       - "./api:/opt/app"
-    networks:
-      - traefik-proxy
     depends_on: [db]
     labels:
       - "traefik.enable=true" 
@@ -67,49 +46,73 @@ services:
       - "traefik.http.middlewares.traefik-auth.basicauth.removeheader=true"
 
       - "traefik.http.services.api.loadbalancer.server.port=5000"
+      - "traefik.http.middlewares.strip-api.stripprefix.prefixes=/api"
 
       # private route with auth
-      - "traefik.http.routers.api-private.rule=Host(`api.localhost`) && PathPrefix(`/private/`)"
+      - "traefik.http.routers.api-private.rule=Host(`localhost`) && PathPrefix(`/api/private/`)"
       - "traefik.http.routers.api-private.entrypoints=https"
       - "traefik.http.routers.api-private.tls.certresolver=tls"
       - "traefik.http.middlewares.api-private.redirectscheme.scheme=https"
-      - "traefik.http.routers.api-private.middlewares=traefik-auth@docker"
+      - "traefik.http.routers.api-private.middlewares=traefik-auth@docker,strip-api@docker"
 
       # Public router without auth
-      - "traefik.http.routers.api-public.rule=Host(`api.localhost`)"
+      - "traefik.http.routers.api-public.rule=Host(`localhost`) && PathPrefix(`/api/public`)"
       - "traefik.http.routers.api-public.entrypoints=https"
       - "traefik.http.routers.api-public.tls.certresolver=tls"
       - "traefik.http.middlewares.api-public.redirectscheme.scheme=https"
+      - "traefik.http.routers.api-private.middlewares=strip-api@docker"
+  
+  web:
+    image: registry.osiris.services/anubis/web:latest
+    build: ./web
+    restart: on-failure
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.services.web.loadbalancer.server.port=3000"
+
+      - "traefik.http.routers.web-public.rule=Host(`localhost`)"
+      - "traefik.http.routers.web-public.entrypoints=https"
+      - "traefik.http.routers.web-public.tls.certresolver=tls"
+
+  db:
+    image: mariadb:10.5.5
+    restart: on-failure
+    dns: [8.8.8.8]
+    ports:
+      - "127.0.0.1:3306:3306"
+    environment:
+      - "MYSQL_ROOT_PASSWORD=anubis"
+      - "MYSQL_DATABASE=anubis"
+      - "MYSQL_USER=anubis"
+    volumes:
+      - "db_data:/var/lib/mysql"
+    labels:
+      - "traefik.enable=false"
 
   redis:
     image: redis:5
     restart: on-failure
     ports:
       - "127.0.0.1:6379:6379"
-    networks:
-      - traefik-proxy
     volumes:
       - "redis_data:/data"
     labels:
       - "traefik.enable=false"
 
-  worker:
-    build: api
-    restart: on-failure
-    command: rq worker -u redis://redis
-    user: root
-    networks:
-      - traefik-proxy
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:rw"
-    labels:
-      - "traefik.enable=false"
+#  rpc:
+#    build: api
+#    restart: on-failure
+#    command: rq rpc -u redis://redis
+#    user: root
+#    volumes:
+#      - "/var/run/docker.sock:/var/run/docker.sock:rw"
+#    labels:
+#      - "traefik.enable=false"
 
   smtp:
     image: namshi/smtp
     restart: on-failure
-    networks:
-      - traefik-proxy
 
   elasticsearch:
     image: elasticsearch:7.5.2
@@ -119,59 +122,23 @@ services:
     volumes:
       - el_data:/usr/share/elasticsearch/data
       - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
-    networks:
-      - traefik-proxy
     labels:
       - "traefik.enable=false"
 
   logstash:
     image: registry.osiris.services/anubis/logstash:latest
     build: ./logstash
-    networks:
-      - traefik-proxy
     labels:
-      - "traefik.enable"
+      - "traefik.enable=false"
 
   kibana:
     image: kibana:7.5.2
     restart: on-failure
-    networks:
-      - traefik-proxy
+    ports:
+      - 127.0.0.1:5601:5601
     volumes:
       - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
-    labels:
-      - "traefik.enable=true"
 
-      - "traefik.http.services.kibana.loadbalancer.server.port=5601"
-
-      - "traefik.http.routers.kibana.rule=Host(`kibana.localhost`)"
-      - "traefik.http.routers.kibana.entrypoints=https"
-      - "traefik.http.routers.kibana.tls.certresolver=tls"
-      - "traefik.http.middlewares.kibana.redirectscheme.scheme=https"
-
-  web:
-    image: registry.osiris.services/anubis/web:latest
-    build: ./web
-    restart: on-failure
-    networks:
-      - traefik-proxy
-    labels:
-      - "traefik.enable=true"
-      
-      - "traefik.http.routers.web-http.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.web-http.entrypoints=http"
-      - "traefik.http.routers.web-http.middlewares=redirect"      
-
-      - "traefik.http.services.web.loadbalancer.server.port=3000"
-
-      - "traefik.http.routers.web-public.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.web-public.entrypoints=https"
-      - "traefik.http.routers.web-public.tls.certresolver=tls"
-      - "traefik.http.middlewares.web-public.redirectscheme.scheme=https"
-
-
-networks:
-  traefik-proxy: {}
 
 volumes:
   traefik_data:

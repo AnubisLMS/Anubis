@@ -1,5 +1,7 @@
 FROM python:3.8-alpine
 
+ENV SECRET_KEY=DEFAULT
+
 WORKDIR /opt/app
 
 COPY requirements.txt requirements.txt

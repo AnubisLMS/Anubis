@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 
 from anubis.models import db, SubmissionTestResult
 from anubis.utils.elastic import esindex
-from anubis.worker.utils import report_error, PipelineException
+from anubis.rpc.submission_pipeline.utils import report_error, PipelineException
 
 
 def test(client, repo_url, submission, volume_name):

@@ -5,6 +5,7 @@ from flask import request
 
 from anubis.models import User
 from anubis.utils.data import error_response
+from anubis.utils.auth import current_user
 
 
 def load_from_id(model, verify_owner=True):
@@ -12,7 +13,7 @@ def load_from_id(model, verify_owner=True):
         @wraps(func)
         def decorator(id, *args, **kwargs):
             r = model.query.filter_by(id=id).first()
-            if r is None or (verify_owner and User.current_user().id != r.owner.id):
+            if r is None or (verify_owner and current_user().id != r.owner.id):
                 logging.info("Unauthenticated GET {}".format(request.path))
                 return error_response("Unable to find"), 400
             return func(r, *args, **kwargs)
@@ -34,7 +35,7 @@ def require_user(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        u = User.current_user()
+        u = current_user()
         if u is None:
             return error_response('Unauthenticated'), 401
         return func(*args, **kwargs)

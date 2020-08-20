@@ -1,41 +1,28 @@
-
-# These variables control the number of instances of the api and
-# the rq workers get created. Take care to gradually move these values
-# up, and not to overload your system.
-#
-# RQ_WORKER_SCALE will be the max number of assignments anubis can process
-# at any given time.
-API_SCALE := 3
-RQ_WORKER_SCALE := 5
+PERSISTENT_SERVICES := db traefik kibana elasticsearch redis smtp logstash
+RESTART_ALWAYS_SERVICES := api web
+PUSH_SERVICES := api web logstash
 
 
 CURRENT_DIR := $(shell basename $$(pwd) | tr '[:upper:]' '[:lower:]')
-
 IMAGES := $(shell \
 	ruby -ryaml -rjson -e 'puts JSON.pretty_generate(YAML.load(ARGF))' \
 	docker-compose.yml | jq '.services | .[].image | select(.!=null)' -r \
 	2> /dev/null \
 )
-
 BUILT_IMAGES := $(shell \
 	docker image ls | \
 	awk '{print $$1}' | \
 	grep -P '^($(CURRENT_DIR)_|os3224-)' \
 	2> /dev/null \
 )
-
 RUNNING_CONTAINERS := $(shell docker-compose ps -q)
-
-API_IP := $(shell docker network inspect traefik-proxy | \
+API_IP := $(shell docker network inspect anubis_default | \
 	jq '.[0].Containers | .[] | select(.Name == "anubis_api_1") | .IPv4Address' -r | \
 	awk '{print substr($$0, 1, index($$0, "/")-1)}' \
 	2> /dev/null \
 )
-
 VOLUMES := $(shell docker volume ls | awk '{if (match($$2, /^anubis_.*$$/)) {print $$2}}')
 
-PERSISTENT_SERVICES := db traefik kibana elasticsearch redis smtp logstash
-RESTART_ALWAYS_SERVICES := api worker web
 
 help:
 	@echo 'For convenience'
@@ -54,6 +41,10 @@ check:
 .PHONY: build        # Build all docker images
 build:
 	docker-compose build --pull --parallel
+
+.PHONY: push         # Push images to registry.osiris.services (requires vpn)
+push:
+	docker-compose push $(PUSH_SERVICES)
 
 .PHONY: db           # Start and initialize the database service
 db:

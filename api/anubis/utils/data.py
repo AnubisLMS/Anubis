@@ -12,39 +12,6 @@ from anubis.models import db
 from anubis.utils.redis_queue import enqueue_webhook_job
 
 
-def jsonify(data):
-    """
-    Wrap a data response to set proper headers for json
-    """
-    res = Response(dumps(data))
-    res.headers['Content-Type'] = 'application/json'
-    res.headers['Access-Control-Allow-Origin'] = 'https://anubis.osiris.services' \
-        if not environ.get('DEBUG', False) \
-        else 'https://localhost'
-    return res
-
-
-def json(func):
-    """
-    Wrap a route so that it always converts data
-    response to proper json.
-
-    @app.route('/')
-    @json
-    def test():
-        return {
-            'success': True
-        }
-    """
-
-    @wraps(func)
-    def json_wrap(*args, **kwargs):
-        data = func(*args, **kwargs)
-        return jsonify(data)
-
-    return json_wrap
-
-
 def regrade_submission(submission):
     """
     Regrade a submission
@@ -94,6 +61,19 @@ def reset_submission(submission):
         db.session.rollback()
         return False
     return True
+
+
+def jsonify(data, status_code=200):
+    """
+    Wrap a data response to set proper headers for json
+    """
+    res = Response(dumps(data))
+    res.status_code = status_code
+    res.headers['Content-Type'] = 'application/json'
+    res.headers['Access-Control-Allow-Origin'] = 'https://nyu.cool' \
+        if not environ.get('DEBUG', False) \
+        else 'https://localhost'
+    return res
 
 
 def json_response(func):
@@ -182,7 +162,7 @@ def error_response(error_message: str) -> dict:
     }
 
 
-def success_response(data: dict) -> dict:
+def success_response(data: Union[dict, str, None]) -> dict:
     """
     Form a success REST api response dict.
 
