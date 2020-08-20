@@ -5,15 +5,13 @@ from flask import request, Blueprint
 from sqlalchemy.exc import IntegrityError
 import traceback
 
-from .messages import err_msg, crit_err_msg, success_msg, code_msg
-from ..app import db, cache
-from ..config import Config
-from ..models.submission import Submission, SubmissionTestResult, SubmissionBuild
-from ..models.assignment import StudentQuestion, Assignment, AssignmentQuestion
-from ..models.user import User
-from ..utils.redis_queue import enqueue_webhook_job
-from ..utils.data import json, regrade_submission, send_noreply_email
-from ..utils.elastic import log_event, esindex
+from anubis.utils.cache import cache
+from anubis.routes.messages import err_msg, crit_err_msg, success_msg, code_msg
+from anubis.config import Config
+from anubis.models import db, Assignment, AssignmentQuestion, StudentQuestion, Submission, SubmissionTestResult, User
+from anubis.utils.redis_queue import enqueue_webhook_job
+from anubis.utils.data import json_response, regrade_submission, send_noreply_email
+from anubis.utils.elastic import log_event, esindex
 
 import logging
 
@@ -51,16 +49,39 @@ def fix_dangling():
             enqueue_webhook_job(d.id)
     return fixed
 
+@cache.memoize(timeout=30)
+def stats_for(studentid, assignmentid):
+    best = None
+    best_count = -1
+    for submission in Submission.query.filter_by(
+            assignmentid=assignmentid,
+            studentid=studentid,
+            processed=True,
+    ).all():
+        correct_count = sum(map(
+            lambda rep: 1 if rep.passed else 0,
+            submission.reports
+        ))
+
+        if correct_count >= best_count:
+            best = submission
+    return best.id if best is not None else None
+
+
+@cache.cached(timeout=30)
+def get_students():
+    return [s.data for s in User.query.all()]
+
 
 @private.route('/')
-def index():
+def private_index():
     return 'super duper secret'
 
 
 @private.route('/report-panic', methods=['POST'])
 @log_event('panic-report', lambda: 'panic was report from worker ' + dumps(request.json))
-@json
-def handle_report_panic():
+@json_response
+def private_report_panic():
     """
     This route will only be hit when there is a panic reported from a worker.
     The difference between an error and a panic is that a panic is an unexpected error.
@@ -129,8 +150,8 @@ def handle_report_panic():
 
 @private.route('/report-error', methods=['POST'])
 @log_event('error-report', lambda: 'error was report from worker ' + dumps(request.json))
-@json
-def handle_report_error():
+@json_response
+def private_report_error():
     """
     If at any point, a worker in the rq cluster encounters an error
     with grading an assignment, the worker should report to this endpoint.
@@ -191,8 +212,8 @@ def handle_report_error():
 
 @private.route('/report', methods=['POST'])
 @log_event('report', lambda: 'report from worker submitted for {}'.format(request.json['netid']))
-@json
-def handle_report():
+@json_response
+def private_report():
     """
     TODO redocument and reformat this
 
@@ -278,8 +299,8 @@ def handle_report():
 
 @private.route('/ls')
 @log_event('cli', lambda: 'ls')
-@json
-def ls():
+@json_response
+def private_ls():
     """
     This route should hand back a json list of all submissions that are marked as
     not processed. Those submissions should be all activly enqueued or be running in tests.
@@ -296,8 +317,8 @@ def ls():
 
 @private.route('/dangling')
 @log_event('cli', lambda: 'dangling')
-@json
-def dangling():
+@json_response
+def private_dangling():
     """
     This route should hand back a json list of all submissions that are dangling.
     Dangling being that we have no netid to match to the github username that
@@ -307,7 +328,7 @@ def dangling():
     dangling = Submission.query.filter(
         Submission.student_id == None,
     ).all()
-    dangling = [api.src.utils.data.json for a in dangling]
+    dangling = [a.data for a in dangling]
 
     return {
         "success": True,
@@ -320,8 +341,8 @@ def dangling():
 
 @private.route('/regrade/<assignment_name>')
 @log_event('cli', lambda: 'regrade')
-@json
-def regrade_all(assignment_name):
+@json_response
+def private_regrade_assignment(assignment_name):
     """
     This route is used to restart / re-enqueue jobs.
 
@@ -369,8 +390,8 @@ def regrade_all(assignment_name):
 
 @private.route('/student', methods=['GET', 'POST'])
 @log_event('cli', lambda: 'student')
-@json
-def handle_student():
+@json_response
+def private_student():
     """
     [{netid, github_username, first_name, last_name, email}]
     """
@@ -408,15 +429,15 @@ def handle_student():
 
 @private.route('/fix-dangling')
 @log_event('cli', lambda: 'fix-dangling')
-@json
-def fix_dangling_route():
+@json_response
+def private_fix_dangling():
     return fix_dangling()
 
 
 @private.route('/assignment', methods=['POST'])
 @log_event('cli', lambda: 'assignment')
-@json
-def handle_assignment():
+@json_response
+def private_assignment():
     """
     This route is a catchall endpoint for creating, modifying or listing assignment data.
     Anubis needs assignment metadata for the due dates and grace dates of assignments. This
@@ -493,36 +514,12 @@ def handle_assignment():
     }
 
 
-@cache.memoize(timeout=30)
-def stats_for(studentid, assignmentid):
-    best = None
-    best_count = -1
-    for submission in Submission.query.filter_by(
-            assignmentid=assignmentid,
-            studentid=studentid,
-            processed=True,
-    ).all():
-        correct_count = sum(map(
-            lambda rep: 1 if rep.passed else 0,
-            submission.reports
-        ))
-
-        if correct_count >= best_count:
-            best = submission
-    return best.id if best is not None else None
-
-
-@cache.cached(timeout=30)
-def get_students():
-    return [s.data for s in User.query.all()]
-
-
 @private.route('/stats/<assignment_name>')
 @private.route('/stats/<assignment_name>/<netid>')
 @log_event('cli', lambda: 'stats')
 @cache.memoize(timeout=60, unless=lambda: request.args.get('netids', None) is not None)
-@json
-def stats(assignment_name, netid=None):
+@json_response
+def private_stats_assignment(assignment_name, netid=None):
     netids = request.args.get('netids', None)
 
     if netids is not None:
@@ -585,8 +582,8 @@ def stats(assignment_name, netid=None):
 @private.route('/finalquestions', methods=['GET', 'POST'])
 @log_event('cli', lambda: 'finalquestions')
 @cache.memoize(timeout=60, unless=lambda: request.method == 'POST')
-@json
-def priv_finalquestions():
+@json_response
+def private_finalquestions():
     """
     This route should be used by the CLI to both get or modify / add
     existing questions. If the student final questions table is not
@@ -688,8 +685,8 @@ def priv_finalquestions():
 
 @private.route('/overwritefq')
 @log_event('cli', lambda: 'overwritefq')
-@json
-def priv_overwritefq():
+@json_response
+def private_overwrite_final_question():
     """
     Use this route with extreme caution. Hitting this route will trigger all
     the data from the StudentFinalQuestion table to be repopulated with new
@@ -747,8 +744,8 @@ def priv_overwritefq():
 
 
 @private.route('/sendcodes')
-@json
-def priv_sendcodes():
+@json_response
+def private_sendcodes():
     """
     Send out all randomly generated codes to students. This should only be triggered once.
     Once students have their codes, they should not ever change.

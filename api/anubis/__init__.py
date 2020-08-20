@@ -1,1 +1,1 @@
-from .app import app, db
+from anubis.app import create_app

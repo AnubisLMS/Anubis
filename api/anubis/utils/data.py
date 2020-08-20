@@ -3,12 +3,13 @@ from functools import wraps
 from json import dumps
 from os import environ
 from smtplib import SMTP
+from typing import Union, List
 
 from flask import Response, request
 from sqlalchemy.exc import IntegrityError
 
-from api.anubis import db
-from .redis_queue import enqueue_webhook_job
+from anubis.models import db
+from anubis.utils.redis_queue import enqueue_webhook_job
 
 
 def jsonify(data):

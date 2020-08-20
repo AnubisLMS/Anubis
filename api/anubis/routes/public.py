@@ -1,19 +1,13 @@
 import traceback
-import time
+import logging
 
 from flask import request, redirect, Blueprint
 from sqlalchemy.exc import IntegrityError
 
-import api.anubis.utils.data
-from ..app import db, cache
-from ..models.user import User
-from ..models.submission import Submission
-from ..models.assignment import StudentQuestion, Assignment
-from ..utils.data import json_response, regrade_submission, enqueue_webhook_job
-from ..utils.elastic import log_event, esindex
-import logging
-from ..utils.http import get_request_ip
-from ..utils.data import error_response, success_response
+from anubis.models import db, Assignment, Submission, User
+from anubis.utils.data import json_response, regrade_submission, enqueue_webhook_job
+from anubis.utils.elastic import log_event, esindex
+from anubis.utils.data import error_response, success_response
 
 public = Blueprint('public', __name__, url_prefix='/public')
 
@@ -27,7 +21,7 @@ def webhook_log_msg():
 
 @public.route('/memes')
 @log_event('rick-roll', lambda: 'rick-roll')
-def handle_memes():
+def public_memes():
     logging.info('rick-roll')
     return redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
 
@@ -35,7 +29,7 @@ def handle_memes():
 @public.route('/regrade/<commit>')
 @log_event('regrade-request', lambda: 'submission regrade request ' + request.path)
 @json_response
-def handle_regrade(commit=None):
+def public_regrade_commit(commit=None):
     """
     This route will get hit whenever someone clicks the regrade button on a
     processed assignment. It should do some validity checks on the commit and
@@ -63,7 +57,7 @@ def handle_regrade(commit=None):
 @public.route('/submissions/<commit>')
 @log_event('submission-request', lambda: 'specifc submission request ' + request.path)
 @json_response
-def handle_submission(commit=None):
+def public_submissions_commit(commit=None):
     if commit is None:
         return error_response('missing commit or netid')
     submission = Submission.query.filter_by(
@@ -87,7 +81,7 @@ def handle_submission(commit=None):
 @public.route('/webhook', methods=['POST'])
 @log_event('job-request', webhook_log_msg)
 @json_response
-def webhook():
+def public_webhook():
     """
     This route should be hit by the github when a push happens.
     We should take the the github repo url and enqueue it as a job.
@@ -199,72 +193,72 @@ def webhook():
     })
 
 
-@public.route('/finalquestions/<netid>/<code>')
-@json_response
-def pub_finalquestions(netid, code):
-    """
-    This is the route that the frontend will hit to get
-    the questions for a given student. Students will enter
-    their netid and the code that was emailed to them to
-    get their questions. Only with the correct netid and
-    code combination will the request be completed.
-
-    response is json of shape:
-
-    {
-      questions : [
-        {
-          content
-          level
-        },
-        ...
-      ],
-      student: {
-        netid
-        name
-      },
-      success: true
-    }
-
-    or on failure:
-
-    {
-      success: false
-      error: "..."
-    }
-
-    :param netid: netid of student
-    :param code: sha256 hash that was emailed to student
-    :return: json specified above
-    """
-
-    # Mon May 18 2020 09:00:00 GMT-0400 (Eastern Daylight Time)
-    if int(time.time()) <= 1589806800:
-        return error_response('unable to complete request')
-
-    if netid is None or code is None:
-        return error_response('missing fields')
-
-    student = User.query.filter_by(netid=netid).first()
-    if student is None:
-        return error_response('unable to complete request')
-
-    sfq: StudentQuestion = StudentQuestion.query.filter_by(
-        student=student,
-        code=code,
-    ).first()
-    if sfq is None:
-        return error_response('unable to complete request')
-
-    res = sfq.data
-
-    for i in res['questions']:
-        del i['id']
-        del i['solution']
-
-    del res['code']
-    del res['student']['id']
-    del res['student']['github_username']
-
-    return success_response(res)
+# @public.route('/questions/<str:assignment>')
+# @json_response
+# def public_questions_assignment(assignment):
+#     """
+#     This is the route that the frontend will hit to get
+#     the questions for a given student. Students will enter
+#     their netid and the code that was emailed to them to
+#     get their questions. Only with the correct netid and
+#     code combination will the request be completed.
+#
+#     response is json of shape:
+#
+#     {
+#       questions : [
+#         {
+#           content
+#           level
+#         },
+#         ...
+#       ],
+#       student: {
+#         netid
+#         name
+#       },
+#       success: true
+#     }
+#
+#     or on failure:
+#
+#     {
+#       success: false
+#       error: "..."
+#     }
+#
+#     :param netid: netid of student
+#     :param code: sha256 hash that was emailed to student
+#     :return: json specified above
+#     """
+#
+#     # Mon May 18 2020 09:00:00 GMT-0400 (Eastern Daylight Time)
+#     if int(time.time()) <= 1589806800:
+#         return error_response('unable to complete request')
+#
+#     if netid is None or code is None:
+#         return error_response('missing fields')
+#
+#     student = User.query.filter_by(netid=netid).first()
+#     if student is None:
+#         return error_response('unable to complete request')
+#
+#     sfq: StudentQuestion = StudentQuestion.query.filter_by(
+#         student=student,
+#         code=code,
+#     ).first()
+#     if sfq is None:
+#         return error_response('unable to complete request')
+#
+#     res = sfq.data
+#
+#     for i in res['questions']:
+#         del i['id']
+#         del i['solution']
+#
+#     del res['code']
+#     del res['student']['id']
+#     del res['student']['github_username']
+#
+#     return success_response(res)
 

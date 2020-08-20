@@ -1,9 +1,7 @@
 import requests
 
-import api.anubis.utils.elastic
-from .utils import report_error, PipelineException
-from .. import utils
-
+from anubis.utils.elastic import esindex
+from anubis.worker.utils import report_error, PipelineException
 
 def clone(client, repo_url, submission, volume_name):
     """
@@ -48,7 +46,7 @@ def clone(client, repo_url, submission, volume_name):
             raise PipelineException('clone failure')
 
     except PipelineException as e:
-        api.anubis.utils.elastic.esindex(
+        esindex(
             type='clone',
             logs=logs,
             submission=submission.id,
@@ -57,7 +55,7 @@ def clone(client, repo_url, submission, volume_name):
         raise report_error(str(e), submission.id)
 
     except requests.exceptions.ReadTimeout:
-        api.anubis.utils.elastic.esindex(
+        esindex(
             type='clone-timeout',
             logs=logs,
             submission=submission.id,

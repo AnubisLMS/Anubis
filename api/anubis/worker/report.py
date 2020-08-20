@@ -1,14 +1,14 @@
 import requests
 
-import api.anubis.utils.elastic
-from .utils import report_panic, PipelineException
+from anubis.utils.elastic import esindex
+from anubis.worker.utils import report_panic, PipelineException
 
 
 def report(client, repo_url, submission, volume_name):
     """
     Report results of tests to api
 
-    :client docker.client: docker clien
+    :client docker.client: docker client
     :netid str: netid of student
     :assignment: name of assignment being tested
     :submission Submissions: id of submission
@@ -48,7 +48,7 @@ def report(client, repo_url, submission, volume_name):
             raise PipelineException('report failure')
 
     except PipelineException as e:
-        api.anubis.utils.elastic.esindex(
+        esindex(
             type='report',
             logs=logs,
             submission=submission.id,
@@ -57,7 +57,7 @@ def report(client, repo_url, submission, volume_name):
         raise report_panic(str(e) + '\n' + logs, submission.id)
 
     except requests.exceptions.ReadTimeout:
-        api.anubis.utils.elastic.esindex(
+        esindex(
             type='report-timeout',
             logs=logs,
             submission=submission.id,

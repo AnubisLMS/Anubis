@@ -34,9 +34,8 @@ API_IP := $(shell docker network inspect traefik-proxy | \
 
 VOLUMES := $(shell docker volume ls | awk '{if (match($$2, /^anubis_.*$$/)) {print $$2}}')
 
-PERSISTENT_SERVICES := db traefik kibana elasticsearch redis smtp
+PERSISTENT_SERVICES := db traefik kibana elasticsearch redis smtp logstash
 RESTART_ALWAYS_SERVICES := api worker web
-BOMBLAB_SERVICES := bomblab-report bomblab-request bomblab-result bomblab-bombs
 
 help:
 	@echo 'For convenience'
@@ -55,7 +54,6 @@ check:
 .PHONY: build        # Build all docker images
 build:
 	docker-compose build --pull --parallel
-	./assignments/build.sh
 
 .PHONY: db           # Start and initialize the database service
 db:
@@ -72,10 +70,7 @@ debug: check build db
 	docker-compose up -d $(PERSISTENT_SERVICES)
 	docker-compose up \
 		-d --force-recreate \
-		--scale worker=3 \
-		--scale api=1 \
-		$(RESTART_ALWAYS_SERVICES) \
-		$(BOMBLAB_SERVICES)
+		$(RESTART_ALWAYS_SERVICES)
 
 sleep3:
 	sleep 3
@@ -86,20 +81,13 @@ seed:
 .PHONY: deploy       # Start the cluster in production mode
 deploy: check build db restart
 
-.PHONY: bomblab
-bomblab:
-	docker-compose -f ./docker-compose.yml up \
-		-d --force-recreate \
-		$(BOMBLAB_SERVICES)
 
 .PHONY: restart      # Restart the cluster
 restart:
 	docker-compose -f ./docker-compose.yml up -d $(PERSISTENT_SERVICES)
 	docker-compose -f ./docker-compose.yml up \
 		-d --force-recreate \
-		--scale worker=$(RQ_WORKER_SCALE) \
-		--scale api=$(API_SCALE) \
-		$(RESTART_ALWAYS_SERVICES) \
+		$(RESTART_ALWAYS_SERVICES)
 
 .PHONY: cli          # Install the cli
 cli:

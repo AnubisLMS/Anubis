@@ -1,11 +1,9 @@
 import requests
 from sqlalchemy.exc import IntegrityError
 
-import api.anubis.utils.elastic
-from .utils import report_error, PipelineException
-from .. import utils
-from ..app import db
-from ..models.submission import SubmissionBuild
+from anubis.worker.utils import report_error, PipelineException
+from anubis.utils.elastic import esindex
+from anubis.models import db, SubmissionBuild
 
 assingment_files = {
     'os3224-assignment-1': ['xv6.img', 'fs.img', 'short', 'long'],
@@ -73,7 +71,7 @@ def build(client, repo_url, submission, volume_name):
             raise PipelineException('build failure')
 
     except PipelineException as e:
-        api.anubis.utils.elastic.esindex(
+        esindex(
             type='build',
             logs=logs,
             submission=submission.id,
@@ -83,7 +81,7 @@ def build(client, repo_url, submission, volume_name):
 
     except requests.exceptions.ReadTimeout:
         # Kill container if it has reached its timeout
-        api.anubis.utils.elastic.esindex(
+        esindex(
             type='build-timeout',
             logs=logs,
             submission=submission.id,

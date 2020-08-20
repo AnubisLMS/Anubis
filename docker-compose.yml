@@ -51,8 +51,12 @@ services:
     image: registry.osiris.services/anubis/api:latest
     build: ./api
     restart: on-failure
+    command: sh -c "while true; do python3 dev.py; sleep 1; done"
+    ports:
+      - 127.0.0.1:5000:5000
     volumes:
       - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
+      - "./api:/opt/app"
     networks:
       - traefik-proxy
     depends_on: [db]

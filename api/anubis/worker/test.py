@@ -1,11 +1,9 @@
 import requests
 from sqlalchemy.exc import IntegrityError
 
-import api.anubis.utils.elastic
-from .utils import PipelineException, report_error
-from .. import utils
-from ..app import db
-from ..models import Tests
+from anubis.utils.elastic import esindex
+from anubis.worker.utils import report_error, PipelineException
+from anubis.models import db, SubmissionTestResult
 
 
 def test(client, repo_url, submission, volume_name):
@@ -62,7 +60,7 @@ def test(client, repo_url, submission, volume_name):
             raise PipelineException('test failure')
 
     except PipelineException as e:
-        api.anubis.utils.elastic.esindex(
+        esindex(
             type='test',
             logs=logs,
             submission=submission.id,
@@ -72,7 +70,7 @@ def test(client, repo_url, submission, volume_name):
 
     except requests.exceptions.ReadTimeout:
         # Kill container if it has reached its timeout
-        api.anubis.utils.elastic.esindex(
+        esindex(
             type='test-timeout',
             logs=logs,
             submission=submission.id,
@@ -88,7 +86,7 @@ def test(client, repo_url, submission, volume_name):
         container = client.containers.get(name)
         container.remove(force=True)
 
-    t = Tests(
+    t = SubmissionTestResult(
         stdout=logs,
         submission=submission,
     )

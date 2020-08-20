@@ -3,8 +3,8 @@ from functools import wraps
 
 from flask import request
 
-from .data import error_response
-from ..models import User
+from anubis.utils.data import error_response
+from anubis.models import User
 
 
 def load_from_id(model, verify_owner=True):
