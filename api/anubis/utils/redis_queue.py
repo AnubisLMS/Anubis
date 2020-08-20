@@ -4,7 +4,7 @@ from rq import Queue
 from anubis.rpc import test_repo
 
 
-def enqueue(func, *args):
+def rpc_enqueue(func, *args):
     """
     Enqueues a job on the redis cache
 
@@ -16,13 +16,13 @@ def enqueue(func, *args):
         q.enqueue(func, *args)
 
 
-def enqueue_webhook_job(*args):
+def enqueue_webhook_rpc(*args):
     """
     Enqueues a test job
 
     :repo_url str: github repo url (eg https://github.com/os3224/...)
     """
-    enqueue(
+    rpc_enqueue(
         test_repo,
         *args
     )

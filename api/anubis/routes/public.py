@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from anubis.models import db, Assignment, Submission, User
 from anubis.utils.auth import current_user
 from anubis.utils.data import error_response, success_response
-from anubis.utils.data import json_response, regrade_submission, enqueue_webhook_job
+from anubis.utils.data import json_response, regrade_submission, enqueue_webhook_rpc
 from anubis.utils.elastic import log_event, esindex
 
 public = Blueprint('public', __name__, url_prefix='/public')
@@ -198,7 +198,7 @@ def public_webhook():
         return error_response('unable to commit'), 400
 
     # if the github username is not found, create a dangling submission
-    enqueue_webhook_job(submission.id)
+    enqueue_webhook_rpc(submission.id)
 
     return success_response('submission accepted')
 

@@ -9,7 +9,7 @@ from flask import Response, request
 from sqlalchemy.exc import IntegrityError
 
 from anubis.models import db
-from anubis.utils.redis_queue import enqueue_webhook_job
+from anubis.utils.redis_queue import enqueue_webhook_rpc
 
 
 def regrade_submission(submission):
@@ -26,7 +26,7 @@ def regrade_submission(submission):
     if not reset_submission(submission):
         return error_response('error regrading')
 
-    enqueue_webhook_job(submission.id)
+    enqueue_webhook_rpc(submission.id)
 
     return success_response({'message': 'regrade started'})
 

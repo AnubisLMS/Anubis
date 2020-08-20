@@ -15,7 +15,7 @@ from anubis.routes.messages import err_msg, crit_err_msg, success_msg, code_msg
 from anubis.utils.cache import cache
 from anubis.utils.data import json_response, regrade_submission, send_noreply_email
 from anubis.utils.elastic import log_event, esindex
-from anubis.utils.redis_queue import enqueue_webhook_job
+from anubis.utils.redis_queue import enqueue_webhook_rpc
 
 private = Blueprint('private', __name__, url_prefix='/private')
 
@@ -48,7 +48,7 @@ def fix_dangling():
                 'submission': d.json,
                 'student': d.json,
             })
-            enqueue_webhook_job(d.id)
+            enqueue_webhook_rpc(d.id)
     return fixed
 
 
