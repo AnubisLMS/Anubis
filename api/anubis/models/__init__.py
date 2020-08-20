@@ -22,6 +22,17 @@ class User(db.Model):
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
 
     @property
+    def assignments(self) -> list:
+        """
+        Get all currently assigned assignments for a given user.
+        """
+        classes = self.classes
+        assignments = []
+        for assignment in map(lambda x: x.assignmentst, classes):
+            assignments.append(assignment)
+        return assignments
+
+    @property
     def classes(self):
         return [
             in_class.class_
@@ -85,10 +96,19 @@ class Assignment(db.Model):
     # id
     id = db.Column(db.Integer, primary_key=True)
 
+    # Foreign Keys
+    class_id = db.Column(db.Integer, db.ForeignKey(Class_.id), index=True)
+
     # Fields
     name = db.Column(db.Text, nullable=False, unique=True)
-    due_date = db.Column(db.DateTime(True), nullable=False)
-    grace_date = db.Column(db.DateTime(True), nullable=False)
+    hidden = db.Column(db.Boolean, default=False)
+    
+    # Dates
+    release_date = db.Column(db.DateTime, nullable=False)
+    due_date = db.Column(db.DateTime, nullable=False)
+    grace_date = db.Column(db.DateTime, nullable=True)
+
+    class_ = db.relationship(Class_, cascade='all,delete', backref='assignments')
 
     @property
     def data(self):
