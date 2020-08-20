@@ -1,20 +1,20 @@
-import traceback
 import logging
+import traceback
 
 from flask import request, redirect, Blueprint
 from sqlalchemy.exc import IntegrityError
 
 from anubis.models import db, Assignment, Submission, User
+from anubis.utils.data import error_response, success_response
 from anubis.utils.data import json_response, regrade_submission, enqueue_webhook_job
 from anubis.utils.elastic import log_event, esindex
-from anubis.utils.data import error_response, success_response
 
 public = Blueprint('public', __name__, url_prefix='/public')
 
 
 def webhook_log_msg():
     if request.headers.get('Content-Type', None) == 'application/json' and \
-            request.headers.get('X-GitHub-Event', None) == 'push':
+    request.headers.get('X-GitHub-Event', None) == 'push':
         return request.json['pusher']['name']
     return None
 
@@ -88,7 +88,7 @@ def public_webhook():
     """
 
     if request.headers.get('Content-Type', None) == 'application/json' and \
-            request.headers.get('X-GitHub-Event', None) == 'push':
+    request.headers.get('X-GitHub-Event', None) == 'push':
         data = request.json
 
         repo_url = data['repository']['ssh_url']
@@ -192,7 +192,6 @@ def public_webhook():
         'message': 'webhook successful'
     })
 
-
 # @public.route('/questions/<str:assignment>')
 # @json_response
 # def public_questions_assignment(assignment):
@@ -261,4 +260,3 @@ def public_webhook():
 #     del res['student']['github_username']
 #
 #     return success_response(res)
-

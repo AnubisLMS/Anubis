@@ -1,19 +1,19 @@
+import logging
+import traceback
 from json import dumps, loads
 
 import dateutil.parser
 from flask import request, Blueprint
 from sqlalchemy.exc import IntegrityError
-import traceback
 
-from anubis.utils.cache import cache
-from anubis.routes.messages import err_msg, crit_err_msg, success_msg, code_msg
 from anubis.config import Config
-from anubis.models import db, Assignment, AssignmentQuestion, StudentQuestion, Submission, SubmissionTestResult, User
-from anubis.utils.redis_queue import enqueue_webhook_job
+from anubis.models import db, Assignment, AssignmentQuestion, AssignmentStudentQuestion, Submission, \
+    SubmissionTestResult, User
+from anubis.routes.messages import err_msg, crit_err_msg, success_msg, code_msg
+from anubis.utils.cache import cache
 from anubis.utils.data import json_response, regrade_submission, send_noreply_email
 from anubis.utils.elastic import log_event, esindex
-
-import logging
+from anubis.utils.redis_queue import enqueue_webhook_job
 
 private = Blueprint('private', __name__, url_prefix='/private')
 
@@ -49,14 +49,15 @@ def fix_dangling():
             enqueue_webhook_job(d.id)
     return fixed
 
+
 @cache.memoize(timeout=30)
 def stats_for(studentid, assignmentid):
     best = None
     best_count = -1
     for submission in Submission.query.filter_by(
-            assignmentid=assignmentid,
-            studentid=studentid,
-            processed=True,
+    assignmentid=assignmentid,
+    studentid=studentid,
+    processed=True,
     ).all():
         correct_count = sum(map(
             lambda rep: 1 if rep.passed else 0,
@@ -670,14 +671,14 @@ def private_finalquestions():
             unable_to_complete['traceback'] = traceback.format_exc()
             return unable_to_complete
 
-        r = StudentQuestion.populate()
+        r = AssignmentStudentQuestion.populate()
         if not r['success']:
             return r
 
     return {
         'data': {
             sfq.student.netid: sfq.data
-            for sfq in StudentQuestion.query.all()
+            for sfq in AssignmentStudentQuestion.query.all()
         },
         'success': True
     }
@@ -729,7 +730,7 @@ def private_overwrite_final_question():
     :return: json of shape specified above
     """
 
-    r = StudentQuestion.populate(overwrite=True)
+    r = AssignmentStudentQuestion.populate(overwrite=True)
 
     if not r['success']:
         return r
@@ -737,7 +738,7 @@ def private_overwrite_final_question():
     return {
         'data': {
             sfq.student.netid: sfq.data
-            for sfq in StudentQuestion.query.all()
+            for sfq in AssignmentStudentQuestion.query.all()
         },
         'success': True
     }
@@ -753,7 +754,7 @@ def private_sendcodes():
     :return: json indicating success for failure
     """
 
-    for sfq in StudentQuestion.query.all():
+    for sfq in AssignmentStudentQuestion.query.all():
         student_name = sfq.student.name
         netid = sfq.student.netid
         code = sfq.code

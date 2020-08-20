@@ -1,9 +1,9 @@
 import requests
 from sqlalchemy.exc import IntegrityError
 
-from anubis.worker.utils import report_error, PipelineException
-from anubis.utils.elastic import esindex
 from anubis.models import db, SubmissionBuild
+from anubis.utils.elastic import esindex
+from anubis.worker.utils import report_error, PipelineException
 
 assingment_files = {
     'os3224-assignment-1': ['xv6.img', 'fs.img', 'short', 'long'],

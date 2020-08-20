@@ -7,7 +7,6 @@ from typing import Union
 
 import jwt
 from flask import request
-
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 
@@ -20,7 +19,7 @@ class User(db.Model):
     netid = db.Column(db.String(128), unique=True, index=True)
     github_username = db.Column(db.String(128), index=True)
     name = db.Column(db.String(128))
-    admin = db.Column(db.Boolean, nullable=False, default=False)
+    is_admin = db.Column(db.Boolean, nullable=False, default=False)
 
     @staticmethod
     def load_user(netid: Union[str, None]):
@@ -78,6 +77,7 @@ class User(db.Model):
             'admin': self.admin,
         }
 
+
 class Assignment(db.Model):
     __tablename__ = 'assignment'
     id = db.Column(db.Integer, primary_key=True)
@@ -100,7 +100,8 @@ class AssignmentTest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     submission_id = db.Column(db.Integer, db.ForeignKey('submission.id'))
     name = db.Column(db.String(128), index=True)
-    #TODO Add relationship
+
+    submission = db.relationship('Submission', cascade='all,delete', backref='test_results')
 
 
 class AssignmentQuestion(db.Model):
@@ -111,7 +112,7 @@ class AssignmentQuestion(db.Model):
     solution = db.Column(db.Text, nullable=True)
     level = db.Column(db.Integer, index=True, nullable=False)
 
-    assignment = db.relationship(Assignment, backref='questions')
+    assignment = db.relationship(Assignment, cascade='all,delete', backref='questions')
 
     @property
     def data(self):
@@ -123,16 +124,17 @@ class AssignmentQuestion(db.Model):
         }
 
 
-class StudentQuestion(db.Model):
+class AssignmentStudentQuestion(db.Model):
     __tablename__ = 'student_question'
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), primary_key=True)
+    assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), index=True, nullable=False)
     question1id = db.Column(db.Integer, db.ForeignKey('finalquestions.id'))
     question2id = db.Column(db.Integer, db.ForeignKey('finalquestions.id'))
     question3id = db.Column(db.Integer, db.ForeignKey('finalquestions.id'))
     question4id = db.Column(db.Integer, db.ForeignKey('finalquestions.id'))
     code = db.Column(db.Text, unique=True, nullable=False)
 
-    student = db.relationship('Student', backref='assignment_questions')
+    student = db.relationship('Student', cascade='all,delete', backref='assignment_questions')
 
     @staticmethod
     def populate_codes():
@@ -152,7 +154,7 @@ class StudentQuestion(db.Model):
         sha256 = lambda s: hashlib.sha256(str(s).encode()).hexdigest()
         for student in User.query.all():
             netid = student.netid
-            if StudentQuestion.query.filter_by(studentid=student.id).first() is not None:
+            if AssignmentStudentQuestion.query.filter_by(studentid=student.id).first() is not None:
                 # skip if student data already present
                 continue
             code = sha256('{}{}{}'.format(
@@ -160,7 +162,7 @@ class StudentQuestion(db.Model):
                 timestamp,
                 random.getrandbits(100)
             ))
-            sfq = StudentQuestion(
+            sfq = AssignmentStudentQuestion(
                 studentid=student.id,
                 code=code
             )
@@ -197,8 +199,8 @@ class StudentQuestion(db.Model):
         :param overwrite: bool to indicate if we should overwrite existing data
         :return: dict as specified above
         """
-        if len(StudentQuestion.query.all()) == 0:
-            err = StudentQuestion.populate_codes()
+        if len(AssignmentStudentQuestion.query.all()) == 0:
+            err = AssignmentStudentQuestion.populate_codes()
             if not err:
                 return {
                     'success': False,
@@ -227,7 +229,7 @@ class StudentQuestion(db.Model):
             for level in range(1, 5)
         }
 
-        for sfq in StudentQuestion.query.all():
+        for sfq in AssignmentStudentQuestion.query.all():
             # don't overwrite existing student questions on accident
             if overwrite or not sfq.is_populated:
                 sfq.question1id = random.choice(questions[1])['id']
@@ -311,8 +313,8 @@ class Submission(db.Model):
     processed = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime(True), default=datetime.now)
 
-    student = db.relationship(User, backref='submissions')
-    assignment = db.relationship(Assignment)
+    student = db.relationship(User, cascade='all,delete', backref='submissions')
+    assignment = db.relationship(Assignment, cascade='all,delete')
 
     @property
     def url(self):
@@ -350,8 +352,8 @@ class SubmissionTestResult(db.Model):
     errors = db.Column(db.Text)
     passed = db.Column(db.Boolean)
 
-    submission = db.relationship(Submission, backref='test_results')
-    assignment_test = db.relationship(AssignmentTest, backref='test_results')
+    submission = db.relationship(Submission, cascade='all,delete', backref='test_results')
+    assignment_test = db.relationship(AssignmentTest, cascade='all,delete', backref='test_results')
 
     @property
     def data(self):
@@ -377,7 +379,7 @@ class SubmissionBuild(db.Model):
 
     stdout = db.Column(db.Text)
 
-    submission = db.relationship('Submissions', backref='build', uselist=False)
+    submission = db.relationship('Submissions', cascade='all,delete', backref='build', uselist=False)
 
     @property
     def data(self):

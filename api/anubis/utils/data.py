@@ -96,7 +96,6 @@ def reset_submission(submission):
     return True
 
 
-
 def json_response(func):
     """
     Wrap a route so that it always converts data

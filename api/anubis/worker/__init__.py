@@ -1,12 +1,12 @@
 import docker
 
+from anubis.models import Submission
+from anubis.worker.build import build
 from anubis.worker.build import build
 from anubis.worker.clone import clone
 from anubis.worker.report import report
 from anubis.worker.test import test
-from anubis.worker.build import build
 from anubis.worker.utils import report_error
-from anubis.models import Submission
 
 """
 This is where we should implement any and all job function for the

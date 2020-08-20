@@ -3,8 +3,8 @@ from functools import wraps
 
 from flask import request
 
-from anubis.utils.data import error_response
 from anubis.models import User
+from anubis.utils.data import error_response
 
 
 def load_from_id(model, verify_owner=True):
@@ -22,7 +22,7 @@ def load_from_id(model, verify_owner=True):
     return wrapper
 
 
-def require_verified(func):
+def require_user(func):
     """
     Wrap a function to require a user to be logged in.
     If they are not logged in, they will get an Unathed

@@ -22,7 +22,6 @@ def create_app():
     app.register_blueprint(private)
     add_global_error_handler(app)
 
-
     @app.route('/')
     def index():
         return 'Hello from the other side'
