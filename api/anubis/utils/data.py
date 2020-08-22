@@ -7,15 +7,24 @@ from typing import List, Union, Dict
 from flask import Response
 from sqlalchemy.exc import IntegrityError
 
+from anubis.config import config
 from anubis.models import User, Class_, InClass, Assignment, Submission
 from anubis.models import db
 from anubis.utils.auth import load_user
 from anubis.utils.cache import cache
 from anubis.utils.redis_queue import enqueue_webhook_rpc
-from anubis.config import config
 
 
-@cache.memoize(timeout=60)
+def is_debug() -> bool:
+    """
+    Returns true if the app is running in debug mode
+
+    :return:
+    """
+    return config.DEBUG
+
+
+@cache.memoize(timeout=60, unless=is_debug)
 def get_classes(netid: str):
     """
     Get all classes a given netid is in
@@ -32,7 +41,7 @@ def get_classes(netid: str):
     return [c.data for c in classes]
 
 
-@cache.memoize(timeout=60)
+@cache.memoize(timeout=60, unless=is_debug)
 def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], None]:
     """
     Get all the current assignments for a netid. Optionally specify a class_name
@@ -61,7 +70,7 @@ def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], 
     return [a.data for a in assignments]
 
 
-@cache.memoize(timeout=3)
+# @cache.memoize(timeout=3, unless=is_debug)
 def get_submissions(netid: str, class_name=None, assignment_name=None) -> Union[List[Dict[str, str]], None]:
     """
     Get all submissions for a given netid. Cache the results. Optionally specify
@@ -183,15 +192,6 @@ def success_response(data: Union[dict, str, None]) -> dict:
         'error': None,
         'data': data,
     }
-
-
-def is_debug() -> bool:
-    """
-    Returns true if the app is running in debug mode
-
-    :return:
-    """
-    return config.DEBUG
 
 
 def send_noreply_email(msg, subject, to):

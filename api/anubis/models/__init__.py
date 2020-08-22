@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_json import MutableJson
@@ -117,7 +118,7 @@ class AssignmentRepo(db.Model):
     # Relationships
     owner = db.relationship(User, cascade='all,delete')
     assignment = db.relationship(Assignment, cascade='all,delete')
-    submissions = db.relationship('Submissions', cascade='all,delete')
+    submissions = db.relationship('Submission', cascade='all,delete')
 
 
 class AssignmentTest(db.Model):
@@ -245,6 +246,9 @@ class Submission(db.Model):
 
         # Find tests for the current assignment
         tests = AssignmentTest.query.filter(Assignment.id == self.assignment_id).all()
+
+        logging.debug('found tests: {}'.format(list(map(lambda x: x.data, tests))))
+
         for test in tests:
             tr = SubmissionTestResult(submission=self, assignment_test=test)
             db.session.add(tr)
@@ -277,10 +281,15 @@ class Submission(db.Model):
         # Query for matching AssignmentTests, and TestResults
         tests = db.session.query(
             AssignmentTest, SubmissionTestResult
-        ).join(Assignment).join(Class_).join(InClass).join(User).filter(
+        ).join(Assignment).join(Class_).join(InClass).join(User).join(Submission).filter(
+            Assignment.id == self.assignment_id,
             User.id == self.owner_id,
-            Assignment.id == self.assignment_id
-        )
+            SubmissionTestResult.submission_id == Submission.id,
+            SubmissionTestResult.assignment_test_id == AssignmentTest.id,
+        ).group_by(AssignmentTest.id).all()
+        # ^^ Dont Touch this ^^
+
+        logging.debug('Loaded tests {}'.format(tests))
 
         # Convert to dictionary data
         return [

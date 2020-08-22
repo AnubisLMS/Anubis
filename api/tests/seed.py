@@ -3,6 +3,7 @@ import requests
 
 os.environ['DB_HOST'] = '127.0.0.1'
 os.environ['DISABLE_ELK'] = '1'
+os.environ['DEBUG'] = '1'
 
 from anubis.app import create_app
 from anubis.models import db, User, InClass, Class_
@@ -48,8 +49,8 @@ with app.app_context():
     at1 = AssignmentTest(name='Long file test', assignment=a)
     at2 = AssignmentTest(name='Short file test', assignment=a)
     r = AssignmentRepo(owner=u, assignment=a, repo_url='git@github.com/os3224/final')
-    s1 = Submission(commit='0000', state='Enqueued', owner=u, assignment=a)
-    s2 = Submission(commit='0001', state='Enqueued', owner=u, assignment=a)
+    s1 = Submission(commit='0000', state='Enqueued', owner=u, assignment=a, repo=r)
+    s2 = Submission(commit='0001', state='Enqueued', owner=u, assignment=a, repo=r)
 
     # Commit
     db.session.add_all([u, c, ic, a, at1, at2, s1, s2, r])
