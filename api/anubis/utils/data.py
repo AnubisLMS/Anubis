@@ -1,15 +1,96 @@
 from email.mime.text import MIMEText
-from functools import wraps
 from json import dumps
 from os import environ
 from smtplib import SMTP
-from typing import Union, List
+from typing import List, Union, Dict
 
-from flask import Response, request
+from flask import Response
 from sqlalchemy.exc import IntegrityError
 
+from anubis.models import User, Class_, InClass, Assignment, Submission
 from anubis.models import db
+from anubis.utils.auth import load_user
+from anubis.utils.cache import cache
 from anubis.utils.redis_queue import enqueue_webhook_rpc
+
+
+@cache.memoize(timeout=60)
+def get_classes(netid: str):
+    """
+    Get all classes a given netid is in
+
+    :param netid:
+    :return:
+    """
+    # Query for classes
+    classes = Class_.query.join(InClass).join(User).filter(
+        User.netid == netid
+    ).all()
+
+    # Convert to list of data representation
+    return [c.data for c in classes]
+
+
+@cache.memoize(timeout=1)
+def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], None]:
+    """
+    Get all the current assignments for a netid. Optionally specify a class_name
+    to filter by class.
+
+    :param netid: netid of user
+    :param class_name: optional class name
+    :return: List[Assignment.data]
+    """
+    # Load user
+    user = load_user(netid)
+
+    # Verify user exists
+    if user is None:
+        return None
+
+    filters = []
+    if class_name is not None:
+        filters.append(Class_.name == class_name)
+
+    assignments = Assignment.query.join(Class_).join(InClass).join(User).filter(
+        User.netid == netid,
+        *filters
+    ).all()
+
+    return [a.data for a in assignments]
+
+
+@cache.memoize(timeout=3)
+def get_submissions(netid: str, class_name=None, assignment_name=None) -> Union[List[Dict[str, str]], None]:
+    """
+    Get all submissions for a given netid. Cache the results. Optionally specify
+    a class_name and / or assignment_name for additional filtering.
+
+    :param netid: netid of student
+    :param class_name: name of class
+    :param assignment_name: name of assignment
+    :return:
+    """
+    # Load user
+    user = load_user(netid)
+
+    # Verify user exists
+    if user is None:
+        return None
+
+    # Build filters
+    filters = []
+    if class_name is not None:
+        filters.append(Class_.name == class_name)
+    if assignment_name is not None:
+        filters.append(Assignment.name == assignment_name)
+
+    submissions = Submission.query.join(Assignment).join(Class_).join(InClass).join(User).filter(
+        User.netid == netid,
+        *filters
+    ).all()
+
+    return [s.data for s in submissions]
 
 
 def regrade_submission(submission):
@@ -74,78 +155,6 @@ def jsonify(data, status_code=200):
         if not environ.get('DEBUG', False) \
         else 'https://localhost'
     return res
-
-
-def json_response(func):
-    """
-    Wrap a route so that it always converts data
-    response to proper json.
-
-    @app.route('/')
-    @json
-    def test():
-        return {
-            'success': True
-        }
-    """
-
-    @wraps(func)
-    def json_wrap(*args, **kwargs):
-        data = func(*args, **kwargs)
-        status_code = 200
-        if isinstance(data, tuple):
-            data, status_code = data
-        return jsonify(data, status_code)
-
-    return json_wrap
-
-
-def json_endpoint(required_fields: Union[List[str], None] = None):
-    """
-    Wrap a route so that it always converts data
-    response to proper json.
-
-    @app.route('/')
-    @json
-    def test():
-        return {
-            'success': True
-        }
-    """
-
-    def wrapper(func):
-        @wraps(func)
-        def json_wrap(*args, **kwargs):
-            if not request.headers.get('Content-Type', default=None).startswith('application/json'):
-                return {
-                           'success': False,
-                           'error': 'Content-Type header is not application/json',
-                           'data': None,
-                       }, 406  # Not Acceptable
-            json_data: dict = request.json
-
-            if required_fields is not None:
-                # Check required fields
-                for field in required_fields:
-                    if field not in json_data:
-                        # field missing, return error
-                        return {
-                                   'success': False,
-                                   'error': 'Malformed requests. Missing fields.',
-                                   'data': None
-                               }, 406  # Not Acceptable
-
-            if required_fields is not None:
-                return func(
-                    *args,
-                    *(json_data[field] for field in required_fields),
-                    **{key: value for key, value in json_data.items() if key not in required_fields},
-                    **kwargs)
-            return func(json_data, *args, **kwargs)
-
-        return json_wrap
-
-    return wrapper
 
 
 def error_response(error_message: str) -> dict:

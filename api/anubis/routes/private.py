@@ -6,16 +6,19 @@ import dateutil.parser
 from flask import request, Blueprint
 from sqlalchemy.exc import IntegrityError
 
-from anubis.config import Config
+from anubis.config import config
 from anubis.models import Assignment, AssignmentQuestion, AssignedStudentQuestion
 from anubis.models import Submission, SubmissionTestResult
 from anubis.models import User
 from anubis.models import db
 from anubis.routes.messages import err_msg, crit_err_msg, success_msg, code_msg
 from anubis.utils.cache import cache
-from anubis.utils.data import json_response, regrade_submission, send_noreply_email
+from anubis.utils.data import regrade_submission, send_noreply_email, is_debug
+from anubis.utils.data import success_response, error_response
+from anubis.utils.decorators import json_response
 from anubis.utils.elastic import log_event, esindex
 from anubis.utils.redis_queue import enqueue_webhook_rpc
+from anubis.utils.auth import get_token
 
 private = Blueprint('private', __name__, url_prefix='/private')
 
@@ -81,6 +84,16 @@ def private_index():
     return 'super duper secret'
 
 
+if is_debug():
+    @private.route('/token/<netid>')
+    @json_response
+    def private_token_netid(netid):
+        user = User.query.filter_by(netid=netid).first()
+        if user is None:
+            return error_response('User does not exist')
+        return success_response(get_token(user.netid))
+
+
 @private.route('/report-panic', methods=['POST'])
 @log_event('panic-report', lambda: 'panic was report from rpc ' + dumps(request.json))
 @json_response
@@ -108,7 +121,7 @@ def private_report_panic():
         db.session.add(submission)
         db.session.commit()
     except IntegrityError:
-        print('ERROR unable to mark submission as processed, continuing to report the panic - {}'.format(
+        logging.error('ERROR unable to mark submission as processed, continuing to report the panic - {}'.format(
             submission.id
         ))
         db.session.rollback()
@@ -134,7 +147,7 @@ def private_report_panic():
     send_noreply_email(
         msg + req['error'],
         'Anubis Panic',  # email subject
-        Config.ADMINS,  # recipient
+        config.ADMINS,  # recipient
     )
 
     esindex(
@@ -148,7 +161,7 @@ def private_report_panic():
         passed=0
     )
 
-    return {'success': True}
+    return success_response(None)
 
 
 @private.route('/report-error', methods=['POST'])
@@ -208,9 +221,7 @@ def private_report_error():
 
     logging.error(msg, extra={'type': 'non-critical'})
 
-    return {
-        'success': True
-    }
+    return success_response(None)
 
 
 @private.route('/report', methods=['POST'])
@@ -266,11 +277,8 @@ def private_report():
         db.session.commit()
     except IntegrityError as e:
         db.session.rollback()
-        print('ERROR unable to process report for {}'.format(report['netid']))
-        return {
-            'success': False,
-            'errors': ['unable to process report']
-        }
+        logging.error('ERROR unable to process report for {}'.format(report['netid']))
+        return error_response('unable to process report')
 
     build = submission.builds[0]
     msg = success_msg.format(
@@ -295,9 +303,7 @@ def private_report():
         passed=sum(1 if r.passed else 0 for r in reports)
     )
 
-    return {
-        'success': True
-    }
+    return success_response(None)
 
 
 @private.route('/ls')
@@ -315,7 +321,7 @@ def private_ls():
         Submission.processed == False,
     ).all()
 
-    return [a.json for a in active]
+    return success_response({'processing': [a.data for a in active]})
 
 
 @private.route('/dangling')
@@ -333,13 +339,10 @@ def private_dangling():
     ).all()
     dangling = [a.data for a in dangling]
 
-    return {
-        "success": True,
-        "data": {
-            "dangling": dangling,
-            "count": len(dangling)
-        }
-    }
+    return success_response({
+        "dangling": dangling,
+        "count": len(dangling)
+    })
 
 
 @private.route('/regrade/<assignment_name>')
@@ -365,10 +368,7 @@ def private_regrade_assignment(assignment_name):
     ).first()
 
     if assignment is None:
-        return {
-            'success': False,
-            'error': ['cant find assignment']
-        }
+        return error_response('cant find assignment')
 
     submission = Submission.query.filter_by(
         assignment=assignment
@@ -385,10 +385,7 @@ def private_regrade_assignment(assignment_name):
             'success': res['success'],
         })
 
-    return {
-        'success': True,
-        'data': response
-    }
+    return success_response({'submissions': response})
 
 
 @private.route('/student', methods=['GET', 'POST'])
@@ -412,22 +409,14 @@ def private_student():
                 s.github_username = student['github_username']
                 s.name = student['name'] if 'name' in student else student['first_name'] + ' ' + student['last_name'],
             db.session.add(s)
-            try:
-                db.session.commit()
-            except IntegrityError as e:
-                print('integ err')
-                return {
-                    'success': False,
-                    'errors': ['integ error']
-                }
-    return {
-        'success': True,
-        'data': list(map(
+            db.session.commit()
+    return success_response({
+        'students': list(map(
             lambda x: x.json,
             User.query.all()
         )),
         'dangling': fix_dangling()
-    }
+    })
 
 
 @private.route('/fix-dangling')
@@ -475,18 +464,14 @@ def private_assignment():
                 'success': False,
                 'error': ['unable to commit']
             }
-        return {
-            'success': True,
+        return success_response({
             'msg': 'assignment created',
-            'data': a.json
-        }
+            'assignment': a.data
+        })
     elif action == 'modify':
         a = Assignment.query.filter_by(name=data['name']).first()
         if a is None:
-            return {
-                'success': False,
-                'error': ['assignment does not exist']
-            }
+            return error_response('assignment does not exist')
 
         a.due_date = dateutil.parser.parse(data['due_date'], ignoretz=False),
         a.grace_date = dateutil.parser.parse(data['grace_date'], ignoretz=False)
@@ -495,26 +480,16 @@ def private_assignment():
             db.session.commit()
         except IntegrityError as e:
             db.session.rollback()
-            return {
-                'success': False,
-                'error': ['unable to delete']
-            }
+            return error_response('unable to delete')
 
-        return {
-            'success': True,
+        return success_response({
             'msg': 'Assignment updated',
-            'data': a.data,
-        }
+            'assignment': a.data,
+        })
     elif action == 'ls':
         assignments = Assignment.query.all()
-        return {
-            'success': True,
-            'data': list(map(lambda x: x.data, assignments))
-        }
-    return {
-        'success': False,
-        'error': ['invalid action']
-    }
+        return success_response({'assignments': list(map(lambda x: x.data, assignments))})
+    return error_response('invalid action')
 
 
 @private.route('/stats/<assignment_name>')
@@ -542,10 +517,7 @@ def private_stats_assignment(assignment_name, netid=None):
 
     assignment = Assignment.query.filter_by(name=assignment_name).first()
     if assignment is None:
-        return {
-            'success': False,
-            'error': ['assignment does not exist']
-        }
+        return error_response('assignment does not exist')
 
     for student in students:
         submissionid = stats_for(student['id'], assignment.id)
@@ -576,10 +548,7 @@ def private_stats_assignment(assignment_name, netid=None):
                 ),
                 'late': late
             }
-    return {
-        "success": True,
-        "data": bests
-    }
+    return success_response({'stats': bests})
 
 
 @private.route('/finalquestions', methods=['GET', 'POST'])
@@ -677,13 +646,10 @@ def private_finalquestions():
         if not r['success']:
             return r
 
-    return {
-        'data': {
-            sfq.student.netid: sfq.data
-            for sfq in AssignedStudentQuestion.query.all()
-        },
-        'success': True
-    }
+    return success_response({
+        sfq.student.netid: sfq.data
+        for sfq in AssignedStudentQuestion.query.all()
+    })
 
 
 @private.route('/overwritefq')
@@ -737,36 +703,9 @@ def private_overwrite_final_question():
     if not r['success']:
         return r
 
-    return {
-        'data': {
-            sfq.student.netid: sfq.data
-            for sfq in AssignedStudentQuestion.query.all()
-        },
-        'success': True
-    }
+    return success_response({
+        sfq.student.netid: sfq.data
+        for sfq in AssignedStudentQuestion.query.all()
+    })
 
 
-@private.route('/sendcodes')
-@json_response
-def private_sendcodes():
-    """
-    Send out all randomly generated codes to students. This should only be triggered once.
-    Once students have their codes, they should not ever change.
-
-    :return: json indicating success for failure
-    """
-
-    for sfq in AssignedStudentQuestion.query.all():
-        student_name = sfq.student.name
-        netid = sfq.student.netid
-        code = sfq.code
-
-        msg = code_msg.format(
-            name=student_name.split()[0],
-            code=code
-        )
-        send_noreply_email(msg, 'Anubis OS3224 Exam Code', '{}@nyu.edu'.format(netid))
-
-    return {
-        'success': True
-    }

@@ -7,7 +7,8 @@ from flask import request
 from geoip import geolite2
 from werkzeug import exceptions
 
-from .http import get_request_ip
+from anubis.utils.http import get_request_ip
+from anubis.config import config
 
 es = Elasticsearch(['http://elasticsearch:9200'])
 
@@ -54,6 +55,8 @@ def esindex(index='error', **kwargs):
 
     :kwargs dict:
     """
+    if config.DISABLE_ELK:
+        return
     es.index(index=index, body={
         'timestamp': datetime.utcnow(),
         **kwargs,
