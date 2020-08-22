@@ -12,6 +12,7 @@ from anubis.models import db
 from anubis.utils.auth import load_user
 from anubis.utils.cache import cache
 from anubis.utils.redis_queue import enqueue_webhook_rpc
+from anubis.config import config
 
 
 @cache.memoize(timeout=60)
@@ -31,7 +32,7 @@ def get_classes(netid: str):
     return [c.data for c in classes]
 
 
-@cache.memoize(timeout=1)
+@cache.memoize(timeout=60)
 def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], None]:
     """
     Get all the current assignments for a netid. Optionally specify a class_name
@@ -104,8 +105,7 @@ def regrade_submission(submission):
     if not submission.processed:
         return error_response('submission currently being processed')
 
-    if not reset_submission(submission):
-        return error_response('error regrading')
+    submission.init_submission_models()
 
     enqueue_webhook_rpc(submission.id)
 
@@ -191,7 +191,7 @@ def is_debug() -> bool:
 
     :return:
     """
-    return environ.get('DEBUG', default=False) is not False
+    return config.DEBUG
 
 
 def send_noreply_email(msg, subject, to):

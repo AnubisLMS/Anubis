@@ -60,7 +60,6 @@ with app.app_context():
     s2.init_submission_models()
 
 
-
 token = get('/private/token/jmc1283')['data']
 
 # whoami

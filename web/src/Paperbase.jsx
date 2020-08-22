@@ -12,6 +12,7 @@ import Navigator from './Navigator';
 import SubmissionView from './Submissions/View';
 import SearchSubmissions from "./Submissions/SearchSubmissions";
 import NotFound from "./NotFound";
+import apiUrl from './utils';
 
 import FinalQuestionView from './FinalQuestions/View';
 
@@ -164,12 +165,7 @@ function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
-      <Link href={
-        (process.env.REACT_APP_DEV ?
-            'https://api.localhost/public/memes' :
-            'https://api.nyu.cool/public/memes'
-        )
-      }>
+      <Link href={apiUrl + '/public/memes'}>
         Memes
       </Link>{' '}
       {new Date().getFullYear()}

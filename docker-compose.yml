@@ -85,6 +85,12 @@ services:
   web:
     image: registry.osiris.services/anubis/web:latest
     build: ./web
+    command: sh -c 'yarn && yarn run start'
+    environment:
+      NODE_ENV: development
+      REACT_APP_DEV: dev
+    volumes:
+      - ./web:/opt/app
     restart: on-failure
     labels:
       - "traefik.enable=true"

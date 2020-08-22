@@ -151,16 +151,17 @@ def public_regrade_commit(commit=None):
     if commit is None:
         return error_response('incomplete_request'), 406
 
-    # Find the submission
-    submission: Submission = Submission.query.filter_by(
-        commit=commit
-    ).first()
-
     # Load current user
     user: User = User.current_user()
 
+    # Find the submission
+    submission: Submission = Submission.query.join(User).filter(
+        Submission.commit == commit,
+        User.netid == user.netid
+    ).first()
+
     # Verify Ownership
-    if user is None or submission is None or submission.owner.id != user.id:
+    if submission is None:
         return error_response('invalid commit hash or netid'), 406
 
     # Regrade
