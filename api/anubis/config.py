@@ -1,8 +1,9 @@
+import logging
 import os
 
 
 class Config:
-    SECRET_KEY = os.urandom(32)
+    SECRET_KEY = os.environ.get('SECRET_KEY')
 
     # sqlalchemy
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://anubis:anubis@{}/anubis'.format(
@@ -18,5 +19,6 @@ class Config:
     CACHE_REDIS_HOST = 'redis'
 
     def __init__(self):
+        logging.info('Starting Anubis API with SECRET_KEY: {}'.format(self.SECRET_KEY))
         if os.environ.get('DEBUG', None):
             self.DEBUG = True

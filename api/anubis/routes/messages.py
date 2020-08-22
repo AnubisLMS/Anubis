@@ -34,7 +34,6 @@ test logs:
 {test_logs}
 """
 
-
 code_msg = """
 
 Hello {name},

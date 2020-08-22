@@ -1,33 +1,32 @@
 import docker
 
-from .build import build
-from .clone import clone
-from .report import report
-from .test import test
-from .utils import report_error
-from ..models import Submissions
+from anubis.models import Submission
+from anubis.rpc.submission_pipeline.build import build
+from anubis.rpc.submission_pipeline.build import build
+from anubis.rpc.submission_pipeline.clone import clone
+from anubis.rpc.submission_pipeline.report import report
+from anubis.rpc.submission_pipeline.test import test
+from anubis.rpc.submission_pipeline.utils import report_error
 
 """
 This is where we should implement any and all job function for the
-redis queue. The rq library requires specical namespacing in order to work,
-so these functions must reside in a seperate file.
+redis queue. The rq library requires special namespacing in order to work,
+so these functions must reside in a separate file.
 """
 
 
-def test_repo(submission_id):
+def test_repo(submission_id: int):
     """
-    This function should launch the apropriate testing container
+    This function should launch the appropriate testing container
     for the assignment, passing along the function arguments.
 
-    :repo_url str: url for student repo
-    :netid str: netid of student
-    :assignment str: name of assignment
+    :param submission_id: submission.id of to test
     """
 
     client = docker.from_env()
     client.volumes.prune()
 
-    submission = Submissions.query.filter_by(
+    submission = Submission.query.filter_by(
         id=submission_id
     ).first()
     repo_url = submission.repo
