@@ -1,9 +1,11 @@
 import logging
+from datetime import datetime, timedelta
 from typing import Union
 
 import jwt
 from flask import request
 
+from anubis.config import config
 from anubis.models import User
 
 
@@ -34,12 +36,33 @@ def current_user() -> Union[User, None]:
         return None
 
     try:
-        # TODO update secret key
-        decoded = jwt.decode(token, 'secret', algorithms=['HS256'])
+        decoded = jwt.decode(token, config.SECRET_KEY, algorithms=['HS256'])
     except Exception as e:
         return None
 
     if 'netid' not in decoded:
         return None
 
-    return User.load_user(decoded['netid'])
+    return load_user(decoded['netid'])
+
+
+def get_token(netid: str) -> Union[str, None]:
+    """
+    Get token for user by netid
+
+    :param netid:
+    :return: token string or None (if user not found)
+    """
+
+    # Get user
+    user: User = load_user(netid)
+
+    # Verify user exists
+    if user is None:
+        return None
+
+    # Create new token
+    return jwt.encode({
+        'netid': user.netid,
+        'exp': datetime.utcnow() + timedelta(hours=6),
+    }, config.SECRET_KEY, algorithm='HS256').decode()

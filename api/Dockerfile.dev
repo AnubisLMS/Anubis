@@ -1,0 +1,11 @@
+FROM registry.osiris.services/anubis/api:v2.0.0-alpha
+
+ENV DISABLE_ELK=1
+CMD ./docker-entrypoint-dev.sh
+USER root
+ENV PYTHONPATH='/usr/lib/python3.8/site-packages'
+
+RUN apk add --update --no-cache libffi-dev libffi libzmq g++ zeromq-dev py3-matplotlib \
+  && pip3 install -r requirements-dev.txt
+
+USER anubis

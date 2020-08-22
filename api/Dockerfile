@@ -6,14 +6,14 @@ WORKDIR /opt/app
 
 COPY requirements.txt requirements.txt
 
-RUN apk add --update --no-cache make mariadb-client git \
+RUN apk add --update --no-cache mariadb-client git \
   && pip3 install -r ./requirements.txt \
-  && adduser -HD os3224 \
-  && chown os3224:os3224 -R /opt/app \
+  && adduser -D anubis \
+  && chown anubis:anubis -R /opt/app \
   && ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
 
-USER os3224
+USER anubis
 
 COPY . .
 
-CMD make deploy
+CMD ./docker-entrypoint.sh

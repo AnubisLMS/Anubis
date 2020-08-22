@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: web
-  replicas: 3
+  replicas: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -52,3 +52,25 @@ spec:
   - name: web
     port: 80
     targetPort: 80
+
+---
+# Public Ingress Route /*
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingress.route.anubis.web
+  namespace: anubis
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - kind: Rule
+    match: Host(`anubis.osiris.services`)
+    middlewares:
+    - name: whitelist-vpn
+      namespace: traefik
+    services:
+    - name: api
+      port: 80
+  tls:
+    certResolver: tls

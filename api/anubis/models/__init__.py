@@ -1,10 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
-import jwt
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_json import MutableJson
-
-from anubis.config import Config
 
 db = SQLAlchemy()
 
@@ -13,7 +10,7 @@ class User(db.Model):
     __tablename__ = 'user'
 
     # id
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     # Fields
     netid = db.Column(db.String(128), primary_key=True, unique=True, index=True)
@@ -21,30 +18,8 @@ class User(db.Model):
     name = db.Column(db.String(128))
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
 
-    @property
-    def assignments(self) -> list:
-        """
-        Get all currently assigned assignments for a given user.
-        """
-        classes = self.classes
-        assignments = []
-        for assignment in map(lambda x: x.assignmentst, classes):
-            assignments.append(assignment)
-        return assignments
-
-    @property
-    def classes(self):
-        return [
-            in_class.class_
-            for in_class in self.in_classes
-        ]
-
-    @property
-    def token(self):
-        return jwt.encode({
-            'netid': self.netid,
-            'exp': datetime.utcnow() + timedelta(hours=6),
-        }, Config.SECRET_KEY, algorithm='HS256').decode()
+    repos = db.relationship('AssignmentRepo', cascade='all,delete')
+    in_class = db.relationship('InClass', cascade='all,delete')
 
     @property
     def data(self):
@@ -53,7 +28,7 @@ class User(db.Model):
             'netid': self.netid,
             'github_username': self.github_username,
             'name': self.name,
-            'admin': self.admin,
+            'is_admin': self.is_admin,
         }
 
 
@@ -61,13 +36,15 @@ class Class_(db.Model):
     __tablename__ = '_class'
 
     # id
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     # Fields
     name = db.Column(db.String(256), nullable=False)
     class_code = db.Column(db.String(256), nullable=False)
     section = db.Column(db.String(256), nullable=True)
     professor = db.Column(db.String(256), nullable=False)
+
+    in_class = db.relationship('InClass', cascade='all,delete')
 
     @property
     def data(self):
@@ -86,15 +63,15 @@ class InClass(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
     class_id = db.Column(db.Integer, db.ForeignKey(Class_.id), primary_key=True)
 
-    owner = db.relationship(User, cascade='all,delete', backref='in_class')
-    class_ = db.relationship(Class_, cascade='all,delete', backref='students')
+    owner = db.relationship(User, cascade='all,delete')
+    class_ = db.relationship(Class_, cascade='all,delete')
 
 
 class Assignment(db.Model):
     __tablename__ = 'assignment'
 
     # id
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     # Foreign Keys
     class_id = db.Column(db.Integer, db.ForeignKey(Class_.id), index=True)
@@ -102,13 +79,15 @@ class Assignment(db.Model):
     # Fields
     name = db.Column(db.Text, nullable=False, unique=True)
     hidden = db.Column(db.Boolean, default=False)
-    
+
     # Dates
     release_date = db.Column(db.DateTime, nullable=False)
     due_date = db.Column(db.DateTime, nullable=False)
     grace_date = db.Column(db.DateTime, nullable=True)
 
     class_ = db.relationship(Class_, cascade='all,delete', backref='assignments')
+    tests = db.relationship('AssignmentTest', cascade='all,delete')
+    repos = db.relationship('AssignmentRepo', cascade='all,delete')
 
     @property
     def data(self):
@@ -117,6 +96,9 @@ class Assignment(db.Model):
             'name': self.name,
             'due_date': str(self.due_date),
             'grace_date': str(self.grace_date),
+            'class': self.class_.data,
+
+            'tests': [t.data for t in self.tests]
         }
 
 
@@ -124,38 +106,47 @@ class AssignmentRepo(db.Model):
     __tablename__ = 'assignment_repo'
 
     # id
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     # Foreign Keys
-    owner_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
+    owner_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=True)
     assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), nullable=False)
 
+    repo_url = db.Column(db.String(128), unique=True, nullable=False)
+
     # Relationships
-    owner = db.relationship(User, cascade='all,delete', backref='submissions')
+    owner = db.relationship(User, cascade='all,delete')
     assignment = db.relationship(Assignment, cascade='all,delete')
+    submissions = db.relationship('Submissions', cascade='all,delete')
 
 
 class AssignmentTest(db.Model):
     __tablename__ = 'assignment_test'
 
     # id
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     # Foreign Keys
-    submission_id = db.Column(db.Integer, db.ForeignKey('submission.id'))
+    assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id))
 
     # Fields
     name = db.Column(db.String(128), index=True)
 
     # Relationships
-    submission = db.relationship('Submission', cascade='all,delete', backref='test_results')
+    assignment = db.relationship(Assignment, cascade='all,delete')
+
+    @property
+    def data(self):
+        return {
+            'name': self.name
+        }
 
 
 class AssignmentQuestion(db.Model):
     __tablename__ = 'assignment_question'
 
     # id
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     # Foreign Keys
     assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), index=True)
@@ -182,7 +173,7 @@ class AssignedStudentQuestion(db.Model):
     __tablename__ = 'assigned_student_question'
 
     # id
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     # Foreign Keys
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id))
@@ -210,14 +201,15 @@ class AssignedStudentQuestion(db.Model):
 
 
 class Submission(db.Model):
-    __tablename__ = 'submissions'
+    __tablename__ = 'submission'
 
     # id
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     # Foreign Keys
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id), index=True, nullable=True)
     assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), index=True, nullable=False)
+    assignment_repo_id = db.Column(db.Integer, db.ForeignKey(AssignmentRepo.id), nullable=False)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
@@ -226,21 +218,75 @@ class Submission(db.Model):
     # Fields
     commit = db.Column(db.String(128), unique=True, index=True, nullable=False)
     processed = db.Column(db.Boolean, default=False)
+    state = db.Column(db.String(128), default='')
     errors = db.Column(MutableJson, default=None, nullable=True)
 
     # Relationships
-    owner = db.relationship(User, cascade='all,delete', backref='submissions')
+    owner = db.relationship(User, cascade='all,delete')
     assignment = db.relationship(Assignment, cascade='all,delete')
+    build = db.relationship('SubmissionBuild', cascade='all,delete', uselist=False)
+    test_results = db.relationship('SubmissionTestResult', cascade='all,delete')
+    repo = db.relationship(AssignmentRepo, cascade='all,delete')
+
+    def init_submission_models(self):
+        """
+        Create adjacent submission models.
+
+        :return:
+        """
+        # If the models already exist, yeet
+        if len(self.test_results) != 0:
+            SubmissionTestResult.query.filter_by(submission_id=self.id).delete()
+        if self.build is not None:
+            SubmissionBuild.query.filter_by(submission_id=self.id).delete()
+
+        # Commit deletions (if necessary)
+        db.session.commit()
+
+        # Find tests for the current assignment
+        tests = AssignmentTest.query.filter(Assignment.id == self.assignment_id).all()
+        for test in tests:
+            tr = SubmissionTestResult(submission=self, assignment_test=test)
+            db.session.add(tr)
+        sb = SubmissionBuild(submission=self)
+        db.session.add(sb)
+
+        # Commit new models
+        db.session.commit()
+
 
     @property
     def url(self):
-        return 'https://anubis.osiris.services/view/{}/{}'.format(self.commit, self.netid)
+        return 'https://anubis.osiris.services/submission/{}'.format(self.commit)
 
     @property
     def netid(self):
         if self.owner is not None:
             return self.owner.netid
         return 'null'
+
+    @property
+    def tests(self):
+        """
+        Get a list of dictionaries of the matching Test, and TestResult
+        for the current submission.
+
+        :return:
+        """
+
+        # Query for matching AssignmentTests, and TestResults
+        tests = db.session.query(
+            AssignmentTest, SubmissionTestResult
+        ).join(Assignment).join(Class_).join(InClass).join(User).filter(
+            User.id == self.owner_id,
+            Assignment.id == self.assignment_id
+        )
+
+        # Convert to dictionary data
+        return [
+            {'test': test.data, 'result': result.data}
+            for test, result in tests
+        ]
 
     @property
     def data(self):
@@ -251,11 +297,14 @@ class Submission(db.Model):
             'url': self.url,
             'commit': self.commit,
             'processed': self.processed,
-            'timestamp': str(self.timestamp),
+            'state': self.state,
+            'created': str(self.created),
+            'last_updated': str(self.last_updated),
 
             # Connected models
-            'test_results': [r.data for r in self.test_results],
-            'submission_build': self.build.data,
+            'repo': self.repo.repo_url,
+            'tests': self.tests,
+            'submission_build': self.build.data if self.build is not None else None,
         }
 
 
@@ -263,11 +312,11 @@ class SubmissionTestResult(db.Model):
     __tablename__ = 'submission_test_result'
 
     # id
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     # Foreign Keys
     submission_id = db.Column(db.Integer, db.ForeignKey(Submission.id), primary_key=True)
-    assignment_test_id = db.Column(db.Integer, db.ForeignKey(Submission.id), primary_key=True)
+    assignment_test_id = db.Column(db.Integer, db.ForeignKey(AssignmentTest.id), primary_key=True)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
@@ -279,16 +328,17 @@ class SubmissionTestResult(db.Model):
     passed = db.Column(db.Boolean)
 
     # Relationships
-    submission = db.relationship(Submission, cascade='all,delete', backref='test_results')
-    assignment_test = db.relationship(AssignmentTest, cascade='all,delete', backref='test_results')
+    submission = db.relationship(Submission, cascade='all,delete')
+    assignment_test = db.relationship(AssignmentTest, cascade='all,delete')
 
     @property
     def data(self):
         return {
-            'testname': self.testname,
             'errors': self.errors,
             'passed': self.passed,
-            'stdout': self.stdout
+            'stdout': self.stdout,
+            'created': str(self.created),
+            'last_updated': str(self.last_updated),
         }
 
     def __str__(self):
@@ -303,7 +353,7 @@ class SubmissionBuild(db.Model):
     __tablename__ = 'submission_build'
 
     # id
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     # Foreign Keys
     submission_id = db.Column(db.Integer, db.ForeignKey(Submission.id), index=True)
@@ -314,12 +364,14 @@ class SubmissionBuild(db.Model):
 
     # Fields
     stdout = db.Column(db.Text)
+    passed = db.Column(db.Boolean)
 
     # Relationships
-    submission = db.relationship('Submissions', cascade='all,delete', backref='build', uselist=False)
+    submission = db.relationship(Submission, cascade='all,delete')
 
     @property
     def data(self):
         return {
             'stdout': self.stdout,
+            'passed': self.passed,
         }

@@ -1,6 +1,7 @@
-PERSISTENT_SERVICES := db traefik kibana elasticsearch redis smtp logstash
+PERSISTENT_SERVICES := db traefik kibana elasticsearch redis smtp logstash api-dev
 RESTART_ALWAYS_SERVICES := api web
 PUSH_SERVICES := api web logstash
+BUILD_ALLWAYS := api web
 
 
 CURRENT_DIR := $(shell basename $$(pwd) | tr '[:upper:]' '[:lower:]')
@@ -40,34 +41,20 @@ check:
 
 .PHONY: build        # Build all docker images
 build:
-	docker-compose build --pull --parallel
+	docker-compose build --parallel $(BUILD_ALLWAYS)
 
 .PHONY: push         # Push images to registry.osiris.services (requires vpn)
 push:
 	docker-compose push $(PUSH_SERVICES)
 
-.PHONY: db           # Start and initialize the database service
-db:
-	docker-compose up -d db
-	until docker-compose exec db mysqladmin ping -u root; do sleep 1; done
-	@sleep 1
-	@docker-compose exec db \
-		sh -c 'mysql -u root < /docker-entrypoint-initdb.d/init.sql' || true
-	@docker-compose exec db \
-		sh -c 'mysql -u root --password=password < /docker-entrypoint-initdb.d/init.sql' || true
 
 .PHONY: debug        # Start the cluster in debug mode
-debug: check build db
+debug: check build
 	docker-compose up -d $(PERSISTENT_SERVICES)
 	docker-compose up \
 		-d --force-recreate \
 		$(RESTART_ALWAYS_SERVICES)
 
-sleep3:
-	sleep 3
-
-seed:
-	./tests/init.sh
 
 .PHONY: deploy       # Start the cluster in production mode
 deploy: check build db restart
@@ -91,6 +78,12 @@ backup:
 .PHONY: restore      # Restore to most recent backup
 restore:
 	./scripts/restore.sh
+
+yeetdb:
+	docker-compose kill db
+	docker-compose rm -f
+	docker volume rm anubis_db_data
+	docker-compose up -d --force-recreate db
 
 .PHONY: cleandata    # yeet data
 cleandata:

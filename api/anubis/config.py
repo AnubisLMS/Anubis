@@ -19,6 +19,14 @@ class Config:
     CACHE_REDIS_HOST = 'redis'
 
     def __init__(self):
-        logging.info('Starting Anubis API with SECRET_KEY: {}'.format(self.SECRET_KEY))
-        if os.environ.get('DEBUG', None):
-            self.DEBUG = True
+        self.DEBUG = os.environ.get('DEBUG', default='0') == '1'
+        self.SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://anubis:anubis@{}/anubis'.format(
+            os.environ.get('DB_HOST', default='db'))
+        self.DISABLE_ELK = os.environ.get('DISABLE_ELK', default='0') == '1'
+
+        logging.info('Starting with DB_HOST: {}'.format(os.environ.get('DB_HOST', default='db')))
+        logging.info('Starting with SECRET_KEY: {}'.format(self.SECRET_KEY))
+        logging.info('Starting with DEBUG: {}'.format(self.DEBUG))
+
+
+config = Config()

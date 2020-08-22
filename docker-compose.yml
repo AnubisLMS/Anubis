@@ -33,10 +33,12 @@ services:
     build: ./api
     restart: on-failure
     command: sh -c "while true; do python3 dev.py; sleep 1; done"
+    environment:
+      - "DEBUG=1"
+      - "DB_HOST=db"
     ports:
       - 127.0.0.1:5000:5000
     volumes:
-      - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
       - "./api:/opt/app"
     depends_on: [db]
     labels:
@@ -61,10 +63,34 @@ services:
       - "traefik.http.routers.api-public.tls.certresolver=tls"
       - "traefik.http.middlewares.api-public.redirectscheme.scheme=https"
       - "traefik.http.routers.api-private.middlewares=strip-api@docker"
+
+  api-dev:
+    image: registry.osiris.services/anubis/api-dev:v2.0.0-alpha
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    restart: on-failure
+    environment:
+      - "DISABLE_ELK=1"
+      - "DB_HOST=db"
+      - "DEBUG=1"
+    command: ./docker-entrypoint-dev.sh
+    ports:
+      - "127.0.0.1:5003:5003"
+    volumes:
+      - "./api:/opt/app"
+    labels:
+      - "traefik.enable=false"
   
   web:
     image: registry.osiris.services/anubis/web:latest
     build: ./web
+    command: sh -c 'yarn && yarn run start'
+    environment:
+      NODE_ENV: development
+      REACT_APP_DEV: dev
+    volumes:
+      - ./web:/opt/app
     restart: on-failure
     labels:
       - "traefik.enable=true"
@@ -85,6 +111,7 @@ services:
       - "MYSQL_ROOT_PASSWORD=anubis"
       - "MYSQL_DATABASE=anubis"
       - "MYSQL_USER=anubis"
+      - "MYSQL_PASSWORD=anubis"
     volumes:
       - "db_data:/var/lib/mysql"
     labels:
@@ -135,7 +162,7 @@ services:
     image: kibana:7.5.2
     restart: on-failure
     ports:
-      - 127.0.0.1:5601:5601
+      - 127.0.0.1:5001:5601
     volumes:
       - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
 
