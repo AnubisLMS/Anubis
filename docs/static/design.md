@@ -1,6 +1,9 @@
 # Anubis Design Doc
 
+![](./img/anubis-icon-1.png)
+
 > Authors: John Cunnif & Somto Ejinkonye
+
 > Version: v2.0.0
 
 - [Overview](#overview)
@@ -21,33 +24,33 @@
             - [Build](#build)
             - [Test](#test)
     - [Web Frontend](#web-frontend)
-    - Datastores
-        - Elasticsearch
-        - Mariadb
-    - Logging
-        - logstash
-- Deployment
-    - Kubernetes
-        - Rolling updates
-        - Storage Volumes
-        - Health Checks
-        - Space Cluster design
-    - Github
-        - Organization
-        - Classroom
-- Using the CLI
-    - Installing
-    - Authenticating
-    - Command cheat sheet
-- Assignments
-    - Creating a new Assignment
-        - Writting tests
-        - Uploading tests
-        - Updating existing tests
-        - Connecting to github classrooms
-    - Getting Autograding results
+        - [Pages](#pages)
+    - [Datastores](#datastores)
+        - [Mariadb](#mariadb)
+        - [Elasticsearch](#elasticsearch)
+        - [Kibana](#kibana)
+    - [Logging](#logging)
+        - [logstash](#logstash)
+- [Deployment](#deployment)
+    - [Kubernetes](#kubernetes)
+        - [Rolling Updates](#rolling-updates)
+        - [Longhorn](#longhorn)
+        - [OSIRIS Space Cluster](#the-osiris-space-cluster)
+    - [Github](#github)
+        - [Organization](#organization)
+        - [Classroom](#classroom)
+- [CLI](#cli)
+    - [Installing](#installing-the-cli)
+    - [Authenticating](#authenticating-the-cli)
+    - [Usage](#cli-usage)
+- [Assignments](#assignments)
+    - [Creating a new Assignment](#creating-a-new-assignment)
+        - [Writing Tests](#writing-tests)
+        - [Uploading Tests](#uploading-tests)
+        - [Updating Existing Tests](#updating-existing-tests)
+        - [Connecting to github classrooms](#connecting-to-github-classrooms)
+    - [Getting Autograder Results](#getting-autograder-results)
     
-
 
 ## Overview
 
@@ -72,6 +75,8 @@ The primary difference in version two is scale and reliability. We are planning 
 
 
 ## Services
+
+![](./services.pdf)
 
 ### Traefik
 
@@ -133,6 +138,7 @@ A given submission pipeline is of the form of a Kubernetes [Job](https://kuberne
 At each and every tage of a submission pipeline, the job will report to the api with a state update. This state is in the form of a string that describes what is currently happening at that moment. This data can then be passed along to a user that is watching their pipeline be processed live.
 
 Each unique per-assignment pipeline is packaged in the form of a docker image.
+
 > See [Creating a new Assignment](#creating-a-new-assignment)
 
 > An error at any stage of the submissions pipeline will result in an error being reported to the API, and the container exiting.
@@ -173,5 +179,131 @@ Located on the submission page, the purpose of the regrade button is to be a sim
 On the submissions page, the find-missing button will trigger a server side update of the submission data. When the find-missing endpoint is hit, the API will use the graphql API for github to pull all the commits for all the known repos for that user. If it sees commits that were not preveously seen (likely though github not delivering a webhook), then it will create and enqueue the new submissions.
 
 
+### Datastores
+
+#### Mariadb
+
+Anubis will use the OSIRIS Space Clusters existing MariaDB cluster. That cluster is made from [bitnami's MariaDB chart](https://hub.kubeapps.com/charts/bitnami/mariadb). It runs with 3 read-only replication nodes, along with a main node that does read-write. The underlying MariaDB files are also backed up with a [Longhorn](https://longhorn.io/) persistent volume that has 3x replication in the cluster. That volume has daily snapshots. Redundancy is the name of the game here.
+
+The precice data model that we will be using is a simple relational database. From the API, we will interface with Mariadb via [SQLAlchemy](https://www.sqlalchemy.org/). 
+
+![](./data-model.pdf)
+
+#### Elasticsearch
+
+Anubis uses elasticsearch as a search engine for logging, and event tracking. The [elastic ecosystem](https://www.elastic.co/) has other tools like [kibana](#kibana) and [logstash](#logstash) for visualizing data, and logging. Other than the visualization features, elastic allows us to simply start throwing data at it without defining any meaningful shape. This allows us to just log events and data into elastic to be retrieved, and visualized later.
+
+#### Kibana
+
+The Anubis autograder generates a lot of data. We have intense logging, and event tracking on every service. When something happens on the cluster, it will be indexed into elastic. [Kibana](https://www.elastic.co/kibana) is elastic's data visualization tool. It runs as a website that interfaces with the internal elasticsearch. Through kibana, we can stream live logs, view event data, and create meaningful visualizations. 
+
+The Kibana instance will be accessable via `https://anubis.osiris.services/kibana`, with http basic auth for authenticating.
+
+The API sees when students start their homeworks (create their github repo), and when they are submitting (pushing to their repo). This data is indexed into elasticsearch, and visualized via kibana. In Anubis version one we were able to show graphs of when students were starting vs finishing their assignments. To no ones surprise, the majority of the class was starting very late, with a large influx of submissions in the few hours before each deadline. Furthermore, we can show how long it takes for a student to start their assignment to when they have their tests pass on average. We can also show which tests were causing students the most trouble.
+
+This incredably precise view into the actual data that can be generated on a platform such as Anubis is something that sets it apart from its competitors. We can show meaningful statistics to the professors and TAs on the platform about what went well with their assignment, and where students strugled.
+
+### Logging
+
+> _When it doubt, just log it_
+
+#### Logstash
+
+Logstash itself is a service that your applications can ship their logs to before being indexed into elasticsearch. Its purpose is to act as a natural buffer of log data. It is able to interface with elasticsearch, adjusting the speed of log injestion as needed. In addition to acting as a buffer, it also enriches the data that it sees. For example, the logstash python client will not only ship the log message, but also the file that the log is coming from, along with which node the log is coming from. 
+
+This centralized, and persistent logging is indexed into elasticsearch, and accessed via kiaban. Anubis uses logstash on its API and submission pipeline.
+
+
+## Deployment
+
+### Kubernetes
+
+The main goal with moving to Kubernetes from a simple single server docker-compose setup was scalability. We needed to scale our load horizontally. No longer was adding more RAM and CPU cores to the VM viable. With more users, we have a greater load. Kuberentes allows us to distribute this load accross the servers in the clusters quite easily. 
+
+In moving to Kube, we are also now able to make guraentees about availibility. In theory, even if sections of physical servers on the cluster go offline Anubis will still remain availible. [More on that later...](#space-cluster)
+
+#### Rolling Updates
+
+In the decisions that were made when considering when expanding Anubis, availibility was of the most importaint. Specifically we needed to move to a platform that would allow us to do _zero_ downtime deploys. Kubernetes has very powerful rolling update features. We can bring up a new version of the Anubis API, verify that this new version is healthy, then bring down the old version. All the while, there will be no degrasions in availibility.
+
+Of all the features of Kubernetes that Anubis leverages, none are quite as importaint as rolling updates. The Anubis API can be updated to a new version with _zero_ downtime. This means we can live patch the API with new versions, with little to no degrasions in service.
+
+#### Longhorn
+
+The Kubernetes [StorageClass](https://kubernetes.io/docs/concepts/storage/storage-classes/) that the Space Cluster supports is Longhorn. It allows us to have replicated data volumes with scheduled snapshots and backups.
+
+All persistent data is stored on 3x replicated Longhorn StorageVolumes. Those volumes all have at least daily snapshots taken of them. At any given time, we can reset any stateful servie to a previous snapshot from the last seven days.
+
+#### The OSIRIS Space Cluster
+
+The OSIRIS Space Cluster is a k3s Kubernetes cluster that is managed by the OSIRIS Lab at NYU Tandon. It is primarily used for research and website hosting. It was designed by John Cunniff to be highly redundant, even in the case of a networking outage / natural desaster.
+
+##### Nodes
+
+The cluster is comprised of Servers that are evenly distributed between the South Data Center (SDC) on Lafeyette Stret in Manhattan and MetroTech Center (MTC) in Rogers Hall in Brooklyn. The nodes are connected via the internal OSIRIS server network. 
+
+##### Networking
+
+There are multiple so called "Ingress Nodes" in both the MTC and SDC. These are nodes that have both public IP addreses and internal OSIRIS IP addresses. These nodes handle all inbound traffic to the cluster via Traefik.
+
+Because there are multiple IP address for the space cluster, the main ingress DNS `space.osiris.services` will always resolve to all of the current IP address. This guarentees greater availibility, as if one IP is down for whatever reason another may be availible.
+
+The public IP addresses that are used are made up of both NYU, and POLY IP addresses. This design is quite purposeful. It will guarentee that even in the event of a network outage at Poly or NYU, the cluster will remain able to handle ingress.
+
+##### Shared Services
+
+The space cluster has a few shared internal services. Namely there is a shared replicated, and backed up MariaDB instance which Anubis will use a datastore. There is also an instance of [Kubernetes-Dashboard](https://github.com/kubernetes/dashboard) running for viewing kubernetes resources. The Space Cluster also provides Longhorn for persistent data.
+
+### Github
+
+#### Organization
+
+Each class that will need a github organization to put all its repos under. The only members of that organization should be the professor and TAs.
+
+The organization should be set up to have push event webhooks to anubis. The endpoint the webhook should push to is https://anubis.osiris.services/api/public/webhook. That endpoint will be hit when there is a push to a repo in that organization.
+
+#### Classroom
+
+[Github classroom](https://classroom.github.com/) is used to create, and distribute repos for assignments. There you can create assignments that will pull from a template repo of your chooseing. A link will be generated that can be distibuted to students. When clicked, that link will generate a new repo for the student within the class organization. As the student is not a part of the organization, they will not be able to see any of the other student repos (given the assginment was made using a private repo).
+
+The best place to put the template repo is within the class organization as a private repo.
+
+One very importaint thing to note here is that in order to be able to create private assignment repo's, the classroom you create must be verified by github. This can take a few weeks, ad a professor needs to email github asking for permission from a .edu email providing their title and whatnot. 
+
+> Getting your github classroom / org approved will likely cause delays if not done at least a month before the semester starts.
+
+
+## CLI
+
+### Installing the CLI
+
+The command line interface for anubis is packaged as a simple pip package. To install it, make sure you have python3 and pip installed, then from the anubis repo run `make cli`. This will run the pip install command necessary for installing the cli globally. If that was successful, then the `anubis` command will be installed.
+
+### Authenticating the CLI
+
+Primarily, the CLI will make simple calls to the private API via anubis.osiris.services/api/private/*. To do that, it must know the http basic auth password. The first time you run the cli it will prompt you for the username and password. If successful with authenticating, it will save those credentials to `~/.anubis`. 
+
+### CLI Usage
+
+The main purposes of the API is for making it a bit easier for admins to make private API calls. In some cases it will handle the input and output of files. 
+
+Some use cases would be:
+- Adding, Updating and Listing student data
+- Adding, Updating and Listing assignment data
+- Adding, Updating and Listing class data
+- Packaging a new assignment tests, and sending its data off to the cluster
+- Getting autograded results
+
+
+## Assignments
+
+_This section is intentionally left blank as it is in active development.
+
+### Creating a new Assignment
+#### Writing Tests
+#### Uploading Tests
+#### Updating existing Tests
+#### Connecting to github classrooms
+### Getting Autograder Results
 
 
