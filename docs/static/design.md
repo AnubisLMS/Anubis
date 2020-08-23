@@ -24,6 +24,7 @@
             - [Build](#build)
             - [Test](#test)
     - [Web Frontend](#web-frontend)
+        - [React Framework](#React)
         - [Pages](#pages)
     - [Datastores](#datastores)
         - [Mariadb](#mariadb)
@@ -56,23 +57,22 @@
 
 ### Elevator Pitch
 
-At its core, Anubis is a tool to give Intro to OS students live feedback from their homework assignments while they are working on them. Instead of having students submit a parch file, through github classrooms each student will have their own private repo for every assignment. The way students then submit their work is simply by submitting before the deadline. Students can then push, and therefore submit as many times as they would like before the deadline. 
+At its core, Anubis is a tool to give Intro to OS students live feedback from their homework assignments while they are working on them. Instead of having students submit a patch file, through github classrooms each student will have their own private repo for every assignment. The way students then submit their work is simply by submitting before the deadline. Students can then push, and therefore submit as many times as they would like before the deadline. 
 
 When a student pushes to thier assignment repo, a job is launched in the Anubis cluster. That job will build their repo, run tests on the results, and store the results in the [datastore](#datastore).
 
 Students can then navigate to the anubis website, where they will sign in through [NYU SSO](#sso). From there, they will be able to see all the current and past assignments, and submissions for their classes. They are able to view all relevent data from their build and tests for a given submission. There they can request a regrade, there by launching a new submission pipeline. While the submission still being processed, the frontend will poll the [API](#api) for updates. In this, the frontend will be containtly updating while the submission is being processed, giving a live and interactive feel to the frontend. Once a submission is processed Anubis will show the students logs from their tests, and builds along with which tests passed and which failed. 
 
 
-### Differences from v1.0.0
+### Anubis v2.0.0 Changelog
+* Improved Scalability and reliability. Better load management during assignment submission window.
+* Transitioned from github's webhooks for better reliablity and stability. Fixed issues with missing student submisisons.
+* Added more functionality within the Anubis website. Students can now see current and prior submisisons and assignments
 
-Version 1.0.0 went through many changes over the course of the spring 2020 semester. By the end, it was stable and worked well enough. 
-
-The places version one lacked the most was in its ability to scale. Since it was designed to run on a single server, only verticle scaling was possible. In the hour or so before the deadline for an assignment was the only time the system was stressed by the load. The server would only be able to process a limited number of submissions at a time. 
-
-One other major issues was that github's webhook feature was not stable. It would routenly fail to deliver the webhooks to anubis indicating a new submission was pushed. This issue lead to a great deal of confusion where students could not find their submissions in the frontend because the api were never notified by github.
-
-The primary difference in version two is scale and reliability. We are planning on displaying more meaningful feedback, with an improved UI. Along with this, we are building the new system on the container orchestrator Kubernetes. Not only does this allow us to scale horizontally significantly easier, but we will also be able to have certain guarentees about availibility of services. 
-
+Ongoing changes
+* Providing meaningful user feedback through UI improvements.
+* Leveraging kubernetes for better horizontal scaling. 
+* Improve availability of services.
 
 ## Services
 
