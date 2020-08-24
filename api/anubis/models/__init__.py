@@ -1,5 +1,7 @@
 from datetime import datetime
 import logging
+import os
+import base64
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_json import MutableJson
@@ -80,6 +82,10 @@ class Assignment(db.Model):
     # Fields
     name = db.Column(db.Text, nullable=False, unique=True)
     hidden = db.Column(db.Boolean, default=False)
+    description = db.Column(db.Text, nullable=True)
+    github_classroom_url = db.Column(db.String(256), nullable=True)
+    pipeline_image = db.Column(db.String(256), unique=True, nullable=True)
+    unique_code = db.Column(db.String(8), unique=True, default=lambda: base64.b16encode(os.urandom(4)).decode())
 
     # Dates
     release_date = db.Column(db.DateTime, nullable=False)
@@ -98,6 +104,8 @@ class Assignment(db.Model):
             'due_date': str(self.due_date),
             'grace_date': str(self.grace_date),
             'class': self.class_.data,
+            'description': self.description,
+            'github_classroom_link': self.github_classroom_rul,
 
             'tests': [t.data for t in self.tests]
         }
