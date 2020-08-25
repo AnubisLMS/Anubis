@@ -83,7 +83,6 @@ services:
       - "traefik.enable=false"
 
   pipeline-api:
-    image: registry.osiris.services/anubis/api:v2.0.0-alpha
     build: ./api
     restart: on-failure
     environment:
@@ -99,7 +98,6 @@ services:
     labels:
       - "traefik.enable=false"
 
-  
   web:
     image: registry.osiris.services/anubis/web:latest
     build: ./web
