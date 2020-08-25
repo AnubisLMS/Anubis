@@ -10,8 +10,10 @@ meta:
 
 build:
   command: "make xv6.img fs.img"
+  before_build: None
   timeout: 60
 
 tests:
 - name: First test
   script: First-Test.py
+  timeout: 60

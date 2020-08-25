@@ -13,7 +13,7 @@ from anubis.config import config
 es = Elasticsearch(['http://elasticsearch:9200'])
 
 
-def log_event(log_type, message_func):
+def log_endpoint(log_type, message_func):
     """
     Use this to decorate a route and add logging.
     The message_func should be a calleble object
@@ -34,13 +34,17 @@ def log_event(log_type, message_func):
         def wrapper(*args, **kwargs):
             ip = get_request_ip()
             location = geolite2.lookup(ip)
-            es.index(index='request', body={
-                'type': log_type.lower(),
-                'msg': message_func(),
-                'location': location.location[::-1] if location is not None else location,
-                'ip': ip,
-                'timestamp': datetime.utcnow(),
-            })
+
+            # Skip indexing if the app has ELK disabled
+            if not config.DISABLE_ELK:
+                es.index(index='request', body={
+                    'type': log_type.lower(),
+                    'path': request.path,
+                    'msg': message_func(),
+                    'location': location.location[::-1] if location is not None else location,
+                    'ip': ip,
+                    'timestamp': datetime.utcnow(),
+                })
 
             return function(*args, **kwargs)
 

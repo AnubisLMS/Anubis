@@ -15,6 +15,6 @@ RUN useradd --create-home -u 1000 anubis \
 WORKDIR /home/anubis
 USER anubis
 
-COPY assignment.py assignment.py
+COPY pipeline.py pipeline.py
 
-CMD assignment.py
+CMD pipeline.py

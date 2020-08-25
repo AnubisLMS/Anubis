@@ -1,7 +1,7 @@
 PERSISTENT_SERVICES := db traefik kibana elasticsearch redis smtp logstash api-dev
-RESTART_ALWAYS_SERVICES := api web
-PUSH_SERVICES := api web logstash
-BUILD_ALLWAYS := api web
+RESTART_ALWAYS_SERVICES := api web pipeline-api
+PUSH_SERVICES := api web logstash pipeline-api
+BUILD_ALLWAYS := api web pipeline-api
 
 
 CURRENT_DIR := $(shell basename $$(pwd) | tr '[:upper:]' '[:lower:]')

@@ -1,24 +1,24 @@
-import logging
 import traceback
-from json import dumps, loads
+from json import loads
+
+import traceback
+from json import loads
 
 import dateutil.parser
 from flask import request, Blueprint
 from sqlalchemy.exc import IntegrityError
 
-from anubis.config import config
 from anubis.models import Assignment, AssignmentQuestion, AssignedStudentQuestion
-from anubis.models import Submission, SubmissionTestResult
+from anubis.models import Submission
 from anubis.models import User
 from anubis.models import db
-from anubis.routes.messages import err_msg, crit_err_msg, success_msg, code_msg
+from anubis.utils.auth import get_token
 from anubis.utils.cache import cache
-from anubis.utils.data import regrade_submission, send_noreply_email, is_debug
+from anubis.utils.data import regrade_submission, is_debug
 from anubis.utils.data import success_response, error_response
 from anubis.utils.decorators import json_response
-from anubis.utils.elastic import log_event, esindex
+from anubis.utils.elastic import log_endpoint
 from anubis.utils.redis_queue import enqueue_webhook_rpc
-from anubis.utils.auth import get_token
 
 private = Blueprint('private', __name__, url_prefix='/private')
 
@@ -60,9 +60,9 @@ def stats_for(studentid, assignmentid):
     best = None
     best_count = -1
     for submission in Submission.query.filter_by(
-            assignmentid=assignmentid,
-            studentid=studentid,
-            processed=True,
+    assignmentid=assignmentid,
+    studentid=studentid,
+    processed=True,
     ).all():
         correct_count = sum(map(
             lambda rep: 1 if rep.passed else 0,
@@ -94,220 +94,8 @@ if is_debug():
         return success_response(get_token(user.netid))
 
 
-@private.route('/report-panic', methods=['POST'])
-@log_event('panic-report', lambda: 'panic was report from rpc ' + dumps(request.json))
-@json_response
-def private_report_panic():
-    """
-    This route will only be hit when there is a panic reported from a rpc.
-    The difference between an error and a panic is that a panic is an unexpected error.
-    This could potentially mean that something in the pipeline is broken. This route
-    will notify the admins of the error. We will also let the student know there was an
-    error (not showing them the logs).
-
-    request.json = {
-      submission_id : int - database id for submission that was processed
-      error         : str - description of error encountered
-    }
-    """
-
-    req = request.json
-    submission = Submission.query.filter_by(
-        id=req['submission_id'],
-    ).first()
-
-    submission.processed = True
-    try:
-        db.session.add(submission)
-        db.session.commit()
-    except IntegrityError:
-        logging.error('ERROR unable to mark submission as processed, continuing to report the panic - {}'.format(
-            submission.id
-        ))
-        db.session.rollback()
-
-    msg = crit_err_msg.format(
-        netid=submission.netid,
-        assignment=submission.assignment,
-        commit=submission.commit,
-    )
-
-    logging.error(msg, extra={'type': 'panic'})
-
-    esindex(
-        'email',
-        type='panic',
-        msg=msg,
-        submission=submission.id,
-        assignment=submission.assignment.name,
-        netid=submission.netid,
-    )
-
-    # Notify Admins (with logs)
-    send_noreply_email(
-        msg + req['error'],
-        'Anubis Panic',  # email subject
-        config.ADMINS,  # recipient
-    )
-
-    esindex(
-        index='submission',
-        processed=1,
-        error=2,
-        netid=submission.netid,
-        commit=submission.commit,
-        assignment=submission.assignment.name,
-        report=str(req['error']),
-        passed=0
-    )
-
-    return success_response(None)
-
-
-@private.route('/report-error', methods=['POST'])
-@log_event('error-report', lambda: 'error was report from rpc ' + dumps(request.json))
-@json_response
-def private_report_error():
-    """
-    If at any point, a rpc in the rq cluster encounters an error
-    with grading an assignment, the rpc should report to this endpoint.
-    This does not necessarily mean that something is broken in the cluster.
-    errors could include:
-
-    - Clone errors
-    - Build errors
-    - Various docker errors
-
-    The body of the post request should fit the shape:
-
-    request.json = {
-      submission_id : int - database id for submission that was processed
-      error         : str - description of error encountered
-    }
-
-    When this route is hit, we should mearly report the error back to the student
-    through a noreply email.
-    """
-    req = request.json
-    submission = Submission.query.filter_by(
-        id=req['submission_id'],
-    ).first()
-
-    submission.processed = True
-    try:
-        db.session.add(submission)
-        db.session.commit()
-    except IntegrityError:
-        print('ERROR unable to mark submission as processed, continuing to report the error')
-        db.session.rollback()
-
-    msg = err_msg.format(
-        netid=submission.netid,
-        assignment=submission.assignment,
-        commit=submission.commit,
-        error=req['error'],
-    )
-
-    esindex(
-        index='submission',
-        processed=1,
-        error=1,
-        netid=submission.netid,
-        commit=submission.commit,
-        assignment=submission.assignment.name,
-        report=str(req['error']),
-        passed=0
-    )
-
-    logging.error(msg, extra={'type': 'non-critical'})
-
-    return success_response(None)
-
-
-@private.route('/report', methods=['POST'])
-@log_event('report', lambda: 'report from rpc submitted for {}'.format(request.json['netid']))
-@json_response
-def private_report():
-    """
-    TODO re-document and reformat this
-
-    This endpoint should only ever be hit by the rq workers. This is where
-    they should be posting report jsons. We should document the results,
-    then notify the student.
-
-    The report json should follow this structure:
-
-    report = {
-      netid: str
-      assignment: str
-      results: [
-        testname: str
-        errors: str
-        passed: true
-      ]
-    }
-    """
-    report = request.json
-
-    submission = Submission.query.filter_by(
-        id=report['submission_id']
-    ).first()
-
-    submission.processed = True
-    try:
-        db.session.add(submission)
-        db.session.commit()
-    except IntegrityError:
-        print('ERROR unable to mark submission as processed {}'.format(submission.id))
-        db.session.rollback()
-
-    reports = [
-        SubmissionTestResult(
-            testname=result['name'],
-            errors=dumps(result['errors']),
-            passed=result['passed'],
-            submission=submission,
-        )
-        for result in report['reports']
-    ]
-
-    try:
-        for result in reports:
-            db.session.add(result)
-        db.session.commit()
-    except IntegrityError as e:
-        db.session.rollback()
-        logging.error('ERROR unable to process report for {}'.format(report['netid']))
-        return error_response('unable to process report')
-
-    build = submission.builds[0]
-    msg = success_msg.format(
-        netid=submission.netid,
-        commit=submission.commit,
-        assignment=submission.assignment,
-        report='\n\n'.join(str(r) for r in reports),
-        test_logs=submission.tests[0].stdout,
-        build=build.stdout,
-    )
-
-    logging.info(msg, extra={'type': 'report'})
-
-    esindex(
-        index='submission',
-        processed=1,
-        error=0,
-        netid=submission.netid,
-        commit=submission.commit,
-        assignment=submission.assignment.name,
-        report='\n\n'.join(str(r) for r in reports),
-        passed=sum(1 if r.passed else 0 for r in reports)
-    )
-
-    return success_response(None)
-
-
 @private.route('/ls')
-@log_event('cli', lambda: 'ls')
+@log_endpoint('cli', lambda: 'ls')
 @json_response
 def private_ls():
     """
@@ -325,7 +113,7 @@ def private_ls():
 
 
 @private.route('/dangling')
-@log_event('cli', lambda: 'dangling')
+@log_endpoint('cli', lambda: 'dangling')
 @json_response
 def private_dangling():
     """
@@ -346,7 +134,7 @@ def private_dangling():
 
 
 @private.route('/regrade/<assignment_name>')
-@log_event('cli', lambda: 'regrade')
+@log_endpoint('cli', lambda: 'regrade')
 @json_response
 def private_regrade_assignment(assignment_name):
     """
@@ -389,7 +177,7 @@ def private_regrade_assignment(assignment_name):
 
 
 @private.route('/student', methods=['GET', 'POST'])
-@log_event('cli', lambda: 'student')
+@log_endpoint('cli', lambda: 'student')
 @json_response
 def private_student():
     """
@@ -420,81 +208,15 @@ def private_student():
 
 
 @private.route('/fix-dangling')
-@log_event('cli', lambda: 'fix-dangling')
+@log_endpoint('cli', lambda: 'fix-dangling')
 @json_response
 def private_fix_dangling():
     return fix_dangling()
 
 
-@private.route('/assignment', methods=['POST'])
-@log_event('cli', lambda: 'assignment')
-@json_response
-def private_assignment():
-    """
-    This route is a catchall endpoint for creating, modifying or listing assignment data.
-    Anubis needs assignment metadata for the due dates and grace dates of assignments. This
-    endpoint should be hit by the api to create and modify those values. All timezones should
-    be EST. The dateutil parser is used for paring datetime values, so the accepted datetime
-    format is quite flexable.
-
-    body = {
-      action
-      data {
-        name
-        due_date
-        grace_date
-      }
-    }
-    """
-    data = request.json
-    action = data['action']
-    data = data['data']
-    if action == 'add':
-        a = Assignment(
-            name=data['name'],
-            due_date=dateutil.parser.parse(data['due_date'], ignoretz=False),
-            grace_date=dateutil.parser.parse(data['grace_date'], ignoretz=False)
-        )
-        db.session.add(a)
-        try:
-            db.session.commit()
-        except IntegrityError as e:
-            db.session.rollback()
-            return {
-                'success': False,
-                'error': ['unable to commit']
-            }
-        return success_response({
-            'msg': 'assignment created',
-            'assignment': a.data
-        })
-    elif action == 'modify':
-        a = Assignment.query.filter_by(name=data['name']).first()
-        if a is None:
-            return error_response('assignment does not exist')
-
-        a.due_date = dateutil.parser.parse(data['due_date'], ignoretz=False),
-        a.grace_date = dateutil.parser.parse(data['grace_date'], ignoretz=False)
-
-        try:
-            db.session.commit()
-        except IntegrityError as e:
-            db.session.rollback()
-            return error_response('unable to delete')
-
-        return success_response({
-            'msg': 'Assignment updated',
-            'assignment': a.data,
-        })
-    elif action == 'ls':
-        assignments = Assignment.query.all()
-        return success_response({'assignments': list(map(lambda x: x.data, assignments))})
-    return error_response('invalid action')
-
-
 @private.route('/stats/<assignment_name>')
 @private.route('/stats/<assignment_name>/<netid>')
-@log_event('cli', lambda: 'stats')
+@log_endpoint('cli', lambda: 'stats')
 @cache.memoize(timeout=60, unless=lambda: request.args.get('netids', None) is not None)
 @json_response
 def private_stats_assignment(assignment_name, netid=None):
@@ -552,7 +274,7 @@ def private_stats_assignment(assignment_name, netid=None):
 
 
 @private.route('/finalquestions', methods=['GET', 'POST'])
-@log_event('cli', lambda: 'finalquestions')
+@log_endpoint('cli', lambda: 'finalquestions')
 @cache.memoize(timeout=60, unless=lambda: request.method == 'POST')
 @json_response
 def private_finalquestions():
@@ -653,7 +375,7 @@ def private_finalquestions():
 
 
 @private.route('/overwritefq')
-@log_event('cli', lambda: 'overwritefq')
+@log_endpoint('cli', lambda: 'overwritefq')
 @json_response
 def private_overwrite_final_question():
     """
@@ -707,5 +429,3 @@ def private_overwrite_final_question():
         sfq.student.netid: sfq.data
         for sfq in AssignedStudentQuestion.query.all()
     })
-
-

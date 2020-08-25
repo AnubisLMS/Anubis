@@ -229,6 +229,7 @@ class Submission(db.Model):
     processed = db.Column(db.Boolean, default=False)
     state = db.Column(db.String(128), default='')
     errors = db.Column(MutableJson, default=None, nullable=True)
+    token = db.Column(db.String(64), default=lambda: base64.b16encode(os.urandom(32)).decode())
 
     # Relationships
     owner = db.relationship(User, cascade='all,delete')
@@ -341,7 +342,7 @@ class SubmissionTestResult(db.Model):
 
     # Fields
     stdout = db.Column(db.Text)
-    errors = db.Column(db.Text)
+    message = db.Column(db.Text)
     passed = db.Column(db.Boolean)
 
     # Relationships
@@ -351,8 +352,9 @@ class SubmissionTestResult(db.Model):
     @property
     def data(self):
         return {
-            'errors': self.errors,
+            'test_name': self.assignment_test.name,
             'passed': self.passed,
+            'message': self.message,
             'stdout': self.stdout,
             'created': str(self.created),
             'last_updated': str(self.last_updated),

@@ -1,10 +1,10 @@
 import logging
 from functools import wraps
-from typing import Union, List
+from typing import Union, List, Tuple
 
 from flask import request
 
-from anubis.models import User
+from anubis.models import User, Submission
 from anubis.utils.auth import current_user
 from anubis.utils.data import error_response, jsonify
 
@@ -88,7 +88,7 @@ def json_response(func):
     return json_wrap
 
 
-def json_endpoint(required_fields: Union[List[str], None] = None):
+def json_endpoint(required_fields: Union[List[str], List[Tuple], None] = None):
     """
     Wrap a route so that it always converts data
     response to proper json.
@@ -115,14 +115,25 @@ def json_endpoint(required_fields: Union[List[str], None] = None):
             if required_fields is not None:
                 # Check required fields
                 for field in required_fields:
+                    # If field was a tuple, extract field name and required type
+                    required_type = None
+                    if isinstance(field, tuple):
+                        field, required_type = field
+
+                    # Make sure
                     if field not in json_data:
                         # field missing, return error
-                        return {
-                                   'success': False,
-                                   'error': 'Malformed requests. Missing fields.',
-                                   'data': None
-                               }, 406  # Not Acceptable
+                        return error_response('Malformed requests. Missing fields.'), 406  # Not Acceptable
 
+                    # If a type was specified, verify it
+                    if required_type is not None:
+                        if not isinstance(json_data[field], required_type):
+                            return error_response('Malformed requests. Invalid field type.'), 406  # Not Acceptable
+
+            # Give the positional args first,
+            # then the json data (in the order of
+            # the required fields), and lastly
+            # the kwargs that were passed in.
             if required_fields is not None:
                 return func(
                     *args,
@@ -134,3 +145,66 @@ def json_endpoint(required_fields: Union[List[str], None] = None):
         return json_wrap
 
     return wrapper
+
+
+def check_submission_token(func):
+    """
+    This decorator should be exclusively used on the pipeline manager.
+    For the report endpoints, it will find and verify submission data
+    for endpoints that follow the shape:
+
+    /report/.../<int:submission_id>?token=<token>
+
+    If the submission and the token are not verified, and error response
+    with status code 406 (rejected) will be returned.
+
+    :param func:
+    :return:
+    """
+    @wraps(func)
+    def wrapper(submission_id: int, *args, **kwargs):
+        submission = Submission.query.filter(Submission.id == submission_id).first()
+        token = request.args.get('token', default=None)
+
+        # Verify submission exists
+        if submission is None:
+            logging.error('Invalid submission from submission pipeline', extra={
+                'submission_id': submission_id,
+                'path': request.path,
+                'headers': request.headers,
+                'ip': request.remote_addr,
+            })
+            return error_response('Invalid'), 406
+
+        # Verify we got a token
+        if token is None:
+            logging.error('Attempted report post with no token', extra={
+                'submission_id': submission_id,
+                'path': request.path,
+                'headers': request.headers,
+                'ip': request.remote_addr,
+            })
+            return error_response('Invalid'), 406
+
+        # Verify token matches
+        if token != submission.token:
+            logging.error('Invalid token reported from pipeline', extra={
+                'submission_id': submission_id,
+                'path': request.path,
+                'headers': request.headers,
+                'ip': request.remote_addr,
+            })
+            return error_response('Invalid'), 406
+
+        return func(submission, *args, **kwargs)
+    return wrapper
+
+
+
+
+
+
+
+
+
+
