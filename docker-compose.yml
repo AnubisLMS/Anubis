@@ -41,7 +41,7 @@ services:
     volumes:
       - "./api:/opt/app"
     labels:
-      - "traefik.enable=true" 
+      - "traefik.enable=true"
 
       - "traefik.http.middlewares.traefik-auth.basicauth.users=${AUTH}"
       - "traefik.http.middlewares.traefik-auth.basicauth.removeheader=true"
@@ -83,6 +83,7 @@ services:
 
   pipeline-api:
     build: ./api
+    image: registry.osiris.services/anubis/api:v2.0.0-alpha
     restart: on-failure
     environment:
       - "DEBUG=1"
@@ -109,7 +110,7 @@ services:
       - "traefik.enable=false"
 
   web:
-    image: registry.osiris.services/anubis/web:latest
+    image: registry.osiris.services/anubis/web:v2.0.0-alpha
     build: ./web
     command: sh -c 'yarn && yarn run start'
     environment:

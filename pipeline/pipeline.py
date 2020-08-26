@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 
+import base64
 import json
+import logging
 import os
 import traceback
-import logging
 
 import git
 import requests
 import yaml
-import base64
+
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.DEBUG)
+root_logger.addHandler(logging.StreamHandler())
 
 from utils import fix_permissions, exec_as_student
 
@@ -27,6 +31,31 @@ else:
     SUBMISSION_ID = 'DEBUG'
 
 
+def post(path: str, data: dict):
+    headers = {'Content-Type': 'application/json'}
+    params = {'token': TOKEN}
+
+    # Attempt to contact the pipeline API
+    try:
+        res = requests.post(
+            'http://anubis-pipeline-api:5000' + path,
+            headers=headers,
+            params=params,
+            json=data,
+        )
+    except:
+        logging.error('UNABLE TO REPORT POST TO PIPELINE API')
+        exit(0)
+
+    # If the call to the api failed we're in trouble,
+    # and need to abort.
+    if res.status_code != 200:
+        logging.error('UNABLE TO REPORT POST TO PIPELINE API')
+        exit(0)
+
+    return res
+
+
 def report_panic(message: str, traceback: str, ):
     """
     Report and error to the API
@@ -35,13 +64,14 @@ def report_panic(message: str, traceback: str, ):
     :param traceback: optional traceback
     :return:
     """
-    print('report_error {}'.format(json.dumps({
-        'submission_id': SUBMISSION_ID,
+    data = {
         'token': TOKEN,
         'commit': COMMIT,
         'message': message,
         'traceback': traceback,
-    }, indent=2)))
+    }
+    print('report_error {}'.format(json.dumps(data, indent=2)))
+    post('/pipeline/report/panic/{}'.format(SUBMISSION_ID), data)
 
 
 def report_state(state: str):
@@ -51,63 +81,37 @@ def report_state(state: str):
     :param state: text representation of state
     :return:
     """
-    print('report_state {}'.format(json.dumps({
-        'submission_id': SUBMISSION_ID,
+    data = {
         'token': TOKEN,
         'commit': COMMIT,
         'state': state,
-    }, indent=2)))
+    }
+    print('report_state {}'.format(json.dumps(data, indent=2)))
+    post('/pipeline/report/state/{}'.format(SUBMISSION_ID), data)
 
 
 def report_build_results(stdout: str, passed: bool):
-    print('report_build {}'.format(json.dumps({
-        'submission_id': SUBMISSION_ID,
+    data = {
         'token': TOKEN,
         'commit': COMMIT,
         'stdout': base64.b16encode(stdout).decode(),
         'passed': passed,
-    }, indent=2)))
+    }
+    print('report_build {}'.format(json.dumps(data, indent=2)))
+    post('/pipeline/report/build/{}'.format(SUBMISSION_ID), data)
 
 
 def report_test_results(test_name: str, stdout: str, message: str, passed: bool):
-    print('report_test_results {}'.format(json.dumps({
-        'submission_id': SUBMISSION_ID,
+    data = {
         'token': TOKEN,
         'commit': COMMIT,
         'test_name': test_name,
         'stdout': base64.b16encode(stdout).decode(),
         'message': message,
         'passed': passed,
-    }, indent=2)))
-
-
-def post(path: str, data: dict):
-    headers = {'Content-Type': 'application/json'}
-    params = {'token': TOKEN}
-
-    # Attempt to contact the pipeline API
-    try:
-        res = requests.post(
-            'http://anubis-pipeline-api:5000/' + path,
-            headers=headers,
-            params=params
-        )
-    except:
-        report_panic(
-            'Unable to connect to Pipeline API {}'.format(path),
-            traceback.format_exc()
-        )
-        exit(0)
-
-    # If the call to the api failed we're in trouble,
-    # and need to abort.
-    if res.status_code != 200:
-        report_panic('Unable to communicate with pipeline manager status_code={} path={} data={}'.format(
-            res.status_code, path, json.dumps(data)
-        ), '')
-        exit(0)
-
-    return res
+    }
+    print('report_test_results {}'.format(json.dumps(data, indent=2)))
+    post('/pipeline/report/test/{}'.format(SUBMISSION_ID), data)
 
 
 def get_assignment_data() -> dict:

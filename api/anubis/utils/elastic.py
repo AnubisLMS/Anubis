@@ -1,4 +1,5 @@
 import traceback
+import logging
 from datetime import datetime
 from functools import wraps
 
@@ -71,13 +72,11 @@ def add_global_error_handler(app):
     @app.errorhandler(Exception)
     def global_err_handler(error):
         tb = traceback.format_exc()  # get traceback string
-        esindex(
-            'error',
-            type='global-handler',
-            logs=request.url + ' - ' + get_request_ip() + '\n' + tb,
-            submission=None,
-            netid=None,
-        )
+        logging.error('global-handler-error', extra={
+            'traceback': tb,
+            'ip': get_request_ip(),
+            'path': request.path
+        })
         if isinstance(error, exceptions.NotFound):
             return '', 404
-        return 'err'
+        return 'err', 500

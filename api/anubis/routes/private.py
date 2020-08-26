@@ -1,10 +1,6 @@
 import traceback
 from json import loads
 
-import traceback
-from json import loads
-
-import dateutil.parser
 from flask import request, Blueprint
 from sqlalchemy.exc import IntegrityError
 
@@ -429,3 +425,51 @@ def private_overwrite_final_question():
         sfq.student.netid: sfq.data
         for sfq in AssignedStudentQuestion.query.all()
     })
+
+
+from anubis.models import SubmissionTestResult, SubmissionBuild
+from anubis.models import AssignmentTest, AssignmentRepo, InClass, Class_
+
+
+@private.route('/seed')
+@json_response
+def private_seed():
+    # Yeet
+    SubmissionTestResult.query.delete()
+    SubmissionBuild.query.delete()
+    Submission.query.delete()
+    AssignmentRepo.query.delete()
+    AssignmentTest.query.delete()
+    InClass.query.delete()
+    Assignment.query.delete()
+    Class_.query.delete()
+    User.query.delete()
+    db.session.commit()
+
+    # Create
+    u = User(netid='jmc1283', github_username='juanpunchman', name='John Cunniff', is_admin=True)
+    c = Class_(name='Intro to OS', class_code='CS-UY 3224', section='A', professor='Gustavo')
+    ic = InClass(owner=u, class_=c)
+    a = Assignment(name='Assignment1: uniq', pipeline_image="registry.osiris.services/anubis/assignment/1",
+                   hidden=False, release_date='2020-08-22', due_date='2020-08-22', class_=c, github_classroom_url='')
+    at1 = AssignmentTest(name='Long file test', assignment=a)
+    at2 = AssignmentTest(name='Short file test', assignment=a)
+    r = AssignmentRepo(owner=u, assignment=a, repo_url='https://github.com/juan-punchman/xv6-public.git')
+    s1 = Submission(commit='2bc7f8d636365402e2d6cc2556ce814c4fcd1489', state='Enqueued', owner=u, assignment=a, repo=r)
+    s2 = Submission(commit='0001', state='Enqueued', owner=u, assignment=a, repo=r)
+
+    # Commit
+    db.session.add_all([u, c, ic, a, at1, at2, s1, s2, r])
+    db.session.commit()
+
+    # Init models
+    s1.init_submission_models()
+    s2.init_submission_models()
+
+    enqueue_webhook_rpc(s1.id)
+
+    return {
+        'u': u.data,
+        'a': a.data,
+        's1': s1.data,
+    }

@@ -45,11 +45,11 @@ with app.app_context():
     u = User(netid='jmc1283', github_username='juanpunchman', name='John Cunniff', is_admin=True)
     c = Class_(name='Intro to OS', class_code='CS-UY 3224', section='A', professor='Gustavo')
     ic = InClass(owner=u, class_=c)
-    a = Assignment(name='Assignment1: uniq', hidden=False, release_date='2020-08-22', due_date='2020-08-22', class_=c)
+    a = Assignment(name='Assignment1: uniq', pipeline_image="registry.osiris.services/anubis/assignment/1", hidden=False, release_date='2020-08-22', due_date='2020-08-22', class_=c)
     at1 = AssignmentTest(name='Long file test', assignment=a)
     at2 = AssignmentTest(name='Short file test', assignment=a)
-    r = AssignmentRepo(owner=u, assignment=a, repo_url='git@github.com/os3224/final')
-    s1 = Submission(commit='0000', state='Enqueued', owner=u, assignment=a, repo=r)
+    r = AssignmentRepo(owner=u, assignment=a, repo_url='https://github.com/juan-punchman/xv6-public.git')
+    s1 = Submission(commit='2bc7f8d636365402e2d6cc2556ce814c4fcd1489', state='Enqueued', owner=u, assignment=a, repo=r)
     s2 = Submission(commit='0001', state='Enqueued', owner=u, assignment=a, repo=r)
 
     # Commit

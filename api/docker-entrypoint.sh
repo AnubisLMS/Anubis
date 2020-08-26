@@ -27,4 +27,7 @@ if [ "${DEBUG}" = "1" ]; then
 fi
 
 echo 'Starting api'
-exec gunicorn ${GUNICORN_OPTIONS} -w ${WORKERS:-4} -b 0.0.0.0:5000 "anubis.app:${CREATE_APP_FUNCTION:-create_app}()"
+exec gunicorn ${GUNICORN_OPTIONS} \
+    -w ${WORKERS:-4} \
+    -b 0.0.0.0:5000 \
+    "anubis.app:${CREATE_APP_FUNCTION:-create_app}()"

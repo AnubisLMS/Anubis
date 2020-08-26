@@ -23,18 +23,18 @@ spec:
       dnsPolicy: ClusterFirst
       containers:
       - name: web
-        image: registry.osiris.services/anubis/web:latest
+        image: registry.osiris.services/anubis/web:v2.0.0-alpha
         imagePullPolicy: IfNotPresent
         ports:
         - name: web
           containerPort: 80
-        livenessProbe:
-          exec:
-            command:
-              - curl
-              - http://localhost/
-          initialDelaySeconds: 30
-          periodSeconds: 5
+        # livenessProbe:
+        #   exec:
+        #     command:
+        #       - curl
+        #       - http://localhost/
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 5
 
 ---
 apiVersion: v1

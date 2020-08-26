@@ -31,7 +31,7 @@ def init_services(app):
 
     @app.route('/')
     def index():
-        return 'Hello there...\nGeneral Kenobi!'
+        return 'Hello there...!'
 
     # Add ELK stuff
     if not config.DISABLE_ELK:

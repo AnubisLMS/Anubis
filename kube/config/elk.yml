@@ -25,17 +25,9 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - name: web
-          containerPort: 9200
-        env:
-        - name: "discovery.type"
-          value: "single-node"
-        volumeMounts:
-        - name: elastic-data
-          mountPath: /usr/share/elasticsearch/data
-      volumes:
-      - name: elastic-data
-        persistentVolumeClaim:
-          claimName: elastic-data
+          containerPort: 5000
+        - name: api
+          containerPort: 9600
 
 ---
 
@@ -106,13 +98,16 @@ metadata:
   labels:
     app: logstash
 spec:
-  type: NodePort
   selector:
     app: logstash
   ports:
   - name: logstash
+    protocol: UDP
     port: 5000
     targetPort: 5000
+  - name: api
+    port: 9600
+    targetPort: 9600
 
 ---
 apiVersion: v1

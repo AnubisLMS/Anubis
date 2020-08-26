@@ -55,8 +55,8 @@ def pipeline_report_panic(submission: Submission):
 
 @pipeline.route('/report/error/<int:submission_id>', methods=['POST'])
 @log_endpoint('pipeline', lambda: 'error report from pipeline ' + dumps(request.json))
-@json_response
 @check_submission_token
+@json_response
 def pipeline_report_error(submission: Submission):
     return success_response('Error was successfully reported')
 
@@ -65,7 +65,7 @@ def pipeline_report_error(submission: Submission):
 @log_endpoint('pipeline', lambda: 'build report from pipeline ' + dumps(request.json))
 @check_submission_token
 @json_endpoint(required_fields=[('stdout', str), ('passed', bool)])
-def pipeline_report_build(submission: Submission, stdout: str, passed: bool):
+def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **kwargs):
     """
     POSTed json should be of the shape:
 
@@ -103,7 +103,7 @@ def pipeline_report_build(submission: Submission, stdout: str, passed: bool):
 @log_endpoint('pipeline', lambda: 'build report from pipeline ' + dumps(request.json))
 @check_submission_token
 @json_endpoint(required_fields=[('test_name', str), ('passed', bool), ('message', str), ('stdout', str)])
-def pipeline_report_test(submission: Submission, test_name: str, passed: bool, message: str, stdout: str):
+def pipeline_report_test(submission: Submission, test_name: str, passed: bool, message: str, stdout: str, **kwargs):
     """
     POSTed json should be of the shape:
 
@@ -151,7 +151,7 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
 @log_endpoint('pipeline', lambda: 'build report from pipeline ' + dumps(request.json))
 @check_submission_token
 @json_endpoint(required_fields=[('state', str)])
-def pipeline_report_state(submission: Submission, state: str):
+def pipeline_report_state(submission: Submission, state: str, **kwargs):
     """
     POSTed json should be of the shape:
 

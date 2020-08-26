@@ -80,7 +80,7 @@ class Assignment(db.Model):
     class_id = db.Column(db.Integer, db.ForeignKey(Class_.id), index=True)
 
     # Fields
-    name = db.Column(db.Text, nullable=False, unique=True)
+    name = db.Column(db.String(256), nullable=False, unique=True)
     hidden = db.Column(db.Boolean, default=False)
     description = db.Column(db.Text, nullable=True)
     github_classroom_url = db.Column(db.String(256), nullable=True)
@@ -105,7 +105,7 @@ class Assignment(db.Model):
             'grace_date': str(self.grace_date),
             'class': self.class_.data,
             'description': self.description,
-            'github_classroom_link': self.github_classroom_rul,
+            'github_classroom_link': self.github_classroom_url,
 
             'tests': [t.data for t in self.tests]
         }
@@ -161,7 +161,7 @@ class AssignmentQuestion(db.Model):
     assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), index=True)
 
     # Fields
-    content = db.Column(db.Text, unique=True, nullable=False)
+    content = db.Column(db.Text, nullable=False)
     solution = db.Column(db.Text, nullable=True)
     level = db.Column(db.Integer, index=True, nullable=False)
 

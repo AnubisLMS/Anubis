@@ -1,13 +1,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api
+  name: anubis-api
   namespace: anubis
 
 spec:
   selector:
     matchLabels:
-      app: api
+      app: anubis-api
   replicas: 1
   strategy:
     type: RollingUpdate
@@ -18,12 +18,12 @@ spec:
   template:
     metadata:
       labels:
-        app: api
+        app: anubis-api
     spec:
       dnsPolicy: ClusterFirst
       containers:
-      - name: api
-        image: registry.osiris.services/anubis/api:latest
+      - name: anubis-api
+        image: registry.osiris.services/anubis/api:v2.0.0-alpha
         imagePullPolicy: IfNotPresent
         ports:
         - name: web
@@ -32,10 +32,15 @@ spec:
         # Gunicorn workers
         - name: "WORKERS"
           value: "8"
-        - name: "DEBUG"
-          value: "0"
+        - name: "SECRET_KEY"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: secret-key
+        - name: DB_HOST
+          value: mariadb.mariadb.svc.cluster.local
         # sqlalchemy uri
-        - name: "DATABASE_URL"
+        - name: "DATABASE_URI"
           valueFrom:
             secretKeyRef:
               name: api
@@ -45,9 +50,24 @@ spec:
             command:
               - curl
               - http://localhost:5000/
-          initialDelaySeconds: 30
+          initialDelaySeconds: 120
           periodSeconds: 5
 
+      - name: api-dev
+        image: registry.osiris.services/anubis/api-dev:v2.0.0-alpha
+        imagePullPolicy: IfNotPresent
+        ports:
+          - name: web
+            containerPort: 5003
+        env:
+          - name: DB_HOST
+            value: mariadb.mariadb.svc.cluster.local
+          # sqlalchemy uri
+          - name: "DATABASE_URI"
+            valueFrom:
+              secretKeyRef:
+                name: api
+                key: database-uri
 
       # Mail container
       - name: smtp
@@ -56,18 +76,33 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: api
+  name: anubis
   namespace: anubis
   labels:
-    app: api
+    app: anubis-api
 spec:
-  type: NodePort
   selector:
-    app: api
+    app: anubis-api
   ports:
   - name: web
-    port: 80
+    port: 5000
     targetPort: 5000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: anubis-jupyter
+  namespace: anubis
+  labels:
+    app: anubis-api
+spec:
+  selector:
+    app: anubis-api
+  ports:
+  - name: web
+    port: 5003
+    targetPort: 5003
 
 ---
 # Strip prefix /api
@@ -80,7 +115,6 @@ spec:
   stripPrefix:
     prefixes:
       - "/api"
-
 ---
 # Declaring the user list
 apiVersion: traefik.containo.us/v1alpha1
@@ -128,7 +162,7 @@ spec:
       namespace: anubis
     services:
     - name: api
-      port: 80
+      port: 5000
   tls:
     certResolver: tls
 

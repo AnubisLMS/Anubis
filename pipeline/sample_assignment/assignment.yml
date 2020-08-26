@@ -14,4 +14,5 @@ build:
   timeout: 60
 
 tests:
-- name: "First test"
+- name: "Long file test"
+- name: "Short file test"

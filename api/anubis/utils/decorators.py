@@ -114,11 +114,12 @@ def json_endpoint(required_fields: Union[List[str], List[Tuple], None] = None):
 
             if required_fields is not None:
                 # Check required fields
-                for field in required_fields:
+                for index, field in enumerate(required_fields):
                     # If field was a tuple, extract field name and required type
                     required_type = None
                     if isinstance(field, tuple):
                         field, required_type = field
+                        required_fields[index] = field
 
                     # Make sure
                     if field not in json_data:
@@ -162,7 +163,7 @@ def check_submission_token(func):
     :return:
     """
     @wraps(func)
-    def wrapper(submission_id: int, *args, **kwargs):
+    def wrapper(submission_id: int):
         submission = Submission.query.filter(Submission.id == submission_id).first()
         token = request.args.get('token', default=None)
 
@@ -196,7 +197,8 @@ def check_submission_token(func):
             })
             return error_response('Invalid'), 406
 
-        return func(submission, *args, **kwargs)
+        logging.info('Pipeline request validated {}'.format(request.path))
+        return func(submission)
     return wrapper
 
 
