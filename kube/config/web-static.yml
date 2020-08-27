@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: web
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -24,7 +24,7 @@ spec:
       containers:
       - name: web
         image: registry.osiris.services/anubis/web:v2.0.0-alpha
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - name: web
           containerPort: 80

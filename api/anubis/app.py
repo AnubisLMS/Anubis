@@ -5,7 +5,7 @@ from flask import Flask
 from anubis.utils.data import is_debug
 
 root_logger = logging.getLogger()
-root_logger.setLevel(logging.DEBUG if is_debug() else logging.INFO)
+root_logger.setLevel(logging.DEBUG)
 root_logger.addHandler(logging.StreamHandler())
 
 

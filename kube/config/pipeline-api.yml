@@ -24,14 +24,21 @@ spec:
       containers:
       - name: anubis-pipeline-api
         image: registry.osiris.services/anubis/api:v2.0.0-alpha
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: "2"
+            memory: "200Mi"
+          requests:
+            cpu: "2"
+            memory: "100Mi"
         ports:
         - name: web
           containerPort: 5000
         env:
         # Gunicorn workers
         - name: "WORKERS"
-          value: "8"
+          value: "2"
         - name: "CREATE_APP_FUNCTION"
           value: "create_pipeline_app"
         - name: "SECRET_KEY"
@@ -90,10 +97,15 @@ spec:
   policyTypes:
   - Ingress
   - Egress
-  ingress:
-  - {}
   egress:
   - to:
+    - namespaceSelector:
+        matchLabels:
+          networking/namespace: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+
     # Pipeline API
     - podSelector:
         matchLabels:
@@ -170,3 +182,13 @@ spec:
         cidr: 18.231.104.233/32
     - ipBlock:
         cidr: 18.228.167.86/32
+
+    ports:
+      - protocol: TCP
+        port: 5000
+      - protocol: TCP
+        port: 443
+      - protocol: TCP
+        port: 53
+      - protocol: UDP
+        port: 53

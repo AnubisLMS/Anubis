@@ -53,14 +53,6 @@ def pipeline_report_panic(submission: Submission):
     return success_response('Panic successfully reported')
 
 
-@pipeline.route('/report/error/<int:submission_id>', methods=['POST'])
-@log_endpoint('pipeline', lambda: 'error report from pipeline ' + dumps(request.json))
-@check_submission_token
-@json_response
-def pipeline_report_error(submission: Submission):
-    return success_response('Error was successfully reported')
-
-
 @pipeline.route('/report/build/<int:submission_id>', methods=['POST'])
 @log_endpoint('pipeline', lambda: 'build report from pipeline ' + dumps(request.json))
 @check_submission_token

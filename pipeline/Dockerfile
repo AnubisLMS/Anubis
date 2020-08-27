@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 
 RUN apt update \
   && apt install -y git python3 python3-pip qemu-system-x86 \
-  && pip3 install pyyaml requests gitpython
+  && pip3 install pyyaml requests gitpython parse python-lorem
 RUN useradd --no-create-home -u 1001 student \
   && mkdir -p /root/anubis/student \
   && chmod 700 -R /root \

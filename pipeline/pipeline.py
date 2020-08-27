@@ -70,7 +70,7 @@ def report_panic(message: str, traceback: str, ):
         'message': message,
         'traceback': traceback,
     }
-    print('report_error {}'.format(json.dumps(data, indent=2)))
+    logging.info('report_error {}'.format(json.dumps(data, indent=2)))
     post('/pipeline/report/panic/{}'.format(SUBMISSION_ID), data)
 
 
@@ -86,22 +86,38 @@ def report_state(state: str):
         'commit': COMMIT,
         'state': state,
     }
-    print('report_state {}'.format(json.dumps(data, indent=2)))
+    logging.info('report_state {}'.format(json.dumps(data, indent=2)))
     post('/pipeline/report/state/{}'.format(SUBMISSION_ID), data)
 
 
 def report_build_results(stdout: str, passed: bool):
+    """
+    Report the results of a given build.
+
+    :param stdout:
+    :param passed:
+    :return:
+    """
     data = {
         'token': TOKEN,
         'commit': COMMIT,
         'stdout': base64.b16encode(stdout).decode(),
         'passed': passed,
     }
-    print('report_build {}'.format(json.dumps(data, indent=2)))
+    logging.info('report_build {}'.format(json.dumps(data, indent=2)))
     post('/pipeline/report/build/{}'.format(SUBMISSION_ID), data)
 
 
 def report_test_results(test_name: str, stdout: str, message: str, passed: bool):
+    """
+    Report a single test result to the pipeline API.
+
+    :param test_name:
+    :param stdout:
+    :param message:
+    :param passed:
+    :return:
+    """
     data = {
         'token': TOKEN,
         'commit': COMMIT,
@@ -110,7 +126,7 @@ def report_test_results(test_name: str, stdout: str, message: str, passed: bool)
         'message': message,
         'passed': passed,
     }
-    print('report_test_results {}'.format(json.dumps(data, indent=2)))
+    logging.info('report_test_results {}'.format(json.dumps(data, indent=2)))
     post('/pipeline/report/test/{}'.format(SUBMISSION_ID), data)
 
 
@@ -168,7 +184,6 @@ def clone():
 def run_build(assignment_data: dict):
     """
     Build the student repo.
-
 
     :param assignment_data: assignment meta
     :return:
