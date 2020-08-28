@@ -1,6 +1,6 @@
-PERSISTENT_SERVICES := db traefik kibana elasticsearch redis smtp logstash api-dev
+PERSISTENT_SERVICES := db traefik kibana elasticsearch redis smtp logstash
 RESTART_ALWAYS_SERVICES := api web pipeline-api
-PUSH_SERVICES := api web logstash
+PUSH_SERVICES := api web logstash api-dev
 BUILD_ALLWAYS := api web pipeline-api
 
 
@@ -56,8 +56,13 @@ debug: check build
 		$(RESTART_ALWAYS_SERVICES)
 
 
+.PHONY: jupyter      # Start he jupyterhub container
+jupyter:
+	docker-compose up --force-recreate --build api-dev
+
+
 .PHONY: deploy       # Start the cluster in production mode
-deploy: check build db restart
+deploy: check build restart
 
 
 .PHONY: restart      # Restart the cluster

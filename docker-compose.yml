@@ -3,7 +3,7 @@ version: '3.7'
 services:
   traefik:
     image: "traefik:v2.2"
-    restart: on-failure
+    # restart: on-failure
     command:
       - "--api.insecure=true"
 
@@ -31,7 +31,7 @@ services:
   api:
     image: registry.osiris.services/anubis/api:v2.0.0-alpha
     build: ./api
-    restart: on-failure
+    # restart: on-failure
     command: sh -c "while true; do python3 dev.py; sleep 1; done"
     environment:
       - "DEBUG=1"
@@ -68,7 +68,7 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile.dev
-    restart: on-failure
+    # restart: on-failure
     environment:
       - "DISABLE_ELK=1"
       - "DB_HOST=db"
@@ -84,7 +84,7 @@ services:
   pipeline-api:
     build: ./api
     image: registry.osiris.services/anubis/api:v2.0.0-alpha
-    restart: on-failure
+    # restart: on-failure
     environment:
       - "DEBUG=1"
       - "DB_HOST=db"
@@ -99,7 +99,7 @@ services:
 
   rpc-worker:
     build: ./api
-    restart: on-failure
+    # restart: on-failure
     command: "rq worker -u redis://redis"
     environment:
       - "DEBUG=1"
@@ -118,7 +118,9 @@ services:
       REACT_APP_DEV: dev
     volumes:
       - ./web:/opt/app
-    restart: on-failure
+    ports:
+      - 127.0.0.1:3000:3000
+    # restart: on-failure
     labels:
       - "traefik.enable=true"
 
@@ -130,7 +132,7 @@ services:
 
   db:
     image: mariadb:10.5.5
-    restart: on-failure
+    # restart: on-failure
     dns: [8.8.8.8]
     ports:
       - "127.0.0.1:3306:3306"
@@ -146,7 +148,7 @@ services:
 
   redis:
     image: redis:5
-    restart: on-failure
+    # restart: on-failure
     ports:
       - "127.0.0.1:6379:6379"
     volumes:
@@ -156,7 +158,7 @@ services:
 
 #  rpc:
 #    build: api
-#    restart: on-failure
+#    # restart: on-failure
 #    command: rq rpc -u redis://redis
 #    user: root
 #    volumes:
@@ -166,11 +168,11 @@ services:
 
   smtp:
     image: namshi/smtp
-    restart: on-failure
+    # restart: on-failure
 
   elasticsearch:
     image: elasticsearch:7.5.2
-    restart: on-failure
+    # restart: on-failure
     environment:
       - "discovery.type=single-node"
     volumes:
@@ -187,7 +189,7 @@ services:
 
   kibana:
     image: kibana:7.5.2
-    restart: on-failure
+    # restart: on-failure
     ports:
       - 127.0.0.1:5001:5601
     volumes:
