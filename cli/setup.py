@@ -1,21 +1,51 @@
-import setuptools
+#!/usr/bin/env python
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+"""The setup script."""
 
-setuptools.setup(
-    name="Anubis",
-    version='0.0.1',
-    author="John McCann Cunniff Jr",
-    author_email="john@osiris.cyber.nyu.edu",
-    description="Interface for managing jobs on the Anubis cluster",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(),
-    python_requires='>=3.6',
+from setuptools import setup, find_packages
+
+with open('README.rst') as readme_file:
+    readme = readme_file.read()
+
+with open('HISTORY.rst') as history_file:
+    history = history_file.read()
+
+requirements = ['Click>=7.0', ]
+
+setup_requirements = [ ]
+
+test_requirements = [ ]
+
+setup(
+    author="John McCann Cunniff Jr.",
+    author_email='johncunniff1248@gmail.com',
+    python_requires='>=3.5',
+    classifiers=[
+        'Development Status :: 2 - Pre-Alpha',
+        'Intended Audience :: Developers',
+        'Natural Language :: English',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+    ],
+    description="CLI component to the Anubis autograder.",
     entry_points={
-        "console_scripts": {
-            'anubis=anubis:main'
-        }
-    }
+        'console_scripts': [
+            'anubis=anubis.cli:main',
+        ],
+    },
+    install_requires=requirements,
+    long_description=readme + '\n\n' + history,
+    include_package_data=True,
+    keywords='anubis',
+    name='anubis',
+    packages=find_packages(include=['anubis', 'anubis.*']),
+    setup_requires=setup_requirements,
+    test_suite='tests',
+    tests_require=test_requirements,
+    url='https://github.com/juan-punchman/anubis',
+    version='v2.0.0',
+    zip_safe=False,
 )
