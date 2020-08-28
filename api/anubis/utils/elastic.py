@@ -11,6 +11,8 @@ from werkzeug import exceptions
 from anubis.utils.http import get_request_ip
 from anubis.config import config
 
+import logging
+
 es = Elasticsearch(['http://elasticsearch:9200'])
 
 
@@ -38,6 +40,12 @@ def log_endpoint(log_type, message_func):
 
             # Skip indexing if the app has ELK disabled
             if not config.DISABLE_ELK:
+                logging.info("{ip} -- {date} \"{method} {path}\"".format(
+                    ip=get_request_ip(),
+                    date=datetime.now(),
+                    method=request.method,
+                    path=request.path
+                ))
                 es.index(index='request', body={
                     'type': log_type.lower(),
                     'path': request.path,

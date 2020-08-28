@@ -27,7 +27,7 @@ spec:
         imagePullPolicy: Always
         ports:
         - name: web
-          containerPort: 80
+          containerPort: 3000
         # livenessProbe:
         #   exec:
         #     command:
@@ -50,8 +50,8 @@ spec:
     app: web
   ports:
   - name: web
-    port: 80
-    targetPort: 80
+    port: 3000
+    targetPort: 3000
 
 ---
 # Public Ingress Route /*
@@ -70,7 +70,7 @@ spec:
     - name: whitelist-vpn
       namespace: traefik
     services:
-    - name: api
-      port: 80
+    - name: web
+      port: 3000
   tls:
     certResolver: tls

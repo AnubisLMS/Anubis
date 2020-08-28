@@ -175,14 +175,14 @@ spec:
     - websecure
   routes:
   - kind: Rule
-    match: Host(`anubis.osiris.services`) && PathPrefix(`/api/public/`)
+    match: Host(`anubis.osiris.services`) && PathPrefix(`/api/`)
     middlewares:
     - name: whitelist-vpn
       namespace: traefik
     - name: strip-api
       namespace: anubis
     services:
-    - name: api
+    - name: anubis
       port: 5000
   tls:
     certResolver: tls
@@ -208,7 +208,7 @@ spec:
     - name: private-api-basicauth
       namespace: anubis
     services:
-    - name: api
-      port: 80
+    - name: anubis
+      port: 5000
   tls:
     certResolver: tls
