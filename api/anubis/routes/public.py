@@ -12,7 +12,7 @@ from anubis.utils.data import error_response, success_response
 from anubis.utils.data import get_classes, get_assignments, get_submissions
 from anubis.utils.data import regrade_submission, enqueue_webhook_rpc
 from anubis.utils.decorators import json_response, require_user
-from anubis.utils.elastic import log_event, esindex
+from anubis.utils.elastic import log_endpoint, esindex
 from anubis.utils.http import get_request_ip
 
 public = Blueprint('public', __name__, url_prefix='/public')
@@ -20,7 +20,7 @@ public = Blueprint('public', __name__, url_prefix='/public')
 
 @public.route('/classes')
 @require_user
-@log_event('public-classes', lambda: 'get classes {}'.format(get_request_ip()))
+@log_endpoint('public-classes', lambda: 'get classes {}'.format(get_request_ip()))
 @json_response
 def public_classes():
     """
@@ -36,7 +36,7 @@ def public_classes():
 
 @public.route('/assignments')
 @require_user
-@log_event('public-assignments', lambda: 'get assignments {}'.format(get_request_ip()))
+@log_endpoint('public-assignments', lambda: 'get assignments {}'.format(get_request_ip()))
 @json_response
 def public_assignments():
     """
@@ -65,7 +65,7 @@ def public_assignments():
 
 @public.route('/submissions')
 @require_user
-@log_event('public-submissions', lambda: 'get submissions {}'.format(get_request_ip()))
+@log_endpoint('public-submissions', lambda: 'get submissions {}'.format(get_request_ip()))
 @json_response
 def public_submissions():
     """
@@ -98,7 +98,7 @@ def public_submissions():
 
 @public.route('/submission/<string:commit>')
 @require_user
-@log_event('public-submission-commit', lambda: 'get submission {}'.format(request.path))
+@log_endpoint('public-submission-commit', lambda: 'get submission {}'.format(request.path))
 @json_response
 def public_submission(commit: str):
     """
@@ -132,7 +132,7 @@ def webhook_log_msg():
 
 
 @public.route('/memes')
-@log_event('rick-roll', lambda: 'rick-roll')
+@log_endpoint('rick-roll', lambda: 'rick-roll')
 def public_memes():
     logging.info('rick-roll')
     return redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
@@ -140,7 +140,7 @@ def public_memes():
 
 @public.route('/regrade/<commit>')
 @require_user
-@log_event('regrade-request', lambda: 'submission regrade request ' + request.path)
+@log_endpoint('regrade-request', lambda: 'submission regrade request ' + request.path)
 @json_response
 def public_regrade_commit(commit=None):
     """
@@ -170,7 +170,7 @@ def public_regrade_commit(commit=None):
 
 # dont think we need GET here
 @public.route('/webhook', methods=['POST'])
-@log_event('webhook', webhook_log_msg)
+@log_endpoint('webhook', webhook_log_msg)
 @json_response
 def public_webhook():
     """

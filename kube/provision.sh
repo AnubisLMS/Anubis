@@ -8,7 +8,7 @@ echo 'This script will provision your cluster for debugging'
 
 if ! minikube status | grep 'kubelet: Running' &> /dev/null; then
     echo 'staring minikube...' 1>&2
-    minikube start
+    minikube start --feature-gates=TTLAfterFinished=true
     sleep 1
 fi
 

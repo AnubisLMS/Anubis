@@ -194,7 +194,7 @@ def success_response(data: Union[dict, str, None]) -> dict:
     }
 
 
-def send_noreply_email(msg, subject, to):
+def send_noreply_email(message: str, subject: str, recipient: str):
     """
     Use this function to send a noreply email to a user (ie student).
 
@@ -214,14 +214,27 @@ def send_noreply_email(msg, subject, to):
     """
 
     if environ.get('DEBUG', False):
-        return print(msg, subject, to, flush=True)
+        return print(message, subject, recipient, flush=True)
 
-    msg = MIMEText(msg, "plain")
-    msg["Subject"] = subject
+    message = MIMEText(message, "plain")
+    message["Subject"] = subject
 
-    msg["From"] = "john@nyu.lol"
-    msg["To"] = to
+    message["From"] = "noreply@anubis.osiris.services"
+    message["To"] = recipient
 
     s = SMTP("smtp")
-    s.send_message(msg)
+    s.send_message(message)
     s.quit()
+
+
+def notify(user: User, message: str, subject: str):
+    """
+    Send a noreply email to a user.
+
+    :param user:
+    :param message:
+    :param subject:
+    :return:
+    """
+    recipient = '{netid}@nyu.edu'.format(netid=user.netid)
+    send_noreply_email(message, subject, recipient)

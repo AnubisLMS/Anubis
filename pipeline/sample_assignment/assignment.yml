@@ -1,0 +1,18 @@
+
+meta:
+  name: "Assignment 1: uniq"
+  class: "CS-UY 3224"
+  release_date: "2020-08-24 23:55:00"
+  due_date: "2020-08-25 23:55:00"
+
+  description: |
+    This is a very long description that encompases the entire assignment
+
+build:
+  command: "make xv6.img fs.img"
+  before_build: None
+  timeout: 60
+
+tests:
+- name: "Long file test"
+- name: "Short file test"

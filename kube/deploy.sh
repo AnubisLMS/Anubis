@@ -3,8 +3,7 @@
 cd $(dirname $(realpath $0))
 
 
-kubectl config use-context minikube
-eval $(minikube -p minikube docker-env)
+kubectl config use-context space
 
 if ! kubectl get namespace | grep anubis &> /dev/null; then
     kubectl create namespace anubis
@@ -22,10 +21,13 @@ fi
 pushd ..
 docker-compose build api
 docker-compose build --parallel
-# docker-compose push
+docker-compose push
 popd
 
 ../pipeline/build.sh
+
+docker push registry.osiris.services/anubis/assignment-base:ubuntu-16.04
+docker push registry.osiris.services/anubis/assignment/1:latest
 
 kubectl apply \
         -f config/api.yml \

@@ -1,5 +1,7 @@
 from datetime import datetime
 import logging
+import os
+import base64
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_json import MutableJson
@@ -78,8 +80,12 @@ class Assignment(db.Model):
     class_id = db.Column(db.Integer, db.ForeignKey(Class_.id), index=True)
 
     # Fields
-    name = db.Column(db.Text, nullable=False, unique=True)
+    name = db.Column(db.String(256), nullable=False, unique=True)
     hidden = db.Column(db.Boolean, default=False)
+    description = db.Column(db.Text, nullable=True)
+    github_classroom_url = db.Column(db.String(256), nullable=True)
+    pipeline_image = db.Column(db.String(256), unique=True, nullable=True)
+    unique_code = db.Column(db.String(8), unique=True, default=lambda: base64.b16encode(os.urandom(4)).decode())
 
     # Dates
     release_date = db.Column(db.DateTime, nullable=False)
@@ -98,6 +104,8 @@ class Assignment(db.Model):
             'due_date': str(self.due_date),
             'grace_date': str(self.grace_date),
             'class': self.class_.data,
+            'description': self.description,
+            'github_classroom_link': self.github_classroom_url,
 
             'tests': [t.data for t in self.tests]
         }
@@ -153,7 +161,7 @@ class AssignmentQuestion(db.Model):
     assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), index=True)
 
     # Fields
-    content = db.Column(db.Text, unique=True, nullable=False)
+    content = db.Column(db.Text, nullable=False)
     solution = db.Column(db.Text, nullable=True)
     level = db.Column(db.Integer, index=True, nullable=False)
 
@@ -221,6 +229,7 @@ class Submission(db.Model):
     processed = db.Column(db.Boolean, default=False)
     state = db.Column(db.String(128), default='')
     errors = db.Column(MutableJson, default=None, nullable=True)
+    token = db.Column(db.String(64), default=lambda: base64.b16encode(os.urandom(32)).decode())
 
     # Relationships
     owner = db.relationship(User, cascade='all,delete')
@@ -333,7 +342,7 @@ class SubmissionTestResult(db.Model):
 
     # Fields
     stdout = db.Column(db.Text)
-    errors = db.Column(db.Text)
+    message = db.Column(db.Text)
     passed = db.Column(db.Boolean)
 
     # Relationships
@@ -343,8 +352,9 @@ class SubmissionTestResult(db.Model):
     @property
     def data(self):
         return {
-            'errors': self.errors,
+            'test_name': self.assignment_test.name,
             'passed': self.passed,
+            'message': self.message,
             'stdout': self.stdout,
             'created': str(self.created),
             'last_updated': str(self.last_updated),

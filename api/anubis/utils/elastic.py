@@ -1,4 +1,5 @@
 import traceback
+import logging
 from datetime import datetime
 from functools import wraps
 
@@ -10,10 +11,12 @@ from werkzeug import exceptions
 from anubis.utils.http import get_request_ip
 from anubis.config import config
 
+import logging
+
 es = Elasticsearch(['http://elasticsearch:9200'])
 
 
-def log_event(log_type, message_func):
+def log_endpoint(log_type, message_func):
     """
     Use this to decorate a route and add logging.
     The message_func should be a calleble object
@@ -34,13 +37,23 @@ def log_event(log_type, message_func):
         def wrapper(*args, **kwargs):
             ip = get_request_ip()
             location = geolite2.lookup(ip)
-            es.index(index='request', body={
-                'type': log_type.lower(),
-                'msg': message_func(),
-                'location': location.location[::-1] if location is not None else location,
-                'ip': ip,
-                'timestamp': datetime.utcnow(),
-            })
+
+            # Skip indexing if the app has ELK disabled
+            if not config.DISABLE_ELK:
+                logging.info("{ip} -- {date} \"{method} {path}\"".format(
+                    ip=get_request_ip(),
+                    date=datetime.now(),
+                    method=request.method,
+                    path=request.path
+                ))
+                es.index(index='request', body={
+                    'type': log_type.lower(),
+                    'path': request.path,
+                    'msg': message_func(),
+                    'location': location.location[::-1] if location is not None else location,
+                    'ip': ip,
+                    'timestamp': datetime.utcnow(),
+                })
 
             return function(*args, **kwargs)
 
@@ -67,13 +80,11 @@ def add_global_error_handler(app):
     @app.errorhandler(Exception)
     def global_err_handler(error):
         tb = traceback.format_exc()  # get traceback string
-        esindex(
-            'error',
-            type='global-handler',
-            logs=request.url + ' - ' + get_request_ip() + '\n' + tb,
-            submission=None,
-            netid=None,
-        )
+        logging.error('global-handler-error', extra={
+            'traceback': tb,
+            'ip': get_request_ip(),
+            'path': request.path
+        })
         if isinstance(error, exceptions.NotFound):
             return '', 404
-        return 'err'
+        return 'err', 500

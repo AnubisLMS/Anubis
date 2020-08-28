@@ -17,3 +17,4 @@ sqlalchemy-json
 flask_limiter
 pyjwt
 python-logstash
+kubernetes

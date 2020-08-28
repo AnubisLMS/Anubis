@@ -41,7 +41,7 @@ spec:
       containers:
       - name: traefik
         image: traefik:v2.2
-        imagePullPolicy: IfNotPresent
+        # imagePullPolicy: IfNotPresent
         securityContext:
           capabilities:
             add:
