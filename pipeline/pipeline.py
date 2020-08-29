@@ -14,26 +14,30 @@ root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)
 root_logger.addHandler(logging.StreamHandler())
 
-from utils import fix_permissions, exec_as_student
+try:
+    import assignment
+except ImportError:
+    report_panic('Unable to import assignment', traceback.format_exc())
+    exit(0)
 
-DEBUG = os.environ.get('DEBUG', default='0') == '1'
+from utils import registered_tests, build_function
+from utils import fix_permissions, exec_as_student, Panic, DEBUG
 
-if not DEBUG:
-    TOKEN = os.environ.get('TOKEN')
-    COMMIT = os.environ.get('COMMIT')
-    GIT_REPO = os.environ.get('GIT_REPO')
-    SUBMISSION_ID = os.environ.get('SUBMISSION_ID')
-    del os.environ['TOKEN']
-else:
-    TOKEN = 'DEBUG'
-    COMMIT = 'DEBUG'
-    GIT_REPO = 'DEBUG'
-    SUBMISSION_ID = 'DEBUG'
+
+TOKEN = os.environ.get('TOKEN')
+COMMIT = os.environ.get('COMMIT')
+GIT_REPO = os.environ.get('GIT_REPO')
+SUBMISSION_ID = os.environ.get('SUBMISSION_ID')
+del os.environ['TOKEN']
 
 
 def post(path: str, data: dict):
     headers = {'Content-Type': 'application/json'}
     params = {'token': TOKEN}
+
+    if DEBUG:
+        logging.info("post: {} data: {}".format(path, data))
+        return None
 
     # Attempt to contact the pipeline API
     try:
@@ -172,7 +176,8 @@ def clone():
     # Clone
     try:
         repo = git.Repo.clone_from(GIT_REPO, './student')
-        repo.git.checkout(COMMIT)
+        if COMMIT.lower() != 'null':
+            repo.git.checkout(COMMIT)
     except git.exc.GitCommandError:
         report_panic('Git error', traceback.format_exc())
         exit(0)
@@ -189,13 +194,10 @@ def run_build(assignment_data: dict):
     :return:
     """
     # build
-    report_state('Building...')
-    build_stdout, build_passed = exec_as_student(
-        assignment_data['build']['command'],
-        timeout=assignment_data['build']['timeout'] if 'timeout' in assignment_data['build'] else 60
-    )
-    report_build_results(build_stdout, build_passed)
-    if not build_passed:
+    report_state('Running Build...')
+    result = build_function()
+    report_build_results(result.stdout, result.passed)
+    if not result.passed:
         exit(0)
 
 
@@ -207,14 +209,6 @@ def run_tests(assignment_data: dict):
     :return:
     """
 
-    try:
-        import assignment
-    except ImportError:
-        report_panic('Unable to import assignment', traceback.format_exc())
-        exit(0)
-
-    from utils import registered_tests
-
     # Tests
     for test_meta in assignment_data['tests']:
         test_name = test_meta['name']
@@ -223,14 +217,10 @@ def run_tests(assignment_data: dict):
             report_panic('Unable to find function for test_name {}'.format(test_name), '')
             exit(0)
 
-        report_state('Running test: '.format(test_name))
+        report_state('Running test: {}'.format(test_name))
         result = registered_tests[test_name]()
 
-        print(result.stdout)
-
         report_test_results(test_name, result.stdout, result.message, result.passed)
-
-        # TODO run tests
 
 
 def main():
@@ -238,8 +228,13 @@ def main():
     clone()
 
     os.chdir('./student')
-    run_build(assignment_data)
-    run_tests(assignment_data)
+    try:
+        run_build(assignment_data)
+        run_tests(assignment_data)
+    except Panic as e:
+        report_panic(repr(e), traceback.format_exc())
+    except Exception as e:
+        report_panic(repr(e), traceback.format_exc())
 
 
 if __name__ == '__main__':

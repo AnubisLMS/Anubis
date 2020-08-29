@@ -2,8 +2,12 @@ import os
 import subprocess
 import typing
 import logging
+import functools
+
+DEBUG = os.environ.get('DEBUG', default='0') == '1'
 
 registered_tests = {}
+build_function = None
 
 
 class TestResult(object):
@@ -18,6 +22,21 @@ class TestResult(object):
             self.message,
             self.stdout
         )
+
+class BuildResult(object):
+    def __init__(self):
+        self.stdout = None
+        self.passed = None
+
+    def __repr__(self):
+        return "<BuildResult passed={} stdout={:5.5}>".format(
+            self.passed,
+            self.stdout
+        )
+
+
+class Panic(Exception):
+    pass
 
 
 def exec_as_student(cmd, timeout=60) -> typing.Tuple[str, bool]:
@@ -70,6 +89,7 @@ def fix_permissions():
 
 def register_test(test_name):
     def decorator(func):
+        @functools.wraps(func)
         def wrapper():
             result = TestResult()
             func(result)
@@ -80,3 +100,16 @@ def register_test(test_name):
         return wrapper
 
     return decorator
+
+
+def register_build(func):
+    @functools.wraps(func)
+    def wrapper():
+        result = BuildResult()
+        func(result)
+        return result
+
+    global build_function
+    build_function = wrapper
+
+    return wrapper

@@ -1,7 +1,7 @@
-from datetime import datetime
+import base64
 import logging
 import os
-import base64
+from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_json import MutableJson
@@ -108,6 +108,23 @@ class Assignment(db.Model):
             'github_classroom_link': self.github_classroom_url,
 
             'tests': [t.data for t in self.tests]
+        }
+
+    @property
+    def meta_shape(self):
+        return {
+            'assignment': {
+                "name": str,
+                "class": str,
+                "unique_code": str,
+                "hidden": bool,
+                "github_classroom_url": str,
+                "pipeline_image": str,
+                "release_date": str,
+                "due_date": str,
+                "grace_date": str,
+                "description": str,
+            }
         }
 
 
@@ -266,7 +283,6 @@ class Submission(db.Model):
 
         # Commit new models
         db.session.commit()
-
 
     @property
     def url(self):

@@ -1,4 +1,4 @@
-PERSISTENT_SERVICES := db traefik kibana elasticsearch redis smtp logstash
+PERSISTENT_SERVICES := db traefik kibana elasticsearch redis smtp logstash adminer
 RESTART_ALWAYS_SERVICES := api web pipeline-api
 PUSH_SERVICES := api web logstash api-dev
 BUILD_ALLWAYS := api web pipeline-api
@@ -42,6 +42,7 @@ check:
 .PHONY: build        # Build all docker images
 build:
 	docker-compose build --parallel $(BUILD_ALLWAYS)
+	./pipeline/build.sh
 
 .PHONY: push         # Push images to registry.osiris.services (requires vpn)
 push:
