@@ -42,11 +42,12 @@ check:
 .PHONY: build        # Build all docker images
 build:
 	docker-compose build --parallel $(BUILD_ALLWAYS)
-	./pipeline/build.sh
+	./assignment/build.sh
 
 .PHONY: push         # Push images to registry.osiris.services (requires vpn)
-push:
+push: build
 	docker-compose push $(PUSH_SERVICES)
+	docker push 'registry.osiris.services/anubis/assignment-base:ubuntu-20.04'
 
 
 .PHONY: debug        # Start the cluster in debug mode

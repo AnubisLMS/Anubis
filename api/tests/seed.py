@@ -45,7 +45,7 @@ with app.app_context():
     u = User(netid='jmc1283', github_username='juanpunchman', name='John Cunniff', is_admin=True)
     c = Class_(name='Intro to OS', class_code='CS-UY 3224', section='A', professor='Gustavo')
     ic = InClass(owner=u, class_=c)
-    a = Assignment(name='Assignment1: uniq', pipeline_image="registry.osiris.services/anubis/assignment/1", hidden=False, release_date='2020-08-22', due_date='2020-08-22', class_=c)
+    a = Assignment(name='Assignment1: uniq', unique_code='abc123', pipeline_image="registry.osiris.services/anubis/assignment/1", hidden=False, release_date='2020-08-22', due_date='2020-08-22', class_=c)
     at1 = AssignmentTest(name='Long file test', assignment=a)
     at2 = AssignmentTest(name='Short file test', assignment=a)
     r = AssignmentRepo(owner=u, assignment=a, repo_url='https://github.com/juan-punchman/xv6-public.git')

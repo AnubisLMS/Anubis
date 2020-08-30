@@ -8,7 +8,7 @@ from anubis.models import Assignment, AssignmentRepo
 from anubis.models import Submission
 from anubis.models import db, User, Class_, InClass
 from anubis.utils.auth import current_user
-from anubis.utils.data import error_response, success_response
+from anubis.utils.data import error_response, success_response, is_debug
 from anubis.utils.data import get_classes, get_assignments, get_submissions
 from anubis.utils.data import regrade_submission, enqueue_webhook_rpc
 from anubis.utils.decorators import json_response, require_user
@@ -192,9 +192,10 @@ def public_webhook():
     github_username = webhook['pusher']['name']
     commit = webhook['after']
     assignment_name = webhook['repository']['name'][:-(len(github_username) + 1)]
+    unique_code = assignment_name.split('-')[-1]
 
     # Attempt to find records for the relevant models
-    assignment = Assignment.query.filter_by(name=assignment_name).first()
+    assignment = Assignment.query.filter_by(unique_code=unique_code).first()
     user = User.query.filter(User.github_username == github_username).first()
     repo = AssignmentRepo.query.Join(Assignment).Join(Class_).join(InClass).join(User).filter(
         User.github_username == github_username,
@@ -203,15 +204,20 @@ def public_webhook():
 
     # Verify that we can match this push to an assignment
     if assignment is None:
-        logging.error('Could not find repo', extra={
+        logging.error('Could not find assignment', extra={
             'repo_url': repo_url, 'github_username': github_username,
             'assignment_name': assignment_name, 'commit': commit,
         })
         return error_response('assignment not found'), 406
 
-    # Make sure that the repo we're about to process actually belongs to our organization
-    if not webhook['repository']['full_name'].startswith('os3224/'):
-        return error_response('invalid repo'), 406
+    if not is_debug():
+        # Make sure that the repo we're about to process actually belongs to our organization
+        if not webhook['repository']['full_name'].startswith('os3224/'):
+            logging.error('Invalid github organization in webhook.', extra={
+                'repo_url': repo_url, 'github_username': github_username,
+                'assignment_name': assignment_name, 'commit': commit,
+            })
+            return error_response('invalid repo'), 406
 
     # if we dont have a record of the repo, then add it
     if repo is None:
@@ -222,10 +228,21 @@ def public_webhook():
     # The before Hash will be all 0s on for the first hash.
     # We will want to ignore both this first push (the initialization of the repo)
     # and all branches that are not master.
-    if webhook['before'] == '0000000000000000000000000000000000000000' or webhook['ref'] != 'refs/heads/master':
+    if webhook['before'] == '0000000000000000000000000000000000000000':
         # Record that a new repo was created (and therefore, someone just started their assignment)
+        logging.info('new student repo ', extra={
+            'repo_url': repo_url, 'github_username': github_username,
+            'assignment_name': assignment_name, 'commit': commit,
+        })
         esindex('new-repo', github_username=github_username, repo_url=repo_url, assignment=str(assignment))
-        return success_response('initial commit or push not to master')
+        return success_response('initial commit')
+
+    if webhook['ref'] != 'refs/heads/master':
+        logging.warn('not push to master', extra={
+            'repo_url': repo_url, 'github_username': github_username,
+            'assignment_name': assignment_name, 'commit': commit,
+        })
+        return error_response('not push to master')
 
     # Create a shiny new submission
     submission = Submission(assignment=assignment, owner=user, commit=commit, state='Enqueued')
@@ -238,6 +255,10 @@ def public_webhook():
     # If a user has not given us their github username
     # the submission will stay in a "dangling" state
     if user is None:
+        logging.warn('dangling submission from {}'.format(github_username), extra={
+            'repo_url': repo_url, 'github_username': github_username,
+            'assignment_name': assignment_name, 'commit': commit,
+        })
         esindex(
             type='error',
             logs='dangling submission by: ' + github_username,

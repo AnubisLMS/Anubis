@@ -30,15 +30,15 @@ spec:
           containerPort: 5000
         resources:
           limits:
-            cpu: "8"
+            cpu: "4"
             memory: "200Mi"
           requests:
-            cpu: "8"
+            cpu: "4"
             memory: "100Mi"
         env:
         # Gunicorn workers
         - name: "WORKERS"
-          value: "8"
+          value: "4"
         - name: "GUNICORN_OPTIONS"
           value: "--preload"
         - name: "SECRET_KEY"
