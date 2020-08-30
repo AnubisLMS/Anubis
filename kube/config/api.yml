@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: anubis-api
-  replicas: 1
+  replicas: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -39,6 +39,8 @@ spec:
         # Gunicorn workers
         - name: "WORKERS"
           value: "8"
+        - name: "GUNICORN_OPTIONS"
+          value: "--preload"
         - name: "SECRET_KEY"
           valueFrom:
             secretKeyRef:
