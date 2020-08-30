@@ -1,0 +1,21 @@
+assignment:
+  name: "{name}"
+  class: "CS-UY 3224"
+  hidden: true
+  # Optionally specify the github classroom link
+  # for students to get their repo.
+  github_classroom_url: ""
+
+  # Don't change these!
+  unique_code: "{code}"
+  pipeline_image: "registry.osiris.services/anubis/assignment/{code}"
+
+  # Specify the importaint dates here
+  date:
+    release: "{now}"
+    due: "{week_from_now}"
+    grace: "{week_from_now}"
+
+  # This description will be shown to the user on the Anubis website.
+  description: |
+    This is a very long description that encompases the entire assignment

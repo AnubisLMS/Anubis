@@ -1,4 +1,6 @@
-FROM ubuntu:16.04
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update \
   && apt install -y git python3 python3-pip qemu-system-x86 \

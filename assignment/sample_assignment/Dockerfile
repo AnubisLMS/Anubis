@@ -1,4 +1,4 @@
-FROM registry.osiris.services/anubis/assignment-base:ubuntu-16.04
+FROM registry.osiris.services/anubis/assignment-base:ubuntu-20.04
 
 # Switch to the root user to install stuff
 # USER root

@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
-requirements = ['Click>=7.0', 'requests', 'pyyaml', 'docker']
+requirements = ['Click>=7.0', 'requests','pyyaml','docker']
 
 setup_requirements = [ ]
 
@@ -42,7 +42,6 @@ setup(
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/juan-punchman/anubis',
     version='v2.0.0',
     zip_safe=False,
 )
