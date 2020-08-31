@@ -1,9 +1,9 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import clsx from "clsx";
 import {
   makeStyles,
-  createMuiTheme,
-  ThemeProvider
+  useTheme
 } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -27,8 +27,9 @@ import CloudUploadOutlinedIcon from "@material-ui/icons/CloudUploadOutlined";
 import PublicIcon from "@material-ui/icons/Public";
 import { Link, useRouteMatch } from "react-router-dom";
 
+
 const categories = [
-  { id: "Courses", icon: <SchoolIcon />, path: "/class", sublists: [] },
+  { id: "Courses", icon: <SchoolIcon />, path: "/" },
   {
     id: "Assignments",
     icon: <AssignmentOutlinedIcon />,
@@ -47,7 +48,7 @@ const footerLinks = [
 ];
 const drawerWidth = 240;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme)  => ({
   root: {
     display: "flex"
   },
@@ -71,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
   hide: {
     display: "none"
   },
-  drawer: {
+  drawer: { 
     width: drawerWidth,
     flexShrink: 0
   },
@@ -87,7 +88,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "flex-end"
   },
   drawerIcon: {
-    marginLeft: 80
+    marginLeft: 75
   },
   content: {
     flexGrow: 1,
@@ -111,136 +112,17 @@ const useStyles = makeStyles((theme) => ({
     display:"inline",
     paddingBottom: 10,
     
+  },
+  drawerHeaderText : {
+    marginTop : 5
   }
 }));
 
-let theme = createMuiTheme({
-  palette: {
-    primary: {
-      light: "#63ccff",
-      main: "#009be5",
-      dark: "#006db3"
-    },
-    type: "dark"
-  },
-
-  typography: {
-    h5: {
-      fontWeight: 300,
-      fontSize: 30,
-      letterSpacing: 0.7
-    }
-  },
-  shape: {
-    borderRadius: 8
-  },
-  props: {
-    MuiTab: {
-      disableRipple: true
-    }
-  },
-  mixins: {
-    toolbar: {
-      minHeight: 48
-    }
-  }
-});
-
-theme = {
-  ...theme,
-  overrides: {
-    MuiDrawer: {
-      paper: {
-        backgroundColor: "#18202c"
-      }
-    },
-    MuiButton: {
-      label: {
-        textTransform: "none"
-      },
-      contained: {
-        boxShadow: "none",
-        "&:active": {
-          boxShadow: "none"
-        }
-      }
-    },
-    MuiTabs: {
-      root: {
-        marginLeft: theme.spacing(1)
-      },
-      indicator: {
-        height: 3,
-        borderTopLeftRadius: 3,
-        borderTopRightRadius: 3,
-        backgroundColor: theme.palette.common.white
-      }
-    },
-    MuiTab: {
-      root: {
-        textTransform: "none",
-        margin: "0 16px",
-        minWidth: 0,
-        padding: 0,
-        [theme.breakpoints.up("md")]: {
-          padding: 0,
-          minWidth: 0
-        }
-      }
-    },
-    MuiIconButton: {
-      root: {
-        padding: theme.spacing(1)
-      }
-    },
-    MuiTooltip: {
-      tooltip: {
-        borderRadius: 4
-      }
-    },
-    MuiDivider: {
-      root: {
-        backgroundColor: "#404854"
-      }
-    },
-    MuiListItemText: {
-      primary: {
-        fontWeight: theme.typography.fontWeightMedium
-      }
-    },
-    MuiListItemIcon: {
-      root: {
-        color: "inherit",
-        marginRight: -7,
-        "& svg": {
-          fontSize: 20
-        }
-      }
-    },
-    MuiAvatar: {
-      root: {
-        width: 32,
-        height: 32
-      }
-    }
-  }
-};
-
 export default function Navigator(props) {
   const classes = useStyles();
-  const { ...other } = props;
-  const [open, setOpen] = React.useState(true);
-
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
-
+  const {variant, open, onClose, onOpen} = props;
+  const theme = useTheme();
   return (
-    <ThemeProvider theme={theme}>
       <div className={classes.root}>
         <CssBaseline />
         <AppBar
@@ -254,12 +136,13 @@ export default function Navigator(props) {
             <IconButton
               color="inherit"
               aria-label="open drawer"
-              onClick={handleDrawerOpen}
+              onClick={onOpen}
               edge="start"
               className={clsx(classes.menuButton, open && classes.hide)}
             >
               <MenuIcon />
             </IconButton>
+            
             <Typography variant="h6" noWrap>
               Student Courses
             </Typography>
@@ -271,15 +154,15 @@ export default function Navigator(props) {
           anchor="left"
           open={open}
           classes={{
-            paper: classes.drawerPaper
+            paper:classes.drawerPaper
           }}
         >
           <div className={classes.drawerHeader}>
-            <div>
+            <div className={classes.drawerHeaderText}>
               <Typography variant="h5">Anubis </Typography>
             </div>
             <div class={classes.drawerIcon}>
-              <IconButton onClick={handleDrawerClose}>
+              <IconButton onClick={onClose}>
                 {theme.direction === "ltr" ? (
                   <ChevronLeftIcon />
                 ) : (
@@ -290,16 +173,18 @@ export default function Navigator(props) {
           </div>
           <Divider />
           <List>
-            {categories.map(({ id, icon, path, sublists }) => (
-              <ListItem button key={id}>
+            {categories.map(({ id, icon, path}) => (
+              <ListItem button key={id}
+                component={Link}
+                to={path}
+              >
                 <ListItemIcon>{icon}</ListItemIcon>
                 <ListItemText primary={id} />
               </ListItem>
             ))}
           </List>
         <div className={classes.bottomPush}>
-          <List >
-            
+          <List >            
             {footerLinks.map((item) => (
               <ListItem button key={item.id}>
                 <ListItemIcon>{item.icon}</ListItemIcon>
@@ -309,14 +194,9 @@ export default function Navigator(props) {
           </List>
           </div>
         </Drawer>
+        
       </div>
-    </ThemeProvider>
   );
 }
 
 
-Navigator.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-export default withStyles(styles)(Navigator);
