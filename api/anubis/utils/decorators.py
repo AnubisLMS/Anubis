@@ -124,7 +124,7 @@ def json_endpoint(required_fields: Union[List[str], List[Tuple], None] = None):
                     # Make sure
                     if field not in json_data:
                         # field missing, return error
-                        return error_response('Malformed requests. Missing fields.'), 406  # Not Acceptable
+                        return error_response('Malformed requests. Missing field {}.'.format(field)), 406  # Not Acceptable
 
                     # If a type was specified, verify it
                     if required_type is not None:

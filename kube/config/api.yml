@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: anubis-api
-  replicas: 1
+  replicas: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -30,15 +30,17 @@ spec:
           containerPort: 5000
         resources:
           limits:
-            cpu: "8"
             memory: "200Mi"
           requests:
-            cpu: "8"
             memory: "100Mi"
         env:
+        - name: "DISABLE_ELK"
+          value: "0"
         # Gunicorn workers
         - name: "WORKERS"
-          value: "8"
+          value: "4"
+        - name: "GUNICORN_OPTIONS"
+          value: "--preload --capture-output --enable-stdio-inheritance"
         - name: "SECRET_KEY"
           valueFrom:
             secretKeyRef:
@@ -60,18 +62,43 @@ spec:
           initialDelaySeconds: 120
           periodSeconds: 5
 
-      - name: api-dev
+      # Mail container
+      - name: smtp
+        image: namshi/smtp
+        resources:
+          limits:
+            memory: "100Mi"
+          requests:
+            memory: "100Mi"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anubis-debug
+  namespace: anubis
+
+spec:
+  selector:
+    matchLabels:
+      app: anubis-debug
+  template:
+    metadata:
+      labels:
+        app: anubis-debug
+    spec:
+      dnsPolicy: ClusterFirst
+      containers:
+      - name: jupyter
         image: registry.osiris.services/anubis/api-dev:v2.0.0-alpha
         imagePullPolicy: Always
         ports:
-          - name: web
-            containerPort: 5003
+        - name: web
+          containerPort: 5003
         resources:
           limits:
-            cpu: "2"
             memory: "200Mi"
           requests:
-            cpu: "2"
             memory: "100Mi"
         env:
           - name: DB_HOST
@@ -83,16 +110,21 @@ spec:
                 name: api
                 key: database-uri
 
-      # Mail container
-      - name: smtp
-        image: namshi/smtp
+      - name: adminer
+        image: adminer
+        env:
+        - name: "ADMINER_DEFAULT_SERVER"
+          value: "mariadb.mariadb.svc.cluster.local"
+        ports:
+        - name: adminer
+          containerPort: 8080
         resources:
           limits:
-            cpu: "1"
-            memory: "100Mi"
+            memory: "200Mi"
           requests:
-            cpu: "1"
             memory: "100Mi"
+
+
 ---
 apiVersion: v1
 kind: Service
@@ -113,15 +145,18 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: anubis-jupyter
+  name: anubis-debug
   namespace: anubis
   labels:
-    app: anubis-api
+    app: anubis-debug
 spec:
   selector:
-    app: anubis-api
+    app: anubis-debug
   ports:
-  - name: web
+  - name: adminer
+    port: 5002
+    targetPort: 8080
+  - name: jupyter
     port: 5003
     targetPort: 5003
 

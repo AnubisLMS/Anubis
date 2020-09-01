@@ -80,8 +80,8 @@ def add_global_error_handler(app):
     @app.errorhandler(Exception)
     def global_err_handler(error):
         tb = traceback.format_exc()  # get traceback string
-        logging.error('global-handler-error', extra={
-            'traceback': tb,
+        logging.error(tb, extra={
+            'from': 'global-error-handler',
             'ip': get_request_ip(),
             'path': request.path
         })
