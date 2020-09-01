@@ -30,17 +30,17 @@ spec:
           containerPort: 5000
         resources:
           limits:
-            cpu: "4"
             memory: "200Mi"
           requests:
-            cpu: "4"
             memory: "100Mi"
         env:
+        - name: "DISABLE_ELK"
+          value: "0"
         # Gunicorn workers
         - name: "WORKERS"
           value: "4"
         - name: "GUNICORN_OPTIONS"
-          value: "--preload"
+          value: "--preload --capture-output --enable-stdio-inheritance"
         - name: "SECRET_KEY"
           valueFrom:
             secretKeyRef:
@@ -66,14 +66,12 @@ spec:
         image: registry.osiris.services/anubis/api-dev:v2.0.0-alpha
         imagePullPolicy: Always
         ports:
-          - name: web
-            containerPort: 5003
+        - name: web
+          containerPort: 5003
         resources:
           limits:
-            cpu: "2"
             memory: "200Mi"
           requests:
-            cpu: "2"
             memory: "100Mi"
         env:
           - name: DB_HOST
@@ -90,10 +88,22 @@ spec:
         image: namshi/smtp
         resources:
           limits:
-            cpu: "1"
             memory: "100Mi"
           requests:
-            cpu: "1"
+            memory: "100Mi"
+
+      - name: adminer
+        image: adminer
+        env:
+        - name: "ADMINER_DEFAULT_SERVER"
+          value: "mariadb.mariadb.svc.cluster.local"
+        ports:
+        - name: adminer
+          containerPort: 8080
+        resources:
+          limits:
+            memory: "200Mi"
+          requests:
             memory: "100Mi"
 ---
 apiVersion: v1
@@ -110,20 +120,10 @@ spec:
   - name: web
     port: 5000
     targetPort: 5000
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: anubis-jupyter
-  namespace: anubis
-  labels:
-    app: anubis-api
-spec:
-  selector:
-    app: anubis-api
-  ports:
-  - name: web
+  - name: adminer
+    port: 5002
+    targetPort: 8080
+  - name: jupyter
     port: 5003
     targetPort: 5003
 

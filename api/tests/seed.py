@@ -12,13 +12,27 @@ from anubis.models import Submission, SubmissionTestResult, SubmissionBuild
 import json
 
 
-def get(path, token=None, params=None) -> dict:
-    headers = {}
+def get(path, token=None, params=None, headers=None) -> dict:
+    if headers is None:
+        headers = {}
     if token is not None:
         headers['token'] = token
     if params is None:
         params = {}
     response = requests.get('http://localhost:5000' + path, headers=headers, params=params)
+    print('path={} params={} data={}\n'.format(path, params, json.dumps(response.json(), indent=2)))
+    return response.json()
+
+
+def post(path, data, token=None, params=None, headers=None) -> dict:
+    if headers is None:
+        headers = {}
+    headers['Content-Type'] = 'application/json'
+    if token is not None:
+        headers['token'] = token
+    if params is None:
+        params = {}
+    response = requests.post('http://localhost:5000' + path, headers=headers, params=params, json=data)
     print('path={} params={} data={}\n'.format(path, params, json.dumps(response.json(), indent=2)))
     return response.json()
 
@@ -42,7 +56,7 @@ with app.app_context():
     db.session.commit()
 
     # Create
-    u = User(netid='jmc1283', github_username='juanpunchman', name='John Cunniff', is_admin=True)
+    u = User(netid='jmc1283', github_username='juan-punchman', name='John Cunniff', is_admin=True)
     c = Class_(name='Intro to OS', class_code='CS-UY 3224', section='A', professor='Gustavo')
     ic = InClass(owner=u, class_=c)
     a = Assignment(name='Assignment1: uniq', unique_code='abc123', pipeline_image="registry.osiris.services/anubis/assignment/1", hidden=False, release_date='2020-08-22', due_date='2020-08-22', class_=c)
@@ -84,3 +98,7 @@ get('/public/submissions', token=token, params={'class': 'Intro to OS', 'assignm
 get('/public/submission/0000', token=token)
 get('/public/submission/0001', token=token)
 get('/public/submission/0003', token=token)
+
+
+webhook = json.load(open(os.path.join(os.path.dirname(__file__), 'webhook2.json')))
+post('/public/webhook', data=webhook, headers={'X-GitHub-Event': 'push'})

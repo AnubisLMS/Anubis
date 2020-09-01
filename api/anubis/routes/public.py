@@ -194,13 +194,18 @@ def public_webhook():
     assignment_name = webhook['repository']['name'][:-(len(github_username) + 1)]
     unique_code = assignment_name.split('-')[-1]
 
+    # logging.debug('github_username: {} unique_code: {}'.format(github_username, unique_code))
+
     # Attempt to find records for the relevant models
     assignment = Assignment.query.filter_by(unique_code=unique_code).first()
     user = User.query.filter(User.github_username == github_username).first()
-    repo = AssignmentRepo.query.Join(Assignment).Join(Class_).join(InClass).join(User).filter(
+    repo = AssignmentRepo.query.join(Assignment).join(Class_).join(InClass).join(User).filter(
         User.github_username == github_username,
         Assignment.name == assignment_name,
     ).first()
+
+    logging.debug('github_username: {} unique_code: {}'.format(github_username, unique_code))
+    logging.debug('assignment: {} user: {} repo: {}'.format(assignment, user, repo))
 
     # Verify that we can match this push to an assignment
     if assignment is None:
@@ -238,14 +243,14 @@ def public_webhook():
         return success_response('initial commit')
 
     if webhook['ref'] != 'refs/heads/master':
-        logging.warn('not push to master', extra={
+        logging.warning('not push to master', extra={
             'repo_url': repo_url, 'github_username': github_username,
             'assignment_name': assignment_name, 'commit': commit,
         })
         return error_response('not push to master')
 
     # Create a shiny new submission
-    submission = Submission(assignment=assignment, owner=user, commit=commit, state='Enqueued')
+    submission = Submission(assignment=assignment, repo=repo, owner=user, commit=commit, state='Enqueued')
     db.session.add(submission)
     db.session.commit()
 
@@ -255,7 +260,7 @@ def public_webhook():
     # If a user has not given us their github username
     # the submission will stay in a "dangling" state
     if user is None:
-        logging.warn('dangling submission from {}'.format(github_username), extra={
+        logging.warning('dangling submission from {}'.format(github_username), extra={
             'repo_url': repo_url, 'github_username': github_username,
             'assignment_name': assignment_name, 'commit': commit,
         })

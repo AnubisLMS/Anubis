@@ -138,7 +138,7 @@ class AssignmentRepo(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=True)
     assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), nullable=False)
 
-    repo_url = db.Column(db.String(128), unique=True, nullable=False)
+    repo_url = db.Column(db.String(128), nullable=False)
 
     # Relationships
     owner = db.relationship(User, cascade='all,delete')

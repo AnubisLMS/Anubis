@@ -39,7 +39,7 @@ class Panic(Exception):
     pass
 
 
-def exec_as_student(cmd, timeout=60) -> typing.Tuple[str, bool]:
+def exec_as_student(cmd, timeout=60) -> typing.Tuple[str, int]:
     """
     Run a command as the student. Any and all times that student
     code is run, it should be done through this function. Any other
@@ -59,6 +59,7 @@ def exec_as_student(cmd, timeout=60) -> typing.Tuple[str, bool]:
         stdout = subprocess.check_output(
             ["su", "student", "-c", cmd],
             timeout=timeout,
+            stderr=subprocess.STDOUT,
         )
     except subprocess.CalledProcessError as e:
         stdout = e.output
@@ -68,7 +69,7 @@ def exec_as_student(cmd, timeout=60) -> typing.Tuple[str, bool]:
         cmd, return_code, stdout
     ))
     fix_permissions()
-    return stdout, return_code == 0
+    return stdout, return_code
 
 
 def fix_permissions():

@@ -47,7 +47,7 @@ build:
 .PHONY: push         # Push images to registry.osiris.services (requires vpn)
 push: build
 	docker-compose push $(PUSH_SERVICES)
-	docker push 'registry.osiris.services/anubis/assignment-base:ubuntu-20.04'
+	docker push 'registry.osiris.services/anubis/assignment-base:latest'
 
 
 .PHONY: debug        # Start the cluster in debug mode

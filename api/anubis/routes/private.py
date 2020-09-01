@@ -84,12 +84,12 @@ def private_assignment_sync(assignment_data: dict, tests: List[str]):
     a.pipeline_image = assignment_data['pipeline_image']
     a.class_ = c
     try:
-        a.release_date = date_parse(assignment_data['release_date'])
-        a.due_date = date_parse(assignment_data['due_date'])
-        a.grace_date = date_parse(assignment_data['grace_date'])
+        a.release_date = date_parse(assignment_data['date']['release'])
+        a.due_date = date_parse(assignment_data['date']['due'])
+        a.grace_date = date_parse(assignment_data['date']['grace'])
     except ParserError:
         logging.error(traceback.format_exc())
-        return error_response('Unable to parse datetime')
+        return error_response('Unable to parse datetime'), 406
 
     db.session.add(a)
     db.session.commit()

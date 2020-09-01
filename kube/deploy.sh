@@ -20,7 +20,7 @@ fi
 
 pushd ..
 docker-compose build api
-docker-compose build --parallel
+docker-compose build --parallel web logstash
 docker-compose push
 popd
 

@@ -10,7 +10,7 @@ metadata:
   name: elastic-data
   namespace: anubis
 spec:
-  #storageClassName: longhorn
+  storageClassName: longhorn
   accessModes:
     - ReadWriteOnce
   volumeMode: Filesystem
@@ -64,6 +64,14 @@ spec:
         app: elasticsearch
         ecosystem: elk
     spec:
+      initContainers:
+      - name: volume-permissions
+        image: busybox:1.31.1
+        command: ["sh", "-c", "chown -R 1000:1000 /data && chmod -Rv 755 /data/*"]
+        volumeMounts:
+        - name: elastic-data
+          mountPath: /data
+
       containers:
       - name: elasticsearch
         image: elasticsearch:7.5.2

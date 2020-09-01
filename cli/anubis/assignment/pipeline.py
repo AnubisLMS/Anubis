@@ -210,13 +210,7 @@ def run_tests(assignment_data: dict):
     """
 
     # Tests
-    for test_meta in assignment_data['tests']:
-        test_name = test_meta['name']
-
-        if test_name not in registered_tests:
-            report_panic('Unable to find function for test_name {}'.format(test_name), '')
-            exit(0)
-
+    for test_name in registered_tests:
         report_state('Running test: {}'.format(test_name))
         result = registered_tests[test_name]()
 
@@ -231,6 +225,7 @@ def main():
     try:
         run_build(assignment_data)
         run_tests(assignment_data)
+        report_state('Finished!')
     except Panic as e:
         report_panic(repr(e), traceback.format_exc())
     except Exception as e:

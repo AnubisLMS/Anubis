@@ -36,8 +36,8 @@ def init_services(app):
     # Add ELK stuff
     if not config.DISABLE_ELK:
         # Add logstash handler
-        app.logger.addHandler(logstash.LogstashHandler('logstash', 5000))
         root_logger.addHandler(logstash.LogstashHandler('logstash', 5000))
+        app.logger = root_logger
 
         # Add elastic global error handler
         add_global_error_handler(app)
