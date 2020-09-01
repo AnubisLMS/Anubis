@@ -1,0 +1,2 @@
+recursive-include anubis/assignment *.py *.sh *.yml Dockerfile
+include requirements.txt

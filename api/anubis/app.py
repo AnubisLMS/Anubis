@@ -16,7 +16,7 @@ def init_services(app):
     :param app: Flask app
     :return:
     """
-    from anubis.models import db
+    from anubis.models import db, Config
     from anubis.utils.cache import cache
     from anubis.utils.elastic import add_global_error_handler
     from anubis.config import config
@@ -29,6 +29,11 @@ def init_services(app):
     with app.app_context():
         db.create_all()
 
+        if Config.query.filter(Config.key == "MAX_JOBS").first() is None:
+            c = Config(key='MAX_JOBS', value='10')
+            db.session.add(c)
+            db.session.commit()
+
     @app.route('/')
     def index():
         return 'Hello there...!'
@@ -36,8 +41,8 @@ def init_services(app):
     # Add ELK stuff
     if not config.DISABLE_ELK:
         # Add logstash handler
-        app.logger.addHandler(logstash.LogstashHandler('logstash', 5000))
         root_logger.addHandler(logstash.LogstashHandler('logstash', 5000))
+        app.logger = root_logger
 
         # Add elastic global error handler
         add_global_error_handler(app)
