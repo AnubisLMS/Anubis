@@ -105,7 +105,7 @@ export default function AssignmentCard(props) {
         <Card className={classes.root}>
              <CardActionArea 
                 component={Link} 
-                to={`/courses/${courseCode.replace(/\s+/g,'')}/assignments/${assignmentNumber}/submissions`} > 
+                to={`/courses/${courseCode.replace(/\s+/g,'')}/assignments/${assignmentNumber}/info`} > 
                 <CardContent>  
 
                     <Typography className={classes.title} color="textSecondary" gutterBottom>
@@ -143,7 +143,11 @@ export default function AssignmentCard(props) {
             <CardActions>  
               <div className={classes.submitIcon}>                                    
                 <PublishIcon style = {hasSubmission ? {color:blue[500]} : {color:grey[500]}}/>
-                <Button style = {hasSubmission ? {color:blue[500]} : {color:grey[500]}} size="small">Submissions</Button>
+                <Button 
+                  component={Link}
+                  to={`/courses/${courseCode.replace(/\s+/g,'')}/assignments/${assignmentNumber}/submissions`}
+                  style = {hasSubmission ? {color:blue[500]} : {color:grey[500]}} size="small">
+                    Submissions</Button>
                 
               </div>    
                 </CardActions>

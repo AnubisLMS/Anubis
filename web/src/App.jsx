@@ -11,11 +11,12 @@ import {SnackbarProvider} from 'notistack';
 import CourseView from './Pages/Courses/View';
 import AssignmentView from './Pages/Assignments/View'
 import Navigator from './Navigation/Navigator';
-//import SubmissionView from './Submissions/View';
+import SubmissionInfo from './Pages/Submissions/SubmissionInfo';
 //import SearchSubmissions from "./Submissions/SearchSubmissions";
 import NotFound from "./NotFound";
 import apiUrl from './utils';
 import { Toolbar } from '@material-ui/core';
+import SubmissionsView from './Pages/Submissions/View';
 
 
 let theme = createMuiTheme({
@@ -220,11 +221,13 @@ function App(props) {
                 </Route>
 
                 {/* Submissions page */}
-                <Route exact path = {'/courses/:courseid/assignments/:assignmentid/submissions'}>                  
+                <Route exact path = {'/courses/:courseid/assignments/:assignmentid/submissions'}>  
+                   <SubmissionsView />             
                 </Route>
                 
                 {/* Individual submission status, test results page  */}
                 <Route exact path = {'/courses/:courseid/assignments/:assignmentid/submissions/:commit'}>
+                  <SubmissionInfo />
                 </Route>
            
             
