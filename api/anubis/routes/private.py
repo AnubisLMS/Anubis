@@ -1,13 +1,13 @@
-import traceback
-import logging
 import json
+import logging
+import traceback
 from typing import List
 
+from dateutil.parser import parse as date_parse, ParserError
 from flask import request, Blueprint
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_, and_
 
-from anubis.models import Assignment, AssignmentQuestion, AssignedStudentQuestion
+from anubis.models import Assignment
 from anubis.models import Submission
 from anubis.models import User
 from anubis.models import db
@@ -18,7 +18,6 @@ from anubis.utils.data import success_response, error_response
 from anubis.utils.decorators import json_response, json_endpoint
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.redis_queue import enqueue_webhook_rpc
-from dateutil.parser import parse as date_parse, ParserError
 
 private = Blueprint('private', __name__, url_prefix='/private')
 
@@ -95,8 +94,8 @@ def private_assignment_sync(assignment_data: dict, tests: List[str]):
     db.session.commit()
 
     for i in AssignmentTest.query.filter(
-        and_(AssignmentTest.assignment_id == a.id,
-             AssignmentTest.name.notin_(tests))
+    and_(AssignmentTest.assignment_id == a.id,
+         AssignmentTest.name.notin_(tests))
     ).all():
         db.session.delete(i)
     db.session.commit()
@@ -115,6 +114,7 @@ def private_assignment_sync(assignment_data: dict, tests: List[str]):
     return success_response({
         'assignment': a.data,
     })
+
 
 @private.route('/dangling')
 @log_endpoint('cli', lambda: 'dangling')
@@ -270,11 +270,13 @@ if is_debug():
         c = Class_(name='Intro to OS', class_code='CS-UY 3224', section='A', professor='Gustavo')
         ic = InClass(owner=u, class_=c)
         a = Assignment(name='Assignment1: uniq', pipeline_image="registry.osiris.services/anubis/assignment/1",
-                       hidden=False, release_date='2020-08-22', due_date='2020-08-22', class_=c, github_classroom_url='')
+                       hidden=False, release_date='2020-08-22', due_date='2020-08-22', class_=c,
+                       github_classroom_url='')
         at1 = AssignmentTest(name='Long file test', assignment=a)
         at2 = AssignmentTest(name='Short file test', assignment=a)
         r = AssignmentRepo(owner=u, assignment=a, repo_url='https://github.com/juan-punchman/xv6-public.git')
-        s1 = Submission(commit='2bc7f8d636365402e2d6cc2556ce814c4fcd1489', state='Enqueued', owner=u, assignment=a, repo=r)
+        s1 = Submission(commit='2bc7f8d636365402e2d6cc2556ce814c4fcd1489', state='Enqueued', owner=u, assignment=a,
+                        repo=r)
         s2 = Submission(commit='0001', state='Enqueued', owner=u, assignment=a, repo=r)
 
         # Commit

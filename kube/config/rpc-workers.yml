@@ -15,7 +15,7 @@ spec:
   selector:
     matchLabels:
       app: anubis-rpc-workers
-  replicas: 1
+  replicas: 5
   strategy:
     type: RollingUpdate
     rollingUpdate:

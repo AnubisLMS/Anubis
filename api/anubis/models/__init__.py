@@ -9,6 +9,12 @@ from sqlalchemy_json import MutableJson
 db = SQLAlchemy()
 
 
+class Config(db.Model):
+    __tablename__ = 'config'
+    key = db.Column(db.String(128), primary_key=True)
+    value = db.Column(db.String(2048))
+
+
 class User(db.Model):
     __tablename__ = 'user'
 

@@ -24,7 +24,7 @@ docker-compose build --parallel web logstash
 docker-compose push
 popd
 
-../pipeline/build.sh
+../pipeline/build.sh --push
 
 docker push registry.osiris.services/anubis/assignment-base:ubuntu-16.04
 docker push registry.osiris.services/anubis/assignment/1:latest

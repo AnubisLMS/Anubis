@@ -2,7 +2,7 @@ import logging
 import logstash
 import time
 
-from anubis.models import Submission
+from anubis.models import Submission, Config
 from kubernetes import client, config
 
 
@@ -38,6 +38,8 @@ def test_repo(submission_id: int):
     })
 
     with app.app_context():
+        max_jobs = Config.query.filter(Config.key == "MAX_JOBS").first()
+        max_jobs = int(max_jobs.value) if max_jobs is not None else 10
         submission = Submission.query.filter(
             Submission.id == submission_id).first()
 
@@ -53,17 +55,19 @@ def test_repo(submission_id: int):
         batch_v1 = client.BatchV1Api()
 
         active_jobs = batch_v1.list_namespaced_job('anubis')
-        if len(active_jobs.items) > 10:
-            enqueue_webhook_rpc(submission_id)
-            time.sleep(10)
-            exit(0)
-
         for job in active_jobs.items:
             if job.status.succeeded is not None and job.status.succeeded >= 1:
+                logging.info('deleting namespaced job {}'.format(job.metadata.name))
                 batch_v1.delete_namespaced_job(
                     job.metadata.name,
                     job.metadata.namespace,
                     propagation_policy='Background')
+
+        if len(active_jobs.items) > max_jobs:
+            logging.info('TOO many jobs - re-enqueue {}'.format(submission_id), extra={'submission_id': submission_id})
+            enqueue_webhook_rpc(submission_id)
+            time.sleep(1)
+            exit(0)
 
         container = client.V1Container(
             name="pipeline",
@@ -73,7 +77,13 @@ def test_repo(submission_id: int):
                 client.V1EnvVar(name="TOKEN", value=submission.token),
                 client.V1EnvVar(name="COMMIT", value=submission.commit),
                 client.V1EnvVar(name="GIT_REPO", value=submission.repo.repo_url),
-                client.V1EnvVar(name="SUBMISSION_ID", value=str(submission.id))
+                client.V1EnvVar(name="SUBMISSION_ID", value=str(submission.id)),
+                client.V1EnvVar(name="GIT_CRED",
+                                value_from=client.V1EnvVarSource(
+                                    secret_key_ref=client.V1SecretKeySelector(
+                                        name='git',
+                                        key='credentials'
+                                    ))),
             ],
             resources=client.V1ResourceRequirements(
                 limits={'cpu': '1', 'memory': '100Mi'},

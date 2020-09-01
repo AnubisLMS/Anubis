@@ -157,6 +157,9 @@ def pipeline_report_state(submission: Submission, state: str, **kwargs):
     :return:
     """
 
+    processed = request.args.get('processed', default='0')
+    submission.processed = processed != '0'
+
     # Update state field
     submission.state = state
 

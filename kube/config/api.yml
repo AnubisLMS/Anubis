@@ -62,7 +62,34 @@ spec:
           initialDelaySeconds: 120
           periodSeconds: 5
 
-      - name: api-dev
+      # Mail container
+      - name: smtp
+        image: namshi/smtp
+        resources:
+          limits:
+            memory: "100Mi"
+          requests:
+            memory: "100Mi"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anubis-debug
+  namespace: anubis
+
+spec:
+  selector:
+    matchLabels:
+      app: anubis-debug
+  template:
+    metadata:
+      labels:
+        app: anubis-debug
+    spec:
+      dnsPolicy: ClusterFirst
+      containers:
+      - name: jupyter
         image: registry.osiris.services/anubis/api-dev:v2.0.0-alpha
         imagePullPolicy: Always
         ports:
@@ -83,15 +110,6 @@ spec:
                 name: api
                 key: database-uri
 
-      # Mail container
-      - name: smtp
-        image: namshi/smtp
-        resources:
-          limits:
-            memory: "100Mi"
-          requests:
-            memory: "100Mi"
-
       - name: adminer
         image: adminer
         env:
@@ -105,6 +123,8 @@ spec:
             memory: "200Mi"
           requests:
             memory: "100Mi"
+
+
 ---
 apiVersion: v1
 kind: Service
@@ -120,6 +140,19 @@ spec:
   - name: web
     port: 5000
     targetPort: 5000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: anubis-debug
+  namespace: anubis
+  labels:
+    app: anubis-debug
+spec:
+  selector:
+    app: anubis-debug
+  ports:
   - name: adminer
     port: 5002
     targetPort: 8080

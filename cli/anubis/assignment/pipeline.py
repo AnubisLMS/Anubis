@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import base64
 import json
 import logging
 import os
@@ -21,8 +20,14 @@ except ImportError:
     exit(0)
 
 from utils import registered_tests, build_function
-from utils import fix_permissions, exec_as_student, Panic, DEBUG
+from utils import fix_permissions, Panic, DEBUG
 
+git_creds = os.environ.get('GIT_CRED', default=None)
+if git_creds is not None:
+    del os.environ['GIT_CRED']
+    with open(os.environ.get('HOME') + '/.git-credentials', 'w') as f:
+        f.write(git_creds)
+        f.close()
 
 TOKEN = os.environ.get('TOKEN')
 COMMIT = os.environ.get('COMMIT')
@@ -31,9 +36,11 @@ SUBMISSION_ID = os.environ.get('SUBMISSION_ID')
 del os.environ['TOKEN']
 
 
-def post(path: str, data: dict):
+def post(path: str, data: dict, params=None):
+    if params is None:
+        params = {}
     headers = {'Content-Type': 'application/json'}
-    params = {'token': TOKEN}
+    params['token'] = TOKEN
 
     if DEBUG:
         logging.info("post: {} data: {}".format(path, data))
@@ -78,10 +85,11 @@ def report_panic(message: str, traceback: str, ):
     post('/pipeline/report/panic/{}'.format(SUBMISSION_ID), data)
 
 
-def report_state(state: str):
+def report_state(state: str, params=None):
     """
     Report a state update for the current submission
 
+    :param params:
     :param state: text representation of state
     :return:
     """
@@ -91,7 +99,7 @@ def report_state(state: str):
         'state': state,
     }
     logging.info('report_state {}'.format(json.dumps(data, indent=2)))
-    post('/pipeline/report/state/{}'.format(SUBMISSION_ID), data)
+    post('/pipeline/report/state/{}'.format(SUBMISSION_ID), data, params=params)
 
 
 def report_build_results(stdout: str, passed: bool):
@@ -105,7 +113,8 @@ def report_build_results(stdout: str, passed: bool):
     data = {
         'token': TOKEN,
         'commit': COMMIT,
-        'stdout': base64.b16encode(stdout).decode(),
+        # 'stdout': base64.b16encode(stdout).decode(),
+        'stdout': stdout,
         'passed': passed,
     }
     logging.info('report_build {}'.format(json.dumps(data, indent=2)))
@@ -126,7 +135,8 @@ def report_test_results(test_name: str, stdout: str, message: str, passed: bool)
         'token': TOKEN,
         'commit': COMMIT,
         'test_name': test_name,
-        'stdout': base64.b16encode(stdout).decode(),
+        # 'stdout': base64.b16encode(stdout).decode(),
+        'stdout': stdout,
         'message': message,
         'passed': passed,
     }
@@ -225,7 +235,7 @@ def main():
     try:
         run_build(assignment_data)
         run_tests(assignment_data)
-        report_state('Finished!')
+        report_state('Finished!', params={'processed': '1'})
     except Panic as e:
         report_panic(repr(e), traceback.format_exc())
     except Exception as e:
