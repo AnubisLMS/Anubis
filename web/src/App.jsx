@@ -11,7 +11,7 @@ import {SnackbarProvider} from 'notistack';
 import CourseView from './Pages/Courses/View';
 import AssignmentView from './Pages/Assignments/View'
 import Navigator from './Navigation/Navigator';
-import SubmissionInfo from './Pages/Submissions/SubmissionInfo';
+import SubmissionInfo from './Pages/Submissions/SubmissionData/SubmissionInfo';
 //import SearchSubmissions from "./Submissions/SearchSubmissions";
 import NotFound from "./NotFound";
 import apiUrl from './utils';
