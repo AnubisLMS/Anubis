@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { Typography } from "@material-ui/core";
-import Grow from '@material-ui/core/Grow'
+import Zoom from '@material-ui/core/Zoom'
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -35,15 +35,11 @@ export default function SubmissionsView() {
                     CS-3224
               </Typography>
         </Grid>
-        <Grid item xs={6}>
-        <Grow
-          in= "true"
-          style={{ transformOrigin: '0 0 0' }}
-          {...({ timeout: 300 } )}
-        >          
-            <SubmissionTable />   
-        </Grow>     
+        <Zoom in={true} timeout={350}> 
+        <Grid item xs={6}>             
+            <SubmissionTable />             
         </Grid>
+        </Zoom>  
       </Grid>
     </div>
   );
