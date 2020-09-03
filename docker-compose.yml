@@ -54,14 +54,14 @@ services:
       - "traefik.http.routers.api-private.entrypoints=https"
       - "traefik.http.routers.api-private.tls.certresolver=tls"
       - "traefik.http.middlewares.api-private.redirectscheme.scheme=https"
-      - "traefik.http.routers.api-private.middlewares=traefik-auth@docker,strip-api@docker"
+      - "traefik.http.routers.api-private.middlewares=strip-api@docker"
 
       # Public router without auth
       - "traefik.http.routers.api-public.rule=Host(`localhost`) && PathPrefix(`/api/public`)"
       - "traefik.http.routers.api-public.entrypoints=https"
       - "traefik.http.routers.api-public.tls.certresolver=tls"
       - "traefik.http.middlewares.api-public.redirectscheme.scheme=https"
-      - "traefik.http.routers.api-private.middlewares=strip-api@docker"
+      - "traefik.http.routers.api-public.middlewares=strip-api@docker"
 
   api-dev:
     image: registry.osiris.services/anubis/api-dev:v2.0.0-alpha

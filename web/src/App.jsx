@@ -1,9 +1,8 @@
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import {createMuiTheme, ThemeProvider, withStyles, useTheme, makeStyles} from '@material-ui/core/styles';
+import {createMuiTheme, makeStyles, ThemeProvider, withStyles} from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import Hidden from '@material-ui/core/Hidden';
 import Typography from '@material-ui/core/Typography';
 import Link from '@material-ui/core/Link';
 import {BrowserRouter as Router, Redirect, Route, Switch} from "react-router-dom";
@@ -14,8 +13,7 @@ import Navigator from './Navigation/Navigator';
 import SubmissionInfo from './Pages/Submissions/SubmissionData/SubmissionInfo';
 //import SearchSubmissions from "./Submissions/SearchSubmissions";
 import NotFound from "./NotFound";
-import apiUrl from './utils';
-import { Toolbar } from '@material-ui/core';
+import {useQuery} from './utils';
 import SubmissionsView from './Pages/Submissions/View';
 
 
@@ -25,7 +23,7 @@ let theme = createMuiTheme({
       light: "#63ccff",
       main: "#009be5",
       dark: "#006db3"
-      
+
     },
     type: "dark"
   },
@@ -48,7 +46,7 @@ let theme = createMuiTheme({
   mixins: {
     toolbar: {
       minHeight: 48,
- 
+
     }
   }
 });
@@ -59,7 +57,7 @@ theme = {
     MuiDrawer: {
       paper: {
         backgroundColor: "#18202c"
-      }, 
+      },
     },
     MuiButton: {
       label: {
@@ -133,7 +131,7 @@ theme = {
   }
 };
 const drawerWidth = 240;
-const useStyles = makeStyles(() =>({
+const useStyles = makeStyles(() => ({
   root: {
     display: 'flex',
 
@@ -145,7 +143,7 @@ const useStyles = makeStyles(() =>({
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
     justifyContent: "flex-end"
-  },  
+  },
   content: {
     flexGrow: 1,
     padding: theme.spacing(3),
@@ -168,7 +166,7 @@ function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
-      <Link href={apiUrl + '/public/memes'}>
+      <Link href={'/api/public/memes'}>
         Memes
       </Link>{' '}
       {new Date().getFullYear()}
@@ -179,7 +177,6 @@ function Copyright() {
 
 function App(props) {
   const classes = useStyles();
-  const [data, setData] = useState(null);
   const [open, setOpen] = useState(true);
   const handleDrawerClose = () => {
     setOpen(false);
@@ -187,63 +184,61 @@ function App(props) {
   const handleDrawerOpen = () => {
     setOpen(true);
   };
-  
+  const query = useQuery();
+
   return (
     <ThemeProvider theme={theme}>
-      <div className={classes.root}>       
+      <div className={classes.root}>
         <SnackbarProvider maxSnack={5}>
-        <Router>
-          <CssBaseline>
-            <Route exact path ={'/'}>
-              <Redirect to={'/courses'}/>
-            </Route>
-            <Navigator              
-              variant="temporary"
-              open={open}
-              onClose={handleDrawerClose}
-              onOpen={handleDrawerOpen}
-            />
-            <main 
-            className={clsx(classes.content, {
-            [classes.contentShift]: open,
-            })}
-          >
-          <div className={classes.drawerHeader} />
-          <Switch>
-             {/* Courses page */}
-            <Route exact path = {'/courses'} >     
-              <CourseView />    
-               
+          <Router>
+            <CssBaseline>
+              <Route exact path={'/'}>
+                <Redirect to={'/courses'}/>
               </Route>
-                {/* Assignments page */}
-                <Route exact path = {'/courses/:courseid/assignments'}>
-                    <AssignmentView />
-                </Route>
+              <Navigator
+                variant="temporary"
+                open={open}
+                onClose={handleDrawerClose}
+                onOpen={handleDrawerOpen}
+              />
+              <main
+                className={clsx(classes.content, {
+                  [classes.contentShift]: open,
+                })}
+              >
+                <div className={classes.drawerHeader}/>
+                <Switch>
+                  {/* Courses page */}
+                  <Route exact path={'/courses'}>
+                    <CourseView/>
 
-                {/* Submissions page */}
-                <Route exact path = {'/courses/:courseid/assignments/:assignmentid/submissions'}>  
-                   <SubmissionsView />             
-                </Route>
-                
-                {/* Individual submission status, test results page  */}
-                <Route exact path = {'/courses/:courseid/assignments/:assignmentid/submissions/:commit'}>
-                  <SubmissionInfo />
-                </Route>
-           
-            
-            <Route>
-              <div className={classes.app}>
-                <main className={classes.main}>
-                  <NotFound/>
-                </main>
-              </div>
-            </Route>
-          </Switch>
-        </main> 
-        </CssBaseline>
-        </Router>
+                  </Route>
+                  {/* Assignments page */}
+                  <Route exact path={'/courses/assignments'}>
+                    <AssignmentView/>
+                  </Route>
+
+                  <Route exact path={'/courses/assignments/submissions'}>
+                    {
+                      query.get('commit') === null ?
+                        <SubmissionsView/> :
+                        <SubmissionInfo/>
+                    }
+                  </Route>
+
+                  <Route>
+                    <div className={classes.app}>
+                      <main className={classes.main}>
+                        <NotFound/>
+                      </main>
+                    </div>
+                  </Route>
+                </Switch>
+              </main>
+            </CssBaseline>
+          </Router>
         </SnackbarProvider>
-      </div>          
+      </div>
     </ThemeProvider>
   );
 }

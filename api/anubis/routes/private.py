@@ -4,7 +4,7 @@ import traceback
 from typing import List
 
 from dateutil.parser import parse as date_parse, ParserError
-from flask import request, Blueprint
+from flask import request, Blueprint, Response
 from sqlalchemy import or_, and_
 
 from anubis.models import Assignment
@@ -45,12 +45,13 @@ def private_index():
 
 if is_debug():
     @private.route('/token/<netid>')
-    @json_response
     def private_token_netid(netid):
         user = User.query.filter_by(netid=netid).first()
         if user is None:
             return error_response('User does not exist')
-        return success_response(get_token(user.netid))
+        res = Response(json.dumps(success_response(get_token(user.netid))), headers={'Content-Type': 'application/json'})
+        res.set_cookie('token', get_token(user.netid), httponly=True)
+        return res
 
 
 @private.route('/assignment/sync', methods=['POST'])

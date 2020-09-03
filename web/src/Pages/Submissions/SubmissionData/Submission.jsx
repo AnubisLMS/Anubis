@@ -14,7 +14,8 @@ import {makeStyles} from "@material-ui/core/styles";
 import {green} from "@material-ui/core/colors";
 import {useSnackbar} from "notistack";
 
-import {api} from '../../../utils';
+const api = null;
+
 const useStyles = makeStyles(theme => ({
   paper: {
     maxWidth: 936,

@@ -3,12 +3,13 @@ import Grid from '@material-ui/core/Grid';
 import {Redirect, useParams} from "react-router-dom";
 import {useSnackbar} from 'notistack';
 
-import {api} from '../../../utils';
+// import {api} from '../../../utils';
 import Submission from './Submission';
 import Error from '../../../Error';
 import Build from './Build';
 import Tests from '../Test';
 
+const api = null;
 
 export default function SubmissionInfo({data, setData}) {
   const [authOpen, setAuth] = useState(true);

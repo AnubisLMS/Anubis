@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import {makeStyles, useTheme} from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableHead from '@material-ui/core/TableHead';
 import TableBody from '@material-ui/core/TableBody';
@@ -36,7 +36,7 @@ const useStyles2 = makeStyles({
 function TablePaginationActions(props) {
   const classes = useStyles1();
   const theme = useTheme();
-  const { count, page, rowsPerPage, onChangePage } = props;
+  const {count, page, rowsPerPage, onChangePage} = props;
 
   const handleFirstPageButtonClick = (event) => {
     onChangePage(event, 0);
@@ -61,24 +61,24 @@ function TablePaginationActions(props) {
         disabled={page === 0}
         aria-label="first page"
       >
-        {theme.direction === 'rtl' ? <LastPageIcon /> : <FirstPageIcon />}
+        {theme.direction === 'rtl' ? <LastPageIcon/> : <FirstPageIcon/>}
       </IconButton>
       <IconButton onClick={handleBackButtonClick} disabled={page === 0} aria-label="previous page">
-        {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+        {theme.direction === 'rtl' ? <KeyboardArrowRight/> : <KeyboardArrowLeft/>}
       </IconButton>
       <IconButton
         onClick={handleNextButtonClick}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label="next page"
       >
-        {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+        {theme.direction === 'rtl' ? <KeyboardArrowLeft/> : <KeyboardArrowRight/>}
       </IconButton>
       <IconButton
         onClick={handleLastPageButtonClick}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label="last page"
       >
-        {theme.direction === 'rtl' ? <FirstPageIcon /> : <LastPageIcon />}
+        {theme.direction === 'rtl' ? <FirstPageIcon/> : <LastPageIcon/>}
       </IconButton>
     </div>
   );
@@ -92,73 +92,72 @@ TablePaginationActions.propTypes = {
 };
 
 
-function createData(processed, timeSubmitted, dateSubmitted){
+function createData(processed, timeSubmitted, dateSubmitted) {
   return {processed, timeSubmitted, dateSubmitted};
 }
 
 const submissionList = [
   {
-    assignment : "",
-    courseCode : "",
-    timestamp : "2020-09-02 12:24:33",
+    assignment: "",
+    courseCode: "",
+    timestamp: "2020-09-02 12:24:33",
     processed: true,
-    build : {}
-      
+    build: {}
+
   },
   {
-    assignment : "",
-    courseCode : "",
-    timestamp : "2020-09-02 12:24:33",
+    assignment: "",
+    courseCode: "",
+    timestamp: "2020-09-02 12:24:33",
     processed: true,
-    build : {}
-      
+    build: {}
+
   },
   {
-    assignment : "",
-    courseCode : "",
-    timestamp : "2020-09-03 12:24:33",
+    assignment: "",
+    courseCode: "",
+    timestamp: "2020-09-03 12:24:33",
     processed: true,
-    build : {}
-      
+    build: {}
+
   },
   {
-    assignment : "",
-    courseCode : "",
-    timestamp : "2020-09-04 12:24:33",
+    assignment: "",
+    courseCode: "",
+    timestamp: "2020-09-04 12:24:33",
     processed: false,
-    build : {}
-      
+    build: {}
+
   },
   {
-    assignment : "",
-    courseCode : "",
-    timestamp : "2020-09-04 12:24:33",
+    assignment: "",
+    courseCode: "",
+    timestamp: "2020-09-04 12:24:33",
     processed: true,
-    build : {}
-      
+    build: {}
+
   },
   {
-    assignment : "",
-    courseCode : "",
-    timestamp : "2020-09-05 12:24:33",
+    assignment: "",
+    courseCode: "",
+    timestamp: "2020-09-05 12:24:33",
     processed: false,
-    build : {}
-      
+    build: {}
+
   },
   {
-    assignment : "",
-    courseCode : "",
-    timestamp : "2020-09-06 12:24:33",
+    assignment: "",
+    courseCode: "",
+    timestamp: "2020-09-06 12:24:33",
     processed: false,
-    build : {}
-      
+    build: {}
+
   }
-] 
+]
 
-const rows = 
- (submissionList).map((item)=>(createData(item.processed, item.timestamp.split(" ")[0], item.timestamp.split(" ")[1])))
- .sort((a, b) => (a.timeSubmitted > b.timeSubmitted ? -1 : 1)); //sorts submissions in reverse chronological order
-
+const rows =
+  (submissionList).map((item) => (createData(item.processed, item.timestamp.split(" ")[0], item.timestamp.split(" ")[1])))
+    .sort((a, b) => (a.timeSubmitted > b.timeSubmitted ? -1 : 1)); //sorts submissions in reverse chronological order
 
 
 export default function SubmissionsTable() {
@@ -179,56 +178,57 @@ export default function SubmissionsTable() {
 
   return (
     <TableContainer component={Paper}>
-      <Table 
-        className={classes.table} 
+      <Table
+        className={classes.table}
         aria-label="Submissions Table"
-        >
+      >
         <TableHead>
-            <TableRow>
-              <TableCell> Assignment 3 </TableCell>
-              <TableCell align="right">Status</TableCell>
-              <TableCell align="right">Date</TableCell>
-              <TableCell align="right">Time</TableCell>              
-            </TableRow>
-          </TableHead>
+          <TableRow>
+            <TableCell> Assignment 3 </TableCell>
+            <TableCell align="right">Status</TableCell>
+            <TableCell align="right">Date</TableCell>
+            <TableCell align="right">Time</TableCell>
+          </TableRow>
+        </TableHead>
 
         <TableBody>
           {(rowsPerPage > 0
-            ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            : rows
+              ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              : rows
           ).map((row, ind) => (
             <TableRow key={row.name}>
               <TableCell component="th" scope="row">
-                  {`Sub. ${rows.length-ind}`}
+                {`Sub. ${rows.length - ind}`}
               </TableCell>
-              <TableCell style={{ width: 160 }} align="right">
-                {row.processed ? <CheckCircleIcon style={{color:green[500]}}/> : <CancelIcon style={{color:red[500]}}/>}
+              <TableCell style={{width: 160}} align="right">
+                {row.processed ? <CheckCircleIcon style={{color: green[500]}}/> :
+                  <CancelIcon style={{color: red[500]}}/>}
               </TableCell>
-              <TableCell style={{ width: 160 }} align="right">
+              <TableCell style={{width: 160}} align="right">
                 {row.timeSubmitted}
               </TableCell>
-              <TableCell style={{ width: 160 }} align="right">
+              <TableCell style={{width: 160}} align="right">
                 {row.dateSubmitted}
               </TableCell>
             </TableRow>
           ))}
 
           {emptyRows > 0 && (
-            <TableRow style={{ height: 53 * emptyRows }}>
-              <TableCell colSpan={6} />
+            <TableRow style={{height: 53 * emptyRows}}>
+              <TableCell colSpan={6}/>
             </TableRow>
           )}
         </TableBody>
         <TableFooter>
           <TableRow>
             <TablePagination
-              rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+              rowsPerPageOptions={[5, 10, 25, {label: 'All', value: -1}]}
               colSpan={4}
               count={rows.length}
               rowsPerPage={rowsPerPage}
               page={page}
               SelectProps={{
-                inputProps: { 'aria-label': 'rows per page' },
+                inputProps: {'aria-label': 'rows per page'},
                 native: true,
               }}
               onChangePage={handleChangePage}

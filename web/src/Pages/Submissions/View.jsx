@@ -1,10 +1,10 @@
 import SubmissionTable from "./SubmissionTable"
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
+import {makeStyles} from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import { Typography } from "@material-ui/core";
+import {Typography} from "@material-ui/core";
 import Zoom from '@material-ui/core/Zoom'
+
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -15,9 +15,9 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.secondary,
   },
   subtitle:
-  {
-      fontWeight:300
-  }
+    {
+      fontWeight: 300
+    }
 }));
 
 export default function SubmissionsView() {
@@ -26,20 +26,20 @@ export default function SubmissionsView() {
     <div className={classes.root}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-            
-            
-              <Typography variant="h6"> 
-                    Intro to Operating Systems 
-              </Typography>
-              <Typography variant="body1" className={classes.subtitle} >
-                    CS-3224
-              </Typography>
+
+
+          <Typography variant="h6">
+            Intro to Operating Systems
+          </Typography>
+          <Typography variant="body1" className={classes.subtitle}>
+            CS-3224
+          </Typography>
         </Grid>
-        <Zoom in={true} timeout={350}> 
-        <Grid item xs={6}>             
-            <SubmissionTable />             
-        </Grid>
-        </Zoom>  
+        <Zoom in={true} timeout={350}>
+          <Grid item xs={6}>
+            <SubmissionTable/>
+          </Grid>
+        </Zoom>
       </Grid>
     </div>
   );
