@@ -106,7 +106,7 @@ def private_assignment_sync(assignment_data: dict, tests: List[str]):
             Assignment.id == a.id,
             AssignmentTest.name == test_name,
         ).join(Assignment).first()
-
+        
         if at is None:
             at = AssignmentTest(assignment=a, name=test_name)
             db.session.add(at)
