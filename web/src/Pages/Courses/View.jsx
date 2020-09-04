@@ -6,6 +6,7 @@ import Grow from "@material-ui/core/Grow";
 import useGet from '../../useGet';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import {Redirect} from "react-router-dom";
+import {useQuery} from '../../utils';
 
 
 //passes course data to individual course cards
@@ -59,9 +60,9 @@ export default function CourseView(props) {
   if (loading) return <CircularProgress />;
   if (error) return <Redirect to={`/error`}/>
 
-  const translateCourseData = ({name, class_code, section, professor}) => ({
+  const translateCourseData = ({name, class_code, section, professor, total_assignments, open_assignments}) => ({
     courseName: name, courseCode: class_code, section: section, instructor: professor,
-    openAssignments: 1, totalAssignments: 6
+    openAssignments: open_assignments, totalAssignments: total_assignments,
   });
 
   return (
@@ -70,11 +71,12 @@ export default function CourseView(props) {
         <Grid container justify="left" spacing={4}>
           {data.classes.map(translateCourseData).map((course, pos) => (
             <Grow
+              key={course.courseCode}
               in={true}
               style={{transformOrigin: "0 0 0"}}
               {...({timeout: 300 * (pos + 1)})}
             >
-              <Grid key={course.courseCode} item>
+              <Grid item>
                 <CourseCard course={course}/>
               </Grid>
             </Grow>

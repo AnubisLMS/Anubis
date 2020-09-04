@@ -107,18 +107,20 @@ export default function AssignmentCard(props) {
           <Typography className={classes.title} color="textSecondary" gutterBottom>
             {courseCode}
           </Typography>
-          <Typography className={classes.mainTitle}>
 
-            {`Assignment ${assignmentNumber}`}
+          <Typography className={classes.mainTitle}>
+            {assignmentTitle}
           </Typography>
 
           <Typography className={classes.pos} color="textSecondary">
-            {assignmentTitle}
+            {`Assignment ${assignmentNumber}`}
           </Typography>
+
           <div className={classes.datePos}>
             <EventNoteIcon style={{marginRight: 7}}/>
-            <p className={classes.dateText}> {` Due: ${dueDate}`} </p>
+            <p className={classes.dateText}> {` Due: ${(new Date(dueDate)).toLocaleDateString()}`} </p>
           </div>
+
           <div className={classes.statusPos} style={hasSubmission ? {} : {color: red[500]}}>
             {hasSubmission ?
               <CheckCircleIcon style={{color: green[500], marginRight: 6}}/> :

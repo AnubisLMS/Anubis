@@ -23,7 +23,7 @@ export default function useGet(path, params) {
     .then(function (data) {
       setState({
         loading: false,
-        error: null,
+        error: !data.data.success,
         data: data.data.data,
       });
     })

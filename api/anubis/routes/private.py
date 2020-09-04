@@ -270,8 +270,11 @@ if is_debug():
         u = User(netid='jmc1283', github_username='juanpunchman', name='John Cunniff', is_admin=True)
         c = Class_(name='Intro to OS', class_code='CS-UY 3224', section='A', professor='Gustavo')
         ic = InClass(owner=u, class_=c)
-        a = Assignment(name='Assignment1: uniq', pipeline_image="registry.osiris.services/anubis/assignment/1",
-                       hidden=False, release_date='2020-08-22', due_date='2020-08-22', class_=c,
+        a = Assignment(name='uniq', pipeline_image="registry.osiris.services/anubis/assignment/1",
+                       hidden=False, release_date='2020-08-22 23:55:00', due_date='2020-08-22 23:55:00', class_=c,
+                       github_classroom_url='')
+        a2 = Assignment(name='ez mem', pipeline_image="registry.osiris.services/anubis/assignment/2",
+                       hidden=False, release_date='2020-09-03 23:55:00', due_date='2020-09-03 23:55:00', class_=c,
                        github_classroom_url='')
         at1 = AssignmentTest(name='Long file test', assignment=a)
         at2 = AssignmentTest(name='Short file test', assignment=a)
@@ -281,7 +284,7 @@ if is_debug():
         s2 = Submission(commit='0001', state='Enqueued', owner=u, assignment=a, repo=r)
 
         # Commit
-        db.session.add_all([u, c, ic, a, at1, at2, s1, s2, r])
+        db.session.add_all([u, c, ic, a, at1, at2, s1, s2, r, a2])
         db.session.commit()
 
         # Init models

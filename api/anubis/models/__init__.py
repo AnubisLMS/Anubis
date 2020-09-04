@@ -56,12 +56,28 @@ class Class_(db.Model):
     in_class = db.relationship('InClass', cascade='all,delete')
 
     @property
+    def total_assignments(self):
+        return len(list(self.assignments))
+
+    @property
+    def open_assignments(self):
+        now = datetime.now()
+        return Assignment.query.filter(
+            Assignment.class_id == self.id,
+            Assignment.release_date >= now,
+            Assignment.due_date <= now
+        ).count()
+
+    @property
     def data(self):
         return {
             'name': self.name,
             'class_code': self.class_code,
             'section': self.section,
             'professor': self.professor,
+
+            'total_assignments': self.total_assignments,
+            'open_assignment': self.open_assignments,
         }
 
 
@@ -108,8 +124,7 @@ class Assignment(db.Model):
             'id': self.id,
             'name': self.name,
             'due_date': str(self.due_date),
-            'grace_date': str(self.grace_date),
-            'class': self.class_.data,
+            'course': self.class_.data,
             'description': self.description,
             'github_classroom_link': self.github_classroom_url,
 

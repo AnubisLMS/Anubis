@@ -65,9 +65,16 @@ def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], 
     assignments = Assignment.query.join(Class_).join(InClass).join(User).filter(
         User.netid == netid,
         *filters
-    ).all()
+    ).order_by(Assignment.due_date.desc()).all()
 
-    return [a.data for a in assignments]
+    a = [a.data for a in assignments]
+    for assignment_data in a:
+        assignment_data['has_submission'] = Submission.query.join(User).join(Assignment).filter(
+            Assignment.id == assignment_data['id'],
+            User.netid == netid,
+        ).first() is not None
+
+    return a
 
 
 # @cache.memoize(timeout=3, unless=is_debug)
