@@ -34,7 +34,7 @@ const categories = [
   {
     id: "Submissions",
     icon: <CloudUploadOutlinedIcon/>,
-    path: "//courses/assignments/submissions"
+    path: "/courses/assignments/submissions"
   }
 ];
 

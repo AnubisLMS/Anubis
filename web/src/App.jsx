@@ -134,7 +134,9 @@ const drawerWidth = 240;
 const useStyles = makeStyles(() => ({
   root: {
     display: 'flex',
-
+    height: '100%',
+    width: '100%',
+    backgroundImage: `url(/curvylines.png)`,
   },
   drawerHeader: {
     display: "flex",
