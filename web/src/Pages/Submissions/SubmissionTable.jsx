@@ -19,6 +19,7 @@ import red from '@material-ui/core/colors/red';
 import green from '@material-ui/core/colors/green';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
+import { Typography } from '@material-ui/core';
 
 const useStyles1 = makeStyles((theme) => ({
   root: {
@@ -31,6 +32,15 @@ const useStyles2 = makeStyles({
   table: {
     minWidth: 500,
   },
+  headerText: {
+    fontWeight: 600
+  },
+  commitHashContainer: {
+    
+    width: 200,
+    overflow: "hidden",
+  }
+
 });
 
 function TablePaginationActions(props) {
@@ -92,62 +102,57 @@ TablePaginationActions.propTypes = {
 };
 
 
-function createData(processed, timeSubmitted, dateSubmitted) {
-  return {processed, timeSubmitted, dateSubmitted};
+function createData(commitHash, processed, timeSubmitted, dateSubmitted) {
+  return {commitHash, processed, timeSubmitted, dateSubmitted};
 }
 
 const submissionList = [
   {
-    assignment: "",
-    courseCode: "",
+
+    commitHash: "943c5065784ef636ce33f6be79d4ccc8e635da61",
     timestamp: "2020-09-02 12:24:33",
     processed: true,
     build: {}
 
   },
   {
-    assignment: "",
-    courseCode: "",
+
+    commitHash: "943c5065784ef636ce33f6be79d4ccc8e635da61",
     timestamp: "2020-09-02 12:24:33",
     processed: true,
     build: {}
 
   },
   {
-    assignment: "",
-    courseCode: "",
+    commitHash: "943c5065784ef636ce33f6be79d4ccc8e635da61",
     timestamp: "2020-09-03 12:24:33",
     processed: true,
     build: {}
 
   },
   {
-    assignment: "",
-    courseCode: "",
+    commitHash: "943c5065784ef636ce33f6be79d4ccc8e635da61",
     timestamp: "2020-09-04 12:24:33",
     processed: false,
     build: {}
 
   },
   {
-    assignment: "",
-    courseCode: "",
+    commitHash: "943c5065784ef636ce33f6be79d4ccc8e635da61",
     timestamp: "2020-09-04 12:24:33",
     processed: true,
     build: {}
 
   },
   {
-    assignment: "",
-    courseCode: "",
+    commitHash: "943c5065784ef636ce33f6be79d4ccc8e635da61",
     timestamp: "2020-09-05 12:24:33",
     processed: false,
     build: {}
 
   },
   {
-    assignment: "",
-    courseCode: "",
+    commitHash: "943c5065784ef636ce33f6be79d4ccc8e635da61",
     timestamp: "2020-09-06 12:24:33",
     processed: false,
     build: {}
@@ -156,7 +161,7 @@ const submissionList = [
 ]
 
 const rows =
-  (submissionList).map((item) => (createData(item.processed, item.timestamp.split(" ")[0], item.timestamp.split(" ")[1])))
+  (submissionList).map((item) => (createData(item.commitHash, item.processed, item.timestamp.split(" ")[0], item.timestamp.split(" ")[1])))
     .sort((a, b) => (a.timeSubmitted > b.timeSubmitted ? -1 : 1)); //sorts submissions in reverse chronological order
 
 
@@ -182,12 +187,13 @@ export default function SubmissionsTable() {
         className={classes.table}
         aria-label="Submissions Table"
       >
-        <TableHead>
-          <TableRow>
-            <TableCell> Assignment 3 </TableCell>
-            <TableCell align="right">Status</TableCell>
-            <TableCell align="right">Date</TableCell>
-            <TableCell align="right">Time</TableCell>
+        <TableHead >
+          <TableRow >
+            <TableCell > Submission Number </TableCell>
+            <TableCell align="left" >Commit Hash</TableCell>
+            <TableCell align="center">Processed</TableCell>
+            <TableCell align="left">Date</TableCell>
+            <TableCell align="left">Time</TableCell>
           </TableRow>
         </TableHead>
 
@@ -196,20 +202,23 @@ export default function SubmissionsTable() {
               ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               : rows
           ).map((row, ind) => (
-            <TableRow key={row.name}>
-              <TableCell component="th" scope="row">
-                {`Sub. ${rows.length - ind}`}
-              </TableCell>
-              <TableCell style={{width: 160}} align="right">
+            <TableRow key={row.name} hover={true}>
+              <TableCell style={{width: 60}} align="center" >
+                {`${rows.length - ind}`}
+              </TableCell>  
+              <TableCell style={{width: 160}} >
+               {row.commitHash}
+               </TableCell>
+              <TableCell  style={{width: 100}} align="center" >
                 {row.processed ? <CheckCircleIcon style={{color: green[500]}}/> :
                   <CancelIcon style={{color: red[500]}}/>}
               </TableCell>
-              <TableCell style={{width: 160}} align="right">
+              <TableCell style={{width: 100}} align="left">
                 {row.timeSubmitted}
               </TableCell>
-              <TableCell style={{width: 160}} align="right">
+              <TableCell style={{width: 120}} align="left">
                 {row.dateSubmitted}
-              </TableCell>
+              </TableCell>             
             </TableRow>
           ))}
 
@@ -234,6 +243,7 @@ export default function SubmissionsTable() {
               onChangePage={handleChangePage}
               onChangeRowsPerPage={handleChangeRowsPerPage}
               ActionsComponent={TablePaginationActions}
+              labelRowsPerPage = "Submissions per page"
             />
           </TableRow>
         </TableFooter>

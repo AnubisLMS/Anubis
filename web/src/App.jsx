@@ -219,11 +219,12 @@ function App(props) {
                   </Route>
 
                   <Route exact path={'/courses/assignments/submissions'}>
-                    {
+                    {/* {
                       query.get('commit') === null ?
                         <SubmissionsView/> :
                         <SubmissionInfo/>
-                    }
+                    } */}
+                     <SubmissionsView/> 
                   </Route>
 
                   <Route>
