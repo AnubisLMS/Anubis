@@ -32,13 +32,13 @@ export default function SubmissionsView() {
         <Grid item xs={12}>
 
           <Typography variant="h6">
-            Intro to Operating Systems
+            Submissions
           </Typography>
           <Typography variant="body1" className={classes.subtitle}>
-            CS-3224
+            CS-UY 3224
           </Typography>
         </Grid>
-        <Zoom in={true} timeout={350}>
+        <Zoom in={true} timeout={200}>
           <Grid item xs>
             <SubmissionTable/>
           </Grid>

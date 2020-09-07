@@ -19,7 +19,6 @@ import SchoolIcon from "@material-ui/icons/School";
 import AssignmentOutlinedIcon from "@material-ui/icons/AssignmentOutlined";
 import ExitToAppOutlinedIcon from "@material-ui/icons/ExitToAppOutlined";
 import CloudUploadOutlinedIcon from "@material-ui/icons/CloudUploadOutlined";
-
 import PublicIcon from "@material-ui/icons/Public";
 import {Link} from "react-router-dom";
 
@@ -113,7 +112,11 @@ const useStyles = makeStyles((theme) => ({
     marginTop: 5
   }
 }));
+const pageHeader = ()=> {
+  const currentPath = window.location.pathnamme
 
+
+}
 export default function Navigator(props) {
   const classes = useStyles();
   const {variant, open, onClose, onOpen} = props;
@@ -141,6 +144,7 @@ export default function Navigator(props) {
 
           <Typography variant="h6" noWrap>
             Student Courses
+            {console.log(window.location.pathname)}
           </Typography>
         </Toolbar>
       </AppBar>

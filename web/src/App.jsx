@@ -213,22 +213,18 @@ function App(props) {
                   {/* Courses page */}
                   <Route exact path={'/courses'}>
                     <CourseView/>
-
                   </Route>
                   {/* Assignments page */}
                   <Route exact path={'/courses/assignments'}>
                     <AssignmentView/>
                   </Route>
-
                   <Route exact path={'/courses/assignments/submissions'}>
-                    {/* {
+                    {
                       query.get('commit') === null ?
                         <SubmissionsView/> :
                         <SubmissionInfo/>
-                    } */}
-                     <SubmissionsView/> 
+                    }                     
                   </Route>
-
                   <Route>
                     <div className={classes.app}>
                       <main className={classes.main}>

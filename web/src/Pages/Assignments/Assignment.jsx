@@ -143,8 +143,9 @@ export default function AssignmentCard(props) {
           <PublishIcon style={hasSubmission ? {color: blue[500]} : {color: grey[500]}}/>
           <Button
             component={Link}
-            to={`/courses/${courseCode.replace(/\s+/g, '')}/assignments/${assignmentNumber}/submissions`}
-            style={hasSubmission ? {color: blue[500]} : {color: grey[500]}} size="small">
+            to={`/courses/assignments/submissions`}
+            style={hasSubmission ? {color: blue[500]} : {color: grey[500]}} size="small"
+            disabled = {!hasSubmission}>
             Submissions</Button>
 
         </div>

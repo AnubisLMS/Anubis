@@ -20,7 +20,7 @@ import green from '@material-ui/core/colors/green';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
 import { Typography } from '@material-ui/core';
-
+import {Link} from 'react-router-dom'
 const useStyles1 = makeStyles((theme) => ({
   root: {
     flexShrink: 0,
@@ -110,7 +110,7 @@ const submissionList = [
   {
 
     commitHash: "943c5065784ef636ce33f6be79d4ccc8e635da61",
-    timestamp: "2020-09-02 12:24:33",
+    timestamp: "2020-09-02T12:24:33",
     processed: true,
     build: {}
 
@@ -118,58 +118,58 @@ const submissionList = [
   {
 
     commitHash: "943c5065784ef636ce33f6be79d4ccc8e635da61",
-    timestamp: "2020-09-02 12:24:33",
+    timestamp: "2020-09-02T12:24:33",
     processed: true,
     build: {}
 
   },
   {
     commitHash: "943c5065784ef636ce33f6be79d4ccc8e635da61",
-    timestamp: "2020-09-03 12:24:33",
+    timestamp: "2020-09-03T12:24:33",
     processed: true,
     build: {}
 
   },
   {
     commitHash: "943c5065784ef636ce33f6be79d4ccc8e635da61",
-    timestamp: "2020-09-04 12:24:33",
+    timestamp: "2020-09-04T12:24:33",
     processed: false,
     build: {}
 
   },
   {
     commitHash: "943c5065784ef636ce33f6be79d4ccc8e635da61",
-    timestamp: "2020-09-04 12:24:33",
+    timestamp: "2020-09-04T12:24:33",
     processed: true,
     build: {}
 
   },
   {
     commitHash: "943c5065784ef636ce33f6be79d4ccc8e635da61",
-    timestamp: "2020-09-05 12:24:33",
+    timestamp: "2020-09-05T12:24:33",
     processed: false,
     build: {}
 
   },
   {
     commitHash: "943c5065784ef636ce33f6be79d4ccc8e635da61",
-    timestamp: "2020-09-06 12:24:33",
+    timestamp: "2020-09-06T12:24:33",
     processed: false,
     build: {}
 
   }
 ]
-const assigmentTime ="2020-09-04 11:55:55"
+const assigmentTime ="2020-09-04T23:55:55"
 
 const rows =
-  (submissionList).map((item) => (createData(item.commitHash, item.processed, item.timestamp.split(" ")[0], item.timestamp.split(" ")[1], item.timestamp)))
+  (submissionList).map((item) => (createData(item.commitHash, item.processed, item.timestamp.split("T")[1], item.timestamp.split("T")[0], item.timestamp)))
     .sort((a, b) => (a.timeSubmitted > b.timeSubmitted ? -1 : 1)); //sorts submissions in reverse chronological order
 
 
 export default function SubmissionsTable() {
   const classes = useStyles2();
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
@@ -189,13 +189,37 @@ export default function SubmissionsTable() {
         aria-label="Submissions Table"
       >
         <TableHead >
-          <TableRow >
-            <TableCell > Submission Number </TableCell>
-            <TableCell align="left" >Commit Hash</TableCell>
-            <TableCell align="center">Processed</TableCell>
-            <TableCell align="left">Date</TableCell>
-            <TableCell align="left">Time</TableCell>
-            <TableCell align="left">On Time</TableCell>
+          <TableRow >    
+          <TableCell align="left" >
+            <b>
+              Assignment Name
+            </b>
+            </TableCell>
+            <TableCell align="left" >
+              <b>
+                Commit Hash
+              </b>
+            </TableCell>
+            <TableCell align="center">
+              <b>
+                Processed
+              </b>
+            </TableCell>
+            <TableCell align="left">
+              <b>
+              Date
+              </b>
+              </TableCell>
+            <TableCell align="left">
+              <b>
+              Time
+              </b>
+             </TableCell>
+            <TableCell align="left">
+              <b>
+              On Time
+              </b>
+            </TableCell>
 
           </TableRow>
         </TableHead>
@@ -205,10 +229,12 @@ export default function SubmissionsTable() {
               ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               : rows
           ).map((row, ind) => (
-            <TableRow key={row.name} hover={true}>
-              <TableCell style={{width: 60}} align="center" >
-                {`${rows.length - ind}`}
-              </TableCell>  
+            <TableRow key={row.name} hover={true}
+              component={Link}
+              style={{ textDecoration: 'none' }}
+              to= {`/courses/assignments/submissions/?commit=${row.commitHash}`}>
+              <TableCell style={{width: 160}} >
+               </TableCell>
               <TableCell style={{width: 160}} >
                {row.commitHash}
                </TableCell>
@@ -223,7 +249,7 @@ export default function SubmissionsTable() {
                 {row.dateSubmitted}
               </TableCell>      
               <TableCell style={{width: 120}} align="left">
-                {new Date(row.dateSubmitted) <= new Date(assigmentTime) ?  <CheckCircleIcon style={{color: green[500]}}/> :
+                {new Date(row.timeStamp) <= new Date(assigmentTime) ?  <CheckCircleIcon style={{color: green[500]}}/> :
                   <CancelIcon style={{color: red[500]}}/>}
                   {console.log(new Date(row.timeStamp) <= new Date(assigmentTime) )}
               </TableCell>         
@@ -239,7 +265,7 @@ export default function SubmissionsTable() {
         <TableFooter>
           <TableRow>
             <TablePagination
-              rowsPerPageOptions={[5, 10, 20, {label: 'All', value: -1}]}
+              rowsPerPageOptions={[10, 20, 30, {label: 'All', value: -1}]}
               colSpan={4}
               count={rows.length}
               rowsPerPage={rowsPerPage}
