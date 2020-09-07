@@ -121,6 +121,7 @@ def regrade_submission(submission):
     if not submission.processed:
         return error_response('submission currently being processed')
 
+    submission.processed = False
     submission.init_submission_models()
 
     enqueue_webhook_rpc(submission.id)

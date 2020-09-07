@@ -10,8 +10,7 @@ import {SnackbarProvider} from 'notistack';
 import CourseView from './Pages/Courses/View';
 import AssignmentView from './Pages/Assignments/View'
 import Navigator from './Navigation/Navigator';
-import SubmissionInfo from './Pages/Submissions/SubmissionData/SubmissionInfo';
-//import SearchSubmissions from "./Submissions/SearchSubmissions";
+import SubmissionInfo from './Pages/Submissions/Info/View';
 import NotFound from "./NotFound";
 import {useQuery} from './utils';
 import SubmissionsView from './Pages/Submissions/View';
@@ -23,7 +22,6 @@ let theme = createMuiTheme({
       light: "#63ccff",
       main: "#009be5",
       dark: "#006db3"
-
     },
     type: "dark"
   },
@@ -137,6 +135,7 @@ const useStyles = makeStyles(() => ({
     height: '100%',
     width: '100%',
     backgroundImage: `url(/curvylines.png)`,
+    // flexDirection: 'column',
   },
   drawerHeader: {
     display: "flex",
@@ -148,12 +147,18 @@ const useStyles = makeStyles(() => ({
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing(3),
+    padding: theme.spacing(6, 4),
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
     }),
     marginLeft: -drawerWidth
+  },
+  main: {
+    width: '100%',
+    height: '100%',
+    flexDirection: 'column',
+    // background: '#eaeff1',
   },
   contentShift: {
     transition: theme.transitions.create("margin", {
@@ -161,6 +166,15 @@ const useStyles = makeStyles(() => ({
       duration: theme.transitions.duration.enteringScreen
     }),
     marginLeft: 0
+  },
+  footer: {
+    padding: theme.spacing(2),
+    bottom: '0',
+    left: '0',
+    textAlign: "center",
+    position: 'fixed',
+    width: "100%",
+    // background: '#eaeff1',
   },
 }));
 
@@ -187,6 +201,7 @@ function App(props) {
     setOpen(true);
   };
   const query = useQuery();
+  console.log(query.get('commit'))
 
   return (
     <ThemeProvider theme={theme}>
@@ -204,12 +219,12 @@ function App(props) {
                 onOpen={handleDrawerOpen}
               />
               <main
-                className={clsx(classes.content, {
+                className={clsx(classes.content, classes.main, {
                   [classes.contentShift]: open,
                 })}
               >
                 <div className={classes.drawerHeader}/>
-                <Switch>
+                <Switch style={{width: '100%'}}>
                   {/* Courses page */}
                   <Route exact path={'/courses'}>
                     <CourseView/>
@@ -219,11 +234,10 @@ function App(props) {
                     <AssignmentView/>
                   </Route>
                   <Route exact path={'/courses/assignments/submissions'}>
-                    {
-                      query.get('commit') === null ?
-                        <SubmissionsView/> :
-                        <SubmissionInfo/>
-                    }                     
+                    <SubmissionsView/>
+                  </Route>
+                  <Route exact path={'/courses/assignments/submissions/info'}>
+                    <SubmissionInfo/>
                   </Route>
                   <Route>
                     <div className={classes.app}>
@@ -233,6 +247,9 @@ function App(props) {
                     </div>
                   </Route>
                 </Switch>
+              <footer className={classes.footer}>
+                <Copyright/>
+              </footer>
               </main>
             </CssBaseline>
           </Router>

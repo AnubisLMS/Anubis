@@ -330,9 +330,9 @@ class Submission(db.Model):
         ).join(Assignment).join(Class_).join(InClass).join(User).join(Submission).filter(
             Assignment.id == self.assignment_id,
             User.id == self.owner_id,
-            SubmissionTestResult.submission_id == Submission.id,
+            SubmissionTestResult.submission_id == self.id,
             SubmissionTestResult.assignment_test_id == AssignmentTest.id,
-        ).group_by(AssignmentTest.id).all()
+        ).group_by(SubmissionTestResult.id).all()
         # ^^ Dont Touch this ^^
 
         logging.debug('Loaded tests {}'.format(tests))
@@ -348,7 +348,9 @@ class Submission(db.Model):
         return {
             'id': self.id,
             'netid': self.netid,
-            'assignment': self.assignment.name,
+            'assignment_name': self.assignment.name,
+            'assignment_due': str(self.assignment.due_date),
+            'class_code': self.assignment.class_.class_code,
             'url': self.url,
             'commit': self.commit,
             'processed': self.processed,
@@ -359,7 +361,7 @@ class Submission(db.Model):
             # Connected models
             'repo': self.repo.repo_url,
             'tests': self.tests,
-            'submission_build': self.build.data if self.build is not None else None,
+            'build': self.build.data if self.build is not None else None,
         }
 
 
@@ -389,6 +391,7 @@ class SubmissionTestResult(db.Model):
     @property
     def data(self):
         return {
+            'id': self.id,
             'test_name': self.assignment_test.name,
             'passed': self.passed,
             'message': self.message,

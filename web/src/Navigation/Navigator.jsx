@@ -18,8 +18,8 @@ import ListItemText from "@material-ui/core/ListItemText";
 import SchoolIcon from "@material-ui/icons/School";
 import AssignmentOutlinedIcon from "@material-ui/icons/AssignmentOutlined";
 import ExitToAppOutlinedIcon from "@material-ui/icons/ExitToAppOutlined";
-import CloudUploadOutlinedIcon from "@material-ui/icons/CloudUploadOutlined";
 import PublicIcon from "@material-ui/icons/Public";
+import AssessmentIcon from '@material-ui/icons/Assessment';
 import {Link} from "react-router-dom";
 
 
@@ -32,7 +32,7 @@ const categories = [
   },
   {
     id: "Submissions",
-    icon: <CloudUploadOutlinedIcon/>,
+    icon: <AssessmentIcon/>,
     path: "/courses/assignments/submissions"
   }
 ];
@@ -102,11 +102,10 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: 0
   },
   bottomPush: {
-    position: "fixed",
+    // position: "absolute",
     bottom: 0,
     display: "inline",
     paddingBottom: 10,
-
   },
   drawerHeaderText: {
     marginTop: 5
@@ -161,7 +160,7 @@ export default function Navigator(props) {
           <div className={classes.drawerHeaderText}>
             <Typography variant="h5">Anubis </Typography>
           </div>
-          <div class={classes.drawerIcon}>
+          <div className={classes.drawerIcon}>
             <IconButton onClick={onClose}>
               {theme.direction === "ltr" ? (
                 <ChevronLeftIcon/>
@@ -177,6 +176,7 @@ export default function Navigator(props) {
             <ListItem button key={id}
                       component={Link}
                       to={path}
+                      selected={window.location.pathname === path}
             >
               <ListItemIcon>{icon}</ListItemIcon>
               <ListItemText primary={id}/>
@@ -185,10 +185,14 @@ export default function Navigator(props) {
         </List>
         <div className={classes.bottomPush}>
           <List>
-            {footerLinks.map((item) => (
-              <ListItem button key={item.id}>
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.id}/>
+            {footerLinks.map(({id, icon, path}) => (
+              <ListItem button key={id}
+                        component={Link}
+                        to={path}
+                        selected={window.location.pathname === path} >
+                {console.log(window.location.pathname === path)}
+                <ListItemIcon>{icon}</ListItemIcon>
+                <ListItemText primary={id}/>
               </ListItem>
             ))}
           </List>

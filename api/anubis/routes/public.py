@@ -11,6 +11,7 @@ from anubis.utils.decorators import json_response, require_user
 from anubis.utils.elastic import log_endpoint, esindex
 from anubis.utils.http import get_request_ip
 from anubis.utils.logger import logger
+from anubis.utils.cache import cache
 
 public = Blueprint('public', __name__, url_prefix='/public')
 
@@ -97,6 +98,7 @@ def public_submissions():
 @require_user
 @log_endpoint('public-submission-commit', lambda: 'get submission {}'.format(request.path))
 @json_response
+@cache.memoize(timeout=1, unless=is_debug)
 def public_submission(commit: str):
     """
     Get submission data for a given commit.
@@ -132,7 +134,7 @@ def webhook_log_msg():
 @log_endpoint('rick-roll', lambda: 'rick-roll')
 def public_memes():
     logger.info('rick-roll')
-    return redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+    return redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ&autoplay=1')
 
 
 @public.route('/regrade/<commit>')
@@ -149,7 +151,7 @@ def public_regrade_commit(commit=None):
         return error_response('incomplete_request'), 406
 
     # Load current user
-    user: User = User.current_user()
+    user: User = current_user()
 
     # Find the submission
     submission: Submission = Submission.query.join(User).filter(
