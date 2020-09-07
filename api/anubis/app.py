@@ -2,11 +2,10 @@ import logging
 
 import logstash
 from flask import Flask
-from anubis.utils.data import is_debug
+from utils.logger import logger
 
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.DEBUG)
-root_logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler())
 
 
 def init_services(app):
@@ -41,8 +40,8 @@ def init_services(app):
     # Add ELK stuff
     if not config.DISABLE_ELK:
         # Add logstash handler
-        root_logger.addHandler(logstash.LogstashHandler('logstash', 5000))
-        app.logger = root_logger
+        logger.addHandler(logstash.LogstashHandler('logstash', 5000))
+        app.logger = logger
 
         # Add elastic global error handler
         add_global_error_handler(app)

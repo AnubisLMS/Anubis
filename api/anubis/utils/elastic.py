@@ -1,5 +1,5 @@
 import traceback
-import logging
+import json
 from datetime import datetime
 from functools import wraps
 
@@ -10,8 +10,7 @@ from werkzeug import exceptions
 
 from anubis.utils.http import get_request_ip
 from anubis.config import config
-
-import logging
+from anubis.utils.logger import logger
 
 es = Elasticsearch(['http://elasticsearch:9200'])
 
@@ -40,7 +39,7 @@ def log_endpoint(log_type, message_func):
 
             # Skip indexing if the app has ELK disabled
             if not config.DISABLE_ELK:
-                logging.info("{ip} -- {date} \"{method} {path}\"".format(
+                logger.info("{ip} -- {date} \"{method} {path}\"".format(
                     ip=get_request_ip(),
                     date=datetime.now(),
                     method=request.method,
@@ -80,11 +79,25 @@ def add_global_error_handler(app):
     @app.errorhandler(Exception)
     def global_err_handler(error):
         tb = traceback.format_exc()  # get traceback string
-        logging.error(tb, extra={
+        logger.error(tb, extra={
             'from': 'global-error-handler',
+            'traceback': tb,
             'ip': get_request_ip(),
-            'path': request.path
+            'method': request.method,
+            'path': request.path,
+            'query': json.dumps(dict(list(request.args.items()))),
+            'headers': json.dumps(dict(list(request.headers.items()))),
+        })
+        esindex(type='error', body={
+            'traceback': tb,
+            'ip': get_request_ip(),
+            'method': request.method,
+            'path': request.path,
+            'query': json.dumps(dict(list(request.args.items()))),
+            'headers': json.dumps(dict(list(request.headers.items()))),
         })
         if isinstance(error, exceptions.NotFound):
             return '', 404
+        if isinstance(error, exceptions.MethodNotAllowed):
+            return 'MethodNotAllowed', 405
         return 'err', 500

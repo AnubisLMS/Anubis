@@ -1,22 +1,17 @@
 import json
-import logging
-from json import dumps
 
 from flask import request, Blueprint
 
 from anubis.models import Submission, SubmissionTestResult
-from anubis.models import User
 from anubis.models import db
-from anubis.routes.messages import panic_msg
-from anubis.utils.data import success_response, error_response, notify
+from anubis.utils.data import success_response, error_response
 from anubis.utils.decorators import json_response, check_submission_token, json_endpoint
-from anubis.utils.elastic import log_endpoint
+from anubis.utils.logger import logger
 
 pipeline = Blueprint('pipeline', __name__, url_prefix='/pipeline')
 
 
 @pipeline.route('/report/panic/<int:submission_id>', methods=['POST'])
-@log_endpoint('pipeline-panic', lambda: 'panic report from pipeline  ' + dumps(request.json))
 @json_response
 @check_submission_token
 def pipeline_report_panic(submission: Submission):
@@ -33,11 +28,14 @@ def pipeline_report_panic(submission: Submission):
     :return:
     """
 
+    logger.info('submission panic reported', extra={
+        'type': 'panic_report',
+        'submission_id': submission.id, 'assignment_id': submission.assignment_id,
+        'owner_id': submission.owner_id, 'data': json.dumps(request.json)})
+
     submission.processed = True
     submission.state = 'Whoops! There was an error on our end. The Anubis admins have been notified.'
     submission.errors = {'panic': request.json}
-
-    logging.error('Panic from submission cluster', extra={"request": request.json})
 
     db.session.add(submission)
     db.session.commit()
@@ -54,7 +52,6 @@ def pipeline_report_panic(submission: Submission):
 
 
 @pipeline.route('/report/build/<int:submission_id>', methods=['POST'])
-@log_endpoint('pipeline', lambda: 'build report from pipeline ' + dumps(request.json))
 @check_submission_token
 @json_endpoint(required_fields=[('stdout', str), ('passed', bool)])
 def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **kwargs):
@@ -71,6 +68,11 @@ def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **k
     :param passed:
     :return:
     """
+
+    logger.info('submission build reported', extra={
+        'type': 'build_report',
+        'submission_id': submission.id, 'assignment_id': submission.assignment_id,
+        'owner_id': submission.owner_id, 'passed': passed, 'stdout': stdout})
 
     # Update submission build
     submission.build.stdout = stdout
@@ -92,7 +94,6 @@ def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **k
 
 
 @pipeline.route('/report/test/<int:submission_id>', methods=['POST'])
-@log_endpoint('pipeline', lambda: 'build report from pipeline ' + dumps(request.json))
 @check_submission_token
 @json_endpoint(required_fields=[('test_name', str), ('passed', bool), ('message', str), ('stdout', str)])
 def pipeline_report_test(submission: Submission, test_name: str, passed: bool, message: str, stdout: str, **kwargs):
@@ -113,6 +114,13 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
     :param stdout:
     :return:
     """
+
+    logger.info('submission test reported', extra={
+        'type': 'test_result',
+        'submission_id': submission.id, 'assignment_id': submission.assignment_id,
+        'owner_id': submission.owner_id, 'test_name': test_name,
+        'message': message, 'passed': passed, 'stdout': stdout})
+
     submission_test_result: SubmissionTestResult = None
 
     # Look for corresponding submission_test_result based on given name
@@ -124,7 +132,7 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
 
     # Verify we got a match
     if submission_test_result is None:
-        logging.error('Invalid submission test result reported', extra={'request': request.json})
+        logger.error('Invalid submission test result reported', extra={'request': request.json})
         return error_response('Invalid'), 406
 
     # Update the fields
@@ -140,7 +148,6 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
 
 
 @pipeline.route('/report/state/<int:submission_id>', methods=['POST'])
-@log_endpoint('pipeline', lambda: 'build report from pipeline ' + dumps(request.json))
 @check_submission_token
 @json_endpoint(required_fields=[('state', str)])
 def pipeline_report_state(submission: Submission, state: str, **kwargs):
@@ -156,6 +163,11 @@ def pipeline_report_state(submission: Submission, state: str, **kwargs):
     :param state:
     :return:
     """
+
+    logger.info('submission state update', extra={
+        'type': 'state_report',
+        'submission_id': submission.id, 'assignment_id': submission.assignment_id,
+        'owner_id': submission.owner_id, "state": state})
 
     processed = request.args.get('processed', default='0')
     submission.processed = processed != '0'

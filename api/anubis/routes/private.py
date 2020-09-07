@@ -1,5 +1,4 @@
 import json
-import logging
 import traceback
 from typing import List
 
@@ -18,6 +17,7 @@ from anubis.utils.data import success_response, error_response
 from anubis.utils.decorators import json_response, json_endpoint
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.redis_queue import enqueue_webhook_rpc
+from anubis.utils.logger import logger
 
 private = Blueprint('private', __name__, url_prefix='/private')
 
@@ -58,8 +58,8 @@ if is_debug():
 @log_endpoint('cli', lambda: 'assignment-sync')
 @json_endpoint(required_fields=[('assignment', dict), ('tests', list)])
 def private_assignment_sync(assignment_data: dict, tests: List[str]):
-    logging.debug("/private/assignment/sync meta: {}".format(json.dumps(assignment_data, indent=2)))
-    logging.debug("/private/assignment/sync tests: {}".format(json.dumps(tests, indent=2)))
+    logger.debug("/private/assignment/sync meta: {}".format(json.dumps(assignment_data, indent=2)))
+    logger.debug("/private/assignment/sync tests: {}".format(json.dumps(tests, indent=2)))
     # Find the assignment
     a = Assignment.query.filter(
         Assignment.unique_code == assignment_data['unique_code']
@@ -88,7 +88,7 @@ def private_assignment_sync(assignment_data: dict, tests: List[str]):
         a.due_date = date_parse(assignment_data['date']['due'])
         a.grace_date = date_parse(assignment_data['date']['grace'])
     except ParserError:
-        logging.error(traceback.format_exc())
+        logger.error(traceback.format_exc())
         return error_response('Unable to parse datetime'), 406
 
     db.session.add(a)
@@ -270,31 +270,46 @@ if is_debug():
         u = User(netid='jmc1283', github_username='juanpunchman', name='John Cunniff', is_admin=True)
         c = Class_(name='Intro to OS', class_code='CS-UY 3224', section='A', professor='Gustavo')
         ic = InClass(owner=u, class_=c)
-        a = Assignment(name='uniq', pipeline_image="registry.osiris.services/anubis/assignment/1",
+        user_items = [u, c, ic]
+
+        # Assignment 1 uniq
+        a1 = Assignment(name='uniq', pipeline_image="registry.osiris.services/anubis/assignment/1",
                        hidden=False, release_date='2020-08-22 23:55:00', due_date='2020-08-22 23:55:00', class_=c,
                        github_classroom_url='')
-        a2 = Assignment(name='ez mem', pipeline_image="registry.osiris.services/anubis/assignment/2",
+        a1t1 = AssignmentTest(name='Long file test', assignment=a)
+        a1t2 = AssignmentTest(name='Short file test', assignment=a)
+        a1r1 = AssignmentRepo(owner=u, assignment=a, repo_url='https://github.com/juan-punchman/xv6-public.git')
+        a1s1 = Submission(commit='2bc7f8d636365402e2d6cc2556ce814c4fcd1489', state='Enqueued', owner=u, assignment=a,
+                        repo=a1r1)
+        a1s2 = Submission(commit='0001', state='Enqueued', owner=u, assignment=a, repo=a1r1)
+        assignment_1_items = [a1, a1t1, a1t2, a1r1, a1s1, a1s2]
+
+        # Assignment 2 tail
+        a2 = Assignment(name='tail', pipeline_image="registry.osiris.services/anubis/assignment/2",
                        hidden=False, release_date='2020-09-03 23:55:00', due_date='2020-09-03 23:55:00', class_=c,
                        github_classroom_url='')
-        at1 = AssignmentTest(name='Long file test', assignment=a)
-        at2 = AssignmentTest(name='Short file test', assignment=a)
-        r = AssignmentRepo(owner=u, assignment=a, repo_url='https://github.com/juan-punchman/xv6-public.git')
-        s1 = Submission(commit='2bc7f8d636365402e2d6cc2556ce814c4fcd1489', state='Enqueued', owner=u, assignment=a,
-                        repo=r)
-        s2 = Submission(commit='0001', state='Enqueued', owner=u, assignment=a, repo=r)
+        a2t1 = AssignmentTest(name='Hello world test', assignment=a2)
+        a2t2 = AssignmentTest(name='Short file test', assignment=a2)
+        a2t3 = AssignmentTest(name='Long file test', assignment=a2)
+        a2r2 = AssignmentRepo(owner=u, assignment=a2, repo_url='https://github.com/os3224/assignment-1-spring2020.git')
+        a2s1 = Submission(commit='2bc7f8d636365402e2d6cc2556ce814c4fcd1489', state='Enqueued', owner=u, assignment=a,
+                        repo=a1r1)
+        assignment_2_items = [a2, a2t1, a2t2, a2t3, a2r2, a2s1]
 
         # Commit
-        db.session.add_all([u, c, ic, a, at1, at2, s1, s2, r, a2])
+        db.session.add_all(user_items)
+        db.session.add_all(assignment_1_items)
+        db.session.add_all(assignment_2_items)
         db.session.commit()
 
         # Init models
-        s1.init_submission_models()
-        s2.init_submission_models()
+        a1s1.init_submission_models()
+        a1s2.init_submission_models()
 
-        enqueue_webhook_rpc(s1.id)
+        enqueue_webhook_rpc(a1s1.id)
 
         return {
             'u': u.data,
             'a': a.data,
-            's1': s1.data,
+            's1': a1s1.data,
         }
