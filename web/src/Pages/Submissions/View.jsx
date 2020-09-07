@@ -39,7 +39,7 @@ export default function SubmissionsView() {
           </Typography>
         </Grid>
         <Zoom in={true} timeout={350}>
-          <Grid item xs={6}>
+          <Grid item xs>
             <SubmissionTable/>
           </Grid>
         </Zoom>

@@ -102,8 +102,8 @@ TablePaginationActions.propTypes = {
 };
 
 
-function createData(commitHash, processed, timeSubmitted, dateSubmitted) {
-  return {commitHash, processed, timeSubmitted, dateSubmitted};
+function createData(commitHash, processed, dateSubmitted, timeSubmitted, timeStamp) {
+  return {commitHash, processed, timeSubmitted, dateSubmitted, timeStamp};
 }
 
 const submissionList = [
@@ -159,9 +159,10 @@ const submissionList = [
 
   }
 ]
+const assigmentTime ="2020-09-04 11:55:55"
 
 const rows =
-  (submissionList).map((item) => (createData(item.commitHash, item.processed, item.timestamp.split(" ")[0], item.timestamp.split(" ")[1])))
+  (submissionList).map((item) => (createData(item.commitHash, item.processed, item.timestamp.split(" ")[0], item.timestamp.split(" ")[1], item.timestamp)))
     .sort((a, b) => (a.timeSubmitted > b.timeSubmitted ? -1 : 1)); //sorts submissions in reverse chronological order
 
 
@@ -194,6 +195,8 @@ export default function SubmissionsTable() {
             <TableCell align="center">Processed</TableCell>
             <TableCell align="left">Date</TableCell>
             <TableCell align="left">Time</TableCell>
+            <TableCell align="left">On Time</TableCell>
+
           </TableRow>
         </TableHead>
 
@@ -218,7 +221,12 @@ export default function SubmissionsTable() {
               </TableCell>
               <TableCell style={{width: 120}} align="left">
                 {row.dateSubmitted}
-              </TableCell>             
+              </TableCell>      
+              <TableCell style={{width: 120}} align="left">
+                {new Date(row.dateSubmitted) <= new Date(assigmentTime) ?  <CheckCircleIcon style={{color: green[500]}}/> :
+                  <CancelIcon style={{color: red[500]}}/>}
+                  {console.log(new Date(row.timeStamp) <= new Date(assigmentTime) )}
+              </TableCell>         
             </TableRow>
           ))}
 
@@ -231,7 +239,7 @@ export default function SubmissionsTable() {
         <TableFooter>
           <TableRow>
             <TablePagination
-              rowsPerPageOptions={[5, 10, 25, {label: 'All', value: -1}]}
+              rowsPerPageOptions={[5, 10, 20, {label: 'All', value: -1}]}
               colSpan={4}
               count={rows.length}
               rowsPerPage={rowsPerPage}
