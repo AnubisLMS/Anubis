@@ -20,8 +20,6 @@ def load_user(netid: Union[str, None]) -> Union[User, None]:
         return None
     u1 = User.query.filter_by(netid=netid).first()
 
-    logging.debug(f'loading user {u1.data}')
-
     return u1
 
 

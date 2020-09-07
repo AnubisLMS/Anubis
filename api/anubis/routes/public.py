@@ -187,13 +187,13 @@ def public_webhook():
     webhook = request.json
 
     # Load the basics from the webhook
-    repo_url = webhook['repository']['ssh_url']
+    repo_url = webhook['repository']['url']
     github_username = webhook['pusher']['name']
     commit = webhook['after']
     assignment_name = webhook['repository']['name'][:-(len(github_username) + 1)]
     unique_code = assignment_name.split('-')[-1]
 
-    # logging.debug('github_username: {} unique_code: {}'.format(github_username, unique_code))
+    logger.debug('github_username: {} unique_code: {}'.format(github_username, unique_code))
 
     # Attempt to find records for the relevant models
     assignment = Assignment.query.filter_by(unique_code=unique_code).first()
@@ -249,7 +249,7 @@ def public_webhook():
         return error_response('not push to master')
 
     # Create a shiny new submission
-    submission = Submission(assignment=assignment, repo=repo, owner=user, commit=commit, state='Enqueued')
+    submission = Submission(assignment=assignment, repo=repo, owner=user, commit=commit, state='Waiting for resources...')
     db.session.add(submission)
     db.session.commit()
 

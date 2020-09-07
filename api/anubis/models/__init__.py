@@ -292,9 +292,9 @@ class Submission(db.Model):
         db.session.commit()
 
         # Find tests for the current assignment
-        tests = AssignmentTest.query.filter(Assignment.id == self.assignment_id).all()
+        tests = AssignmentTest.query.filter_by(assignment_id=self.assignment_id).all()
 
-        logging.debug('found tests: {}'.format(list(map(lambda x: x.data, tests))))
+        logging.error('found tests: {}'.format(list(map(lambda x: x.data, tests))))
 
         for test in tests:
             tr = SubmissionTestResult(submission=self, assignment_test=test)
@@ -325,29 +325,22 @@ class Submission(db.Model):
         """
 
         # Query for matching AssignmentTests, and TestResults
-        tests = db.session.query(
-            AssignmentTest, SubmissionTestResult
-        ).join(Assignment).join(Class_).join(InClass).join(User).join(Submission).filter(
-            Assignment.id == self.assignment_id,
-            User.id == self.owner_id,
-            SubmissionTestResult.submission_id == self.id,
-            SubmissionTestResult.assignment_test_id == AssignmentTest.id,
-        ).group_by(SubmissionTestResult.id).all()
-        # ^^ Dont Touch this ^^
+        tests = SubmissionTestResult.query.filter_by(
+            submission_id=self.id,
+        ).all()
 
-        logging.debug('Loaded tests {}'.format(tests))
+        logging.error('Loaded tests {}'.format(tests))
 
         # Convert to dictionary data
         return [
-            {'test': test.data, 'result': result.data}
-            for test, result in tests
+            {'test': result.assignment_test.data, 'result': result.data}
+            for result in tests
         ]
 
     @property
     def data(self):
         return {
             'id': self.id,
-            'netid': self.netid,
             'assignment_name': self.assignment.name,
             'assignment_due': str(self.assignment.due_date),
             'class_code': self.assignment.class_.class_code,

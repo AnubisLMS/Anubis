@@ -102,8 +102,9 @@ def get_submissions(netid: str, class_name=None, assignment_name=None) -> Union[
     if assignment_name is not None:
         filters.append(Assignment.name == assignment_name)
 
+    owner = User.query.filter(User.netid == netid).first()
     submissions = Submission.query.join(Assignment).join(Class_).join(InClass).join(User).filter(
-        User.netid == netid,
+        Submission.owner_id == owner.id,
         *filters
     ).all()
 
@@ -122,43 +123,12 @@ def regrade_submission(submission):
         return error_response('submission currently being processed')
 
     submission.processed = False
+    submission.state = 'Waiting for resources...'
     submission.init_submission_models()
 
     enqueue_webhook_rpc(submission.id)
 
     return success_response({'message': 'regrade started'})
-
-
-def reset_submission(submission):
-    """
-    This function will reset all the data for a submission,
-    putting it in a pending state. To re-enqueue this submission
-    as a job, use the enqueue_webhook_job function.
-
-    :submission Submissions: submission object
-    :return: bool indicating success
-    """
-    if not submission.processed:
-        return False
-
-    submission.processed = False
-
-    for report in submission.reports:
-        db.session.delete(report)
-    for build in submission.builds:
-        db.session.delete(build)
-    for test in submission.tests:
-        db.session.delete(test)
-    for error in submission.errors:
-        db.session.delete(error)
-
-    try:
-        # db.session.add(submission)
-        db.session.commit()
-    except IntegrityError:
-        db.session.rollback()
-        return False
-    return True
 
 
 def jsonify(data, status_code=200):

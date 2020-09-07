@@ -119,7 +119,7 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
         'type': 'test_result',
         'submission_id': submission.id, 'assignment_id': submission.assignment_id,
         'owner_id': submission.owner_id, 'test_name': test_name,
-        'message': message, 'passed': passed, 'stdout': stdout})
+        'test_message': message, 'passed': passed, 'stdout': stdout})
 
     submission_test_result: SubmissionTestResult = None
 
