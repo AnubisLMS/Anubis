@@ -2,7 +2,7 @@ import logging
 
 import logstash
 from flask import Flask
-from utils.logger import logger
+from anubis.utils.logger import logger
 
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.StreamHandler())
