@@ -24,9 +24,12 @@ export default function SubmissionsView() {
   const classes = useStyles();
   return (
     <div className={classes.root}>
-      <Grid container spacing={3}>
+      <Grid container 
+            direction="row" 
+            justify="center" 
+            alignItems="center"
+            spacing={6}>
         <Grid item xs={12}>
-
 
           <Typography variant="h6">
             Intro to Operating Systems
