@@ -8,7 +8,7 @@ COPY yarn.lock .
 # add program for serving static
 # build prod
 # delete fluff
-RUN yarn \
+RUN apk add --update --no-cache curl && yarn \
   && yarn global add serve
 COPY . .
 RUN yarn run build \
