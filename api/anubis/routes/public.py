@@ -1,4 +1,4 @@
-from flask import request, redirect, Blueprint
+from flask import request, redirect, Blueprint, url_for, make_response
 
 from anubis.models import Assignment, AssignmentRepo
 from anubis.models import Submission
@@ -12,8 +12,42 @@ from anubis.utils.elastic import log_endpoint, esindex
 from anubis.utils.http import get_request_ip
 from anubis.utils.logger import logger
 from anubis.utils.cache import cache
+from anubis.utils.oauth import OAUTH_REMOTE_APP as provider
+from anubis.utils.auth import get_token
 
 public = Blueprint('public', __name__, url_prefix='/public')
+
+
+@public.route('/login')
+@log_endpoint('public-login')
+def public_login():
+    return provider.authorize(callback=url_for('public.public_oauth', _external=True, _scheme='https'))
+
+
+@public.route('/oauth')
+@log_endpoint('public-oauth')
+def public_oauth():
+    next_url = request.args.get('next') or url_for('index')
+    resp = provider.authorized_response()
+    if resp is not None or 'access_token' not in resp:
+        return 'Access Denied'
+
+    user_data = provider.get('userinfo?schema=openid', token=(resp['access_token'],))
+
+    netid = user_data.data['netid']
+    email = user_data.data['email']
+    name = user_data.data['displayname']
+
+    u = User.query.filter(User.netid == netid).first()
+    if u is None:
+        u = User(netid=netid, email=email, name=name, is_admin=False)
+        db.session.add(u)
+        db.session.commit()
+
+    r = make_response(redirect(next_url))
+    r.set_cookie('token', get_token(u.netid))
+
+    return r
 
 
 @public.route('/classes')
