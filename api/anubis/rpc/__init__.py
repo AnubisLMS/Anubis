@@ -102,7 +102,8 @@ def test_repo(submission_id: int):
         job = client.V1Job(
             api_version="batch/v1",
             kind="Job",
-            metadata=client.V1ObjectMeta(name='submission-pipeline-{}'.format(submission.id)),
+            metadata=client.V1ObjectMeta(name='submission-pipeline-{}-{}'.format(
+                submission.id, int(time.time()))),
             spec=spec)
 
         logging.debug(job.to_str())

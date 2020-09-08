@@ -1,8 +1,4 @@
-import logging
-import traceback
-
 from flask import request, redirect, Blueprint
-from sqlalchemy.exc import IntegrityError
 
 from anubis.models import Assignment, AssignmentRepo
 from anubis.models import Submission
@@ -14,6 +10,8 @@ from anubis.utils.data import regrade_submission, enqueue_webhook_rpc
 from anubis.utils.decorators import json_response, require_user
 from anubis.utils.elastic import log_endpoint, esindex
 from anubis.utils.http import get_request_ip
+from anubis.utils.logger import logger
+from anubis.utils.cache import cache
 
 public = Blueprint('public', __name__, url_prefix='/public')
 
@@ -100,6 +98,7 @@ def public_submissions():
 @require_user
 @log_endpoint('public-submission-commit', lambda: 'get submission {}'.format(request.path))
 @json_response
+@cache.memoize(timeout=1, unless=is_debug)
 def public_submission(commit: str):
     """
     Get submission data for a given commit.
@@ -134,8 +133,8 @@ def webhook_log_msg():
 @public.route('/memes')
 @log_endpoint('rick-roll', lambda: 'rick-roll')
 def public_memes():
-    logging.info('rick-roll')
-    return redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+    logger.info('rick-roll')
+    return redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ&autoplay=1')
 
 
 @public.route('/regrade/<commit>')
@@ -152,7 +151,7 @@ def public_regrade_commit(commit=None):
         return error_response('incomplete_request'), 406
 
     # Load current user
-    user: User = User.current_user()
+    user: User = current_user()
 
     # Find the submission
     submission: Submission = Submission.query.join(User).filter(
@@ -188,13 +187,13 @@ def public_webhook():
     webhook = request.json
 
     # Load the basics from the webhook
-    repo_url = webhook['repository']['ssh_url']
+    repo_url = webhook['repository']['url']
     github_username = webhook['pusher']['name']
     commit = webhook['after']
     assignment_name = webhook['repository']['name'][:-(len(github_username) + 1)]
     unique_code = assignment_name.split('-')[-1]
 
-    # logging.debug('github_username: {} unique_code: {}'.format(github_username, unique_code))
+    logger.debug('github_username: {} unique_code: {}'.format(github_username, unique_code))
 
     # Attempt to find records for the relevant models
     assignment = Assignment.query.filter_by(unique_code=unique_code).first()
@@ -204,12 +203,12 @@ def public_webhook():
         Assignment.name == assignment_name,
     ).first()
 
-    logging.debug('github_username: {} unique_code: {}'.format(github_username, unique_code))
-    logging.debug('assignment: {} user: {} repo: {}'.format(assignment, user, repo))
+    logger.debug('github_username: {} unique_code: {}'.format(github_username, unique_code))
+    logger.debug('assignment: {} user: {} repo: {}'.format(assignment, user, repo))
 
     # Verify that we can match this push to an assignment
     if assignment is None:
-        logging.error('Could not find assignment', extra={
+        logger.error('Could not find assignment', extra={
             'repo_url': repo_url, 'github_username': github_username,
             'assignment_name': assignment_name, 'commit': commit,
         })
@@ -218,7 +217,7 @@ def public_webhook():
     if not is_debug():
         # Make sure that the repo we're about to process actually belongs to our organization
         if not webhook['repository']['full_name'].startswith('os3224/'):
-            logging.error('Invalid github organization in webhook.', extra={
+            logger.error('Invalid github organization in webhook.', extra={
                 'repo_url': repo_url, 'github_username': github_username,
                 'assignment_name': assignment_name, 'commit': commit,
             })
@@ -235,7 +234,7 @@ def public_webhook():
     # and all branches that are not master.
     if webhook['before'] == '0000000000000000000000000000000000000000':
         # Record that a new repo was created (and therefore, someone just started their assignment)
-        logging.info('new student repo ', extra={
+        logger.info('new student repo ', extra={
             'repo_url': repo_url, 'github_username': github_username,
             'assignment_name': assignment_name, 'commit': commit,
         })
@@ -243,14 +242,14 @@ def public_webhook():
         return success_response('initial commit')
 
     if webhook['ref'] != 'refs/heads/master':
-        logging.warning('not push to master', extra={
+        logger.warning('not push to master', extra={
             'repo_url': repo_url, 'github_username': github_username,
             'assignment_name': assignment_name, 'commit': commit,
         })
         return error_response('not push to master')
 
     # Create a shiny new submission
-    submission = Submission(assignment=assignment, repo=repo, owner=user, commit=commit, state='Enqueued')
+    submission = Submission(assignment=assignment, repo=repo, owner=user, commit=commit, state='Waiting for resources...')
     db.session.add(submission)
     db.session.commit()
 
@@ -260,7 +259,7 @@ def public_webhook():
     # If a user has not given us their github username
     # the submission will stay in a "dangling" state
     if user is None:
-        logging.warning('dangling submission from {}'.format(github_username), extra={
+        logger.warning('dangling submission from {}'.format(github_username), extra={
             'repo_url': repo_url, 'github_username': github_username,
             'assignment_name': assignment_name, 'commit': commit,
         })

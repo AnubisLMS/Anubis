@@ -34,6 +34,8 @@ spec:
           requests:
             memory: "100Mi"
         env:
+        - name: "DEBUG"
+          value: "1"
         - name: "DISABLE_ELK"
           value: "0"
         # Gunicorn workers

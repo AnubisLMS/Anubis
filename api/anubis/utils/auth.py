@@ -20,8 +20,6 @@ def load_user(netid: Union[str, None]) -> Union[User, None]:
         return None
     u1 = User.query.filter_by(netid=netid).first()
 
-    logging.debug(f'loading user {u1.data}')
-
     return u1
 
 
@@ -31,7 +29,7 @@ def current_user() -> Union[User, None]:
 
     :return: User or None
     """
-    token = request.headers.get('token', default=None)
+    token = request.headers.get('token', default=None) or request.cookies.get('token', default=None)
     if token is None:
         return None
 

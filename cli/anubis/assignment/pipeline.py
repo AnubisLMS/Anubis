@@ -28,6 +28,10 @@ if git_creds is not None:
     with open(os.environ.get('HOME') + '/.git-credentials', 'w') as f:
         f.write(git_creds)
         f.close()
+    with open(os.environ.get('HOME') + '/.gitconfig', 'w') as f:
+        f.write('[credential]\n')
+        f.write('\thelper = store\n')
+        f.close()
 
 TOKEN = os.environ.get('TOKEN')
 COMMIT = os.environ.get('COMMIT')
@@ -228,11 +232,11 @@ def run_tests(assignment_data: dict):
 
 
 def main():
-    assignment_data = get_assignment_data()
-    clone()
-
-    os.chdir('./student')
     try:
+        assignment_data = get_assignment_data()
+        clone()
+        os.chdir('./student')
+
         run_build(assignment_data)
         run_tests(assignment_data)
         report_state('Finished!', params={'processed': '1'})

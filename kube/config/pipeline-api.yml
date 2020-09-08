@@ -34,6 +34,8 @@ spec:
         - name: web
           containerPort: 5000
         env:
+        - name: "LOGGER_NAME"
+          value: "pipeline-api"
         # Gunicorn workers
         - name: "WORKERS"
           value: "2"

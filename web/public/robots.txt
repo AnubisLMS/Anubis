@@ -1,6 +1,5 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Allow: /
-Allow: /view
-Disallow: /view/*
-Disallow: /404
+Allow: /about
+Allow: /favicon.ico
+Disallow: *

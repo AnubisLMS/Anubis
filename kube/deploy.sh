@@ -39,5 +39,6 @@ kubectl apply \
 
 
 kubectl rollout restart deployments.apps/anubis-api -n anubis
+kubectl rollout restart deployments.apps/web -n anubis
 kubectl rollout restart deployments.apps/anubis-pipeline-api -n anubis
 kubectl rollout restart deployments.apps/anubis-rpc-workers  -n anubis

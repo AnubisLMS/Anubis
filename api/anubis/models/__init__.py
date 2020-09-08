@@ -56,12 +56,28 @@ class Class_(db.Model):
     in_class = db.relationship('InClass', cascade='all,delete')
 
     @property
+    def total_assignments(self):
+        return len(list(self.assignments))
+
+    @property
+    def open_assignments(self):
+        now = datetime.now()
+        return Assignment.query.filter(
+            Assignment.class_id == self.id,
+            Assignment.release_date >= now,
+            Assignment.due_date <= now
+        ).count()
+
+    @property
     def data(self):
         return {
             'name': self.name,
             'class_code': self.class_code,
             'section': self.section,
             'professor': self.professor,
+
+            'total_assignments': self.total_assignments,
+            'open_assignment': self.open_assignments,
         }
 
 
@@ -108,8 +124,7 @@ class Assignment(db.Model):
             'id': self.id,
             'name': self.name,
             'due_date': str(self.due_date),
-            'grace_date': str(self.grace_date),
-            'class': self.class_.data,
+            'course': self.class_.data,
             'description': self.description,
             'github_classroom_link': self.github_classroom_url,
 
@@ -277,9 +292,9 @@ class Submission(db.Model):
         db.session.commit()
 
         # Find tests for the current assignment
-        tests = AssignmentTest.query.filter(Assignment.id == self.assignment_id).all()
+        tests = AssignmentTest.query.filter_by(assignment_id=self.assignment_id).all()
 
-        logging.debug('found tests: {}'.format(list(map(lambda x: x.data, tests))))
+        logging.error('found tests: {}'.format(list(map(lambda x: x.data, tests))))
 
         for test in tests:
             tr = SubmissionTestResult(submission=self, assignment_test=test)
@@ -310,30 +325,25 @@ class Submission(db.Model):
         """
 
         # Query for matching AssignmentTests, and TestResults
-        tests = db.session.query(
-            AssignmentTest, SubmissionTestResult
-        ).join(Assignment).join(Class_).join(InClass).join(User).join(Submission).filter(
-            Assignment.id == self.assignment_id,
-            User.id == self.owner_id,
-            SubmissionTestResult.submission_id == Submission.id,
-            SubmissionTestResult.assignment_test_id == AssignmentTest.id,
-        ).group_by(AssignmentTest.id).all()
-        # ^^ Dont Touch this ^^
+        tests = SubmissionTestResult.query.filter_by(
+            submission_id=self.id,
+        ).all()
 
-        logging.debug('Loaded tests {}'.format(tests))
+        logging.error('Loaded tests {}'.format(tests))
 
         # Convert to dictionary data
         return [
-            {'test': test.data, 'result': result.data}
-            for test, result in tests
+            {'test': result.assignment_test.data, 'result': result.data}
+            for result in tests
         ]
 
     @property
     def data(self):
         return {
             'id': self.id,
-            'netid': self.netid,
-            'assignment': self.assignment.name,
+            'assignment_name': self.assignment.name,
+            'assignment_due': str(self.assignment.due_date),
+            'class_code': self.assignment.class_.class_code,
             'url': self.url,
             'commit': self.commit,
             'processed': self.processed,
@@ -344,7 +354,7 @@ class Submission(db.Model):
             # Connected models
             'repo': self.repo.repo_url,
             'tests': self.tests,
-            'submission_build': self.build.data if self.build is not None else None,
+            'build': self.build.data if self.build is not None else None,
         }
 
 
@@ -374,6 +384,7 @@ class SubmissionTestResult(db.Model):
     @property
     def data(self):
         return {
+            'id': self.id,
             'test_name': self.assignment_test.name,
             'passed': self.passed,
             'message': self.message,

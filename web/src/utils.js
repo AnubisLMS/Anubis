@@ -1,13 +1,5 @@
-const axios = require('axios');
+import {useLocation} from "react-router-dom";
 
-const devmode = process.env.REACT_APP_DEV;
-const apiUrl = devmode ? 'http://localhost:5000/api' : 'https://anubis.osiris.services/api'
-
-const api = axios.create({
-  baseURL: apiUrl,
-  timeout: 1000,
-});
-
-module.exports = {
-  api,
-};
+export function useQuery() {
+  return new URLSearchParams(window.location.search);
+}
