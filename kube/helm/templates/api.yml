@@ -2,19 +2,26 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: anubis-api
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: anubis-api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    component: anubis-api
 
 spec:
   selector:
     matchLabels:
       app: anubis-api
-  replicas: 2
+  replicas: {{ .Values.api.replicas }}
+  {{- if .Values.api.rollingUpdates }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 1
       maxSurge: 1
   revisionHistoryLimit: 10
+  {{- end }}
   template:
     metadata:
       labels:
@@ -23,24 +30,21 @@ spec:
       dnsPolicy: ClusterFirst
       containers:
       - name: anubis-api
-        image: registry.osiris.services/anubis/api:v2.0.0-alpha
-        imagePullPolicy: Always
+        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         ports:
         - name: web
           containerPort: 5000
         resources:
-          limits:
-            memory: "200Mi"
-          requests:
-            memory: "100Mi"
+          {{- toYaml .Values.api.resources | nindent 10 }}
         env:
         - name: "DEBUG"
-          value: "1"
+          value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
         - name: "DISABLE_ELK"
           value: "0"
         # Gunicorn workers
         - name: "WORKERS"
-          value: "4"
+          value: {{ .Values.api.workers | quote }}
         - name: "GUNICORN_OPTIONS"
           value: "--preload --capture-output --enable-stdio-inheritance"
         - name: "SECRET_KEY"
@@ -56,6 +60,7 @@ spec:
             secretKeyRef:
               name: api
               key: database-uri
+        {{- if .Values.api.healthCheck }}
         livenessProbe:
           exec:
             command:
@@ -63,22 +68,22 @@ spec:
               - http://localhost:5000/
           initialDelaySeconds: 120
           periodSeconds: 5
+        {{- end }}
 
       # Mail container
       - name: smtp
         image: namshi/smtp
-        resources:
-          limits:
-            memory: "100Mi"
-          requests:
-            memory: "100Mi"
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: anubis-debug
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: anubis-debug
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
 
 spec:
   selector:
@@ -132,9 +137,11 @@ apiVersion: v1
 kind: Service
 metadata:
   name: anubis
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
   labels:
     app: anubis-api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
 spec:
   selector:
     app: anubis-api
@@ -148,9 +155,11 @@ apiVersion: v1
 kind: Service
 metadata:
   name: anubis-debug
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
   labels:
     app: anubis-debug
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
 spec:
   selector:
     app: anubis-debug
@@ -168,7 +177,11 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
   name: strip-api
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: anubis
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
 spec:
   stripPrefix:
     prefixes:
@@ -179,7 +192,12 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
   name: private-api-basicauth
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: anubis-api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+
 spec:
   basicAuth:
     secret: private-api-basicauth
@@ -193,7 +211,11 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: private-api-basicauth
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: anubis-api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
 
 data:
   users: |2
@@ -206,18 +228,24 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: ingress.route.anubis.api.public
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: anubis-api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
 spec:
   entryPoints:
     - websecure
   routes:
   - kind: Rule
-    match: Host(`anubis.osiris.services`) && PathPrefix(`/api/`)
+    match: Host(`{{ .Values.domain }}`) && PathPrefix(`/api/`)
     middlewares:
+    {{- if .Values.vpnOnly }}
     - name: whitelist-vpn
       namespace: traefik
+    {{- end }}
     - name: strip-api
-      namespace: anubis
+      namespace: {{ .Release.Namespace }}
     services:
     - name: anubis
       port: 5000
@@ -230,20 +258,26 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: ingress.route.anubis.api.private
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: anubis-api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
 spec:
   entryPoints:
     - websecure
   routes:
   - kind: Rule
-    match: Host(`anubis.osiris.services`) && PathPrefix(`/api/private/`)
+    match: Host(`{{ .Values.domain }}`) && PathPrefix(`/api/private/`)
     middlewares:
+    {{- if .Values.vpnOnly }}
     - name: whitelist-vpn
       namespace: traefik
+    {{- end }}
     - name: strip-api
-      namespace: anubis
+      namespace: {{ .Release.Namespace }}
     - name: private-api-basicauth
-      namespace: anubis
+      namespace: {{ .Release.Namespace }}
     services:
     - name: anubis
       port: 5000

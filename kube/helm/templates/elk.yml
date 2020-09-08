@@ -8,22 +8,33 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: elastic-data
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: elasticsearch
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+
 spec:
-  storageClassName: longhorn
+  {{- if .Values.elasticsearch.storageClassName }}
+  storageClassName: {{ .Values.elasticsearch.storageClassName | quote }}
+  {{- end }}
   accessModes:
     - ReadWriteOnce
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 4Gi
+      storage: {{ .Values.elasticsearch.storage | quote }}
 ---
 ## Logstash
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: logstash
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: logstash
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
 
 spec:
   selector:
@@ -37,8 +48,8 @@ spec:
     spec:
       containers:
       - name: logstash
-        image: registry.osiris.services/anubis/logstash:latest
-        imagePullPolicy: Always
+        image: {{ .Values.logstash.image }}:{{ .Values.logstash.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         ports:
         - name: web
           containerPort: 5000
@@ -52,7 +63,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: elasticsearch
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: elasticsearch
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
 
 spec:
   selector:
@@ -74,12 +89,9 @@ spec:
 
       containers:
       - name: elasticsearch
-        image: elasticsearch:7.5.2
+        image: {{ .Values.elasticsearch.image }}:{{ .Values.elasticsearch.tag }}
         resources:
-          limits:
-            memory: "2Gi"
-          requests:
-            memory: "2Gi"
+          {{- toYaml .Values.elasticsearch.resources | nindent 10 }}
         ports:
         - name: web
           containerPort: 9200
@@ -99,7 +111,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kibana
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kibana
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
 
 spec:
   selector:
@@ -113,7 +129,7 @@ spec:
     spec:
       containers:
       - name: kibana
-        image: kibana:7.5.2
+        image: {{ .Values.kibana.image }}:{{ .Values.kibana.tag }}
         ports:
         - name: web
           containerPort: 5601

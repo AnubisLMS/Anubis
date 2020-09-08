@@ -2,19 +2,26 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: anubis-pipeline-api
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: anubis-pipeline-api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    component: anubis-pipline-api
 
 spec:
   selector:
     matchLabels:
       app: anubis-pipeline-api
-  replicas: 2
+  replicas: {{ .Values.pipeline_api.replicas }}
+  {{- if .Values.api.rollingUpdates }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 1
       maxSurge: 1
   revisionHistoryLimit: 10
+  {{- end }}
   template:
     metadata:
       labels:
@@ -23,22 +30,21 @@ spec:
       dnsPolicy: ClusterFirst
       containers:
       - name: anubis-pipeline-api
-        image: registry.osiris.services/anubis/api:v2.0.0-alpha
-        imagePullPolicy: Always
+        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
-          limits:
-            memory: "200Mi"
-          requests:
-            memory: "100Mi"
+          {{- toYaml .Values.api.resources | nindent 10 }}
         ports:
         - name: web
           containerPort: 5000
         env:
+        - name: "DEBUG"
+          value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
         - name: "LOGGER_NAME"
           value: "pipeline-api"
         # Gunicorn workers
         - name: "WORKERS"
-          value: "2"
+          value: {{ .Values.pipeline_api.workers | quote }}
         - name: "CREATE_APP_FUNCTION"
           value: "create_pipeline_app"
         - name: "SECRET_KEY"
@@ -54,6 +60,7 @@ spec:
             secretKeyRef:
               name: api
               key: database-uri
+        {{- if .Values.pipeline_api.healthCheck }}
         livenessProbe:
           exec:
             command:
@@ -61,6 +68,7 @@ spec:
               - http://localhost:5000/
           initialDelaySeconds: 120
           periodSeconds: 5
+        {{- end }}
 
 
       # Mail container
@@ -71,9 +79,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: anubis-pipeline-api
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
   labels:
     app: anubis-pipeline-api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+
 spec:
   selector:
     app: anubis-pipeline-api
@@ -89,7 +100,10 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: submission-pipeline-worker
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
 spec:
   podSelector:
     matchLabels:
