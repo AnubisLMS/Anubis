@@ -201,7 +201,7 @@ export default function SubmissionInfo() {
                   {/* Submission state */}
                   <ListItem>
                     <ListItemIcon>
-                      <Tooltip title={submission.submissionState}>
+                      <Tooltip title={!submission.processed ? submission.submissionState : "regrade"}>
                         <IconButton component="div" onClick={() =>
                           regrade(submission.commitHash, enqueueSnackbar)}>
                           {submission.processed
@@ -297,17 +297,19 @@ export default function SubmissionInfo() {
                   <Typography key={'firstline'} variant={'h5'} className={classes.heading}>
                     {test.result.message}
                   </Typography>
-                  {test.result.passed && test.result.stdout
+                  {test.result.passed !== null && !!test.result.stdout
                     ? test.result.stdout.trim().split('\n')
                       .map((line, index) => (
-                        <Typography
-                          variant={"body1"}
-                          color={"textSecondary"}
-                          width={100}
-                          key={`line-${index}`}
-                        >
-                          {line}
-                        </Typography>
+                        line.trim().length !== 0
+                          ? <Typography
+                            variant={"body1"}
+                            color={"textSecondary"}
+                            width={100}
+                            key={`line-${index}`}
+                          >
+                            {line}
+                          </Typography>
+                          : <br/>
                       ))
                     : null}
                 </div>

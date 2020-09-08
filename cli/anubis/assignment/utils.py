@@ -1,8 +1,8 @@
+import functools
+import logging
 import os
 import subprocess
 import typing
-import logging
-import functools
 
 DEBUG = os.environ.get('DEBUG', default='0') == '1'
 
@@ -22,6 +22,7 @@ class TestResult(object):
             self.message,
             self.stdout
         )
+
 
 class BuildResult(object):
     def __init__(self):
@@ -55,11 +56,11 @@ def exec_as_student(cmd, timeout=60) -> typing.Tuple[str, int]:
 
     return_code = 0
     try:
-        print('{} {}'.format(os.getcwd(), ["su", "student", "-c", cmd]))
+        print('{} {}'.format(os.getcwd(), ["env", "-i", "su", "student", "-c", cmd]))
         stdout = subprocess.check_output(
-            ["su", "student", "-c", cmd],
+            ["env", "-i", "su", "student", "-c", cmd],
             timeout=timeout,
-            stderr=subprocess.STDOUT,
+            # stderr=subprocess.STDOUT,
         )
     except subprocess.CalledProcessError as e:
         stdout = e.output
