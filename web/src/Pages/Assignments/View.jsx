@@ -1,5 +1,4 @@
 import React from "react";
-import {makeStyles} from "@material-ui/core/styles";
 import AssignmentCard from "./Assignment";
 import Grid from '@material-ui/core/Grid';
 import Grow from "@material-ui/core/Grow";
@@ -53,20 +52,8 @@ import {Redirect} from "react-router-dom";
 //   },
 // ];
 
-const useStyles = makeStyles((theme) => ({
-  control: {
-    padding: theme.spacing(2),
-  },
-  container: {
-    display: 'flex',
-  },
-  paper: {
-    margin: theme.spacing(1),
-  },
-}));
 
-export default function AssignmentView(props) {
-  const classes = useStyles();
+export default function AssignmentView() {
   const query = useQuery();
   const {loading, error, data} = useGet(
     '/api/public/assignments',
@@ -93,7 +80,6 @@ export default function AssignmentView(props) {
               {...({timeout: 300 * (pos + 1)})}
             >
               <Grid item>
-                {console.log(assignment) || null}
                 <AssignmentCard assignment={assignment}/>
               </Grid>
             </Grow>

@@ -45,7 +45,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const quotes = [
-  "\"I\'ll have you know that I stubbed by toe last week and only cried for 20 minutes.\" – Spongebob",
+  "\"I'll have you know that I stubbed by toe last week and only cried for 20 minutes.\" – Spongebob",
   "\"If you believe in yourself and with a tiny pinch of magic, all your dreams can come true.\" – Spongebob",
   "\"Dumb people are always blissfully unaware of how dumb they really are…(drools)\" – Patrick Star",
   "\"Good people don’t rip other people’s arms off.\" – Spongebob",

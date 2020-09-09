@@ -28,6 +28,8 @@ spec:
         app: anubis-api
     spec:
       dnsPolicy: ClusterFirst
+      nodeSelector:
+        datacenter: mtc
       containers:
       - name: anubis-api
         image: {{ .Values.api.image }}:{{ .Values.api.tag }}
@@ -52,6 +54,16 @@ spec:
             secretKeyRef:
               name: api
               key: secret-key
+        - name: "OAUTH_CONSUMER_KEY"
+          valueFrom:
+            secretKeyRef:
+              name: oauth
+              key: consumer-key
+        - name: "OAUTH_CONSUMER_SECRET"
+          valueFrom:
+            secretKeyRef:
+              name: oauth
+              key: consumer-secret
         - name: DB_HOST
           value: mariadb.mariadb.svc.cluster.local
         # sqlalchemy uri

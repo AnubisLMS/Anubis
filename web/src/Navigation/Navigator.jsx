@@ -24,7 +24,10 @@ import {Link} from "react-router-dom";
 
 
 const categories = [
-  {id: "Courses", icon: <SchoolIcon/>, path: "/"},
+  {
+    id: "Courses",
+    icon: <SchoolIcon/>,
+    path: "/courses"},
   {
     id: "Assignments",
     icon: <AssignmentOutlinedIcon/>,
@@ -39,7 +42,6 @@ const categories = [
 
 const footerLinks = [
   {id: "About", icon: <PublicIcon/>, path: "/about"},
-  {id: "Logout", icon: <ExitToAppOutlinedIcon/>, path: "/logout"}
 ];
 const drawerWidth = 240;
 
@@ -111,14 +113,10 @@ const useStyles = makeStyles((theme) => ({
     marginTop: 5
   }
 }));
-const pageHeader = ()=> {
-  const currentPath = window.location.pathnamme
 
-
-}
 export default function Navigator(props) {
   const classes = useStyles();
-  const {variant, open, onClose, onOpen} = props;
+  const {open, onClose, onOpen} = props;
   const theme = useTheme();
   return (
     <div className={classes.root}>
@@ -143,7 +141,6 @@ export default function Navigator(props) {
 
           <Typography variant="h6" noWrap>
             Student Courses
-            {console.log(window.location.pathname)}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -190,11 +187,16 @@ export default function Navigator(props) {
                         component={Link}
                         to={path}
                         selected={window.location.pathname === path} >
-                {console.log(window.location.pathname === path)}
                 <ListItemIcon>{icon}</ListItemIcon>
                 <ListItemText primary={id}/>
               </ListItem>
             ))}
+            <ListItem button key="Logout"
+                      component={"a"}
+                      href={"/api/public/logout"}>
+              <ListItemIcon><ExitToAppOutlinedIcon/></ListItemIcon>
+              <ListItemText primary={"Logout"}/>
+            </ListItem>
           </List>
         </div>
       </Drawer>

@@ -1,9 +1,15 @@
-from flask import request, redirect, Blueprint, url_for, make_response
+import json
+import string
+from datetime import datetime, timedelta
+
+from flask import request, redirect, Blueprint, make_response
 
 from anubis.models import Assignment, AssignmentRepo
 from anubis.models import Submission
 from anubis.models import db, User, Class_, InClass
 from anubis.utils.auth import current_user
+from anubis.utils.auth import get_token
+from anubis.utils.cache import cache
 from anubis.utils.data import error_response, success_response, is_debug
 from anubis.utils.data import get_classes, get_assignments, get_submissions
 from anubis.utils.data import regrade_submission, enqueue_webhook_rpc
@@ -11,43 +17,85 @@ from anubis.utils.decorators import json_response, require_user
 from anubis.utils.elastic import log_endpoint, esindex
 from anubis.utils.http import get_request_ip
 from anubis.utils.logger import logger
-from anubis.utils.cache import cache
 from anubis.utils.oauth import OAUTH_REMOTE_APP as provider
-from anubis.utils.auth import get_token
 
 public = Blueprint('public', __name__, url_prefix='/public')
 
 
 @public.route('/login')
-@log_endpoint('public-login')
+@log_endpoint('public-login', lambda: 'login')
 def public_login():
-    return provider.authorize(callback=url_for('public.public_oauth', _external=True, _scheme='https'))
+    return provider.authorize(
+        callback='https://anubis.osiris.services/api/public/oauth'
+    )
+
+
+@public.route('/logout')
+@log_endpoint('public-logout', lambda: 'logout')
+def public_logout():
+    r = make_response(redirect('/'))
+    r.set_cookie('token', '')
+    return r
 
 
 @public.route('/oauth')
-@log_endpoint('public-oauth')
+@log_endpoint('public-oauth', lambda: 'oauth')
 def public_oauth():
-    next_url = request.args.get('next') or url_for('index')
+    next_url = request.args.get('next') or '/'
     resp = provider.authorized_response()
-    if resp is not None or 'access_token' not in resp:
+    if resp is None or 'access_token' not in resp:
         return 'Access Denied'
 
     user_data = provider.get('userinfo?schema=openid', token=(resp['access_token'],))
 
     netid = user_data.data['netid']
-    email = user_data.data['email']
-    name = user_data.data['displayname']
+    name = user_data.data['firstname'] + ' ' + user_data.data['lastname']
 
     u = User.query.filter(User.netid == netid).first()
     if u is None:
-        u = User(netid=netid, email=email, name=name, is_admin=False)
+        u = User(netid=netid, name=name, is_admin=False)
         db.session.add(u)
         db.session.commit()
+
+    if u.github_username is None:
+        next_url = '/set-github-username'
 
     r = make_response(redirect(next_url))
     r.set_cookie('token', get_token(u.netid))
 
     return r
+
+
+@public.route('/set-github-username')
+@require_user
+@log_endpoint('public-set-github-username', lambda: 'github username set')
+@json_response
+def public_set_github_username():
+    u: User = current_user()
+
+    github_username = request.args.get('github_username', default=None)
+    if github_username is None:
+        return error_response('missing field')
+    github_username = github_username.strip()
+
+    if any(i in string.whitespace for i in github_username):
+        return error_response('Your username can not have spaces')
+
+    if not (all(i in (string.ascii_letters + string.digits + '-') for i in github_username)
+            and not github_username.startswith('-') and not github_username.endswith('-')):
+        return error_response('Github usernames may only contain alphanumeric characters '
+                              'or single hyphens, and cannot begin or end with a hyphen.')
+
+    if u.github_username is not None and u.last_updated + timedelta(hours=1) < datetime.now():
+        return error_response('Github usernames can only be '
+                              'changed one hour after first setting. '
+                              'Email the TAs to reset your github username.')  # reject their github username change
+
+    u.github_username = github_username
+    db.session.add(u)
+    db.session.commit()
+
+    return success_response(github_username)
 
 
 @public.route('/classes')
@@ -283,7 +331,8 @@ def public_webhook():
         return error_response('not push to master')
 
     # Create a shiny new submission
-    submission = Submission(assignment=assignment, repo=repo, owner=user, commit=commit, state='Waiting for resources...')
+    submission = Submission(assignment=assignment, repo=repo, owner=user, commit=commit,
+                            state='Waiting for resources...')
     db.session.add(submission)
     db.session.commit()
 

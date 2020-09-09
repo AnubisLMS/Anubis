@@ -27,6 +27,10 @@ class User(db.Model):
     name = db.Column(db.String(128))
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
 
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
     repos = db.relationship('AssignmentRepo', cascade='all,delete')
     in_class = db.relationship('InClass', cascade='all,delete')
 

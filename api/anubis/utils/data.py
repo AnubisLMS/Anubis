@@ -64,6 +64,7 @@ def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], 
 
     assignments = Assignment.query.join(Class_).join(InClass).join(User).filter(
         User.netid == netid,
+        Assignment.hidden == False,
         *filters
     ).order_by(Assignment.due_date.desc()).all()
 

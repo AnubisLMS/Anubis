@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {makeStyles, useTheme} from "@material-ui/core/styles";
+import {makeStyles} from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardActionArea from '@material-ui/core/CardActionArea';
 import CardActions from "@material-ui/core/CardActions";
@@ -78,21 +78,19 @@ const remainingTime = (dueDate) => {
 }
 
 export default function AssignmentCard(props) {
-  const {courseCode, assignmentId, assignmentNumber, assignmentTitle, dueDate, hasSubmission} = props.assignment;
+  const {courseCode, assignmentNumber, assignmentTitle, dueDate, hasSubmission} = props.assignment;
   const classes = useStyles();
 
-  const [timeLeft, setTimeLeft] = useState(remainingTime(dueDate));
+  const [timeLeft] = useState(remainingTime(dueDate));
   const timerComponents = [];
-  const theme = useTheme();
   Object.keys(timeLeft).forEach((interval) => {
     if (!timeLeft[interval]) {
       return;
     }
     timerComponents.push( //decorate
       <span>
-
-          {timeLeft[interval]} {interval} left
-        </span>
+        {timeLeft[interval]} {interval} left
+      </span>
     );
   });
 
@@ -146,7 +144,7 @@ export default function AssignmentCard(props) {
             component={Link}
             to={`/courses/assignments/submissions?assignment=${assignmentTitle}`}
             style={hasSubmission ? {color: blue[500]} : {color: grey[500]}} size="small"
-            disabled = {!hasSubmission}>
+            disabled={!hasSubmission}>
             Submissions</Button>
 
         </div>

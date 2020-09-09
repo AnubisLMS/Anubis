@@ -13,7 +13,6 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # OAuth
-    OAUTH_CLIENT_ID = ''
     OAUTH_CONSUMER_KEY = ''
     OAUTH_CONSUMER_SECRET = ''
 
@@ -29,7 +28,6 @@ class Config:
         self.DISABLE_ELK = os.environ.get('DISABLE_ELK', default='0') == '1'
 
         # OAuth
-        self.OAUTH_CLIENT_ID = os.environ.get('OAUTH_CLIENT_ID', default='DEBUG')
         self.OAUTH_CONSUMER_KEY = os.environ.get('OAUTH_CONSUMER_KEY', default='DEBUG')
         self.OAUTH_CONSUMER_SECRET = os.environ.get('OAUTH_CONSUMER_SECRET', default='DEBUG')
 
