@@ -255,9 +255,16 @@ function App() {
                     </div>
                   </Route>
                 </Switch>
-                <footer className={classes.footer}>
-                  <Copyright/>
-                </footer>
+                <Switch>
+                  <Route exact path={'/about'}/>
+                  <Route>
+                    <footer className={classes.footer}>
+                      {window.location.pathname !== '/about'
+                        ? <Copyright/>
+                        : null}
+                    </footer>
+                  </Route>
+                </Switch>
               </main>
             </CssBaseline>
           </Router>

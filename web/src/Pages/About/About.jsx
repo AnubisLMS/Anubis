@@ -6,15 +6,12 @@ import CardContent from "@material-ui/core/CardContent";
 import CardMedia from '@material-ui/core/CardMedia';
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
-import {Divider} from "@material-ui/core";
 
 const useStyles = makeStyles({
   root: {
     maxWidth: 512,
   },
-  authors: {
-
-  }
+  authors: {}
 });
 
 
@@ -69,29 +66,38 @@ export default function About() {
       {/* Author section */}
       <Grid item xs={12}>
         <Card>
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="h2">
-              About the Authors
-            </Typography>
-            <Typography variant="body1" color="textSecondary" component="p">
-              John Cunniff is a senior at NYU Tandon.
-              Among his jobs and responsibilities he is
-              the OSIRIS Cyber Security Research Lab President at NYU Tandon,
-              the Chief Engineer at PlanetCurious,
-              and the Head Infrastructure TA for Introduction to Operating Systems at NYU Tandon.
-              John is a big fan of linux, Docker and Kubernetes.
+          <CardActionArea>
+            <CardContent>
+              <Typography gutterBottom variant="h5" component="h2">
+                About the Authors
+              </Typography>
+              <Typography variant="body1" color="textSecondary" component="p">
+                John Cunniff is a senior at NYU Tandon.
+                Among his jobs and responsibilities he is
+                the OSIRIS Cyber Security Research Lab President at NYU Tandon,
+                the Chief Engineer at PlanetCurious,
+                and the Head Infrastructure TA for Introduction to Operating Systems at NYU Tandon.
+                John is a big fan of linux, Docker and Kubernetes.
+              </Typography>
               <ul>
                 <li><a style={{color: "white"}} href={"https://gitlab.com/juanpunchman"}>gitlab</a></li>
                 <li><a style={{color: "white"}} href={"https://github.com/juan-punchman"}>github</a></li>
-                <li><a style={{color: "white"}} href={"https://f.athena.sh/f/resume.pdf"}>resume</a></li>
                 <li><a style={{color: "white"}} href={"mailto:john@osiris.cyber.nyu.edu"}>contact</a></li>
               </ul>
-            </Typography>
-            <br/><br/>
-            <Typography variant="body1" color="textSecondary" component="p">
-              Somto Ejinkonye is a senior at NYU Tandon.
-            </Typography>
-          </CardContent>
+              <br/><br/>
+              <Typography variant="body1" color="textSecondary" component="p">
+                Somto Ejinkonye is a Senior at NYU Tandon majoring in Computer Engineering with a minor
+                in Cyber Security. Somto currently works as a Software Engineer for the Cyber Defense and Fraud Team at
+                JPMorgan Chase, TA for Data Structures and Algorithms course
+                and Infrastructure TA for the Introduction to Operating Systems course at NYU Tandon.
+                Somto's intrests include embedded security, software engineering and electronics.
+              </Typography>
+              <ul>
+                <li><a style={{color: "white"}} href={"https://github.com/Sejinkonye"}>github</a></li>
+                <li><a style={{color: "white"}} href={"mailto:somto@osiris.cyber.nyu.edu"}>contact</a></li>
+              </ul>
+            </CardContent>
+          </CardActionArea>
         </Card>
       </Grid>
       {/* END Author section */}

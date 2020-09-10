@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import clsx from "clsx";
 import {makeStyles, useTheme} from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
@@ -20,6 +20,8 @@ import AssignmentOutlinedIcon from "@material-ui/icons/AssignmentOutlined";
 import ExitToAppOutlinedIcon from "@material-ui/icons/ExitToAppOutlined";
 import PublicIcon from "@material-ui/icons/Public";
 import AssessmentIcon from '@material-ui/icons/Assessment';
+import CloseOutlinedIcon from '@material-ui/icons/CloseOutlined';
+import LaunchOutlinedIcon from '@material-ui/icons/LaunchOutlined';
 import {Link} from "react-router-dom";
 
 
@@ -117,7 +119,11 @@ const useStyles = makeStyles((theme) => ({
 export default function Navigator(props) {
   const classes = useStyles();
   const {open, onClose, onOpen} = props;
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const theme = useTheme();
+
+  const updatePath = path => () => setCurrentPath(path);
+
   return (
     <div className={classes.root}>
       <CssBaseline/>
@@ -173,7 +179,8 @@ export default function Navigator(props) {
             <ListItem button key={id}
                       component={Link}
                       to={path}
-                      selected={window.location.pathname === path}
+                      selected={currentPath === path}
+                      onClick={updatePath(path)}
             >
               <ListItemIcon>{icon}</ListItemIcon>
               <ListItemText primary={id}/>
@@ -186,15 +193,24 @@ export default function Navigator(props) {
               <ListItem button key={id}
                         component={Link}
                         to={path}
-                        selected={window.location.pathname === path} >
+                        selected={currentPath === path}
+                        onClick={updatePath(path)}
+              >
                 <ListItemIcon>{icon}</ListItemIcon>
                 <ListItemText primary={id}/>
               </ListItem>
             ))}
+            <ListItem button key="Login"
+                      component={"a"}
+                      href={"/api/public/login"}
+            >
+              <ListItemIcon><ExitToAppOutlinedIcon/></ListItemIcon>
+              <ListItemText primary={"Login"}/>
+            </ListItem>
             <ListItem button key="Logout"
                       component={"a"}
                       href={"/api/public/logout"}>
-              <ListItemIcon><ExitToAppOutlinedIcon/></ListItemIcon>
+              <ListItemIcon><LaunchOutlinedIcon/></ListItemIcon>
               <ListItemText primary={"Logout"}/>
             </ListItem>
           </List>
