@@ -12,8 +12,9 @@ import AssignmentView from './Pages/Assignments/View'
 import Navigator from './Navigation/Navigator';
 import SubmissionInfo from './Pages/Submissions/Info/View';
 import NotFound from "./NotFound";
-import {useQuery} from './utils';
 import SubmissionsView from './Pages/Submissions/View';
+import GetGithubUsername from "./Pages/GithubUsername/GetGithubUsername";
+import About from "./Pages/About/About";
 
 
 let theme = createMuiTheme({
@@ -191,7 +192,7 @@ function Copyright() {
   );
 }
 
-function App(props) {
+function App() {
   const classes = useStyles();
   const [open, setOpen] = useState(true);
   const handleDrawerClose = () => {
@@ -200,8 +201,6 @@ function App(props) {
   const handleDrawerOpen = () => {
     setOpen(true);
   };
-  const query = useQuery();
-  console.log(query.get('commit'))
 
   return (
     <ThemeProvider theme={theme}>
@@ -210,7 +209,7 @@ function App(props) {
           <Router>
             <CssBaseline>
               <Route exact path={'/'}>
-                <Redirect to={'/courses'}/>
+                <Redirect to={'/about'}/>
               </Route>
               <Navigator
                 variant="temporary"
@@ -239,6 +238,15 @@ function App(props) {
                   <Route exact path={'/courses/assignments/submissions/info'}>
                     <SubmissionInfo/>
                   </Route>
+                  <Route exact path={'/github-username'}>
+                    <GetGithubUsername/>
+                  </Route>
+                  <Route exact path={"/about"}>
+                    <About/>
+                  </Route>
+                  <Route exact path={'/logout'}>
+                    <Redirect to={'/api/public/logout'} push/>
+                  </Route>
                   <Route>
                     <div className={classes.app}>
                       <main className={classes.main}>
@@ -247,9 +255,16 @@ function App(props) {
                     </div>
                   </Route>
                 </Switch>
-              <footer className={classes.footer}>
-                <Copyright/>
-              </footer>
+                <Switch>
+                  <Route exact path={'/about'}/>
+                  <Route>
+                    <footer className={classes.footer}>
+                      {window.location.pathname !== '/about'
+                        ? <Copyright/>
+                        : null}
+                    </footer>
+                  </Route>
+                </Switch>
               </main>
             </CssBaseline>
           </Router>

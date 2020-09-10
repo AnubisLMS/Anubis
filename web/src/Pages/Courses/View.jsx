@@ -1,12 +1,10 @@
 import React from "react";
-import {makeStyles} from "@material-ui/core/styles";
 import CourseCard from "./Course";
 import Grid from '@material-ui/core/Grid';
 import Grow from "@material-ui/core/Grow";
 import useGet from '../../useGet';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import {Redirect} from "react-router-dom";
-import {useQuery} from '../../utils';
 
 
 //passes course data to individual course cards
@@ -45,16 +43,9 @@ import {useQuery} from '../../utils';
 //   },
 // ]
 
-const useStyles = makeStyles((theme) => ({
-  control: {
-    padding: theme.spacing(2),
-  },
-}));
 
-
-export default function CourseView(props) {
+export default function CourseView() {
   // const{courses} = props; maps to the request for current student courses.
-  const classes = useStyles();
   const {loading, error, data} = useGet('/api/public/classes');
 
   if (loading) return <CircularProgress />;

@@ -12,6 +12,10 @@ class Config:
     SQLALCHEMY_POOL_RECYCLE = 280
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # OAuth
+    OAUTH_CONSUMER_KEY = ''
+    OAUTH_CONSUMER_SECRET = ''
+
     ADMINS = os.environ.get('ADMINS', 'jmc1283@nyu.edu')
 
     CACHE_REDIS_HOST = 'redis'
@@ -22,6 +26,10 @@ class Config:
             default='mysql+pymysql://anubis:anubis@{}/anubis'.format(
                 os.environ.get('DB_HOST', 'db')))
         self.DISABLE_ELK = os.environ.get('DISABLE_ELK', default='0') == '1'
+
+        # OAuth
+        self.OAUTH_CONSUMER_KEY = os.environ.get('OAUTH_CONSUMER_KEY', default='DEBUG')
+        self.OAUTH_CONSUMER_SECRET = os.environ.get('OAUTH_CONSUMER_SECRET', default='DEBUG')
 
         logging.info('Starting with DATABASE_URI: {}'.format(
             self.SQLALCHEMY_DATABASE_URI))

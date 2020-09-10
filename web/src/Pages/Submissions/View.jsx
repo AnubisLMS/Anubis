@@ -198,7 +198,7 @@ export default function SubmissionsView() {
                         {row.assignmentName}
                       </TableCell>
                       <TableCell style={{width: 160}}>
-                        {row.commitHash}
+                        {row.commitHash.substring(0, 10)}
                       </TableCell>
                       <TableCell style={{width: 100}} align="center">
                         {row.processed ? <CheckCircleIcon style={{color: green[500]}}/> :

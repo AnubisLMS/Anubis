@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import {useState, useEffect} from "react";
 import axios from 'axios';
 
 /**
@@ -29,6 +29,8 @@ export default function useSubscribe(path, interval, until, callback) {
           callback(state, newState);
         })
         .catch(function (error) {
+          if (error.response.status === 401)
+            window.location = '/api/public/login';
           setState({
             loading: false,
             error,

@@ -34,7 +34,7 @@ popd
 ../pipeline/build.sh --push
 
 
-helm install anubis ./helm -n anubis
+helm upgrade anubis ./helm -n anubis $@
 
 # kubectl apply \
 #         -f config/api.yml \

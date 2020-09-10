@@ -42,8 +42,6 @@ export default function CourseCard(props) {
   //will have notification to indicate number of open assignment with no submissions
   const classes = useStyles();
   const bull = <span className={classes.bullet}>•</span>;
-  const handleClick = (event) => {
-  }
 
   return (
     <Badge badgeContent={openAssignments} color="error" fontSize="medium">

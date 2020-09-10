@@ -118,7 +118,6 @@ export default function SubmissionInfo() {
   if (loading) return <CircularProgress/>;
   if (error) return <Redirect to={`/error`}/>
 
-  console.log(data)
 
   function translateSubmission(
     {
@@ -269,7 +268,6 @@ export default function SubmissionInfo() {
         <Grid item xs={12} key={'tests'}>
           {submissionTests.map((test, index) => (
             <Accordion key={`test-${index}`}>
-              {console.log(test)}
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon/>}
                 aria-controls="panel2a-content"
