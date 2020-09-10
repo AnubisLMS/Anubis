@@ -144,10 +144,6 @@ export default function Navigator(props) {
           >
             <MenuIcon/>
           </IconButton>
-
-          <Typography variant="h6" noWrap>
-            Student Courses
-          </Typography>
         </Toolbar>
       </AppBar>
       <Drawer
