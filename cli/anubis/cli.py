@@ -152,6 +152,7 @@ def assignment():
 def sync():
     assignment_meta = yaml.safe_load(open('assignment.yml').read())
     click.echo(json.dumps(assignment_meta, indent=2))
+    import assignment
     import utils
     assignment_meta['tests'] = list(utils.registered_tests.keys())
     r = post_json('/private/assignment/sync', assignment_meta)

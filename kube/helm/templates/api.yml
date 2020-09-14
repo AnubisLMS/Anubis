@@ -27,7 +27,7 @@ spec:
       labels:
         app: anubis-api
     spec:
-      dnsPolicy: ClusterFirst
+      # dnsPolicy: Default
       nodeSelector:
         datacenter: mtc
       containers:
@@ -38,7 +38,7 @@ spec:
         - name: web
           containerPort: 5000
         resources:
-          {{- toYaml .Values.api.resources | nindent 10 }}
+         {{- toYaml .Values.api.resources | nindent 10 }}
         env:
         - name: "DEBUG"
           value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
@@ -48,7 +48,7 @@ spec:
         - name: "WORKERS"
           value: {{ .Values.api.workers | quote }}
         - name: "GUNICORN_OPTIONS"
-          value: "--preload --capture-output --enable-stdio-inheritance"
+          value: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
         - name: "SECRET_KEY"
           valueFrom:
             secretKeyRef:
@@ -109,7 +109,7 @@ spec:
       dnsPolicy: ClusterFirst
       containers:
       - name: jupyter
-        image: registry.osiris.services/anubis/api-dev:v2.0.0-alpha
+        image: registry.osiris.services/anubis/api-dev:v2.0.0
         imagePullPolicy: Always
         ports:
         - name: web

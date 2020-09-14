@@ -29,7 +29,7 @@ services:
       - "traefik.enable=false"
 
   api:
-    image: registry.osiris.services/anubis/api:v2.0.0-alpha
+    image: registry.osiris.services/anubis/api:v2.0.0
     build: ./api
     # restart: on-failure
     command: sh -c "while true; do python3 dev.py; sleep 1; done"
@@ -64,7 +64,7 @@ services:
       - "traefik.http.routers.api-public.middlewares=strip-api@docker"
 
   api-dev:
-    image: registry.osiris.services/anubis/api-dev:v2.0.0-alpha
+    image: registry.osiris.services/anubis/api-dev:v2.0.0
     build:
       context: ./api
       dockerfile: Dockerfile.dev
@@ -83,7 +83,7 @@ services:
 
   pipeline-api:
     build: ./api
-    image: registry.osiris.services/anubis/api:v2.0.0-alpha
+    image: registry.osiris.services/anubis/api:v2.0.0
     # restart: on-failure
     environment:
       - "DEBUG=1"
@@ -110,7 +110,7 @@ services:
       - "traefik.enable=false"
 
   web:
-    image: registry.osiris.services/anubis/web:v2.0.0-alpha
+    image: registry.osiris.services/anubis/web:v2.0.0
     build: ./web
     command: sh -c 'yarn && yarn run start'
     environment:

@@ -64,41 +64,68 @@ export default function About() {
       {/* END Jumbotron */}
 
       {/* Author section */}
-      <Grid item xs={12}>
-        <Card>
-          <CardActionArea>
-            <CardContent>
-              <Typography gutterBottom variant="h5" component="h2">
-                About the Authors
-              </Typography>
-              <Typography variant="body1" color="textSecondary" component="p">
-                John Cunniff is a senior at NYU Tandon.
-                Among his jobs and responsibilities he is
-                the OSIRIS Cyber Security Research Lab President at NYU Tandon,
-                the Chief Engineer at PlanetCurious,
-                and the Head Infrastructure TA for Introduction to Operating Systems at NYU Tandon.
-                John is a big fan of linux, Docker and Kubernetes.
-              </Typography>
-              <ul>
-                <li><a style={{color: "white"}} href={"https://gitlab.com/juanpunchman"}>gitlab</a></li>
-                <li><a style={{color: "white"}} href={"https://github.com/juan-punchman"}>github</a></li>
-                <li><a style={{color: "white"}} href={"mailto:john@osiris.cyber.nyu.edu"}>contact</a></li>
-              </ul>
-              <br/><br/>
-              <Typography variant="body1" color="textSecondary" component="p">
-                Somto Ejinkonye is a Senior at NYU Tandon majoring in Computer Engineering with a minor
-                in Cyber Security. Somto currently works as a Software Engineer for the Cyber Defense and Fraud Team at
-                JPMorgan Chase, TA for Data Structures and Algorithms course
-                and Infrastructure TA for the Introduction to Operating Systems course at NYU Tandon.
-                Somto's intrests include embedded security, software engineering and electronics.
-              </Typography>
-              <ul>
-                <li><a style={{color: "white"}} href={"https://github.com/Sejinkonye"}>github</a></li>
-                <li><a style={{color: "white"}} href={"mailto:somto@osiris.cyber.nyu.edu"}>contact</a></li>
-              </ul>
-            </CardContent>
-          </CardActionArea>
-        </Card>
+      <Grid
+        container
+        direction={"row"}
+        spacing={3}
+        alignItems={"center"}
+        justify={"center"}
+      >
+        <Grid item xs={12}/>
+        <Grid item xs={12}/>
+
+        <Grid item xs={12}>
+          <Typography variant="h5" style={{textAlign: "center"}}>
+            About the Authors
+          </Typography>
+        </Grid>
+
+        <Grid item xs>
+          <Card>
+            <CardActionArea>
+              <CardContent>
+                <Typography gutterBottom variant="h5" component="h2">
+                  John Cunniff
+                </Typography>
+                <Typography variant="body1" color="textSecondary" component="p">
+                  John Cunniff is a senior at NYU Tandon.
+                  Among his jobs and responsibilities he is
+                  the OSIRIS Cyber Security Research Lab President at NYU Tandon,
+                  the Chief Engineer at PlanetCurious,
+                  and the Head Infrastructure TA for Introduction to Operating Systems at NYU Tandon.
+                  John is a big fan of distributed computing.
+                </Typography>
+                <ul>
+                  <li><a style={{color: "white"}} href={"https://gitlab.com/juanpunchman"}>gitlab</a></li>
+                  <li><a style={{color: "white"}} href={"https://github.com/juan-punchman"}>github</a></li>
+                  <li><a style={{color: "white"}} href={"mailto:john@osiris.cyber.nyu.edu"}>contact</a></li>
+                </ul>
+              </CardContent>
+            </CardActionArea>
+          </Card>
+        </Grid>
+        <Grid item xs>
+          <Card>
+            <CardActionArea>
+              <CardContent>
+                <Typography gutterBottom variant="h5" component="h2">
+                  Somto Ejinkonye
+                </Typography>
+                <Typography variant="body1" color="textSecondary" component="p">
+                  Somto Ejinkonye is a Senior at NYU Tandon majoring in Computer Engineering with a minor
+                  in Cyber Security. Somto currently works as a Software Engineer for the Cyber Defense and Fraud Team
+                  at JPMorgan Chase, TA for Data Structures and Algorithms course
+                  and Infrastructure TA for the Introduction to Operating Systems course at NYU Tandon.
+                  Somto's intrests include embedded security, software engineering and electronics.
+                </Typography>
+                <ul>
+                  <li><a style={{color: "white"}} href={"https://github.com/Sejinkonye"}>github</a></li>
+                  <li><a style={{color: "white"}} href={"mailto:somto@osiris.cyber.nyu.edu"}>contact</a></li>
+                </ul>
+              </CardContent>
+            </CardActionArea>
+          </Card>
+        </Grid>
       </Grid>
       {/* END Author section */}
 

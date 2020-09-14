@@ -8,7 +8,7 @@ from flask import Response
 from sqlalchemy.exc import IntegrityError
 
 from anubis.config import config
-from anubis.models import User, Class_, InClass, Assignment, Submission
+from anubis.models import User, Class_, InClass, Assignment, Submission, AssignmentRepo
 from anubis.models import db
 from anubis.utils.auth import load_user
 from anubis.utils.cache import cache
@@ -217,3 +217,26 @@ def notify(user: User, message: str, subject: str):
     """
     recipient = '{netid}@nyu.edu'.format(netid=user.netid)
     send_noreply_email(message, subject, recipient)
+
+
+def fix_dangling():
+    """
+    Try to connect repos that do not have an owner.
+
+    :return:
+    """
+    dangling_repos = AssignmentRepo.query.filter(
+        AssignmentRepo.owner_id == None
+    ).all()
+
+    for dr in dangling_repos:
+        owner = User.query.filter(
+            User.github_username == dr.github_username
+        ).first()
+
+        if owner is not None:
+            dr.owner_id = owner.id
+            db.session.add_all((dr, owner))
+
+            for s in dr.submissions:
+                enqueue_webhook_rpc(s.id)

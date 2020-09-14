@@ -32,8 +32,8 @@ spec:
       - name: anubis-pipeline-api
         image: {{ .Values.api.image }}:{{ .Values.api.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
-        resources:
-          {{- toYaml .Values.api.resources | nindent 10 }}
+        #resources:
+        #  { {- toYaml .Values.api.resources | nindent 10 } }
         ports:
         - name: web
           containerPort: 5000
