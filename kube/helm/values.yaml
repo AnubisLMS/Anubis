@@ -11,12 +11,10 @@ api:
   workers: 4
 
   image: "registry.osiris.services/anubis/api"
-  tag: "v2.0.0-alpha"
+  tag: "v2.0.0"
   resources:
-    limits:
-      memory: "200Mi"
     requests:
-      memory: "100Mi"
+      memory: "500Mi"
 
 
 pipeline_api:
@@ -25,14 +23,14 @@ pipeline_api:
 
   resources:
     limits:
-      memory: "200Mi"
+      memory: "500Mi"
     requests:
-      memory: "100Mi"
+      memory: "500Mi"
 
 web:
   replicas: 2
   image: "registry.osiris.services/anubis/web"
-  tag: "v2.0.0-alpha"
+  tag: "v2.0.0"
 
 logstash:
   image: "registry.osiris.services/anubis/logstash"

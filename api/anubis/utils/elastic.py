@@ -1,5 +1,5 @@
-import traceback
 import json
+import traceback
 from datetime import datetime
 from functools import wraps
 
@@ -8,8 +8,8 @@ from flask import request
 from geoip import geolite2
 from werkzeug import exceptions
 
-from anubis.utils.http import get_request_ip
 from anubis.config import config
+from anubis.utils.http import get_request_ip
 from anubis.utils.logger import logger
 
 es = Elasticsearch(['http://elasticsearch:9200'])
@@ -44,7 +44,11 @@ def log_endpoint(log_type, message_func):
                     date=datetime.now(),
                     method=request.method,
                     path=request.path
-                ))
+                ), extra={
+                    'ip': get_request_ip(),
+                    'method': request.method,
+                    'path': request.path,
+                })
                 es.index(index='request', body={
                     'type': log_type.lower(),
                     'path': request.path,

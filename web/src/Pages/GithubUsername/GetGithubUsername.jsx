@@ -44,12 +44,13 @@ export default function GetGithubUsername() {
     axios.get('/api/public/set-github-username', {
       params: {github_username}
     }).then(response => {
-      if (response.data.success)
+      if (response.data.success) {
+        setTimeout(() => window.location = '/courses', 2000);
         setChip({
           label: `Github username is set to ${response.data.data}`,
           hidden: false, color: "primary"
         })
-      else {
+      } else {
         setChip({
           label: response.data.error,
           hidden: false, color: "secondary"
@@ -88,15 +89,13 @@ export default function GetGithubUsername() {
                 </Typography>
               </Grid>
               <Grid item xs={12}>
-                <form noValidate autoComplete="off">
-                  <TextField
-                    label="Username"
-                    name={"github_username"}
-                    variant="outlined"
-                    value={github_username}
-                    onChange={e => setUsername(e.target.value)}
-                  />
-                </form>
+                <TextField
+                  label="Username"
+                  name={"github_username"}
+                  variant="outlined"
+                  value={github_username}
+                  onChange={e => setUsername(e.target.value)}
+                />
               </Grid>
             </Grid>
           </CardContent>

@@ -18,13 +18,9 @@ from anubis.utils.decorators import json_response, json_endpoint
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.redis_queue import enqueue_webhook_rpc
 from anubis.utils.logger import logger
+from anubis.utils.data import fix_dangling
 
 private = Blueprint('private', __name__, url_prefix='/private')
-
-
-def fix_dangling():
-    # TODO rewite this
-    raise
 
 
 @cache.memoize(timeout=30)

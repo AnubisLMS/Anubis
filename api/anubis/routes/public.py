@@ -1,4 +1,3 @@
-import json
 import string
 from datetime import datetime, timedelta
 
@@ -11,6 +10,7 @@ from anubis.utils.auth import current_user
 from anubis.utils.auth import get_token
 from anubis.utils.cache import cache
 from anubis.utils.data import error_response, success_response, is_debug
+from anubis.utils.data import fix_dangling
 from anubis.utils.data import get_classes, get_assignments, get_submissions
 from anubis.utils.data import regrade_submission, enqueue_webhook_rpc
 from anubis.utils.decorators import json_response, require_user
@@ -41,7 +41,7 @@ def public_logout():
 @public.route('/oauth')
 @log_endpoint('public-oauth', lambda: 'oauth')
 def public_oauth():
-    next_url = request.args.get('next') or '/'
+    next_url = request.args.get('next') or '/courses'
     resp = provider.authorized_response()
     if resp is None or 'access_token' not in resp:
         return 'Access Denied'
@@ -59,6 +59,8 @@ def public_oauth():
 
     if u.github_username is None:
         next_url = '/set-github-username'
+
+    fix_dangling()
 
     r = make_response(redirect(next_url))
     r.set_cookie('token', get_token(u.netid))
@@ -85,6 +87,9 @@ def public_set_github_username():
             and not github_username.startswith('-') and not github_username.endswith('-')):
         return error_response('Github usernames may only contain alphanumeric characters '
                               'or single hyphens, and cannot begin or end with a hyphen.')
+
+    logger.info(str(u.last_updated))
+    logger.info(str(u.last_updated + timedelta(hours=1)) + ' - ' + str(datetime.now()))
 
     if u.github_username is not None and u.last_updated + timedelta(hours=1) < datetime.now():
         return error_response('Github usernames can only be '
@@ -273,20 +278,24 @@ def public_webhook():
     github_username = webhook['pusher']['name']
     commit = webhook['after']
     assignment_name = webhook['repository']['name'][:-(len(github_username) + 1)]
-    unique_code = assignment_name.split('-')[-1]
-
-    logger.debug('github_username: {} unique_code: {}'.format(github_username, unique_code))
 
     # Attempt to find records for the relevant models
-    assignment = Assignment.query.filter_by(unique_code=unique_code).first()
-    user = User.query.filter(User.github_username == github_username).first()
-    repo = AssignmentRepo.query.join(Assignment).join(Class_).join(InClass).join(User).filter(
-        User.github_username == github_username,
-        Assignment.name == assignment_name,
+    assignment = Assignment.query.filter(
+        Assignment.unique_code.in_(webhook['repository']['name'].split('-'))
     ).first()
+    user = User.query.filter(User.github_username == github_username).first()
 
-    logger.debug('github_username: {} unique_code: {}'.format(github_username, unique_code))
-    logger.debug('assignment: {} user: {} repo: {}'.format(assignment, user, repo))
+    # The before Hash will be all 0s on for the first hash.
+    # We will want to ignore both this first push (the initialization of the repo)
+    # and all branches that are not master.
+    if webhook['before'] == '0000000000000000000000000000000000000000':
+        # Record that a new repo was created (and therefore, someone just started their assignment)
+        logger.info('new student repo ', extra={
+            'repo_url': repo_url, 'github_username': github_username,
+            'assignment_name': assignment_name, 'commit': commit,
+        })
+        esindex('new-repo', repo_url=repo_url, assignment=str(assignment))
+        return success_response('initial commit')
 
     # Verify that we can match this push to an assignment
     if assignment is None:
@@ -295,6 +304,16 @@ def public_webhook():
             'assignment_name': assignment_name, 'commit': commit,
         })
         return error_response('assignment not found'), 406
+
+    repo = AssignmentRepo.query.join(Assignment).join(Class_).join(InClass).join(User).filter(
+        User.github_username == github_username,
+        Assignment.unique_code == assignment.unique_code,
+    ).first()
+
+    logger.debug('webhook data', extra={
+        'github_username': github_username, 'assignment': assignment.name,
+        'repo_url': repo_url, 'commit': commit, 'unique_code': assignment.unique_code
+    })
 
     if not is_debug():
         # Make sure that the repo we're about to process actually belongs to our organization
@@ -307,21 +326,9 @@ def public_webhook():
 
     # if we dont have a record of the repo, then add it
     if repo is None:
-        repo = AssignmentRepo(owner=user, assignment=assignment, repo_url=repo_url)
+        repo = AssignmentRepo(owner=user, assignment=assignment, repo_url=repo_url, github_username=github_username)
         db.session.add(repo)
         db.session.commit()
-
-    # The before Hash will be all 0s on for the first hash.
-    # We will want to ignore both this first push (the initialization of the repo)
-    # and all branches that are not master.
-    if webhook['before'] == '0000000000000000000000000000000000000000':
-        # Record that a new repo was created (and therefore, someone just started their assignment)
-        logger.info('new student repo ', extra={
-            'repo_url': repo_url, 'github_username': github_username,
-            'assignment_name': assignment_name, 'commit': commit,
-        })
-        esindex('new-repo', github_username=github_username, repo_url=repo_url, assignment=str(assignment))
-        return success_response('initial commit')
 
     if webhook['ref'] != 'refs/heads/master':
         logger.warning('not push to master', extra={

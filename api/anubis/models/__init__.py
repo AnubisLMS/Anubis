@@ -158,6 +158,7 @@ class AssignmentRepo(db.Model):
 
     # id
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    github_username = db.Column(db.String(256), nullable=False)
 
     # Foreign Keys
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=True)

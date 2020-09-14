@@ -238,7 +238,7 @@ function App() {
                   <Route exact path={'/courses/assignments/submissions/info'}>
                     <SubmissionInfo/>
                   </Route>
-                  <Route exact path={'/github-username'}>
+                  <Route exact path={'/set-github-username'}>
                     <GetGithubUsername/>
                   </Route>
                   <Route exact path={"/about"}>
