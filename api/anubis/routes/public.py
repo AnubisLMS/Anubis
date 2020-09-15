@@ -308,6 +308,7 @@ def public_webhook():
     repo = AssignmentRepo.query.join(Assignment).join(Class_).join(InClass).join(User).filter(
         User.github_username == github_username,
         Assignment.unique_code == assignment.unique_code,
+        AssignmentRepo.repo_url == repo_url,
     ).first()
 
     logger.debug('webhook data', extra={
