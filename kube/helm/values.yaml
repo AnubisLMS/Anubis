@@ -3,11 +3,11 @@ debug: false
 rollingUpdates: true
 healthChecks: true
 domain: "anubis.osiris.services"
-vpnOnly: true
+vpnOnly: false
 imagePullPolicy: "Always"
 
 api:
-  replicas: 2
+  replicas: 3
   workers: 4
 
   image: "registry.osiris.services/anubis/api"
