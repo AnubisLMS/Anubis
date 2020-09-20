@@ -20,7 +20,7 @@ spec:
     rollingUpdate:
       maxUnavailable: 1
       maxSurge: 1
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 3
   {{- end }}
   template:
     metadata:
@@ -28,8 +28,8 @@ spec:
         app: anubis-api
     spec:
       # dnsPolicy: Default
-      nodeSelector:
-        datacenter: mtc
+      # nodeSelector:
+      #   datacenter: sdc
       containers:
       - name: anubis-api
         image: {{ .Values.api.image }}:{{ .Values.api.tag }}
