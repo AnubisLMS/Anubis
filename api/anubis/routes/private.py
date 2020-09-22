@@ -138,11 +138,11 @@ def private_dangling():
 @log_endpoint('reset-dangling', lambda: 'reset-dangling')
 @json_response
 def private_reset_dangling():
-    reset = []
+    resets = []
     for s in Submission.query.filter_by(owner_id=None).all():
         s.init_submission_models()
-        reset.append(reset.data)
-    return success_response({'reset': reset})
+        resets.append(s.data)
+    return success_response({'reset': resets})
 
 
 @private.route('/regrade/<assignment_name>')
