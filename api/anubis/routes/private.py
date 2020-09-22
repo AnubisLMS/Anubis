@@ -102,7 +102,7 @@ def private_assignment_sync(assignment_data: dict, tests: List[str]):
             Assignment.id == a.id,
             AssignmentTest.name == test_name,
         ).join(Assignment).first()
-        
+
         if at is None:
             at = AssignmentTest(assignment=a, name=test_name)
             db.session.add(at)
@@ -134,6 +134,17 @@ def private_dangling():
     })
 
 
+@private.route('/reset-dangling')
+@log_endpoint('reset-dangling', lambda: 'reset-dangling')
+@json_response
+def private_reset_dangling():
+    reset = []
+    for s in Submission.query.filter_by(owner_id=None).all():
+        s.init_submission_models()
+        reset.append(reset.data)
+    return success_response({'reset': reset})
+
+
 @private.route('/regrade/<assignment_name>')
 @log_endpoint('cli', lambda: 'regrade')
 @json_response
@@ -160,7 +171,8 @@ def private_regrade_assignment(assignment_name):
         return error_response('cant find assignment')
 
     submission = Submission.query.filter_by(
-        assignment=assignment
+        assignment=assignment,
+        owner_id=None
     ).all()
 
     response = []
