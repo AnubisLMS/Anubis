@@ -78,7 +78,7 @@ spec:
             command:
               - curl
               - http://localhost:5000/
-          initialDelaySeconds: 120
+          initialDelaySeconds: 10
           periodSeconds: 5
         {{- end }}
 

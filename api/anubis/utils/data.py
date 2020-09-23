@@ -225,10 +225,11 @@ def fix_dangling():
 
     :return:
     """
+    fixed = []
+
     dangling_repos = AssignmentRepo.query.filter(
         AssignmentRepo.owner_id == None
     ).all()
-
     for dr in dangling_repos:
         owner = User.query.filter(
             User.github_username == dr.github_username
@@ -237,6 +238,38 @@ def fix_dangling():
         if owner is not None:
             dr.owner_id = owner.id
             db.session.add_all((dr, owner))
+            db.session.commit()
 
             for s in dr.submissions:
+                s.owner_id = owner.id
+                db.session.add(s)
+                db.session.commit()
+                fixed.append(s.data)
                 enqueue_webhook_rpc(s.id)
+
+    dangling_submissions = Submission.query.filter(
+        Submission.owner_id == None
+    ).all()
+    for s in dangling_submissions:
+        dr = AssignmentRepo.query.filter(
+            AssignmentRepo.id == s.assignment_repo_id
+        ).first()
+
+        owner = User.query.filter(
+            User.github_username == dr.github_username
+        ).first()
+
+        if owner is not None:
+            dr.owner_id = owner.id
+            db.session.add_all((dr, owner))
+            db.session.commit()
+
+            s.owner_id = owner.id
+            db.session.add(s)
+            db.session.commit()
+            fixed.append(s.data)
+            enqueue_webhook_rpc(s.id)
+
+    return fixed
+
+

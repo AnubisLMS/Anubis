@@ -31,7 +31,7 @@ docker-compose push
 popd
 
 
-../pipeline/build.sh --push
+# ../pipeline/build.sh --push
 
 
 helm upgrade anubis ./helm -n anubis $@

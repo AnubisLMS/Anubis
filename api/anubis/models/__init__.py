@@ -307,6 +307,10 @@ class Submission(db.Model):
         sb = SubmissionBuild(submission=self)
         db.session.add(sb)
 
+        self.processed = False
+        self.state = 'Reset'
+        db.session.add(self)
+
         # Commit new models
         db.session.commit()
 

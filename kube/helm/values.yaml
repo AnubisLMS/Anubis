@@ -10,6 +10,8 @@ api:
   replicas: 3
   workers: 4
 
+  healthCheck: true
+
   image: "registry.osiris.services/anubis/api"
   tag: "v2.0.0"
   resources:
@@ -20,6 +22,8 @@ api:
 pipeline_api:
   replicas: 2
   workers: 2
+
+  healthCheck: true
 
   resources:
     limits:

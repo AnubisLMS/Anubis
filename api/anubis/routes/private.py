@@ -124,7 +124,7 @@ def private_dangling():
     """
 
     dangling = Submission.query.filter(
-        Submission.student_id == None,
+        Submission.owner_id == None,
     ).all()
     dangling = [a.data for a in dangling]
 
