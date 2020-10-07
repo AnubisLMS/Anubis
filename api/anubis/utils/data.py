@@ -5,7 +5,6 @@ from smtplib import SMTP
 from typing import List, Union, Dict
 
 from flask import Response
-from sqlalchemy.exc import IntegrityError
 
 from anubis.config import config
 from anubis.models import User, Class_, InClass, Assignment, Submission, AssignmentRepo
@@ -78,7 +77,7 @@ def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], 
     return a
 
 
-# @cache.memoize(timeout=3, unless=is_debug)
+@cache.memoize(timeout=3, unless=is_debug)
 def get_submissions(netid: str, class_name=None, assignment_name=None) -> Union[List[Dict[str, str]], None]:
     """
     Get all submissions for a given netid. Cache the results. Optionally specify
@@ -109,7 +108,7 @@ def get_submissions(netid: str, class_name=None, assignment_name=None) -> Union[
         *filters
     ).all()
 
-    return [s.data for s in submissions]
+    return [s.full_data for s in submissions]
 
 
 def regrade_submission(submission):
@@ -273,3 +272,18 @@ def fix_dangling():
     return fixed
 
 
+@cache.memoize(timeout=30, unless=is_debug)
+def stats_for(student_id, assignment_id):
+    best = None
+    best_count = -1
+    for submission in Submission.query.filter(
+    Submission.assignment_id == assignment_id,
+    Submission.owner_id == student_id,
+    Submission.processed == True,
+    ).order_by(Submission.last_updated.desc()).all():
+        correct_count = sum(map(lambda result: 1 if result.passed else 0, submission.test_results))
+
+        if correct_count >= best_count:
+            best_count = correct_count
+            best = submission
+    return best.id if best is not None else None

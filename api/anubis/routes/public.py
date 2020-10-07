@@ -207,7 +207,7 @@ def public_submission(commit: str):
         return error_response('Commit does not exist'), 406
 
     # Hand back submission
-    return success_response({'submission': s.data})
+    return success_response({'submission': s.full_data})
 
 
 def webhook_log_msg():

@@ -1,6 +1,7 @@
 import base64
 import logging
 import os
+from copy import deepcopy
 from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy
@@ -359,12 +360,18 @@ class Submission(db.Model):
             'state': self.state,
             'created': str(self.created),
             'last_updated': str(self.last_updated),
-
-            # Connected models
-            'repo': self.repo.repo_url,
-            'tests': self.tests,
-            'build': self.build.data if self.build is not None else None,
         }
+
+    @property
+    def full_data(self):
+        data = self.data
+
+        # Add connected models
+        data['repo'] = self.repo.repo_url
+        data['tests'] = self.tests
+        data['build'] = self.build.data if self.build is not None else None
+
+        return data
 
 
 class SubmissionTestResult(db.Model):
@@ -402,6 +409,12 @@ class SubmissionTestResult(db.Model):
             'last_updated': str(self.last_updated),
         }
 
+    @property
+    def stat_data(self):
+        data = self.data
+        del data['stdout']
+        return data
+
     def __str__(self):
         return 'testname: {}\nerrors: {}\npassed: {}\n'.format(
             self.testname,
@@ -436,3 +449,9 @@ class SubmissionBuild(db.Model):
             'stdout': self.stdout,
             'passed': self.passed,
         }
+
+    @property
+    def stat_data(self):
+        data = self.data
+        del data['stdout']
+        return data

@@ -1,18 +1,19 @@
 """Console script for anubis."""
 
 import base64
+import getpass
 import json
+import logging
 import os
 import shutil
 import string
 import sys
-import getpass
-import logging
 from datetime import datetime, timedelta
 
 import click
 import requests
 import yaml
+
 API_URL = 'https://anubis.osiris.services/api'
 conf_dir = os.path.join(os.environ.get("HOME"), ".anubis")
 conf_file = os.path.join(os.environ.get("HOME"), ".anubis/config.json")
@@ -23,6 +24,7 @@ def prompt_auth():
     username = input('Anubis Username: ')
     password = getpass.getpass('Anubis Password: ')
     return username, password
+
 
 def load_conf():
     return json.load(open(conf_file))
@@ -129,11 +131,11 @@ def safe_filename(filename: str) -> str:
 @click.option('--password/-p', default=None)
 def main(debug, username, password):
     global assignment_base
+    global API_URL
     assignment_base = os.path.abspath(os.path.join(os.path.dirname(__file__), 'assignment'))
 
     if debug:
-        click.echo('Debug mode is %s' % ('on' if debug else 'off'))
-        global API_URL
+        # click.echo('Debug mode is %s' % ('on' if debug else 'off'))
         API_URL = 'http://localhost:5000'
 
     if username is not None or password is not None:
@@ -152,7 +154,6 @@ def assignment():
 def sync():
     assignment_meta = yaml.safe_load(open('assignment.yml').read())
     click.echo(json.dumps(assignment_meta, indent=2))
-    import assignment
     import utils
     assignment_meta['tests'] = list(utils.registered_tests.keys())
     r = post_json('/private/assignment/sync', assignment_meta)
@@ -199,11 +200,13 @@ def init(assignment_name):
 
 
 @main.command()
+@click.argument('assignment')
 @click.argument('netids', nargs=-1)
-def stats(netids):
+def stats(assignment, netids):
     params = {}
     if len(netids) > 0:
-        params['netids'] = '\n'.join(netids)
+        params['netids'] = json.dumps(netids)
+    click.echo(get_json('/private/stats/{}'.format(assignment), params).text)
 
 
 @assignment.command()
