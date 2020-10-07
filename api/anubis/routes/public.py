@@ -207,7 +207,7 @@ def public_submission(commit: str):
         return error_response('Commit does not exist'), 406
 
     # Hand back submission
-    return success_response({'submission': s.data})
+    return success_response({'submission': s.full_data})
 
 
 def webhook_log_msg():
@@ -308,6 +308,7 @@ def public_webhook():
     repo = AssignmentRepo.query.join(Assignment).join(Class_).join(InClass).join(User).filter(
         User.github_username == github_username,
         Assignment.unique_code == assignment.unique_code,
+        AssignmentRepo.repo_url == repo_url,
     ).first()
 
     logger.debug('webhook data', extra={

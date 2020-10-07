@@ -1,9 +1,10 @@
 import logging
 import os
+import hashlib
 
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY')
+    SECRET_KEY = os.environ.get('SECRET_KEY', default=hashlib.sha512(os.urandom(10)).hexdigest())
 
     # sqlalchemy
     SQLALCHEMY_DATABASE_URI = None
@@ -30,6 +31,9 @@ class Config:
         # OAuth
         self.OAUTH_CONSUMER_KEY = os.environ.get('OAUTH_CONSUMER_KEY', default='DEBUG')
         self.OAUTH_CONSUMER_SECRET = os.environ.get('OAUTH_CONSUMER_SECRET', default='DEBUG')
+
+        # Redis
+        self.CACHE_REDIS_HOST = os.environ.get('CACHE_REDIS_HOST', default='redis')
 
         logging.info('Starting with DATABASE_URI: {}'.format(
             self.SQLALCHEMY_DATABASE_URI))

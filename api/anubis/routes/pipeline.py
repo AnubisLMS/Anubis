@@ -28,7 +28,7 @@ def pipeline_report_panic(submission: Submission):
     :return:
     """
 
-    logger.info('submission panic reported', extra={
+    logger.error('submission panic reported', extra={
         'type': 'panic_report',
         'submission_id': submission.id, 'assignment_id': submission.assignment_id,
         'owner_id': submission.owner_id, 'data': json.dumps(request.json)})

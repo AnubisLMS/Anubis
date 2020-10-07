@@ -3,12 +3,14 @@ debug: false
 rollingUpdates: true
 healthChecks: true
 domain: "anubis.osiris.services"
-vpnOnly: true
+vpnOnly: false
 imagePullPolicy: "Always"
 
 api:
-  replicas: 2
+  replicas: 3
   workers: 4
+
+  healthCheck: true
 
   image: "registry.osiris.services/anubis/api"
   tag: "v2.0.0"
@@ -20,6 +22,8 @@ api:
 pipeline_api:
   replicas: 2
   workers: 2
+
+  healthCheck: true
 
   resources:
     limits:

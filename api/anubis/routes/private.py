@@ -18,20 +18,9 @@ from anubis.utils.decorators import json_response, json_endpoint
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.redis_queue import enqueue_webhook_rpc
 from anubis.utils.logger import logger
-from anubis.utils.data import fix_dangling
+from anubis.utils.data import fix_dangling, bulk_stats, get_students
 
 private = Blueprint('private', __name__, url_prefix='/private')
-
-
-@cache.memoize(timeout=30)
-def stats_for(student_id, assignment_id):
-    # TODO rewrite this
-    raise
-
-
-@cache.cached(timeout=30)
-def get_students():
-    return [s.data for s in User.query.all()]
 
 
 @private.route('/')
@@ -39,15 +28,15 @@ def private_index():
     return 'super duper secret'
 
 
-if is_debug():
-    @private.route('/token/<netid>')
-    def private_token_netid(netid):
-        user = User.query.filter_by(netid=netid).first()
-        if user is None:
-            return error_response('User does not exist')
-        res = Response(json.dumps(success_response(get_token(user.netid))), headers={'Content-Type': 'application/json'})
-        res.set_cookie('token', get_token(user.netid), httponly=True)
-        return res
+@private.route('/token/<netid>')
+def private_token_netid(netid):
+    user = User.query.filter_by(netid=netid).first()
+    if user is None:
+        return error_response('User does not exist')
+    token = get_token(user.netid)
+    res = Response(json.dumps(success_response(token)), headers={'Content-Type': 'application/json'})
+    res.set_cookie('token', token, httponly=True)
+    return res
 
 
 @private.route('/assignment/sync', methods=['POST'])
@@ -102,7 +91,7 @@ def private_assignment_sync(assignment_data: dict, tests: List[str]):
             Assignment.id == a.id,
             AssignmentTest.name == test_name,
         ).join(Assignment).first()
-        
+
         if at is None:
             at = AssignmentTest(assignment=a, name=test_name)
             db.session.add(at)
@@ -124,13 +113,45 @@ def private_dangling():
     """
 
     dangling = Submission.query.filter(
-        Submission.student_id == None,
+        Submission.owner_id == None,
     ).all()
     dangling = [a.data for a in dangling]
 
     return success_response({
         "dangling": dangling,
         "count": len(dangling)
+    })
+
+
+@private.route('/reset-dangling')
+@log_endpoint('reset-dangling', lambda: 'reset-dangling')
+@json_response
+def private_reset_dangling():
+    resets = []
+    for s in Submission.query.filter_by(owner_id=None).all():
+        s.init_submission_models()
+        resets.append(s.data)
+    return success_response({'reset': resets})
+
+
+@private.route('/regrade-submission/<commit>')
+@log_endpoint('cli', lambda: 'regrade-commit')
+@json_response
+def private_regrade_submission(commit):
+    s = Submission.query.filter(
+        Submission.commit == commit,
+        Submission.owner_id != None,
+    ).first()
+
+    if s is None:
+        return error_response('not found')
+
+    s.init_submission_models()
+    enqueue_webhook_rpc(s.id)
+
+    return success_response({
+        'submission': s.data,
+        'user': s.owner.data
     })
 
 
@@ -159,8 +180,9 @@ def private_regrade_assignment(assignment_name):
     if assignment is None:
         return error_response('cant find assignment')
 
-    submission = Submission.query.filter_by(
-        assignment=assignment
+    submission = Submission.query.filter(
+        Submission.assignment_id == assignment.id,
+        Submission.owner_id != None
     ).all()
 
     response = []
@@ -184,12 +206,11 @@ def private_fix_dangling():
     return fix_dangling()
 
 
-@private.route('/stats/<assignment_name>')
-@private.route('/stats/<assignment_name>/<netid>')
+@private.route('/stats/<assignment_id>')
+@private.route('/stats/<assignment_id>/<netid>')
 @log_endpoint('cli', lambda: 'stats')
-@cache.memoize(timeout=60, unless=lambda: request.args.get('netids', None) is not None)
 @json_response
-def private_stats_assignment(assignment_name, netid=None):
+def private_stats_assignment(assignment_id, netid=None):
     netids = request.args.get('netids', None)
 
     if netids is not None:
@@ -199,47 +220,7 @@ def private_stats_assignment(assignment_name, netid=None):
     else:
         netids = list(map(lambda x: x['netid'], get_students()))
 
-    students = get_students()
-    students = filter(
-        lambda x: x['netid'] in netids,
-        students
-    )
-
-    bests = {}
-
-    assignment = Assignment.query.filter_by(name=assignment_name).first()
-    if assignment is None:
-        return error_response('assignment does not exist')
-
-    for student in students:
-        submissionid = stats_for(student['id'], assignment.id)
-        netid = student['netid']
-        if submissionid is None:
-            # no submission
-            bests[netid] = None
-        else:
-            submission = Submission.query.filter_by(
-                id=submissionid
-            ).first()
-            build = len(submission.builds) > 0
-            best_count = sum(map(lambda x: 1 if x.passed else 0, submission.reports))
-            late = 'past due' if assignment.due_date < submission.timestamp else False
-            late = 'past grace' if assignment.grace_date < submission.timestamp else late
-            bests[netid] = {
-                'submission': submission.data,
-                'builds': build,
-                'reports': [rep.data for rep in submission.reports],
-                'total_tests_passed': best_count,
-                'repo_url': submission.repo,
-                'master': 'https://github.com/{}'.format(
-                    submission.repo[submission.repo.index(':') + 1:-len('.git')],
-                ),
-                'commit_tree': 'https://github.com/{}/tree/{}'.format(
-                    submission.repo[submission.repo.index(':') + 1:-len('.git')],
-                    submission.commit
-                ),
-                'late': late
-            }
+    bests = bulk_stats(assignment_id, netids)
     return success_response({'stats': bests})
 
 

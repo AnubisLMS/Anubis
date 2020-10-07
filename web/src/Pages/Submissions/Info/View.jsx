@@ -134,7 +134,7 @@ export default function SubmissionInfo() {
 
   const submission = translateSubmission(data.submission);
   const {submissionBuild, submissionTests} = submission;
-  const onTime = submission.timeStamp <= submission.assignmentDue;
+  const onTime = submission.timeStamp <= new Date(submission.assignmentDue);
 
   return (
     <div>

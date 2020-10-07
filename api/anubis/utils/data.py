@@ -5,7 +5,6 @@ from smtplib import SMTP
 from typing import List, Union, Dict
 
 from flask import Response
-from sqlalchemy.exc import IntegrityError
 
 from anubis.config import config
 from anubis.models import User, Class_, InClass, Assignment, Submission, AssignmentRepo
@@ -78,7 +77,7 @@ def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], 
     return a
 
 
-# @cache.memoize(timeout=3, unless=is_debug)
+@cache.memoize(timeout=3, unless=is_debug)
 def get_submissions(netid: str, class_name=None, assignment_name=None) -> Union[List[Dict[str, str]], None]:
     """
     Get all submissions for a given netid. Cache the results. Optionally specify
@@ -109,7 +108,7 @@ def get_submissions(netid: str, class_name=None, assignment_name=None) -> Union[
         *filters
     ).all()
 
-    return [s.data for s in submissions]
+    return [s.full_data for s in submissions]
 
 
 def regrade_submission(submission):
@@ -225,10 +224,11 @@ def fix_dangling():
 
     :return:
     """
+    fixed = []
+
     dangling_repos = AssignmentRepo.query.filter(
         AssignmentRepo.owner_id == None
     ).all()
-
     for dr in dangling_repos:
         owner = User.query.filter(
             User.github_username == dr.github_username
@@ -237,6 +237,106 @@ def fix_dangling():
         if owner is not None:
             dr.owner_id = owner.id
             db.session.add_all((dr, owner))
+            db.session.commit()
 
             for s in dr.submissions:
+                s.owner_id = owner.id
+                db.session.add(s)
+                db.session.commit()
+                fixed.append(s.data)
                 enqueue_webhook_rpc(s.id)
+
+    dangling_submissions = Submission.query.filter(
+        Submission.owner_id == None
+    ).all()
+    for s in dangling_submissions:
+        dr = AssignmentRepo.query.filter(
+            AssignmentRepo.id == s.assignment_repo_id
+        ).first()
+
+        owner = User.query.filter(
+            User.github_username == dr.github_username
+        ).first()
+
+        if owner is not None:
+            dr.owner_id = owner.id
+            db.session.add_all((dr, owner))
+            db.session.commit()
+
+            s.owner_id = owner.id
+            db.session.add(s)
+            db.session.commit()
+            fixed.append(s.data)
+            enqueue_webhook_rpc(s.id)
+
+    return fixed
+
+
+@cache.memoize(timeout=300, unless=is_debug)
+def stats_for(student_id, assignment_id):
+    best = None
+    best_count = -1
+    for submission in Submission.query.filter(
+    Submission.assignment_id == assignment_id,
+    Submission.owner_id == student_id,
+    Submission.processed == True,
+    ).order_by(Submission.last_updated.desc()).all():
+        correct_count = sum(map(lambda result: 1 if result.passed else 0, submission.test_results))
+
+        if correct_count >= best_count:
+            best_count = correct_count
+            best = submission
+    return best.id if best is not None else None
+
+
+@cache.cached(timeout=120)
+def get_students():
+    return [s.data for s in User.query.all()]
+
+
+@cache.memoize(timeout=300, unless=is_debug)
+def bulk_stats(assignment_id, netids):
+    students = get_students()
+    students = filter(
+        lambda x: x['netid'] in netids,
+        students
+    )
+
+    bests = {}
+
+    assignment = Assignment.query.filter_by(name=assignment_id).first() or Assignment.query.filter_by(
+        id=assignment_id).first()
+    if assignment is None:
+        return error_response('assignment does not exist')
+
+    for student in students:
+        submission_id = stats_for(student['id'], assignment.id)
+        netid = student['netid']
+        if submission_id is None:
+            # no submission
+            bests[netid] = 'No successful submissions'
+        else:
+            submission = Submission.query.filter(
+                Submission.id == submission_id
+            ).first()
+            best_count = sum(map(lambda x: 1 if x.passed else 0, submission.test_results))
+            late = 'past due' if assignment.due_date < submission.created else False
+            late = 'past grace' if assignment.grace_date < submission.created else late
+            bests[netid] = {
+                'submission': submission.data,
+                'build': submission.build.stat_data,
+                'test_results': [submission_test_result.stat_data for submission_test_result in
+                                 submission.test_results],
+                'total_tests_passed': best_count,
+                'repo_url': submission.repo.repo_url,
+                'master': 'https://github.com/{}'.format(
+                    submission.repo.repo_url[submission.repo.repo_url.index(':') + 1:-len('.git')],
+                ),
+                'commit_tree': 'https://github.com/{}/tree/{}'.format(
+                    submission.repo.repo_url[submission.repo.repo_url.index(':') + 1:-len('.git')],
+                    submission.commit
+                ),
+                'late': late
+            }
+
+    return bests

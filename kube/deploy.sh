@@ -31,7 +31,7 @@ docker-compose push
 popd
 
 
-../pipeline/build.sh --push
+# ../pipeline/build.sh --push
 
 
 helm upgrade anubis ./helm -n anubis $@
@@ -45,7 +45,7 @@ helm upgrade anubis ./helm -n anubis $@
 #         -f config/rpc-workers.yml
 
 
-kubectl rollout restart deployments.apps/anubis-api -n anubis
-kubectl rollout restart deployments.apps/anubis-web -n anubis
-kubectl rollout restart deployments.apps/anubis-pipeline-api -n anubis
-kubectl rollout restart deployments.apps/anubis-rpc-workers  -n anubis
+# kubectl rollout restart deployments.apps/anubis-api -n anubis
+# kubectl rollout restart deployments.apps/anubis-web -n anubis
+# kubectl rollout restart deployments.apps/anubis-pipeline-api -n anubis
+# kubectl rollout restart deployments.apps/anubis-rpc-workers  -n anubis
