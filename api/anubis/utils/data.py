@@ -272,7 +272,7 @@ def fix_dangling():
     return fixed
 
 
-@cache.memoize(timeout=30, unless=is_debug)
+@cache.memoize(timeout=300, unless=is_debug)
 def stats_for(student_id, assignment_id):
     best = None
     best_count = -1
@@ -287,3 +287,56 @@ def stats_for(student_id, assignment_id):
             best_count = correct_count
             best = submission
     return best.id if best is not None else None
+
+
+@cache.cached(timeout=120)
+def get_students():
+    return [s.data for s in User.query.all()]
+
+
+@cache.memoize(timeout=300, unless=is_debug)
+def bulk_stats(assignment_id, netids):
+    students = get_students()
+    students = filter(
+        lambda x: x['netid'] in netids,
+        students
+    )
+
+    bests = {}
+
+    assignment = Assignment.query.filter_by(name=assignment_id).first() or Assignment.query.filter_by(
+        id=assignment_id).first()
+    if assignment is None:
+        return error_response('assignment does not exist')
+
+    for student in students:
+        submission_id = stats_for(student['id'], assignment.id)
+        netid = student['netid']
+        if submission_id is None:
+            # no submission
+            bests[netid] = 'No successful submissions'
+        else:
+            submission = Submission.query.filter(
+                Submission.id == submission_id
+            ).first()
+            best_count = sum(map(lambda x: 1 if x.passed else 0, submission.test_results))
+            late = 'past due' if assignment.due_date < submission.created else False
+            late = 'past grace' if assignment.grace_date < submission.created else late
+            bests[netid] = {
+                'submission': submission.data,
+                'build': submission.build.stat_data,
+                'test_results': [submission_test_result.stat_data for submission_test_result in
+                                 submission.test_results],
+                'total_tests_passed': best_count,
+                'repo_url': submission.repo.repo_url,
+                'master': 'https://github.com/{}'.format(
+                    submission.repo.repo_url[submission.repo.repo_url.index(':') + 1:-len('.git')],
+                ),
+                'commit_tree': 'https://github.com/{}/tree/{}'.format(
+                    submission.repo.repo_url[submission.repo.repo_url.index(':') + 1:-len('.git')],
+                    submission.commit
+                ),
+                'late': late
+            }
+
+    return bests

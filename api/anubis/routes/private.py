@@ -18,14 +18,9 @@ from anubis.utils.decorators import json_response, json_endpoint
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.redis_queue import enqueue_webhook_rpc
 from anubis.utils.logger import logger
-from anubis.utils.data import fix_dangling, stats_for
+from anubis.utils.data import fix_dangling, bulk_stats, get_students
 
 private = Blueprint('private', __name__, url_prefix='/private')
-
-
-@cache.cached(timeout=30)
-def get_students():
-    return [s.data for s in User.query.all()]
 
 
 @private.route('/')
@@ -214,7 +209,6 @@ def private_fix_dangling():
 @private.route('/stats/<assignment_id>')
 @private.route('/stats/<assignment_id>/<netid>')
 @log_endpoint('cli', lambda: 'stats')
-@cache.memoize(timeout=60, unless=is_debug)
 @json_response
 def private_stats_assignment(assignment_id, netid=None):
     netids = request.args.get('netids', None)
@@ -226,46 +220,7 @@ def private_stats_assignment(assignment_id, netid=None):
     else:
         netids = list(map(lambda x: x['netid'], get_students()))
 
-    students = get_students()
-    students = filter(
-        lambda x: x['netid'] in netids,
-        students
-    )
-
-    bests = {}
-
-    assignment = Assignment.query.filter_by(name=assignment_id).first() or Assignment.query.filter_by(id=assignment_id).first()
-    if assignment is None:
-        return error_response('assignment does not exist')
-
-    for student in students:
-        submission_id = stats_for(student['id'], assignment.id)
-        netid = student['netid']
-        if submission_id is None:
-            # no submission
-            bests[netid] = 'No successful submissions'
-        else:
-            submission = Submission.query.filter(
-                Submission.id == submission_id
-            ).first()
-            best_count = sum(map(lambda x: 1 if x.passed else 0, submission.test_results))
-            late = 'past due' if assignment.due_date < submission.created else False
-            late = 'past grace' if assignment.grace_date < submission.created else late
-            bests[netid] = {
-                'submission': submission.data,
-                'build': submission.build.stat_data,
-                'test_results': [submission_test_result.stat_data for submission_test_result in submission.test_results],
-                'total_tests_passed': best_count,
-                'repo_url': submission.repo.repo_url,
-                'master': 'https://github.com/{}'.format(
-                    submission.repo.repo_url[submission.repo.repo_url.index(':') + 1:-len('.git')],
-                ),
-                'commit_tree': 'https://github.com/{}/tree/{}'.format(
-                    submission.repo.repo_url[submission.repo.repo_url.index(':') + 1:-len('.git')],
-                    submission.commit
-                ),
-                'late': late
-            }
+    bests = bulk_stats(assignment_id, netids)
     return success_response({'stats': bests})
 
 
