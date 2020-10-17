@@ -289,25 +289,34 @@ def stats_for(student_id, assignment_id):
     return best.id if best is not None else None
 
 
-@cache.cached(timeout=120)
+@cache.cached(timeout=60*60)
 def get_students():
     return [s.data for s in User.query.all()]
 
 
-@cache.memoize(timeout=300, unless=is_debug)
-def bulk_stats(assignment_id, netids):
-    students = get_students()
-    students = filter(
-        lambda x: x['netid'] in netids,
-        students
-    )
+@cache.cached(timeout=60*60)
+def get_students_in_class(class_id):
+    return [c.data for c in User.query.join(InClass).join(Class_).filter(
+        Class_.id == class_id,
+        InClass.owner_id == User.id,
+    ).all()]
 
+
+@cache.memoize(timeout=60*60, unless=is_debug)
+def bulk_stats(assignment_id, netids=None):
     bests = {}
 
     assignment = Assignment.query.filter_by(name=assignment_id).first() or Assignment.query.filter_by(
         id=assignment_id).first()
     if assignment is None:
         return error_response('assignment does not exist')
+
+    students = get_students_in_class(assignment.class_id)
+    if netids is not None:
+        students = filter(
+            lambda x: x['netid'] in netids,
+            students
+        )
 
     for student in students:
         submission_id = stats_for(student['id'], assignment.id)
