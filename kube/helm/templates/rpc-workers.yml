@@ -43,7 +43,7 @@ spec:
       containers:
       - name: anubis-rpc-worker
         image: {{ .Values.api.image }}:{{ .Values.api.tag }}
-        imagePullPolicy: Always
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         command:
         - "rq"
         - "worker"
@@ -52,6 +52,8 @@ spec:
         env:
         - name: "DEBUG"
           value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+        - name: "IMAGE_PULL_POLICY"
+          value: {{ .Values.imagePullPolicy }}
         # sqlalchemy uri
         - name: "DATABASE_URI"
           valueFrom:

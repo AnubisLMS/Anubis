@@ -11,6 +11,7 @@ api:
   workers: 4
 
   healthCheck: true
+  gunicorn_options: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
 
   image: "registry.osiris.services/anubis/api"
   tag: "v2.0.0"
@@ -45,6 +46,7 @@ elasticsearch:
   tag: "7.5.2"
   storage: "4Gi"
   storageClassName: "longhorn"
+  initContainer: true
 
   resources:
     limits:

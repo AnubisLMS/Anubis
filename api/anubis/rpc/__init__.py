@@ -1,6 +1,7 @@
 import logging
 import logstash
 import time
+import os
 
 from anubis.models import Submission, Config
 from kubernetes import client, config
@@ -72,7 +73,7 @@ def test_repo(submission_id: int):
         container = client.V1Container(
             name="pipeline",
             image=submission.assignment.pipeline_image,
-            image_pull_policy='Always',
+            image_pull_policy=os.environ.get('IMAGE_PULL_POLICY', default='Always'),
             env=[
                 client.V1EnvVar(name="TOKEN", value=submission.token),
                 client.V1EnvVar(name="COMMIT", value=submission.commit),
@@ -86,8 +87,8 @@ def test_repo(submission_id: int):
                                     ))),
             ],
             resources=client.V1ResourceRequirements(
-                limits={'cpu': '1', 'memory': '100Mi'},
-                requests={'cpu': '1', 'memory': '100Mi'})
+                limits={'cpu': '2', 'memory': '500Mi'},
+                requests={'cpu': '1', 'memory': '250Mi'})
         )
         # Create and configurate a spec section
         template = client.V1PodTemplateSpec(
