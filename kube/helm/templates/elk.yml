@@ -79,6 +79,7 @@ spec:
         app: elasticsearch
         ecosystem: elk
     spec:
+      {{- if .Values.elasticsearch.initContainer }}
       initContainers:
       - name: volume-permissions
         image: busybox:1.31.1
@@ -86,6 +87,7 @@ spec:
         volumeMounts:
         - name: elastic-data
           mountPath: /data
+      {{- end }}
 
       containers:
       - name: elasticsearch

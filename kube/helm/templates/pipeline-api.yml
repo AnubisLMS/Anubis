@@ -38,8 +38,8 @@ spec:
         - name: web
           containerPort: 5000
         env:
-        - name: "DEBUG"
-          value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+        # - name: "DEBUG"
+        #   value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
         - name: "LOGGER_NAME"
           value: "pipeline-api"
         # Gunicorn workers

@@ -47,8 +47,10 @@ spec:
         # Gunicorn workers
         - name: "WORKERS"
           value: {{ .Values.api.workers | quote }}
+        {{- if .Values.api.gunicorn_options }}
         - name: "GUNICORN_OPTIONS"
-          value: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
+          value: {{ .Values.api.gunicorn_options }}
+        {{- end }}
         - name: "SECRET_KEY"
           valueFrom:
             secretKeyRef:
@@ -110,7 +112,7 @@ spec:
       containers:
       - name: jupyter
         image: registry.osiris.services/anubis/api-dev:v2.0.0
-        imagePullPolicy: Always
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         ports:
         - name: web
           containerPort: 5003

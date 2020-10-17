@@ -21,11 +21,7 @@ echo 'Adding traefik ingress label to minikube node...'
 kubectl label node minikube traefik=ingress --overwrite
 
 echo 'Adding traefik resources...'
-kubectl apply -f ./config/traefik.yml
-
-
-echo 'Adding kubenetes-dashbord resources...'
-kubectl apply -f ./config/dashboard.yml
+kubectl apply -f ./debug-config/traefik.yml
 
 
 echo 'Adding nfs'
@@ -39,6 +35,11 @@ helm repo update
 echo 'Adding mariadb'
 kubectl create namespace mariadb
 helm install mariadb \
-     --set 'rootUser.password=anubis,db.user=anubis,db.name=anubis,db.password=anubis,replication.enabled=false' \
+     --set 'auth.rootPassword=anubis' \
+     --set 'volumePermissions.enabled=true' --set 'auth.username=anubis' \
+     --set 'auth.database=anubis' \
+     --set 'auth.password=anubis' \
+     --set 'replication.enabled=false' \
      --namespace mariadb \
      bitnami/mariadb
+

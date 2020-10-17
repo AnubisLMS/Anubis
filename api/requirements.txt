@@ -2,6 +2,7 @@ flask
 flask-sqlalchemy
 pymysql
 gunicorn
+gunicorn[gevent]
 redis
 rq
 docker
@@ -18,3 +19,4 @@ flask_limiter
 pyjwt
 python-logstash
 kubernetes
+
