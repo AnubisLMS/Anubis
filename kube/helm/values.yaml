@@ -19,6 +19,9 @@ api:
     requests:
       memory: "500Mi"
 
+reaper:
+  enable: true
+  schedule: "*/15 * * * *"
 
 pipeline_api:
   replicas: 2
