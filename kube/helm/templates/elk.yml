@@ -100,6 +100,13 @@ spec:
         env:
         - name: "discovery.type"
           value: "single-node"
+        livenessProbe:
+          exec:
+            command:
+              - curl
+              - http://localhost:9200/
+          initialDelaySeconds: 30
+          periodSeconds: 5
         volumeMounts:
         - name: elastic-data
           mountPath: /usr/share/elasticsearch/data

@@ -8,11 +8,11 @@ until mysqladmin ping -h "${DB_HOST}"; do
 done
 echo 'db ready'
 
-echo 'Waiting for elasticsearch...'
-until curl -q http://elasticsearch:9200/; do
-    sleep 1
-done
-echo 'Elasticsearch ready'
+# echo 'Waiting for elasticsearch...'
+# until curl -q http://elasticsearch:9200/; do
+#     sleep 1
+# done
+# echo 'Elasticsearch ready'
 
 echo 'Waiting a second'
 sleep 1

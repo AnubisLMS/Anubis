@@ -12,7 +12,7 @@ from anubis.config import config
 from anubis.utils.http import get_request_ip
 from anubis.utils.logger import logger
 
-es = Elasticsearch(['http://elasticsearch:9200'])
+es = Elasticsearch(['http://elasticsearch:9200'], timeout=2, max_retries=1, retry_on_timeout=False)
 
 
 def log_endpoint(log_type, message_func):
@@ -73,10 +73,13 @@ def esindex(index='error', **kwargs):
     """
     if config.DISABLE_ELK:
         return
-    es.index(index=index, body={
-        'timestamp': datetime.utcnow(),
-        **kwargs,
-    })
+    try:
+        es.index(index=index, body={
+            'timestamp': datetime.utcnow(),
+            **kwargs,
+        })
+    except:
+        logger.error('Failed to connect to elasticsearch')
 
 
 def add_global_error_handler(app):
