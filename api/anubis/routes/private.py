@@ -1,24 +1,22 @@
 import json
+import random
 import traceback
-from typing import List
+from typing import List, Dict
 
 from dateutil.parser import parse as date_parse, ParserError
 from flask import request, Blueprint, Response
 from sqlalchemy import or_, and_
 
-from anubis.models import Assignment
-from anubis.models import Submission
-from anubis.models import User
-from anubis.models import db
+from anubis.models import db, User, Submission, Assignment, AssignmentQuestion, AssignedStudentQuestion
 from anubis.utils.auth import get_token
 from anubis.utils.cache import cache
 from anubis.utils.data import regrade_submission, is_debug
 from anubis.utils.data import success_response, error_response
-from anubis.utils.decorators import json_response, json_endpoint
+from anubis.utils.decorators import json_response, json_endpoint, load_from_id
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.redis_queue import enqueue_webhook_rpc
 from anubis.utils.logger import logger
-from anubis.utils.data import fix_dangling, bulk_stats, get_students
+from anubis.utils.data import fix_dangling, bulk_stats, get_students, _verify_data_shape
 
 private = Blueprint('private', __name__, url_prefix='/private')
 
@@ -37,6 +35,128 @@ def private_token_netid(netid):
     res = Response(json.dumps(success_response(token)), headers={'Content-Type': 'application/json'})
     res.set_cookie('token', token, httponly=True)
     return res
+
+
+@private.route('/assignment/<id>/questions/assign')
+@log_endpoint('cli', lambda: 'question assign')
+@load_from_id(Assignment, verify_owner=False)
+@json_response
+def private_assignment_question_assign(assignment: Assignment):
+    """
+
+    :return:
+    """
+    AssignedStudentQuestion.query.filter(
+        AssignedStudentQuestion.assignment_id == assignment.id
+    ).delete()
+
+    raw_questions = AssignmentQuestion.query.filter(
+        AssignmentQuestion.assignment_id == assignment.id,
+    ).all()
+
+    sequences = list(set(question.sequence for question in raw_questions))
+    questions = {sequence: [] for sequence in sequences}
+    for question in raw_questions:
+        questions[question.sequence].append(question)
+
+    logger.debug('sequences -> ' + str(sequences))
+    logger.debug('questions -> ' + str(questions))
+
+    assigned_questions = []
+    students = User.query.all()
+    logger.debug('students -> ' + str(len(questions)))
+    for student in students:
+        for sequence, questions in questions.items():
+            selected_question = random.choice(questions)
+            logger.debug('selected -> ' + str(selected_question.data))
+            assigned_question = AssignedStudentQuestion(
+                owner=student,
+                assignment=assignment,
+                question=selected_question,
+                response=selected_question.placeholder,
+            )
+            assigned_questions.append(assigned_question.data)
+            db.session.add(assigned_question)
+
+    db.session.commit()
+    return success_response({'assigned': assigned_questions})
+
+
+@private.route('/assignment/<id>/question/sync', methods=['POST'])
+@log_endpoint('cli', lambda: 'question sync')
+@load_from_id(Assignment, verify_owner=False)
+@json_endpoint(required_fields=[('questions', list)])
+def private_assignment_question_sync(assignment: Assignment, questions: List[Dict] = None, **kwargs):
+    """
+    Additive endpoint for assignment questions. Questions will only be created
+    if they have not been seen yet.
+
+    In the response, all the questions you've posted will appear to be
+
+    body = {
+      questions: [
+        {
+          question: str
+          solution: str
+          sequence: int
+        },
+        ...
+      ]
+    }
+
+    response = {
+      rejected: [ ... ]
+      ignored: [ ... ]
+      accepted: [ ... ]
+    }
+
+    :param assignment: Assignment object
+    :param questions: list of question data
+    :return:
+    """
+
+    # Iterate over questions
+    rejected, ignored, accepted = [], [], []
+    for question in questions:
+        # Verify the fields of the question shape
+        shape_good, _ = _verify_data_shape(question, AssignmentQuestion.shape)
+        if not shape_good:
+            # Reject the question if the shape is bad and continue
+            rejected.append({
+                'question': question,
+                'reason': 'could not verify data shape'
+            })
+            continue
+
+        # Check to see if question already exists for the current assignment
+        exists = AssignmentQuestion.query.filter(
+            AssignmentQuestion.assignment_id == assignment.id,
+            AssignmentQuestion.question == question['question']
+        ).first()
+        if exists is not None:
+            # If the question exists, ignore it and continue
+            ignored.append({
+                'question': question,
+                'reason': 'already exists'
+            })
+            continue
+
+        # Create the new question from posted data
+        assignment_question = AssignmentQuestion(
+            assignment_id=assignment.id,
+            question=question['question'],
+            solution=question['solution'],
+            sequence=question['sequence'],
+        )
+        db.session.add(assignment_question)
+        accepted.append({'question': question})
+
+    db.session.commit()
+    return success_response({
+        'accepted': accepted,
+        'ignored': ignored,
+        'rejected': rejected,
+    })
 
 
 @private.route('/assignment/sync', methods=['POST'])
@@ -255,7 +375,8 @@ if is_debug():
                        github_classroom_url='')
         a1t1 = AssignmentTest(name='Long file test', assignment=a1)
         a1t2 = AssignmentTest(name='Short file test', assignment=a1)
-        a1r1 = AssignmentRepo(owner=u, assignment=a1, repo_url='https://github.com/juan-punchman/xv6-public.git')
+        a1r1 = AssignmentRepo(owner=u, assignment=a1, repo_url='https://github.com/juan-punchman/xv6-public.git',
+                              github_username='juan-punchman')
         a1s1 = Submission(commit='test', state='Waiting for resources...', owner=u, assignment=a1,
                         repo=a1r1)
         a1s2 = Submission(commit='0001', state='Waiting for resources...', owner=u, assignment=a1, repo=a1r1)
@@ -269,7 +390,8 @@ if is_debug():
         a2t1 = AssignmentTest(name='Hello world test', assignment=a2)
         a2t2 = AssignmentTest(name='Short file test', assignment=a2)
         a2t3 = AssignmentTest(name='Long file test', assignment=a2)
-        a2r2 = AssignmentRepo(owner=u, assignment=a2, repo_url='https://github.com/os3224/assignment-1-spring2020.git')
+        a2r2 = AssignmentRepo(owner=u, assignment=a2, repo_url='https://github.com/os3224/assignment-1-spring2020.git',
+                              github_username='juan-punchman')
         a2s1 = Submission(commit='2bc7f8d636365402e2d6cc2556ce814c4fcd1489', state='Waiting for resources...', owner=u, assignment=a2,
                         repo=a1r1)
         assignment_2_items = [a2, a2t1, a2t2, a2t3, a2r2, a2s1]

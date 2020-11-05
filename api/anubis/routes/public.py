@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from flask import request, redirect, Blueprint, make_response
 
-from anubis.models import Assignment, AssignmentRepo
+from anubis.models import Assignment, AssignmentRepo, AssignmentQuestion, AssignedStudentQuestion
 from anubis.models import Submission
 from anubis.models import db, User, Class_, InClass
 from anubis.utils.auth import current_user
@@ -13,7 +13,7 @@ from anubis.utils.data import error_response, success_response, is_debug
 from anubis.utils.data import fix_dangling
 from anubis.utils.data import get_classes, get_assignments, get_submissions
 from anubis.utils.data import regrade_submission, enqueue_webhook_rpc
-from anubis.utils.decorators import json_response, require_user
+from anubis.utils.decorators import json_endpoint, json_response, require_user, load_from_id
 from anubis.utils.elastic import log_endpoint, esindex
 from anubis.utils.http import get_request_ip
 from anubis.utils.logger import logger
@@ -148,6 +148,57 @@ def public_assignments():
     })
 
 
+@public.route('/assignment/questions/get/<int:id>')
+@require_user
+@log_endpoint('public-questions-get', lambda: 'get questions')
+@load_from_id(Assignment, verify_owner=False)
+@json_response
+def public_assignment_questions_id(assignment: Assignment):
+    """
+    Get assigned questions for the current user for a given assignment.
+
+    :param assignment:
+    :return:
+    """
+    # Load current user
+    user: User = current_user()
+
+    # Get assigned questions
+    assigned_questions = AssignedStudentQuestion.query.filter(
+        AssignedStudentQuestion.assignment_id == assignment.id,
+        AssignedStudentQuestion.owner_id == user.id,
+    ).all()
+
+    return success_response({
+        'questions': [
+            assigned_question.data
+            for assigned_question in assigned_questions
+        ]
+    })
+
+
+@public.route('/assignment/questions/save/<int:id>')
+@require_user
+@log_endpoint('public-questions-save', lambda: 'save questions')
+@load_from_id(AssignedStudentQuestion, verify_owner=True)
+@json_endpoint(required_fields=[('response', str)])
+def public_assignment_questions_save_id(assigned_question: AssignedStudentQuestion, response: str, **kwargs):
+    """
+    Save response for a given assignment question
+
+    :param assigned_question:
+    :param response:
+    :param kwargs:
+    :return:
+    """
+    assigned_question.response = response
+
+    db.session.add(assigned_question)
+    db.session.commit()
+
+    return success_response('Success')
+
+
 @public.route('/submissions')
 @require_user
 @log_endpoint('public-submissions', lambda: 'get submissions {}'.format(get_request_ip()))
@@ -168,6 +219,7 @@ def public_submissions():
     # Get optional filters
     class_name = request.args.get('class', default=None)
     assignment_name = request.args.get('assignment', default=None)
+    assignment_id = request.args.get('assignment_id', default=None)
 
     # Load current user
     user: User = current_user()
@@ -177,7 +229,9 @@ def public_submissions():
         'submissions': get_submissions(
             user.netid,
             class_name=class_name,
-            assignment_name=assignment_name)
+            assignment_name=assignment_name,
+            assignment_id=assignment_id
+        )
     })
 
 

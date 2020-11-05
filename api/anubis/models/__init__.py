@@ -205,20 +205,41 @@ class AssignmentQuestion(db.Model):
     assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), index=True)
 
     # Fields
-    content = db.Column(db.Text, nullable=False)
+    question = db.Column(db.Text, nullable=False)
     solution = db.Column(db.Text, nullable=True)
-    level = db.Column(db.Integer, index=True, nullable=False)
+    sequence = db.Column(db.Integer, index=True, nullable=False)
+    code_question = db.Column(db.Boolean, default=False)
+    code_language = db.Column(db.String(128), nullable=True, default=None)
+    placeholder = db.Column(db.Text, nullable=True, default='')
 
     # Relationships
     assignment = db.relationship(Assignment, cascade='all,delete', backref='questions')
+
+    shape = {
+        'question': str,
+        'solution': str,
+        'sequence': int
+    }
+
+    @property
+    def full_data(self):
+        return {
+            'id': self.id,
+            'question': self.question,
+            'code_question': self.code_question,
+            'code_language': self.code_language,
+            'solution': self.solution,
+            'sequence': self.sequence
+        }
 
     @property
     def data(self):
         return {
             'id': self.id,
-            'content': self.content,
-            'solution': self.solution,
-            'level': self.level
+            'question': self.question,
+            'code_question': self.code_question,
+            'code_language': self.code_language,
+            'sequence': self.sequence
         }
 
 
@@ -227,6 +248,11 @@ class AssignedStudentQuestion(db.Model):
 
     # id
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    response = db.Column(db.Text, nullable=False, default='')
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Foreign Keys
     owner_id = db.Column(db.Integer, db.ForeignKey(User.id))
@@ -247,9 +273,8 @@ class AssignedStudentQuestion(db.Model):
         """
 
         return {
-            'question': self.owner.data,
-            'student': self.student.data,
-            'assignment': self.assignment.data
+            'question': self.question.data,
+            'response': self.response,
         }
 
 
