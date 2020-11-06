@@ -7,7 +7,10 @@ import CardContent from '@material-ui/core/CardContent';
 import {Redirect} from "react-router-dom";
 import Typography from "@material-ui/core/Typography";
 import Divider from "@material-ui/core/Divider";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdownWithHtml from "react-markdown/with-html";
+import htmlParser from 'react-markdown/plugins/html-parser';
+import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
+import {dark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 // import AceEditor from "react-ace";
 import useGet from "../../useGet";
 import {useQuery} from "../../utils"
@@ -24,6 +27,19 @@ const useStyles = makeStyles((theme) => ({
     minWidth: '512',
   },
 }));
+
+const parseHtml = htmlParser({
+  isValidNode: (node) => node.type !== 'script',
+  processingInstructions: [
+    /* ... */
+  ]
+})
+
+const renderers = {
+  code: ({language, value}) => {
+    return <SyntaxHighlighter style={dark} language={language} children={value} />
+  }
+}
 
 function Question({questions}) {
   const classes = useStyles();
@@ -42,9 +58,9 @@ function Question({questions}) {
               <React.Fragment>
 
                 {/* Question content */}
-                <ReactMarkdown>
+                <ReactMarkdownWithHtml renderers={renderers} allowDangerousHtml>
                   {question.question}
-                </ReactMarkdown>
+                </ReactMarkdownWithHtml>
 
                 {/* Question editor */}
                 {/*<Grid item xs={12}>*/}
