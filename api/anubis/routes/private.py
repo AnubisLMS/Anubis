@@ -66,8 +66,8 @@ def private_assignment_question_assign(assignment: Assignment):
     students = User.query.all()
     logger.debug('students -> ' + str(len(questions)))
     for student in students:
-        for sequence, questions in questions.items():
-            selected_question = random.choice(questions)
+        for sequence, qs in questions.items():
+            selected_question = random.choice(qs)
             logger.debug('selected -> ' + str(selected_question.data))
             assigned_question = AssignedStudentQuestion(
                 owner=student,

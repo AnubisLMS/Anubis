@@ -41,11 +41,6 @@ function Question({questions}) {
             {questions.map((question, index) => (
               <React.Fragment>
 
-                {/* Question title */}
-                <Typography variant={"h6"}>
-                  Question {index + 1}
-                </Typography>
-
                 {/* Question content */}
                 <ReactMarkdown>
                   {question.question}
