@@ -2,7 +2,7 @@ from email.mime.text import MIMEText
 from json import dumps
 from os import environ
 from smtplib import SMTP
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Tuple
 
 from flask import Response
 
@@ -78,13 +78,14 @@ def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], 
 
 
 @cache.memoize(timeout=3, unless=is_debug)
-def get_submissions(netid: str, class_name=None, assignment_name=None) -> Union[List[Dict[str, str]], None]:
+def get_submissions(netid: str, class_name=None, assignment_name=None, assignment_id=None) -> Union[List[Dict[str, str]], None]:
     """
     Get all submissions for a given netid. Cache the results. Optionally specify
     a class_name and / or assignment_name for additional filtering.
 
     :param netid: netid of student
     :param class_name: name of class
+    :param assignment_id: id of assignment
     :param assignment_name: name of assignment
     :return:
     """
@@ -101,6 +102,8 @@ def get_submissions(netid: str, class_name=None, assignment_name=None) -> Union[
         filters.append(Class_.name == class_name)
     if assignment_name is not None:
         filters.append(Assignment.name == assignment_name)
+    if assignment_id is not None:
+        filters.append(Assignment.id == assignment_id)
 
     owner = User.query.filter(User.netid == netid).first()
     submissions = Submission.query.join(Assignment).join(Class_).join(InClass).join(User).filter(
@@ -290,8 +293,10 @@ def stats_for(student_id, assignment_id):
 
 
 @cache.cached(timeout=60*60)
-def get_students():
-    return [s.data for s in User.query.all()]
+def get_students(class_name: str = 'Intro. to Operating Systems'):
+    return [s.data for s in User.query.join(InClass).join(Class_).filter(
+        Class_.name == class_name,
+    ).all()]
 
 
 @cache.cached(timeout=60*60)
@@ -349,3 +354,131 @@ def bulk_stats(assignment_id, netids=None):
             }
 
     return bests
+
+
+def _verify_data_shape(data, shape, path=None) -> Tuple[bool, Union[str, None]]:
+    """
+    _verify_data_shape(
+      {'data': []},
+      {'data': list}
+    ) == (True, None)
+
+    _verify_data_shape(
+      {'data': ''},
+      {'data': list}
+    ) == (False, '.data')
+
+    _verify_data_shape(
+      {'data': '', 'empty': 10},
+      {'data': list}
+    ) == (False, '.data')
+
+    This function is what handles the data shape verification. You can use this function, or
+    the decorator on uploaded data to verify its use before usage. You can basically write out
+    what the shape should look like. This function supports nested dictionaries.
+
+    Here, we will return a tuple of a boolean indicating success or failure, and a error string.
+    If there was an error validating a given field, the error string will be a path to the
+    unvalidated field. An example would be:
+
+    _verify_data_shape(
+      {'data': ''},
+      {'data': list}
+    ) -> (False, '.data')
+
+    :return: success as bool, error path
+    """
+
+    if path is None:
+        path = ""
+
+    if shape is dict or shape is list:  # Free, just need a match
+        if isinstance(data, shape):
+            return True, None
+        return False, path
+
+    # Verify if data is constant
+    for _t in [int, str, float]:
+        if isinstance(data, _t):
+            return (True, None) if shape == _t else (False, path)
+
+    if isinstance(data, dict):  # Verify dict keys
+        for s_key, s_value in shape.items():
+
+            # Verify key is included
+            if s_key not in data:
+                return False, path + "." + s_key
+
+            # Supported basic types
+            for _t in [int, str, float]:
+
+                # Check free strings are strings and lists
+                if s_value is _t:
+                    if not isinstance(data[s_key], s_value):
+                        return False, path + "." + s_key
+
+                # Check explicit strings and lists
+                elif isinstance(s_value, _t):
+                    if not isinstance(data[s_key], type(s_value)):
+                        return False, path + "." + s_key
+
+            # Recurse on other dicts
+            if isinstance(s_value, dict):
+
+                # Free dict ( no need to verify more )
+                if s_value == dict:
+                    return True, None
+
+                # Explicit Dict ( need to recurse )
+                elif isinstance(s_value, dict):
+                    # Recurse on dict
+                    r, e = _verify_data_shape(data[s_key], s_value, path + "." + s_key)
+
+                    if r is False:
+                        return r, e
+
+                # Type s_value was not dict ( type mismatch )
+                else:
+                    return False, path + "." + s_key
+
+            # Recurse on lists
+            if isinstance(s_value, list):
+                # Free list ( no need to verify more )
+                if s_value == list:
+                    return True, None
+
+                # Explicit list ( need to recurse )
+                elif isinstance(s_value, list):
+
+                    # If we have a type specified in the list,
+                    # we should iterate, then recurse on the
+                    # elements of the data. Otherwise there's
+                    # nothing to do.
+                    if len(s_value) == 1:
+                        s_value = s_value[0]
+
+                        for item in data[s_key]:
+                            # Recurse on list item
+                            r, e = _verify_data_shape(
+                                item, s_value, path + ".[" + s_key + "]"
+                            )
+
+                            if r is False:
+                                return r, e
+
+                # Type s_value was not dict ( type mismatch )
+                else:
+                    return False, path + "." + s_key
+
+            if s_value is list or s_value is dict:
+                if isinstance(data[s_key], s_value):
+                    return True, None
+                return (
+                    False,
+                    path + ".[" + s_key + "]"
+                    if s_value is list
+                    else path + "." + s_key + "",
+                )
+
+    return True, None
+

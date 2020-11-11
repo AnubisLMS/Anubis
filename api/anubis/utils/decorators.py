@@ -202,8 +202,36 @@ def check_submission_token(func):
     return wrapper
 
 
+def verify_shape(*shapes):
+    """
+    This is the decorator form of the data shape verification function. It will validate the
+    arguments of a function before calling it. You can just sequentially provide the expected shapes
+    of the arguments. It will return error_response's if there was a problem validating something.
 
+    :param shapes: sequence of argument shapes
+    :return: error_response on error
+    """
 
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+
+            # We should reject if we're not able to use all our shapes
+            if len(args) < len(shapes):
+                return error_response("Missing fields"), 406
+
+            # Verify our argument shapes
+            for data, shape in zip(args, shapes):
+                r, e = _verify_data_shape(data, shape)
+                if not r:
+                    return error_response("Shape invalid {}".format(e)), 406
+
+            # Shapes pass, run function
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 

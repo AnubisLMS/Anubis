@@ -78,7 +78,7 @@ const remainingTime = (dueDate) => {
 }
 
 export default function AssignmentCard(props) {
-  const {courseCode, assignmentNumber, assignmentTitle, dueDate, hasSubmission} = props.assignment;
+  const {courseCode, assignmentNumber, assignmentTitle, assignmentId, dueDate, hasSubmission} = props.assignment;
   const classes = useStyles();
 
   const [timeLeft] = useState(remainingTime(dueDate));
@@ -99,8 +99,7 @@ export default function AssignmentCard(props) {
     <Card className={classes.root}>
       <CardActionArea
         component={Link}
-        // to={`/courses/${courseCode.replace(/\s+/g, '')}/assignments/${assignmentNumber}/info`}>
-        to={`/courses/assignments/submissions`}>
+        to={`/courses/assignments/submissions?assignmentId=${assignmentId}`}>
         <CardContent>
 
           <Typography className={classes.title} color="textSecondary" gutterBottom>

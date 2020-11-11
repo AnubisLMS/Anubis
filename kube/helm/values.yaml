@@ -19,6 +19,13 @@ api:
     requests:
       memory: "500Mi"
 
+static:
+  replicas: 3
+
+  image: "registry.osiris.services/anubis/static"
+  tag: "v2.0.0"
+  healthCheck: true
+
 reaper:
   enable: true
   schedule: "*/15 * * * *"
