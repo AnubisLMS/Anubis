@@ -16,6 +16,7 @@ if ! kubectl get secrets -n anubis | grep api &> /dev/null; then
     read -s -p "Anubis DB Password: " DB_PASS
     kubectl create secret generic api \
             --from-literal=database-uri=mysql+pymysql://anubis:${DB_PASS}@mariadb.mariadb.svc.cluster.local/anubis \
+            --from-literal=database-password=${DB_PASS} \
             --from-literal=secret-key=$(head -c10 /dev/urandom | openssl sha1 -hex | awk '{print $2}') \
             -n anubis
 fi
@@ -34,7 +35,7 @@ popd
 # ../pipeline/build.sh --push
 
 
-helm upgrade anubis ./helm -n anubis $@
+helm upgrade anubis . -n anubis $@
 
 # kubectl apply \
 #         -f config/api.yml \

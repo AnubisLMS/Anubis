@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: theia
+  namespace: anubis
+spec:
+  selector:
+    app: theia
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: theia
+  namespace: anubis
+spec:
+  selector:
+    matchLabels:
+      app: theia
+  template:
+    metadata:
+      labels:
+        app: theia
+    spec:
+      containers:
+      - name: theia
+        image: registry.osiris.services/anubis/theia:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 5000
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy
+  namespace: anubis
+spec:
+  selector:
+    matchLabels:
+      app: proxy
+  template:
+    metadata:
+      labels:
+        app: proxy
+    spec:
+      containers:
+      - name: proxy
+        image: registry.osiris.services/anubis/theia-proxy:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 5000
+        env:
+        - name: "SECRET_KEY"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: secret-key
+        - name: "DB_PASSWORD"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-password
+        - name: "DB_HOST"
+          value: "mariadb.mariadb.svc.cluster.local"
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxy
+  namespace: anubis
+spec:
+  selector:
+    app: proxy
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+
+      
+---
+
+# Public Ingress Route /api/public/*
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingress.route.theia.public
+  namespace: anubis
+  labels:
+    app: theia
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - kind: Rule
+    match: Host(`proxy.localhost`)
+    services:
+    - name: proxy
+      port: 5000
+  tls:
+    certResolver: tls

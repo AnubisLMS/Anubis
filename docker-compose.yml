@@ -216,6 +216,13 @@ services:
     volumes:
       - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
 
+  theia:
+    image: registry.osiris.services/anubis/theia:latest
+    build: ./theia/theia
+
+  theia-proxy:
+    image: registry.osiris.services/anubis/theia-proxy:latest
+    build: ./theia/proxy
 
 volumes:
   traefik_data:

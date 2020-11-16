@@ -85,6 +85,7 @@ def report_panic(message: str, traceback: str, ):
         'message': message,
         'traceback': traceback,
     }
+    print(traceback)
     logging.info('report_error {}'.format(json.dumps(data, indent=2)))
     post('/pipeline/report/panic/{}'.format(SUBMISSION_ID), data)
 
