@@ -7,7 +7,7 @@ from typing import List, Union, Dict, Tuple
 from flask import Response
 
 from anubis.config import config
-from anubis.models import User, Class_, InClass, Assignment, Submission, AssignmentRepo
+from anubis.models import User, Class_, InClass, Assignment, Submission, AssignmentRepo, AssignedStudentQuestion
 from anubis.models import db
 from anubis.utils.auth import load_user
 from anubis.utils.cache import cache
@@ -78,7 +78,8 @@ def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], 
 
 
 @cache.memoize(timeout=3, unless=is_debug)
-def get_submissions(netid: str, class_name=None, assignment_name=None, assignment_id=None) -> Union[List[Dict[str, str]], None]:
+def get_submissions(netid: str, class_name=None, assignment_name=None, assignment_id=None) -> Union[
+    List[Dict[str, str]], None]:
     """
     Get all submissions for a given netid. Cache the results. Optionally specify
     a class_name and / or assignment_name for additional filtering.
@@ -114,13 +115,44 @@ def get_submissions(netid: str, class_name=None, assignment_name=None, assignmen
     return [s.full_data for s in submissions]
 
 
+@cache.memoize(timeout=60 * 60, unless=is_debug)
+def get_assigned_questions(assignment_id: int, user_id: int):
+    # Get assigned questions
+    assigned_questions = AssignedStudentQuestion.query.filter(
+        AssignedStudentQuestion.assignment_id == assignment_id,
+        AssignedStudentQuestion.owner_id == user_id,
+    ).all()
+
+    return [
+        assigned_question.data
+        for assigned_question in assigned_questions
+    ]
+
+
+def bulk_regrade_submission(submissions):
+    """
+    Regrade a batch of submissions
+    :param submissions:
+    :return:
+    """
+    response = []
+    for submission in submissions:
+        response.append(regrade_submission(submission))
+    return response
+
+
 def regrade_submission(submission):
     """
     Regrade a submission
 
-    :param submission: Submissions
+    :param submission: Union[Submissions, int]
     :return: dict response
     """
+
+    if isinstance(submission, int):
+        submission = Submission.query.filter_by(id=submission).first()
+        if submission is None:
+            return error_response('could not find submission')
 
     if not submission.processed:
         return error_response('submission currently being processed')
@@ -292,14 +324,14 @@ def stats_for(student_id, assignment_id):
     return best.id if best is not None else None
 
 
-@cache.cached(timeout=60*60)
+@cache.cached(timeout=60 * 60)
 def get_students(class_name: str = 'Intro. to Operating Systems'):
     return [s.data for s in User.query.join(InClass).join(Class_).filter(
         Class_.name == class_name,
     ).all()]
 
 
-@cache.cached(timeout=60*60)
+@cache.cached(timeout=60 * 60)
 def get_students_in_class(class_id):
     return [c.data for c in User.query.join(InClass).join(Class_).filter(
         Class_.id == class_id,
@@ -307,7 +339,7 @@ def get_students_in_class(class_id):
     ).all()]
 
 
-@cache.memoize(timeout=60*60, unless=is_debug)
+@cache.memoize(timeout=60 * 60, unless=is_debug)
 def bulk_stats(assignment_id, netids=None):
     bests = {}
 
@@ -482,3 +514,14 @@ def _verify_data_shape(data, shape, path=None) -> Tuple[bool, Union[str, None]]:
 
     return True, None
 
+
+def split_chunks(lst, n):
+    """
+    Split lst into list of lists size n.
+
+    :return: list of lists
+    """
+    _chunks = []
+    for i in range(0, len(lst), n):
+        _chunks.append(lst[i:i + n])
+    return _chunks

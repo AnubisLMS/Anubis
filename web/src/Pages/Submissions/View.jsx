@@ -128,92 +128,92 @@ function SubmissionsTable({rows}) {
 
   return (
     <TableContainer component={Paper}>
-              <Table
-                className={classes.table}
-                aria-label="Submissions Table"
-              >
-                <TableHead>
-                  <TableRow>
-                    <TableCell align="left">
-                      <b>Assignment Name</b>
-                    </TableCell>
-                    <TableCell align="left">
-                      <b>Commit Hash</b>
-                    </TableCell>
-                    <TableCell align="center">
-                      <b>Processed</b>
-                    </TableCell>
-                    <TableCell align="left">
-                      <b>On Time</b>
-                    </TableCell>
-                    <TableCell align="left">
-                      <b>Date</b>
-                    </TableCell>
-                    <TableCell align="left">
-                      <b>Time</b>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
+      <Table
+        className={classes.table}
+        aria-label="Submissions Table"
+      >
+        <TableHead>
+          <TableRow>
+            <TableCell align="left">
+              <b>Assignment Name</b>
+            </TableCell>
+            <TableCell align="left">
+              <b>Commit Hash</b>
+            </TableCell>
+            <TableCell align="center">
+              <b>Processed</b>
+            </TableCell>
+            <TableCell align="left">
+              <b>On Time</b>
+            </TableCell>
+            <TableCell align="left">
+              <b>Date</b>
+            </TableCell>
+            <TableCell align="left">
+              <b>Time</b>
+            </TableCell>
+          </TableRow>
+        </TableHead>
 
-                <TableBody>
-                  {(rowsPerPage > 0
-                      ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                      : rows
-                  ).map((row, ind) => (
-                    <TableRow key={row.name} hover={true}
-                              component={Link}
-                              style={{textDecoration: 'none'}}
-                              to={`/courses/assignments/submissions/info?commit=${row.commitHash}`}>
-                      <TableCell style={{width: 160}}>
-                        {row.assignmentName}
-                      </TableCell>
-                      <TableCell style={{width: 160}}>
-                        {row.commitHash.substring(0, 10)}
-                      </TableCell>
-                      <TableCell style={{width: 100}} align="center">
-                        {row.processed ? <CheckCircleIcon style={{color: green[500]}}/> :
-                          <CancelIcon style={{color: red[500]}}/>}
-                      </TableCell>
-                      <TableCell style={{width: 120}} align="left">
-                        {row.timeStamp <= row.assignmentDue ? <CheckCircleIcon style={{color: green[500]}}/> :
-                          <CancelIcon style={{color: red[500]}}/>}
-                      </TableCell>
-                      <TableCell style={{width: 100}} align="left">
-                        {row.timeSubmitted}
-                      </TableCell>
-                      <TableCell style={{width: 120}} align="left">
-                        {row.dateSubmitted}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+        <TableBody>
+          {(rowsPerPage > 0
+              ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              : rows
+          ).map((row, ind) => (
+            <TableRow key={row.name} hover={true}
+                      component={Link}
+                      style={{textDecoration: 'none'}}
+                      to={`/courses/assignments/submissions/info?commit=${row.commitHash}`}>
+              <TableCell style={{width: 160}}>
+                {row.assignmentName}
+              </TableCell>
+              <TableCell style={{width: 160}}>
+                {row.commitHash.substring(0, 10)}
+              </TableCell>
+              <TableCell style={{width: 100}} align="center">
+                {row.processed ? <CheckCircleIcon style={{color: green[500]}}/> :
+                  <CancelIcon style={{color: red[500]}}/>}
+              </TableCell>
+              <TableCell style={{width: 120}} align="left">
+                {row.timeStamp <= row.assignmentDue ? <CheckCircleIcon style={{color: green[500]}}/> :
+                  <CancelIcon style={{color: red[500]}}/>}
+              </TableCell>
+              <TableCell style={{width: 100}} align="left">
+                {row.timeSubmitted}
+              </TableCell>
+              <TableCell style={{width: 120}} align="left">
+                {row.dateSubmitted}
+              </TableCell>
+            </TableRow>
+          ))}
 
-                  {emptyRows > 0 && (
-                    <TableRow style={{height: 53 * emptyRows}}>
-                      <TableCell colSpan={6}/>
-                    </TableRow>
-                  )}
-                </TableBody>
-                <TableFooter>
-                  <TableRow>
-                    <TablePagination
-                      rowsPerPageOptions={[10, 20, 30, {label: 'All', value: -1}]}
-                      colSpan={4}
-                      count={rows.length}
-                      rowsPerPage={rowsPerPage}
-                      page={page}
-                      SelectProps={{
-                        inputProps: {'aria-label': 'rows per page'},
-                        native: true,
-                      }}
-                      onChangePage={handleChangePage}
-                      onChangeRowsPerPage={handleChangeRowsPerPage}
-                      ActionsComponent={TablePaginationActions}
-                      labelRowsPerPage="Submissions per page"
-                    />
-                  </TableRow>
-                </TableFooter>
-              </Table>
-            </TableContainer>
+          {emptyRows > 0 && (
+            <TableRow style={{height: 53 * emptyRows}}>
+              <TableCell colSpan={6}/>
+            </TableRow>
+          )}
+        </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TablePagination
+              rowsPerPageOptions={[10, 20, 30, {label: 'All', value: -1}]}
+              colSpan={4}
+              count={rows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              SelectProps={{
+                inputProps: {'aria-label': 'rows per page'},
+                native: true,
+              }}
+              onChangePage={handleChangePage}
+              onChangeRowsPerPage={handleChangeRowsPerPage}
+              ActionsComponent={TablePaginationActions}
+              labelRowsPerPage="Submissions per page"
+            />
+          </TableRow>
+        </TableFooter>
+      </Table>
+    </TableContainer>
   )
 }
 
@@ -234,7 +234,8 @@ export default function SubmissionsView() {
     return {
       assignmentName: assignment_name, assignmentDue: new Date(assignment_due), state: state,
       commitHash: commit, processed: processed, timeSubmitted: created.split(' ')[0],
-      dateSubmitted: created.split(' ')[1], timeStamp: new Date(created)};
+      dateSubmitted: created.split(' ')[1], timeStamp: new Date(created)
+    };
   }
 
   const rows = data.submissions
@@ -243,9 +244,9 @@ export default function SubmissionsView() {
 
   return (
     <div className={classes.root}>
-      <Grid container 
-            direction="row" 
-            justify="center" 
+      <Grid container
+            direction="row"
+            justify="center"
             alignItems="center"
             spacing={6}>
 
@@ -253,15 +254,10 @@ export default function SubmissionsView() {
           <Typography variant="h6" className={classes.subtitle}>
             CS-UY 3224
           </Typography>
-          <Typography variant="body1">
-            Questions
-          </Typography>
         </Grid>
-        <Zoom in={true} timeout={200}>
-          <Grid item xs>
-            <Questions/>
-          </Grid>
-        </Zoom>
+        <Grid item xs={12}>
+          <Questions/>
+        </Grid>
 
         <Grid item xs={12}>
           <Typography variant="body1">

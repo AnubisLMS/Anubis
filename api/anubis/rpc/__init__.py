@@ -110,3 +110,18 @@ def test_repo(submission_id: int):
         logging.debug(job.to_str())
 
         batch_v1.create_namespaced_job(body=job, namespace='anubis')
+
+
+def rpc_bulk_regrade(submissions):
+    from anubis.app import create_app
+    from anubis.utils.data import bulk_regrade_submission
+
+    app = create_app()
+    logger = get_logger()
+
+    logger.info('bulk regrading {}'.format(submissions), extra={
+        'submission_id': submissions,
+    })
+
+    with app.app_context():
+        bulk_regrade_submission(submissions)

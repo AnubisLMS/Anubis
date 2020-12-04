@@ -11,7 +11,7 @@ from anubis.utils.auth import get_token
 from anubis.utils.cache import cache
 from anubis.utils.data import error_response, success_response, is_debug
 from anubis.utils.data import fix_dangling
-from anubis.utils.data import get_classes, get_assignments, get_submissions
+from anubis.utils.data import get_classes, get_assignments, get_submissions, get_assigned_questions
 from anubis.utils.data import regrade_submission, enqueue_webhook_rpc
 from anubis.utils.decorators import json_endpoint, json_response, require_user, load_from_id
 from anubis.utils.elastic import log_endpoint, esindex
@@ -163,17 +163,8 @@ def public_assignment_questions_id(assignment: Assignment):
     # Load current user
     user: User = current_user()
 
-    # Get assigned questions
-    assigned_questions = AssignedStudentQuestion.query.filter(
-        AssignedStudentQuestion.assignment_id == assignment.id,
-        AssignedStudentQuestion.owner_id == user.id,
-    ).all()
-
     return success_response({
-        'questions': [
-            assigned_question.data
-            for assigned_question in assigned_questions
-        ]
+        'questions': get_assigned_questions(assignment.id, user.id)
     })
 
 

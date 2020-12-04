@@ -1,11 +1,23 @@
 const http = require("http")
 const httpProxy = require("http-proxy");
-const streamify = require("stream-array");
 const Knex = require("knex");
 const jwt = require("jsonwebtoken");
 const Cookie = require("universal-cookie");
+const k8s = require('@kubernetes/client-node');
+const Redis = require("redis");
+const urlparse = require("url-parse");
+const crypto = require("crypto")
 
 const SECRET_KEY = process.env.SECRET_KEY || 'DEBUG';
+const k8s_client = new k8s.KubeConfig();
+k8s_client.loadFromCluster();
+const k8s_api = k8s_client.makeApiClient((k8s.CoreV1Api));
+
+const redis = Redis.createClient({ host: "redis" });
+
+redis.on("error", function(error) {
+  console.error(error);
+});
 
 const knex = Knex({
   client: "mysql",
@@ -23,14 +35,15 @@ const proxy = httpProxy.createProxyServer({
     port: 5000
   },
   ws: true,
-})
+});
 
-const authenticate = req => {
-  const cookie = new Cookie(req.headers.cookie).cookies;
-  if (cookie.token) {
+
+
+const authenticate = token => {
+  if (token) {
     try {
-      const decoded = jwt.verify(cookie.token, SECRET_KEY);
-      
+      const decoded = jwt.verify(token, SECRET_KEY);
+      return decoded.netid;
     } catch (e) {
       console.error('Caught auth error', e);
     }
@@ -39,10 +52,37 @@ const authenticate = req => {
   return null;
 };
 
+const initialize_session = (req, res) => {
+  redis.smembers("theia-sessions", data => {
+    console.log(data)
+  })
+}
+
 
 var proxyServer = http.createServer(function (req, res) {
-  console.log(req.method, (new Date()).toISOString(),  req.url);
-  proxy.web(req, res);
+  const url = urlparse(req.url);
+  const cookie = new Cookie(req.headers.cookie).cookies;
+  const {token, assignment} = cookie;
+  console.log(req.method, (new Date()).toISOString(),  url.pathname, url.query);
+
+  switch (url.pathname) {
+    case '/initialize':
+      if (!(token && assignment)) {
+        res.writeHead(302, {location: ''});
+        res.end('redirecting...');
+        return;
+      }
+      // initialize new session
+      break
+
+    case '/ping':
+      res.writeHead(200);
+      res.end('pong');
+      return;
+
+    default:
+      proxy.web(req, res);
+  }
 });
 
 proxyServer.on("upgrade", function (req, socket, head) {

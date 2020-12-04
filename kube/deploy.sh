@@ -28,7 +28,7 @@ docker-compose build --parallel web logstash static
 if ! docker image ls | awk '{print $1}' | grep 'registry.osiris.services/anubis/api-dev' &>/dev/null; then
    docker-compose build api-dev
 fi
-docker-compose push
+docker-compose push api web logstash static
 popd
 
 

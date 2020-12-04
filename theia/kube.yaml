@@ -6,6 +6,7 @@ metadata:
 spec:
   selector:
     app: theia
+    component: ide
   ports:
     - protocol: TCP
       port: 5000
@@ -13,27 +14,22 @@ spec:
 
 ---
 
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
   name: theia
   namespace: anubis
+  labels:
+    app: theia
+    component: ide
 spec:
-  selector:
-    matchLabels:
-      app: theia
-  template:
-    metadata:
-      labels:
-        app: theia
-    spec:
-      containers:
-      - name: theia
-        image: registry.osiris.services/anubis/theia:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - name: http
-          containerPort: 5000
+  containers:
+  - name: theia
+    image: registry.osiris.services/anubis/theia:latest
+    imagePullPolicy: IfNotPresent
+    ports:
+    - name: http
+      containerPort: 5000
 
 ---
 
@@ -45,11 +41,13 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: proxy
+      app: theia
+      component: proxy
   template:
     metadata:
       labels:
-        app: proxy
+        app: theia
+        component: proxy
     spec:
       containers:
       - name: proxy
@@ -82,7 +80,8 @@ metadata:
   namespace: anubis
 spec:
   selector:
-    app: proxy
+    app: theia
+    component: proxy
   ports:
     - protocol: TCP
       port: 5000

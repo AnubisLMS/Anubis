@@ -80,7 +80,7 @@ redis:
       memory: "1Gi"
 
 rpc_workers:
-  replicas: 2
+  replicas: 5
 
 
 
