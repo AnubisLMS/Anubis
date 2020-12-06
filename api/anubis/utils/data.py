@@ -313,9 +313,9 @@ def stats_for(student_id, assignment_id):
     best = None
     best_count = -1
     for submission in Submission.query.filter(
-    Submission.assignment_id == assignment_id,
-    Submission.owner_id == student_id,
-    Submission.processed == True,
+        Submission.assignment_id == assignment_id,
+        Submission.owner_id == student_id,
+        Submission.processed == True,
     ).order_by(Submission.last_updated.desc()).all():
         correct_count = sum(map(lambda result: 1 if result.passed else 0, submission.test_results))
 
@@ -361,7 +361,7 @@ def bulk_stats(assignment_id, netids=None):
         netid = student['netid']
         if submission_id is None:
             # no submission
-            bests[netid] = 'No successful submissions'
+            bests[netid] = 'No submission'
         else:
             submission = Submission.query.filter(
                 Submission.id == submission_id

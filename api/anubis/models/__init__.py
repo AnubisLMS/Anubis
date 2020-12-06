@@ -313,6 +313,8 @@ class Submission(db.Model):
 
         :return:
         """
+        logging.info('initializing submission {}'.format(self.id))
+
         # If the models already exist, yeet
         if len(self.test_results) != 0:
             SubmissionTestResult.query.filter_by(submission_id=self.id).delete()
@@ -325,7 +327,7 @@ class Submission(db.Model):
         # Find tests for the current assignment
         tests = AssignmentTest.query.filter_by(assignment_id=self.assignment_id).all()
 
-        logging.error('found tests: {}'.format(list(map(lambda x: x.data, tests))))
+        logging.debug('found tests: {}'.format(list(map(lambda x: x.data, tests))))
 
         for test in tests:
             tr = SubmissionTestResult(submission=self, assignment_test=test)

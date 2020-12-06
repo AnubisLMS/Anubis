@@ -5,6 +5,7 @@ import os
 
 from anubis.models import Submission, Config
 from kubernetes import client, config
+import kubernetes
 
 
 def get_logger():
@@ -59,10 +60,13 @@ def test_repo(submission_id: int):
         for job in active_jobs.items:
             if job.status.succeeded is not None and job.status.succeeded >= 1:
                 logging.info('deleting namespaced job {}'.format(job.metadata.name))
-                batch_v1.delete_namespaced_job(
-                    job.metadata.name,
-                    job.metadata.namespace,
-                    propagation_policy='Background')
+                try:
+                    batch_v1.delete_namespaced_job(
+                        job.metadata.name,
+                        job.metadata.namespace,
+                        propagation_policy='Background')
+                except kubernetes.client.exceptions.ApiException:
+                    pass
 
         if len(active_jobs.items) > max_jobs:
             logging.info('TOO many jobs - re-enqueue {}'.format(submission_id), extra={'submission_id': submission_id})
@@ -88,9 +92,9 @@ def test_repo(submission_id: int):
             ],
             resources=client.V1ResourceRequirements(
                 limits={'cpu': '2', 'memory': '500Mi'},
-                requests={'cpu': '1', 'memory': '250Mi'})
+                requests={'cpu': '500m', 'memory': '250Mi'})
         )
-        # Create and configurate a spec section
+        # Create and configure a spec section
         template = client.V1PodTemplateSpec(
             metadata=client.V1ObjectMeta(labels={"app": "submission-pipeline", "role": "submission-pipeline-worker"}),
             spec=client.V1PodSpec(restart_policy="Never", containers=[container]))
