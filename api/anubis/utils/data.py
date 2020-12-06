@@ -376,6 +376,7 @@ def bulk_stats(assignment_id, netids=None):
                 'test_results': [submission_test_result.stat_data for submission_test_result in
                                  submission.test_results],
                 'total_tests_passed': best_count,
+                'full_stats': 'https://anubis.osiris.services/api/private/submission/{}'.format(submission.id),
                 'master': 'https://github.com/{}'.format(repo_path),
                 'commits': 'https://github.com/{}/commits/master'.format(repo_path),
                 'commit_tree': 'https://github.com/{}/tree/{}'.format(repo_path, submission.commit),

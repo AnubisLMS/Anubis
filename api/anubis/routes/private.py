@@ -363,6 +363,26 @@ def private_stats_assignment(assignment_id, netid=None):
     return success_response({'stats': bests})
 
 
+@private.route('/submission/<int:id>')
+@log_endpoint('cli', lambda: 'submission-stats')
+@load_from_id(Submission, verify_owner=False)
+@json_response
+def private_submission_stats_id(submission: Submission):
+    """
+    Get full stats for a specific submission.
+
+    :param submission:
+    :return:
+    """
+
+    return success_response({
+        'student': submission.owner.data,
+        'submission': submission.full_data,
+        'assignment': submission.assignment.data,
+        'class': submission.assignment.class_.data,
+    })
+
+
 from anubis.models import SubmissionTestResult, SubmissionBuild
 from anubis.models import AssignmentTest, AssignmentRepo, InClass, Class_
 

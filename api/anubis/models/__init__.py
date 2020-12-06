@@ -334,7 +334,7 @@ class Submission(db.Model):
         db.session.add(sb)
 
         self.processed = False
-        self.state = 'Reset'
+        self.state = 'Waiting for resources...'
         db.session.add(self)
 
         # Commit new models
@@ -379,7 +379,6 @@ class Submission(db.Model):
             'assignment_name': self.assignment.name,
             'assignment_due': str(self.assignment.due_date),
             'class_code': self.assignment.class_.class_code,
-            'url': self.url,
             'commit': self.commit,
             'processed': self.processed,
             'state': self.state,
