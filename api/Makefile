@@ -2,7 +2,7 @@
 all: venv
 
 venv:
-	virtualenv -p `which python3` venv
+	virtualenv -p `which python3.8` venv
 	./venv/bin/pip install -r ./requirements.txt
 
 

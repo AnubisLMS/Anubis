@@ -3,6 +3,7 @@ from json import dumps
 from os import environ
 from smtplib import SMTP
 from typing import List, Union, Dict, Tuple
+from parse import parse
 
 from flask import Response
 
@@ -365,6 +366,7 @@ def bulk_stats(assignment_id, netids=None):
             submission = Submission.query.filter(
                 Submission.id == submission_id
             ).first()
+            repo_path = parse('https://github.com/{}', submission.repo.repo_url)[0]
             best_count = sum(map(lambda x: 1 if x.passed else 0, submission.test_results))
             late = 'past due' if assignment.due_date < submission.created else False
             late = 'past grace' if assignment.grace_date < submission.created else late
@@ -374,14 +376,9 @@ def bulk_stats(assignment_id, netids=None):
                 'test_results': [submission_test_result.stat_data for submission_test_result in
                                  submission.test_results],
                 'total_tests_passed': best_count,
-                'repo_url': submission.repo.repo_url,
-                'master': 'https://github.com/{}'.format(
-                    submission.repo.repo_url[submission.repo.repo_url.index(':') + 1:-len('.git')],
-                ),
-                'commit_tree': 'https://github.com/{}/tree/{}'.format(
-                    submission.repo.repo_url[submission.repo.repo_url.index(':') + 1:-len('.git')],
-                    submission.commit
-                ),
+                'master': 'https://github.com/{}'.format(repo_path),
+                'commits': 'https://github.com/{}/commits/master'.format(repo_path),
+                'commit_tree': 'https://github.com/{}/tree/{}'.format(repo_path, submission.commit),
                 'late': late
             }
 
