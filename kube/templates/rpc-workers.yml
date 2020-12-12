@@ -13,7 +13,7 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: anubis-rpc-workers
+  name: rpc-workers
   namespace: {{ .Release.Namespace }}
   labels:
     heritage: {{ .Release.Service | quote }}
@@ -23,7 +23,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: anubis-rpc-workers
+      app: rpc-workers
   replicas: {{ .Values.rpc_workers.replicas }}
   {{- if .Values.api.rollingUpdates }}
   strategy:
@@ -36,7 +36,7 @@ spec:
   template:
     metadata:
       labels:
-        app: anubis-rpc-workers
+        app: rpc-workers
     spec:
       serviceAccountName: pipeline-rpc
       dnsPolicy: ClusterFirst
@@ -72,10 +72,11 @@ metadata:
     rbac.authorization.k8s.io/pipeline-create-jobs: "true"
 rules:
 - apiGroups: ["batch", "extensions"]
-  #
-  # at the HTTP level, the name of the resource for accessing Job
-  # objects is "jobs"
   resources: ["jobs"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+- apiGroups: [""]
+  resources: ["pods", "persistentvolumeclaims"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
 ---

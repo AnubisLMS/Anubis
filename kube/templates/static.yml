@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: anubis-static
+  name: static
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-static
+    app: static
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
     component: nginx
@@ -12,7 +12,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: anubis-static
+      app: static
   replicas: {{ .Values.static.replicas }}
   {{- if .Values.api.rollingUpdates }}
   strategy:
@@ -25,10 +25,10 @@ spec:
   template:
     metadata:
       labels:
-        app: anubis-static
+        app: static
     spec:
       containers:
-      - name: anubis-static
+      - name: static
         image: {{ .Values.static.image }}:{{ .Values.api.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         ports:
@@ -48,15 +48,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: anubis-static
+  name: static
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-static
+    app: static
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
   selector:
-    app: anubis-static
+    app: static
   ports:
   - name: web
     port: 5000
@@ -86,7 +86,7 @@ metadata:
   name: ingress.route.anubis.static
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-static
+    app: static
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
@@ -103,7 +103,7 @@ spec:
     - name: strip-static
       namespace: {{ .Release.Namespace }}
     services:
-    - name: anubis-static
+    - name: static
       port: 5000
   tls:
     certResolver: tls

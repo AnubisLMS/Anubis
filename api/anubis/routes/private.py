@@ -7,7 +7,9 @@ from dateutil.parser import parse as date_parse, ParserError
 from flask import request, Blueprint, Response
 from sqlalchemy import or_, and_
 
-from anubis.models import db, User, Submission, Assignment, AssignmentQuestion, AssignedStudentQuestion
+from anubis.models import db, User, Submission
+from anubis.models import Assignment, AssignmentQuestion, AssignedStudentQuestion
+from anubis.models import TheiaSession
 from anubis.utils.auth import get_token
 from anubis.utils.cache import cache
 from anubis.utils.data import regrade_submission, bulk_regrade_submission, is_debug
@@ -16,9 +18,10 @@ from anubis.utils.data import bulk_stats, get_students, get_assigned_questions
 from anubis.utils.data import fix_dangling, _verify_data_shape, split_chunks
 from anubis.utils.decorators import json_response, json_endpoint, load_from_id
 from anubis.utils.elastic import log_endpoint
-from anubis.utils.redis_queue import enqueue_webhook_rpc, rpc_enqueue
+from anubis.utils.redis_queue import enqueue_webhook, rpc_enqueue
 from anubis.utils.logger import logger
-from anubis.rpc import rpc_bulk_regrade
+from anubis.rpc.batch import rpc_bulk_regrade
+from anubis.rpc.theia import clear_theia_sessions
 
 private = Blueprint('private', __name__, url_prefix='/private')
 
@@ -291,7 +294,7 @@ def private_regrade_submission(commit):
         return error_response('not found')
 
     s.init_submission_models()
-    enqueue_webhook_rpc(s.id)
+    enqueue_webhook(s.id)
 
     return success_response({
         'submission': s.data,
@@ -351,6 +354,10 @@ def private_fix_dangling():
 @json_response
 def private_stats_assignment(assignment_id, netid=None):
     netids = request.args.get('netids', None)
+    force = request.args.get('force', False)
+
+    if force is not False:
+        cache.clear()
 
     if netids is not None:
         netids = json.loads(netids)
@@ -381,6 +388,15 @@ def private_submission_stats_id(submission: Submission):
         'assignment': submission.assignment.data,
         'class': submission.assignment.class_.data,
     })
+
+
+@private.route('/ide/clear')
+@log_endpoint('cli', lambda: 'clear-ide')
+@json_response
+def private_ide_clear():
+    rpc_enqueue(clear_theia_sessions, tuple())
+
+    return success_response({'state': 'enqueued'})
 
 
 from anubis.models import SubmissionTestResult, SubmissionBuild
@@ -446,6 +462,6 @@ if is_debug():
         a1s2.init_submission_models()
         a2s1.init_submission_models()
 
-        enqueue_webhook_rpc(a2s1.id)
+        enqueue_webhook(a2s1.id)
 
         return success_response('seeded')

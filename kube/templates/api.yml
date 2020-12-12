@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: anubis-api
+  name: api
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-api
+    app: api
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
-    component: anubis-api
+    component: api
 
 spec:
   selector:
     matchLabels:
-      app: anubis-api
+      app: api
   replicas: {{ .Values.api.replicas }}
   {{- if .Values.api.rollingUpdates }}
   strategy:
@@ -25,13 +25,13 @@ spec:
   template:
     metadata:
       labels:
-        app: anubis-api
+        app: api
     spec:
       # dnsPolicy: Default
       # nodeSelector:
       #   datacenter: sdc
       containers:
-      - name: anubis-api
+      - name: api
         image: {{ .Values.api.image }}:{{ .Values.api.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         ports:
@@ -74,6 +74,8 @@ spec:
             secretKeyRef:
               name: api
               key: database-uri
+        - name: "THEIA_DOMAIN"
+          value: {{ .Values.theia.proxy.domain | quote }}
         {{- if .Values.api.healthCheck }}
         livenessProbe:
           exec:
@@ -92,21 +94,21 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: anubis-debug
+  name: debug
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-debug
+    app: debug
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 
 spec:
   selector:
     matchLabels:
-      app: anubis-debug
+      app: debug
   template:
     metadata:
       labels:
-        app: anubis-debug
+        app: debug
     spec:
       dnsPolicy: ClusterFirst
       containers:
@@ -153,12 +155,12 @@ metadata:
   name: anubis
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-api
+    app: api
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
   selector:
-    app: anubis-api
+    app: api
   ports:
   - name: web
     port: 5000
@@ -168,15 +170,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: anubis-debug
+  name: debug
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-debug
+    app: debug
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
   selector:
-    app: anubis-debug
+    app: debug
   ports:
   - name: adminer
     port: 5002
@@ -208,7 +210,7 @@ metadata:
   name: private-api-basicauth
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-api
+    app: api
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 
@@ -227,7 +229,7 @@ metadata:
   name: private-api-basicauth
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-api
+    app: api
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 
@@ -244,7 +246,7 @@ metadata:
   name: ingress.route.anubis.api.public
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-api
+    app: api
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
@@ -274,7 +276,7 @@ metadata:
   name: ingress.route.anubis.api.private
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-api
+    app: api
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:

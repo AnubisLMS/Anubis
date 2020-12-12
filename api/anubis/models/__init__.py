@@ -113,6 +113,7 @@ class Assignment(db.Model):
     github_classroom_url = db.Column(db.String(256), nullable=True)
     pipeline_image = db.Column(db.String(256), unique=True, nullable=True)
     unique_code = db.Column(db.String(8), unique=True, default=lambda: base64.b16encode(os.urandom(4)).decode())
+    ide_enabled = db.Column(db.Boolean, default=True)
 
     # Dates
     release_date = db.Column(db.DateTime, nullable=False)
@@ -481,3 +482,46 @@ class SubmissionBuild(db.Model):
         data = self.data
         del data['stdout']
         return data
+
+
+class TheiaSession(db.Model):
+    __tablename__ = 'theia_session'
+
+    # id
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    owner_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
+    assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), nullable=False)
+    repo_id = db.Column(db.Integer, db.ForeignKey(AssignmentRepo.id), nullable=False)
+
+    active = db.Column(db.Boolean, default=True)
+    state = db.Column(db.String(128))
+    cluster_address = db.Column(db.String(256), nullable=True, default=None)
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    ended = db.Column(db.DateTime, nullable=True, default=None)
+    last_heartbeat = db.Column(db.DateTime, default=datetime.now)
+    last_proxy = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    repo = db.relationship(AssignmentRepo)
+    owner = db.relationship(User)
+    assignment = db.relationship(Assignment)
+
+    @property
+    def data(self):
+        return {
+            'id': self.id,
+            'owner_id': self.owner_id,
+            'assignment_id': self.assignment_id,
+            'repo_id': self.repo_id,
+            'active': self.active,
+            'state': self.state,
+            'cluster_address': self.cluster_address,
+            'created': str(self.created),
+            'ended': str(self.ended),
+            'last_heartbeat': str(self.last_heartbeat),
+            'last_proxy': str(self.last_proxy),
+            'last_updated': str(self.last_updated),
+        }

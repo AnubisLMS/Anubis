@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: anubis-web
+  name: web
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-web
+    app: web
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 
 spec:
   selector:
     matchLabels:
-      app: anubis-web
+      app: web
   replicas: 2
   {{- if .Values.rollingUpdates }}
   strategy:
@@ -24,11 +24,11 @@ spec:
   template:
     metadata:
       labels:
-        app: anubis-web
+        app: web
     spec:
       dnsPolicy: ClusterFirst
       containers:
-      - name: anubis-web
+      - name: web
         image: {{ .Values.web.image }}:{{ .Values.web.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         ports:
@@ -46,17 +46,17 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: anubis-web
+  name: web
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-web
+    app: web
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 
 spec:
   type: NodePort
   selector:
-    app: anubis-web
+    app: web
   ports:
   - name: web
     port: 3000
@@ -70,7 +70,7 @@ metadata:
   name: ingress.route.anubis.web
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-web
+    app: web
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
@@ -85,7 +85,7 @@ spec:
       namespace: traefik
     {{- end }}
     services:
-    - name: anubis-web
+    - name: web
       port: 3000
   tls:
     certResolver: tls

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from flask import request, redirect, Blueprint, make_response
 
-from anubis.models import Assignment, AssignmentRepo, AssignmentQuestion, AssignedStudentQuestion
+from anubis.models import Assignment, AssignmentRepo, AssignmentQuestion, AssignedStudentQuestion, TheiaSession
 from anubis.models import Submission
 from anubis.models import db, User, Class_, InClass
 from anubis.utils.auth import current_user
@@ -12,12 +12,14 @@ from anubis.utils.cache import cache
 from anubis.utils.data import error_response, success_response, is_debug
 from anubis.utils.data import fix_dangling
 from anubis.utils.data import get_classes, get_assignments, get_submissions, get_assigned_questions
-from anubis.utils.data import regrade_submission, enqueue_webhook_rpc
+from anubis.utils.data import regrade_submission
+from anubis.utils.data import theia_redirect, rand
 from anubis.utils.decorators import json_endpoint, json_response, require_user, load_from_id
 from anubis.utils.elastic import log_endpoint, esindex
 from anubis.utils.http import get_request_ip
 from anubis.utils.logger import logger
 from anubis.utils.oauth import OAUTH_REMOTE_APP as provider
+from anubis.utils.redis_queue import enqueue_ide_initialize, enqueue_webhook
 
 public = Blueprint('public', __name__, url_prefix='/public')
 
@@ -418,7 +420,7 @@ def public_webhook():
     )
 
     # if the github username is not found, create a dangling submission
-    enqueue_webhook_rpc(submission.id)
+    enqueue_webhook(submission.id)
 
     return success_response('submission accepted')
 
@@ -438,3 +440,54 @@ def public_whoami():
         'classes': get_classes(u.netid),
         'assignments': get_assignments(u.netid),
     })
+
+
+@public.route('/ide/initialize/<int:id>')
+@log_endpoint('ide-initialize', lambda: 'ide-initialize')
+@require_user
+@load_from_id(Assignment, verify_owner=False)
+def public_ide_initialize(assignment: Assignment):
+    """
+    Redirect to theia proxy.
+
+    :param assignment:
+    :return:
+    """
+    user: User = current_user()
+
+    if not assignment.ide_enabled:
+        return error_response('Theia not enabled for this assignment.')
+
+    # Check for existing active session
+    active_session = TheiaSession.query.filter(
+        TheiaSession.owner_id == user.id,
+        TheiaSession.assignment_id == assignment.id,
+        TheiaSession.active == True,
+    ).first()
+    if active_session is not None:
+        return theia_redirect(active_session, user)
+
+    # Make sure we have a repo we can use
+    repo = AssignmentRepo.query.filter(
+        AssignmentRepo.owner_id == user.id,
+        AssignmentRepo.assignment_id == assignment.id,
+    ).first()
+    if repo is None:
+        return error_response('repo needed'), None
+
+    # Create a new session
+    session = TheiaSession(
+        owner_id=user.id,
+        assignment_id=assignment.id,
+        repo_id=repo.id,
+        active=True,
+        state='Initializing',
+    )
+    db.session.add(session)
+    db.session.commit()
+
+    # Send kube resource initialization rpc job
+    enqueue_ide_initialize(session.id)
+
+    # Redirect to proxy
+    return theia_redirect(session, user)

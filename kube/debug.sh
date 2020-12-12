@@ -27,11 +27,11 @@ fi
 
 pushd ..
 docker-compose build api
-docker-compose build --parallel web logstash static theia-proxy
+docker-compose build --parallel web logstash static theia-proxy theia-init
 if ! docker image ls | awk '{print $1}' | grep 'registry.osiris.services/anubis/api-dev' &>/dev/null; then
     docker-compose build api-dev
 fi
-if ! docker image ls | awk '{print $1}' | grep -w 'registry.osiris.services/anubis/theia' &>/dev/null; then
+if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia$' &>/dev/null; then
     docker-compose build theia
 fi
 popd
@@ -43,6 +43,14 @@ if helm list -n anubis | grep anubis &> /dev/null; then
          --set "imagePullPolicy=IfNotPresent" \
          --set "elasticsearch.storageClassName=standard" \
          --set "debug=true" \
+         --set "api.replicas=1" \
+         --set "static.replicas=1" \
+         --set "web.replicas=1" \
+         --set "pipeline_api.replicas=1" \
+         --set "rpc_workers.replicas=1" \
+         --set "theia.proxy.replicas=1" \
+         --set "theia.proxy.domain=ide.localhost" \
+         --set "rollingUpdates=false" \
          --set "domain=localhost" \
          --set "elasticsearch.initContainer=false" $@
 else
@@ -50,10 +58,19 @@ else
          --set "imagePullPolicy=IfNotPresent" \
          --set "elasticsearch.storageClassName=standard" \
          --set "debug=true" \
+         --set "api.replicas=1" \
+         --set "static.replicas=1" \
+         --set "web.replicas=1" \
+         --set "pipeline_api.replicas=1" \
+         --set "rpc_workers.replicas=1" \
+         --set "theia.proxy.replicas=1" \
+         --set "theia.proxy.domain=ide.localhost" \
+         --set "rollingUpdates=false" \
          --set "domain=localhost" \
          --set "elasticsearch.initContainer=false" $@
 fi
 
-kubectl rollout restart deployments.apps/anubis-api -n anubis
-kubectl rollout restart deployments.apps/anubis-pipeline-api -n anubis
-kubectl rollout restart deployments.apps/anubis-rpc-workers  -n anubis
+kubectl rollout restart deployments.apps/api -n anubis
+kubectl rollout restart deployments.apps/pipeline-api -n anubis
+kubectl rollout restart deployments.apps/rpc-workers  -n anubis
+kubectl rollout restart deployments.apps/theia-proxy  -n anubis

@@ -1,7 +1,8 @@
 from redis import Redis
 from rq import Queue
 
-from anubis.rpc import test_repo
+from anubis.rpc.pipeline import test_repo
+from anubis.rpc.theia import initialize_theia_session
 
 
 def rpc_enqueue(func, *args):
@@ -16,13 +17,15 @@ def rpc_enqueue(func, *args):
         q.enqueue(func, *args)
 
 
-def enqueue_webhook_rpc(*args):
-    """
-    Enqueues a test job
-
-    :repo_url str: github repo url (eg https://github.com/os3224/...)
-    """
+def enqueue_webhook(*args):
+    """Enqueues a test job"""
     rpc_enqueue(
         test_repo,
         *args
     )
+
+
+def enqueue_ide_initialize(*args):
+    """Enqueue an ide initialization job"""
+
+    rpc_enqueue(initialize_theia_session, *args)

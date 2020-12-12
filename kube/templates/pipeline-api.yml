@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: anubis-pipeline-api
+  name: pipeline-api
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-pipeline-api
+    app: pipeline-api
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
     component: anubis-pipline-api
@@ -12,7 +12,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: anubis-pipeline-api
+      app: pipeline-api
   replicas: {{ .Values.pipeline_api.replicas }}
   {{- if .Values.api.rollingUpdates }}
   strategy:
@@ -25,11 +25,11 @@ spec:
   template:
     metadata:
       labels:
-        app: anubis-pipeline-api
+        app: pipeline-api
     spec:
       dnsPolicy: ClusterFirst
       containers:
-      - name: anubis-pipeline-api
+      - name: pipeline-api
         image: {{ .Values.api.image }}:{{ .Values.api.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         #resources:
@@ -78,16 +78,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: anubis-pipeline-api
+  name: pipeline-api
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-pipeline-api
+    app: pipeline-api
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 
 spec:
   selector:
-    app: anubis-pipeline-api
+    app: pipeline-api
   ports:
   - name: web
     port: 5000
@@ -123,7 +123,7 @@ spec:
     # Pipeline API
     - podSelector:
         matchLabels:
-          app: anubis-pipeline-api
+          app: pipeline-api
 
     # Github IP Addresses
     - ipBlock:

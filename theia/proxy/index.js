@@ -3,47 +3,37 @@ const httpProxy = require("http-proxy");
 const Knex = require("knex");
 const jwt = require("jsonwebtoken");
 const Cookie = require("universal-cookie");
-const k8s = require('@kubernetes/client-node');
 const Redis = require("redis");
 const urlparse = require("url-parse");
-const crypto = require("crypto")
 
 const SECRET_KEY = process.env.SECRET_KEY || 'DEBUG';
-const k8s_client = new k8s.KubeConfig();
-k8s_client.loadFromCluster();
-const k8s_api = k8s_client.makeApiClient((k8s.CoreV1Api));
 
-const redis = Redis.createClient({ host: "redis" });
+const redis = Redis.createClient({host: "redis"});
 
-redis.on("error", function(error) {
+redis.on("error", function (error) {
   console.error(error);
 });
 
 const knex = Knex({
   client: "mysql",
   connection: {
-    database : "anubis",
-    user : "anubis",
-    password : process.env.DB_PASSWORD || "anubis",
-    host : process.env.DB_HOST || "127.0.0.1",
+    database: "anubis",
+    user: "anubis",
+    password: process.env.DB_PASSWORD || "anubis",
+    host: process.env.DB_HOST || "127.0.0.1",
   }
 });
 
 const proxy = httpProxy.createProxyServer({
-  target: {
-    host: "theia",
-    port: 5000
-  },
   ws: true,
 });
-
 
 
 const authenticate = token => {
   if (token) {
     try {
       const decoded = jwt.verify(token, SECRET_KEY);
-      return decoded.netid;
+      return decoded;
     } catch (e) {
       console.error('Caught auth error', e);
     }
@@ -52,28 +42,63 @@ const authenticate = token => {
   return null;
 };
 
-const initialize_session = (req, res) => {
-  redis.smembers("theia-sessions", data => {
-    console.log(data)
+const get_session_ip = session_id => {
+  return new Promise((resolve, reject) => {
+    knex
+      .first('cluster_address')
+      .from('theia_session')
+      .where('id', session_id)
+      .then((row) => {
+        console.log(`cluster_ip ${row.cluster_address}`)
+        resolve(row.cluster_address)
+      });
   })
 }
 
 
-var proxyServer = http.createServer(function (req, res) {
+const log_req = (req, url) => {
+  console.log(req.method, (new Date()).toISOString(), url.pathname, url.query);
+};
+
+
+const parse_req = req => {
   const url = urlparse(req.url);
-  const cookie = new Cookie(req.headers.cookie).cookies;
-  const {token, assignment} = cookie;
-  console.log(req.method, (new Date()).toISOString(),  url.pathname, url.query);
+  const {cookies} = new Cookie(req.headers.cookie);
+  const query = new URLSearchParams(url.query);
+  let {token} = cookies;
+  token = authenticate(token);
+  return {url, token, query, cookies};
+};
+
+const initialize = (req, res, url, query) => {
+  // Authenticate the token in the http query
+  const query_token = authenticate(query.get('token'));
+  if (query_token === null) {
+    res.writeHead(302, {location: 'https://anubis.osiris.services/error'});
+    res.end('redirecting...');
+    return;
+  }
+
+  // Set cookie for ide session & redirect
+  const signed_token = jwt.sign({
+    token: query.get('token'),
+    session_id: query.get('session_id'),
+  }, SECRET_KEY, {expiresIn: '6h'});
+  res.writeHead(302, {
+    location: '/', "Set-Cookie": `token=${signed_token}; Max-Age=${6 * 3600}; HttpOnly`
+  })
+  res.end('redirecting...')
+};
+
+
+var proxyServer = http.createServer(function (req, res) {
+  const {url, token, query} = parse_req(req);
+  log_req(req, url);
 
   switch (url.pathname) {
     case '/initialize':
-      if (!(token && assignment)) {
-        res.writeHead(302, {location: ''});
-        res.end('redirecting...');
-        return;
-      }
-      // initialize new session
-      break
+      initialize(req, res, url, query)
+      return;
 
     case '/ping':
       res.writeHead(200);
@@ -81,14 +106,36 @@ var proxyServer = http.createServer(function (req, res) {
       return;
 
     default:
-      proxy.web(req, res);
+      if (token === null) {
+        res.writeHead(401)
+        res.end('nah')
+        return;
+      }
+
+      get_session_ip(token.session_id).then((session_ip) => {
+        proxy.web(req, res, {
+          target: {
+            host: session_ip,
+            port: 5000
+          }
+        });
+      })
   }
 });
 
-proxyServer.on("upgrade", function (req, socket, head) {
-  console.log(req.method, (new Date()).toISOString(), req.url);
-  proxy.ws(req, socket, head);
+proxyServer.on("upgrade", function (req, socket) {
+  const {token, url} = parse_req(req);
+  log_req(req, url);
+
+  get_session_ip(token.session_id).then((session_ip) => {
+    proxy.ws(req, socket, {
+      target: {
+        host: session_ip,
+        port: 5000
+      }
+    });
+  });
 });
 
-console.log("starting http://localhost:5000/");
+console.log("starting at 0.0.0.0:5000");
 proxyServer.listen(5000);

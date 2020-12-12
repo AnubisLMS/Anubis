@@ -83,4 +83,11 @@ rpc_workers:
   replicas: 5
 
 
+theia:
+  enable: true
 
+  proxy:
+    replicas: 3
+    domain: "ide.anubis.osiris.services"
+    image: "registry.osiris.services/anubis/theia-proxy"
+    tag: "latest"

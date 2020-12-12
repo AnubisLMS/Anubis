@@ -224,6 +224,10 @@ services:
     image: registry.osiris.services/anubis/theia-proxy:latest
     build: ./theia/proxy
 
+  theia-init:
+    image: registry.osiris.services/anubis/theia-init:latest
+    build: ./theia/init
+
 volumes:
   traefik_data:
   redis_data:

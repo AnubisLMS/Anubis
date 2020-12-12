@@ -1,18 +1,21 @@
 from email.mime.text import MIMEText
 from json import dumps
-from os import environ
+from os import environ, urandom
 from smtplib import SMTP
 from typing import List, Union, Dict, Tuple
+from hashlib import sha256
+
+from flask import Response, redirect
 from parse import parse
 
-from flask import Response
-
 from anubis.config import config
-from anubis.models import User, Class_, InClass, Assignment, Submission, AssignmentRepo, AssignedStudentQuestion
 from anubis.models import db
-from anubis.utils.auth import load_user
+from anubis.models import User, Class_, InClass
+from anubis.models import Assignment, AssignmentRepo, AssignedStudentQuestion, Submission
+from anubis.models import TheiaSession
+from anubis.utils.auth import load_user, get_token
 from anubis.utils.cache import cache
-from anubis.utils.redis_queue import enqueue_webhook_rpc
+from anubis.utils.redis_queue import enqueue_webhook
 
 
 def is_debug() -> bool:
@@ -162,7 +165,7 @@ def regrade_submission(submission):
     submission.state = 'Waiting for resources...'
     submission.init_submission_models()
 
-    enqueue_webhook_rpc(submission.id)
+    enqueue_webhook(submission.id)
 
     return success_response({'message': 'regrade started'})
 
@@ -280,7 +283,7 @@ def fix_dangling():
                 db.session.add(s)
                 db.session.commit()
                 fixed.append(s.data)
-                enqueue_webhook_rpc(s.id)
+                enqueue_webhook(s.id)
 
     dangling_submissions = Submission.query.filter(
         Submission.owner_id == None
@@ -303,7 +306,7 @@ def fix_dangling():
             db.session.add(s)
             db.session.commit()
             fixed.append(s.data)
-            enqueue_webhook_rpc(s.id)
+            enqueue_webhook(s.id)
 
     return fixed
 
@@ -313,10 +316,10 @@ def stats_for(student_id, assignment_id):
     best = None
     best_count = -1
     for submission in Submission.query.filter(
-        Submission.assignment_id == assignment_id,
-        Submission.owner_id == student_id,
-        Submission.processed == True,
-    ).order_by(Submission.last_updated.desc()).all():
+    Submission.assignment_id == assignment_id,
+    Submission.owner_id == student_id,
+    Submission.processed == True,
+    ).order_by(Submission.created.desc()).all():
         correct_count = sum(map(lambda result: 1 if result.passed else 0, submission.test_results))
 
         if correct_count >= best_count:
@@ -523,3 +526,15 @@ def split_chunks(lst, n):
     for i in range(0, len(lst), n):
         _chunks.append(lst[i:i + n])
     return _chunks
+
+
+def rand():
+    return sha256(urandom(32)).hexdigest()
+
+
+def theia_redirect(theia_session: TheiaSession, user: User):
+    return redirect("https://{}/initialize?token={}&session_id={}".format(
+        config.THEIA_DOMAIN,
+        get_token(user.netid),
+        theia_session.id,
+    ))

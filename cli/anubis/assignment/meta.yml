@@ -19,3 +19,9 @@ assignment:
   # This description will be shown to the user on the Anubis website.
   description: |
     This is a very long description that encompases the entire assignment
+
+  # Uncomment this section if you want to have question pools
+  # questions:
+  #   - level: 1
+  #     questions:
+  #       - "What is 3*4?"
