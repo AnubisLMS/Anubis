@@ -1,18 +1,19 @@
+from datetime import datetime
 from email.mime.text import MIMEText
+from hashlib import sha256
 from json import dumps
 from os import environ, urandom
 from smtplib import SMTP
 from typing import List, Union, Dict, Tuple
-from hashlib import sha256
 
 from flask import Response, redirect
 from parse import parse
 
 from anubis.config import config
-from anubis.models import db
-from anubis.models import User, Class_, InClass
 from anubis.models import Assignment, AssignmentRepo, AssignedStudentQuestion, Submission
 from anubis.models import TheiaSession
+from anubis.models import User, Class_, InClass
+from anubis.models import db
 from anubis.utils.auth import load_user, get_token
 from anubis.utils.cache import cache
 from anubis.utils.redis_queue import enqueue_webhook
@@ -68,6 +69,7 @@ def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], 
     assignments = Assignment.query.join(Class_).join(InClass).join(User).filter(
         User.netid == netid,
         Assignment.hidden == False,
+        Assignment.release_date <= datetime.now(),
         *filters
     ).order_by(Assignment.due_date.desc()).all()
 
@@ -532,9 +534,44 @@ def rand():
     return sha256(urandom(32)).hexdigest()
 
 
-def theia_redirect(theia_session: TheiaSession, user: User):
-    return redirect("https://{}/initialize?token={}&session_id={}".format(
+def theia_redirect_url(theia_session: TheiaSession, user: User) -> str:
+    """
+    Generates the url for redirecting to the theia proxy for the given session.
+
+    :param theia_session:
+    :param user:
+    :return:
+    """
+    return "https://{}/initialize?token={}".format(
         config.THEIA_DOMAIN,
-        get_token(user.netid),
-        theia_session.id,
-    ))
+        get_token(user.netid, session_id=theia_session.id),
+    )
+
+
+def theia_redirect(theia_session: TheiaSession, user: User):
+    return redirect(theia_redirect_url(theia_session, user))
+
+
+@cache.memoize(timeout=1)
+def theia_list_all(user_id: int, limit: int = 10):
+    theia_sessions: List[TheiaSession] = TheiaSession.query.filter(
+        TheiaSession.owner_id == user_id,
+    ).order_by(TheiaSession.created.desc()).limit(limit).all()
+
+    return [
+        theia_session.data
+        for theia_session in theia_sessions
+    ]
+
+
+@cache.memoize(timeout=1)
+def theia_poll_ide(theia_session_id: int, user_id: int):
+    theia_session = TheiaSession.query.filter(
+        TheiaSession.id == theia_session_id,
+        TheiaSession.owner_id == user_id,
+    ).first()
+
+    if theia_session is None:
+        return None
+
+    return theia_session.data

@@ -62,15 +62,14 @@ class Class_(db.Model):
 
     @property
     def total_assignments(self):
-        return len(list(self.assignments))
+        return self.open_assignments
 
     @property
     def open_assignments(self):
         now = datetime.now()
         return Assignment.query.filter(
             Assignment.class_id == self.id,
-            Assignment.release_date >= now,
-            Assignment.due_date <= now
+            Assignment.release_date <= now,
         ).count()
 
     @property
@@ -511,14 +510,18 @@ class TheiaSession(db.Model):
 
     @property
     def data(self):
+        from anubis.utils.data import theia_redirect_url
+
         return {
             'id': self.id,
-            'owner_id': self.owner_id,
             'assignment_id': self.assignment_id,
+            'assignment_name': self.assignment.name,
+            'class_name': self.assignment.class_.class_code,
             'repo_id': self.repo_id,
+            'repo_url': self.repo.repo_url,
+            'redirect_url': theia_redirect_url(self, self.owner),
             'active': self.active,
             'state': self.state,
-            'cluster_address': self.cluster_address,
             'created': str(self.created),
             'ended': str(self.ended),
             'last_heartbeat': str(self.last_heartbeat),

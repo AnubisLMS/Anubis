@@ -2,7 +2,7 @@ from redis import Redis
 from rq import Queue
 
 from anubis.rpc.pipeline import test_repo
-from anubis.rpc.theia import initialize_theia_session
+from anubis.rpc.theia import initialize_theia_session, reap_theia_session, reap_stale_theia_sessions
 
 
 def rpc_enqueue(func, *args):
@@ -29,3 +29,14 @@ def enqueue_ide_initialize(*args):
     """Enqueue an ide initialization job"""
 
     rpc_enqueue(initialize_theia_session, *args)
+
+
+def enqueue_ide_stop(*args):
+    """Reap theia session kube resources"""
+
+    rpc_enqueue(reap_theia_session, *args)
+
+
+def enqueue_ide_reap_stale(*args):
+    """Reap stale ide resources"""
+    rpc_enqueue(reap_stale_theia_sessions, *args)

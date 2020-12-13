@@ -26,8 +26,7 @@ fi
 
 
 pushd ..
-docker-compose build api
-docker-compose build --parallel web logstash static theia-proxy theia-init
+docker-compose build --parallel api web logstash static theia-proxy theia-init theia-sidecar
 if ! docker image ls | awk '{print $1}' | grep 'registry.osiris.services/anubis/api-dev' &>/dev/null; then
     docker-compose build api-dev
 fi
@@ -71,6 +70,7 @@ else
 fi
 
 kubectl rollout restart deployments.apps/api -n anubis
+kubectl rollout restart deployments.apps/web -n anubis
 kubectl rollout restart deployments.apps/pipeline-api -n anubis
 kubectl rollout restart deployments.apps/rpc-workers  -n anubis
 kubectl rollout restart deployments.apps/theia-proxy  -n anubis

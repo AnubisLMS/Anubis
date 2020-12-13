@@ -36,6 +36,7 @@ services:
     environment:
       - "DEBUG=1"
       - "DB_HOST=db"
+      - "THEIA_DOMAIN=ide.localhost"
     ports:
       - 127.0.0.1:5000:5000
     volumes:
@@ -227,6 +228,10 @@ services:
   theia-init:
     image: registry.osiris.services/anubis/theia-init:latest
     build: ./theia/init
+
+  theia-sidecar:
+    image: registry.osiris.services/anubis/theia-sidecar:latest
+    build: ./theia/sidecar
 
 volumes:
   traefik_data:

@@ -81,13 +81,35 @@ const initialize = (req, res, url, query) => {
 
   // Set cookie for ide session & redirect
   const signed_token = jwt.sign({
-    token: query.get('token'),
-    session_id: query.get('session_id'),
+    session_id: query_token.session_id,
   }, SECRET_KEY, {expiresIn: '6h'});
   res.writeHead(302, {
     location: '/', "Set-Cookie": `token=${signed_token}; Max-Age=${6 * 3600}; HttpOnly`
   })
   res.end('redirecting...')
+};
+
+function changeTimezone(date, ianatz) {
+  // suppose the date is 12:00 UTC
+  var invdate = new Date(date.toLocaleString('en-US', {
+    timeZone: ianatz
+  }));
+
+  // then invdate will be 07:00 in Toronto
+  // and the diff is 5 hours
+  var diff = date.getTime() - invdate.getTime();
+
+  // so 12:00 in Toronto is 17:00 UTC
+  return new Date(date.getTime() - diff); // needs to substract
+
+}
+
+const updateProxyTime = session_id => {
+  const now = changeTimezone(new Date(), 'America/New_York');
+  knex('theia_session')
+    .where({id: session_id})
+    .update({last_proxy: now})
+    .then(() => null);
 };
 
 
@@ -112,6 +134,7 @@ var proxyServer = http.createServer(function (req, res) {
         return;
       }
 
+      updateProxyTime(token.session_id);
       get_session_ip(token.session_id).then((session_ip) => {
         proxy.web(req, res, {
           target: {
@@ -127,6 +150,7 @@ proxyServer.on("upgrade", function (req, socket) {
   const {token, url} = parse_req(req);
   log_req(req, url);
 
+  updateProxyTime(token.session_id);
   get_session_ip(token.session_id).then((session_ip) => {
     proxy.ws(req, socket, {
       target: {
@@ -136,6 +160,10 @@ proxyServer.on("upgrade", function (req, socket) {
     });
   });
 });
+
+proxyServer.on("error", function (error) {
+  console.error(error)
+})
 
 console.log("starting at 0.0.0.0:5000");
 proxyServer.listen(5000);

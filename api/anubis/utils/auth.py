@@ -44,7 +44,7 @@ def current_user() -> Union[User, None]:
     return load_user(decoded['netid'])
 
 
-def get_token(netid: str) -> Union[str, None]:
+def get_token(netid: str, **extras) -> Union[str, None]:
     """
     Get token for user by netid
 
@@ -63,4 +63,5 @@ def get_token(netid: str) -> Union[str, None]:
     return jwt.encode({
         'netid': user.netid,
         'exp': datetime.utcnow() + timedelta(hours=6),
+        **extras,
     }, config.SECRET_KEY, algorithm='HS256').decode()

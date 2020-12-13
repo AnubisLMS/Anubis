@@ -21,7 +21,7 @@ from anubis.utils.elastic import log_endpoint
 from anubis.utils.redis_queue import enqueue_webhook, rpc_enqueue
 from anubis.utils.logger import logger
 from anubis.rpc.batch import rpc_bulk_regrade
-from anubis.rpc.theia import clear_theia_sessions
+from anubis.rpc.theia import reap_all_theia_sessions
 
 private = Blueprint('private', __name__, url_prefix='/private')
 
@@ -394,7 +394,7 @@ def private_submission_stats_id(submission: Submission):
 @log_endpoint('cli', lambda: 'clear-ide')
 @json_response
 def private_ide_clear():
-    rpc_enqueue(clear_theia_sessions, tuple())
+    rpc_enqueue(reap_all_theia_sessions, tuple())
 
     return success_response({'state': 'enqueued'})
 

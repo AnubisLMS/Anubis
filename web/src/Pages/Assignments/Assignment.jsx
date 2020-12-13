@@ -94,12 +94,15 @@ export default function AssignmentCard(props) {
     );
   });
 
+  const ideMaxTime = new Date(dueDate);
+  ideMaxTime.setDate(ideMaxTime.getDate() + 7);
+  const ideEnabled = new Date() < ideMaxTime;
 
   return (
     <Card className={classes.root}>
       <CardActionArea
         component={Link}
-        to={`/courses/assignments/submissions?assignmentId=${assignmentId}`}>
+        to={`/api/public/ide/initialize/${assignmentId}`}>
         <CardContent>
 
           <Typography className={classes.title} color="textSecondary" gutterBottom>
@@ -137,15 +140,18 @@ export default function AssignmentCard(props) {
         </CardContent>
       </CardActionArea>
       <CardActions>
-        <div className={classes.submitIcon}>
-          <PublishIcon style={hasSubmission ? {color: blue[500]} : {color: grey[500]}}/>
+        <div
+          className={classes.submitIcon}
+        >
+          <PublishIcon style={ideEnabled ? {color: blue[500]} : {color: grey[500]}}/>
           <Button
-            component={Link}
-            to={`/courses/assignments/submissions?assignment=${assignmentTitle}`}
-            style={hasSubmission ? {color: blue[500]} : {color: grey[500]}} size="small"
-            disabled={!hasSubmission}>
-            Submissions</Button>
-
+            style={ideEnabled ? {color: blue[500]} : {color: grey[500]}} size="small"
+            disabled={!ideEnabled}
+            component={"a"}
+            href={`/api/public/ide/initialize/${assignmentId}`}
+          >
+            Launch Anubis Cloud IDE
+          </Button>
         </div>
       </CardActions>
     </Card>

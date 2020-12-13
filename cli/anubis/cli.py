@@ -166,7 +166,7 @@ def sync():
 def init(assignment_name):
     safe_assignment_name = safe_filename(assignment_name)
 
-    assignment_base: str
+    assignment_base: str = os.path.abspath(os.path.join(os.path.dirname(__file__), 'assignment'))
 
     # Copy files over
     click.echo('Creating assignment directory...')

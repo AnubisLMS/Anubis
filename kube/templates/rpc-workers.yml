@@ -73,11 +73,11 @@ metadata:
 rules:
 - apiGroups: ["batch", "extensions"]
   resources: ["jobs"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  verbs: ["get", "list", "watch", "create", "delete"]
 
 - apiGroups: [""]
   resources: ["pods", "persistentvolumeclaims"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  verbs: ["get", "list", "watch", "create", "delete", "deletecollection"]
 
 ---
 kind: RoleBinding

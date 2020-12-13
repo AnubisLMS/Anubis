@@ -23,16 +23,15 @@ fi
 
 
 pushd ..
-docker-compose build api
-docker-compose build --parallel web logstash static
+docker-compose build --parallel api web logstash static theia-proxy theia-init theia-sidecar
 if ! docker image ls | awk '{print $1}' | grep 'registry.osiris.services/anubis/api-dev' &>/dev/null; then
    docker-compose build api-dev
 fi
-docker-compose push api web logstash static
+if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia$' &>/dev/null; then
+    docker-compose build theia
+fi
+docker-compose push api web logstash static theia-proxy theia-init theia-sidecar
 popd
-
-
-# ../pipeline/build.sh --push
 
 
 helm upgrade anubis . -n anubis $@
@@ -46,7 +45,7 @@ helm upgrade anubis . -n anubis $@
 #         -f config/rpc-workers.yml
 
 
-# kubectl rollout restart deployments.apps/anubis-api -n anubis
-# kubectl rollout restart deployments.apps/anubis-web -n anubis
-# kubectl rollout restart deployments.apps/anubis-pipeline-api -n anubis
-# kubectl rollout restart deployments.apps/anubis-rpc-workers  -n anubis
+# kubectl rollout restart deployments.apps/api -n anubis
+# kubectl rollout restart deployments.apps/web -n anubis
+# kubectl rollout restart deployments.apps/pipeline-api -n anubis
+# kubectl rollout restart deployments.apps/rpc-workers  -n anubis

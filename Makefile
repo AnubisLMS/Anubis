@@ -42,7 +42,6 @@ check:
 .PHONY: build        # Build all docker images
 build:
 	docker-compose build --parallel $(BUILD_ALLWAYS)
-	./pipeline/build.sh
 
 .PHONY: push         # Push images to registry.osiris.services (requires vpn)
 push: build
