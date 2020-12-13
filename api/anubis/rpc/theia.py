@@ -6,6 +6,7 @@ from kubernetes import config, client
 
 from anubis.models import db, Config, TheiaSession
 from anubis.utils.logger import logger
+from anubis.utils.elastic import esindex
 
 
 def get_theia_pod_name(theia_session: TheiaSession) -> str:
@@ -32,7 +33,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
             volume_mode="Filesystem",
             resources=client.V1ResourceRequirements(
                 requests={
-                    "storage": "100M",
+                    "storage": "50M",
                 }
             )
         )
@@ -125,6 +126,12 @@ def create_theia_pod_obj(theia_session: TheiaSession):
 
 
 def initialize_theia_session(theia_session_id: int):
+    """
+    Create the kube resources for a theia session. Will update database entries if necessary.
+
+    :param theia_session_id:
+    :return:
+    """
     from anubis.app import create_app
 
     app = create_app()
@@ -141,6 +148,16 @@ def initialize_theia_session(theia_session_id: int):
         theia_session = TheiaSession.query.filter(
             TheiaSession.id == theia_session_id,
         ).first()
+
+        if active_theia_pod_count() >= max_ides:
+            # If there are too many active pods, recycle the job through the queue
+            logger.info('Maximum IDEs currently running. Re-enqueuing session_id={} initialized request'.format(
+                theia_session_id
+            ))
+            time.sleep(1)
+            from anubis.utils.redis_queue import enqueue_ide_initialize
+            enqueue_ide_initialize(theia_session_id)
+            return
 
         if theia_session is None:
             logger.error('Unable to find theia session rpc.initialize_theia_session', extra={
@@ -162,6 +179,7 @@ def initialize_theia_session(theia_session_id: int):
 
         # Wait for it to have started, then update theia_session state
         name = get_theia_pod_name(theia_session)
+        n = 10
         while True:
             pod: client.V1Pod = v1.read_namespaced_pod(
                 name=name,
@@ -169,11 +187,20 @@ def initialize_theia_session(theia_session_id: int):
             )
 
             if pod.status.phase == 'Pending':
+                n += 1
+                if n > 60:
+                    logger.error('Theia session took too long to initialize. Freeing worker.')
+                    break
+
                 time.sleep(1)
 
             if pod.status.phase == 'Running':
                 theia_session.cluster_address = pod.status.pod_ip
                 theia_session.state = 'Running'
+                esindex('theia', body={
+                    'event': 'session-init', 'session_id': theia_session.id,
+                    'netid': theia_session.owner.netid,
+                })
                 logger.info('Theia session started {}'.format(name))
                 break
 
@@ -187,7 +214,13 @@ def initialize_theia_session(theia_session_id: int):
 
 
 def reap_theia_session_resources(theia_session_id: int):
+    """Mark theia session resources for deletion in kube"""
     v1 = client.CoreV1Api()
+
+    logger.info('Reaping TheiaSession {}'.format(theia_session_id))
+    esindex('theia', body={
+        'event': 'session-pod-delete', 'session_id': theia_session_id,
+    })
 
     # Delete the pods
     v1.delete_collection_namespaced_pod(
@@ -204,13 +237,81 @@ def reap_theia_session_resources(theia_session_id: int):
     )
 
 
+def list_theia_pods():
+    """Get list of active theia session pods"""
+    v1 = client.CoreV1Api()
+
+    pods = v1.list_namespaced_pod(
+        namespace='anubis',
+        label_selector='app=theia,role=theia-session'
+    )
+
+    return pods
+
+
+def active_theia_pod_count() -> int:
+    """Get number of active theia pods"""
+
+    return len(list_theia_pods().items)
+
+
+def check_active_pods():
+    """
+    Checks that all active Theia Sessions have active pods
+
+    Will mark pods for deletion if they are marked as not active in db.
+    Will mark db sessions as not active if they do not have a pod.
+
+    :return:
+    """
+
+    logger.info('Checking active ActiveTheia sessions')
+
+    # Get active pods and db rows
+    active_pods = list_theia_pods()
+    active_db_sessions = TheiaSession.query.filter(
+        TheiaSession.active == True,
+    ).all()
+
+    # Build set of active pod session ids
+    active_pod_ids = set()
+    for pod in active_pods.items:
+        active_pod_ids.add(int(pod.metadata.labels['session']))
+
+    # Build set of active db sesion ids
+    active_db_ids = set()
+    for active_db_session in active_db_sessions:
+        active_db_ids.add(active_db_session.id)
+
+    # Figure out which ones don't match
+    # and need to be updated.
+    stale_pods_ids = active_pod_ids - active_db_ids
+    stale_db_ids = active_db_ids - active_pod_ids
+
+    if len(stale_pods_ids) > 0:
+        logger.info('Found stale theia pods to reap: {}'.format(str(list(stale_pods_ids))))
+
+    if len(stale_db_ids) > 0:
+        logger.info('Found stale theia database entries: {}'.format(str(list(stale_db_ids))))
+
+    # Reap theia sessions
+    for stale_pod_id in stale_pods_ids:
+        reap_theia_session(stale_pod_id)
+
+    # Update database entries
+    TheiaSession.query.filter(
+        TheiaSession.id.in_(list(stale_db_ids)),
+    ).update(active=False)
+    db.session.commit()
+
+
 def reap_theia_session(theia_session_id: int):
     from anubis.app import create_app
 
     app = create_app()
     config.load_incluster_config()
 
-    logger.info('Attempting to delete theia session {}'.format(theia_session_id))
+    logger.info('Attempting to reap theia session {}'.format(theia_session_id))
 
     with app.app_context():
         theia_session: TheiaSession = TheiaSession.query.filter(
@@ -312,5 +413,9 @@ def reap_stale_theia_sessions(*_):
             # Batch commits in size of 5
             if n % 5 == 0:
                 db.session.commit()
+
+        # Make sure that database entries marked as active have pods
+        # and pods have active database entries
+        check_active_pods()
 
         db.session.commit()

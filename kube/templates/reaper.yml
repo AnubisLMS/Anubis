@@ -28,6 +28,8 @@ spec:
               value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
             - name: "DISABLE_ELK"
               value: "0"
+            - name: "LOGGER_NAME"
+              value: "reaper"
             - name: DB_HOST
               value: mariadb.mariadb.svc.cluster.local
               # sqlalchemy uri

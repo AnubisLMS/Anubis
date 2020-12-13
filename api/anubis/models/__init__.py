@@ -519,7 +519,7 @@ class TheiaSession(db.Model):
             'class_name': self.assignment.class_.class_code,
             'repo_id': self.repo_id,
             'repo_url': self.repo.repo_url,
-            'redirect_url': theia_redirect_url(self, self.owner),
+            'redirect_url': theia_redirect_url(self.id, self.owner.netid),
             'active': self.active,
             'state': self.state,
             'created': str(self.created),

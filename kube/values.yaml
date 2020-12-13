@@ -80,8 +80,7 @@ redis:
       memory: "1Gi"
 
 rpc_workers:
-  replicas: 5
-
+  replicas: 10
 
 theia:
   enable: true

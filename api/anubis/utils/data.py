@@ -534,22 +534,23 @@ def rand():
     return sha256(urandom(32)).hexdigest()
 
 
-def theia_redirect_url(theia_session: TheiaSession, user: User) -> str:
+@cache.memoize(timeout=60*5)
+def theia_redirect_url(theia_session_id: int, netid: str) -> str:
     """
     Generates the url for redirecting to the theia proxy for the given session.
 
-    :param theia_session:
-    :param user:
+    :param theia_session_id:
+    :param netid:
     :return:
     """
     return "https://{}/initialize?token={}".format(
         config.THEIA_DOMAIN,
-        get_token(user.netid, session_id=theia_session.id),
+        get_token(netid, session_id=theia_session_id),
     )
 
 
 def theia_redirect(theia_session: TheiaSession, user: User):
-    return redirect(theia_redirect_url(theia_session, user))
+    return redirect(theia_redirect_url(theia_session.id, user.netid))
 
 
 @cache.memoize(timeout=1)

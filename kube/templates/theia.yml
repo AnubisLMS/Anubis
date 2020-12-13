@@ -65,7 +65,12 @@ spec:
     app: theia
     component: proxy
   ports:
-    - protocol: TCP
+    - name: http-tcp
+      protocol: TCP
+      port: 5000
+      targetPort: 5000
+    - name: http-udp
+      protocol: UDP
       port: 5000
       targetPort: 5000
 

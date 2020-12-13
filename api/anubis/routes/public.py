@@ -542,7 +542,7 @@ def public_ide_redirect_url(theia_session_id: int) -> Dict[str, str]:
         return error_response('Can not find session')
 
     return success_response({
-        'redirect': theia_redirect_url(theia_session, user)
+        'redirect': theia_redirect_url(theia_session.id, user.netid)
     })
 
 

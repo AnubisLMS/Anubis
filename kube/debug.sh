@@ -35,8 +35,6 @@ if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anu
 fi
 popd
 
-../pipeline/build.sh
-
 if helm list -n anubis | grep anubis &> /dev/null; then
     helm upgrade anubis . -n anubis \
          --set "imagePullPolicy=IfNotPresent" \

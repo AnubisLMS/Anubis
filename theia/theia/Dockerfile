@@ -163,4 +163,4 @@ USER theia
 ENV SHELL=/bin/bash \
     THEIA_DEFAULT_PLUGINS=local-dir:/home/theia/plugins
 
-CMD [ "sh", "-c", "node /home/theia/src-gen/backend/main.js /home/project --hostname=0.0.0.0 --port=5000" ]
+CMD [ "sh", "-c", "env -i THEIA_DEFAULT_PLUGINS=local-dir:/home/theia/plugins SHELL=/bin/bash PATH=/bin:/usr/bin:/usr/local/bin /usr/local/bin/node /home/theia/src-gen/backend/main.js /home/project --hostname=0.0.0.0 --port=5000" ]
