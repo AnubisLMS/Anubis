@@ -17,11 +17,11 @@ import grey from "@material-ui/core/colors/grey";
 import CancelIcon from "@material-ui/icons/Cancel";
 import TableFooter from "@material-ui/core/TableFooter";
 import TablePagination from "@material-ui/core/TablePagination";
-import ExitToAppOutlinedIcon from '@material-ui/icons/ExitToAppOutlined';
 import CodeOutlinedIcon from "@material-ui/icons/CodeOutlined";
 import DeleteForeverOutlinedIcon from '@material-ui/icons/DeleteForeverOutlined';
 import TablePaginationActions from "@material-ui/core/TablePagination/TablePaginationActions";
 import Tooltip from "@material-ui/core/Tooltip";
+import GitHubIcon from "@material-ui/icons/GitHub";
 
 const useStyles = makeStyles({
   root: {
@@ -34,7 +34,6 @@ const useStyles = makeStyles({
     fontWeight: 600
   },
   commitHashContainer: {
-
     width: 200,
     overflow: "hidden",
   }
@@ -112,7 +111,7 @@ export default function IDETable({rows, headers}) {
               </TableCell>
               <TableCell>
                 <IconButton component={"a"} href={row.repo_url} target="_blank">
-                  <ExitToAppOutlinedIcon style={{color: blue[500]}}/>
+                  <GitHubIcon style={{color: blue[500]}}/>
                 </IconButton>
               </TableCell>
               <TableCell>

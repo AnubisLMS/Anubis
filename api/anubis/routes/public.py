@@ -4,6 +4,8 @@ from typing import List, Dict
 
 from flask import request, redirect, Blueprint, make_response
 
+from sqlalchemy import distinct
+
 from anubis.models import Assignment, AssignmentRepo, AssignedStudentQuestion, TheiaSession
 from anubis.models import Submission
 from anubis.models import db, User, Class_, InClass
@@ -603,3 +605,32 @@ def public_ide_initialize(assignment: Assignment):
 
     # Redirect to proxy
     return redirect('/ide')
+
+
+@public.route('/repos')
+@require_user
+@log_endpoint('repos', lambda: 'repos')
+@json_response
+def public_repos():
+    """
+    Get all unique repos for a user
+
+    :return:
+    """
+    user: User = current_user()
+
+    repos: List[AssignmentRepo] = AssignmentRepo.query\
+        .join(Assignment)\
+        .filter(AssignmentRepo.owner_id == user.id)\
+        .distinct(AssignmentRepo.repo_url)\
+        .order_by(Assignment.release_date.desc())\
+        .all()
+
+    return success_response({
+        'repos': [
+            repo.data
+            for repo in repos
+        ]
+    })
+
+

@@ -62,10 +62,10 @@ export default function AssignmentView() {
   if (loading) return <CircularProgress/>;
   if (error) return <Redirect to={`/error`}/>;
 
-  const translateAssignmentData = ({id, name, due_date, course, description, has_submission}, index) => ({
+  const translateAssignmentData = ({id, name, due_date, course, description, has_submission, github_classroom_link}, index) => ({
     courseCode: course.class_code, assignmentId: id, assignmentTitle: name, dueDate: due_date,
     hasSubmission: has_submission, assignmentDescription: description,
-    assignmentNumber: data.assignments.length - index,
+    assignmentNumber: data.assignments.length - index, githubClassroomLink: github_classroom_link,
   });
 
   return (

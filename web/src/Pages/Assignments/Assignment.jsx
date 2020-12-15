@@ -1,4 +1,5 @@
 import React, {useState} from "react";
+import {Link} from "react-router-dom";
 import {makeStyles} from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardActionArea from '@material-ui/core/CardActionArea';
@@ -6,12 +7,13 @@ import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
+import Divider from "@material-ui/core/Divider";
 import AlarmIcon from '@material-ui/icons/Alarm';
 import EventNoteIcon from '@material-ui/icons/EventNote';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import {Link} from "react-router-dom";
-import red from '@material-ui/core/colors/red';
 import PublishIcon from '@material-ui/icons/Publish';
+import GitHubIcon from '@material-ui/icons/GitHub';
+import red from '@material-ui/core/colors/red';
 import green from '@material-ui/core/colors/green';
 import blue from '@material-ui/core/colors/blue';
 import grey from '@material-ui/core/colors/grey'
@@ -50,16 +52,14 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 14,
     paddingLeft: theme.spacing(1)
   },
-  submitIcon: {
+  actionList: {
     display: 'flex',
-    paddingLeft: theme.spacing(0.5),
-
+    flexDirection: 'column',
   },
   mainTitle: {
     fontWeight: 600,
     fontSize: 20,
     letterspacing: 0.4,
-
   },
 }));
 
@@ -78,7 +78,15 @@ const remainingTime = (dueDate) => {
 }
 
 export default function AssignmentCard(props) {
-  const {courseCode, assignmentNumber, assignmentTitle, assignmentId, dueDate, hasSubmission} = props.assignment;
+  const {
+    courseCode,
+    assignmentNumber,
+    assignmentTitle,
+    assignmentId,
+    dueDate,
+    hasSubmission,
+    githubClassroomLink
+  } = props.assignment;
   const classes = useStyles();
 
   const [timeLeft] = useState(remainingTime(dueDate));
@@ -97,6 +105,8 @@ export default function AssignmentCard(props) {
   const ideMaxTime = new Date(dueDate);
   ideMaxTime.setDate(ideMaxTime.getDate() + 7);
   const ideEnabled = new Date() < ideMaxTime;
+
+  const githubLinkEnabled = typeof githubClassroomLink === "string";
 
   return (
     <Card className={classes.root}>
@@ -139,20 +149,26 @@ export default function AssignmentCard(props) {
 
         </CardContent>
       </CardActionArea>
-      <CardActions>
-        <div
-          className={classes.submitIcon}
+      <CardActions className={classes.actionList}>
+        <Button
+          style={{color: ideEnabled ? blue[500] : grey[500]}} size="small"
+          startIcon={<PublishIcon style={{color: ideEnabled ? blue[500] : grey[500]}}/>}
+          disabled={!ideEnabled}
+          component={"a"}
+          href={`/api/public/ide/initialize/${assignmentId}`}
         >
-          <PublishIcon style={ideEnabled ? {color: blue[500]} : {color: grey[500]}}/>
-          <Button
-            style={ideEnabled ? {color: blue[500]} : {color: grey[500]}} size="small"
-            disabled={!ideEnabled}
-            component={"a"}
-            href={`/api/public/ide/initialize/${assignmentId}`}
-          >
-            Launch Anubis Cloud IDE
-          </Button>
-        </div>
+          Launch Anubis Cloud IDE
+        </Button>
+        <Button
+          style={{color: githubLinkEnabled ? blue[500] : grey[500]}}
+          startIcon={<GitHubIcon style={{color: ideEnabled ? blue[500] : grey[500]}}/>}
+          disabled={!githubLinkEnabled}
+          component={"a"}
+          href={githubClassroomLink}
+          target={"_blank"}
+        >
+          Create assignment repo
+        </Button>
       </CardActions>
     </Card>
   );

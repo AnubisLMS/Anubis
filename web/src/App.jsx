@@ -18,8 +18,10 @@ import GetGithubUsername from "./Pages/GithubUsername/GetGithubUsername";
 import About from "./Pages/About/About";
 import Questions from "./Pages/Questions/View";
 import IDE from "./Pages/IDE/View";
+import Repos from "./Pages/Repos/View";
 import theme from './theme';
 import {useQuery} from './utils';
+import Profile from "./Pages/Profile/View";
 
 const drawerWidth = 240;
 const useStyles = makeStyles(() => ({
@@ -151,6 +153,16 @@ function App() {
                   {/* Theia IDE */}
                   <Route exact path={'/ide'}>
                     <IDE/>
+                  </Route>
+
+                  {/* Repo view */}
+                  <Route exact path={'/repos'}>
+                    <Repos/>
+                  </Route>
+
+                  {/* Profile view */}
+                  <Route exact path={'/profile'}>
+                    <Profile/>
                   </Route>
 
                   {/* Set github username */}

@@ -132,7 +132,6 @@ class Assignment(db.Model):
             'course': self.class_.data,
             'description': self.description,
             'github_classroom_link': self.github_classroom_url,
-
             'tests': [t.data for t in self.tests]
         }
 
@@ -171,6 +170,15 @@ class AssignmentRepo(db.Model):
     owner = db.relationship(User, cascade='all,delete')
     assignment = db.relationship(Assignment, cascade='all,delete')
     submissions = db.relationship('Submission', cascade='all,delete')
+
+    @property
+    def data(self):
+        return {
+            'github_username': self.github_username,
+            'assignment_name': self.assignment.name,
+            'class_name': self.assignment.class_.class_code,
+            'repo_url': self.repo_url,
+        }
 
 
 class AssignmentTest(db.Model):
