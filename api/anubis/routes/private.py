@@ -7,16 +7,21 @@ from dateutil.parser import parse as date_parse, ParserError
 from flask import request, Blueprint, Response
 from sqlalchemy import or_, and_
 
-from anubis.models import db, User, Submission, Assignment, AssignmentQuestion, AssignedStudentQuestion
+from anubis.models import db, User, Submission
+from anubis.models import Assignment, AssignmentQuestion, AssignedStudentQuestion
+from anubis.models import TheiaSession
 from anubis.utils.auth import get_token
 from anubis.utils.cache import cache
-from anubis.utils.data import regrade_submission, is_debug
+from anubis.utils.data import regrade_submission, bulk_regrade_submission, is_debug
 from anubis.utils.data import success_response, error_response
+from anubis.utils.data import bulk_stats, get_students, get_assigned_questions
+from anubis.utils.data import fix_dangling, _verify_data_shape, split_chunks
 from anubis.utils.decorators import json_response, json_endpoint, load_from_id
 from anubis.utils.elastic import log_endpoint
-from anubis.utils.redis_queue import enqueue_webhook_rpc
+from anubis.utils.redis_queue import enqueue_webhook, rpc_enqueue
 from anubis.utils.logger import logger
-from anubis.utils.data import fix_dangling, bulk_stats, get_students, _verify_data_shape
+from anubis.rpc.batch import rpc_bulk_regrade
+from anubis.rpc.theia import reap_all_theia_sessions
 
 private = Blueprint('private', __name__, url_prefix='/private')
 
@@ -35,6 +40,28 @@ def private_token_netid(netid):
     res = Response(json.dumps(success_response(token)), headers={'Content-Type': 'application/json'})
     res.set_cookie('token', token, httponly=True)
     return res
+
+
+@private.route('/assignment/<int:id>/questions/get/<string:netid>')
+@log_endpoint('cli', lambda: 'question get')
+@load_from_id(Assignment, verify_owner=False)
+@json_response
+def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str):
+    """
+    Get questions assigned to a given student
+
+    :param assignment:
+    :param netid:
+    :return:
+    """
+    user = User.query.filter_by(netid=netid).first()
+    if user is None:
+        return error_response('user not found')
+
+    return success_response({
+        'netid': user.netid,
+        'questions': get_assigned_questions(assignment.id, user.id)
+    })
 
 
 @private.route('/assignment/<id>/questions/assign')
@@ -267,7 +294,7 @@ def private_regrade_submission(commit):
         return error_response('not found')
 
     s.init_submission_models()
-    enqueue_webhook_rpc(s.id)
+    enqueue_webhook(s.id)
 
     return success_response({
         'submission': s.data,
@@ -300,23 +327,18 @@ def private_regrade_assignment(assignment_name):
     if assignment is None:
         return error_response('cant find assignment')
 
-    submission = Submission.query.filter(
+    submissions = Submission.query.filter(
         Submission.assignment_id == assignment.id,
         Submission.owner_id != None
     ).all()
 
-    response = []
+    submission_ids = [s.id for s in submissions]
+    submission_chunks = split_chunks(submission_ids, 100)
 
-    for s in submission:
-        res = regrade_submission(s)
-        response.append({
-            'submission': s.id,
-            'commit': s.commit,
-            'netid': s.netid,
-            'success': res['success'],
-        })
+    for chunk in submission_chunks:
+        rpc_enqueue(rpc_bulk_regrade, chunk)
 
-    return success_response({'submissions': response})
+    return success_response({'status': 'chunks enqueued'})
 
 
 @private.route('/fix-dangling')
@@ -332,6 +354,10 @@ def private_fix_dangling():
 @json_response
 def private_stats_assignment(assignment_id, netid=None):
     netids = request.args.get('netids', None)
+    force = request.args.get('force', False)
+
+    if force is not False:
+        cache.clear()
 
     if netids is not None:
         netids = json.loads(netids)
@@ -342,6 +368,35 @@ def private_stats_assignment(assignment_id, netid=None):
 
     bests = bulk_stats(assignment_id, netids)
     return success_response({'stats': bests})
+
+
+@private.route('/submission/<int:id>')
+@log_endpoint('cli', lambda: 'submission-stats')
+@load_from_id(Submission, verify_owner=False)
+@json_response
+def private_submission_stats_id(submission: Submission):
+    """
+    Get full stats for a specific submission.
+
+    :param submission:
+    :return:
+    """
+
+    return success_response({
+        'student': submission.owner.data,
+        'submission': submission.full_data,
+        'assignment': submission.assignment.data,
+        'class': submission.assignment.class_.data,
+    })
+
+
+@private.route('/ide/clear')
+@log_endpoint('cli', lambda: 'clear-ide')
+@json_response
+def private_ide_clear():
+    rpc_enqueue(reap_all_theia_sessions, tuple())
+
+    return success_response({'state': 'enqueued'})
 
 
 from anubis.models import SubmissionTestResult, SubmissionBuild
@@ -407,6 +462,6 @@ if is_debug():
         a1s2.init_submission_models()
         a2s1.init_submission_models()
 
-        enqueue_webhook_rpc(a2s1.id)
+        enqueue_webhook(a2s1.id)
 
         return success_response('seeded')

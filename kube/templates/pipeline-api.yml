@@ -1,0 +1,208 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipeline-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: pipeline-api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    component: anubis-pipline-api
+
+spec:
+  selector:
+    matchLabels:
+      app: pipeline-api
+  replicas: {{ .Values.pipeline_api.replicas }}
+  {{- if .Values.api.rollingUpdates }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  revisionHistoryLimit: 10
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        app: pipeline-api
+    spec:
+      dnsPolicy: ClusterFirst
+      containers:
+      - name: pipeline-api
+        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        #resources:
+        #  { {- toYaml .Values.api.resources | nindent 10 } }
+        ports:
+        - name: web
+          containerPort: 5000
+        env:
+        # - name: "DEBUG"
+        #   value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+        - name: "LOGGER_NAME"
+          value: "pipeline-api"
+        # Gunicorn workers
+        - name: "WORKERS"
+          value: {{ .Values.pipeline_api.workers | quote }}
+        - name: "CREATE_APP_FUNCTION"
+          value: "create_pipeline_app"
+        - name: "SECRET_KEY"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: secret-key
+        - name: DB_HOST
+          value: mariadb.mariadb.svc.cluster.local
+        # sqlalchemy uri
+        - name: "DATABASE_URI"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-uri
+        {{- if .Values.pipeline_api.healthCheck }}
+        livenessProbe:
+          exec:
+            command:
+              - curl
+              - http://localhost:5000/
+          initialDelaySeconds: 120
+          periodSeconds: 5
+        {{- end }}
+
+
+      # Mail container
+      - name: smtp
+        image: namshi/smtp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pipeline-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: pipeline-api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+
+spec:
+  selector:
+    app: pipeline-api
+  ports:
+  - name: web
+    port: 5000
+    targetPort: 5000
+
+
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: submission-pipeline-worker
+  namespace: {{ .Release.Namespace }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  podSelector:
+    matchLabels:
+      role: submission-pipeline-worker
+  policyTypes:
+  - Ingress
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          networking/namespace: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+
+    # Pipeline API
+    - podSelector:
+        matchLabels:
+          app: pipeline-api
+
+    # Github IP Addresses
+    - ipBlock:
+        cidr: 192.30.252.0/22
+    - ipBlock:
+        cidr: 185.199.108.0/22
+    - ipBlock:
+        cidr: 140.82.112.0/20
+    - ipBlock:
+        cidr: 13.114.40.48/32
+    - ipBlock:
+        cidr: 52.192.72.89/32
+    - ipBlock:
+        cidr: 52.69.186.44/32
+    - ipBlock:
+        cidr: 15.164.81.167/32
+    - ipBlock:
+        cidr: 52.78.231.108/32
+    - ipBlock:
+        cidr: 13.234.176.102/32
+    - ipBlock:
+        cidr: 13.234.210.38/32
+    - ipBlock:
+        cidr: 13.229.188.59/32
+    - ipBlock:
+        cidr: 13.250.177.223/32
+    - ipBlock:
+        cidr: 52.74.223.119/32
+    - ipBlock:
+        cidr: 13.236.229.21/32
+    - ipBlock:
+        cidr: 13.237.44.5/32
+    - ipBlock:
+        cidr: 52.64.108.95/32
+    - ipBlock:
+        cidr: 18.228.52.138/32
+    - ipBlock:
+        cidr: 18.228.67.229/32
+    - ipBlock:
+        cidr: 18.231.5.6/32
+    - ipBlock:
+        cidr: 18.181.13.223/32
+    - ipBlock:
+        cidr: 54.238.117.237/32
+    - ipBlock:
+        cidr: 54.168.17.15/32
+    - ipBlock:
+        cidr: 3.34.26.58/32
+    - ipBlock:
+        cidr: 13.125.114.27/32
+    - ipBlock:
+        cidr: 3.7.2.84/32
+    - ipBlock:
+        cidr: 3.6.106.81/32
+    - ipBlock:
+        cidr: 18.140.96.234/32
+    - ipBlock:
+        cidr: 18.141.90.153/32
+    - ipBlock:
+        cidr: 18.138.202.180/32
+    - ipBlock:
+        cidr: 52.63.152.235/32
+    - ipBlock:
+        cidr: 3.105.147.174/32
+    - ipBlock:
+        cidr: 3.106.158.203/32
+    - ipBlock:
+        cidr: 54.233.131.104/32
+    - ipBlock:
+        cidr: 18.231.104.233/32
+    - ipBlock:
+        cidr: 18.228.167.86/32
+
+    ports:
+      - protocol: TCP
+        port: 5000
+      - protocol: TCP
+        port: 443
+      - protocol: TCP
+        port: 53
+      - protocol: UDP
+        port: 53

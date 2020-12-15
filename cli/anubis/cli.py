@@ -152,7 +152,7 @@ def assignment():
 
 @assignment.command()
 def sync():
-    assignment_meta = yaml.safe_load(open('assignment.yml').read())
+    assignment_meta = yaml.safe_load(open('meta.yml').read())
     click.echo(json.dumps(assignment_meta, indent=2))
     import assignment
     import utils
@@ -166,20 +166,23 @@ def sync():
 def init(assignment_name):
     safe_assignment_name = safe_filename(assignment_name)
 
+    assignment_base: str = os.path.abspath(os.path.join(os.path.dirname(__file__), 'assignment'))
+
     # Copy files over
     click.echo('Creating assignment directory...')
-    sample_base = os.path.join(assignment_base, 'sample_assignment')
     shutil.copytree(
-        sample_base,
+        assignment_base,
         safe_assignment_name,
         symlinks=True
     )
 
     click.echo('Initializing the assignment with sample data...')
-    meta_path = os.path.join(safe_assignment_name, 'assignment.yml')
     unique_code = base64.b16encode(os.urandom(4)).decode().lower()
     now = datetime.now()
     week_from_now = now + timedelta(weeks=1)
+
+    # Populate meta
+    meta_path = os.path.join(safe_assignment_name, 'meta.yml')
     meta = open(meta_path).read().format(
         name=os.path.basename(safe_assignment_name),
         code=unique_code,
@@ -188,6 +191,15 @@ def init(assignment_name):
     )
     with open(meta_path, 'w') as f:
         f.write(meta)
+        f.close()
+
+    # Populate test.sh
+    test_path = os.path.join(safe_assignment_name, 'test.sh')
+    test_sh = open(test_path).read().format(
+        unique_code=unique_code,
+    )
+    with open(test_path, 'w') as f:
+        f.write(test_sh)
         f.close()
 
     click.echo()
@@ -214,7 +226,7 @@ def stats(assignment, netids):
 @click.argument('path', type=click.Path(exists=True), default='.')
 @click.option('--push/-p', default=False)
 def build(path, push):
-    assignment_meta = yaml.safe_load(open(os.path.join(path, 'assignment.yml')).read())
+    assignment_meta = yaml.safe_load(open(os.path.join(path, 'meta.yml')).read())
 
     # Build base image
     assert os.system('docker build -t {} {}'.format(

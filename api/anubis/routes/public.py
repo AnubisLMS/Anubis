@@ -1,9 +1,12 @@
 import string
 from datetime import datetime, timedelta
+from typing import List, Dict
 
 from flask import request, redirect, Blueprint, make_response
 
-from anubis.models import Assignment, AssignmentRepo, AssignmentQuestion, AssignedStudentQuestion
+from sqlalchemy import distinct
+
+from anubis.models import Assignment, AssignmentRepo, AssignedStudentQuestion, TheiaSession
 from anubis.models import Submission
 from anubis.models import db, User, Class_, InClass
 from anubis.utils.auth import current_user
@@ -11,15 +14,31 @@ from anubis.utils.auth import get_token
 from anubis.utils.cache import cache
 from anubis.utils.data import error_response, success_response, is_debug
 from anubis.utils.data import fix_dangling
-from anubis.utils.data import get_classes, get_assignments, get_submissions
-from anubis.utils.data import regrade_submission, enqueue_webhook_rpc
+from anubis.utils.data import get_classes, get_assignments, get_submissions, get_assigned_questions
+from anubis.utils.data import regrade_submission
+from anubis.utils.data import theia_redirect, theia_list_all, theia_poll_ide, theia_redirect_url
 from anubis.utils.decorators import json_endpoint, json_response, require_user, load_from_id
 from anubis.utils.elastic import log_endpoint, esindex
 from anubis.utils.http import get_request_ip
 from anubis.utils.logger import logger
 from anubis.utils.oauth import OAUTH_REMOTE_APP as provider
+from anubis.utils.redis_queue import enqueue_ide_initialize, enqueue_webhook, enqueue_ide_stop
 
 public = Blueprint('public', __name__, url_prefix='/public')
+
+
+def webhook_log_msg():
+    if request.headers.get('Content-Type', None) == 'application/json' and \
+    request.headers.get('X-GitHub-Event', None) == 'push':
+        return request.json['pusher']['name']
+    return None
+
+
+@public.route('/memes')
+@log_endpoint('rick-roll', lambda: 'rick-roll')
+def public_memes():
+    logger.info('rick-roll')
+    return redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ&autoplay=1')
 
 
 @public.route('/login')
@@ -163,17 +182,8 @@ def public_assignment_questions_id(assignment: Assignment):
     # Load current user
     user: User = current_user()
 
-    # Get assigned questions
-    assigned_questions = AssignedStudentQuestion.query.filter(
-        AssignedStudentQuestion.assignment_id == assignment.id,
-        AssignedStudentQuestion.owner_id == user.id,
-    ).all()
-
     return success_response({
-        'questions': [
-            assigned_question.data
-            for assigned_question in assigned_questions
-        ]
+        'questions': get_assigned_questions(assignment.id, user.id)
     })
 
 
@@ -264,20 +274,6 @@ def public_submission(commit: str):
     return success_response({'submission': s.full_data})
 
 
-def webhook_log_msg():
-    if request.headers.get('Content-Type', None) == 'application/json' and \
-    request.headers.get('X-GitHub-Event', None) == 'push':
-        return request.json['pusher']['name']
-    return None
-
-
-@public.route('/memes')
-@log_endpoint('rick-roll', lambda: 'rick-roll')
-def public_memes():
-    logger.info('rick-roll')
-    return redirect('https://www.youtube.com/watch?v=dQw4w9WgXcQ&autoplay=1')
-
-
 @public.route('/regrade/<commit>')
 @require_user
 @log_endpoint('regrade-request', lambda: 'submission regrade request ' + request.path)
@@ -348,6 +344,22 @@ def public_webhook():
             'repo_url': repo_url, 'github_username': github_username,
             'assignment_name': assignment_name, 'commit': commit,
         })
+
+        repo_name_split = webhook['repository']['name'].split('-')
+        unique_code_index = repo_name_split.index(assignment.unique_code)
+        repo_name_split = repo_name_split[unique_code_index+1:]
+        github_username1 = '-'.join(repo_name_split)
+        github_username2 = '-'.join(repo_name_split[:-1])
+        user = User.query.filter(
+            User.github_username.in_([github_username1, github_username2])
+        ).first()
+
+        if user is not None:
+            repo = AssignmentRepo(owner=user, assignment=assignment,
+                                  repo_url=repo_url, github_username=user.github_username)
+            db.session.add(repo)
+            db.session.commit()
+
         esindex('new-repo', repo_url=repo_url, assignment=str(assignment))
         return success_response('initial commit')
 
@@ -427,7 +439,7 @@ def public_webhook():
     )
 
     # if the github username is not found, create a dangling submission
-    enqueue_webhook_rpc(submission.id)
+    enqueue_webhook(submission.id)
 
     return success_response('submission accepted')
 
@@ -447,3 +459,178 @@ def public_whoami():
         'classes': get_classes(u.netid),
         'assignments': get_assignments(u.netid),
     })
+
+
+@public.route('/ide/list')
+@log_endpoint('ide-list', lambda: 'ide-list')
+@require_user
+@json_response
+def public_ide_list():
+    """
+    List all sessions, active and inactive
+
+    :return:
+    """
+    user: User = current_user()
+
+    return success_response({
+        'sessions': theia_list_all(user.id)
+    })
+
+
+@public.route('/ide/stop/<int:theia_session_id>')
+@log_endpoint('stop-theia-session', lambda: 'stop-theia-session')
+@require_user
+def public_ide_stop(theia_session_id: int) -> Dict[str, str]:
+    user: User = current_user()
+
+    theia_session: TheiaSession = TheiaSession.query.filter(
+        TheiaSession.id == theia_session_id,
+        TheiaSession.owner_id == user.id,
+    ).first()
+    if theia_session is None:
+        return redirect('/ide?error=Can not find session.')
+
+    theia_session.active = False
+    theia_session.ended = datetime.now()
+    theia_session.state = 'Ending'
+    db.session.commit()
+
+    enqueue_ide_stop(theia_session.id)
+
+    return redirect('/ide')
+
+
+@public.route('/ide/poll/<int:theia_session_id>')
+@log_endpoint('ide-poll-id', lambda: 'ide-poll')
+@require_user
+@json_response
+def public_ide_poll(theia_session_id: int) -> Dict[str, str]:
+    """
+    Slightly cached endpoint for polling for session data.
+
+    :param theia_session_id:
+    :return:
+    """
+    user: User = current_user()
+
+    session_data = theia_poll_ide(theia_session_id, user.id)
+    if session_data is None:
+        return error_response('Can not find session')
+
+    return success_response({
+        'session': session_data
+    })
+
+
+@public.route('/ide/redirect-url/<int:theia_session_id>')
+@log_endpoint('ide-redirect-url', lambda: 'ide-redirect-url')
+@require_user
+@json_response
+def public_ide_redirect_url(theia_session_id: int) -> Dict[str, str]:
+    """
+    Get the redirect url for a given session
+
+    :param theia_session_id:
+    :return:
+    """
+    user: User = current_user()
+
+    theia_session: TheiaSession = TheiaSession.query.filter(
+        TheiaSession.id == theia_session_id,
+        TheiaSession.owner_id == user.id,
+    ).first()
+    if theia_session is None:
+        return error_response('Can not find session')
+
+    return success_response({
+        'redirect': theia_redirect_url(theia_session.id, user.netid)
+    })
+
+
+@public.route('/ide/initialize/<int:id>')
+@log_endpoint('ide-initialize', lambda: 'ide-initialize')
+@require_user
+@load_from_id(Assignment, verify_owner=False)
+def public_ide_initialize(assignment: Assignment):
+    """
+    Redirect to theia proxy.
+
+    :param assignment:
+    :return:
+    """
+    user: User = current_user()
+
+    if not assignment.ide_enabled:
+        return error_response('Theia not enabled for this assignment.')
+
+    # Check for existing active session
+    active_session = TheiaSession.query.join(Assignment).filter(
+        TheiaSession.owner_id == user.id,
+        TheiaSession.assignment_id == assignment.id,
+        TheiaSession.active == True,
+        Assignment.release_date <= datetime.now(),
+        Assignment.due_date + timedelta(days=7) >= datetime.now(),
+    ).first()
+    if active_session is not None:
+        return theia_redirect(active_session, user)
+
+    if datetime.now() <= assignment.release_date:
+        return redirect('/ide?error=Assignment has not been released.')
+
+    if assignment.due_date + timedelta(days=3*7) <= datetime.now():
+        return redirect('/ide?error=Assignment due date passed over 3 weeks ago.')
+
+    # Make sure we have a repo we can use
+    repo = AssignmentRepo.query.filter(
+        AssignmentRepo.owner_id == user.id,
+        AssignmentRepo.assignment_id == assignment.id,
+    ).first()
+    if repo is None:
+        return redirect('/courses/assignments?error=Please create your assignment repo first.')
+
+    # Create a new session
+    session = TheiaSession(
+        owner_id=user.id,
+        assignment_id=assignment.id,
+        repo_id=repo.id,
+        active=True,
+        state='Initializing',
+    )
+    db.session.add(session)
+    db.session.commit()
+
+    # Send kube resource initialization rpc job
+    enqueue_ide_initialize(session.id)
+
+    # Redirect to proxy
+    return redirect('/ide')
+
+
+@public.route('/repos')
+@require_user
+@log_endpoint('repos', lambda: 'repos')
+@json_response
+def public_repos():
+    """
+    Get all unique repos for a user
+
+    :return:
+    """
+    user: User = current_user()
+
+    repos: List[AssignmentRepo] = AssignmentRepo.query\
+        .join(Assignment)\
+        .filter(AssignmentRepo.owner_id == user.id)\
+        .distinct(AssignmentRepo.repo_url)\
+        .order_by(Assignment.release_date.desc())\
+        .all()
+
+    return success_response({
+        'repos': [
+            repo.data
+            for repo in repos
+        ]
+    })
+
+

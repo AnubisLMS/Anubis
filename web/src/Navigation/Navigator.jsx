@@ -22,7 +22,10 @@ import PublicIcon from "@material-ui/icons/Public";
 import AssessmentIcon from '@material-ui/icons/Assessment';
 import CloseOutlinedIcon from '@material-ui/icons/CloseOutlined';
 import LaunchOutlinedIcon from '@material-ui/icons/LaunchOutlined';
+import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
 import {Link} from "react-router-dom";
+import GitHubIcon from "@material-ui/icons/GitHub";
+import AccountCircleOutlinedIcon from '@material-ui/icons/AccountCircleOutlined';
 
 
 const categories = [
@@ -36,9 +39,24 @@ const categories = [
     path: "/courses/assignments"
   },
   {
+    id: "Repos",
+    icon: <GitHubIcon/>,
+    path: '/repos',
+  },
+  {
     id: "Submissions",
     icon: <AssessmentIcon/>,
     path: "/courses/assignments/submissions"
+  },
+  {
+    id: "Anubis IDE",
+    icon: <CodeOutlinedIcon/>,
+    path: "/ide"
+  },
+  {
+    id: "Profile",
+    icon: <AccountCircleOutlinedIcon/>,
+    path: "/profile"
   }
 ];
 

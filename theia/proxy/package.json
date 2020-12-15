@@ -1,0 +1,15 @@
+{
+  "name": "proxy",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "http-proxy": "^1.18.1",
+    "jsonwebtoken": "^8.5.1",
+    "knex": "^0.21.12",
+    "mysql": "^2.18.1",
+    "redis": "^3.0.2",
+    "universal-cookie": "^4.0.4",
+    "url-parse": "^1.4.7"
+  }
+}

@@ -1,17 +1,22 @@
+from datetime import datetime
 from email.mime.text import MIMEText
+from hashlib import sha256
 from json import dumps
-from os import environ
+from os import environ, urandom
 from smtplib import SMTP
 from typing import List, Union, Dict, Tuple
 
-from flask import Response
+from flask import Response, redirect
+from parse import parse
 
 from anubis.config import config
-from anubis.models import User, Class_, InClass, Assignment, Submission, AssignmentRepo
+from anubis.models import Assignment, AssignmentRepo, AssignedStudentQuestion, Submission
+from anubis.models import TheiaSession
+from anubis.models import User, Class_, InClass
 from anubis.models import db
-from anubis.utils.auth import load_user
+from anubis.utils.auth import load_user, get_token
 from anubis.utils.cache import cache
-from anubis.utils.redis_queue import enqueue_webhook_rpc
+from anubis.utils.redis_queue import enqueue_webhook
 
 
 def is_debug() -> bool:
@@ -64,6 +69,7 @@ def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], 
     assignments = Assignment.query.join(Class_).join(InClass).join(User).filter(
         User.netid == netid,
         Assignment.hidden == False,
+        Assignment.release_date <= datetime.now(),
         *filters
     ).order_by(Assignment.due_date.desc()).all()
 
@@ -78,7 +84,8 @@ def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], 
 
 
 @cache.memoize(timeout=3, unless=is_debug)
-def get_submissions(netid: str, class_name=None, assignment_name=None, assignment_id=None) -> Union[List[Dict[str, str]], None]:
+def get_submissions(netid: str, class_name=None, assignment_name=None, assignment_id=None) -> Union[
+    List[Dict[str, str]], None]:
     """
     Get all submissions for a given netid. Cache the results. Optionally specify
     a class_name and / or assignment_name for additional filtering.
@@ -114,13 +121,44 @@ def get_submissions(netid: str, class_name=None, assignment_name=None, assignmen
     return [s.full_data for s in submissions]
 
 
+@cache.memoize(timeout=60 * 60, unless=is_debug)
+def get_assigned_questions(assignment_id: int, user_id: int):
+    # Get assigned questions
+    assigned_questions = AssignedStudentQuestion.query.filter(
+        AssignedStudentQuestion.assignment_id == assignment_id,
+        AssignedStudentQuestion.owner_id == user_id,
+    ).all()
+
+    return [
+        assigned_question.data
+        for assigned_question in assigned_questions
+    ]
+
+
+def bulk_regrade_submission(submissions):
+    """
+    Regrade a batch of submissions
+    :param submissions:
+    :return:
+    """
+    response = []
+    for submission in submissions:
+        response.append(regrade_submission(submission))
+    return response
+
+
 def regrade_submission(submission):
     """
     Regrade a submission
 
-    :param submission: Submissions
+    :param submission: Union[Submissions, int]
     :return: dict response
     """
+
+    if isinstance(submission, int):
+        submission = Submission.query.filter_by(id=submission).first()
+        if submission is None:
+            return error_response('could not find submission')
 
     if not submission.processed:
         return error_response('submission currently being processed')
@@ -129,7 +167,7 @@ def regrade_submission(submission):
     submission.state = 'Waiting for resources...'
     submission.init_submission_models()
 
-    enqueue_webhook_rpc(submission.id)
+    enqueue_webhook(submission.id)
 
     return success_response({'message': 'regrade started'})
 
@@ -247,7 +285,7 @@ def fix_dangling():
                 db.session.add(s)
                 db.session.commit()
                 fixed.append(s.data)
-                enqueue_webhook_rpc(s.id)
+                enqueue_webhook(s.id)
 
     dangling_submissions = Submission.query.filter(
         Submission.owner_id == None
@@ -270,7 +308,7 @@ def fix_dangling():
             db.session.add(s)
             db.session.commit()
             fixed.append(s.data)
-            enqueue_webhook_rpc(s.id)
+            enqueue_webhook(s.id)
 
     return fixed
 
@@ -283,7 +321,7 @@ def stats_for(student_id, assignment_id):
     Submission.assignment_id == assignment_id,
     Submission.owner_id == student_id,
     Submission.processed == True,
-    ).order_by(Submission.last_updated.desc()).all():
+    ).order_by(Submission.created.desc()).all():
         correct_count = sum(map(lambda result: 1 if result.passed else 0, submission.test_results))
 
         if correct_count >= best_count:
@@ -292,14 +330,14 @@ def stats_for(student_id, assignment_id):
     return best.id if best is not None else None
 
 
-@cache.cached(timeout=60*60)
+@cache.cached(timeout=60 * 60)
 def get_students(class_name: str = 'Intro. to Operating Systems'):
     return [s.data for s in User.query.join(InClass).join(Class_).filter(
         Class_.name == class_name,
     ).all()]
 
 
-@cache.cached(timeout=60*60)
+@cache.cached(timeout=60 * 60)
 def get_students_in_class(class_id):
     return [c.data for c in User.query.join(InClass).join(Class_).filter(
         Class_.id == class_id,
@@ -307,7 +345,7 @@ def get_students_in_class(class_id):
     ).all()]
 
 
-@cache.memoize(timeout=60*60, unless=is_debug)
+@cache.memoize(timeout=60 * 60, unless=is_debug)
 def bulk_stats(assignment_id, netids=None):
     bests = {}
 
@@ -328,11 +366,12 @@ def bulk_stats(assignment_id, netids=None):
         netid = student['netid']
         if submission_id is None:
             # no submission
-            bests[netid] = 'No successful submissions'
+            bests[netid] = 'No submission'
         else:
             submission = Submission.query.filter(
                 Submission.id == submission_id
             ).first()
+            repo_path = parse('https://github.com/{}', submission.repo.repo_url)[0]
             best_count = sum(map(lambda x: 1 if x.passed else 0, submission.test_results))
             late = 'past due' if assignment.due_date < submission.created else False
             late = 'past grace' if assignment.grace_date < submission.created else late
@@ -342,14 +381,10 @@ def bulk_stats(assignment_id, netids=None):
                 'test_results': [submission_test_result.stat_data for submission_test_result in
                                  submission.test_results],
                 'total_tests_passed': best_count,
-                'repo_url': submission.repo.repo_url,
-                'master': 'https://github.com/{}'.format(
-                    submission.repo.repo_url[submission.repo.repo_url.index(':') + 1:-len('.git')],
-                ),
-                'commit_tree': 'https://github.com/{}/tree/{}'.format(
-                    submission.repo.repo_url[submission.repo.repo_url.index(':') + 1:-len('.git')],
-                    submission.commit
-                ),
+                'full_stats': 'https://anubis.osiris.services/api/private/submission/{}'.format(submission.id),
+                'master': 'https://github.com/{}'.format(repo_path),
+                'commits': 'https://github.com/{}/commits/master'.format(repo_path),
+                'commit_tree': 'https://github.com/{}/tree/{}'.format(repo_path, submission.commit),
                 'late': late
             }
 
@@ -482,3 +517,62 @@ def _verify_data_shape(data, shape, path=None) -> Tuple[bool, Union[str, None]]:
 
     return True, None
 
+
+def split_chunks(lst, n):
+    """
+    Split lst into list of lists size n.
+
+    :return: list of lists
+    """
+    _chunks = []
+    for i in range(0, len(lst), n):
+        _chunks.append(lst[i:i + n])
+    return _chunks
+
+
+def rand():
+    return sha256(urandom(32)).hexdigest()
+
+
+@cache.memoize(timeout=60*5)
+def theia_redirect_url(theia_session_id: int, netid: str) -> str:
+    """
+    Generates the url for redirecting to the theia proxy for the given session.
+
+    :param theia_session_id:
+    :param netid:
+    :return:
+    """
+    return "https://{}/initialize?token={}".format(
+        config.THEIA_DOMAIN,
+        get_token(netid, session_id=theia_session_id),
+    )
+
+
+def theia_redirect(theia_session: TheiaSession, user: User):
+    return redirect(theia_redirect_url(theia_session.id, user.netid))
+
+
+@cache.memoize(timeout=1)
+def theia_list_all(user_id: int, limit: int = 10):
+    theia_sessions: List[TheiaSession] = TheiaSession.query.filter(
+        TheiaSession.owner_id == user_id,
+    ).order_by(TheiaSession.created.desc()).limit(limit).all()
+
+    return [
+        theia_session.data
+        for theia_session in theia_sessions
+    ]
+
+
+@cache.memoize(timeout=1)
+def theia_poll_ide(theia_session_id: int, user_id: int):
+    theia_session = TheiaSession.query.filter(
+        TheiaSession.id == theia_session_id,
+        TheiaSession.owner_id == user_id,
+    ).first()
+
+    if theia_session is None:
+        return None
+
+    return theia_session.data

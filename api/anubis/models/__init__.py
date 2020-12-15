@@ -62,15 +62,14 @@ class Class_(db.Model):
 
     @property
     def total_assignments(self):
-        return len(list(self.assignments))
+        return self.open_assignments
 
     @property
     def open_assignments(self):
         now = datetime.now()
         return Assignment.query.filter(
             Assignment.class_id == self.id,
-            Assignment.release_date >= now,
-            Assignment.due_date <= now
+            Assignment.release_date <= now,
         ).count()
 
     @property
@@ -113,6 +112,7 @@ class Assignment(db.Model):
     github_classroom_url = db.Column(db.String(256), nullable=True)
     pipeline_image = db.Column(db.String(256), unique=True, nullable=True)
     unique_code = db.Column(db.String(8), unique=True, default=lambda: base64.b16encode(os.urandom(4)).decode())
+    ide_enabled = db.Column(db.Boolean, default=True)
 
     # Dates
     release_date = db.Column(db.DateTime, nullable=False)
@@ -132,7 +132,6 @@ class Assignment(db.Model):
             'course': self.class_.data,
             'description': self.description,
             'github_classroom_link': self.github_classroom_url,
-
             'tests': [t.data for t in self.tests]
         }
 
@@ -171,6 +170,15 @@ class AssignmentRepo(db.Model):
     owner = db.relationship(User, cascade='all,delete')
     assignment = db.relationship(Assignment, cascade='all,delete')
     submissions = db.relationship('Submission', cascade='all,delete')
+
+    @property
+    def data(self):
+        return {
+            'github_username': self.github_username,
+            'assignment_name': self.assignment.name,
+            'class_name': self.assignment.class_.class_code,
+            'repo_url': self.repo_url,
+        }
 
 
 class AssignmentTest(db.Model):
@@ -313,6 +321,8 @@ class Submission(db.Model):
 
         :return:
         """
+        logging.info('initializing submission {}'.format(self.id))
+
         # If the models already exist, yeet
         if len(self.test_results) != 0:
             SubmissionTestResult.query.filter_by(submission_id=self.id).delete()
@@ -325,7 +335,7 @@ class Submission(db.Model):
         # Find tests for the current assignment
         tests = AssignmentTest.query.filter_by(assignment_id=self.assignment_id).all()
 
-        logging.error('found tests: {}'.format(list(map(lambda x: x.data, tests))))
+        logging.debug('found tests: {}'.format(list(map(lambda x: x.data, tests))))
 
         for test in tests:
             tr = SubmissionTestResult(submission=self, assignment_test=test)
@@ -334,7 +344,7 @@ class Submission(db.Model):
         db.session.add(sb)
 
         self.processed = False
-        self.state = 'Reset'
+        self.state = 'Waiting for resources...'
         db.session.add(self)
 
         # Commit new models
@@ -379,7 +389,6 @@ class Submission(db.Model):
             'assignment_name': self.assignment.name,
             'assignment_due': str(self.assignment.due_date),
             'class_code': self.assignment.class_.class_code,
-            'url': self.url,
             'commit': self.commit,
             'processed': self.processed,
             'state': self.state,
@@ -480,3 +489,50 @@ class SubmissionBuild(db.Model):
         data = self.data
         del data['stdout']
         return data
+
+
+class TheiaSession(db.Model):
+    __tablename__ = 'theia_session'
+
+    # id
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    owner_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
+    assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), nullable=False)
+    repo_id = db.Column(db.Integer, db.ForeignKey(AssignmentRepo.id), nullable=False)
+
+    active = db.Column(db.Boolean, default=True)
+    state = db.Column(db.String(128))
+    cluster_address = db.Column(db.String(256), nullable=True, default=None)
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    ended = db.Column(db.DateTime, nullable=True, default=None)
+    last_heartbeat = db.Column(db.DateTime, default=datetime.now)
+    last_proxy = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    repo = db.relationship(AssignmentRepo)
+    owner = db.relationship(User)
+    assignment = db.relationship(Assignment)
+
+    @property
+    def data(self):
+        from anubis.utils.data import theia_redirect_url
+
+        return {
+            'id': self.id,
+            'assignment_id': self.assignment_id,
+            'assignment_name': self.assignment.name,
+            'class_name': self.assignment.class_.class_code,
+            'repo_id': self.repo_id,
+            'repo_url': self.repo.repo_url,
+            'redirect_url': theia_redirect_url(self.id, self.owner.netid),
+            'active': self.active,
+            'state': self.state,
+            'created': str(self.created),
+            'ended': str(self.ended),
+            'last_heartbeat': str(self.last_heartbeat),
+            'last_proxy': str(self.last_proxy),
+            'last_updated': str(self.last_updated),
+        }

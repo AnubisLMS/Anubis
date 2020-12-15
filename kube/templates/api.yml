@@ -1,0 +1,301 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    component: api
+
+spec:
+  selector:
+    matchLabels:
+      app: api
+  replicas: {{ .Values.api.replicas }}
+  {{- if .Values.api.rollingUpdates }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  revisionHistoryLimit: 3
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      # dnsPolicy: Default
+      # nodeSelector:
+      #   datacenter: sdc
+      containers:
+      - name: api
+        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        ports:
+        - name: web
+          containerPort: 5000
+        resources:
+         {{- toYaml .Values.api.resources | nindent 10 }}
+        env:
+        - name: "DEBUG"
+          value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+        - name: "DISABLE_ELK"
+          value: "0"
+        # Gunicorn workers
+        - name: "WORKERS"
+          value: {{ .Values.api.workers | quote }}
+        {{- if .Values.api.gunicorn_options }}
+        - name: "GUNICORN_OPTIONS"
+          value: {{ .Values.api.gunicorn_options }}
+        {{- end }}
+        - name: "SECRET_KEY"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: secret-key
+        - name: "OAUTH_CONSUMER_KEY"
+          valueFrom:
+            secretKeyRef:
+              name: oauth
+              key: consumer-key
+        - name: "OAUTH_CONSUMER_SECRET"
+          valueFrom:
+            secretKeyRef:
+              name: oauth
+              key: consumer-secret
+        - name: DB_HOST
+          value: mariadb.mariadb.svc.cluster.local
+        # sqlalchemy uri
+        - name: "DATABASE_URI"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-uri
+        - name: "THEIA_DOMAIN"
+          value: {{ .Values.theia.proxy.domain | quote }}
+        {{- if .Values.api.healthCheck }}
+        livenessProbe:
+          exec:
+            command:
+              - curl
+              - http://localhost:5000/
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        {{- end }}
+
+      # Mail container
+      - name: smtp
+        image: namshi/smtp
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debug
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: debug
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+
+spec:
+  selector:
+    matchLabels:
+      app: debug
+  template:
+    metadata:
+      labels:
+        app: debug
+    spec:
+      dnsPolicy: ClusterFirst
+      containers:
+      - name: jupyter
+        image: registry.osiris.services/anubis/api-dev:v2.0.0
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        ports:
+        - name: web
+          containerPort: 5003
+        resources:
+          limits:
+            memory: "200Mi"
+          requests:
+            memory: "100Mi"
+        env:
+          - name: DB_HOST
+            value: mariadb.mariadb.svc.cluster.local
+          # sqlalchemy uri
+          - name: "DATABASE_URI"
+            valueFrom:
+              secretKeyRef:
+                name: api
+                key: database-uri
+
+      - name: adminer
+        image: adminer
+        env:
+        - name: "ADMINER_DEFAULT_SERVER"
+          value: "mariadb.mariadb.svc.cluster.local"
+        ports:
+        - name: adminer
+          containerPort: 8080
+        resources:
+          limits:
+            memory: "200Mi"
+          requests:
+            memory: "100Mi"
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: anubis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  selector:
+    app: api
+  ports:
+  - name: web
+    port: 5000
+    targetPort: 5000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: debug
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: debug
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  selector:
+    app: debug
+  ports:
+  - name: adminer
+    port: 5002
+    targetPort: 8080
+  - name: jupyter
+    port: 5003
+    targetPort: 5003
+
+---
+# Strip prefix /api
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: anubis
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  stripPrefix:
+    prefixes:
+      - "/api"
+---
+# Declaring the user list
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: private-api-basicauth
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+
+spec:
+  basicAuth:
+    secret: private-api-basicauth
+
+---
+# Note: in a kubernetes secret the string (e.g. generated by htpasswd) must be base64-encoded first.
+# To create an encoded user:password pair, the following command can be used:
+# htpasswd -nb user password | openssl base64
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: private-api-basicauth
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+
+data:
+  users: |2
+    bGludXhpc2xvdmU6JDJ5JDA1JEptLldYL1Nrb2h1WHNkZWZuaE1OdWVod1kwc2tN
+    RTRubG5JSEs0NnpLS0hxNlM3b1RPVjJD
+
+---
+# Public Ingress Route /api/public/*
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingress.route.anubis.api.public
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - kind: Rule
+    match: Host(`{{ .Values.domain }}`) && PathPrefix(`/api/`)
+    middlewares:
+    {{- if .Values.vpnOnly }}
+    - name: whitelist-vpn
+      namespace: traefik
+    {{- end }}
+    - name: strip-api
+      namespace: {{ .Release.Namespace }}
+    services:
+    - name: anubis
+      port: 5000
+  tls:
+    certResolver: tls
+
+---
+# Private Ingress Route /api/private/*
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingress.route.anubis.api.private
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - kind: Rule
+    match: Host(`{{ .Values.domain }}`) && PathPrefix(`/api/private/`)
+    middlewares:
+    {{- if .Values.vpnOnly }}
+    - name: whitelist-vpn
+      namespace: traefik
+    {{- end }}
+    - name: strip-api
+      namespace: {{ .Release.Namespace }}
+    - name: private-api-basicauth
+      namespace: {{ .Release.Namespace }}
+    services:
+    - name: anubis
+      port: 5000
+  tls:
+    certResolver: tls

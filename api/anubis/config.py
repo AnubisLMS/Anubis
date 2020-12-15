@@ -17,9 +17,14 @@ class Config:
     OAUTH_CONSUMER_KEY = ''
     OAUTH_CONSUMER_SECRET = ''
 
-    ADMINS = os.environ.get('ADMINS', 'jmc1283@nyu.edu')
-
+    # Cache config
     CACHE_REDIS_HOST = 'redis'
+
+    # Logger config
+    LOGGER_NAME = os.environ.get('LOGGER_NAME', default='anubis-api')
+
+    # Theia config
+    THEIA_DOMAIN = os.environ.get('THEIA_DOMAIN', default='ide.anubis.osiris.services')
 
     def __init__(self):
         self.DEBUG = os.environ.get('DEBUG', default='0') == '1'
@@ -34,6 +39,12 @@ class Config:
 
         # Redis
         self.CACHE_REDIS_HOST = os.environ.get('CACHE_REDIS_HOST', default='redis')
+
+        # Logger
+        self.LOGGER_NAME = os.environ.get('LOGGER_NAME', default='anubis-api')
+
+        # Theia
+        self.THEIA_DOMAIN = os.environ.get('THEIA_DOMAIN', default='ide.anubis.osiris.services')
 
         logging.info('Starting with DATABASE_URI: {}'.format(
             self.SQLALCHEMY_DATABASE_URI))

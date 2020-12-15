@@ -53,7 +53,7 @@ def post(path: str, data: dict, params=None):
     # Attempt to contact the pipeline API
     try:
         res = requests.post(
-            'http://anubis-pipeline-api:5000' + path,
+            'http://pipeline-api:5000' + path,
             headers=headers,
             params=params,
             json=data,
@@ -85,6 +85,7 @@ def report_panic(message: str, traceback: str, ):
         'message': message,
         'traceback': traceback,
     }
+    print(traceback)
     logging.info('report_error {}'.format(json.dumps(data, indent=2)))
     post('/pipeline/report/panic/{}'.format(SUBMISSION_ID), data)
 
@@ -157,14 +158,14 @@ def get_assignment_data() -> dict:
 
     # Figure out filename
     assignment_filename = None
-    for assignment_filename_option in ['assignment.yml', 'assignment.yaml']:
+    for assignment_filename_option in ['meta.yml', 'meta.yaml']:
         if os.path.isfile(assignment_filename_option):
             assignment_filename = assignment_filename_option
             break
 
     # Make sure we figured out the metadata filename
     if assignment_filename is None:
-        report_panic('No assignment.yml was found', '')
+        report_panic('No meta.yml was found', '')
         exit(0)
 
     # Load yaml

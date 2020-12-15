@@ -26,9 +26,14 @@ export default function useSubscribe(path, interval, until, callback) {
             data: data.data.data,
           }
           setState(newState);
-          callback(state, newState);
+          if (callback)
+            callback(state, newState);
         })
         .catch(function (error) {
+          if (!error.response) {
+            console.error(error)
+            return;
+          }
           if (error.response.status === 401)
             window.location = '/api/public/login';
           setState({

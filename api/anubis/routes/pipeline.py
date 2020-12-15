@@ -34,7 +34,7 @@ def pipeline_report_panic(submission: Submission):
         'owner_id': submission.owner_id, 'data': json.dumps(request.json)})
 
     submission.processed = True
-    submission.state = 'Whoops! There was an error on our end. The Anubis admins have been notified.'
+    submission.state = 'Whoops! There was an error on our end. The error has been logged.'
     submission.errors = {'panic': request.json}
 
     db.session.add(submission)

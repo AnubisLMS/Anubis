@@ -6,7 +6,7 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import {Redirect} from "react-router-dom";
 import Typography from "@material-ui/core/Typography";
-import Divider from "@material-ui/core/Divider";
+import Zoom from "@material-ui/core/Zoom";
 import ReactMarkdownWithHtml from "react-markdown/with-html";
 import htmlParser from 'react-markdown/plugins/html-parser';
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
@@ -37,7 +37,7 @@ const parseHtml = htmlParser({
 
 const renderers = {
   code: ({language, value}) => {
-    return <SyntaxHighlighter style={dark} language={language} children={value} />
+    return <SyntaxHighlighter style={dark} language={language} children={value}/>
   }
 }
 
@@ -88,8 +88,10 @@ function Question({questions}) {
 export default function Questions() {
   const classes = useStyles();
   const query = useQuery();
-  const {loading, error, data} = useGet(`/api/public/assignment/questions/get/${query.get('assignmentId')}`)
+  const assignmentId = query.get('assignmentId');
+  const {loading, error, data} = useGet(`/api/public/assignment/questions/get/${assignmentId}`)
 
+  if (assignmentId === null) return <React.Fragment/>
   if (loading) return <CircularProgress/>;
   if (error) return <Redirect to={`/error`}/>
 
@@ -102,9 +104,20 @@ export default function Questions() {
 
   const questions = data.questions.map(translateQuestion);
 
+  if (questions.length === 0) {
+    return <React.Fragment/>
+  }
+
   return (
-    <Question
-      questions={questions}
-    />
+    <Zoom in={true} timeout={200}>
+      <React.Fragment>
+        <Typography variant="body1">
+          Questions
+        </Typography>
+        <Question
+          questions={questions}
+        />
+      </React.Fragment>
+    </Zoom>
   )
 }

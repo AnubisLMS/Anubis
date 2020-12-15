@@ -36,6 +36,7 @@ services:
     environment:
       - "DEBUG=1"
       - "DB_HOST=db"
+      - "THEIA_DOMAIN=ide.localhost"
     ports:
       - 127.0.0.1:5000:5000
     volumes:
@@ -216,6 +217,21 @@ services:
     volumes:
       - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
 
+  theia:
+    image: registry.osiris.services/anubis/theia:latest
+    build: ./theia/theia
+
+  theia-proxy:
+    image: registry.osiris.services/anubis/theia-proxy:latest
+    build: ./theia/proxy
+
+  theia-init:
+    image: registry.osiris.services/anubis/theia-init:latest
+    build: ./theia/init
+
+  theia-sidecar:
+    image: registry.osiris.services/anubis/theia-sidecar:latest
+    build: ./theia/sidecar
 
 volumes:
   traefik_data:

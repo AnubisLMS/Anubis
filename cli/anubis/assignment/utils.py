@@ -1,8 +1,9 @@
+import subprocess
 import functools
 import logging
-import os
-import subprocess
 import typing
+import json
+import os
 
 DEBUG = os.environ.get('DEBUG', default='0') == '1'
 
@@ -60,7 +61,7 @@ def exec_as_student(cmd, timeout=60) -> typing.Tuple[str, int]:
         stdout = subprocess.check_output(
             ["env", "-i", "su", "student", "-c", cmd],
             timeout=timeout,
-            # stderr=subprocess.STDOUT,
+            stderr=subprocess.STDOUT,
         )
     except subprocess.CalledProcessError as e:
         stdout = e.output
@@ -115,3 +116,78 @@ def register_build(func):
     build_function = wrapper
 
     return wrapper
+
+
+def trim(stdout: str):
+    stdout = stdout.split('\n')
+    try:
+        stdout = stdout[stdout.index('init: starting sh')+1:]
+    except ValueError or IndexError:
+        return stdout
+
+    while len(stdout) != 0 and (len(stdout[-1].strip()) == 0 or stdout[-1].strip() == '$'):
+        stdout.pop()
+
+    if len(stdout) != 0 and stdout[-1].endswith('$'):
+        stdout[-1] = stdout[-1].rstrip('$')
+
+    if len(stdout) != 0 and stdout[0].startswith('$'):
+        stdout[0] = stdout[0].lstrip('$').strip()
+
+    for index in range(len(stdout)):
+        stdout[index] = stdout[index].strip()
+
+    if len(stdout) != 0 and 'terminating on signal 15' in stdout[-1]:
+        stdout.pop()
+
+    if len(stdout) != 0:
+        stdout[-1] = stdout[-1].strip('$')
+
+    print(json.dumps(stdout, indent=2))
+    return stdout
+
+
+def verify_expected(stdout, expected):
+    def test_lines(lines, _expected):
+        return len(lines) == len(_expected) \
+               and all(l.strip() == e.strip() for l, e in zip(lines, _expected))
+
+    if not test_lines(stdout, expected):
+        return (
+            'your lines:\n' + '\n'.join(stdout) + '\n\nwe expected:\n' + '\n'.join(expected),
+            'Did not recieve exepected output',
+            False
+        )
+    else:
+        return (
+            'test passed, we recieved the expected output',
+            'Expected output found',
+            True
+        )
+
+
+def xv6_run(cmd):
+    command = 'timeout 5 qemu-system-i386 -serial mon:stdio ' \
+              '-drive file=./xv6.img,media=disk,index=0,format=raw ' \
+              '-drive file=./fs.img,media=disk,index=1,format=raw ' \
+              '-smp 1 -m 512 -display none -nographic'
+
+    with open('command', 'w') as f:
+        f.write('\n' + cmd + '\n')
+    stdout, retcode = exec_as_student(command + ' < command')
+    stdout = stdout.decode()
+    stdout = stdout.split('\n')
+
+    boot_line = None
+    for index, line in enumerate(stdout):
+        if line.endswith('xv6...'):
+            boot_line = index
+            break
+
+    if boot_line is not None:
+        stdout = stdout[boot_line:]
+
+    stdout = '\n'.join(stdout)
+
+    return trim(stdout), retcode
+

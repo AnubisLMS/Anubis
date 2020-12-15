@@ -4,10 +4,6 @@ import logstash
 from flask import Flask
 from anubis.utils.logger import logger
 
-logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.StreamHandler())
-
-
 def init_services(app):
     """
     Initialize app with redis cache, mariadb database, and ELK services
@@ -37,12 +33,11 @@ def init_services(app):
     def index():
         return 'Hello there...!'
 
+    # Make app logger anubis logger
+    app.logger = logger
+
     # Add ELK stuff
     if not config.DISABLE_ELK:
-        # Add logstash handler
-        logger.addHandler(logstash.LogstashHandler('logstash', 5000))
-        app.logger = logger
-
         # Add elastic global error handler
         add_global_error_handler(app)
 

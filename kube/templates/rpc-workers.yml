@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pipeline-rpc
+  namespace: {{ .Release.Namespace }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    component: pipeline-rpc
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rpc-workers
+  namespace: {{ .Release.Namespace }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    component: pipeline-rpc-workers
+
+spec:
+  selector:
+    matchLabels:
+      app: rpc-workers
+  replicas: {{ .Values.rpc_workers.replicas }}
+  {{- if .Values.api.rollingUpdates }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  revisionHistoryLimit: 10
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        app: rpc-workers
+    spec:
+      serviceAccountName: pipeline-rpc
+      dnsPolicy: ClusterFirst
+      containers:
+      - name: anubis-rpc-worker
+        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        command:
+        - "rq"
+        - "worker"
+        - "-u"
+        - "redis://redis"
+        env:
+        - name: "DEBUG"
+          value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+        - name: "IMAGE_PULL_POLICY"
+          value: {{ .Values.imagePullPolicy }}
+        # sqlalchemy uri
+        - name: "DATABASE_URI"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-uri
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pipeline-create-jobs
+  namespace: {{ .Release.Namespace }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    rbac.authorization.k8s.io/pipeline-create-jobs: "true"
+rules:
+- apiGroups: ["batch", "extensions"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "watch", "create", "delete"]
+
+- apiGroups: [""]
+  resources: ["pods", "persistentvolumeclaims"]
+  verbs: ["get", "list", "watch", "create", "delete", "deletecollection"]
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: pipeline-create-jobs
+  namespace: {{ .Release.Namespace }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pipeline-create-jobs
+subjects:
+  - kind: ServiceAccount
+    name: pipeline-rpc
+    namespace: anubis
