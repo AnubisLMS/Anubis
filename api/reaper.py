@@ -2,7 +2,7 @@ from flask import has_request_context
 from datetime import datetime, timedelta
 from anubis.app import create_app
 from anubis.models import db, Submission, Assignment, TheiaSession
-from anubis.utils.data import bulk_stats
+from anubis.utils.students import bulk_stats
 from anubis.utils.redis_queue import enqueue_ide_stop, enqueue_ide_reap_stale
 from sqlalchemy import func, and_
 import json

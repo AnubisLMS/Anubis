@@ -13,10 +13,10 @@ from anubis.utils.auth import current_user
 from anubis.utils.auth import get_token
 from anubis.utils.cache import cache
 from anubis.utils.data import error_response, success_response, is_debug
-from anubis.utils.data import fix_dangling
-from anubis.utils.data import get_classes, get_assignments, get_submissions, get_assigned_questions
-from anubis.utils.data import regrade_submission
-from anubis.utils.data import theia_redirect, theia_list_all, theia_poll_ide, theia_redirect_url
+from anubis.utils.assignments import get_classes, get_assignments, get_submissions, get_assigned_questions
+from anubis.utils.submissions import regrade_submission, fix_dangling
+from anubis.utils.theia import theia_redirect_url, theia_redirect, theia_list_all, theia_poll_ide
+from anubis.utils.theia import get_n_available_sessions
 from anubis.utils.decorators import json_endpoint, json_response, require_user, load_from_id
 from anubis.utils.elastic import log_endpoint, esindex
 from anubis.utils.http import get_request_ip
@@ -473,7 +473,10 @@ def public_ide_list():
     """
     user: User = current_user()
 
+    active_count, max_count = get_n_available_sessions()
+
     return success_response({
+        'session_available': active_count < max_count,
         'sessions': theia_list_all(user.id)
     })
 

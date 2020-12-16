@@ -12,10 +12,12 @@ from anubis.models import Assignment, AssignmentQuestion, AssignedStudentQuestio
 from anubis.models import TheiaSession
 from anubis.utils.auth import get_token
 from anubis.utils.cache import cache
-from anubis.utils.data import regrade_submission, bulk_regrade_submission, is_debug
+from anubis.utils.data import is_debug
+from anubis.utils.submissions import bulk_regrade_submission, regrade_submission, fix_dangling
 from anubis.utils.data import success_response, error_response
-from anubis.utils.data import bulk_stats, get_students, get_assigned_questions
-from anubis.utils.data import fix_dangling, _verify_data_shape, split_chunks
+from anubis.utils.students import get_students, bulk_stats
+from anubis.utils.assignments import get_assigned_questions
+from anubis.utils.data import _verify_data_shape, split_chunks
 from anubis.utils.decorators import json_response, json_endpoint, load_from_id
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.redis_queue import enqueue_webhook, rpc_enqueue
