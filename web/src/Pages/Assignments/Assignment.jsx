@@ -161,7 +161,7 @@ export default function AssignmentCard(props) {
         </Button>
         <Button
           style={{color: githubLinkEnabled ? blue[500] : grey[500]}}
-          startIcon={<GitHubIcon style={{color: ideEnabled ? blue[500] : grey[500]}}/>}
+          startIcon={<GitHubIcon style={{color: githubLinkEnabled ? blue[500] : grey[500]}}/>}
           disabled={!githubLinkEnabled}
           component={"a"}
           href={githubClassroomLink}
