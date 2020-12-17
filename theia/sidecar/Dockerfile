@@ -1,14 +1,14 @@
 FROM alpine:latest
 
 RUN adduser -D -u 1001 theia \
-  && apk add --update --no-cache fcron git busybox-suid \
-  && chmod +x /usr/sbin/fcron
+  && apk add --update --no-cache dcron git busybox-suid
 
 VOLUME /home/project
 
 COPY entrypoint.sh /entrypoint.sh
 COPY autosave.sh /autosave.sh
 
-CMD /entrypoint.sh
+USER theia
+ENTRYPOINT /entrypoint.sh
 
 

@@ -28,9 +28,7 @@ def get_n_available_sessions() -> Tuple[int, int]:
     return active_ide_count, max_ides
 
 
-
-
-@cache.memoize(timeout=60*5)
+# @cache.memoize(timeout=60 * 5)
 def theia_redirect_url(theia_session_id: int, netid: str) -> str:
     """
     Generates the url for redirecting to the theia proxy for the given session.
@@ -39,7 +37,7 @@ def theia_redirect_url(theia_session_id: int, netid: str) -> str:
     :param netid:
     :return:
     """
-    return "https://{}/initialize?token={}".format(
+    return "https://{}/initialize?token={}&anubis=1".format(
         config.THEIA_DOMAIN,
         get_token(netid, session_id=theia_session_id),
     )

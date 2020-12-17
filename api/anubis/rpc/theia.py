@@ -69,7 +69,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         ports=[client.V1ContainerPort(container_port=3000)],
         resources=client.V1ResourceRequirements(
             limits={'cpu': '2', 'memory': '500Mi'},
-            requests={'cpu': '500m', 'memory': '250Mi'},
+            requests={'cpu': '250m', 'memory': '100Mi'},
         ),
         volume_mounts=[
             client.V1VolumeMount(

@@ -64,4 +64,4 @@ def get_token(netid: str, **extras) -> Union[str, None]:
         'netid': user.netid,
         'exp': datetime.utcnow() + timedelta(hours=6),
         **extras,
-    }, config.SECRET_KEY, algorithm='HS256').decode()
+    }, config.SECRET_KEY).decode()
