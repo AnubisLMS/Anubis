@@ -3,7 +3,7 @@
 Anubis is a cluster of services that work together to automatically test and grade OS3224 
 assignment submissions. 
 
-![alt img](docs/img/20200324_195235.jpg)
+![alt img](docs/static/img/20200324_195235.jpg)
 
 ## Overview
 The basic flow of a submission (from the students prospective) is as follows:
@@ -19,4 +19,9 @@ fail the tests, they should go back to step 2.
 This is quite simply a large scale CD/CI for OS3224 assignments with some other metrics, and tracking 
 built in. If you are unfamiliar with what CD/CI is, you can read up on it 
 [here](https://en.wikipedia.org/wiki/CI/CD).
+
+
+## Anubis Cloud IDE
+
+![alt img](docs/static/img/20201217_235040.jpg)
 
