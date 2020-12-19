@@ -1,10 +1,15 @@
 from datetime import datetime
 from typing import Union, List, Dict
+from sqlalchemy import or_, and_
+import traceback
 
-from anubis.models import Class_, InClass, User, Assignment, Submission, AssignedStudentQuestion
+from dateutil.parser import parse as date_parse, ParserError
+from anubis.models import db, Class_, InClass, User, Assignment, Submission, AssignmentTest
 from anubis.utils.auth import load_user
 from anubis.utils.cache import cache
-from anubis.utils.data import is_debug
+from anubis.utils.data import is_debug, error_response
+from anubis.utils.logger import logger
+from anubis.utils.questions import ingest_questions
 
 
 @cache.memoize(timeout=60, unless=is_debug)
@@ -100,15 +105,61 @@ def get_submissions(netid: str, class_name=None, assignment_name=None, assignmen
     return [s.full_data for s in submissions]
 
 
-@cache.memoize(timeout=60 * 60, unless=is_debug)
-def get_assigned_questions(assignment_id: int, user_id: int):
-    # Get assigned questions
-    assigned_questions = AssignedStudentQuestion.query.filter(
-        AssignedStudentQuestion.assignment_id == assignment_id,
-        AssignedStudentQuestion.owner_id == user_id,
-    ).all()
+def assignment_sync(assignment_data):
+    assignment = Assignment.query.filter(
+        Assignment.unique_code == assignment_data['unique_code']
+    ).first()
 
-    return [
-        assigned_question.data
-        for assigned_question in assigned_questions
-    ]
+    # Attempt to find the class
+    c = Class_.query.filter(
+        or_(Class_.name == assignment_data["class"],
+            Class_.class_code == assignment_data["class"])
+    ).first()
+    if c is None:
+        return 'Unable to find class', False
+
+    # Check if it exists
+    if assignment is None:
+        assignment = Assignment(unique_code=assignment_data['unique_code'])
+
+    # Update fields
+    assignment.name = assignment_data['name']
+    assignment.hidden = assignment_data['hidden']
+    assignment.description = assignment_data['description']
+    assignment.pipeline_image = assignment_data['pipeline_image']
+    assignment.github_classroom_url = assignment_data['github_classroom_url']
+    assignment.class_ = c
+    try:
+        assignment.release_date = date_parse(assignment_data['date']['release'])
+        assignment.due_date = date_parse(assignment_data['date']['due'])
+        assignment.grace_date = date_parse(assignment_data['date']['grace'])
+    except ParserError:
+        logger.error(traceback.format_exc())
+        return 'Unable to parse datetime', 406
+
+    db.session.add(assignment)
+    db.session.commit()
+
+    for i in AssignmentTest.query.filter(
+        and_(AssignmentTest.assignment_id == assignment.id,
+             AssignmentTest.name.notin_(assignment_data['tests']))
+        ).all():
+        db.session.delete(i)
+    db.session.commit()
+
+    for test_name in assignment_data['tests']:
+        assignment_test = AssignmentTest.query.filter(
+            Assignment.id == assignment.id,
+            AssignmentTest.name == test_name,
+        ).join(Assignment).first()
+
+        if assignment_test is None:
+            assignment_test = AssignmentTest(assignment=assignment, name=test_name)
+            db.session.add(assignment_test)
+            db.session.commit()
+
+    accepted, ignored, rejected = ingest_questions(assignment_data['questions'], assignment)
+    question_message = {'accepted': accepted, 'ignored': ignored, 'rejected': rejected}
+
+    return {'assignment': assignment.data, 'questions': question_message}, True
+

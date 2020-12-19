@@ -7,6 +7,7 @@ cd ${1:-/home/project}
 
 echo "Autosaving @ $(date)"
 
+git push
 git add .
 git commit -m "Anubis Cloud IDE Autosave"
 git push

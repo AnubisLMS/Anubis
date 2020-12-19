@@ -13,7 +13,8 @@ from anubis.utils.auth import current_user
 from anubis.utils.auth import get_token
 from anubis.utils.cache import cache
 from anubis.utils.data import error_response, success_response, is_debug
-from anubis.utils.assignments import get_classes, get_assignments, get_submissions, get_assigned_questions
+from anubis.utils.assignments import get_classes, get_assignments, get_submissions
+from anubis.utils.questions import get_assigned_questions
 from anubis.utils.submissions import regrade_submission, fix_dangling
 from anubis.utils.theia import theia_redirect_url, theia_redirect, theia_list_all, theia_poll_ide
 from anubis.utils.theia import get_n_available_sessions
@@ -333,7 +334,16 @@ def public_webhook():
     assignment = Assignment.query.filter(
         Assignment.unique_code.in_(webhook['repository']['name'].split('-'))
     ).first()
-    user = User.query.filter(User.github_username == github_username).first()
+
+    # Get github username from the repository name
+    repo_name_split = webhook['repository']['name'].split('-')
+    unique_code_index = repo_name_split.index(assignment.unique_code)
+    repo_name_split = repo_name_split[unique_code_index + 1:]
+    github_username1 = '-'.join(repo_name_split)
+    github_username2 = '-'.join(repo_name_split[:-1])
+    user = User.query.filter(
+        User.github_username.in_([github_username1, github_username2])
+    ).first()
 
     # The before Hash will be all 0s on for the first hash.
     # We will want to ignore both this first push (the initialization of the repo)
@@ -344,15 +354,6 @@ def public_webhook():
             'repo_url': repo_url, 'github_username': github_username,
             'assignment_name': assignment_name, 'commit': commit,
         })
-
-        repo_name_split = webhook['repository']['name'].split('-')
-        unique_code_index = repo_name_split.index(assignment.unique_code)
-        repo_name_split = repo_name_split[unique_code_index+1:]
-        github_username1 = '-'.join(repo_name_split)
-        github_username2 = '-'.join(repo_name_split[:-1])
-        user = User.query.filter(
-            User.github_username.in_([github_username1, github_username2])
-        ).first()
 
         if user is not None:
             repo = AssignmentRepo(owner=user, assignment=assignment,

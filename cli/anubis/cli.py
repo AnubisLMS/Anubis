@@ -150,13 +150,25 @@ def assignment():
     pass
 
 
+@main.group()
+def questions():
+    pass
+
+
+@questions.command()
+def assign():
+    assignment_meta = yaml.safe_load(open('meta.yml').read())
+    unique_code = assignment_meta['assignment']['unique_code']
+    get_json('/private/questions/assign/{}'.format(unique_code))
+
+
 @assignment.command()
 def sync():
     assignment_meta = yaml.safe_load(open('meta.yml').read())
-    click.echo(json.dumps(assignment_meta, indent=2))
+    # click.echo(json.dumps(assignment_meta, indent=2))
     import assignment
     import utils
-    assignment_meta['tests'] = list(utils.registered_tests.keys())
+    assignment_meta['assignment']['tests'] = list(utils.registered_tests.keys())
     r = post_json('/private/assignment/sync', assignment_meta)
     click.echo(json.dumps(r.json(), indent=2))
 
@@ -227,10 +239,6 @@ def stats(assignment, netids):
 @click.option('--push/-p', default=False)
 def build(path, push):
     assignment_meta = yaml.safe_load(open(os.path.join(path, 'meta.yml')).read())
-
-    # Build base image
-    assert os.system('docker build -t {} {}'.format(
-        'registry.osiris.services/anubis/assignment-base:latest', assignment_base)) == 0
 
     # Build assignment image
     assert os.system('docker build -t {} {}'.format(
