@@ -112,7 +112,7 @@ export default function AssignmentCard(props) {
     <Card className={classes.root}>
       <CardActionArea
         component={Link}
-        to={`/api/public/ide/initialize/${assignmentId}`}>
+        to={`/courses/assignments/submissions?assignmentId=${assignmentId}`}>
         <CardContent>
 
           <Typography className={classes.title} color="textSecondary" gutterBottom>
