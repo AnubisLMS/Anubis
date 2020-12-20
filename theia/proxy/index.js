@@ -134,7 +134,7 @@ var proxyServer = http.createServer(function (req, res) {
         return;
       }
 
-      updateProxyTime(token.session_id);
+      // updateProxyTime(token.session_id);
       get_session_ip(token.session_id).then((session_ip) => {
         proxy.web(req, res, {
           target: {
@@ -150,7 +150,11 @@ proxyServer.on("upgrade", function (req, socket) {
   const {token, url} = parse_req(req);
   log_req(req, url);
 
-  updateProxyTime(token.session_id);
+  if (token === null) {
+    return
+  }
+
+  // updateProxyTime(token.session_id);
   get_session_ip(token.session_id).then((session_ip) => {
     proxy.ws(req, socket, {
       target: {
@@ -166,6 +170,10 @@ proxyServer.on("error", function (error) {
 })
 
 proxy.on('error', function(error) {
+  console.error(error);
+})
+
+process.on('uncaughtException', function(error) {
   console.error(error);
 })
 
