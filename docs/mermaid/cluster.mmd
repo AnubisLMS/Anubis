@@ -1,0 +1,101 @@
+graph LR
+    subgraph Anubis
+
+    subgraph users
+    subgraph students_group[students]
+    student1(student)
+    student2(student)
+    student3(student)
+    student4(student)
+    student5(student) --- student1
+    student6(student) --- student2
+    student7(student) --- student3
+    student8(student) --- student4
+    end
+    subgraph admins [Admins]
+    ta(TA)
+    professor(Professor)
+    end
+    end
+
+
+    subgraph Cluster
+
+    subgraph traefik_group[Traefik]
+    traefik[Traefik]
+    end
+
+    subgraph theia [Anubis Cloud IDE]
+    theia_proxy1((theia proxy))
+    theia_proxy2((theia proxy))
+    theia1((theia session 1337))
+    theia2((theia session 1338))
+    theia3((theia session 1339))
+    end
+
+    subgraph API [API]
+    api1((API 1))
+    api2((API 1))
+    api3((API 1))
+    end
+
+    subgraph web_group [Static]
+    web1((web static))
+    web2((web static))
+    web3((web static))
+    end
+
+    subgraph logging [logging]
+    logstash
+    end
+
+    subgraph state_group [State Stores]
+    db[(Database)]
+    elastic[(elasticsearch)]
+    redis((redis cache))
+    end
+
+
+    subgraph rpc_cluster
+    rpc1{{RPC Worker}}
+    rpc2{{RPC Worker}}
+    rpc3{{RPC Worker}}
+    rpc4{{RPC Worker}}
+    end
+
+    subgraph pipeline_group [submission pipeline jobs]
+    submission1[submission job 1337]
+    submission2[submission job 1338]
+    submission3[submission job 1339]
+    pipeline_api((pipeline API))
+    end
+
+    end
+
+    end
+
+
+
+
+    student1 & student2 & student3 & student4 ==> |Ingress| traefik
+    ta & professor --> |Ingress| traefik
+
+    traefik --> web1 & web2 & web3 & api1 & api2 & api3
+    traefik --> theia_proxy1 & theia_proxy2
+
+    theia_proxy1 -.-> |forward| theia1 & theia2
+    theia_proxy2 -.-> |forward| theia3
+    rpc1 -.-> |create| theia1 & theia2 & theia3
+
+    api1 & api2 & api3 -.-> |log| logstash
+    api1 & api2 & api3 ==> db
+    api1 & api2 & api3 --> |cache or push rpc| redis
+    logstash --> |log stream| elastic
+
+    submission1 & submission2 & submission3 --> |push state updates| pipeline_api
+
+    rpc2 -.-> |create| submission1
+    rpc3 -.-> |create| submission2
+    rpc4 -.-> |create| submission3
+    rpc1 & rpc2 & rpc3 & rpc4 -.-> |rpc poll| redis
+    pipeline_api --> |store| db

@@ -1,12 +1,12 @@
 # Deploy
 
-I would recomend that before attempting to deploy, familiarise yourself with the different 
+I would recommend that before attempting to deploy, familiarize yourself with the different
 [services](services.md) that make up Anubis.
 
-## Server Resource Recomendations
+## Server Resource Recommendations
 
 The scale at which you deploy Anubis is configurable, but it still is a hefty cluster of services that
-wont work on a raspberry pi. I would recommend these as the *minimum* specs the server Anubis runs on 
+wont work on a raspberry pi. I would recommend these as the *minimum* specs the server Anubis runs on
 should have.
 
 ```
@@ -38,14 +38,14 @@ sudo systemctl start docker
 sudo usermod -aG docker ${USER}
 
 # Get jq installed
-sudo apt update && sudo apt upgrade && sudo apt install -y jq 
+sudo apt update && sudo apt upgrade && sudo apt install -y jq
 ```
 
 ## Configuration
 
-Most of the configuration for deploying Anubis is made to be done through the environment variables. My 
-recomendation is that you use a `.env` file for holding your configuration on the server. You can put a file 
-called `.env` at the root of the project directory with `key=value` on each line. A sample `.env` file would 
+Most of the configuration for deploying Anubis is made to be done through the environment variables. My
+recommendation is that you use a `.env` file for holding your configuration on the server. You can put a file
+called `.env` at the root of the project directory with `key=value` on each line. A sample `.env` file would
 look like this:
 
 ```
@@ -65,13 +65,12 @@ Please take care to not commit any of these values to the repo. They should be k
 - DOMAIN - dns domain that the server resides on
 - BOMBLAB_DOMAIN - dns domain for bomblab
 
-The AUTH environment variable is used to set the username password for all the services that are locked 
+The AUTH environment variable is used to set the username password for all the services that are locked
 behind http basic auth. Those services include the private section of the api, the cli, and kibana. To generate
 the AUTH environment variable, we can use a simple docker command:
 
 ```
-docker run -it httpd htpasswd -Bbn '<username>' '<password>' 
+docker run -it httpd htpasswd -Bbn '<username>' '<password>'
 ```
 
 This will print out a username password hash that you can use for the AUTH environment variable.
-
