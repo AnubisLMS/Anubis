@@ -3,13 +3,14 @@ import json
 from flask import Blueprint, Response
 
 from anubis.models import User
-from anubis.utils.auth import create_token
+from anubis.utils.auth import create_token, require_admin
 from anubis.utils.http import error_response, success_response
 
 auth = Blueprint('admin-auth', __name__, url_prefix='/admin/auth')
 
 
 @auth.route('/token/<netid>')
+@require_admin
 def private_token_netid(netid):
     """
     For debugging, you can use this to sign in as the given user.

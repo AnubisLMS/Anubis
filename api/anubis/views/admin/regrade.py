@@ -4,6 +4,7 @@ from anubis.models import Submission, Assignment
 from anubis.rpc.batch import rpc_bulk_regrade
 from anubis.utils.data import split_chunks
 from anubis.utils.decorators import json_response
+from anubis.utils.auth import require_admin
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response
 from anubis.utils.redis_queue import enqueue_webhook, rpc_enqueue
@@ -12,6 +13,7 @@ regrade = Blueprint('admin-regrade', __name__, url_prefix='/admin/regrade')
 
 
 @regrade.route('/submission/<commit>')
+@require_admin
 @log_endpoint('cli', lambda: 'regrade-commit')
 @json_response
 def private_regrade_submission(commit):
@@ -44,6 +46,7 @@ def private_regrade_submission(commit):
 
 
 @regrade.route('/<assignment_name>')
+@require_admin
 @log_endpoint('cli', lambda: 'regrade')
 @json_response
 def private_regrade_assignment(assignment_name):

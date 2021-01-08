@@ -552,6 +552,7 @@ class StaticFile(db.Model):
 
     # Fields
     filename = db.Column(db.String(256))
+    path = db.Column(db.String(256))
     content_type = db.Column(db.String(128))
     blob = db.Column(db.BLOB)
     hidden = db.Column(db.Boolean)

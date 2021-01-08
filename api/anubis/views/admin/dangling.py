@@ -5,11 +5,13 @@ from anubis.utils.decorators import json_response
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import success_response
 from anubis.utils.submissions import fix_dangling
+from anubis.utils.auth import require_admin
 
 dangling = Blueprint('admin-dangling', __name__, url_prefix='/admin/dangling')
 
 
 @dangling.route('/')
+@require_admin
 @log_endpoint('cli', lambda: 'dangling')
 @json_response
 def private_dangling():
@@ -31,6 +33,7 @@ def private_dangling():
 
 
 @dangling.route('/reset')
+@require_admin
 @log_endpoint('reset-dangling', lambda: 'reset-dangling')
 @json_response
 def private_reset_dangling():
@@ -42,6 +45,7 @@ def private_reset_dangling():
 
 
 @dangling.route('/fix')
+@require_admin
 @log_endpoint('cli', lambda: 'fix-dangling')
 @json_response
 def private_fix_dangling():

@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Union
 
 from flask import request
@@ -57,3 +58,43 @@ def success_response(data: Union[dict, str, None]) -> dict:
         'error': None,
         'data': data,
     }
+
+
+def get_number_arg(arg_name: str = "number", default_value: int = 10) -> int:
+    n = request.args.get(arg_name, default=default_value)
+    try:
+        return int(n)
+    except ValueError:
+        return default_value
+
+
+def get_request_file_stream() -> Union[bytes, None]:
+    """
+    Get first file uploaded in the request. Will return None if
+    there is no file uploaded.
+
+    :return:
+    """
+
+    # Check to see if we have a single file
+    if len(request.files) != 1:
+        return None
+
+    # Read its stream
+    return list(request.files.values())[0].stream.read()
+
+
+def get_request_days_offset():
+    """
+    From the days and offset values specified in GET query, construct
+    datetime objects for the start and end time.
+
+    :return:
+    """
+    days = get_number_arg('days', default_value=100)
+    offset = get_number_arg('offset', default_value=0)
+
+    start_time = datetime.utcnow() - timedelta(days=offset + days)
+    end_time = start_time + timedelta(days=days)
+
+    return start_time, end_time

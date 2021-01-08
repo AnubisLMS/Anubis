@@ -4,9 +4,9 @@ from typing import Union, List, Tuple
 
 from flask import request
 
-from anubis.models import User, Submission
+from anubis.models import Submission
 from anubis.utils.auth import current_user
-from anubis.utils.data import jsonify
+from anubis.utils.data import jsonify, _verify_data_shape
 from anubis.utils.http import error_response
 
 
@@ -21,46 +21,6 @@ def load_from_id(model, verify_owner=True):
             return func(r, *args, **kwargs)
 
         return decorator
-
-    return wrapper
-
-
-def require_user(func):
-    """
-    Wrap a function to require a user to be logged in.
-    If they are not logged in, they will get an Unathed
-    error response with status code 401.
-
-    :param func:
-    :return:
-    """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        u = current_user()
-        if u is None:
-            return error_response('Unauthenticated'), 401
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
-def require_admin(func):
-    """
-    Wrap a function to require an admin to be logged in.
-    If they are not logged in, they will get an Unathed
-    error response with status code 401.
-
-    :param func:
-    :return:
-    """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        u = User.current_user()
-        if u is None or u.is_admin is False:
-            return error_response('Unauthenticated'), 401
-        return func(*args, **kwargs)
 
     return wrapper
 

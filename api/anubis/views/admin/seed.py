@@ -1,8 +1,19 @@
 from flask import Blueprint
 
-from anubis.models import SubmissionTestResult, SubmissionBuild, Submission, AssignmentRepo, AssignmentTest, InClass, \
-    Assignment, Class_, User, db
+from anubis.models import (
+    db,
+    SubmissionTestResult,
+    SubmissionBuild,
+    Submission,
+    AssignmentRepo,
+    AssignmentTest,
+    InClass,
+    Assignment,
+    Class_,
+    User,
+)
 from anubis.utils.decorators import json_response
+from anubis.utils.auth import require_admin
 from anubis.utils.http import success_response
 from anubis.utils.redis_queue import enqueue_webhook
 
@@ -10,6 +21,7 @@ seed = Blueprint('admin-seed', __name__, url_prefix='/admin/seed')
 
 
 @seed.route('/seed')
+@require_admin
 @json_response
 def private_seed():
     # Yeet

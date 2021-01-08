@@ -6,10 +6,11 @@ def register_public_views(app):
     from anubis.views.public.profile import profile
     from anubis.views.public.submissions import submissions
     from anubis.views.public.assignments import assignments
+    from anubis.views.public.static import static
 
     views = [
         auth, ide, repos, webhook, profile,
-        submissions, assignments
+        submissions, assignments, static
     ]
 
     for view in views:

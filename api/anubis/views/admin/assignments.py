@@ -6,11 +6,13 @@ from anubis.utils.decorators import load_from_id, json_response, json_endpoint
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response
 from anubis.utils.questions import get_assigned_questions
+from anubis.utils.auth import require_admin
 
 assignments = Blueprint('admin-assignments', __name__, url_prefix='/admin/assignments')
 
 
 @assignments.route('/assignment/<int:id>/questions/get/<string:netid>')
+@require_admin
 @log_endpoint('cli', lambda: 'question get')
 @load_from_id(Assignment, verify_owner=False)
 @json_response
@@ -33,6 +35,7 @@ def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str
 
 
 @assignments.route('/assignment/sync', methods=['POST'])
+@require_admin
 @log_endpoint('cli', lambda: 'assignment-sync')
 @json_endpoint(required_fields=[('assignment', dict)])
 def private_assignment_sync(assignment_data: dict):

@@ -3,8 +3,8 @@ from typing import List
 from flask import Blueprint
 
 from anubis.models import User, AssignmentRepo, Assignment
-from anubis.utils.auth import current_user
-from anubis.utils.decorators import require_user, json_response
+from anubis.utils.auth import current_user, require_user
+from anubis.utils.decorators import json_response
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import success_response
 

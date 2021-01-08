@@ -4,8 +4,8 @@ from datetime import timedelta, datetime
 from flask import Blueprint, request
 
 from anubis.models import User, db
-from anubis.utils.auth import current_user
-from anubis.utils.decorators import require_user, json_response
+from anubis.utils.auth import current_user, require_user
+from anubis.utils.decorators import json_response
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response
 from anubis.utils.logger import logger

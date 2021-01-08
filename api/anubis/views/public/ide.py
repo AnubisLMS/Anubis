@@ -4,8 +4,8 @@ from typing import Dict
 from flask import Blueprint, redirect
 
 from anubis.models import User, TheiaSession, db, Assignment, AssignmentRepo
-from anubis.utils.auth import current_user
-from anubis.utils.decorators import require_user, json_response, load_from_id
+from anubis.utils.auth import current_user, require_user
+from anubis.utils.decorators import json_response, load_from_id
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response
 from anubis.utils.redis_queue import enqueue_ide_stop, enqueue_ide_initialize

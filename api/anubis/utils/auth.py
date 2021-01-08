@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from functools import wraps
 from typing import Union
 
 import jwt
@@ -7,6 +8,7 @@ from flask import request
 
 from anubis.config import config
 from anubis.models import User
+from anubis.utils.http import error_response
 
 
 def get_user(netid: Union[str, None]) -> Union[User, None]:
@@ -90,3 +92,43 @@ def create_token(netid: str, **extras) -> Union[str, None]:
         'exp': datetime.utcnow() + timedelta(hours=6),
         **extras,
     }, config.SECRET_KEY).decode()
+
+
+def require_user(func):
+    """
+    Wrap a function to require a user to be logged in.
+    If they are not logged in, they will get an Unathed
+    error response with status code 401.
+
+    :param func:
+    :return:
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        user = current_user()
+        if user is None:
+            return error_response('Unauthenticated'), 401
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def require_admin(func):
+    """
+    Wrap a function to require an admin to be logged in.
+    If they are not logged in, they will get an Unathed
+    error response with status code 401.
+
+    :param func:
+    :return:
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        user = current_user()
+        if user is None or user.is_admin is False:
+            return error_response('Unauthenticated'), 401
+        return func(*args, **kwargs)
+
+    return wrapper

@@ -5,6 +5,7 @@ from flask import Blueprint, request
 from anubis.models import Submission
 from anubis.utils.cache import cache
 from anubis.utils.decorators import json_response, load_from_id
+from anubis.utils.auth import require_admin
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import success_response
 from anubis.utils.questions import get_assigned_questions
@@ -15,6 +16,7 @@ stats = Blueprint('admin-stats', __name__, url_prefix='/admin/stats')
 
 @stats.route('/assignment/<assignment_id>')
 @stats.route('/assignment/<assignment_id>/<netid>')
+@require_admin
 @log_endpoint('cli', lambda: 'stats')
 @json_response
 def private_stats_assignment(assignment_id, netid=None):
@@ -52,6 +54,7 @@ def private_stats_assignment(assignment_id, netid=None):
 
 
 @stats.route('/submission/<int:id>')
+@require_admin
 @log_endpoint('cli', lambda: 'submission-stats')
 @load_from_id(Submission, verify_owner=False)
 @json_response

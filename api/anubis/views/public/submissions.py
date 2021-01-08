@@ -2,10 +2,10 @@ from flask import Blueprint, request
 
 from anubis.models import User, Submission
 from anubis.utils.assignments import get_submissions
-from anubis.utils.auth import current_user
+from anubis.utils.auth import current_user, require_user
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug
-from anubis.utils.decorators import require_user, json_response
+from anubis.utils.decorators import json_response
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import get_request_ip, error_response, success_response
 from anubis.utils.submissions import regrade_submission
