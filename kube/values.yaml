@@ -14,7 +14,7 @@ api:
   gunicorn_options: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
 
   image: "registry.osiris.services/anubis/api"
-  tag: "v2.0.0"
+  tag: "latest"
   resources:
     requests:
       memory: "500Mi"
@@ -23,7 +23,7 @@ static:
   replicas: 3
 
   image: "registry.osiris.services/anubis/static"
-  tag: "v2.0.0"
+  tag: "latest"
   healthCheck: true
 
 reaper:
@@ -45,29 +45,11 @@ pipeline_api:
 web:
   replicas: 2
   image: "registry.osiris.services/anubis/web"
-  tag: "v2.0.0"
+  tag: "latest"
 
 logstash:
   image: "registry.osiris.services/anubis/logstash"
   tag: "latest"
-
-elasticsearch:
-  image: "elasticsearch"
-  tag: "7.10.1"
-  storage: "4Gi"
-  storageClassName: "longhorn"
-  initContainer: true
-
-  resources:
-    limits:
-      memory: "2Gi"
-    requests:
-      memory: "2Gi"        
-
-kibana:
-  image: "kibana"
-  tag: "7.10.1"
-
 
 redis:
   image: "redis"

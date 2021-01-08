@@ -1,4 +1,4 @@
-PERSISTENT_SERVICES := db traefik kibana elasticsearch redis logstash adminer
+PERSISTENT_SERVICES := db traefik kibana elasticsearch-coordinating redis-master logstash adminer
 RESTART_ALWAYS_SERVICES := api web
 PUSH_SERVICES := api web logstash
 BUILD_ALLWAYS := api web
@@ -31,14 +31,6 @@ help:
 	@echo 'Available make targets:'
 	@grep PHONY: Makefile | cut -d: -f2 | sed '1d;s/^/make/'
 
-.PHONY: check        # Checks that env vars are set
-check:
-	for var in ACME_EMAIL AUTH DOMAIN; do \
-		if ([ -f .env ] && ! grep -P "^$${var}=" .env &> /dev/null) && [ ! -z "$${var}" ]; then \
-			echo "ERROR $${var} not defined! this variable is required" 1>&2; \
-		fi; \
-	done
-
 .PHONY: build        # Build all docker images
 build:
 	docker-compose build --parallel $(BUILD_ALLWAYS)
@@ -46,11 +38,9 @@ build:
 .PHONY: push         # Push images to registry.osiris.services (requires vpn)
 push: build
 	docker-compose push $(PUSH_SERVICES)
-	docker push 'registry.osiris.services/anubis/assignment-base:latest'
-
 
 .PHONY: debug        # Start the cluster in debug mode
-debug: check build
+debug: build
 	docker-compose up -d $(PERSISTENT_SERVICES)
 	docker-compose up \
 		-d --force-recreate \
@@ -64,18 +54,6 @@ jupyter:
 
 .PHONY: deploy       # Start the cluster in production mode
 deploy: check build restart
-
-
-.PHONY: restart      # Restart the cluster
-restart:
-	docker-compose -f ./docker-compose.yml up -d $(PERSISTENT_SERVICES)
-	docker-compose -f ./docker-compose.yml up \
-		-d --force-recreate \
-		$(RESTART_ALWAYS_SERVICES)
-
-.PHONY: cli          # Install the cli
-cli:
-	sudo pip3 install ./cli
 
 .PHONY: backup       # Backup database to file
 backup:

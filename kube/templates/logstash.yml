@@ -1,0 +1,59 @@
+### ELK stack
+# - Elasticsearch
+# - Logstash
+# - Kibana
+
+
+---
+## Logstash
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: logstash
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+
+spec:
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+        ecosystem: elk
+    spec:
+      containers:
+      - name: logstash
+        image: {{ .Values.logstash.image }}:{{ .Values.logstash.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        ports:
+        - name: web
+          containerPort: 5000
+        - name: api
+          containerPort: 9600
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+  namespace: anubis
+  labels:
+    app: logstash
+spec:
+  selector:
+    app: logstash
+  ports:
+  - name: logstash
+    protocol: UDP
+    port: 5000
+    targetPort: 5000
+  - name: api
+    port: 9600
+    targetPort: 9600
+
+---

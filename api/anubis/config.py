@@ -18,7 +18,8 @@ class Config:
     OAUTH_CONSUMER_SECRET = ''
 
     # Cache config
-    CACHE_REDIS_HOST = 'redis'
+    CACHE_REDIS_HOST = 'redis-master'
+    CACHE_REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', default='anubis')
 
     # Logger config
     LOGGER_NAME = os.environ.get('LOGGER_NAME', default='anubis-api')
