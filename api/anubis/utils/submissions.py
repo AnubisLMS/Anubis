@@ -1,5 +1,5 @@
 from anubis.models import Submission, AssignmentRepo, User, db
-from anubis.utils.data import error_response, success_response
+from anubis.utils.http import error_response, success_response
 from anubis.utils.redis_queue import enqueue_webhook
 
 

@@ -2,7 +2,8 @@ from parse import parse
 
 from anubis.models import Submission, User, InClass, Class_, Assignment
 from anubis.utils.cache import cache
-from anubis.utils.data import is_debug, error_response
+from anubis.utils.data import is_debug
+from anubis.utils.http import error_response
 
 
 @cache.cached(timeout=60 * 60)
@@ -25,9 +26,9 @@ def stats_for(student_id, assignment_id):
     best = None
     best_count = -1
     for submission in Submission.query.filter(
-        Submission.assignment_id == assignment_id,
-        Submission.owner_id == student_id,
-        Submission.processed == True,
+            Submission.assignment_id == assignment_id,
+            Submission.owner_id == student_id,
+            Submission.processed == True,
     ).order_by(Submission.created.desc()).all():
         correct_count = sum(map(lambda result: 1 if result.passed else 0, submission.test_results))
 

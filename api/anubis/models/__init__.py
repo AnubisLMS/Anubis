@@ -1,13 +1,16 @@
 import base64
 import logging
 import os
-from copy import deepcopy
 from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_json import MutableJson
 
+from anubis.utils.data import rand
+
 db = SQLAlchemy()
+
+default_id = lambda: db.Column(db.String(128), primary_key=True, default=rand)
 
 
 class Config(db.Model):
@@ -20,7 +23,7 @@ class User(db.Model):
     __tablename__ = 'user'
 
     # id
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = default_id()
 
     # Fields
     netid = db.Column(db.String(128), primary_key=True, unique=True, index=True)
@@ -50,7 +53,7 @@ class Class_(db.Model):
     __tablename__ = '_class'
 
     # id
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = default_id()
 
     # Fields
     name = db.Column(db.String(256), nullable=False)
@@ -89,8 +92,8 @@ class InClass(db.Model):
     __tablename__ = 'in_class'
 
     # Foreign Keys
-    owner_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
-    class_id = db.Column(db.Integer, db.ForeignKey(Class_.id), primary_key=True)
+    owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
+    class_id = db.Column(db.String(128), db.ForeignKey(Class_.id), primary_key=True)
 
     owner = db.relationship(User, cascade='all,delete')
     class_ = db.relationship(Class_, cascade='all,delete')
@@ -100,10 +103,10 @@ class Assignment(db.Model):
     __tablename__ = 'assignment'
 
     # id
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = default_id()
 
     # Foreign Keys
-    class_id = db.Column(db.Integer, db.ForeignKey(Class_.id), index=True)
+    class_id = db.Column(db.String(128), db.ForeignKey(Class_.id), index=True)
 
     # Fields
     name = db.Column(db.String(256), nullable=False, unique=True)
@@ -157,12 +160,12 @@ class AssignmentRepo(db.Model):
     __tablename__ = 'assignment_repo'
 
     # id
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = default_id()
     github_username = db.Column(db.String(256), nullable=False)
 
     # Foreign Keys
-    owner_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=True)
-    assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), nullable=False)
+    owner_id = db.Column(db.String(128), db.ForeignKey(User.id), nullable=True)
+    assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), nullable=False)
 
     repo_url = db.Column(db.String(128), nullable=False)
 
@@ -185,10 +188,10 @@ class AssignmentTest(db.Model):
     __tablename__ = 'assignment_test'
 
     # id
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = default_id()
 
     # Foreign Keys
-    assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id))
+    assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id))
 
     # Fields
     name = db.Column(db.String(128), index=True)
@@ -207,10 +210,10 @@ class AssignmentQuestion(db.Model):
     __tablename__ = 'assignment_question'
 
     # id
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = default_id()
 
     # Foreign Keys
-    assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), index=True)
+    assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), index=True)
 
     # Fields
     question = db.Column(db.Text, nullable=False)
@@ -255,17 +258,19 @@ class AssignedStudentQuestion(db.Model):
     __tablename__ = 'assigned_student_question'
 
     # id
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = default_id()
+
+    # Fields
     response = db.Column(db.Text, nullable=False, default='')
+
+    # Foreign Keys
+    owner_id = db.Column(db.String(128), db.ForeignKey(User.id))
+    assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), index=True, nullable=False)
+    question_id = db.Column(db.String(128), db.ForeignKey(AssignmentQuestion.id), index=True, nullable=False)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
-
-    # Foreign Keys
-    owner_id = db.Column(db.Integer, db.ForeignKey(User.id))
-    assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), index=True, nullable=False)
-    question_id = db.Column(db.Integer, db.ForeignKey(AssignmentQuestion.id), index=True, nullable=False)
 
     # Relationships
     owner = db.relationship(User, cascade='all,delete')
@@ -290,12 +295,12 @@ class Submission(db.Model):
     __tablename__ = 'submission'
 
     # id
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = default_id()
 
     # Foreign Keys
-    owner_id = db.Column(db.Integer, db.ForeignKey(User.id), index=True, nullable=True)
-    assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), index=True, nullable=False)
-    assignment_repo_id = db.Column(db.Integer, db.ForeignKey(AssignmentRepo.id), nullable=False)
+    owner_id = db.Column(db.String(128), db.ForeignKey(User.id), index=True, nullable=True)
+    assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), index=True, nullable=False)
+    assignment_repo_id = db.Column(db.String(128), db.ForeignKey(AssignmentRepo.id), nullable=False)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
@@ -412,11 +417,11 @@ class SubmissionTestResult(db.Model):
     __tablename__ = 'submission_test_result'
 
     # id
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = default_id()
 
     # Foreign Keys
-    submission_id = db.Column(db.Integer, db.ForeignKey(Submission.id), primary_key=True)
-    assignment_test_id = db.Column(db.Integer, db.ForeignKey(AssignmentTest.id), primary_key=True)
+    submission_id = db.Column(db.String(128), db.ForeignKey(Submission.id), primary_key=True)
+    assignment_test_id = db.Column(db.String(128), db.ForeignKey(AssignmentTest.id), primary_key=True)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
@@ -461,18 +466,18 @@ class SubmissionBuild(db.Model):
     __tablename__ = 'submission_build'
 
     # id
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = default_id()
 
     # Foreign Keys
-    submission_id = db.Column(db.Integer, db.ForeignKey(Submission.id), index=True)
-
-    # Timestamps
-    created = db.Column(db.DateTime, default=datetime.now)
-    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    submission_id = db.Column(db.String(128), db.ForeignKey(Submission.id), index=True)
 
     # Fields
     stdout = db.Column(db.Text)
     passed = db.Column(db.Boolean)
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Relationships
     submission = db.relationship(Submission, cascade='all,delete')
@@ -495,12 +500,14 @@ class TheiaSession(db.Model):
     __tablename__ = 'theia_session'
 
     # id
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = default_id()
 
-    owner_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
-    assignment_id = db.Column(db.Integer, db.ForeignKey(Assignment.id), nullable=False)
-    repo_id = db.Column(db.Integer, db.ForeignKey(AssignmentRepo.id), nullable=False)
+    # Foreign keys
+    owner_id = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
+    assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), nullable=False)
+    repo_id = db.Column(db.String(128), db.ForeignKey(AssignmentRepo.id), nullable=False)
 
+    # Fields
     active = db.Column(db.Boolean, default=True)
     state = db.Column(db.String(128))
     cluster_address = db.Column(db.String(256), nullable=True, default=None)
@@ -535,4 +542,29 @@ class TheiaSession(db.Model):
             'last_heartbeat': str(self.last_heartbeat),
             'last_proxy': str(self.last_proxy),
             'last_updated': str(self.last_updated),
+        }
+
+
+class StaticFile(db.Model):
+    __tablename__ = "static_file"
+
+    id = default_id()
+
+    # Fields
+    filename = db.Column(db.String(256))
+    content_type = db.Column(db.String(128))
+    blob = db.Column(db.BLOB)
+    hidden = db.Column(db.Boolean)
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    @property
+    def data(self):
+        return {
+            'id': self.id,
+            'content_type': self.content_type,
+            'filename': self.filename,
+            'hidden': self.hidden,
         }

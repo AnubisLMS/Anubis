@@ -6,7 +6,8 @@ from flask import request
 
 from anubis.models import User, Submission
 from anubis.utils.auth import current_user
-from anubis.utils.data import error_response, jsonify
+from anubis.utils.data import jsonify
+from anubis.utils.http import error_response
 
 
 def load_from_id(model, verify_owner=True):
@@ -124,7 +125,8 @@ def json_endpoint(required_fields: Union[List[str], List[Tuple], None] = None):
                     # Make sure
                     if field not in json_data:
                         # field missing, return error
-                        return error_response('Malformed requests. Missing field {}.'.format(field)), 406  # Not Acceptable
+                        return error_response(
+                            'Malformed requests. Missing field {}.'.format(field)), 406  # Not Acceptable
 
                     # If a type was specified, verify it
                     if required_type is not None:
@@ -162,6 +164,7 @@ def check_submission_token(func):
     :param func:
     :return:
     """
+
     @wraps(func)
     def wrapper(submission_id: int):
         submission = Submission.query.filter(Submission.id == submission_id).first()
@@ -199,6 +202,7 @@ def check_submission_token(func):
 
         logging.info('Pipeline request validated {}'.format(request.path))
         return func(submission)
+
     return wrapper
 
 
@@ -232,9 +236,3 @@ def verify_shape(*shapes):
         return wrapper
 
     return decorator
-
-
-
-
-
-

@@ -1,10 +1,9 @@
 import random
-from typing import List, Dict, Tuple, Set
+from typing import List, Dict
 
 from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQuestion, User, InClass
 from anubis.utils.cache import cache
 from anubis.utils.data import _verify_data_shape, is_debug
-from anubis.utils.logger import logger
 
 
 def get_question_sequence_mapping(questions: List[AssignmentQuestion]) -> Dict[int, List[AssignmentQuestion]]:

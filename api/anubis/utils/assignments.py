@@ -1,13 +1,14 @@
+import traceback
 from datetime import datetime
 from typing import Union, List, Dict
-from sqlalchemy import or_, and_
-import traceback
 
 from dateutil.parser import parse as date_parse, ParserError
+from sqlalchemy import or_, and_
+
 from anubis.models import db, Class_, InClass, User, Assignment, Submission, AssignmentTest
-from anubis.utils.auth import load_user
+from anubis.utils.auth import get_user
 from anubis.utils.cache import cache
-from anubis.utils.data import is_debug, error_response
+from anubis.utils.data import is_debug
 from anubis.utils.logger import logger
 from anubis.utils.questions import ingest_questions
 
@@ -40,7 +41,7 @@ def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], 
     :return: List[Assignment.data]
     """
     # Load user
-    user = load_user(netid)
+    user = get_user(netid)
 
     # Verify user exists
     if user is None:
@@ -81,7 +82,7 @@ def get_submissions(netid: str, class_name=None, assignment_name=None, assignmen
     :return:
     """
     # Load user
-    user = load_user(netid)
+    user = get_user(netid)
 
     # Verify user exists
     if user is None:
@@ -141,9 +142,9 @@ def assignment_sync(assignment_data):
     db.session.commit()
 
     for i in AssignmentTest.query.filter(
-        and_(AssignmentTest.assignment_id == assignment.id,
-             AssignmentTest.name.notin_(assignment_data['tests']))
-        ).all():
+            and_(AssignmentTest.assignment_id == assignment.id,
+                 AssignmentTest.name.notin_(assignment_data['tests']))
+    ).all():
         db.session.delete(i)
     db.session.commit()
 
@@ -162,4 +163,3 @@ def assignment_sync(assignment_data):
     question_message = {'accepted': accepted, 'ignored': ignored, 'rejected': rejected}
 
     return {'assignment': assignment.data, 'questions': question_message}, True
-

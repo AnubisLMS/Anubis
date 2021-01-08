@@ -3,7 +3,6 @@ import traceback
 from datetime import datetime
 from functools import wraps
 
-from elasticsearch import Elasticsearch
 from flask import request
 from geoip import geolite2
 from werkzeug import exceptions
@@ -12,19 +11,17 @@ from anubis.config import config
 from anubis.utils.http import get_request_ip
 from anubis.utils.logger import logger
 
-es = Elasticsearch(['http://elasticsearch:9200'], timeout=2, max_retries=1, retry_on_timeout=False)
-
 
 def log_endpoint(log_type, message_func):
     """
     Use this to decorate a route and add logging.
-    The message_func should be a calleble object
+    The message_func should be a callable object
     that returns a string to be logged.
 
     eg.
 
-    @log_event('LOG-TYPE', lambda: 'somefunction was just called')
-    def somefunction(arg1, arg2):
+    @log_event('LOG-TYPE', lambda: 'some_function was just called')
+    def some_function(arg1, arg2):
         ....
 
     :log_type str: log type to noted in event
@@ -45,17 +42,14 @@ def log_endpoint(log_type, message_func):
                     method=request.method,
                     path=request.path
                 ), extra={
-                    'ip': get_request_ip(),
-                    'method': request.method,
-                    'path': request.path,
-                })
-                es.index(index='request', body={
-                    'type': log_type.lower(),
-                    'path': request.path,
-                    'msg': message_func(),
-                    'location': location.location[::-1] if location is not None else location,
-                    'ip': ip,
-                    'timestamp': datetime.utcnow(),
+                    'body': {
+                        'type': log_type.lower(),
+                        'path': request.path,
+                        'msg': message_func(),
+                        'location': location.location[::-1] if location is not None else location,
+                        'ip': ip,
+                        'timestamp': datetime.utcnow(),
+                    }
                 })
 
             return function(*args, **kwargs)
@@ -73,13 +67,10 @@ def esindex(index='error', **kwargs):
     """
     if config.DISABLE_ELK:
         return
-    try:
-        es.index(index=index, body={
-            'timestamp': datetime.utcnow(),
-            **kwargs,
-        })
-    except:
-        logger.error('Failed to connect to elasticsearch')
+    logger.info('event', extra={
+        'index': index,
+        'body': kwargs
+    })
 
 
 def add_global_error_handler(app):
@@ -88,14 +79,6 @@ def add_global_error_handler(app):
         tb = traceback.format_exc()  # get traceback string
         logger.error(tb, extra={
             'from': 'global-error-handler',
-            'traceback': tb,
-            'ip': get_request_ip(),
-            'method': request.method,
-            'path': request.path,
-            'query': json.dumps(dict(list(request.args.items()))),
-            'headers': json.dumps(dict(list(request.headers.items()))),
-        })
-        esindex(type='error', body={
             'traceback': tb,
             'ip': get_request_ip(),
             'method': request.method,

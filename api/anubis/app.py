@@ -1,8 +1,6 @@
-import logging
-
-import logstash
 from flask import Flask
 from anubis.utils.logger import logger
+
 
 def init_services(app):
     """
@@ -11,30 +9,20 @@ def init_services(app):
     :param app: Flask app
     :return:
     """
-    from anubis.models import db, Config
+    from anubis.models import db
     from anubis.utils.cache import cache
+    from anubis.utils.migrate import migrate
     from anubis.utils.elastic import add_global_error_handler
     from anubis.config import config
 
     # Init services
     db.init_app(app)
     cache.init_app(app)
-
-    # Initialize the DB
-    with app.app_context():
-        db.create_all()
-
-        if Config.query.filter(Config.key == "MAX_JOBS").first() is None:
-            c = Config(key='MAX_JOBS', value='10')
-            db.session.add(c)
-            db.session.commit()
+    migrate.init_app(app, db)
 
     @app.route('/')
     def index():
-        return 'Hello there...!'
-
-    # Make app logger anubis logger
-    app.logger = logger
+        return 'Hello there...'
 
     # Add ELK stuff
     if not config.DISABLE_ELK:
@@ -52,18 +40,21 @@ def create_app():
     :return: Flask app
     """
     from anubis.config import config
-    from anubis.routes.public import public
-    from anubis.routes.private import private
+
+    # Import views
+    from anubis.views.public import register_public_views
+    from anubis.views.admin import register_admin_views
 
     # Create app
     app = Flask(__name__)
     app.config.from_object(config)
 
+    # Initialize app with all the extra services
     init_services(app)
 
-    # register blueprints
-    app.register_blueprint(public)
-    app.register_blueprint(private)
+    # register views
+    register_public_views(app)
+    register_admin_views(app)
 
     return app
 
@@ -78,12 +69,13 @@ def create_pipeline_app():
     :return: Flask app
     """
     from anubis.config import config
-    from anubis.routes.pipeline import pipeline
+    from anubis.views.pipeline.pipeline import pipeline
 
     # Create app
     app = Flask(__name__)
     app.config.from_object(config)
 
+    # Initialize app with all the extra services
     init_services(app)
 
     # register blueprints

@@ -4,7 +4,7 @@ from werkzeug.utils import redirect
 
 from anubis.config import config
 from anubis.models import TheiaSession, User, Config
-from anubis.utils.auth import get_token
+from anubis.utils.auth import create_token
 from anubis.utils.cache import cache
 
 
@@ -39,7 +39,7 @@ def theia_redirect_url(theia_session_id: int, netid: str) -> str:
     """
     return "https://{}/initialize?token={}&anubis=1".format(
         config.THEIA_DOMAIN,
-        get_token(netid, session_id=theia_session_id),
+        create_token(netid, session_id=theia_session_id),
     )
 
 
