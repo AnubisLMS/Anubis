@@ -7,7 +7,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import red from "@material-ui/core/colors/red";
 
-export default function Warning() {
+export default function Instructions() {
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {

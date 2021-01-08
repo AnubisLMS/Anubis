@@ -1,4 +1,6 @@
-FROM registry.osiris.services/anubis/assignment-base:latest
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update \
   && apt install -y git python3 python3-pip qemu-system-x86 \
@@ -13,5 +15,6 @@ COPY pipeline.py pipeline.py
 COPY utils.py utils.py
 COPY assignment.py assignment.py
 COPY meta.yml meta.yml
+# COPY student /student
 
 CMD python3 pipeline.py

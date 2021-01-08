@@ -57,6 +57,10 @@ function Question({questions}) {
             {questions.map((question, index) => (
               <React.Fragment>
 
+                <Typography variant={"h6"}>
+                  Question {question.sequence})
+                </Typography>
+
                 {/* Question content */}
                 <ReactMarkdownWithHtml renderers={renderers} allowDangerousHtml>
                   {question.question}

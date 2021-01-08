@@ -3,7 +3,7 @@ from anubis.utils.logger import get_logger
 
 def rpc_bulk_regrade(submissions):
     from anubis.app import create_app
-    from anubis.utils.data import bulk_regrade_submission
+    from anubis.utils.submissions import bulk_regrade_submission
 
     app = create_app()
     logger = get_logger()

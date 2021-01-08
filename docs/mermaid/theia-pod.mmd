@@ -1,0 +1,35 @@
+stateDiagram-v2
+    student --> proxy
+    proxy --> theia
+    
+    state proxy {
+        proxy1 : proxy instance
+        proxy2 : proxy instance
+        proxy3 : proxy instance
+    }
+
+    note right of proxy
+        highly replicated proxy deployment
+    end note
+
+    state pod {
+        autosave
+
+        note left of autosave
+            pushes to github every 5 minutes
+        end note
+
+        theia
+
+        note left of theia
+            theia server container
+        end note
+
+        autosave --> volume
+        theia --> volume
+
+        note right of volume
+            shared PV between containers with student repo
+        end note
+
+    }

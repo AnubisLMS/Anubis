@@ -150,6 +150,10 @@ proxyServer.on("upgrade", function (req, socket) {
   const {token, url} = parse_req(req);
   log_req(req, url);
 
+  if (token === null) {
+    return
+  }
+
   // updateProxyTime(token.session_id);
   get_session_ip(token.session_id).then((session_ip) => {
     proxy.ws(req, socket, {
@@ -166,6 +170,10 @@ proxyServer.on("error", function (error) {
 })
 
 proxy.on('error', function(error) {
+  console.error(error);
+})
+
+process.on('uncaughtException', function(error) {
   console.error(error);
 })
 

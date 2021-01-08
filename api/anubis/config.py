@@ -24,7 +24,7 @@ class Config:
     LOGGER_NAME = os.environ.get('LOGGER_NAME', default='anubis-api')
 
     # Theia config
-    THEIA_DOMAIN = os.environ.get('THEIA_DOMAIN', default='ide.anubis.osiris.services')
+    THEIA_DOMAIN = ''
 
     def __init__(self):
         self.DEBUG = os.environ.get('DEBUG', default='0') == '1'
