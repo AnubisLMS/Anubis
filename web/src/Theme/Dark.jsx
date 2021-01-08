@@ -4,32 +4,31 @@ export default function darkTheme() {
   return createMuiTheme({
     palette: {
       primary: {
-        light: "#63ccff",
-        main: "#009be5",
-        dark: "#006db3"
+        light: '#63ccff',
+        main: '#009be5',
+        dark: '#006db3',
       },
-      type: "dark"
+      type: 'dark',
     },
     typography: {
       h5: {
         fontWeight: 500,
         fontSize: 26,
-        letterSpacing: 0.5
-      }
+        letterSpacing: 0.5,
+      },
     },
     shape: {
-      borderRadius: 8
+      borderRadius: 8,
     },
     props: {
       MuiTab: {
-        disableRipple: true
-      }
+        disableRipple: true,
+      },
     },
     mixins: {
       toolbar: {
-        minHeight: 48
-      }
-    }
+        minHeight: 48,
+      },
+    },
   });
-
 }
