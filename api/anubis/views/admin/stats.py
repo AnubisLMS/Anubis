@@ -11,13 +11,13 @@ from anubis.utils.http import success_response
 from anubis.utils.questions import get_assigned_questions
 from anubis.utils.students import get_students, bulk_stats
 
-stats = Blueprint('admin-stats', __name__, url_prefix='/admin/stats')
+stats = Blueprint("admin-stats", __name__, url_prefix="/admin/stats")
 
 
-@stats.route('/assignment/<assignment_id>')
-@stats.route('/assignment/<assignment_id>/<netid>')
+@stats.route("/assignment/<assignment_id>")
+@stats.route("/assignment/<assignment_id>/<netid>")
 @require_admin
-@log_endpoint('cli', lambda: 'stats')
+@log_endpoint("cli", lambda: "stats")
 @json_response
 def private_stats_assignment(assignment_id, netid=None):
     """
@@ -36,8 +36,8 @@ def private_stats_assignment(assignment_id, netid=None):
     :param netid:
     :return:
     """
-    netids = request.args.get('netids', None)
-    force = request.args.get('force', False)
+    netids = request.args.get("netids", None)
+    force = request.args.get("force", False)
 
     if force is not False:
         cache.clear()
@@ -47,15 +47,15 @@ def private_stats_assignment(assignment_id, netid=None):
     elif netid is not None:
         netids = [netid]
     else:
-        netids = list(map(lambda x: x['netid'], get_students()))
+        netids = list(map(lambda x: x["netid"], get_students()))
 
     bests = bulk_stats(assignment_id, netids)
-    return success_response({'stats': bests})
+    return success_response({"stats": bests})
 
 
-@stats.route('/submission/<int:id>')
+@stats.route("/submission/<int:id>")
 @require_admin
-@log_endpoint('cli', lambda: 'submission-stats')
+@log_endpoint("cli", lambda: "submission-stats")
 @load_from_id(Submission, verify_owner=False)
 @json_response
 def private_submission_stats_id(submission: Submission):
@@ -68,10 +68,14 @@ def private_submission_stats_id(submission: Submission):
     :return:
     """
 
-    return success_response({
-        'student': submission.owner.data,
-        'submission': submission.full_data,
-        'assignment': submission.assignment.data,
-        'questions': get_assigned_questions(submission.assignment.id, submission.owner.id),
-        'class': submission.assignment.class_.data,
-    })
+    return success_response(
+        {
+            "student": submission.owner.data,
+            "submission": submission.full_data,
+            "assignment": submission.assignment.data,
+            "questions": get_assigned_questions(
+                submission.assignment.id, submission.owner.id
+            ),
+            "class": submission.assignment.course.data,
+        }
+    )

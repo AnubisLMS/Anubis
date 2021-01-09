@@ -6,10 +6,10 @@ import Grid from '@material-ui/core/Grid';
 export default function MainSwitch() {
   return (
     <Switch>
-      {navconfig.map(({children}) => children.map(({path, page = 'div'}) => (
-        <Route exact path={path}>
+      {navconfig.map(({children}) => children.map(({path, Page = 'div'}) => (
+        <Route exact path={path} key={path}>
           <Grid container spacing={2} justify="center" alignItems="center">
-            <page/>
+            <Page/>
           </Grid>
         </Route>
       )))}

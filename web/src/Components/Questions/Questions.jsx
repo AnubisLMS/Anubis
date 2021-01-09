@@ -1,4 +1,4 @@
-import {useQuery} from '../../hooks/useQuery';
+import useQuery from '../../hooks/useQuery';
 import useGet from '../../hooks/useGet';
 import React from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';

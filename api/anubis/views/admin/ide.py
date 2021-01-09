@@ -7,12 +7,12 @@ from anubis.utils.http import success_response
 from anubis.utils.redis_queue import rpc_enqueue
 from anubis.utils.auth import require_admin
 
-ide = Blueprint('admin-ide', __name__, url_prefix='/admin/ide')
+ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 
 
-@ide.route('/ide/clear')
+@ide.route("/ide/clear")
 @require_admin
-@log_endpoint('cli', lambda: 'clear-ide')
+@log_endpoint("cli", lambda: "clear-ide")
 @json_response
 def private_ide_clear():
     """
@@ -24,4 +24,4 @@ def private_ide_clear():
     """
     rpc_enqueue(reap_all_theia_sessions, tuple())
 
-    return success_response({'state': 'enqueued'})
+    return success_response({"state": "enqueued"})

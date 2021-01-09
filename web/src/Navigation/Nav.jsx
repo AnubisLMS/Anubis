@@ -2,7 +2,7 @@ import React from 'react';
 import {makeStyles} from '@material-ui/core/styles';
 import Hidden from '@material-ui/core/Hidden';
 
-import NavList from './NavList';
+import NavList from '../Components/Navigation/NavList';
 
 const drawerWidth = 256;
 

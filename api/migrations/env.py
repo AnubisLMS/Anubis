@@ -11,9 +11,9 @@ from dotenv import load_dotenv
 if os.environ.get("DB_HOST", None) is None:
     os.environ["DB_HOST"] = "127.0.0.1"
 
-dotenv_path = os.path.join(os.path.dirname(__file__), '../../.env')
+dotenv_path = os.path.join(os.path.dirname(__file__), "../../.env")
 if os.path.exists(dotenv_path):
-    print('Loading env from .env')
+    print("Loading env from .env")
     load_dotenv(dotenv_path=dotenv_path)
 
 try:

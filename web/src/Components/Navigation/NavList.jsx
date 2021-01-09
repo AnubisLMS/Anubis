@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import clsx from 'clsx';
 import {makeStyles} from '@material-ui/core/styles';
 import Divider from '@material-ui/core/Divider';
@@ -7,12 +7,11 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import HomeIcon from '@material-ui/icons/Home';
-import {Link} from 'react-router-dom';
 
-import {footerconfig, navconfig} from './navconfig';
+import {footerconfig, navconfig} from '../../Navigation/navconfig';
 import ExitToAppOutlinedIcon from '@material-ui/icons/ExitToAppOutlined';
 import LaunchOutlinedIcon from '@material-ui/icons/LaunchOutlined';
+import NavItem from './NavItem';
 
 const useStyles = makeStyles((theme) => ({
   categoryHeader: {
@@ -23,8 +22,6 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.common.white,
   },
   item: {
-    'paddingTop': 1,
-    'paddingBottom': 1,
     'color': 'rgba(255, 255, 255, 0.7)',
     '&:hover,&:focus': {
       backgroundColor: 'rgba(255, 255, 255, 0.08)',
@@ -58,6 +55,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function NavList({...other}) {
   const classes = useStyles();
+  const [pathname, setPathname] = useState(window.location.pathname);
 
   return (
     <Drawer variant="permanent" {...other}>
@@ -65,46 +63,17 @@ export default function NavList({...other}) {
         <ListItem className={clsx(classes.firebase, classes.item, classes.itemCategory)} key={0}>
           Anubis
         </ListItem>
-        <ListItem className={clsx(classes.item, classes.itemCategory)} key={1}>
-          <ListItemIcon className={classes.itemIcon}>
-            <HomeIcon/>
-          </ListItemIcon>
-          <ListItemText
-            classes={{
-              primary: classes.itemPrimary,
-            }}
-          >
-            Anubis
-          </ListItemText>
-        </ListItem>
         {navconfig.map(({id, children}) => (
           <React.Fragment key={`${id}-thing`}>
-            <ListItem className={classes.categoryHeader}>
-              <ListItemText
-                classes={{
-                  primary: classes.categoryHeaderPrimary,
-                }}
-              >
-                {id}
-              </ListItemText>
-            </ListItem>
             {children.map(({id: childId, icon, path}) => (
-              <ListItem
+              <NavItem
                 key={childId}
-                button
-                className={clsx(classes.item, window.location.pathname === path && classes.itemActiveItem)}
-                component={Link}
-                to={path}
-              >
-                <ListItemIcon className={classes.itemIcon}>{icon}</ListItemIcon>
-                <ListItemText
-                  classes={{
-                    primary: classes.itemPrimary,
-                  }}
-                >
-                  {childId}
-                </ListItemText>
-              </ListItem>
+                onClick={() => setPathname(path)}
+                childId={childId}
+                icon={icon}
+                path={path}
+                pathname={pathname}
+              />
             ))}
 
             <Divider className={classes.divider}/>
@@ -113,16 +82,15 @@ export default function NavList({...other}) {
       </List>
       <div className={classes.bottomPush}>
         <List>
-          {footerconfig.map(({id, icon, path}) => (
-            <ListItem
-              button key={id}
-              component={Link}
-              to={path}
-              selected={window.location.pathname === path}
-            >
-              <ListItemIcon>{icon}</ListItemIcon>
-              <ListItemText primary={id}/>
-            </ListItem>
+          {footerconfig.map(({id: childId, icon, path}) => (
+            <NavItem
+              key={childId}
+              onClick={() => setPathname(path)}
+              childId={childId}
+              icon={icon}
+              path={path}
+              pathname={pathname}
+            />
           ))}
           <ListItem
             button key="Login"

@@ -1,7 +1,7 @@
 import React from 'react';
 import Chip from '@material-ui/core/Chip';
 import {makeStyles} from '@material-ui/core/styles';
-import {useQuery} from '../hooks/useQuery';
+import useQuery from '../hooks/useQuery';
 
 const useStyles = makeStyles((theme) => ({
   card: {

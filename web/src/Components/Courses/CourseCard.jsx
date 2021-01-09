@@ -37,20 +37,21 @@ const useStyles = makeStyles({
 });
 
 
-export default function CourseCard(props) {
-  const {courseCode, courseName, instructor, section, openAssignments, totalAssignments} = props.course;
+export default function CourseCard({course}) {
   // will have notification to indicate number of open assignment with no submissions
   const classes = useStyles();
   const bull = <span className={classes.bullet}>•</span>;
 
+  const {id, name, course_code, section, professor, total_assignments, open_assignments, semester} = course;
+
   return (
-    <Badge badgeContent={openAssignments} color="error" fontSize="medium">
+    <Badge badgeContent={open_assignments} color="error" fontSize="medium">
 
       <Card className={classes.root}>
 
         <CardActionArea
           component={Link}
-          to={`/courses/assignments?course=${courseCode.replace(/\s+/g, '')}`}>
+          to={`/courses/assignments?course=${id}`}>
 
           <CardContent>
             <Typography
@@ -58,22 +59,22 @@ export default function CourseCard(props) {
               color="textSecondary"
               gutterBottom
             >
-              Fall 2020
+              {semester}
             </Typography>
 
             <Typography className={classes.title} variant="h6" component="h2">
-              {courseName}
+              {name}
             </Typography>
             <Typography className={classes.pos} color="textSecondary">
-              {courseCode} {bull} {section}
+              {course_code} {bull} {section}
             </Typography>
             <Typography variant="body2" component="p">
-              {instructor}
+              {professor}
             </Typography>
           </CardContent>
           <CardActions>
             <Button size="small" color="primary">
-              {`${totalAssignments} Assigments`}
+              {`${total_assignments} Assigments`}
             </Button>
           </CardActions>
 

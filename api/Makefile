@@ -1,9 +1,16 @@
+LINT_DIRECTORIES := \
+	anubis \
+	tests \
+	migrations
+
+LINT_FILES := $(shell find $(LINT_DIRECTORIES) -name '*.py' | xargs)
+
 .PHONY: all
 all: venv
 
 venv:
 	virtualenv -p `which python3.8` venv
-	./venv/bin/pip install -r ./requirements.txt
+	./venv/bin/pip install -r ./requirements.txt -r ./requirements-dev.txt
 
 yeetdb:
 	make -C .. yeetdb
@@ -14,8 +21,7 @@ cleanyeetdb:
 .PHONY: lint             # Run autopep8 then black on lint directories
 lint: venv
 	@echo 'autopep to check and fix un-python things'
-	./venv/bin/autopep8 --in-place --aggressive --aggressive \
-		$(LINT_FILES)
+	./venv/bin/autopep8 --in-place --aggressive --aggressive $(LINT_FILES)
 	@echo 'black to stylize'
 	./venv/bin/black $(LINT_FILES)
 

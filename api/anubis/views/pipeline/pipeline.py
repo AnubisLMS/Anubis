@@ -8,10 +8,10 @@ from anubis.utils.decorators import json_response, check_submission_token, json_
 from anubis.utils.http import error_response, success_response
 from anubis.utils.logger import logger
 
-pipeline = Blueprint('pipeline', __name__, url_prefix='/pipeline')
+pipeline = Blueprint("pipeline", __name__, url_prefix="/pipeline")
 
 
-@pipeline.route('/report/panic/<int:submission_id>', methods=['POST'])
+@pipeline.route("/report/panic/<int:submission_id>", methods=["POST"])
 @json_response
 @check_submission_token
 def pipeline_report_panic(submission: Submission):
@@ -28,14 +28,22 @@ def pipeline_report_panic(submission: Submission):
     :return:
     """
 
-    logger.error('submission panic reported', extra={
-        'type': 'panic_report',
-        'submission_id': submission.id, 'assignment_id': submission.assignment_id,
-        'owner_id': submission.owner_id, 'data': json.dumps(request.json)})
+    logger.error(
+        "submission panic reported",
+        extra={
+            "type": "panic_report",
+            "submission_id": submission.id,
+            "assignment_id": submission.assignment_id,
+            "owner_id": submission.owner_id,
+            "data": json.dumps(request.json),
+        },
+    )
 
     submission.processed = True
-    submission.state = 'Whoops! There was an error on our end. The error has been logged.'
-    submission.errors = {'panic': request.json}
+    submission.state = (
+        "Whoops! There was an error on our end. The error has been logged."
+    )
+    submission.errors = {"panic": request.json}
 
     db.session.add(submission)
     db.session.commit()
@@ -48,12 +56,12 @@ def pipeline_report_panic(submission: Submission):
     #         panic=json.dumps(request.json, indent=2),
     #     ), 'Anubis pipeline panic submission_id={}'.format(submission.id))
 
-    return success_response('Panic successfully reported')
+    return success_response("Panic successfully reported")
 
 
-@pipeline.route('/report/build/<int:submission_id>', methods=['POST'])
+@pipeline.route("/report/build/<int:submission_id>", methods=["POST"])
 @check_submission_token
-@json_endpoint(required_fields=[('stdout', str), ('passed', bool)])
+@json_endpoint(required_fields=[("stdout", str), ("passed", bool)])
 def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **kwargs):
     """
     POSTed json should be of the shape:
@@ -69,10 +77,17 @@ def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **k
     :return:
     """
 
-    logger.info('submission build reported', extra={
-        'type': 'build_report',
-        'submission_id': submission.id, 'assignment_id': submission.assignment_id,
-        'owner_id': submission.owner_id, 'passed': passed, 'stdout': stdout})
+    logger.info(
+        "submission build reported",
+        extra={
+            "type": "build_report",
+            "submission_id": submission.id,
+            "assignment_id": submission.assignment_id,
+            "owner_id": submission.owner_id,
+            "passed": passed,
+            "stdout": stdout,
+        },
+    )
 
     # Update submission build
     submission.build.stdout = stdout
@@ -82,7 +97,7 @@ def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **k
     # submission pipeline is done
     if passed is False:
         submission.processed = True
-        submission.state = 'Build did not succeed'
+        submission.state = "Build did not succeed"
 
     # Add and commit
     db.session.add(submission)
@@ -90,13 +105,27 @@ def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **k
     db.session.commit()
 
     # Report success
-    return success_response('Build successfully reported.')
+    return success_response("Build successfully reported.")
 
 
-@pipeline.route('/report/test/<int:submission_id>', methods=['POST'])
+@pipeline.route("/report/test/<int:submission_id>", methods=["POST"])
 @check_submission_token
-@json_endpoint(required_fields=[('test_name', str), ('passed', bool), ('message', str), ('stdout', str)])
-def pipeline_report_test(submission: Submission, test_name: str, passed: bool, message: str, stdout: str, **kwargs):
+@json_endpoint(
+    required_fields=[
+        ("test_name", str),
+        ("passed", bool),
+        ("message", str),
+        ("stdout", str),
+    ]
+)
+def pipeline_report_test(
+    submission: Submission,
+    test_name: str,
+    passed: bool,
+    message: str,
+    stdout: str,
+    **kwargs
+):
     """
     POSTed json should be of the shape:
 
@@ -115,11 +144,19 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
     :return:
     """
 
-    logger.info('submission test reported', extra={
-        'type': 'test_result',
-        'submission_id': submission.id, 'assignment_id': submission.assignment_id,
-        'owner_id': submission.owner_id, 'test_name': test_name,
-        'test_message': message, 'passed': passed, 'stdout': stdout})
+    logger.info(
+        "submission test reported",
+        extra={
+            "type": "test_result",
+            "submission_id": submission.id,
+            "assignment_id": submission.assignment_id,
+            "owner_id": submission.owner_id,
+            "test_name": test_name,
+            "test_message": message,
+            "passed": passed,
+            "stdout": stdout,
+        },
+    )
 
     submission_test_result: SubmissionTestResult = None
 
@@ -132,8 +169,10 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
 
     # Verify we got a match
     if submission_test_result is None:
-        logger.error('Invalid submission test result reported', extra={'request': request.json})
-        return error_response('Invalid'), 406
+        logger.error(
+            "Invalid submission test result reported", extra={"request": request.json}
+        )
+        return error_response("Invalid"), 406
 
     # Update the fields
     submission_test_result.passed = passed
@@ -144,12 +183,12 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
     db.session.add(submission_test_result)
     db.session.commit()
 
-    return success_response('Test data successfully added.')
+    return success_response("Test data successfully added.")
 
 
-@pipeline.route('/report/state/<int:submission_id>', methods=['POST'])
+@pipeline.route("/report/state/<int:submission_id>", methods=["POST"])
 @check_submission_token
-@json_endpoint(required_fields=[('state', str)])
+@json_endpoint(required_fields=[("state", str)])
 def pipeline_report_state(submission: Submission, state: str, **kwargs):
     """
     POSTed json should be of the shape:
@@ -164,23 +203,29 @@ def pipeline_report_state(submission: Submission, state: str, **kwargs):
     :return:
     """
 
-    logger.info('submission state update', extra={
-        'type': 'state_report',
-        'submission_id': submission.id, 'assignment_id': submission.assignment_id,
-        'owner_id': submission.owner_id, "state": state})
+    logger.info(
+        "submission state update",
+        extra={
+            "type": "state_report",
+            "submission_id": submission.id,
+            "assignment_id": submission.assignment_id,
+            "owner_id": submission.owner_id,
+            "state": state,
+        },
+    )
 
-    processed = request.args.get('processed', default='0')
-    submission.processed = processed != '0'
+    processed = request.args.get("processed", default="0")
+    submission.processed = processed != "0"
 
     # Update state field
     submission.state = state
 
     # If processed was specified and is of type bool, then update that too
-    if 'processed' in request.json and isinstance(request.json['processed'], bool):
-        submission.processed = request.json['processed']
+    if "processed" in request.json and isinstance(request.json["processed"], bool):
+        submission.processed = request.json["processed"]
 
     # Add and commit
     db.session.add(submission)
     db.session.commit()
 
-    return success_response('State successfully updated.')
+    return success_response("State successfully updated.")

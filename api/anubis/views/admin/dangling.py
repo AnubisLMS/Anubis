@@ -7,12 +7,12 @@ from anubis.utils.http import success_response
 from anubis.utils.submissions import fix_dangling
 from anubis.utils.auth import require_admin
 
-dangling = Blueprint('admin-dangling', __name__, url_prefix='/admin/dangling')
+dangling = Blueprint("admin-dangling", __name__, url_prefix="/admin/dangling")
 
 
-@dangling.route('/')
+@dangling.route("/")
 @require_admin
-@log_endpoint('cli', lambda: 'dangling')
+@log_endpoint("cli", lambda: "dangling")
 @json_response
 def private_dangling():
     """
@@ -22,31 +22,28 @@ def private_dangling():
     """
 
     dangling_ = Submission.query.filter(
-        Submission.owner_id == None,
+        Submission.owner_id is None,
     ).all()
     dangling_ = [a.data for a in dangling_]
 
-    return success_response({
-        "dangling": dangling_,
-        "count": len(dangling_)
-    })
+    return success_response({"dangling": dangling_, "count": len(dangling_)})
 
 
-@dangling.route('/reset')
+@dangling.route("/reset")
 @require_admin
-@log_endpoint('reset-dangling', lambda: 'reset-dangling')
+@log_endpoint("reset-dangling", lambda: "reset-dangling")
 @json_response
 def private_reset_dangling():
     resets = []
     for s in Submission.query.filter_by(owner_id=None).all():
         s.init_submission_models()
         resets.append(s.data)
-    return success_response({'reset': resets})
+    return success_response({"reset": resets})
 
 
-@dangling.route('/fix')
+@dangling.route("/fix")
 @require_admin
-@log_endpoint('cli', lambda: 'fix-dangling')
+@log_endpoint("cli", lambda: "fix-dangling")
 @json_response
 def private_fix_dangling():
     """

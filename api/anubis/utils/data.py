@@ -25,10 +25,10 @@ def jsonify(data, status_code=200):
     """
     res = Response(dumps(data))
     res.status_code = status_code
-    res.headers['Content-Type'] = 'application/json'
-    res.headers['Access-Control-Allow-Origin'] = 'https://nyu.cool' \
-        if not environ.get('DEBUG', False) \
-        else 'https://localhost'
+    res.headers["Content-Type"] = "application/json"
+    res.headers["Access-Control-Allow-Origin"] = (
+        "https://nyu.cool" if not environ.get("DEBUG", False) else "https://localhost"
+    )
     return res
 
 
@@ -51,7 +51,7 @@ def send_noreply_email(message: str, subject: str, recipient: str):
     :to str: recipient of email (should be their nyu email)
     """
 
-    if environ.get('DEBUG', False):
+    if environ.get("DEBUG", False):
         return print(message, subject, recipient, flush=True)
 
     message = MIMEText(message, "plain")
@@ -74,7 +74,7 @@ def notify(user, message: str, subject: str):
     :param subject:
     :return:
     """
-    recipient = '{netid}@nyu.edu'.format(netid=user.netid)
+    recipient = "{netid}@nyu.edu".format(netid=user.netid)
     send_noreply_email(message, subject, recipient)
 
 
@@ -213,7 +213,7 @@ def split_chunks(lst, n):
     """
     _chunks = []
     for i in range(0, len(lst), n):
-        _chunks.append(lst[i:i + n])
+        _chunks.append(lst[i : i + n])
     return _chunks
 
 

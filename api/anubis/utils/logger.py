@@ -10,7 +10,7 @@ def get_logger(logger_name):
     logger.setLevel(logging.DEBUG)
 
     if not config.DISABLE_ELK:
-        logger.addHandler(logstash.LogstashHandler('logstash', 5000))
+        logger.addHandler(logstash.LogstashHandler("logstash", 5000))
 
     return logger
 

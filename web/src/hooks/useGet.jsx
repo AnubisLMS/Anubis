@@ -28,12 +28,12 @@ export default function useGet(path, params) {
         });
       })
       .catch(function(error) {
-        if (error.response.status === 401) {
-          window.location = '/api/public/login';
+        if (error.response && error.response.status === 401) {
+          window.location = '/api/public/auth/login';
         }
         setState({
           loading: false,
-          error,
+          error: error,
           data: null,
         });
       });

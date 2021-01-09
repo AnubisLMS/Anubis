@@ -9,6 +9,7 @@ from flask import request
 from anubis.config import config
 from anubis.models import User
 from anubis.utils.http import error_response
+from anubis.utils.data import is_debug
 
 
 def get_user(netid: Union[str, None]) -> Union[User, None]:
@@ -33,7 +34,7 @@ def current_user() -> Union[User, None]:
 
     :return: User or None
     """
-    if g.get('user', default=None) is not None:
+    if g.get("user", default=None) is not None:
         return g.user
 
     # Attempt to get the token from the request
@@ -43,16 +44,16 @@ def current_user() -> Union[User, None]:
 
     # Try to decode the jwt
     try:
-        decoded = jwt.decode(token, config.SECRET_KEY, algorithms=['HS256'])
+        decoded = jwt.decode(token, config.SECRET_KEY, algorithms=["HS256"])
     except Exception as e:
         return None
 
     # Make sure there is a netid in the jwt
-    if 'netid' not in decoded:
+    if "netid" not in decoded:
         return None
 
     # Get the user from the decoded jwt
-    user = get_user(decoded['netid'])
+    user = get_user(decoded["netid"])
 
     # Cache the user in the request context
     g.user = user
@@ -68,7 +69,9 @@ def get_token() -> Union[str, None]:
     :return:
     """
 
-    return request.headers.get('token', default=None) or request.cookies.get('token', default=None)
+    return request.headers.get("token", default=None) or request.cookies.get(
+        "token", default=None
+    )
 
 
 def create_token(netid: str, **extras) -> Union[str, None]:
@@ -87,11 +90,14 @@ def create_token(netid: str, **extras) -> Union[str, None]:
         return None
 
     # Create new token
-    return jwt.encode({
-        'netid': user.netid,
-        'exp': datetime.utcnow() + timedelta(hours=6),
-        **extras,
-    }, config.SECRET_KEY).decode()
+    return jwt.encode(
+        {
+            "netid": user.netid,
+            "exp": datetime.utcnow() + timedelta(hours=6),
+            **extras,
+        },
+        config.SECRET_KEY,
+    )
 
 
 def require_user(func):
@@ -108,7 +114,7 @@ def require_user(func):
     def wrapper(*args, **kwargs):
         user = current_user()
         if user is None:
-            return error_response('Unauthenticated'), 401
+            return error_response("Unauthenticated"), 401
         return func(*args, **kwargs)
 
     return wrapper
@@ -127,8 +133,28 @@ def require_admin(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         user = current_user()
-        if user is None or user.is_admin is False:
-            return error_response('Unauthenticated'), 401
+        if not is_debug() and (user is None or user.is_admin is False):
+            return error_response("Unauthenticated"), 401
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def require_superuser(func):
+    """
+    Wrap a function to require a superuser to be logged in.
+    If they are not logged in, they will get an Unathed
+    error response with status code 401.
+
+    :param func:
+    :return:
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        user = current_user()
+        if not is_debug() and (user is None or user.is_superuser is False):
+            return error_response("Unauthenticated"), 401
         return func(*args, **kwargs)
 
     return wrapper

@@ -12,7 +12,7 @@ from anubis.utils.http import get_request_ip
 from anubis.utils.logger import logger
 
 
-def log_endpoint(log_type, message_func):
+def log_endpoint(log_type, message_func=None):
     """
     Use this to decorate a route and add logging.
     The message_func should be a callable object
@@ -36,21 +36,26 @@ def log_endpoint(log_type, message_func):
 
             # Skip indexing if the app has ELK disabled
             if not config.DISABLE_ELK:
-                logger.info("{ip} -- {date} \"{method} {path}\"".format(
-                    ip=get_request_ip(),
-                    date=datetime.now(),
-                    method=request.method,
-                    path=request.path
-                ), extra={
-                    'body': {
-                        'type': log_type.lower(),
-                        'path': request.path,
-                        'msg': message_func(),
-                        'location': location.location[::-1] if location is not None else location,
-                        'ip': ip,
-                        'timestamp': datetime.utcnow(),
-                    }
-                })
+                logger.info(
+                    '{ip} -- {date} "{method} {path}"'.format(
+                        ip=get_request_ip(),
+                        date=datetime.now(),
+                        method=request.method,
+                        path=request.path,
+                    ),
+                    extra={
+                        "body": {
+                            "type": log_type.lower(),
+                            "path": request.path,
+                            "msg": message_func() if message_func is not None else None,
+                            "location": location.location[::-1]
+                            if location is not None
+                            else location,
+                            "ip": ip,
+                            "timestamp": datetime.utcnow(),
+                        }
+                    },
+                )
 
             return function(*args, **kwargs)
 
@@ -59,7 +64,7 @@ def log_endpoint(log_type, message_func):
     return decorator
 
 
-def esindex(index='error', **kwargs):
+def esindex(index="error", **kwargs):
     """
     Index anything with elasticsearch
 
@@ -67,27 +72,27 @@ def esindex(index='error', **kwargs):
     """
     if config.DISABLE_ELK:
         return
-    logger.info('event', extra={
-        'index': index,
-        'body': kwargs
-    })
+    logger.info("event", extra={"index": index, "body": kwargs})
 
 
 def add_global_error_handler(app):
     @app.errorhandler(Exception)
     def global_err_handler(error):
         tb = traceback.format_exc()  # get traceback string
-        logger.error(tb, extra={
-            'from': 'global-error-handler',
-            'traceback': tb,
-            'ip': get_request_ip(),
-            'method': request.method,
-            'path': request.path,
-            'query': json.dumps(dict(list(request.args.items()))),
-            'headers': json.dumps(dict(list(request.headers.items()))),
-        })
+        logger.error(
+            tb,
+            extra={
+                "from": "global-error-handler",
+                "traceback": tb,
+                "ip": get_request_ip(),
+                "method": request.method,
+                "path": request.path,
+                "query": json.dumps(dict(list(request.args.items()))),
+                "headers": json.dumps(dict(list(request.headers.items()))),
+            },
+        )
         if isinstance(error, exceptions.NotFound):
-            return '', 404
+            return "", 404
         if isinstance(error, exceptions.MethodNotAllowed):
-            return 'MethodNotAllowed', 405
-        return 'err', 500
+            return "MethodNotAllowed", 405
+        return "err", 500

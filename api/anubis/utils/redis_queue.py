@@ -2,7 +2,11 @@ from redis import Redis
 from rq import Queue
 
 from anubis.rpc.pipeline import test_repo
-from anubis.rpc.theia import initialize_theia_session, reap_theia_session, reap_stale_theia_sessions
+from anubis.rpc.theia import (
+    initialize_theia_session,
+    reap_theia_session,
+    reap_stale_theia_sessions,
+)
 from anubis.config import config
 
 
@@ -13,7 +17,7 @@ def rpc_enqueue(func, *args):
     :func callable: any callable object
     :args tuple: ordered arguments for function
     """
-    with Redis(host='redis', password=config.CACHE_REDIS_PASSWORD) as conn:
+    with Redis(host="redis-master", password=config.CACHE_REDIS_PASSWORD) as conn:
         q = Queue(connection=conn)
         q.enqueue(func, *args)
         conn.close()
@@ -21,10 +25,7 @@ def rpc_enqueue(func, *args):
 
 def enqueue_webhook(*args):
     """Enqueues a test job"""
-    rpc_enqueue(
-        test_repo,
-        *args
-    )
+    rpc_enqueue(test_repo, *args)
 
 
 def enqueue_ide_initialize(*args):

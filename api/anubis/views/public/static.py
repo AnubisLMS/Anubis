@@ -5,10 +5,10 @@ from anubis.models import StaticFile
 from anubis.utils.cache import cache
 from anubis.utils.files import make_blob_response
 
-static = Blueprint('public-static', __name__, url_prefix='/public/static')
+static = Blueprint("public-static", __name__, url_prefix="/public/static")
 
 
-@static.route('/<path:path>')
+@static.route("/<path:path>")
 @cache.memoize(timeout=60)
 def public_static(path: str):
     """
@@ -21,9 +21,9 @@ def public_static(path: str):
     """
 
     blob = StaticFile.query.filter(
-        or_(StaticFile.path == path, StaticFile == '/' + path)
+        or_(StaticFile.path == path, StaticFile == "/" + path)
     ).first()
     if blob is None:
-        return '404 Not Found', 404
+        return "404 Not Found", 404
 
     return make_blob_response(blob)

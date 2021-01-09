@@ -5,14 +5,18 @@ from anubis.utils.decorators import json_response
 from anubis.utils.auth import require_admin
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response
-from anubis.utils.questions import hard_reset_questions, get_all_questions, assign_questions
+from anubis.utils.questions import (
+    hard_reset_questions,
+    get_all_questions,
+    assign_questions,
+)
 
-questions = Blueprint('admin-questions', __name__, url_prefix='/admin-questions')
+questions = Blueprint("admin-questions", __name__, url_prefix="/admin-questions")
 
 
-@questions.route('/hard-reset/<string:unique_code>')
+@questions.route("/hard-reset/<string:unique_code>")
 @require_admin
-@log_endpoint('cli', lambda: 'question hard reset')
+@log_endpoint("cli", lambda: "question hard reset")
 @json_response
 def private_questions_hard_reset_unique_code(unique_code: str):
     """
@@ -39,19 +43,17 @@ def private_questions_hard_reset_unique_code(unique_code: str):
         Assignment.unique_code == unique_code
     ).first()
     if assignment is None:
-        return error_response('Unable to find assignment')
+        return error_response("Unable to find assignment")
 
     # Hard reset questions
     hard_reset_questions(assignment)
 
-    return success_response({
-        'status': 'questions deleted'
-    })
+    return success_response({"status": "questions deleted"})
 
 
-@questions.route('/get/<string:unique_code>')
+@questions.route("/get/<string:unique_code>")
 @require_admin
-@log_endpoint('cli', lambda: 'questions get')
+@log_endpoint("cli", lambda: "questions get")
 @json_response
 def private_questions_get_unique_code(unique_code: str):
     """
@@ -66,14 +68,14 @@ def private_questions_get_unique_code(unique_code: str):
         Assignment.unique_code == unique_code
     ).first()
     if assignment is None:
-        return error_response('Unable to find assignment')
+        return error_response("Unable to find assignment")
 
     return get_all_questions(assignment)
 
 
-@questions.route('/assign/<string:unique_code>')
+@questions.route("/assign/<string:unique_code>")
 @require_admin
-@log_endpoint('cli', lambda: 'question assign')
+@log_endpoint("cli", lambda: "question assign")
 @json_response
 def private_questions_assign_unique_code(unique_code: str):
     """
@@ -91,10 +93,10 @@ def private_questions_assign_unique_code(unique_code: str):
         Assignment.unique_code == unique_code
     ).first()
     if assignment is None:
-        return error_response('Unable to find assignment')
+        return error_response("Unable to find assignment")
 
     # Assign the questions
     assigned_questions = assign_questions(assignment)
 
     # Pass back the response
-    return success_response({'assigned': assigned_questions})
+    return success_response({"assigned": assigned_questions})

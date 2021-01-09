@@ -8,12 +8,12 @@ from anubis.utils.http import error_response, success_response
 from anubis.utils.questions import get_assigned_questions
 from anubis.utils.auth import require_admin
 
-assignments = Blueprint('admin-assignments', __name__, url_prefix='/admin/assignments')
+assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
 
 
-@assignments.route('/assignment/<int:id>/questions/get/<string:netid>')
+@assignments.route("/assignment/<int:id>/questions/get/<string:netid>")
 @require_admin
-@log_endpoint('cli', lambda: 'question get')
+@log_endpoint("cli", lambda: "question get")
 @load_from_id(Assignment, verify_owner=False)
 @json_response
 def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str):
@@ -26,18 +26,20 @@ def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str
     """
     user = User.query.filter_by(netid=netid).first()
     if user is None:
-        return error_response('user not found')
+        return error_response("user not found")
 
-    return success_response({
-        'netid': user.netid,
-        'questions': get_assigned_questions(assignment.id, user.id)
-    })
+    return success_response(
+        {
+            "netid": user.netid,
+            "questions": get_assigned_questions(assignment.id, user.id),
+        }
+    )
 
 
-@assignments.route('/assignment/sync', methods=['POST'])
+@assignments.route("/assignment/sync", methods=["POST"])
 @require_admin
-@log_endpoint('cli', lambda: 'assignment-sync')
-@json_endpoint(required_fields=[('assignment', dict)])
+@log_endpoint("cli", lambda: "assignment-sync")
+@json_endpoint(required_fields=[("assignment", dict)])
 def private_assignment_sync(assignment_data: dict):
     """
     Sync assignment data from the CLI. This should be used to create and update assignment data.

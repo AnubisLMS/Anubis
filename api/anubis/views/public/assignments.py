@@ -1,35 +1,23 @@
 from flask import Blueprint, request
 
 from anubis.models import User, Assignment, AssignedStudentQuestion, db
-from anubis.utils.assignments import get_classes, get_assignments
+from anubis.utils.assignments import get_assignments
 from anubis.utils.auth import current_user, require_user
 from anubis.utils.decorators import json_response, load_from_id, json_endpoint
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import get_request_ip, success_response
 from anubis.utils.questions import get_assigned_questions
 
-assignments = Blueprint('public-assignments', __name__, url_prefix='/public/assignments')
+assignments = Blueprint(
+    "public-assignments", __name__, url_prefix="/public/assignments"
+)
 
 
-@assignments.route('/classes')
+@assignments.route("/")
 @require_user
-@log_endpoint('public-classes', lambda: 'get classes {}'.format(get_request_ip()))
-@json_response
-def public_classes():
-    """
-    Get class data for current user
-
-    :return:
-    """
-    user: User = current_user()
-    return success_response({
-        'classes': get_classes(user.netid)
-    })
-
-
-@assignments.route('/')
-@require_user
-@log_endpoint('public-assignments', lambda: 'get assignments {}'.format(get_request_ip()))
+@log_endpoint(
+    "public-assignments", lambda: "get assignments {}".format(get_request_ip())
+)
 @json_response
 def public_assignments():
     """
@@ -42,7 +30,7 @@ def public_assignments():
     """
 
     # Get optional class filter from get query
-    class_name = request.args.get('class', default=None)
+    class_name = request.args.get("class", default=None)
 
     # Load current user
     user: User = current_user()
@@ -51,14 +39,12 @@ def public_assignments():
     assignment_data = get_assignments(user.netid, class_name)
 
     # Iterate over assignments, getting their data
-    return success_response({
-        'assignments': assignment_data
-    })
+    return success_response({"assignments": assignment_data})
 
 
-@assignments.route('/questions/get/<int:id>')
+@assignments.route("/questions/get/<int:id>")
 @require_user
-@log_endpoint('public-questions-get', lambda: 'get questions')
+@log_endpoint("public-questions-get", lambda: "get questions")
 @load_from_id(Assignment, verify_owner=False)
 @json_response
 def public_assignment_questions_id(assignment: Assignment):
@@ -71,17 +57,19 @@ def public_assignment_questions_id(assignment: Assignment):
     # Load current user
     user: User = current_user()
 
-    return success_response({
-        'questions': get_assigned_questions(assignment.id, user.id)
-    })
+    return success_response(
+        {"questions": get_assigned_questions(assignment.id, user.id)}
+    )
 
 
-@assignments.route('/questions/save/<int:id>')
+@assignments.route("/questions/save/<int:id>")
 @require_user
-@log_endpoint('public-questions-save', lambda: 'save questions')
+@log_endpoint("public-questions-save", lambda: "save questions")
 @load_from_id(AssignedStudentQuestion, verify_owner=True)
-@json_endpoint(required_fields=[('response', str)])
-def public_assignment_questions_save_id(assigned_question: AssignedStudentQuestion, response: str, **kwargs):
+@json_endpoint(required_fields=[("response", str)])
+def public_assignment_questions_save_id(
+    assigned_question: AssignedStudentQuestion, response: str, **kwargs
+):
     """
     Save response for a given assignment question
 
@@ -95,4 +83,4 @@ def public_assignment_questions_save_id(assigned_question: AssignedStudentQuesti
     db.session.add(assigned_question)
     db.session.commit()
 
-    return success_response('Success')
+    return success_response("Success")

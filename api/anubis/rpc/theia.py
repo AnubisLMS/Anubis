@@ -17,7 +17,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
     name = get_theia_pod_name(theia_session)
 
     # PVC
-    volume_name = name + '-volume'
+    volume_name = name + "-volume"
     pvc = client.V1PersistentVolumeClaim(
         metadata=client.V1ObjectMeta(
             name=volume_name,
@@ -26,78 +26,82 @@ def create_theia_pod_obj(theia_session: TheiaSession):
                 "role": "session-storage",
                 "netid": theia_session.owner.netid,
                 "session": str(theia_session.id),
-            }
+            },
         ),
         spec=client.V1PersistentVolumeClaimSpec(
-            access_modes=['ReadWriteMany'],
+            access_modes=["ReadWriteMany"],
             volume_mode="Filesystem",
             resources=client.V1ResourceRequirements(
                 requests={
                     "storage": "50M",
                 }
-            )
-        )
+            ),
+        ),
     )
 
     # Init container
     init_container = client.V1Container(
         name="theia-init-{}-{}".format(theia_session.owner.netid, theia_session.id),
         image="registry.osiris.services/anubis/theia-init:latest",
-        image_pull_policy=os.environ.get('IMAGE_PULL_POLICY', default='Always'),
+        image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
         env=[
             client.V1EnvVar(name="GIT_REPO", value=theia_session.repo.repo_url),
-            client.V1EnvVar(name="GIT_CRED",
-                            value_from=client.V1EnvVarSource(
-                                secret_key_ref=client.V1SecretKeySelector(
-                                    name='git',
-                                    key='credentials'
-                                ))),
+            client.V1EnvVar(
+                name="GIT_CRED",
+                value_from=client.V1EnvVarSource(
+                    secret_key_ref=client.V1SecretKeySelector(
+                        name="git", key="credentials"
+                    )
+                ),
+            ),
         ],
         volume_mounts=[
             client.V1VolumeMount(
-                mount_path='/out',
+                mount_path="/out",
                 name=volume_name,
             )
-        ]
+        ],
     )
 
     # Theia container
     theia_container = client.V1Container(
         name="theia",
         image="registry.osiris.services/anubis/theia:latest",
-        image_pull_policy=os.environ.get('IMAGE_PULL_POLICY', default='Always'),
+        image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
         ports=[client.V1ContainerPort(container_port=3000)],
         resources=client.V1ResourceRequirements(
-            limits={'cpu': '2', 'memory': '500Mi'},
-            requests={'cpu': '250m', 'memory': '100Mi'},
+            limits={"cpu": "2", "memory": "500Mi"},
+            requests={"cpu": "250m", "memory": "100Mi"},
         ),
         volume_mounts=[
             client.V1VolumeMount(
-                mount_path='/home/project',
+                mount_path="/home/project",
                 name=volume_name,
             )
-        ]
+        ],
     )
 
     # Sidecar container
     sidecar_container = client.V1Container(
         name="sidecar",
         image="registry.osiris.services/anubis/theia-sidecar:latest",
-        image_pull_policy=os.environ.get('IMAGE_PULL_POLICY', default='Always'),
+        image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
         env=[
-            client.V1EnvVar(name="GIT_CRED",
-                            value_from=client.V1EnvVarSource(
-                                secret_key_ref=client.V1SecretKeySelector(
-                                    name='git',
-                                    key='credentials'
-                                ))),
+            client.V1EnvVar(
+                name="GIT_CRED",
+                value_from=client.V1EnvVarSource(
+                    secret_key_ref=client.V1SecretKeySelector(
+                        name="git", key="credentials"
+                    )
+                ),
+            ),
         ],
         volume_mounts=[
             client.V1VolumeMount(
-                mount_path='/home/project',
+                mount_path="/home/project",
                 name=volume_name,
             )
-        ]
+        ],
     )
 
     # Create pod
@@ -107,9 +111,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
             containers=[theia_container, sidecar_container],
             volumes=[client.V1Volume(name=volume_name)],
             dns_policy="None",
-            dns_config=client.V1PodDNSConfig(
-                nameservers=['1.1.1.1']
-            )
+            dns_config=client.V1PodDNSConfig(nameservers=["1.1.1.1"]),
         ),
         metadata=client.V1ObjectMeta(
             name="theia-{}-{}".format(theia_session.owner.netid, theia_session.id),
@@ -118,8 +120,8 @@ def create_theia_pod_obj(theia_session: TheiaSession):
                 "role": "theia-session",
                 "netid": theia_session.owner.netid,
                 "session": str(theia_session.id),
-            }
-        )
+            },
+        ),
     )
 
     return pod, pvc
@@ -138,9 +140,12 @@ def initialize_theia_session(theia_session_id: int):
     config.load_incluster_config()
     v1 = client.CoreV1Api()
 
-    logger.info('Initializing theia session {}'.format(theia_session_id), extra={
-        'Initializing theia session': theia_session_id,
-    })
+    logger.info(
+        "Initializing theia session {}".format(theia_session_id),
+        extra={
+            "Initializing theia session": theia_session_id,
+        },
+    )
 
     with app.app_context():
         max_ides = Config.query.filter(Config.key == "MAX_IDES").first()
@@ -150,32 +155,42 @@ def initialize_theia_session(theia_session_id: int):
         ).first()
 
         if active_theia_pod_count() >= max_ides:
-            # If there are too many active pods, recycle the job through the queue
-            logger.info('Maximum IDEs currently running. Re-enqueuing session_id={} initialized request'.format(
-                theia_session_id
-            ))
+            # If there are too many active pods, recycle the job through the
+            # queue
+            logger.info(
+                "Maximum IDEs currently running. Re-enqueuing session_id={} initialized request".format(
+                    theia_session_id
+                )
+            )
             time.sleep(1)
             from anubis.utils.redis_queue import enqueue_ide_initialize
+
             enqueue_ide_initialize(theia_session_id)
             return
 
         if theia_session is None:
-            logger.error('Unable to find theia session rpc.initialize_theia_session', extra={
-                'theia_session_id': theia_session_id,
-            })
+            logger.error(
+                "Unable to find theia session rpc.initialize_theia_session",
+                extra={
+                    "theia_session_id": theia_session_id,
+                },
+            )
             return
 
-        logger.debug('Found theia_session {}'.format(theia_session_id), extra={'submission': theia_session.data})
+        logger.debug(
+            "Found theia_session {}".format(theia_session_id),
+            extra={"submission": theia_session.data},
+        )
 
         # Create pod, and pvc object
         pod, pvc = create_theia_pod_obj(theia_session)
 
         # Log
-        logger.info('creating theia pod: ' + pod.to_str())
+        logger.info("creating theia pod: " + pod.to_str())
 
         # Send to kube api
-        v1.create_namespaced_persistent_volume_claim(namespace='anubis', body=pvc)
-        v1.create_namespaced_pod(namespace='anubis', body=pod)
+        v1.create_namespaced_persistent_volume_claim(namespace="anubis", body=pvc)
+        v1.create_namespaced_pod(namespace="anubis", body=pod)
 
         # Wait for it to have started, then update theia_session state
         name = get_theia_pod_name(theia_session)
@@ -183,31 +198,37 @@ def initialize_theia_session(theia_session_id: int):
         while True:
             pod: client.V1Pod = v1.read_namespaced_pod(
                 name=name,
-                namespace='anubis',
+                namespace="anubis",
             )
 
-            if pod.status.phase == 'Pending':
+            if pod.status.phase == "Pending":
                 n += 1
                 if n > 60:
-                    logger.error('Theia session took too long to initialize. Freeing worker.')
+                    logger.error(
+                        "Theia session took too long to initialize. Freeing worker."
+                    )
                     break
 
                 time.sleep(1)
 
-            if pod.status.phase == 'Running':
+            if pod.status.phase == "Running":
                 theia_session.cluster_address = pod.status.pod_ip
-                theia_session.state = 'Running'
-                esindex('theia', body={
-                    'event': 'session-init', 'session_id': theia_session.id,
-                    'netid': theia_session.owner.netid,
-                })
-                logger.info('Theia session started {}'.format(name))
+                theia_session.state = "Running"
+                esindex(
+                    "theia",
+                    body={
+                        "event": "session-init",
+                        "session_id": theia_session.id,
+                        "netid": theia_session.owner.netid,
+                    },
+                )
+                logger.info("Theia session started {}".format(name))
                 break
 
-            if pod.status.phase == 'Failed':
+            if pod.status.phase == "Failed":
                 theia_session.active = False
-                theia_session.state = 'Failed'
-                logger.error('Theia session failed {}'.format(name))
+                theia_session.state = "Failed"
+                logger.error("Theia session failed {}".format(name))
                 break
 
         db.session.commit()
@@ -217,23 +238,31 @@ def reap_theia_session_resources(theia_session_id: int):
     """Mark theia session resources for deletion in kube"""
     v1 = client.CoreV1Api()
 
-    logger.info('Reaping TheiaSession {}'.format(theia_session_id))
-    esindex('theia', body={
-        'event': 'session-pod-delete', 'session_id': theia_session_id,
-    })
+    logger.info("Reaping TheiaSession {}".format(theia_session_id))
+    esindex(
+        "theia",
+        body={
+            "event": "session-pod-delete",
+            "session_id": theia_session_id,
+        },
+    )
 
     # Delete the pods
     v1.delete_collection_namespaced_pod(
-        namespace='anubis',
-        label_selector='app=theia,role=theia-session,session={}'.format(theia_session_id),
-        propagation_policy='Background'
+        namespace="anubis",
+        label_selector="app=theia,role=theia-session,session={}".format(
+            theia_session_id
+        ),
+        propagation_policy="Background",
     )
 
     # Delete the pvc
     v1.delete_collection_namespaced_persistent_volume_claim(
-        namespace='anubis',
-        label_selector='app=theia,role=session-storage,session={}'.format(theia_session_id),
-        propagation_policy="Background"
+        namespace="anubis",
+        label_selector="app=theia,role=session-storage,session={}".format(
+            theia_session_id
+        ),
+        propagation_policy="Background",
     )
 
 
@@ -242,8 +271,7 @@ def list_theia_pods():
     v1 = client.CoreV1Api()
 
     pods = v1.list_namespaced_pod(
-        namespace='anubis',
-        label_selector='app=theia,role=theia-session'
+        namespace="anubis", label_selector="app=theia,role=theia-session"
     )
 
     return pods
@@ -265,18 +293,18 @@ def check_active_pods():
     :return:
     """
 
-    logger.info('Checking active ActiveTheia sessions')
+    logger.info("Checking active ActiveTheia sessions")
 
     # Get active pods and db rows
     active_pods = list_theia_pods()
     active_db_sessions = TheiaSession.query.filter(
-        TheiaSession.active == True,
+        TheiaSession.active,
     ).all()
 
     # Build set of active pod session ids
     active_pod_ids = set()
     for pod in active_pods.items:
-        active_pod_ids.add(int(pod.metadata.labels['session']))
+        active_pod_ids.add(int(pod.metadata.labels["session"]))
 
     # Build set of active db sesion ids
     active_db_ids = set()
@@ -289,10 +317,14 @@ def check_active_pods():
     stale_db_ids = active_db_ids - active_pod_ids
 
     if len(stale_pods_ids) > 0:
-        logger.info('Found stale theia pods to reap: {}'.format(str(list(stale_pods_ids))))
+        logger.info(
+            "Found stale theia pods to reap: {}".format(str(list(stale_pods_ids)))
+        )
 
     if len(stale_db_ids) > 0:
-        logger.info('Found stale theia database entries: {}'.format(str(list(stale_db_ids))))
+        logger.info(
+            "Found stale theia database entries: {}".format(str(list(stale_db_ids)))
+        )
 
     # Reap theia sessions
     for stale_pod_id in stale_pods_ids:
@@ -311,7 +343,7 @@ def reap_theia_session(theia_session_id: int):
     app = create_app()
     config.load_incluster_config()
 
-    logger.info('Attempting to reap theia session {}'.format(theia_session_id))
+    logger.info("Attempting to reap theia session {}".format(theia_session_id))
 
     with app.app_context():
         theia_session: TheiaSession = TheiaSession.query.filter(
@@ -319,7 +351,11 @@ def reap_theia_session(theia_session_id: int):
         ).first()
 
         if theia_session is None:
-            logger.error('Could not find theia session {} when attempting to delete'.format(theia_session_id))
+            logger.error(
+                "Could not find theia session {} when attempting to delete".format(
+                    theia_session_id
+                )
+            )
             return
 
         reap_theia_session_resources(theia_session_id)
@@ -328,7 +364,7 @@ def reap_theia_session(theia_session_id: int):
             theia_session.active = False
             theia_session.ended = datetime.now()
 
-        theia_session.state = 'Ended'
+        theia_session.state = "Ended"
         db.session.commit()
 
 
@@ -338,11 +374,11 @@ def reap_all_theia_sessions(*_):
     app = create_app()
     config.load_incluster_config()
 
-    logger.info('Clearing theia sessions')
+    logger.info("Clearing theia sessions")
 
     with app.app_context():
         theia_sessions = TheiaSession.query.filter(
-            TheiaSession.active == True,
+            TheiaSession.active,
         ).all()
 
         for n, theia_session in enumerate(theia_sessions):
@@ -351,15 +387,17 @@ def reap_all_theia_sessions(*_):
 
             if theia_session.active:
                 # Log deletion
-                logger.info('deleting theia session pod: {}'.format(name),
-                            extra={'session': theia_session.data})
+                logger.info(
+                    "deleting theia session pod: {}".format(name),
+                    extra={"session": theia_session.data},
+                )
 
                 # Reap kube resources
                 reap_theia_session_resources(theia_session.id)
 
                 # Update the database row
                 theia_session.active = False
-                theia_session.state = 'Ended'
+                theia_session.state = "Ended"
                 theia_session.ended = datetime.now()
 
             # Batch commits in size of 5
@@ -376,12 +414,11 @@ def reap_stale_theia_sessions(*_):
     config.load_incluster_config()
     v1 = client.CoreV1Api()
 
-    logger.info('Clearing stale theia sessions')
+    logger.info("Clearing stale theia sessions")
 
     with app.app_context():
         resp = v1.list_namespaced_pod(
-            namespace='anubis',
-            label_selector="app=theia,role=theia-session"
+            namespace="anubis", label_selector="app=theia,role=theia-session"
         )
 
         for n, pod in enumerate(resp.items):
@@ -399,15 +436,17 @@ def reap_stale_theia_sessions(*_):
                 continue
 
             # Log deletion
-            logger.info('deleting theia session pod: {}'.format(session_id),
-                        extra={'session': theia_session.data})
+            logger.info(
+                "deleting theia session pod: {}".format(session_id),
+                extra={"session": theia_session.data},
+            )
 
             # Reap
             reap_theia_session_resources(theia_session.id)
 
             # Update the database row
             theia_session.active = False
-            theia_session.state = 'Ended'
+            theia_session.state = "Ended"
             theia_session.ended = datetime.now()
 
             # Batch commits in size of 5

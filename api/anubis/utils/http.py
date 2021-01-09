@@ -14,22 +14,26 @@ def get_request_ip():
 
     def check(header):
         """get header from request else empty string"""
-        return request.headers[
-            header
-        ] if header in request.headers else ''
+        return request.headers[header] if header in request.headers else ""
 
     def check_(headers, n=0):
         """check headers based on ordered piority"""
         if n == len(headers):
-            return ''
+            return ""
         return check(headers[n]) or check_(headers, n + 1)
 
-    return str(check_([
-        'x-forwarded-for',  # highest priority
-        'X-Forwarded-For',
-        'x-real-ip',
-        'X-Real-Ip',  # lowest priority
-    ]) or request.remote_addr or 'N/A')
+    return str(
+        check_(
+            [
+                "x-forwarded-for",  # highest priority
+                "X-Forwarded-For",
+                "x-real-ip",
+                "X-Real-Ip",  # lowest priority
+            ]
+        )
+        or request.remote_addr
+        or "N/A"
+    )
 
 
 def error_response(error_message: str) -> dict:
@@ -40,9 +44,9 @@ def error_response(error_message: str) -> dict:
     :return:
     """
     return {
-        'success': False,
-        'error': error_message,
-        'data': None,
+        "success": False,
+        "error": error_message,
+        "data": None,
     }
 
 
@@ -54,9 +58,9 @@ def success_response(data: Union[dict, str, None]) -> dict:
     :return:
     """
     return {
-        'success': True,
-        'error': None,
-        'data': data,
+        "success": True,
+        "error": None,
+        "data": data,
     }
 
 
@@ -91,8 +95,8 @@ def get_request_days_offset():
 
     :return:
     """
-    days = get_number_arg('days', default_value=100)
-    offset = get_number_arg('offset', default_value=0)
+    days = get_number_arg("days", default_value=100)
+    offset = get_number_arg("offset", default_value=0)
 
     start_time = datetime.utcnow() - timedelta(days=offset + days)
     end_time = start_time + timedelta(days=days)

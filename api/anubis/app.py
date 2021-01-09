@@ -20,9 +20,9 @@ def init_services(app):
     cache.init_app(app)
     migrate.init_app(app, db)
 
-    @app.route('/')
+    @app.route("/")
     def index():
-        return 'Hello there...'
+        return "Hello there..."
 
     # Add ELK stuff
     if not config.DISABLE_ELK:

@@ -6,10 +6,10 @@ from anubis.models import User
 from anubis.utils.auth import create_token, require_admin
 from anubis.utils.http import error_response, success_response
 
-auth = Blueprint('admin-auth', __name__, url_prefix='/admin/auth')
+auth = Blueprint("admin-auth", __name__, url_prefix="/admin/auth")
 
 
-@auth.route('/token/<netid>')
+@auth.route("/token/<netid>")
 @require_admin
 def private_token_netid(netid):
     """
@@ -20,8 +20,11 @@ def private_token_netid(netid):
     """
     user = User.query.filter_by(netid=netid).first()
     if user is None:
-        return error_response('User does not exist')
+        return error_response("User does not exist")
     token = create_token(user.netid)
-    res = Response(json.dumps(success_response(token)), headers={'Content-Type': 'application/json'})
-    res.set_cookie('token', token, httponly=True)
+    res = Response(
+        json.dumps(success_response(token)),
+        headers={"Content-Type": "application/json"},
+    )
+    res.set_cookie("token", token, httponly=True)
     return res

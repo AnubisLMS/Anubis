@@ -65,18 +65,21 @@ def json_endpoint(required_fields: Union[List[str], List[Tuple], None] = None):
     def wrapper(func):
         @wraps(func)
         def json_wrap(*args, **kwargs):
-            if not request.headers.get('Content-Type', default=None).startswith('application/json'):
+            if not request.headers.get("Content-Type", default=None).startswith(
+                "application/json"
+            ):
                 return {
-                           'success': False,
-                           'error': 'Content-Type header is not application/json',
-                           'data': None,
-                       }, 406  # Not Acceptable
+                    "success": False,
+                    "error": "Content-Type header is not application/json",
+                    "data": None,
+                }, 406  # Not Acceptable
             json_data: dict = request.json
 
             if required_fields is not None:
                 # Check required fields
                 for index, field in enumerate(required_fields):
-                    # If field was a tuple, extract field name and required type
+                    # If field was a tuple, extract field name and required
+                    # type
                     required_type = None
                     if isinstance(field, tuple):
                         field, required_type = field
@@ -85,13 +88,22 @@ def json_endpoint(required_fields: Union[List[str], List[Tuple], None] = None):
                     # Make sure
                     if field not in json_data:
                         # field missing, return error
-                        return error_response(
-                            'Malformed requests. Missing field {}.'.format(field)), 406  # Not Acceptable
+                        return (
+                            error_response(
+                                "Malformed requests. Missing field {}.".format(field)
+                            ),
+                            406,
+                        )  # Not Acceptable
 
                     # If a type was specified, verify it
                     if required_type is not None:
                         if not isinstance(json_data[field], required_type):
-                            return error_response('Malformed requests. Invalid field type.'), 406  # Not Acceptable
+                            return (
+                                error_response(
+                                    "Malformed requests. Invalid field type."
+                                ),
+                                406,
+                            )  # Not Acceptable
 
             # Give the positional args first,
             # then the json data (in the order of
@@ -101,8 +113,13 @@ def json_endpoint(required_fields: Union[List[str], List[Tuple], None] = None):
                 return func(
                     *args,
                     *(json_data[field] for field in required_fields),
-                    **{key: value for key, value in json_data.items() if key not in required_fields},
-                    **kwargs)
+                    **{
+                        key: value
+                        for key, value in json_data.items()
+                        if key not in required_fields
+                    },
+                    **kwargs
+                )
             return func(json_data, *args, **kwargs)
 
         return json_wrap
@@ -128,39 +145,48 @@ def check_submission_token(func):
     @wraps(func)
     def wrapper(submission_id: int):
         submission = Submission.query.filter(Submission.id == submission_id).first()
-        token = request.args.get('token', default=None)
+        token = request.args.get("token", default=None)
 
         # Verify submission exists
         if submission is None:
-            logging.error('Invalid submission from submission pipeline', extra={
-                'submission_id': submission_id,
-                'path': request.path,
-                'headers': request.headers,
-                'ip': request.remote_addr,
-            })
-            return error_response('Invalid'), 406
+            logging.error(
+                "Invalid submission from submission pipeline",
+                extra={
+                    "submission_id": submission_id,
+                    "path": request.path,
+                    "headers": request.headers,
+                    "ip": request.remote_addr,
+                },
+            )
+            return error_response("Invalid"), 406
 
         # Verify we got a token
         if token is None:
-            logging.error('Attempted report post with no token', extra={
-                'submission_id': submission_id,
-                'path': request.path,
-                'headers': request.headers,
-                'ip': request.remote_addr,
-            })
-            return error_response('Invalid'), 406
+            logging.error(
+                "Attempted report post with no token",
+                extra={
+                    "submission_id": submission_id,
+                    "path": request.path,
+                    "headers": request.headers,
+                    "ip": request.remote_addr,
+                },
+            )
+            return error_response("Invalid"), 406
 
         # Verify token matches
         if token != submission.token:
-            logging.error('Invalid token reported from pipeline', extra={
-                'submission_id': submission_id,
-                'path': request.path,
-                'headers': request.headers,
-                'ip': request.remote_addr,
-            })
-            return error_response('Invalid'), 406
+            logging.error(
+                "Invalid token reported from pipeline",
+                extra={
+                    "submission_id": submission_id,
+                    "path": request.path,
+                    "headers": request.headers,
+                    "ip": request.remote_addr,
+                },
+            )
+            return error_response("Invalid"), 406
 
-        logging.info('Pipeline request validated {}'.format(request.path))
+        logging.info("Pipeline request validated {}".format(request.path))
         return func(submission)
 
     return wrapper

@@ -10,17 +10,21 @@ from anubis.utils.data import rand
 
 db = SQLAlchemy()
 
-default_id = lambda: db.Column(db.String(128), primary_key=True, default=rand)
+
+def default_id() -> db.Column:
+    return db.Column(db.String(128), primary_key=True, default=rand)
 
 
 class Config(db.Model):
-    __tablename__ = 'config'
+    __tablename__ = "config"
+
+    # Fields
     key = db.Column(db.String(128), primary_key=True)
     value = db.Column(db.String(2048))
 
 
 class User(db.Model):
-    __tablename__ = 'user'
+    __tablename__ = "user"
 
     # id
     id = default_id()
@@ -30,38 +34,41 @@ class User(db.Model):
     github_username = db.Column(db.String(128), index=True)
     name = db.Column(db.String(128))
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
+    is_superuser = db.Column(db.Boolean, nullable=False, default=False)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    repos = db.relationship('AssignmentRepo', cascade='all,delete')
-    in_class = db.relationship('InClass', cascade='all,delete')
+    repos = db.relationship("AssignmentRepo", cascade="all,delete")
+    in_class = db.relationship("InClass", cascade="all,delete")
 
     @property
     def data(self):
         return {
-            'id': self.id,
-            'netid': self.netid,
-            'github_username': self.github_username,
-            'name': self.name,
-            'is_admin': self.is_admin,
+            "id": self.id,
+            "netid": self.netid,
+            "github_username": self.github_username,
+            "name": self.name,
+            "is_admin": self.is_admin,
+            "is_superuser": self.is_superuser,
         }
 
 
-class Class_(db.Model):
-    __tablename__ = '_class'
+class Course(db.Model):
+    __tablename__ = "course"
 
     # id
     id = default_id()
 
     # Fields
     name = db.Column(db.String(256), nullable=False)
-    class_code = db.Column(db.String(256), nullable=False)
+    course_code = db.Column(db.String(256), nullable=False)
+    semester = db.Column(db.String(256), nullable=True)
     section = db.Column(db.String(256), nullable=True)
     professor = db.Column(db.String(256), nullable=False)
 
-    in_class = db.relationship('InClass', cascade='all,delete')
+    in_class = db.relationship("InClass", cascade="all,delete")
 
     @property
     def total_assignments(self):
@@ -71,42 +78,42 @@ class Class_(db.Model):
     def open_assignments(self):
         now = datetime.now()
         return Assignment.query.filter(
-            Assignment.class_id == self.id,
+            Assignment.course_id == self.id,
             Assignment.release_date <= now,
         ).count()
 
     @property
     def data(self):
         return {
-            'name': self.name,
-            'class_code': self.class_code,
-            'section': self.section,
-            'professor': self.professor,
-
-            'total_assignments': self.total_assignments,
-            'open_assignment': self.open_assignments,
+            "id": self.id,
+            "name": self.name,
+            "course_code": self.course_code,
+            "section": self.section,
+            "professor": self.professor,
+            "total_assignments": self.total_assignments,
+            "open_assignment": self.open_assignments,
         }
 
 
 class InClass(db.Model):
-    __tablename__ = 'in_class'
+    __tablename__ = "in_class"
 
     # Foreign Keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
-    class_id = db.Column(db.String(128), db.ForeignKey(Class_.id), primary_key=True)
+    course_id = db.Column(db.String(128), db.ForeignKey(Course.id), primary_key=True)
 
-    owner = db.relationship(User, cascade='all,delete')
-    class_ = db.relationship(Class_, cascade='all,delete')
+    owner = db.relationship(User, cascade="all,delete")
+    course = db.relationship(Course, cascade="all,delete")
 
 
 class Assignment(db.Model):
-    __tablename__ = 'assignment'
+    __tablename__ = "assignment"
 
     # id
     id = default_id()
 
     # Foreign Keys
-    class_id = db.Column(db.String(128), db.ForeignKey(Class_.id), index=True)
+    course_id = db.Column(db.String(128), db.ForeignKey(Course.id), index=True)
 
     # Fields
     name = db.Column(db.String(256), nullable=False, unique=True)
@@ -114,7 +121,11 @@ class Assignment(db.Model):
     description = db.Column(db.Text, nullable=True)
     github_classroom_url = db.Column(db.String(256), nullable=True)
     pipeline_image = db.Column(db.String(256), unique=True, nullable=True)
-    unique_code = db.Column(db.String(8), unique=True, default=lambda: base64.b16encode(os.urandom(4)).decode())
+    unique_code = db.Column(
+        db.String(8),
+        unique=True,
+        default=lambda: base64.b16encode(os.urandom(4)).decode(),
+    )
     ide_enabled = db.Column(db.Boolean, default=True)
 
     # Dates
@@ -122,26 +133,26 @@ class Assignment(db.Model):
     due_date = db.Column(db.DateTime, nullable=False)
     grace_date = db.Column(db.DateTime, nullable=True)
 
-    class_ = db.relationship(Class_, cascade='all,delete', backref='assignments')
-    tests = db.relationship('AssignmentTest', cascade='all,delete')
-    repos = db.relationship('AssignmentRepo', cascade='all,delete')
+    course = db.relationship(Course, cascade="all,delete", backref="assignments")
+    tests = db.relationship("AssignmentTest", cascade="all,delete")
+    repos = db.relationship("AssignmentRepo", cascade="all,delete")
 
     @property
     def data(self):
         return {
-            'id': self.id,
-            'name': self.name,
-            'due_date': str(self.due_date),
-            'course': self.class_.data,
-            'description': self.description,
-            'github_classroom_link': self.github_classroom_url,
-            'tests': [t.data for t in self.tests]
+            "id": self.id,
+            "name": self.name,
+            "due_date": str(self.due_date),
+            "course": self.course.data,
+            "description": self.description,
+            "github_classroom_link": self.github_classroom_url,
+            "tests": [t.data for t in self.tests],
         }
 
     @property
     def meta_shape(self):
         return {
-            'assignment': {
+            "assignment": {
                 "name": str,
                 "class": str,
                 "unique_code": str,
@@ -157,35 +168,38 @@ class Assignment(db.Model):
 
 
 class AssignmentRepo(db.Model):
-    __tablename__ = 'assignment_repo'
+    __tablename__ = "assignment_repo"
 
     # id
     id = default_id()
-    github_username = db.Column(db.String(256), nullable=False)
 
     # Foreign Keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), nullable=True)
-    assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), nullable=False)
+    assignment_id = db.Column(
+        db.String(128), db.ForeignKey(Assignment.id), nullable=False
+    )
 
+    # Fields
+    github_username = db.Column(db.String(256), nullable=False)
     repo_url = db.Column(db.String(128), nullable=False)
 
     # Relationships
-    owner = db.relationship(User, cascade='all,delete')
-    assignment = db.relationship(Assignment, cascade='all,delete')
-    submissions = db.relationship('Submission', cascade='all,delete')
+    owner = db.relationship(User, cascade="all,delete")
+    assignment = db.relationship(Assignment, cascade="all,delete")
+    submissions = db.relationship("Submission", cascade="all,delete")
 
     @property
     def data(self):
         return {
-            'github_username': self.github_username,
-            'assignment_name': self.assignment.name,
-            'class_name': self.assignment.class_.class_code,
-            'repo_url': self.repo_url,
+            "github_username": self.github_username,
+            "assignment_name": self.assignment.name,
+            "course_code": self.assignment.course.course_code,
+            "repo_url": self.repo_url,
         }
 
 
 class AssignmentTest(db.Model):
-    __tablename__ = 'assignment_test'
+    __tablename__ = "assignment_test"
 
     # id
     id = default_id()
@@ -197,17 +211,15 @@ class AssignmentTest(db.Model):
     name = db.Column(db.String(128), index=True)
 
     # Relationships
-    assignment = db.relationship(Assignment, cascade='all,delete')
+    assignment = db.relationship(Assignment, cascade="all,delete")
 
     @property
     def data(self):
-        return {
-            'name': self.name
-        }
+        return {"name": self.name}
 
 
 class AssignmentQuestion(db.Model):
-    __tablename__ = 'assignment_question'
+    __tablename__ = "assignment_question"
 
     # id
     id = default_id()
@@ -221,61 +233,61 @@ class AssignmentQuestion(db.Model):
     sequence = db.Column(db.Integer, index=True, nullable=False)
     code_question = db.Column(db.Boolean, default=False)
     code_language = db.Column(db.String(128), nullable=True, default=None)
-    placeholder = db.Column(db.Text, nullable=True, default='')
+    placeholder = db.Column(db.Text, nullable=True, default="")
 
     # Relationships
-    assignment = db.relationship(Assignment, cascade='all,delete', backref='questions')
+    assignment = db.relationship(Assignment, cascade="all,delete", backref="questions")
 
-    shape = {
-        'question': str,
-        'solution': str,
-        'sequence': int
-    }
+    shape = {"question": str, "solution": str, "sequence": int}
 
     @property
     def full_data(self):
         return {
-            'id': self.id,
-            'question': self.question,
-            'code_question': self.code_question,
-            'code_language': self.code_language,
-            'solution': self.solution,
-            'sequence': self.sequence
+            "id": self.id,
+            "question": self.question,
+            "code_question": self.code_question,
+            "code_language": self.code_language,
+            "solution": self.solution,
+            "sequence": self.sequence,
         }
 
     @property
     def data(self):
         return {
-            'id': self.id,
-            'question': self.question,
-            'code_question': self.code_question,
-            'code_language': self.code_language,
-            'sequence': self.sequence
+            "id": self.id,
+            "question": self.question,
+            "code_question": self.code_question,
+            "code_language": self.code_language,
+            "sequence": self.sequence,
         }
 
 
 class AssignedStudentQuestion(db.Model):
-    __tablename__ = 'assigned_student_question'
+    __tablename__ = "assigned_student_question"
 
     # id
     id = default_id()
 
     # Fields
-    response = db.Column(db.Text, nullable=False, default='')
+    response = db.Column(db.Text, nullable=False, default="")
 
     # Foreign Keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id))
-    assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), index=True, nullable=False)
-    question_id = db.Column(db.String(128), db.ForeignKey(AssignmentQuestion.id), index=True, nullable=False)
+    assignment_id = db.Column(
+        db.String(128), db.ForeignKey(Assignment.id), index=True, nullable=False
+    )
+    question_id = db.Column(
+        db.String(128), db.ForeignKey(AssignmentQuestion.id), index=True, nullable=False
+    )
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Relationships
-    owner = db.relationship(User, cascade='all,delete')
-    assignment = db.relationship(Assignment, cascade='all,delete')
-    question = db.relationship(AssignmentQuestion, cascade='all,delete')
+    owner = db.relationship(User, cascade="all,delete")
+    assignment = db.relationship(Assignment, cascade="all,delete")
+    question = db.relationship(AssignmentQuestion, cascade="all,delete")
 
     @property
     def data(self):
@@ -286,21 +298,27 @@ class AssignedStudentQuestion(db.Model):
         """
 
         return {
-            'question': self.question.data,
-            'response': self.response,
+            "question": self.question.data,
+            "response": self.response,
         }
 
 
 class Submission(db.Model):
-    __tablename__ = 'submission'
+    __tablename__ = "submission"
 
     # id
     id = default_id()
 
     # Foreign Keys
-    owner_id = db.Column(db.String(128), db.ForeignKey(User.id), index=True, nullable=True)
-    assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), index=True, nullable=False)
-    assignment_repo_id = db.Column(db.String(128), db.ForeignKey(AssignmentRepo.id), nullable=False)
+    owner_id = db.Column(
+        db.String(128), db.ForeignKey(User.id), index=True, nullable=True
+    )
+    assignment_id = db.Column(
+        db.String(128), db.ForeignKey(Assignment.id), index=True, nullable=False
+    )
+    assignment_repo_id = db.Column(
+        db.String(128), db.ForeignKey(AssignmentRepo.id), nullable=False
+    )
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
@@ -309,16 +327,18 @@ class Submission(db.Model):
     # Fields
     commit = db.Column(db.String(128), unique=True, index=True, nullable=False)
     processed = db.Column(db.Boolean, default=False)
-    state = db.Column(db.String(128), default='')
+    state = db.Column(db.String(128), default="")
     errors = db.Column(MutableJson, default=None, nullable=True)
-    token = db.Column(db.String(64), default=lambda: base64.b16encode(os.urandom(32)).decode())
+    token = db.Column(
+        db.String(64), default=lambda: base64.b16encode(os.urandom(32)).decode()
+    )
 
     # Relationships
-    owner = db.relationship(User, cascade='all,delete')
-    assignment = db.relationship(Assignment, cascade='all,delete')
-    build = db.relationship('SubmissionBuild', cascade='all,delete', uselist=False)
-    test_results = db.relationship('SubmissionTestResult', cascade='all,delete')
-    repo = db.relationship(AssignmentRepo, cascade='all,delete')
+    owner = db.relationship(User, cascade="all,delete")
+    assignment = db.relationship(Assignment, cascade="all,delete")
+    build = db.relationship("SubmissionBuild", cascade="all,delete", uselist=False)
+    test_results = db.relationship("SubmissionTestResult", cascade="all,delete")
+    repo = db.relationship(AssignmentRepo, cascade="all,delete")
 
     def init_submission_models(self):
         """
@@ -326,7 +346,7 @@ class Submission(db.Model):
 
         :return:
         """
-        logging.info('initializing submission {}'.format(self.id))
+        logging.info("initializing submission {}".format(self.id))
 
         # If the models already exist, yeet
         if len(self.test_results) != 0:
@@ -340,7 +360,7 @@ class Submission(db.Model):
         # Find tests for the current assignment
         tests = AssignmentTest.query.filter_by(assignment_id=self.assignment_id).all()
 
-        logging.debug('found tests: {}'.format(list(map(lambda x: x.data, tests))))
+        logging.debug("found tests: {}".format(list(map(lambda x: x.data, tests))))
 
         for test in tests:
             tr = SubmissionTestResult(submission=self, assignment_test=test)
@@ -349,7 +369,7 @@ class Submission(db.Model):
         db.session.add(sb)
 
         self.processed = False
-        self.state = 'Waiting for resources...'
+        self.state = "Waiting for resources..."
         db.session.add(self)
 
         # Commit new models
@@ -357,13 +377,13 @@ class Submission(db.Model):
 
     @property
     def url(self):
-        return 'https://anubis.osiris.services/submission/{}'.format(self.commit)
+        return "https://anubis.osiris.services/submission/{}".format(self.commit)
 
     @property
     def netid(self):
         if self.owner is not None:
             return self.owner.netid
-        return 'null'
+        return "null"
 
     @property
     def tests(self):
@@ -379,26 +399,26 @@ class Submission(db.Model):
             submission_id=self.id,
         ).all()
 
-        logging.error('Loaded tests {}'.format(tests))
+        logging.error("Loaded tests {}".format(tests))
 
         # Convert to dictionary data
         return [
-            {'test': result.assignment_test.data, 'result': result.data}
+            {"test": result.assignment_test.data, "result": result.data}
             for result in tests
         ]
 
     @property
     def data(self):
         return {
-            'id': self.id,
-            'assignment_name': self.assignment.name,
-            'assignment_due': str(self.assignment.due_date),
-            'class_code': self.assignment.class_.class_code,
-            'commit': self.commit,
-            'processed': self.processed,
-            'state': self.state,
-            'created': str(self.created),
-            'last_updated': str(self.last_updated),
+            "id": self.id,
+            "assignment_name": self.assignment.name,
+            "assignment_due": str(self.assignment.due_date),
+            "class_code": self.assignment.course.course_code,
+            "commit": self.commit,
+            "processed": self.processed,
+            "state": self.state,
+            "created": str(self.created),
+            "last_updated": str(self.last_updated),
         }
 
     @property
@@ -406,22 +426,26 @@ class Submission(db.Model):
         data = self.data
 
         # Add connected models
-        data['repo'] = self.repo.repo_url
-        data['tests'] = self.tests
-        data['build'] = self.build.data if self.build is not None else None
+        data["repo"] = self.repo.repo_url
+        data["tests"] = self.tests
+        data["build"] = self.build.data if self.build is not None else None
 
         return data
 
 
 class SubmissionTestResult(db.Model):
-    __tablename__ = 'submission_test_result'
+    __tablename__ = "submission_test_result"
 
     # id
     id = default_id()
 
     # Foreign Keys
-    submission_id = db.Column(db.String(128), db.ForeignKey(Submission.id), primary_key=True)
-    assignment_test_id = db.Column(db.String(128), db.ForeignKey(AssignmentTest.id), primary_key=True)
+    submission_id = db.Column(
+        db.String(128), db.ForeignKey(Submission.id), primary_key=True
+    )
+    assignment_test_id = db.Column(
+        db.String(128), db.ForeignKey(AssignmentTest.id), primary_key=True
+    )
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
@@ -433,29 +457,29 @@ class SubmissionTestResult(db.Model):
     passed = db.Column(db.Boolean)
 
     # Relationships
-    submission = db.relationship(Submission, cascade='all,delete')
-    assignment_test = db.relationship(AssignmentTest, cascade='all,delete')
+    submission = db.relationship(Submission, cascade="all,delete")
+    assignment_test = db.relationship(AssignmentTest, cascade="all,delete")
 
     @property
     def data(self):
         return {
-            'id': self.id,
-            'test_name': self.assignment_test.name,
-            'passed': self.passed,
-            'message': self.message,
-            'stdout': self.stdout,
-            'created': str(self.created),
-            'last_updated': str(self.last_updated),
+            "id": self.id,
+            "test_name": self.assignment_test.name,
+            "passed": self.passed,
+            "message": self.message,
+            "stdout": self.stdout,
+            "created": str(self.created),
+            "last_updated": str(self.last_updated),
         }
 
     @property
     def stat_data(self):
         data = self.data
-        del data['stdout']
+        del data["stdout"]
         return data
 
     def __str__(self):
-        return 'testname: {}\nerrors: {}\npassed: {}\n'.format(
+        return "testname: {}\nerrors: {}\npassed: {}\n".format(
             self.testname,
             self.errors,
             self.passed,
@@ -463,7 +487,7 @@ class SubmissionTestResult(db.Model):
 
 
 class SubmissionBuild(db.Model):
-    __tablename__ = 'submission_build'
+    __tablename__ = "submission_build"
 
     # id
     id = default_id()
@@ -480,32 +504,36 @@ class SubmissionBuild(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Relationships
-    submission = db.relationship(Submission, cascade='all,delete')
+    submission = db.relationship(Submission, cascade="all,delete")
 
     @property
     def data(self):
         return {
-            'stdout': self.stdout,
-            'passed': self.passed,
+            "stdout": self.stdout,
+            "passed": self.passed,
         }
 
     @property
     def stat_data(self):
         data = self.data
-        del data['stdout']
+        del data["stdout"]
         return data
 
 
 class TheiaSession(db.Model):
-    __tablename__ = 'theia_session'
+    __tablename__ = "theia_session"
 
     # id
     id = default_id()
 
     # Foreign keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
-    assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), nullable=False)
-    repo_id = db.Column(db.String(128), db.ForeignKey(AssignmentRepo.id), nullable=False)
+    assignment_id = db.Column(
+        db.String(128), db.ForeignKey(Assignment.id), nullable=False
+    )
+    repo_id = db.Column(
+        db.String(128), db.ForeignKey(AssignmentRepo.id), nullable=False
+    )
 
     # Fields
     active = db.Column(db.Boolean, default=True)
@@ -528,20 +556,20 @@ class TheiaSession(db.Model):
         from anubis.utils.theia import theia_redirect_url
 
         return {
-            'id': self.id,
-            'assignment_id': self.assignment_id,
-            'assignment_name': self.assignment.name,
-            'class_name': self.assignment.class_.class_code,
-            'repo_id': self.repo_id,
-            'repo_url': self.repo.repo_url,
-            'redirect_url': theia_redirect_url(self.id, self.owner.netid),
-            'active': self.active,
-            'state': self.state,
-            'created': str(self.created),
-            'ended': str(self.ended),
-            'last_heartbeat': str(self.last_heartbeat),
-            'last_proxy': str(self.last_proxy),
-            'last_updated': str(self.last_updated),
+            "id": self.id,
+            "assignment_id": self.assignment_id,
+            "assignment_name": self.assignment.name,
+            "class_name": self.assignment.course.course_code,
+            "repo_id": self.repo_id,
+            "repo_url": self.repo.repo_url,
+            "redirect_url": theia_redirect_url(self.id, self.owner.netid),
+            "active": self.active,
+            "state": self.state,
+            "created": str(self.created),
+            "ended": str(self.ended),
+            "last_heartbeat": str(self.last_heartbeat),
+            "last_proxy": str(self.last_proxy),
+            "last_updated": str(self.last_updated),
         }
 
 
@@ -564,8 +592,8 @@ class StaticFile(db.Model):
     @property
     def data(self):
         return {
-            'id': self.id,
-            'content_type': self.content_type,
-            'filename': self.filename,
-            'hidden': self.hidden,
+            "id": self.id,
+            "content_type": self.content_type,
+            "filename": self.filename,
+            "hidden": self.hidden,
         }

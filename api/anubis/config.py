@@ -4,7 +4,9 @@ import hashlib
 
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY', default=hashlib.sha512(os.urandom(10)).hexdigest())
+    SECRET_KEY = os.environ.get(
+        "SECRET_KEY", default=hashlib.sha512(os.urandom(10)).hexdigest()
+    )
 
     # sqlalchemy
     SQLALCHEMY_DATABASE_URI = None
@@ -14,43 +16,51 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # OAuth
-    OAUTH_CONSUMER_KEY = ''
-    OAUTH_CONSUMER_SECRET = ''
+    OAUTH_CONSUMER_KEY = ""
+    OAUTH_CONSUMER_SECRET = ""
 
     # Cache config
-    CACHE_REDIS_HOST = 'redis-master'
-    CACHE_REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', default='anubis')
+    CACHE_REDIS_HOST = "redis-master"
+    CACHE_REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", default="anubis")
 
     # Logger config
-    LOGGER_NAME = os.environ.get('LOGGER_NAME', default='anubis-api')
+    LOGGER_NAME = os.environ.get("LOGGER_NAME", default="anubis-api")
 
     # Theia config
-    THEIA_DOMAIN = ''
+    THEIA_DOMAIN = ""
 
     def __init__(self):
-        self.DEBUG = os.environ.get('DEBUG', default='0') == '1'
-        self.SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI',
-            default='mysql+pymysql://anubis:anubis@{}/anubis'.format(
-                os.environ.get('DB_HOST', 'db')))
-        self.DISABLE_ELK = os.environ.get('DISABLE_ELK', default='0') == '1'
+        self.DEBUG = os.environ.get("DEBUG", default="0") == "1"
+        self.SQLALCHEMY_DATABASE_URI = os.environ.get(
+            "DATABASE_URI",
+            default="mysql+pymysql://anubis:anubis@{}/anubis".format(
+                os.environ.get("DB_HOST", "db")
+            ),
+        )
+        self.DISABLE_ELK = os.environ.get("DISABLE_ELK", default="0") == "1"
 
         # OAuth
-        self.OAUTH_CONSUMER_KEY = os.environ.get('OAUTH_CONSUMER_KEY', default='DEBUG')
-        self.OAUTH_CONSUMER_SECRET = os.environ.get('OAUTH_CONSUMER_SECRET', default='DEBUG')
+        self.OAUTH_CONSUMER_KEY = os.environ.get("OAUTH_CONSUMER_KEY", default="DEBUG")
+        self.OAUTH_CONSUMER_SECRET = os.environ.get(
+            "OAUTH_CONSUMER_SECRET", default="DEBUG"
+        )
 
         # Redis
-        self.CACHE_REDIS_HOST = os.environ.get('CACHE_REDIS_HOST', default='redis')
+        self.CACHE_REDIS_HOST = os.environ.get("CACHE_REDIS_HOST", default="redis")
 
         # Logger
-        self.LOGGER_NAME = os.environ.get('LOGGER_NAME', default='anubis-api')
+        self.LOGGER_NAME = os.environ.get("LOGGER_NAME", default="anubis-api")
 
         # Theia
-        self.THEIA_DOMAIN = os.environ.get('THEIA_DOMAIN', default='ide.anubis.osiris.services')
+        self.THEIA_DOMAIN = os.environ.get(
+            "THEIA_DOMAIN", default="ide.anubis.osiris.services"
+        )
 
-        logging.info('Starting with DATABASE_URI: {}'.format(
-            self.SQLALCHEMY_DATABASE_URI))
-        logging.info('Starting with SECRET_KEY: {}'.format(self.SECRET_KEY))
-        logging.info('Starting with DEBUG: {}'.format(self.DEBUG))
+        logging.info(
+            "Starting with DATABASE_URI: {}".format(self.SQLALCHEMY_DATABASE_URI)
+        )
+        logging.info("Starting with SECRET_KEY: {}".format(self.SECRET_KEY))
+        logging.info("Starting with DEBUG: {}".format(self.DEBUG))
 
 
 config = Config()

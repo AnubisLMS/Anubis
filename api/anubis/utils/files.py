@@ -14,7 +14,7 @@ def make_blob_response(file: StaticFile) -> Response:
     response = make_response(file.blob)
 
     # Set its content type header to the proper value
-    response.headers['Content-Type'] = file.content_type
+    response.headers["Content-Type"] = file.content_type
 
     # Hand the flask response back
     return response

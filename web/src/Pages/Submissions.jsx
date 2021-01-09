@@ -7,7 +7,7 @@ import Zoom from '@material-ui/core/Zoom';
 import Typography from '@material-ui/core/Typography';
 import useGet from '../hooks/useGet';
 import {SubmissionsTable} from '../Components/Submissions/SubmissionsTable';
-import {useQuery} from '../hooks/useQuery';
+import useQuery from '../hooks/useQuery';
 import Questions from '../Components/Questions/Questions';
 
 const useStyles = makeStyles({
@@ -21,7 +21,6 @@ const useStyles = makeStyles({
     fontWeight: 600,
   },
   commitHashContainer: {
-
     width: 200,
     overflow: 'hidden',
   },

@@ -9,12 +9,12 @@ from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response
 from anubis.utils.redis_queue import enqueue_webhook, rpc_enqueue
 
-regrade = Blueprint('admin-regrade', __name__, url_prefix='/admin/regrade')
+regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 
 
-@regrade.route('/submission/<commit>')
+@regrade.route("/submission/<commit>")
 @require_admin
-@log_endpoint('cli', lambda: 'regrade-commit')
+@log_endpoint("cli", lambda: "regrade-commit")
 @json_response
 def private_regrade_submission(commit):
     """
@@ -27,10 +27,10 @@ def private_regrade_submission(commit):
     # Find the submission
     s = Submission.query.filter(
         Submission.commit == commit,
-        Submission.owner_id != None,
+        Submission.owner_id is not None,
     ).first()
     if s is None:
-        return error_response('not found')
+        return error_response("not found")
 
     # Reset submission in database
     s.init_submission_models()
@@ -39,15 +39,12 @@ def private_regrade_submission(commit):
     enqueue_webhook(s.id)
 
     # Return status
-    return success_response({
-        'submission': s.data,
-        'user': s.owner.data
-    })
+    return success_response({"submission": s.data, "user": s.owner.data})
 
 
-@regrade.route('/<assignment_name>')
+@regrade.route("/<assignment_name>")
 @require_admin
-@log_endpoint('cli', lambda: 'regrade')
+@log_endpoint("cli", lambda: "regrade")
 @json_response
 def private_regrade_assignment(assignment_name):
     """
@@ -71,16 +68,13 @@ def private_regrade_assignment(assignment_name):
     """
 
     # Find the assignment
-    assignment = Assignment.query.filter_by(
-        name=assignment_name
-    ).first()
+    assignment = Assignment.query.filter_by(name=assignment_name).first()
     if assignment is None:
-        return error_response('cant find assignment')
+        return error_response("cant find assignment")
 
     # Get all submissions that have an owner (not dangling)
     submissions = Submission.query.filter(
-        Submission.assignment_id == assignment.id,
-        Submission.owner_id != None
+        Submission.assignment_id == assignment.id, Submission.owner_id is not None
     ).all()
 
     # Split the submissions into bite sized chunks
@@ -92,4 +86,4 @@ def private_regrade_assignment(assignment_name):
         rpc_enqueue(rpc_bulk_regrade, chunk)
 
     # Pass back the enqueued status
-    return success_response({'status': 'chunks enqueued'})
+    return success_response({"status": "chunks enqueued"})

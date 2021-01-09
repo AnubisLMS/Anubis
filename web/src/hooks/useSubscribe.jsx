@@ -38,7 +38,7 @@ export default function useSubscribe(path, interval, until, callback) {
               return;
             }
             if (error.response.status === 401) {
-              window.location = '/api/public/login';
+              window.location = '/api/public/auth/login';
             }
             setState({
               loading: false,

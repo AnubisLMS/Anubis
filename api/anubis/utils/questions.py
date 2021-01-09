@@ -1,12 +1,21 @@
 import random
 from typing import List, Dict
 
-from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQuestion, User, InClass
+from anubis.models import (
+    db,
+    Assignment,
+    AssignmentQuestion,
+    AssignedStudentQuestion,
+    User,
+    InClass,
+)
 from anubis.utils.cache import cache
 from anubis.utils.data import _verify_data_shape, is_debug
 
 
-def get_question_sequence_mapping(questions: List[AssignmentQuestion]) -> Dict[int, List[AssignmentQuestion]]:
+def get_question_sequence_mapping(
+    questions: List[AssignmentQuestion],
+) -> Dict[int, List[AssignmentQuestion]]:
     """
     Get mapping of sequence to question mapping from list of questions
 
@@ -80,9 +89,9 @@ def assign_questions(assignment: Assignment):
 
     # Go through students in the class and assign them questions
     assigned_questions = []
-    students = User.query.join(InClass).filter(
-        InClass.class_id == assignment.class_id
-    ).all()
+    students = (
+        User.query.join(InClass).filter(InClass.course_id == assignment.course_id).all()
+    )
     for student in students:
         for sequence, qs in questions.items():
             # Get a random question from the pool at this sequence
@@ -130,10 +139,7 @@ def ingest_questions(questions: dict, assignment: Assignment):
     :return:
     """
 
-    question_shape = {
-        'questions': {'q': str, 'a': str},
-        'sequence': int
-    }
+    question_shape = {"questions": {"q": str, "a": str}, "sequence": int}
 
     if questions is None:
         return
@@ -144,37 +150,37 @@ def ingest_questions(questions: dict, assignment: Assignment):
         shape_good, err_path = _verify_data_shape(question_sequence, question_shape)
         if not shape_good:
             # Reject the question if the shape is bad and continue
-            rejected.append({
-                'question': question_sequence,
-                'reason': 'could not verify data shape ' + err_path
-            })
+            rejected.append(
+                {
+                    "question": question_sequence,
+                    "reason": "could not verify data shape " + err_path,
+                }
+            )
             continue
 
-        sequence = question_sequence['sequence']
-        for question in question_sequence['questions']:
+        sequence = question_sequence["sequence"]
+        for question in question_sequence["questions"]:
 
-            # Check to see if question already exists for the current assignment
+            # Check to see if question already exists for the current
+            # assignment
             exists = AssignmentQuestion.query.filter(
                 AssignmentQuestion.assignment_id == assignment.id,
-                AssignmentQuestion.question == question['q']
+                AssignmentQuestion.question == question["q"],
             ).first()
             if exists is not None:
                 # If the question exists, ignore it and continue
-                ignored.append({
-                    'question': question,
-                    'reason': 'already exists'
-                })
+                ignored.append({"question": question, "reason": "already exists"})
                 continue
 
             # Create the new question from posted data
             assignment_question = AssignmentQuestion(
                 assignment_id=assignment.id,
-                question=question['q'],
-                solution=question['a'],
+                question=question["q"],
+                solution=question["a"],
                 sequence=sequence,
             )
             db.session.add(assignment_question)
-            accepted.append({'question': question})
+            accepted.append({"question": question})
 
     # Commit additions
     db.session.commit()
@@ -210,10 +216,7 @@ def get_all_questions(assignment: Assignment) -> Dict[int, List[Dict[str, str]]]
 
     # Convert ORM object to a dictionary
     return {
-        _sequence: [
-            _question.full_data
-            for _question in _questions
-        ]
+        _sequence: [_question.full_data for _question in _questions]
         for _sequence, _questions in sequence_to_questions.items()
     }
 
@@ -226,7 +229,4 @@ def get_assigned_questions(assignment_id: int, user_id: int):
         AssignedStudentQuestion.owner_id == user_id,
     ).all()
 
-    return [
-        assigned_question.data
-        for assigned_question in assigned_questions
-    ]
+    return [assigned_question.data for assigned_question in assigned_questions]
