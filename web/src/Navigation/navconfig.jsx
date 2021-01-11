@@ -7,23 +7,29 @@ import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import AccountCircleOutlinedIcon from '@material-ui/icons/AccountCircleOutlined';
 import PublicIcon from '@material-ui/icons/Public';
+import GroupIcon from '@material-ui/icons/Group';
 
-import About from '../Pages/About';
-import Courses from '../Pages/Courses';
-import Assignments from '../Pages/Assignments';
-import IDE from '../Pages/IDE';
-import Profile from '../Pages/Profile';
-import Repos from '../Pages/Repos';
-import Submissions from '../Pages/Submissions';
+import About from '../Pages/Public/About';
+import Courses from '../Pages/Public/Courses';
+import Assignments from '../Pages/Public/Assignments';
+import IDE from '../Pages/Public/IDE';
+import Profile from '../Pages/Public/Profile';
+import Repos from '../Pages/Public/Repos';
+import Submissions from '../Pages/Public/Submissions';
+import Submission from '../Pages/Public/Submission';
 
-export const footerconfig = [{
+import Users from '../Pages/Admin/Users';
+import User from '../Pages/Admin/User';
+
+export const footer_nav = [{
   id: 'About',
   icon: <PublicIcon/>,
+  exact: true,
   path: '/about',
   Page: About,
 }];
 
-export const navconfig = [
+export const public_nav = [
   {
     id: 'Anubis',
     children: [
@@ -40,12 +46,6 @@ export const navconfig = [
         Page: Assignments,
       },
       {
-        id: 'Repos',
-        icon: <GitHubIcon/>,
-        path: '/repos',
-        Page: Repos,
-      },
-      {
         id: 'Submissions',
         icon: <AssessmentIcon/>,
         path: '/courses/assignments/submissions',
@@ -58,12 +58,41 @@ export const navconfig = [
         Page: IDE,
       },
       {
+        id: 'Repos',
+        icon: <GitHubIcon/>,
+        path: '/repos',
+        Page: Repos,
+      },
+      {
         id: 'Profile',
         icon: <AccountCircleOutlinedIcon/>,
         path: '/profile',
         Page: Profile,
       },
     ],
+  },
+];
+
+
+export const admin_nav = [
+  {
+    id: 'Users',
+    icon: <GroupIcon/>,
+    path: '/users',
+    Page: Users,
+  },
+];
+
+export const not_shown_nav = [
+  {
+    id: 'Submission',
+    path: '/submission',
+    Page: Submission,
+  },
+  {
+    id: 'User',
+    path: '/user',
+    Page: User,
   },
 ];
 

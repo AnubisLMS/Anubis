@@ -49,9 +49,9 @@ export default function IDEInstructions() {
             clone exactly what is in your github repo into your Cloud IDE filesystem. When we stop and reclaim your
             Cloud IDE
             resources, we delete the Cloud IDE instance allocated to you. This means that the filesystem for your
-            Cloud IDE system, including your work will be deleted forever. There is a robot user in the Cloud IDE
-            instance that will automatically commit and push your work every 5 minutes. You should
-            <i>not</i> rely on this exclusively.
+            Cloud IDE system, including your work will be deleted forever. There is some witchcraft in the Cloud IDE
+            instance that will automatically commit and push your work every 5 minutes. You should <i>not</i> rely
+            on this exclusively.
           </DialogContentText>
           <DialogContentText id="alert-dialog-description">
             Each session will last for a maximum of 6 hours. After that, the resources running your IDE will be

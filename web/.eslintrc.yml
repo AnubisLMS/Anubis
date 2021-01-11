@@ -19,4 +19,6 @@ rules:
   require-jsdoc: off
   valid-jsdoc: off
   camelcase: off
+  no-unused-vars: off
+  indent: ["error", 2]
   max-len: ["error", { "code": 120 }]

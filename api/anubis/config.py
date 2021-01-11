@@ -46,7 +46,7 @@ class Config:
         )
 
         # Redis
-        self.CACHE_REDIS_HOST = os.environ.get("CACHE_REDIS_HOST", default="redis")
+        self.CACHE_REDIS_HOST = os.environ.get("CACHE_REDIS_HOST", default="redis-master")
 
         # Logger
         self.LOGGER_NAME = os.environ.get("LOGGER_NAME", default="anubis-api")

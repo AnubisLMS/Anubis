@@ -42,7 +42,7 @@ def public_assignments():
     return success_response({"assignments": assignment_data})
 
 
-@assignments.route("/questions/get/<int:id>")
+@assignments.route("/questions/get/<string:id>")
 @require_user
 @log_endpoint("public-questions-get", lambda: "get questions")
 @load_from_id(Assignment, verify_owner=False)
@@ -62,7 +62,7 @@ def public_assignment_questions_id(assignment: Assignment):
     )
 
 
-@assignments.route("/questions/save/<int:id>")
+@assignments.route("/questions/save/<string:id>")
 @require_user
 @log_endpoint("public-questions-save", lambda: "save questions")
 @load_from_id(AssignedStudentQuestion, verify_owner=True)

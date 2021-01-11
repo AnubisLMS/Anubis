@@ -17,7 +17,9 @@ def get_n_available_sessions() -> Tuple[int, int]:
     """
     max_ides_config: Config = Config.query.filter(Config.key == "MAX_IDES").first()
 
-    active_ide_count: int = TheiaSession.query.filter(TheiaSession.active).count()
+    active_ide_count: int = TheiaSession.query.filter(
+        TheiaSession.active == True
+    ).count()
 
     max_ides = int(max_ides_config.value) if max_ides_config is not None else 50
 
@@ -25,7 +27,7 @@ def get_n_available_sessions() -> Tuple[int, int]:
 
 
 # @cache.memoize(timeout=60 * 5)
-def theia_redirect_url(theia_session_id: int, netid: str) -> str:
+def theia_redirect_url(theia_session_id: str, netid: str) -> str:
     """
     Generates the url for redirecting to the theia proxy for the given session.
 
@@ -44,7 +46,7 @@ def theia_redirect(theia_session: TheiaSession, user: User):
 
 
 @cache.memoize(timeout=1)
-def theia_list_all(user_id: int, limit: int = 10):
+def theia_list_all(user_id: str, limit: int = 10):
     theia_sessions: List[TheiaSession] = (
         TheiaSession.query.filter(
             TheiaSession.owner_id == user_id,
@@ -58,7 +60,7 @@ def theia_list_all(user_id: int, limit: int = 10):
 
 
 @cache.memoize(timeout=1)
-def theia_poll_ide(theia_session_id: int, user_id: int):
+def theia_poll_ide(theia_session_id: str, user_id: str):
     theia_session = TheiaSession.query.filter(
         TheiaSession.id == theia_session_id,
         TheiaSession.owner_id == user_id,

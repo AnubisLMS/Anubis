@@ -127,7 +127,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
     return pod, pvc
 
 
-def initialize_theia_session(theia_session_id: int):
+def initialize_theia_session(theia_session_id: str):
     """
     Create the kube resources for a theia session. Will update database entries if necessary.
 
@@ -234,7 +234,7 @@ def initialize_theia_session(theia_session_id: int):
         db.session.commit()
 
 
-def reap_theia_session_resources(theia_session_id: int):
+def reap_theia_session_resources(theia_session_id: str):
     """Mark theia session resources for deletion in kube"""
     v1 = client.CoreV1Api()
 
@@ -337,7 +337,7 @@ def check_active_pods():
     db.session.commit()
 
 
-def reap_theia_session(theia_session_id: int):
+def reap_theia_session(theia_session_id: str):
     from anubis.app import create_app
 
     app = create_app()

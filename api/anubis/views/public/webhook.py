@@ -6,7 +6,7 @@ from anubis.models import (
     AssignmentRepo,
     db,
     Course,
-    InClass,
+    InCourse,
     Submission,
 )
 from anubis.utils.data import is_debug
@@ -112,7 +112,7 @@ def public_webhook():
     repo = (
         AssignmentRepo.query.join(Assignment)
         .join(Course)
-        .join(InClass)
+        .join(InCourse)
         .join(User)
         .filter(
             User.github_username == github_username,

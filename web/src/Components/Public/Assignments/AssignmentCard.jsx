@@ -95,9 +95,9 @@ export default function AssignmentCard(props) {
       return;
     }
     timerComponents.push( // decorate
-        <span>
-          {timeLeft[interval]} {interval} left
-        </span>,
+      <span>
+        {timeLeft[interval]} {interval} left
+      </span>,
     );
   });
 

@@ -40,9 +40,6 @@ class User(db.Model):
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    repos = db.relationship("AssignmentRepo", cascade="all,delete")
-    in_class = db.relationship("InClass", cascade="all,delete")
-
     @property
     def data(self):
         return {
@@ -67,8 +64,6 @@ class Course(db.Model):
     semester = db.Column(db.String(256), nullable=True)
     section = db.Column(db.String(256), nullable=True)
     professor = db.Column(db.String(256), nullable=False)
-
-    in_class = db.relationship("InClass", cascade="all,delete")
 
     @property
     def total_assignments(self):
@@ -95,8 +90,8 @@ class Course(db.Model):
         }
 
 
-class InClass(db.Model):
-    __tablename__ = "in_class"
+class InCourse(db.Model):
+    __tablename__ = "in_course"
 
     # Foreign Keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)

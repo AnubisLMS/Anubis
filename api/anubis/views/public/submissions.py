@@ -1,14 +1,16 @@
 from flask import Blueprint, request
 
 from anubis.models import User, Submission
+
 from anubis.utils.assignments import get_submissions
 from anubis.utils.auth import current_user, require_user
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug
 from anubis.utils.decorators import json_response
 from anubis.utils.elastic import log_endpoint
-from anubis.utils.http import get_request_ip, error_response, success_response
+from anubis.utils.http import error_response, success_response
 from anubis.utils.submissions import regrade_submission
+from anubis.utils.logger import logger
 
 submissions = Blueprint(
     "public-submissions", __name__, url_prefix="/public/submissions"
@@ -17,9 +19,7 @@ submissions = Blueprint(
 
 @submissions.route("/")
 @require_user
-@log_endpoint(
-    "public-submissions", lambda: "get submissions {}".format(get_request_ip())
-)
+@log_endpoint("public-submissions")
 @json_response
 def public_submissions():
     """
@@ -35,27 +35,37 @@ def public_submissions():
     :return:
     """
     # Get optional filters
-    class_name = request.args.get("class", default=None)
-    assignment_name = request.args.get("assignment", default=None)
-    assignment_id = request.args.get("assignment_id", default=None)
+    course_id = request.args.get("courseId", default=None)
+    perspective_of_id = request.args.get("userId", default=None)
+    assignment_id = request.args.get("assignmentId", default=None)
 
     # Load current user
     user: User = current_user()
 
+    if perspective_of_id is not None and not (user.is_admin or user.is_superuser):
+        return error_response('Bad Request'), 400
+
+    logger.debug('id: ' + str(perspective_of_id))
+    logger.debug('id: ' + str(perspective_of_id or user.id))
+
+    submissions_ = get_submissions(
+        user_id=perspective_of_id or user.id,
+        course_id=course_id,
+        assignment_id=assignment_id,
+    )
+
+    if submissions_ is None:
+        return error_response('Bad Request'), 400
+
     # Get submissions through cached function
     return success_response(
         {
-            "submissions": get_submissions(
-                user.netid,
-                class_name=class_name,
-                assignment_name=assignment_name,
-                assignment_id=assignment_id,
-            )
+            "submissions": submissions_
         }
     )
 
 
-@submissions.route("/<string:commit>")
+@submissions.route("/get/<string:commit>")
 @require_user
 @log_endpoint(
     "public-submission-commit", lambda: "get submission {}".format(request.path)
@@ -73,11 +83,9 @@ def public_submission(commit: str):
     user: User = current_user()
 
     # Try to find commit (verifying ownership)
-    s = (
-        Submission.query.join(User)
-        .filter(User.netid == user.netid, Submission.commit == commit)
-        .first()
-    )
+    s = Submission.query.filter(
+        Submission.owner_id == user.id, Submission.commit == commit
+    ).first()
 
     # Make sure we caught one
     if s is None:
@@ -106,8 +114,8 @@ def public_regrade_commit(commit=None):
     # Find the submission
     submission: Submission = (
         Submission.query.join(User)
-        .filter(Submission.commit == commit, User.netid == user.netid)
-        .first()
+            .filter(Submission.commit == commit, User.netid == user.netid)
+            .first()
     )
 
     # Verify Ownership

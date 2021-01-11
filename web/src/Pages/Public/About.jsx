@@ -3,9 +3,9 @@ import {makeStyles} from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 
-import John from '../Components/About/John';
-import Somto from '../Components/About/Somto';
-import Description from '../Components/About/Description';
+import John from '../../Components/Public/About/John';
+import Somto from '../../Components/Public/About/Somto';
+import Description from '../../Components/Public/About/Description';
 
 const useStyles = makeStyles((theme) => ({
   root: {

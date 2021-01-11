@@ -1,28 +1,43 @@
 import React from 'react';
-import {Route, Switch} from 'react-router-dom';
-import {footerconfig, navconfig} from './navconfig';
-import Grid from '@material-ui/core/Grid';
+import {Redirect, Route, Switch} from 'react-router-dom';
+import {admin_nav, footer_nav, not_shown_nav, public_nav} from './navconfig';
+import AuthContext from '../Contexts/AuthContext';
 
 export default function MainSwitch() {
   return (
-    <Switch>
-      {navconfig.map(({children}) => children.map(({path, Page = 'div'}) => (
-        <Route exact path={path} key={path}>
-          <Grid container spacing={2} justify="center" alignItems="center">
-            <Page/>
-          </Grid>
-        </Route>
-      )))}
-      {footerconfig.map(({path, Page}) => (
-        <Route exact path={path} key={`path-${path}`}>
-          <Grid container spacing={2} justify="center" alignItems="center">
-            <Page/>
-          </Grid>
-        </Route>
-      ))}
-      <Route>
-        404 not found
-      </Route>
-    </Switch>
+    <AuthContext.Consumer>
+      {(user) => (
+        <Switch>
+          {public_nav.map(({children}) => children.map(({path, Page}) => (
+            <Route exact path={path} key={path}>
+              <Page/>
+            </Route>
+          )))}
+          {footer_nav.map(({path, Page}) => (
+            <Route exact path={path} key={`path-${path}`}>
+              <Page/>
+            </Route>
+          ))}
+          {admin_nav.map(({path, Page}) => (
+            <Route exact path={path} key={`path-${path}`}>
+              {user && user.is_admin ? (
+                <Page/>
+              ) : null}
+            </Route>
+          ))}
+          {not_shown_nav.map(({path, Page}) => (
+            <Route exact path={path} key={`path-${path}`}>
+              <Page/>
+            </Route>
+          ))}
+          <Route exact path={'/'}>
+            <Redirect to={'/about'}/>
+          </Route>
+          <Route>
+            404 not found
+          </Route>
+        </Switch>
+      )}
+    </AuthContext.Consumer>
   );
 }

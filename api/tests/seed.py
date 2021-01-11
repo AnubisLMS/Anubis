@@ -1,7 +1,7 @@
 import json
 from anubis.models import Submission, SubmissionTestResult, SubmissionBuild
 from anubis.models import Assignment, AssignmentRepo, AssignmentTest
-from anubis.models import db, User, InClass, Course
+from anubis.models import db, User, InCourse, Course
 from anubis.app import create_app
 import os
 import requests
@@ -60,7 +60,7 @@ with app.app_context():
     Submission.query.delete()
     AssignmentRepo.query.delete()
     AssignmentTest.query.delete()
-    InClass.query.delete()
+    InCourse.query.delete()
     Assignment.query.delete()
     Course.query.delete()
     User.query.delete()
@@ -76,7 +76,7 @@ with app.app_context():
     c = Course(
         name="Intro to OS", class_code="CS-UY 3224", section="A", professor="Gustavo"
     )
-    ic = InClass(owner=u, class_=c)
+    ic = InCourse(owner=u, class_=c)
     a = Assignment(
         name="Assignment1: uniq",
         unique_code="abc123",

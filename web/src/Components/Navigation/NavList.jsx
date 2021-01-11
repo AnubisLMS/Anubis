@@ -8,10 +8,11 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 
-import {footerconfig, navconfig} from '../../Navigation/navconfig';
+import {admin_nav, footer_nav, public_nav} from '../../Navigation/navconfig';
 import ExitToAppOutlinedIcon from '@material-ui/icons/ExitToAppOutlined';
 import LaunchOutlinedIcon from '@material-ui/icons/LaunchOutlined';
 import NavItem from './NavItem';
+import AuthContext from '../../Contexts/AuthContext';
 
 const useStyles = makeStyles((theme) => ({
   categoryHeader: {
@@ -63,7 +64,7 @@ export default function NavList({...other}) {
         <ListItem className={clsx(classes.firebase, classes.item, classes.itemCategory)} key={0}>
           Anubis
         </ListItem>
-        {navconfig.map(({id, children}) => (
+        {public_nav.map(({id, children}) => (
           <React.Fragment key={`${id}-thing`}>
             {children.map(({id: childId, icon, path}) => (
               <NavItem
@@ -75,14 +76,34 @@ export default function NavList({...other}) {
                 pathname={pathname}
               />
             ))}
-
             <Divider className={classes.divider}/>
           </React.Fragment>
         ))}
+        <AuthContext.Consumer>
+          {(user) => (
+            <React.Fragment>
+              {user && user.is_admin ? (
+                <React.Fragment>
+                  {admin_nav.map(({id: childId, icon, path}) => (
+                    <NavItem
+                      key={childId}
+                      onClick={() => setPathname(path)}
+                      childId={childId}
+                      icon={icon}
+                      path={path}
+                      pathname={pathname}
+                    />
+                  ))}
+                  <Divider className={classes.divider}/>
+                </React.Fragment>
+              ) : null}
+            </React.Fragment>
+          )}
+        </AuthContext.Consumer>
       </List>
       <div className={classes.bottomPush}>
         <List>
-          {footerconfig.map(({id: childId, icon, path}) => (
+          {footer_nav.map(({id: childId, icon, path}) => (
             <NavItem
               key={childId}
               onClick={() => setPathname(path)}

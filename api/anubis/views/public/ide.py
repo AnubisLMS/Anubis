@@ -21,7 +21,7 @@ ide = Blueprint("public-ide", __name__, url_prefix="/public/ide")
 
 
 @ide.route("/list")
-@log_endpoint("ide-list", lambda: "ide-list")
+@log_endpoint("ide-list")
 @require_user
 @json_response
 def public_ide_list():
@@ -43,9 +43,9 @@ def public_ide_list():
 
 
 @ide.route("/stop/<int:theia_session_id>")
-@log_endpoint("stop-theia-session", lambda: "stop-theia-session")
+@log_endpoint("stop-theia-session")
 @require_user
-def public_ide_stop(theia_session_id: int) -> Dict[str, str]:
+def public_ide_stop(theia_session_id: str) -> Dict[str, str]:
     user: User = current_user()
 
     theia_session: TheiaSession = TheiaSession.query.filter(
@@ -69,7 +69,7 @@ def public_ide_stop(theia_session_id: int) -> Dict[str, str]:
 @log_endpoint("ide-poll-id", lambda: "ide-poll")
 @require_user
 @json_response
-def public_ide_poll(theia_session_id: int) -> Dict[str, str]:
+def public_ide_poll(theia_session_id: str) -> Dict[str, str]:
     """
     Slightly cached endpoint for polling for session data.
 
@@ -89,7 +89,7 @@ def public_ide_poll(theia_session_id: int) -> Dict[str, str]:
 @log_endpoint("ide-redirect-url", lambda: "ide-redirect-url")
 @require_user
 @json_response
-def public_ide_redirect_url(theia_session_id: int) -> Dict[str, str]:
+def public_ide_redirect_url(theia_session_id: str) -> Dict[str, str]:
     """
     Get the redirect url for a given session
 
@@ -110,7 +110,7 @@ def public_ide_redirect_url(theia_session_id: int) -> Dict[str, str]:
     )
 
 
-@ide.route("/initialize/<int:id>")
+@ide.route("/initialize/<string:id>")
 @log_endpoint("ide-initialize", lambda: "ide-initialize")
 @require_user
 @load_from_id(Assignment, verify_owner=False)

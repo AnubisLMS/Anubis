@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 from anubis.models import User
-from anubis.utils.assignments import get_classes
+from anubis.utils.assignments import get_courses
 from anubis.utils.auth import require_user, current_user
 from anubis.utils.decorators import json_response
 from anubis.utils.elastic import log_endpoint
@@ -21,4 +21,4 @@ def public_classes():
     :return:
     """
     user: User = current_user()
-    return success_response({"classes": get_classes(user.netid)})
+    return success_response({"classes": get_courses(user.netid)})

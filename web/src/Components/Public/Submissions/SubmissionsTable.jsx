@@ -80,13 +80,13 @@ export function SubmissionsTable({rows}) {
 
         <TableBody>
           {(rowsPerPage > 0 ?
-              rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) :
-              rows
-          ).map((row, ind) => (
+            rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) :
+            rows
+          ).map((row) => (
             <TableRow key={row.name} hover={true}
               component={Link}
               style={{textDecoration: 'none'}}
-              to={`/courses/assignments/submissions/info?commit=${row.commitHash}`}>
+              to={`/submission?commit=${row.commitHash}`}>
               <TableCell style={{width: 160}}>
                 {row.assignmentName}
               </TableCell>

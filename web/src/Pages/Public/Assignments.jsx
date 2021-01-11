@@ -6,16 +6,16 @@ import Grid from '@material-ui/core/Grid';
 import Grow from '@material-ui/core/Grow';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import useGet from '../hooks/useGet';
-import useQuery from '../hooks/useQuery';
+import useGet from '../../hooks/useGet';
+import useQuery from '../../hooks/useQuery';
 
-import AssignmentCard from '../Components/Assignments/AssignmentCard';
+import AssignmentCard from '../../Components/Public/Assignments/AssignmentCard';
 
 
 export default function AssignmentView() {
   const query = useQuery();
-  const {loading, error, data} = useGet(
-      '/api/public/assignments',
+  const [{loading, error, data}] = useGet(
+    '/api/public/assignments/',
     query.course ? {course: query.course} : {});
 
   if (loading) return <CircularProgress/>;

@@ -6,13 +6,13 @@ import Grid from '@material-ui/core/Grid';
 import Grow from '@material-ui/core/Grow';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import useGet from '../hooks/useGet';
+import useGet from '../../hooks/useGet';
 
-import CourseCard from '../Components/Courses/CourseCard';
+import CourseCard from '../../Components/Public/Courses/CourseCard';
 
 export default function CourseView() {
   // const{courses} = props; maps to the request for current student courses.
-  const {loading, error, data} = useGet('/api/public/courses/');
+  const [{loading, error, data}] = useGet('/api/public/courses/');
 
   if (loading) return <CircularProgress/>;
   if (error) return <Redirect to={`/error`}/>;

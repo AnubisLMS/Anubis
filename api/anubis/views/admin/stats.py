@@ -53,7 +53,7 @@ def private_stats_assignment(assignment_id, netid=None):
     return success_response({"stats": bests})
 
 
-@stats.route("/submission/<int:id>")
+@stats.route("/submission/<string:id>")
 @require_admin
 @log_endpoint("cli", lambda: "submission-stats")
 @load_from_id(Submission, verify_owner=False)

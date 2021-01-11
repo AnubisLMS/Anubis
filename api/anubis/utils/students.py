@@ -1,50 +1,50 @@
 from parse import parse
 
-from anubis.models import Submission, User, InClass, Course, Assignment
+from anubis.models import Submission, User, InCourse, Course, Assignment
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug
 from anubis.utils.http import error_response
 
 
-@cache.cached(timeout=60 * 60)
-def get_students(class_name: str = "Intro. to Operating Systems"):
+@cache.cached(timeout=5, unless=is_debug)
+def get_students(course_code=None):
+    filters = []
+    if course_code is not None:
+        filters = [Course.course_code == course_code]
     return [
         s.data
-        for s in User.query.join(InClass)
-        .join(Course)
-        .filter(
-            Course.name == class_name,
-        )
-        .all()
+        for s in User.query.join(InCourse).join(Course).filter(
+            *filters
+        ).all()
     ]
 
 
-@cache.cached(timeout=60 * 60)
+@cache.cached(timeout=5, unless=is_debug)
 def get_students_in_class(class_id):
     return [
         c.data
-        for c in User.query.join(InClass)
-        .join(Course)
-        .filter(
+        for c in User.query.join(InCourse)
+            .join(Course)
+            .filter(
             Course.id == class_id,
-            InClass.owner_id == User.id,
+            InCourse.owner_id == User.id,
         )
-        .all()
+            .all()
     ]
 
 
-@cache.memoize(timeout=300, unless=is_debug)
+@cache.memoize(timeout=5 * 60, unless=is_debug)
 def stats_for(student_id, assignment_id):
     best = None
     best_count = -1
     for submission in (
-        Submission.query.filter(
-            Submission.assignment_id == assignment_id,
-            Submission.owner_id == student_id,
-            Submission.processed,
-        )
-        .order_by(Submission.created.desc())
-        .all()
+            Submission.query.filter(
+                Submission.assignment_id == assignment_id,
+                Submission.owner_id == student_id,
+                Submission.processed,
+            )
+                    .order_by(Submission.created.desc())
+                    .all()
     ):
         correct_count = sum(
             map(lambda result: 1 if result.passed else 0, submission.test_results)
@@ -61,8 +61,8 @@ def bulk_stats(assignment_id, netids=None):
     bests = {}
 
     assignment = (
-        Assignment.query.filter_by(name=assignment_id).first()
-        or Assignment.query.filter_by(id=assignment_id).first()
+            Assignment.query.filter_by(name=assignment_id).first()
+            or Assignment.query.filter_by(id=assignment_id).first()
     )
     if assignment is None:
         return error_response("assignment does not exist")

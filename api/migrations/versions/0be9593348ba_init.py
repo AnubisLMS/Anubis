@@ -89,7 +89,7 @@ def upgrade():
         op.f("ix_assignment_course_id"), "assignment", ["course_id"], unique=False
     )
     op.create_table(
-        "in_class",
+        "in_course",
         sa.Column("owner_id", sa.String(length=128), nullable=False),
         sa.Column("course_id", sa.String(length=128), nullable=False),
         sa.ForeignKeyConstraint(
@@ -335,7 +335,7 @@ def downgrade():
         op.f("ix_assignment_question_assignment_id"), table_name="assignment_question"
     )
     op.drop_table("assignment_question")
-    op.drop_table("in_class")
+    op.drop_table("in_course")
     op.drop_index(op.f("ix_assignment_course_id"), table_name="assignment")
     op.drop_table("assignment")
     op.drop_index(op.f("ix_user_netid"), table_name="user")

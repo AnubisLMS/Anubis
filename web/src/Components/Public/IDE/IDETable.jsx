@@ -75,8 +75,8 @@ export default function IDETable({rows}) {
 
         <TableBody>
           {(rowsPerPage > 0 ?
-              rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) :
-              rows
+            rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) :
+            rows
           ).map((row) => (
             <TableRow key={row.name} hover={true}
               style={{textDecoration: 'none'}}>

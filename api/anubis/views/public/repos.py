@@ -11,7 +11,7 @@ from anubis.utils.http import success_response
 repos = Blueprint("public-repos", __name__, url_prefix="/public/repos")
 
 
-@repos.route("/repos")
+@repos.route("/")
 @require_user
 @log_endpoint("repos", lambda: "repos")
 @json_response

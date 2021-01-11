@@ -1,20 +1,20 @@
 import React, {useState} from 'react';
 
-import {BrowserRouter as Router, Redirect, Route} from 'react-router-dom';
-
+import {BrowserRouter as Router} from 'react-router-dom';
 import {SnackbarProvider} from 'notistack';
-
 import clsx from 'clsx';
 
 import {makeStyles, ThemeProvider} from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
+import {drawerWidth} from './Navigation/navconfig';
 import theme from './theme';
+
+import AuthWrapper from './Components/AuthWrapper';
 import MainSwitch from './Navigation/MainSwitch';
 import useQuery from './hooks/useQuery';
 import Nav from './Navigation/Nav';
 import Error from './Components/Error';
-import {drawerWidth} from './Navigation/navconfig';
 import Footer from './Components/Footer';
 
 const useStyles = makeStyles(() => ({
@@ -23,15 +23,6 @@ const useStyles = makeStyles(() => ({
     height: '100%',
     width: '100%',
     backgroundImage: `url(/curvylines.png)`,
-    // flexDirection: 'column',
-  },
-  drawerHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: theme.spacing(0, 1),
-    // necessary for content to be below app bar
-    ...theme.mixins.toolbar,
-    justifyContent: 'flex-end',
   },
   content: {
     flexGrow: 1,
@@ -55,19 +46,6 @@ const useStyles = makeStyles(() => ({
     }),
     marginLeft: 0,
   },
-  footer: {
-    padding: theme.spacing(2),
-    bottom: '0',
-    left: '0',
-    textAlign: 'center',
-    position: 'fixed',
-    width: '100%',
-  },
-  chip: {
-    padding: theme.spacing(1),
-    width: '100%',
-    textAlign: 'center',
-  },
 }));
 
 export default function App() {
@@ -81,29 +59,25 @@ export default function App() {
       <div className={classes.root}>
         <SnackbarProvider maxSnack={5}>
           <Router>
-            <CssBaseline>
-              <Route exact path={'/'}>
-                <Redirect to={'/about'}/>
-              </Route>
-
-              <Nav
-                variant="temporary"
-                open={open}
-                onClose={() => setOpen(false)}
-                onOpen={() => setOpen(true)}
-              />
-
-              <main
-                className={clsx(classes.content, classes.main, {
-                  [classes.contentShift]: open,
-                })}
-              >
-                <Error show={showError} onDelete={() => setShowError(false)}/>
-                <MainSwitch/>
-
+            <AuthWrapper>
+              <CssBaseline>
+                <Nav
+                  variant="temporary"
+                  open={open}
+                  onClose={() => setOpen(false)}
+                  onOpen={() => setOpen(true)}
+                />
+                <main
+                  className={clsx(classes.content, classes.main, {
+                    [classes.contentShift]: open,
+                  })}
+                >
+                  <Error show={showError} onDelete={() => setShowError(false)}/>
+                  <MainSwitch/>
+                </main>
                 <Footer/>
-              </main>
-            </CssBaseline>
+              </CssBaseline>
+            </AuthWrapper>
           </Router>
         </SnackbarProvider>
       </div>

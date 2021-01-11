@@ -5,10 +5,10 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
 import Zoom from '@material-ui/core/Zoom';
 import Typography from '@material-ui/core/Typography';
-import useGet from '../hooks/useGet';
-import {SubmissionsTable} from '../Components/Submissions/SubmissionsTable';
-import useQuery from '../hooks/useQuery';
-import Questions from '../Components/Questions/Questions';
+import useGet from '../../hooks/useGet';
+import {SubmissionsTable} from '../../Components/Public/Submissions/SubmissionsTable';
+import useQuery from '../../hooks/useQuery';
+import Questions from '../../Components/Public/Questions/Questions';
 
 const useStyles = makeStyles({
   root: {
@@ -27,14 +27,19 @@ const useStyles = makeStyles({
 });
 
 
-export default function SubmissionsView() {
+export default function Submissions() {
   const classes = useStyles();
   const query = useQuery();
-  const {loading, error, data} = useGet(
-    query.get('assignmentId') ?
-      `/api/public/submissions?assignment_id=${query.get('assignmentId')}` :
-      '/api/public/submissions',
+  const [{loading, error, data}] = useGet(
+    `/api/public/submissions/`,
+    {
+      assignmentId: query.get('assignmentId'),
+      courseId: query.get('courseId'),
+      userId: query.get('userId'),
+    },
   );
+
+  const assignment_id = query.get('assignmentId');
 
   if (loading) return <CircularProgress/>;
   if (error) return <Redirect to={`/error`}/>;
@@ -48,8 +53,8 @@ export default function SubmissionsView() {
   }
 
   const rows = data.submissions
-      .map(translateSubmission)
-      .sort((a, b) => (a.timeStamp > b.timeStamp ? -1 : 1)); // sorts submissions in reverse chronological order
+    .map(translateSubmission)
+    .sort((a, b) => (a.timeStamp > b.timeStamp ? -1 : 1)); // sorts submissions in reverse chronological order
 
   return (
     <div className={classes.root}>
@@ -65,15 +70,22 @@ export default function SubmissionsView() {
             CS-UY 3224
           </Typography>
         </Grid>
-        <Grid item xs={12}>
-          <Questions/>
-        </Grid>
 
+        {/* Questions */}
+        {!!assignment_id ? (
+          <Grid item xs={12}>
+            <Questions assignment_id={assignment_id}/>
+          </Grid>
+        ) : null}
+
+        {/* Submissions subheading */}
         <Grid item xs={12}>
           <Typography variant="body1">
             Submissions
           </Typography>
         </Grid>
+
+        {/* Table */}
         <Zoom in={true} timeout={200}>
           <Grid item xs>
             <SubmissionsTable rows={rows}/>

@@ -45,6 +45,9 @@ debug: build
 	docker-compose up \
 		-d --force-recreate \
 		$(RESTART_ALWAYS_SERVICES)
+	@echo 'site: http://localhost/'
+	@echo 'seed: http://localhost/api/admin/seed/'
+	@echo 'auth: http://localhost/api/admin/auth/jmc1283'
 
 
 .PHONY: jupyter      # Start he jupyterhub container

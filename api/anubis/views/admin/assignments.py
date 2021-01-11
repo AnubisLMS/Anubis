@@ -11,7 +11,7 @@ from anubis.utils.auth import require_admin
 assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
 
 
-@assignments.route("/assignment/<int:id>/questions/get/<string:netid>")
+@assignments.route("/assignment/<string:id>/questions/get/<string:netid>")
 @require_admin
 @log_endpoint("cli", lambda: "question get")
 @load_from_id(Assignment, verify_owner=False)

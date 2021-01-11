@@ -1,12 +1,13 @@
 from flask import Blueprint, make_response, redirect, request
 
 from anubis.models import User, db
-from anubis.utils.assignments import get_classes, get_assignments
+from anubis.utils.assignments import get_courses, get_assignments
 from anubis.utils.auth import create_token, current_user
 from anubis.utils.elastic import log_endpoint
-from anubis.utils.http import success_response
+from anubis.utils.http import success_response, error_response
 from anubis.utils.oauth import OAUTH_REMOTE_APP as provider
 from anubis.utils.submissions import fix_dangling
+from anubis.utils.auth import require_user
 
 auth = Blueprint("public-auth", __name__, url_prefix="/public/auth")
 
@@ -70,7 +71,41 @@ def public_whoami():
     return success_response(
         {
             "user": u.data,
-            "classes": get_classes(u.netid),
+            "classes": get_courses(u.netid),
             "assignments": get_assignments(u.netid),
         }
     )
+
+
+@auth.route('/set-github-username')
+@require_user
+def public_auth_set_github_username():
+    """
+    Sets a github username for the current user.
+
+    :return:
+    """
+
+    user: User = current_user()
+    github_username = request.args.get('github-username', default=None)
+
+    # Make sure github username was specified
+    if github_username is None:
+        return error_response('github username not specified'), 400
+
+    # Make sure the github username is not already being used
+    other: User = User.query.filter(
+        User.github_username == github_username,
+        User.id != user.id
+    ).first()
+    if other is not None:
+        return error_response('github username is already taken'), 400
+
+    # Set github username and commit
+    user.github_username = github_username
+    db.session.add(user)
+    db.session.commit()
+
+    return success_response({
+        'status': 'github username updated'
+    })

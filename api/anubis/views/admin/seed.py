@@ -1,3 +1,7 @@
+import random
+import string
+from datetime import datetime, timedelta
+
 from flask import Blueprint
 
 from anubis.models import (
@@ -7,17 +11,109 @@ from anubis.models import (
     Submission,
     AssignmentRepo,
     AssignmentTest,
-    InClass,
+    InCourse,
     Assignment,
     Course,
     User,
+    TheiaSession
 )
-from anubis.utils.decorators import json_response
 from anubis.utils.auth import require_admin
+from anubis.utils.decorators import json_response
 from anubis.utils.http import success_response
-from anubis.utils.redis_queue import enqueue_webhook
 
 seed = Blueprint("admin-seed", __name__, url_prefix="/admin/seed")
+
+
+def randstr(n=10):
+    return ''.join(random.choice(string.ascii_letters) for _ in range(random.randint(1, n)))
+
+
+def randnetid():
+    return ''.join(random.choice(string.ascii_lowercase) for _ in range(3)) \
+           + ''.join(random.choice(string.digits) for _ in range(random.randint(2, 4)))
+
+
+def create_assignment(course, users):
+    # Assignment 1 uniq
+    a = Assignment(
+        name="uniq",
+        pipeline_image="registry.osiris.services/anubis/assignment/1",
+        hidden=False,
+        release_date=datetime.now() - timedelta(hours=2),
+        due_date=datetime.now() + timedelta(hours=2),
+        course=course,
+        github_classroom_url="",
+        ide_enabled=True,
+    )
+
+    tests = []
+    for i in range(random.randint(1, 5)):
+        tests.append(AssignmentTest(name=f"test {i}", assignment=a))
+
+    submissions = []
+    repos = []
+    theia_sessions = []
+    for user in users:
+        repos.append(AssignmentRepo(
+            owner=user,
+            assignment=a,
+            repo_url="https://github.com/wabscale/xv6-public.git",
+            github_username=user.github_username,
+        ))
+
+        theia_sessions.append(TheiaSession(
+            owner=user,
+            assignment=a,
+            repo=repos[-1],
+            active=False,
+            ended=datetime.now(),
+            state='state',
+            cluster_address='127.0.0.1'
+        ))
+
+        if random.randint(0, 3) != 0:
+            for i in range(random.randint(1, 10)):
+                submissions.append(Submission(
+                    commit=randstr(),
+                    state="Waiting for resources...",
+                    owner=user,
+                    assignment=a,
+                    repo=repos[-1],
+                ))
+
+    db.session.add_all(tests)
+    db.session.add_all(submissions)
+    db.session.add_all(theia_sessions)
+    db.session.add_all(repos)
+    db.session.add(a)
+
+    return a, tests, submissions, repos
+
+
+def create_students(n=10):
+    students = []
+    for i in range(random.randint(3, n)):
+        students.append(User(
+            netid=randnetid(),
+            github_username=randstr(),
+            name=f"first last {i}",
+            is_admin=False,
+            is_superuser=False,
+        ))
+    db.session.add_all(students)
+    return students
+
+
+def create_course(users):
+    course = Course(
+        name=randstr(25), course_code=randstr(), section="A", professor=randstr(6)
+    )
+    db.session.add(course)
+
+    for user in users:
+        db.session.add(InCourse(owner=user, course=course))
+
+    return course
 
 
 @seed.route("/")
@@ -30,101 +126,30 @@ def private_seed():
     Submission.query.delete()
     AssignmentRepo.query.delete()
     AssignmentTest.query.delete()
-    InClass.query.delete()
+    InCourse.query.delete()
     Assignment.query.delete()
     Course.query.delete()
     User.query.delete()
     db.session.commit()
 
     # Create
-    u = User(
+    me = User(
         netid="jmc1283",
-        github_username="juan-punchman",
+        github_username="wabscale",
         name="John Cunniff",
         is_admin=True,
+        is_superuser=True,
     )
-    c = Course(
-        name="Intro to OS", class_code="CS-UY 3224", section="A", professor="Gustavo"
-    )
-    ic = InClass(owner=u, class_=c)
-    user_items = [u, c, ic]
+    db.session.add(me)
 
-    # Assignment 1 uniq
-    a1 = Assignment(
-        name="uniq",
-        pipeline_image="registry.osiris.services/anubis/assignment/1",
-        hidden=False,
-        release_date="2020-08-22 23:55:00",
-        due_date="2020-08-22 23:55:00",
-        class_=c,
-        github_classroom_url="",
-        ide_enabled=True,
-    )
-    a1t1 = AssignmentTest(name="Long file test", assignment=a1)
-    a1t2 = AssignmentTest(name="Short file test", assignment=a1)
-    a1r1 = AssignmentRepo(
-        owner=u,
-        assignment=a1,
-        repo_url="https://github.com/wabscale/xv6-public.git",
-        github_username="juan-punchman",
-    )
-    a1s1 = Submission(
-        commit="test",
-        state="Waiting for resources...",
-        owner=u,
-        assignment=a1,
-        repo=a1r1,
-    )
-    a1s2 = Submission(
-        commit="0001",
-        state="Waiting for resources...",
-        owner=u,
-        assignment=a1,
-        repo=a1r1,
-    )
-    assignment_1_items = [a1, a1t1, a1t2, a1r1, a1s1, a1s2]
+    students = create_students() + [me]
+    course = create_course(students)
+    _, _, submissions, _ = create_assignment(course, students)
 
-    # Assignment 2 tail
-    a2 = Assignment(
-        name="tail",
-        pipeline_image="registry.osiris.services/anubis/assignment/f1295ac4",
-        unique_code="f1295ac4",
-        hidden=False,
-        release_date="2020-09-03 23:55:00",
-        due_date="2020-09-03 23:55:00",
-        class_=c,
-        github_classroom_url="",
-        ide_enabled=True,
-    )
-    a2t1 = AssignmentTest(name="Hello world test", assignment=a2)
-    a2t2 = AssignmentTest(name="Short file test", assignment=a2)
-    a2t3 = AssignmentTest(name="Long file test", assignment=a2)
-    a2r2 = AssignmentRepo(
-        owner=u,
-        assignment=a2,
-        repo_url="https://github.com/os3224/assignment-1-spring2020.git",
-        github_username="juan-punchman",
-    )
-    a2s1 = Submission(
-        commit="2bc7f8d636365402e2d6cc2556ce814c4fcd1489",
-        state="Waiting for resources...",
-        owner=u,
-        assignment=a2,
-        repo=a1r1,
-    )
-    assignment_2_items = [a2, a2t1, a2t2, a2t3, a2r2, a2s1]
-
-    # Commit
-    db.session.add_all(user_items)
-    db.session.add_all(assignment_1_items)
-    db.session.add_all(assignment_2_items)
     db.session.commit()
 
     # Init models
-    a1s1.init_submission_models()
-    a1s2.init_submission_models()
-    a2s1.init_submission_models()
-
-    enqueue_webhook(a2s1.id)
+    for submission in submissions:
+        submission.init_submission_models()
 
     return success_response("seeded")
