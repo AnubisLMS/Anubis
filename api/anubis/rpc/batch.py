@@ -8,9 +8,12 @@ def rpc_bulk_regrade(submissions):
     app = create_app()
     logger = get_logger()
 
-    logger.info('bulk regrading {}'.format(submissions), extra={
-        'submission_id': submissions,
-    })
+    logger.info(
+        "bulk regrading {}".format(submissions),
+        extra={
+            "submission_id": submissions,
+        },
+    )
 
     with app.app_context():
         bulk_regrade_submission(submissions)

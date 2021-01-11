@@ -44,11 +44,7 @@ spec:
       - name: anubis-rpc-worker
         image: {{ .Values.api.image }}:{{ .Values.api.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
-        command:
-        - "rq"
-        - "worker"
-        - "-u"
-        - "redis://redis"
+        command: "rq worker -u redis://:${REDIS_PASS}@redis-master --results-ttl 5"
         env:
         - name: "DEBUG"
           value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
@@ -60,6 +56,11 @@ spec:
             secretKeyRef:
               name: api
               key: database-uri
+         - name: "REDIS_PASS"
+         valueFrom:
+           secretKeyRef:
+             name: api
+             key: redis-password
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -81,7 +82,7 @@ rules:
 
 ---
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: pipeline-create-jobs
   namespace: {{ .Release.Namespace }}

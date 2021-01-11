@@ -8,7 +8,6 @@ from typing import Union, Tuple
 from flask import Response
 
 from anubis.config import config
-from anubis.models import User
 
 
 def is_debug() -> bool:
@@ -26,39 +25,11 @@ def jsonify(data, status_code=200):
     """
     res = Response(dumps(data))
     res.status_code = status_code
-    res.headers['Content-Type'] = 'application/json'
-    res.headers['Access-Control-Allow-Origin'] = 'https://nyu.cool' \
-        if not environ.get('DEBUG', False) \
-        else 'https://localhost'
+    res.headers["Content-Type"] = "application/json"
+    res.headers["Access-Control-Allow-Origin"] = (
+        "https://nyu.cool" if not environ.get("DEBUG", False) else "https://localhost"
+    )
     return res
-
-
-def error_response(error_message: str) -> dict:
-    """
-    Form an error REST api response dict.
-
-    :param error_message: string error message
-    :return:
-    """
-    return {
-        'success': False,
-        'error': error_message,
-        'data': None,
-    }
-
-
-def success_response(data: Union[dict, str, None]) -> dict:
-    """
-    Form a success REST api response dict.
-
-    :param data:
-    :return:
-    """
-    return {
-        'success': True,
-        'error': None,
-        'data': data,
-    }
 
 
 def send_noreply_email(message: str, subject: str, recipient: str):
@@ -80,7 +51,7 @@ def send_noreply_email(message: str, subject: str, recipient: str):
     :to str: recipient of email (should be their nyu email)
     """
 
-    if environ.get('DEBUG', False):
+    if environ.get("DEBUG", False):
         return print(message, subject, recipient, flush=True)
 
     message = MIMEText(message, "plain")
@@ -94,7 +65,7 @@ def send_noreply_email(message: str, subject: str, recipient: str):
     s.quit()
 
 
-def notify(user: User, message: str, subject: str):
+def notify(user, message: str, subject: str):
     """
     Send a noreply email to a user.
 
@@ -103,7 +74,7 @@ def notify(user: User, message: str, subject: str):
     :param subject:
     :return:
     """
-    recipient = '{netid}@nyu.edu'.format(netid=user.netid)
+    recipient = "{netid}@nyu.edu".format(netid=user.netid)
     send_noreply_email(message, subject, recipient)
 
 
@@ -242,11 +213,9 @@ def split_chunks(lst, n):
     """
     _chunks = []
     for i in range(0, len(lst), n):
-        _chunks.append(lst[i:i + n])
+        _chunks.append(lst[i : i + n])
     return _chunks
 
 
 def rand():
     return sha256(urandom(32)).hexdigest()
-
-

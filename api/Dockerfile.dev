@@ -1,4 +1,4 @@
-FROM registry.osiris.services/anubis/api:v2.0.0
+FROM registry.osiris.services/anubis/api:latest
 
 ENV DISABLE_ELK=1
 CMD ./docker-entrypoint-dev.sh

@@ -54,7 +54,7 @@ def reap_stats():
     :return:
     """
     recent_assignments = Assignment.query.group_by(
-        Assignment.class_id
+        Assignment.course_id
     ).having(
         and_(
             Assignment.release_date == func.max(Assignment.release_date),

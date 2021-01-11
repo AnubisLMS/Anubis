@@ -1,5 +1,5 @@
 from anubis.models import Submission, AssignmentRepo, User, db
-from anubis.utils.data import error_response, success_response
+from anubis.utils.http import error_response, success_response
 from anubis.utils.redis_queue import enqueue_webhook
 
 
@@ -26,18 +26,18 @@ def regrade_submission(submission):
     if isinstance(submission, int):
         submission = Submission.query.filter_by(id=submission).first()
         if submission is None:
-            return error_response('could not find submission')
+            return error_response("could not find submission")
 
     if not submission.processed:
-        return error_response('submission currently being processed')
+        return error_response("submission currently being processed")
 
     submission.processed = False
-    submission.state = 'Waiting for resources...'
+    submission.state = "Waiting for resources..."
     submission.init_submission_models()
 
     enqueue_webhook(submission.id)
 
-    return success_response({'message': 'regrade started'})
+    return success_response({"message": "regrade started"})
 
 
 def fix_dangling():
@@ -48,13 +48,9 @@ def fix_dangling():
     """
     fixed = []
 
-    dangling_repos = AssignmentRepo.query.filter(
-        AssignmentRepo.owner_id == None
-    ).all()
+    dangling_repos = AssignmentRepo.query.filter(AssignmentRepo.owner_id is None).all()
     for dr in dangling_repos:
-        owner = User.query.filter(
-            User.github_username == dr.github_username
-        ).first()
+        owner = User.query.filter(User.github_username == dr.github_username).first()
 
         if owner is not None:
             dr.owner_id = owner.id
@@ -68,17 +64,13 @@ def fix_dangling():
                 fixed.append(s.data)
                 enqueue_webhook(s.id)
 
-    dangling_submissions = Submission.query.filter(
-        Submission.owner_id == None
-    ).all()
+    dangling_submissions = Submission.query.filter(Submission.owner_id is None).all()
     for s in dangling_submissions:
         dr = AssignmentRepo.query.filter(
             AssignmentRepo.id == s.assignment_repo_id
         ).first()
 
-        owner = User.query.filter(
-            User.github_username == dr.github_username
-        ).first()
+        owner = User.query.filter(User.github_username == dr.github_username).first()
 
         if owner is not None:
             dr.owner_id = owner.id

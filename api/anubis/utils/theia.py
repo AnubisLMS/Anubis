@@ -4,7 +4,7 @@ from werkzeug.utils import redirect
 
 from anubis.config import config
 from anubis.models import TheiaSession, User, Config
-from anubis.utils.auth import get_token
+from anubis.utils.auth import create_token
 from anubis.utils.cache import cache
 
 
@@ -15,13 +15,9 @@ def get_n_available_sessions() -> Tuple[int, int]:
 
     :return:
     """
-    max_ides_config: Config = Config.query.filter(
-        Config.key == "MAX_IDES"
-    ).first()
+    max_ides_config: Config = Config.query.filter(Config.key == "MAX_IDES").first()
 
-    active_ide_count: int = TheiaSession.query.filter(
-        TheiaSession.active == True
-    ).count()
+    active_ide_count: int = TheiaSession.query.filter(TheiaSession.active).count()
 
     max_ides = int(max_ides_config.value) if max_ides_config is not None else 50
 
@@ -39,7 +35,7 @@ def theia_redirect_url(theia_session_id: int, netid: str) -> str:
     """
     return "https://{}/initialize?token={}&anubis=1".format(
         config.THEIA_DOMAIN,
-        get_token(netid, session_id=theia_session_id),
+        create_token(netid, session_id=theia_session_id),
     )
 
 
@@ -49,14 +45,16 @@ def theia_redirect(theia_session: TheiaSession, user: User):
 
 @cache.memoize(timeout=1)
 def theia_list_all(user_id: int, limit: int = 10):
-    theia_sessions: List[TheiaSession] = TheiaSession.query.filter(
-        TheiaSession.owner_id == user_id,
-    ).order_by(TheiaSession.created.desc()).limit(limit).all()
+    theia_sessions: List[TheiaSession] = (
+        TheiaSession.query.filter(
+            TheiaSession.owner_id == user_id,
+        )
+        .order_by(TheiaSession.created.desc())
+        .limit(limit)
+        .all()
+    )
 
-    return [
-        theia_session.data
-        for theia_session in theia_sessions
-    ]
+    return [theia_session.data for theia_session in theia_sessions]
 
 
 @cache.memoize(timeout=1)

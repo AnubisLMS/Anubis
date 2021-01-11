@@ -11,8 +11,8 @@ metadata:
     component: theia-proxy
 
 spec:
-  replicas: {{ .Values.rpc_workers.replicas }}
-  {{- if .Values.api.rollingUpdates }}
+  replicas: {{ .Values.theia.proxy.replicas }}
+  {{- if .Values.rollingUpdates }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
