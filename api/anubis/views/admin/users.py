@@ -12,7 +12,7 @@ students = Blueprint('admin-students', __name__, url_prefix='/admin/students')
 
 
 @students.route('/list')
-@require_admin
+@require_admin()
 @json_response
 @cache.cached(timeout=5, unless=is_debug)
 def admin_students_list():
@@ -22,7 +22,7 @@ def admin_students_list():
 
 
 @students.route('/info/<string:id>')
-@require_admin
+@require_admin()
 @json_response
 def admin_students_info_id(id: str):
     student = User.query.filter(
@@ -45,7 +45,7 @@ def admin_students_info_id(id: str):
 
 
 @students.route('/submissions/<string:id>')
-@require_admin
+@require_admin()
 @json_response
 def admin_students_submissions_id(id: str):
     student = User.query.filter(
@@ -71,7 +71,7 @@ def admin_students_submissions_id(id: str):
 
 
 @students.route('/update/<string:id>', methods=['POST'])
-@require_admin
+@require_admin()
 @json_endpoint(required_fields=[('name', str), ('github_username', str)], only_required=True)
 def admin_students_update_id(id: str, name: str = None, github_username: str = None):
     student = User.query.filter(

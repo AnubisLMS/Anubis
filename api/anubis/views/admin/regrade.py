@@ -13,7 +13,7 @@ regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 
 
 @regrade.route("/submission/<commit>")
-@require_admin
+@require_admin()
 @log_endpoint("cli", lambda: "regrade-commit")
 @json_response
 def private_regrade_submission(commit):
@@ -43,7 +43,7 @@ def private_regrade_submission(commit):
 
 
 @regrade.route("/<assignment_name>")
-@require_admin
+@require_admin()
 @log_endpoint("cli", lambda: "regrade")
 @json_response
 def private_regrade_assignment(assignment_name):

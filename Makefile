@@ -4,6 +4,7 @@ PUSH_SERVICES := api web logstash
 BUILD_ALLWAYS := api web
 
 
+
 CURRENT_DIR := $(shell basename $$(pwd) | tr '[:upper:]' '[:lower:]')
 IMAGES := $(shell \
 	ruby -ryaml -rjson -e 'puts JSON.pretty_generate(YAML.load(ARGF))' \
@@ -47,13 +48,22 @@ debug: build
 		$(RESTART_ALWAYS_SERVICES)
 	@echo 'site: http://localhost/'
 	@echo 'seed: http://localhost/api/admin/seed/'
-	@echo 'auth: http://localhost/api/admin/auth/jmc1283'
+	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
+
+.PHONY: mindebug     # Start the minimal cluster in debug mode
+mindebug: build
+	docker-compose up -d traefik db cache logstash
+	docker-compose up \
+		-d --force-recreate \
+		api web
+	@echo 'site: http://localhost/'
+	@echo 'seed: http://localhost/api/admin/seed/'
+	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
 
 
 .PHONY: jupyter      # Start he jupyterhub container
 jupyter:
 	docker-compose up --force-recreate --build api-dev
-
 
 .PHONY: deploy       # Start the cluster in production mode
 deploy: check build restart

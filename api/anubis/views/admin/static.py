@@ -16,7 +16,7 @@ static = Blueprint("admin-static", __name__, url_prefix="/admin/static")
 
 
 @static.route("/list")
-@require_admin
+@require_admin()
 @json_response
 def static_public_list():
     """
@@ -39,7 +39,7 @@ def static_public_list():
 
 
 @static.route("/upload", methods=["POST"])
-@require_admin
+@require_admin()
 @json_response
 def static_public_upload():
     """

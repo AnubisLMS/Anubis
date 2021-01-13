@@ -11,7 +11,7 @@ courses = Blueprint("public-courses", __name__, url_prefix="/public/courses")
 
 
 @courses.route("/")
-@require_user
+@require_user()
 @log_endpoint("public-classes")
 @json_response
 def public_classes():

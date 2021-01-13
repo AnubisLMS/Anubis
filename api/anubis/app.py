@@ -69,7 +69,7 @@ def create_pipeline_app():
     :return: Flask app
     """
     from anubis.config import config
-    from anubis.views.pipeline.pipeline import pipeline
+    from anubis.views.pipeline import register_pipeline_views
 
     # Create app
     app = Flask(__name__)
@@ -79,6 +79,6 @@ def create_pipeline_app():
     init_services(app)
 
     # register blueprints
-    app.register_blueprint(pipeline)
+    register_pipeline_views(app)
 
     return app

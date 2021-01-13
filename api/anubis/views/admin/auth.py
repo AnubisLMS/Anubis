@@ -10,7 +10,7 @@ auth = Blueprint("admin-auth", __name__, url_prefix="/admin/auth")
 
 
 @auth.route("/token/<netid>")
-@require_admin
+@require_admin(unless_debug=True)
 def private_token_netid(netid):
     """
     For debugging, you can use this to sign in as the given user.

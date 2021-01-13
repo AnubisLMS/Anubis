@@ -14,7 +14,7 @@ assignments = Blueprint(
 
 
 @assignments.route("/")
-@require_user
+@require_user()
 @log_endpoint(
     "public-assignments", lambda: "get assignments {}".format(get_request_ip())
 )
@@ -43,7 +43,7 @@ def public_assignments():
 
 
 @assignments.route("/questions/get/<string:id>")
-@require_user
+@require_user()
 @log_endpoint("public-questions-get", lambda: "get questions")
 @load_from_id(Assignment, verify_owner=False)
 @json_response
@@ -63,7 +63,7 @@ def public_assignment_questions_id(assignment: Assignment):
 
 
 @assignments.route("/questions/save/<string:id>")
-@require_user
+@require_user()
 @log_endpoint("public-questions-save", lambda: "save questions")
 @load_from_id(AssignedStudentQuestion, verify_owner=True)
 @json_endpoint(required_fields=[("response", str)])

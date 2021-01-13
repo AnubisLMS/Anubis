@@ -11,7 +11,7 @@ dangling = Blueprint("admin-dangling", __name__, url_prefix="/admin/dangling")
 
 
 @dangling.route("/")
-@require_admin
+@require_admin()
 @log_endpoint("cli", lambda: "dangling")
 @json_response
 def private_dangling():
@@ -30,7 +30,7 @@ def private_dangling():
 
 
 @dangling.route("/reset")
-@require_admin
+@require_admin()
 @log_endpoint("reset-dangling", lambda: "reset-dangling")
 @json_response
 def private_reset_dangling():
@@ -42,7 +42,7 @@ def private_reset_dangling():
 
 
 @dangling.route("/fix")
-@require_admin
+@require_admin()
 @log_endpoint("cli", lambda: "fix-dangling")
 @json_response
 def private_fix_dangling():

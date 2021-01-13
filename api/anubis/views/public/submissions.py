@@ -18,7 +18,7 @@ submissions = Blueprint(
 
 
 @submissions.route("/")
-@require_user
+@require_user()
 @log_endpoint("public-submissions")
 @json_response
 def public_submissions():
@@ -66,7 +66,7 @@ def public_submissions():
 
 
 @submissions.route("/get/<string:commit>")
-@require_user
+@require_user()
 @log_endpoint(
     "public-submission-commit", lambda: "get submission {}".format(request.path)
 )
@@ -96,7 +96,7 @@ def public_submission(commit: str):
 
 
 @submissions.route("/regrade/<commit>")
-@require_user
+@require_user()
 @log_endpoint("regrade-request", lambda: "submission regrade request " + request.path)
 @json_response
 def public_regrade_commit(commit=None):
