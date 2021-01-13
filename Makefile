@@ -46,19 +46,23 @@ debug: build
 	docker-compose up \
 		-d --force-recreate \
 		$(RESTART_ALWAYS_SERVICES)
-	@echo 'site: http://localhost/'
+	@echo 'running migrations'
+	make -C api migrations
 	@echo 'seed: http://localhost/api/admin/seed/'
 	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
+	@echo 'site: http://localhost/'
 
 .PHONY: mindebug     # Start the minimal cluster in debug mode
 mindebug: build
-	docker-compose up -d traefik db cache logstash
+	docker-compose up -d traefik db redis-master logstash
 	docker-compose up \
 		-d --force-recreate \
 		api web
-	@echo 'site: http://localhost/'
+	@echo 'running migrations'
+	make -C api migrations
 	@echo 'seed: http://localhost/api/admin/seed/'
 	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
+	@echo 'site: http://localhost/'
 
 
 .PHONY: jupyter      # Start he jupyterhub container

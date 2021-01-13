@@ -18,6 +18,10 @@ yeetdb:
 cleanyeetdb:
 	make -C .. cleanyeetdb
 
+.PHONY: migrations       # Run alembic migrations
+migrations: venv
+	./venv/bin/alembic upgrade head
+
 .PHONY: lint             # Run autopep8 then black on lint directories
 lint: venv
 	@echo 'autopep to check and fix un-python things'

@@ -121,6 +121,7 @@ def create_course(users):
 @json_response
 def private_seed():
     # Yeet
+    TheiaSession.query.delete()
     SubmissionTestResult.query.delete()
     SubmissionBuild.query.delete()
     Submission.query.delete()
