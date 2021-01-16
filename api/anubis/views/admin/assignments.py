@@ -12,7 +12,7 @@ assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assign
 
 
 @assignments.route("/assignment/<string:id>/questions/get/<string:netid>")
-@require_admin
+@require_admin()
 @log_endpoint("cli", lambda: "question get")
 @load_from_id(Assignment, verify_owner=False)
 @json_response
@@ -37,7 +37,7 @@ def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str
 
 
 @assignments.route("/assignment/sync", methods=["POST"])
-@require_admin
+@require_admin()
 @log_endpoint("cli", lambda: "assignment-sync")
 @json_endpoint(required_fields=[("assignment", dict)])
 def private_assignment_sync(assignment_data: dict):

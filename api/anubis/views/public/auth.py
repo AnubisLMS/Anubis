@@ -78,7 +78,7 @@ def public_whoami():
 
 
 @auth.route('/set-github-username')
-@require_user
+@require_user()
 def public_auth_set_github_username():
     """
     Sets a github username for the current user.

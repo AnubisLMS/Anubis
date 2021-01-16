@@ -106,7 +106,7 @@ def create_students(n=10):
 
 def create_course(users):
     course = Course(
-        name=randstr(25), course_code=randstr(), section="A", professor=randstr(6)
+        name='Intro to OS', course_code='CS-UY 3224', section="A", professor='Gustavo'
     )
     db.session.add(course)
 
@@ -117,10 +117,11 @@ def create_course(users):
 
 
 @seed.route("/")
-@require_admin
+@require_admin(unless_debug=True)
 @json_response
 def private_seed():
     # Yeet
+    TheiaSession.query.delete()
     SubmissionTestResult.query.delete()
     SubmissionBuild.query.delete()
     Submission.query.delete()

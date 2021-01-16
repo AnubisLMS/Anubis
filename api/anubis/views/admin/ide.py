@@ -11,7 +11,7 @@ ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 
 
 @ide.route("/ide/clear")
-@require_admin
+@require_admin()
 @log_endpoint("cli", lambda: "clear-ide")
 @json_response
 def private_ide_clear():

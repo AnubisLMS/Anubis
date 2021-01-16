@@ -14,7 +14,7 @@ profile = Blueprint("public-profile", __name__, url_prefix="/public/profile")
 
 
 @profile.route("/set-github-username")
-@require_user
+@require_user()
 @log_endpoint("public-set-github-username", lambda: "github username set")
 @json_response
 def public_set_github_username():

@@ -16,7 +16,7 @@ stats = Blueprint("admin-stats", __name__, url_prefix="/admin/stats")
 
 @stats.route("/assignment/<assignment_id>")
 @stats.route("/assignment/<assignment_id>/<netid>")
-@require_admin
+@require_admin()
 @log_endpoint("cli", lambda: "stats")
 @json_response
 def private_stats_assignment(assignment_id, netid=None):
@@ -54,7 +54,7 @@ def private_stats_assignment(assignment_id, netid=None):
 
 
 @stats.route("/submission/<string:id>")
-@require_admin
+@require_admin()
 @log_endpoint("cli", lambda: "submission-stats")
 @load_from_id(Submission, verify_owner=False)
 @json_response

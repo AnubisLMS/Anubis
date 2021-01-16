@@ -8,8 +8,8 @@ from flask import request
 
 from anubis.config import config
 from anubis.models import User
-from anubis.utils.http import error_response
 from anubis.utils.data import is_debug
+from anubis.utils.http import error_response
 
 
 def get_user(netid: Union[str, None]) -> Union[User, None]:
@@ -100,61 +100,112 @@ def create_token(netid: str, **extras) -> Union[str, None]:
     )
 
 
-def require_user(func):
+def require_user(unless_debug=False):
     """
     Wrap a function to require a user to be logged in.
     If they are not logged in, they will get an Unathed
     error response with status code 401.
 
-    :param func:
+    :param unless_debug:
     :return:
     """
 
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        user = current_user()
-        if user is None:
-            return error_response("Unauthenticated"), 401
-        return func(*args, **kwargs)
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # Get the user in the current
+            # request context.
+            user = current_user()
 
-    return wrapper
+            # Bypass auth if the api is in debug
+            # mode and unless_debug is true.
+            if unless_debug and is_debug():
+                return func(*args, **kwargs)
+
+            # Check that there is a user specified
+            # in the current request context, and
+            # that use is an admin.
+            if user is None:
+                return error_response("Unauthenticated"), 401
+
+            # Pass the parameters to the
+            # decorated function.
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
-def require_admin(func):
+def require_admin(unless_debug=False):
     """
     Wrap a function to require an admin to be logged in.
     If they are not logged in, they will get an Unathed
     error response with status code 401.
 
-    :param func:
+    :param unless_debug:
     :return:
     """
 
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        user = current_user()
-        if not is_debug() and (user is None or user.is_admin is False):
-            return error_response("Unauthenticated"), 401
-        return func(*args, **kwargs)
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # Get the user in the current
+            # request context.
+            user = current_user()
 
-    return wrapper
+            # Bypass auth if the api is in debug
+            # mode and unless_debug is true.
+            if unless_debug and is_debug():
+                return func(*args, **kwargs)
+
+            # Check that there is a user specified
+            # in the current request context, and
+            # that use is an admin.
+            if user is None or user.is_admin is False:
+                return error_response("Unauthenticated"), 401
+
+            # Pass the parameters to the
+            # decorated function.
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
-def require_superuser(func):
+def require_superuser(unless_debug=False):
     """
-    Wrap a function to require a superuser to be logged in.
+    Wrap a function to require an superuser to be logged in.
     If they are not logged in, they will get an Unathed
     error response with status code 401.
 
-    :param func:
+    :param unless_debug:
     :return:
     """
 
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        user = current_user()
-        if not is_debug() and (user is None or user.is_superuser is False):
-            return error_response("Unauthenticated"), 401
-        return func(*args, **kwargs)
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # Get the user in the current
+            # request context.
+            user = current_user()
 
-    return wrapper
+            # Bypass auth if the api is in debug
+            # mode and unless_debug is true.
+            if unless_debug and is_debug():
+                return func(*args, **kwargs)
+
+            # Check that there is a user specified
+            # in the current request context, and
+            # that use is a superuser.
+            if user is None or user.is_superuser is False:
+                return error_response("Unauthenticated"), 401
+
+            # Pass the parameters to the
+            # decorated function.
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator

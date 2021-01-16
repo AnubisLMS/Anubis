@@ -4,9 +4,7 @@ import hashlib
 
 
 class Config:
-    SECRET_KEY = os.environ.get(
-        "SECRET_KEY", default=hashlib.sha512(os.urandom(10)).hexdigest()
-    )
+    SECRET_KEY = None
 
     # sqlalchemy
     SQLALCHEMY_DATABASE_URI = None
@@ -31,6 +29,11 @@ class Config:
 
     def __init__(self):
         self.DEBUG = os.environ.get("DEBUG", default="0") == "1"
+
+        self.SECRET_KEY = os.environ.get(
+            "SECRET_KEY", default=hashlib.sha512(os.urandom(10)).hexdigest()
+        ) if not self.DEBUG else 'DEFAULT'
+
         self.SQLALCHEMY_DATABASE_URI = os.environ.get(
             "DATABASE_URI",
             default="mysql+pymysql://anubis:anubis@{}/anubis".format(
