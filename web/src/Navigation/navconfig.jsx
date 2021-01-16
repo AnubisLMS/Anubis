@@ -8,6 +8,8 @@ import GitHubIcon from '@material-ui/icons/GitHub';
 import AccountCircleOutlinedIcon from '@material-ui/icons/AccountCircleOutlined';
 import PublicIcon from '@material-ui/icons/Public';
 import GroupIcon from '@material-ui/icons/Group';
+import SettingsIcon from '@material-ui/icons/Settings';
+import PieChartIcon from '@material-ui/icons/PieChart';
 
 import About from '../Pages/Public/About';
 import Courses from '../Pages/Public/Courses';
@@ -76,10 +78,22 @@ export const public_nav = [
 
 export const admin_nav = [
   {
-    id: 'Users',
+    id: 'StudentStats',
     icon: <GroupIcon/>,
     path: '/users',
     Page: Users,
+  },
+  {
+    id: 'AssignmentStats',
+    icon: <PieChartIcon/>,
+    path: '/assingmentstats',
+    Page: Courses,
+  },
+  {
+    id: 'Courses',
+    icon: <SettingsIcon/>,
+    path: '/assingmentstats',
+    Page: Courses,
   },
 ];
 
