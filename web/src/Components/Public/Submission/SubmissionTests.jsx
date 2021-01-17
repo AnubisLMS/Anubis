@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function SubmissionTests({tests}) {
+export default function SubmissionTests({tests, stop}) {
   const classes = useStyles();
 
   return (
@@ -50,9 +50,9 @@ export default function SubmissionTests({tests}) {
               >
                 {test.result.passed === null ? (
                   <AssessmentIcon/>
-                ) : test.result.passed === true ? (
+                ) : (test.result.passed === true && !stop) ? (
                   <CheckCircleIcon/>
-                ) : test.result.passed === false ? (
+                ) : (test.result.passed === false || stop) ? (
                   <CancelIcon/>
                 ) : null}
               </Fab>

@@ -20,12 +20,13 @@ from anubis.models import (
 from anubis.utils.auth import require_admin
 from anubis.utils.decorators import json_response
 from anubis.utils.http import success_response
+from anubis.utils.data import rand
 
 seed = Blueprint("admin-seed", __name__, url_prefix="/admin/seed")
 
 
 def randstr(n=10):
-    return ''.join(random.choice(string.ascii_letters) for _ in range(random.randint(1, n)))
+    return rand()[:n]
 
 
 def randnetid():
@@ -41,6 +42,7 @@ def create_assignment(course, users):
         hidden=False,
         release_date=datetime.now() - timedelta(hours=2),
         due_date=datetime.now() + timedelta(hours=2),
+        grace_date=datetime.now() + timedelta(hours=3),
         course=course,
         github_classroom_url="",
         ide_enabled=True,
@@ -92,7 +94,7 @@ def create_assignment(course, users):
 
 def create_students(n=10):
     students = []
-    for i in range(random.randint(3, n)):
+    for i in range(random.randint(n//2, n)):
         students.append(User(
             netid=randnetid(),
             github_username=randstr(),
@@ -143,7 +145,7 @@ def private_seed():
     )
     db.session.add(me)
 
-    students = create_students() + [me]
+    students = create_students(130) + [me]
     course = create_course(students)
     _, _, submissions, _ = create_assignment(course, students)
 

@@ -17,26 +17,38 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import React from 'react';
 import {makeStyles} from '@material-ui/core/styles';
+import TableCell from '@material-ui/core/TableCell';
+import Divider from '@material-ui/core/Divider';
 
 const useStyles = makeStyles((theme) => ({
-  wrapper: {
+  root: {
+    width: '75%',
+  },
+  title: {
     margin: theme.spacing(1),
-    position: 'relative',
+  },
+  divider: {
+    backgroundColor: '#999',
   },
 }));
 
-export default function SubmissionSummary({submission, onTime, regrade, enqueueSnackbar}) {
+export default function SubmissionSummary({submission, onTime, regrade, enqueueSnackbar, stop}) {
   const classes = useStyles();
+
+  const testsPassed = submission.tests.filter((test) => test.result.passed).length;
+  const totalTests = submission.tests.length;
 
   return (
     <Card className={classes.root}>
       <CardActionArea>
         <CardContent>
-          <Typography gutterBottom variant="h5" component="h2">
-            {submission.assignmentName}
+          {/* Assignment name */}
+          <Typography gutterBottom variant={'h6'} className={classes.title}>
+            {submission.assignment_name}
           </Typography>
-          <List>
+          <Divider variant={'middle'} className={classes.divider}/>
 
+          <List>
             {/* On time*/}
             <ListItem>
               <ListItemIcon>
@@ -67,13 +79,39 @@ export default function SubmissionSummary({submission, onTime, regrade, enqueueS
               <ListItemText primary={submission.created}/>
             </ListItem>
 
+            {/* Tests passed / total tests */}
+            <ListItem>
+              <ListItemIcon>
+                {!submission.processed ? (
+                  <Tooltip title={'Submission is still processing!'}>
+                    <IconButton>
+                      <CircularProgress size="1em"/>
+                    </IconButton>
+                  </Tooltip>
+                ) : (
+                  <Tooltip title={testsPassed === totalTests ?
+                    'All Tests Passed' :
+                    'Not all tests passed'}>
+                    <IconButton>
+                      {testsPassed === totalTests ?
+                        <CheckCircleIcon style={{color: green[500]}}/> :
+                        <CancelIcon style={{color: red[500]}}/>}
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </ListItemIcon>
+              <ListItemText primary={
+                `${testsPassed}/${totalTests}`
+              }/>
+            </ListItem>
+
             {/* Submission state */}
             <ListItem>
               <ListItemIcon>
                 <Tooltip title={!submission.processed ? submission.state : 'regrade'}>
                   <IconButton component="div" onClick={() =>
                     regrade(submission.commitHash, enqueueSnackbar)}>
-                    {submission.processed ?
+                    {(submission.processed && !stop) ?
                       <RefreshIcon color={'primary'}/> :
                       <CircularProgress size="1em"/>}
                   </IconButton>

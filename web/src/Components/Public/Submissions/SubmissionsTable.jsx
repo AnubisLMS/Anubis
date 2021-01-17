@@ -63,6 +63,9 @@ export function SubmissionsTable({rows}) {
             <TableCell align="left">
               <b>Commit Hash</b>
             </TableCell>
+            <TableCell align="left">
+              <b>Tests Passed</b>
+            </TableCell>
             <TableCell align="center">
               <b>Processed</b>
             </TableCell>
@@ -87,24 +90,27 @@ export function SubmissionsTable({rows}) {
               component={Link}
               style={{textDecoration: 'none'}}
               to={`/submission?commit=${row.commitHash}`}>
-              <TableCell style={{width: 160}}>
+              <TableCell style={{width: 60}}>
                 {row.assignmentName}
               </TableCell>
-              <TableCell style={{width: 160}}>
+              <TableCell style={{width: 60}}>
                 {row.commitHash.substring(0, 10)}
               </TableCell>
-              <TableCell style={{width: 100}} align="center">
+              <TableCell style={{width: 60}}>
+                {row.testsPassed}/{row.totalTests}
+              </TableCell>
+              <TableCell style={{width: 30}} align="center">
                 {row.processed ? <CheckCircleIcon style={{color: green[500]}}/> :
                   <CancelIcon style={{color: red[500]}}/>}
               </TableCell>
-              <TableCell style={{width: 120}} align="left">
+              <TableCell style={{width: 30}} align="left">
                 {row.timeStamp <= row.assignmentDue ? <CheckCircleIcon style={{color: green[500]}}/> :
                   <CancelIcon style={{color: red[500]}}/>}
               </TableCell>
-              <TableCell style={{width: 100}} align="left">
+              <TableCell style={{width: 60}} align="left">
                 {row.timeSubmitted}
               </TableCell>
-              <TableCell style={{width: 120}} align="left">
+              <TableCell style={{width: 60}} align="left">
                 {row.dateSubmitted}
               </TableCell>
             </TableRow>

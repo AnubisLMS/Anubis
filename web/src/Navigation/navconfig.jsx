@@ -20,8 +20,9 @@ import Repos from '../Pages/Public/Repos';
 import Submissions from '../Pages/Public/Submissions';
 import Submission from '../Pages/Public/Submission';
 
-import Users from '../Pages/Admin/Users';
-import User from '../Pages/Admin/User';
+import AdminUsers from '../Pages/Admin/Users';
+import AdminUser from '../Pages/Admin/User';
+import AdminAssignments from '../Pages/Admin/Assignments';
 
 export const footer_nav = [{
   id: 'About',
@@ -78,21 +79,21 @@ export const public_nav = [
 
 export const admin_nav = [
   {
-    id: 'StudentStats',
+    id: 'Students',
     icon: <GroupIcon/>,
-    path: '/users',
-    Page: Users,
+    path: '/admin/users',
+    Page: AdminUsers,
   },
   {
-    id: 'AssignmentStats',
+    id: 'Assignments',
     icon: <PieChartIcon/>,
-    path: '/assingmentstats',
-    Page: Courses,
+    path: '/admin/assignments',
+    Page: AdminAssignments,
   },
   {
     id: 'Courses',
     icon: <SettingsIcon/>,
-    path: '/assingmentstats',
+    path: '/admin/courses',
     Page: Courses,
   },
 ];
@@ -105,8 +106,8 @@ export const not_shown_nav = [
   },
   {
     id: 'User',
-    path: '/user',
-    Page: User,
+    path: '/admin/user',
+    Page: AdminUser,
   },
 ];
 

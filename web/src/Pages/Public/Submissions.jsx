@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {makeStyles} from '@material-ui/core/styles';
 import {Redirect} from 'react-router-dom';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -9,6 +9,9 @@ import useGet from '../../hooks/useGet';
 import {SubmissionsTable} from '../../Components/Public/Submissions/SubmissionsTable';
 import useQuery from '../../hooks/useQuery';
 import Questions from '../../Components/Public/Questions/Questions';
+import axios from 'axios';
+import standardStatusHandler from '../../Utils/standardStatusHandler';
+import {useSnackbar} from 'notistack';
 
 const useStyles = makeStyles({
   root: {
@@ -26,35 +29,41 @@ const useStyles = makeStyles({
   },
 });
 
+function translateSubmission({assignment_name, assignment_due, commit, processed, state, created, tests}) {
+  const testsPassed = tests.filter((test) => test.result.passed).length;
+  const totalTests = tests.length;
+
+  return {
+    assignmentName: assignment_name, assignmentDue: new Date(assignment_due), state: state,
+    commitHash: commit, processed: processed, timeSubmitted: created.split(' ')[0],
+    dateSubmitted: created.split(' ')[1], timeStamp: new Date(created), testsPassed, totalTests,
+  };
+}
+
 
 export default function Submissions() {
   const classes = useStyles();
   const query = useQuery();
-  const [{loading, error, data}] = useGet(
-    `/api/public/submissions/`,
-    {
-      assignmentId: query.get('assignmentId'),
-      courseId: query.get('courseId'),
-      userId: query.get('userId'),
-    },
-  );
+  const {enqueueSnackbar} = useSnackbar();
+  const [submissions, setSubmissions] = useState([]);
 
   const assignment_id = query.get('assignmentId');
 
-  if (loading) return <CircularProgress/>;
-  if (error) return <Redirect to={`/error`}/>;
-
-  function translateSubmission({assignment_name, assignment_due, commit, processed, state, created}) {
-    return {
-      assignmentName: assignment_name, assignmentDue: new Date(assignment_due), state: state,
-      commitHash: commit, processed: processed, timeSubmitted: created.split(' ')[0],
-      dateSubmitted: created.split(' ')[1], timeStamp: new Date(created),
-    };
-  }
-
-  const rows = data.submissions
-    .map(translateSubmission)
-    .sort((a, b) => (a.timeStamp > b.timeStamp ? -1 : 1)); // sorts submissions in reverse chronological order
+  React.useEffect(() => {
+    axios.get(
+      `/api/public/submissions/`,
+      {params: {
+        assignmentId: query.get('assignmentId'),
+        courseId: query.get('courseId'),
+        userId: query.get('userId'),
+      }},
+    ).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      setSubmissions(data.submissions
+        .map(translateSubmission)
+        .sort((a, b) => (a.timeStamp > b.timeStamp ? -1 : 1)));
+    }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
+  }, []);
 
   return (
     <div className={classes.root}>
@@ -88,7 +97,7 @@ export default function Submissions() {
         {/* Table */}
         <Zoom in={true} timeout={200}>
           <Grid item xs>
-            <SubmissionsTable rows={rows}/>
+            <SubmissionsTable rows={submissions}/>
           </Grid>
         </Zoom>
       </Grid>

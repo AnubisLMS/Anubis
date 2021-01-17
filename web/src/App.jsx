@@ -10,12 +10,15 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import {drawerWidth} from './Navigation/navconfig';
 import theme from './theme';
 
+import AuthContext from './Contexts/AuthContext';
+
 import AuthWrapper from './Components/AuthWrapper';
 import MainSwitch from './Navigation/MainSwitch';
 import useQuery from './hooks/useQuery';
 import Nav from './Navigation/Nav';
 import Error from './Components/Error';
 import Footer from './Components/Footer';
+import Header from './Components/Header';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -46,6 +49,11 @@ const useStyles = makeStyles(() => ({
     }),
     marginLeft: 0,
   },
+  app: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+  },
 }));
 
 export default function App() {
@@ -60,23 +68,33 @@ export default function App() {
         <SnackbarProvider maxSnack={5}>
           <Router>
             <AuthWrapper>
-              <CssBaseline>
-                <Nav
-                  variant="temporary"
-                  open={open}
-                  onClose={() => setOpen(false)}
-                  onOpen={() => setOpen(true)}
-                />
-                <main
-                  className={clsx(classes.content, classes.main, {
-                    [classes.contentShift]: open,
-                  })}
-                >
-                  <Error show={showError} onDelete={() => setShowError(false)}/>
-                  <MainSwitch/>
-                </main>
-                <Footer/>
-              </CssBaseline>
+              <AuthContext.Consumer>
+                {(user) => (
+                  <CssBaseline>
+                    <Nav
+                      variant="temporary"
+                      open={open}
+                      onClose={() => setOpen(false)}
+                      onOpen={() => setOpen(true)}
+                    />
+                    <div className={classes.app}>
+                      <Header
+                        onDrawerToggle={() => setOpen(!open)}
+                        user={user}
+                      />
+                      <main
+                        className={clsx(classes.content, classes.main, {
+                          [classes.contentShift]: open,
+                        })}
+                      >
+                        <Error show={showError} onDelete={() => setShowError(false)}/>
+                        <MainSwitch user={user}/>
+                      </main>
+                      <Footer/>
+                    </div>
+                  </CssBaseline>
+                )}
+              </AuthContext.Consumer>
             </AuthWrapper>
           </Router>
         </SnackbarProvider>

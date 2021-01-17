@@ -71,7 +71,6 @@ def public_submissions():
     "public-submission-commit", lambda: "get submission {}".format(request.path)
 )
 @json_response
-@cache.memoize(timeout=1, unless=is_debug)
 def public_submission(commit: str):
     """
     Get submission data for a given commit.
@@ -82,14 +81,22 @@ def public_submission(commit: str):
     # Get current user
     user: User = current_user()
 
-    # Try to find commit (verifying ownership)
-    s = Submission.query.filter(
-        Submission.owner_id == user.id, Submission.commit == commit
-    ).first()
+    if not (user.is_admin or user.is_superuser):
+        # Try to find commit (verifying ownership)
+        s = Submission.query.filter(
+            Submission.owner_id == user.id,
+            Submission.commit == commit,
+        ).first()
+
+    else:
+        # Try to find commit (verifying not ownership)
+        s = Submission.query.filter(
+            Submission.commit == commit,
+        ).first()
 
     # Make sure we caught one
     if s is None:
-        return error_response("Commit does not exist"), 406
+        return error_response("Submission does not exist")
 
     # Hand back submission
     return success_response({"submission": s.full_data})

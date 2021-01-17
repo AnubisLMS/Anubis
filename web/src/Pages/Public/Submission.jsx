@@ -1,17 +1,15 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {makeStyles} from '@material-ui/core/styles';
-import {Redirect} from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
 import green from '@material-ui/core/colors/green';
 import {useSnackbar} from 'notistack';
-import useSubscribe from '../../hooks/useSubscribe';
 import axios from 'axios';
 import useQuery from '../../hooks/useQuery';
 import SubmissionSummary from '../../Components/Public/Submission/SubmissionSummary';
 import SubmissionBuild from '../../Components/Public/Submission/SubmissionBuild';
 import SubmissionTests from '../../Components/Public/Submission/SubmissionTests';
+import standardStatusHandler from '../../Utils/standardStatusHandler';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,40 +46,77 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function regrade(commit, enqueueSnackbar) {
+const regrade = ({commit, submission, setSubmission, setStep, setErrorStop}, enqueueSnackbar) => () => {
+  if (!submission.processed) {
+    return enqueueSnackbar('Submission must first finish tests before regrading.', {variant: 'warning'});
+  }
+
   axios
     .get(`/api/public/regrade/${commit}`)
     .then((response) => {
-      if (response.data.success) {
-        window.location.reload();
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data) {
+        setErrorStop(false);
+        setStep(-1);
+        setSubmission(null);
+        enqueueSnackbar('Regrading submission', {variant: 'success'});
       } else {
         enqueueSnackbar(`Unable to regrade`, {variant: 'error'});
       }
     })
     .catch((error) => {
-      enqueueSnackbar(`Unable to regrade`, {variant: 'error'});
+      enqueueSnackbar(error.toString(), {variant: 'error'});
     });
-}
+};
+
+const translateSubmission = ({created, assignment_due, ...other}) => ({
+  date_submitted: created.split(' ')[1], timestamp: new Date(created), time_submitted: created.split(' ')[0],
+  assignment_due, on_time: new Date(created) <= new Date(assignment_due), created, ...other,
+});
 
 
 export default function Submission() {
   const classes = useStyles();
+  const query = useQuery();
   const {enqueueSnackbar} = useSnackbar();
-  const [{loading, error, data}] = useSubscribe(
-    `/api/public/submissions/get/${useQuery().get('commit')}`,
-    1000,
-    (data) => data.submission.processed,
-    (oldState, newState) => {
-      if (oldState.data.submission === undefined) return;
-      if (oldState.data.submission.build.passed !== newState.data.submission.build.passed) {
-        const buildPassed = newState.data.submission.build.passed;
-        enqueueSnackbar(
-          `Build ${buildPassed ? 'passed' : 'failed'}`,
-          {variant: (buildPassed ? 'success' : 'error')});
+  const [step, setStep] = useState(0);
+  const [submission, setSubmission] = useState(null);
+  const [errorStop, setErrorStop] = useState(false);
+
+  const continueSubscribe = () => setTimeout(() => {
+    if (step < 60) {
+      setStep((state) => ++state);
+    }
+  }, 1000);
+
+  React.useEffect(() => {
+    axios.get(
+      `/api/public/submissions/get/${query.get('commit')}`,
+    ).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (!data) {
+        return;
       }
-      for (let index = 0; index < oldState.data.submission.tests.length; index++) {
-        const oldTest = oldState.data.submission.tests[index];
-        const newTest = newState.data.submission.tests[index];
+
+      const newSubmission = translateSubmission(data.submission);
+      setSubmission(newSubmission);
+
+      if (!submission) {
+        return continueSubscribe();
+      }
+
+      if (submission.build.passed !== newSubmission.build.passed) {
+        if (newSubmission.build.passed) {
+          enqueueSnackbar('Build passed', {variant: 'success'});
+        } else {
+          setErrorStop(true);
+          return enqueueSnackbar('Build failed', {variant: 'error'});
+        }
+      }
+
+      for (let index = 0; index < submission.tests.length; index++) {
+        const oldTest = submission.tests[index];
+        const newTest = newSubmission.tests[index];
 
         if (oldTest.result.passed !== newTest.result.passed) {
           enqueueSnackbar(
@@ -89,30 +124,30 @@ export default function Submission() {
             {variant: (newTest.result.passed ? 'success' : 'error')});
         }
       }
-    });
 
-  if (loading) return <CircularProgress/>;
-  if (error) return <Redirect to={`/error`}/>;
+      continueSubscribe();
+    }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
+  }, [step]);
 
-
-  function translateSubmission({created, ...other}) {
-    return {
-      date_submitted: created.split(' ')[1], timestamp: new Date(created), time_submitted: created.split(' ')[0],
-      ...other,
-    };
+  if (!submission) {
+    return null;
   }
 
-  const submission = translateSubmission(data.submission);
-  const onTime = submission.timestamp <= new Date(submission.assignment_due);
   const {build, tests} = submission;
+  const pageState = {
+    commit: query.get('commit'),
+    step, setStep,
+    submission, setSubmission,
+    errorStop, setErrorStop,
+  };
 
   return (
     <Grid
       container
-      direction="row"
       justify="center"
-      alignItems="center"
-      spacing={6}
+      alignItems="flex-start"
+      direction={'row'}
+      spacing={2}
     >
 
       {/* Upper description */}
@@ -129,25 +164,29 @@ export default function Submission() {
       </Grid>
 
       {/* Summary */}
-      <Grid item xs={12} key={'summary'}>
+      <Grid item xs={12} md={4} key={'summary'}>
         <SubmissionSummary
           submission={submission}
-          onTime={onTime}
-          regrade={regrade}
+          onTime={submission.on_time}
+          regrade={regrade(pageState, enqueueSnackbar)}
           enqueueSnackbar={enqueueSnackbar}
+          stop={errorStop}
         />
       </Grid>
 
-      {/* Build */}
-      <Grid item xs={12} key={'build'}>
-        <SubmissionBuild build={build}/>
-      </Grid>
+      <Grid item xs={12} md={8} key={'build-test'}>
+        <Grid container spacing={1}>
+          {/* Build */}
+          <Grid item xs={12} key={'build'}>
+            <SubmissionBuild build={build} stop={errorStop}/>
+          </Grid>
 
-      {/* Tests */}
-      <Grid item xs={12} key={'tests'}>
-        <SubmissionTests tests={tests}/>
+          {/* Tests */}
+          <Grid item xs={12} key={'tests'}>
+            <SubmissionTests tests={tests} stop={errorStop}/>
+          </Grid>
+        </Grid>
       </Grid>
-
     </Grid>
   );
 }

@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SubmissionBuild({build}) {
+export default function SubmissionBuild({build, stop}) {
   const classes = useStyles();
 
   return (
@@ -48,9 +48,9 @@ export default function SubmissionBuild({build}) {
           >
             {build.passed === null ? (
               <BuildIcon/>
-            ) : build.passed === true ? (
+            ) : (build.passed === true && !stop) ? (
               <CheckCircleIcon/>
-            ) : build.passed === false ? (
+            ) : (build.passed === false || stop) ? (
               <CancelIcon/>
             ) : null}
           </Fab>

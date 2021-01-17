@@ -1,12 +1,17 @@
 from flask import Blueprint
+from sqlalchemy.exc import DataError, IntegrityError
+import json
 
-from anubis.models import Assignment, User
+from anubis.models import db, Assignment, User
 from anubis.utils.assignments import assignment_sync
+from anubis.utils.auth import require_admin
+from anubis.utils.data import row2dict
 from anubis.utils.decorators import load_from_id, json_response, json_endpoint
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response
 from anubis.utils.questions import get_assigned_questions
-from anubis.utils.auth import require_admin
+from anubis.utils.data import rand
+from anubis.utils.logger import logger
 
 assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
 
@@ -36,7 +41,64 @@ def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str
     )
 
 
-@assignments.route("/assignment/sync", methods=["POST"])
+@assignments.route('/list')
+@require_admin()
+@json_response
+def admin_assignments_list():
+    all_assignments = Assignment.query.all()
+
+    return success_response({
+        'assignments': [
+            row2dict(assignment)
+            for assignment in all_assignments
+        ]
+    })
+
+
+@assignments.route("/save", methods=["POST"])
+@require_admin()
+@json_endpoint(required_fields=[("assignment", dict)])
+def private_assignment_save(assignment: dict):
+    """
+    Save assignment from raw fields
+
+    :param assignment:
+    :return:
+    """
+
+    logger.info(json.dumps(assignment, indent=2))
+
+    # Get assignment
+    assignment_id = assignment['id']
+    db_assignment = Assignment.query.filter(
+        Assignment.id == assignment_id
+    ).first()
+
+    # Make sure it exists
+    if db_assignment is None:
+        # Create it if it doens't exist
+        db_assignment = Assignment()
+        assignment['id'] = rand()
+        db.session.add(db_assignment)
+
+    # Update all it's fields
+    for key, value in assignment.items():
+        setattr(db_assignment, key, value)
+
+    # Attempt to commit
+    try:
+        db.session.commit()
+    except (IntegrityError, DataError) as e:
+        # Tell frontend what error happened
+        return error_response(str(e))
+
+    # Return status
+    return success_response({
+        'status': 'Assignment updated',
+    })
+
+
+@assignments.route("/sync", methods=["POST"])
 @require_admin()
 @log_endpoint("cli", lambda: "assignment-sync")
 @json_endpoint(required_fields=[("assignment", dict)])

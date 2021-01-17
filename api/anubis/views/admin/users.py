@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 from anubis.models import db, User, Course, InCourse, Submission
-from anubis.utils.auth import require_admin
+from anubis.utils.auth import require_admin, current_user
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug
 from anubis.utils.decorators import json_response, json_endpoint
@@ -93,3 +93,83 @@ def admin_students_update_id(id: str, name: str = None, github_username: str = N
     return success_response({
         'status': 'saved',
     })
+
+
+@students.route('/toggle-admin/<string:id>')
+@require_admin()
+@json_response
+def admin_students_toggle_admin(id: str):
+    """
+    Toggle the admin status for a user. Requires user to
+    be admin to be able to make this change.
+
+    :param id:
+    :return:
+    """
+    user: User = current_user()
+    other = User.query.filter(User.id == id).first()
+
+    if other is None:
+        return error_response('User could not be found')
+
+    if user.id == other.id:
+        return error_response('You can not toggle your own permission.')
+
+    other.is_admin = not other.is_admin
+    db.session.commit()
+
+    if other.is_admin:
+        return success_response({
+            'status': f'{other.name} is now an admin',
+            'variant': 'warning'
+        })
+
+    else:
+        return success_response({
+            'status': f'{other.name} is no longer an admin',
+            'variant': 'success'
+        })
+
+
+@students.route('/toggle-superuser/<string:id>')
+@require_admin()
+@json_response
+def admin_students_toggle_superuser(id: str):
+    """
+    Toggle the superuser status for a user. Requires user to be superuser
+    to be able to make this change.
+
+    :param id:
+    :return:
+    """
+    user: User = current_user()
+    other = User.query.filter(User.id == id).first()
+
+    if not user.is_superuser:
+        return error_response('Only superusers can create other superusers.')
+
+    if other is None:
+        return error_response('User could not be found')
+
+    if user.id == other.id:
+        return error_response('You can not toggle your own permission.')
+
+    other.is_admin = not other.is_admin
+    db.session.commit()
+
+    if other.is_admin:
+        return success_response({
+            'status': f'{other.name} is now a superuser',
+            'variant': 'warning'
+        })
+
+    else:
+        return success_response({
+            'status': f'{other.name} is no longer a superuser',
+            'variant': 'success'
+        })
+
+
+
+
+

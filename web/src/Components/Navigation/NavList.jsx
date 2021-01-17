@@ -84,6 +84,15 @@ export default function NavList({...other}) {
             <React.Fragment>
               {user && user.is_admin ? (
                 <React.Fragment>
+                  <ListItem className={classes.categoryHeader}>
+                    <ListItemText
+                      classes={{
+                        primary: classes.categoryHeaderPrimary,
+                      }}
+                    >
+                      Admin
+                    </ListItemText>
+                  </ListItem>
                   {admin_nav.map(({id: childId, icon, path}) => (
                     <NavItem
                       key={childId}

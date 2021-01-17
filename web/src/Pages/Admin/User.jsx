@@ -1,31 +1,41 @@
 import React, {useState} from 'react';
 
-import {Redirect} from 'react-router-dom';
-
 import Grid from '@material-ui/core/Grid';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 import useQuery from '../../hooks/useQuery';
-import useGet from '../../hooks/useGet';
 import UserCard from '../../Components/Admin/Users/UserCard';
 import CourseCard from '../../Components/Admin/Users/CourseCard';
+import axios from 'axios';
+import standardStatusHandler from '../../Utils/standardStatusHandler';
+import {useSnackbar} from 'notistack';
 
 
 export default function User() {
-  const [{loading, error, data}] = useGet(`/api/admin/students/info/${useQuery().get('userId')}`);
+  const query = useQuery();
+  const {enqueueSnackbar} = useSnackbar();
   const [user, setUser] = useState(null);
+  const [edits, setEdits] = useState(0);
 
-  if (loading) return <CircularProgress/>;
-  if (error) return <Redirect to={`/error`}/>;
+  React.useEffect(() => {
+    axios.get(`/api/admin/students/info/${query.get('userId')}`).then((response) => {
+      if (standardStatusHandler(response, enqueueSnackbar)) {
+        setUser(response?.data?.data);
+      }
+    });
+  }, [edits]);
 
-  if (user === null) {
-    setUser(data);
+  if (!user) {
     return null;
   }
 
+  const pageState = {
+    user, setUser,
+    edits, setEdits,
+  };
+
   return (
     <Grid container spacing={2} justify={'center'} alignItems={'center'} direction={'column'}>
-      <Grid item xs key={'user-card'}>
+      <Grid item xs={12} md={8} key={'user-card'}>
         <UserCard user={user} setUser={setUser}/>
       </Grid>
       {user.courses.map((course) => (

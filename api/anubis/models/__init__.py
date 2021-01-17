@@ -149,7 +149,7 @@ class Assignment(db.Model):
         return {
             "assignment": {
                 "name": str,
-                "class": str,
+                "course": str,
                 "unique_code": str,
                 "hidden": bool,
                 "github_classroom_url": str,
@@ -408,7 +408,7 @@ class Submission(db.Model):
             "id": self.id,
             "assignment_name": self.assignment.name,
             "assignment_due": str(self.assignment.due_date),
-            "class_code": self.assignment.course.course_code,
+            "course_code": self.assignment.course.course_code,
             "commit": self.commit,
             "processed": self.processed,
             "state": self.state,
@@ -554,7 +554,7 @@ class TheiaSession(db.Model):
             "id": self.id,
             "assignment_id": self.assignment_id,
             "assignment_name": self.assignment.name,
-            "class_name": self.assignment.course.course_code,
+            "course_code": self.assignment.course.course_code,
             "repo_id": self.repo_id,
             "repo_url": self.repo.repo_url,
             "redirect_url": theia_redirect_url(self.id, self.owner.netid),

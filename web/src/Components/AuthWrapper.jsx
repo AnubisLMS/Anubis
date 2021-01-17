@@ -1,22 +1,23 @@
-import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import useGet from '../hooks/useGet';
-import {Redirect} from 'react-router-dom';
+import React, {useState} from 'react';
 import AuthContext from '../Contexts/AuthContext';
+import axios from 'axios';
+import standardStatusHandler from '../Utils/standardStatusHandler';
+import {useSnackbar} from 'notistack';
 
 export default function AuthWrapper({children}) {
-  const [{loading, error, data}, reset] = useGet('/api/public/auth/whoami');
+  const {enqueueSnackbar} = useSnackbar();
+  const [user, setUser] = useState(null);
+  const [reset, setReset] = useState(0);
 
-  if (loading) return <CircularProgress/>;
-  if (error) return <Redirect to={`/error`}/>;
-
-  let user;
-  if (data) {
-    user = data.user;
-    user.reset = reset;
-  } else {
-    user = null;
-  }
+  React.useEffect(() => {
+    axios.get('/api/public/auth/whoami').then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      setUser({
+        setReset,
+        ...(data?.user ?? {}),
+      });
+    });
+  }, [reset]);
 
   return (
     <AuthContext.Provider value={user}>
