@@ -222,11 +222,13 @@ def get_all_questions(assignment: Assignment) -> Dict[int, List[Dict[str, str]]]
 
 
 @cache.memoize(timeout=60 * 60, unless=is_debug)
-def get_assigned_questions(assignment_id: str, user_id: str):
+def get_assigned_questions(assignment_id: str, user_id: str, full=False):
     # Get assigned questions
     assigned_questions = AssignedStudentQuestion.query.filter(
         AssignedStudentQuestion.assignment_id == assignment_id,
         AssignedStudentQuestion.owner_id == user_id,
     ).all()
 
-    return [assigned_question.data for assigned_question in assigned_questions]
+    if not full:
+        return [assigned_question.data for assigned_question in assigned_questions]
+    return [assigned_question.full_data for assigned_question in assigned_questions]

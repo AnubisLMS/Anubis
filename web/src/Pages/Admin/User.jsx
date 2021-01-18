@@ -8,6 +8,7 @@ import CourseCard from '../../Components/Admin/Users/CourseCard';
 import axios from 'axios';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import {useSnackbar} from 'notistack';
+import Typography from '@material-ui/core/Typography';
 
 
 export default function User() {
@@ -34,15 +35,27 @@ export default function User() {
   };
 
   return (
-    <Grid container spacing={2} justify={'center'} alignItems={'center'} direction={'column'}>
-      <Grid item xs={12} md={8} key={'user-card'}>
+    <Grid container spacing={2} justify={'center'} alignItems={'center'}>
+      <Grid item xs={12}>
+        <Typography variant="h6">
+          Anubis
+        </Typography>
+        <Typography variant={'subtitle1'} color={'textSecondary'}>
+          Student Management
+        </Typography>
+      </Grid>
+      <Grid item xs={12} md={6} key={'user-card'}>
         <UserCard user={user} setUser={setUser}/>
       </Grid>
-      {user.courses.map((course) => (
-        <Grid item xs key={'course-card'}>
-          <CourseCard student={user.student} course={course}/>
+      <Grid item xs={12} md={6}>
+        <Grid container spacing={2} justify={'center'} alignItems={'flex-start'}>
+          {user.courses.map((course) => (
+            <Grid item xs key={'course-card'}>
+              <CourseCard student={user.student} course={course}/>
+            </Grid>
+          ))}
         </Grid>
-      ))}
+      </Grid>
     </Grid>
   );
 }

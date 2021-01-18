@@ -8,12 +8,12 @@ import {makeStyles, ThemeProvider} from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import {drawerWidth} from './Navigation/navconfig';
-import theme from './theme';
+import theme from './Theme/Dark';
 
 import AuthContext from './Contexts/AuthContext';
 
 import AuthWrapper from './Components/AuthWrapper';
-import MainSwitch from './Navigation/MainSwitch';
+import Main from './Main';
 import useQuery from './hooks/useQuery';
 import Nav from './Navigation/Nav';
 import Error from './Components/Error';
@@ -88,7 +88,7 @@ export default function App() {
                         })}
                       >
                         <Error show={showError} onDelete={() => setShowError(false)}/>
-                        <MainSwitch user={user}/>
+                        <Main user={user}/>
                       </main>
                       <Footer/>
                     </div>

@@ -293,7 +293,16 @@ class AssignedStudentQuestion(db.Model):
         """
 
         return {
+            "id": self.id,
+            "response": self.response,
             "question": self.question.data,
+        }
+
+    @property
+    def full_data(self):
+        return {
+            "id": self.id,
+            "question": self.question.full_data,
             "response": self.response,
         }
 
@@ -492,7 +501,7 @@ class SubmissionBuild(db.Model):
 
     # Fields
     stdout = db.Column(db.Text)
-    passed = db.Column(db.Boolean)
+    passed = db.Column(db.Boolean, default=None)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)

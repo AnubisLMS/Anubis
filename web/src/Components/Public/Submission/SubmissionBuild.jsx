@@ -34,6 +34,10 @@ const useStyles = makeStyles((theme) => ({
 export default function SubmissionBuild({build, stop}) {
   const classes = useStyles();
 
+  if (!build) {
+    return null;
+  }
+
   return (
     <Accordion>
       <AccordionSummary

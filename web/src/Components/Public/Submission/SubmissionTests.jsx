@@ -34,6 +34,10 @@ const useStyles = makeStyles((theme) => ({
 export default function SubmissionTests({tests, stop}) {
   const classes = useStyles();
 
+  if (!tests) {
+    return null;
+  }
+
   return (
     <React.Fragment>
       {tests.map((test, index) => (

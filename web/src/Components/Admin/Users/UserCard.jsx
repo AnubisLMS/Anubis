@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {makeStyles} from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
@@ -10,6 +10,12 @@ import TextField from '@material-ui/core/TextField';
 import SaveIcon from '@material-ui/icons/Save';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
+import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import standardErrorHandler from '../../../Utils/standardErrorHandler';
+import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import Grid from '@material-ui/core/Grid';
+import {Gif} from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -42,45 +48,108 @@ function saveUser(user, enqueueSnackbar) {
 export default function UserCard({user, setUser}) {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
+  const [edits, setEdits] = useState(0);
 
-  const {student} = user;
+  const incEdits = () => {
+    setEdits((state) => ++state);
+  };
 
   return (
     <Card className={classes.root}>
       <CardActionArea>
         <CardContent>
-          {/* netid */}
-          <Typography gutterBottom variant="subtitle1">
-            {student.netid}
-          </Typography>
+          <Grid container spacing={1} justify={'center'} alignItems={'flex-start'}>
+            {/* netid */}
+            <Grid item xs={12}>
+              <Typography gutterBottom variant="subtitle1">
+                Netid: {user.student.netid}
+              </Typography>
+            </Grid>
 
-          {/* name */}
-          <TextField
-            className={classes.textField}
-            label="name"
-            value={student.name}
-            onChange={(e) => setUser(({student: {name, ...rest1}, ...rest2}) => ({
-              student: {
-                name: e.target.value,
-                ...rest1,
-              },
-              ...rest2,
-            }))}
-          />
+            {/* name */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                className={classes.textField}
+                label="name"
+                value={user.student.name}
+                onChange={(e) => {
+                  setUser((state) => {
+                    state.student.name = e.target.value;
+                    return state;
+                  });
+                  incEdits();
+                }}
+              />
+            </Grid>
 
-          {/* github username */}
-          <TextField
-            className={classes.textField}
-            label="Github username"
-            value={student.github_username}
-            onChange={(e) => setUser(({student: {github_username, ...rest1}, ...rest2}) => ({
-              student: {
-                github_username: e.target.value,
-                ...rest1,
-              },
-              ...rest2,
-            }))}
-          />
+            {/* github username */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                className={classes.textField}
+                label="Github username"
+                value={user.student.github_username}
+                onChange={(e) => {
+                  setUser((state) => {
+                    state.github_username.name = e.target.value;
+                    return state;
+                  });
+                  incEdits();
+                }}
+              />
+            </Grid>
+
+            {/* Is Admin */}
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={user.student.is_admin}
+                    color={'primary'}
+                    onChange={() => {
+                      axios.get(`/api/admin/students/toggle-admin/${user.student.id}`).then((response) => {
+                        const data = standardStatusHandler(response, enqueueSnackbar);
+                        if (data) {
+                          setUser((state) => {
+                            state.student.is_admin = !state.student.is_admin;
+                            return state;
+                          });
+                          incEdits();
+                        }
+                      }).catch(standardErrorHandler(enqueueSnackbar));
+                    }}
+                  />
+                }
+                label="Is Admin"
+                labelPlacement="end"
+              />
+            </Grid>
+
+            {/* Is Superuser */}
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={user.student.is_superuser}
+                    color={'primary'}
+                    onChange={() => {
+                      axios.get(`/api/admin/students/toggle-superuser/${user.student.id}`).then((response) => {
+                        const data = standardStatusHandler(response, enqueueSnackbar);
+                        if (data) {
+                          setUser((state) => {
+                            state.student.is_superuser = !state.student.is_superuser;
+                            return state;
+                          });
+                          incEdits();
+                        }
+                      }).catch(standardErrorHandler(enqueueSnackbar));
+                    }}
+                  />
+                }
+                label="Is Superuser"
+                labelPlacement="end"
+              />
+            </Grid>
+          </Grid>
         </CardContent>
       </CardActionArea>
       <CardActions>

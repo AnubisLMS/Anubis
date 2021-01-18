@@ -15,6 +15,7 @@ import Switch from '@material-ui/core/Switch';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import Button from '@material-ui/core/Button';
 import {format} from 'date-fns';
+import Typography from '@material-ui/core/Typography';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -106,6 +107,14 @@ export default function Assignments() {
 
   return (
     <Grid container spacing={1} justify={'center'} alignItems={'center'}>
+      <Grid item xs={12}>
+        <Typography variant="h6">
+          Anubis
+        </Typography>
+        <Typography variant={'subtitle1'} color={'textSecondary'}>
+          Assignment Management
+        </Typography>
+      </Grid>
       {assignments.map((assignment) => (
         <Grid item xs={8} key={assignment.id}>
           <Card>
@@ -115,9 +124,8 @@ export default function Assignments() {
                   switch (type) {
                   case 'string':
                     return (
-                      <Grid item xs>
+                      <Grid item xs key={field}>
                         <TextField
-                          key={field}
                           disabled={disabled}
                           variant={'outlined'}
                           label={label}
@@ -128,7 +136,7 @@ export default function Assignments() {
                     );
                   case 'boolean':
                     return (
-                      <Grid item xs={12}>
+                      <Grid item xs={12} key={field}>
                         <FormControlLabel
                           value={assignment[field]}
                           control={
@@ -146,7 +154,7 @@ export default function Assignments() {
                   case 'datetime':
                     const date = new Date(assignment[field]);
                     return (
-                      <Grid item xs={12}>
+                      <Grid item xs={12} key={field}>
                         <MuiPickersUtilsProvider utils={DateFnsUtils}>
                           <KeyboardDatePicker
                             margin="normal"

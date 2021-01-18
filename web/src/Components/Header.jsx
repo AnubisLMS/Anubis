@@ -1,15 +1,12 @@
 import React from 'react';
 import AppBar from '@material-ui/core/AppBar';
-import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Toolbar from '@material-ui/core/Toolbar';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import Typography from '@material-ui/core/Typography';
-
-const lightColor = 'rgba(255, 255, 255, 0.7)';
+import Chip from '@material-ui/core/Chip';
 
 const useStyles = makeStyles((theme) => ({
   menuButton: {
@@ -46,7 +43,7 @@ export default function Header({onDrawerToggle, user}) {
             <Grid item xs/>
             <Grid item>
               <div className={classes.avatar}>
-                <Typography variant={'body2'}>{user?.netid}</Typography>
+                <Chip clickable label={user?.netid}/>
               </div>
             </Grid>
           </Grid>

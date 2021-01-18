@@ -12,6 +12,7 @@ import Questions from '../../Components/Public/Questions/Questions';
 import axios from 'axios';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import {useSnackbar} from 'notistack';
+import AuthContext from '../../Contexts/AuthContext';
 
 const useStyles = makeStyles({
   root: {
@@ -75,9 +76,16 @@ export default function Submissions() {
         spacing={6}
       >
         <Grid item xs={12}>
-          <Typography variant="h6" className={classes.subtitle}>
+          <Typography variant="h6">
             CS-UY 3224
           </Typography>
+          <AuthContext.Consumer>
+            {(user) => (
+              <Typography variant={'subtitle1'} color={'textSecondary'}>
+                {user.name}&apos;s Submissions
+              </Typography>
+            )}
+          </AuthContext.Consumer>
         </Grid>
 
         {/* Questions */}

@@ -19,6 +19,7 @@ import React from 'react';
 import {makeStyles} from '@material-ui/core/styles';
 import TableCell from '@material-ui/core/TableCell';
 import Divider from '@material-ui/core/Divider';
+import {useSnackbar} from 'notistack';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,8 +33,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SubmissionSummary({submission, onTime, regrade, enqueueSnackbar, stop}) {
+export default function SubmissionSummary({submission, regrade, stop = false}) {
   const classes = useStyles();
+  const {enqueueSnackbar} = useSnackbar();
+
+  if (!submission) {
+    return null;
+  }
 
   const testsPassed = submission.tests.filter((test) => test.result.passed).length;
   const totalTests = submission.tests.length;
@@ -52,17 +58,17 @@ export default function SubmissionSummary({submission, onTime, regrade, enqueueS
             {/* On time*/}
             <ListItem>
               <ListItemIcon>
-                <Tooltip title={onTime ?
+                <Tooltip title={submission.on_time ?
                   'Submitted On Time' :
                   'Submitted Late'}>
                   <IconButton component="div">
-                    {onTime ?
+                    {submission.on_time ?
                       <CheckCircleIcon style={{color: green[500]}}/> :
                       <CancelIcon style={{color: red[500]}}/>}
                   </IconButton>
                 </Tooltip>
               </ListItemIcon>
-              <ListItemText primary={onTime ?
+              <ListItemText primary={submission.on_time ?
                 'Submitted On Time' :
                 'Submitted Late'}/>
             </ListItem>

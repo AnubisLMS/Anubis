@@ -7,35 +7,35 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
-import SearchIcon from '@material-ui/icons/Search';
-import InputAdornment from '@material-ui/core/InputAdornment';
 import axios from 'axios';
 import {useSnackbar} from 'notistack';
-import standardStatusHandler from '../../Utils/standardStatusHandler';
 import {Link} from 'react-router-dom';
 import PersonIcon from '@material-ui/icons/Person';
 import Fab from '@material-ui/core/Fab';
-import {Tooltip} from '@material-ui/core';
+import Tooltip from '@material-ui/core/Tooltip';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import Typography from '@material-ui/core/Typography';
 
+import standardStatusHandler from '../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../Utils/standardErrorHandler';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
+    flex: 1,
     padding: theme.spacing(1),
   },
-  fullHeightWidth: {
+  dataGridPaper: {
     height: 700,
   },
   dataGrid: {
     height: '100%',
     display: 'flex',
   },
-  search: {
-    display: 'flex',
-  },
-  input: {
-    marginLeft: theme.spacing(1),
-    flex: 1,
-    width: '100%',
+  autocomplete: {
+    paddingBottom: theme.spacing(1),
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
   },
 }));
 
@@ -53,7 +53,7 @@ const toggleAdmin = (id, {setStudents, setEdits}, enqueueSnackbar) => () => {
       });
       setEdits((state) => ++state);
     }
-  }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
+  }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
 
@@ -70,7 +70,7 @@ const toggleSuperuser = (id, {setStudents, setEdits}, enqueueSnackbar) => () => 
       });
       setEdits((state) => ++state);
     }
-  }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
+  }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
 const useColumns = (pageState, enqueueSnackbar) => ([
@@ -78,20 +78,43 @@ const useColumns = (pageState, enqueueSnackbar) => ([
     field: 'id',
     headerName: 'ID',
     renderCell: (params) => (
-      <Fab
-        size={'small'}
-        color={'primary'}
-        component={Link}
-        to={`/admin/user?userId=${params.row.id}`}
-      >
-        <Tooltip title={params.row.netid}>
+      <Tooltip title={`View ${params.row.netid}`}>
+        <Fab
+          size={'small'}
+          color={'primary'}
+          component={Link}
+          to={`/admin/user?userId=${params.row.id}`}
+        >
           <PersonIcon/>
-        </Tooltip>
-      </Fab>
+        </Fab>
+      </Tooltip>
+    ),
+  },
+  {
+    field: 'log_in_as',
+    headerName: 'Log in as',
+    width: 130,
+    renderCell: (params) => (
+      <Tooltip title={`Log in as ${params.row.netid}`}>
+        <Fab
+          size={'small'}
+          style={{backgroundColor: 'yellow'}}
+          onClick={() => {
+            axios.get(`/api/admin/auth/token/${params.row.netid}`).then((response) => {
+              const data = standardStatusHandler(response);
+              if (data) {
+                window.location.reload();
+              }
+            }).catch(standardErrorHandler(enqueueSnackbar));
+          }}
+        >
+          <ExitToAppIcon/>
+        </Fab>
+      </Tooltip>
     ),
   },
   {field: 'netid', headerName: 'netid'},
-  {field: 'name', headerName: 'Name', width: 130},
+  {field: 'name', headerName: 'Name', width: 150},
   {field: 'github_username', headerName: 'Github Username', width: 200},
   {
     field: 'is_admin',
@@ -128,17 +151,15 @@ export default function Users() {
   const {enqueueSnackbar} = useSnackbar();
   const [reset, setReset] = useState(0);
   const [edits, setEdits] = useState(0);
-  const [students, setStudents] = useState(null);
-  const [selected, setSelected] = useState(null);
-  const [searchText, setSearchText] = useState(null);
+  const [students, setStudents] = useState([]);
+  const [searched, setSearched] = useState(null);
   const [rows, setRows] = useState([]);
 
   const pageState = {
     reset, setReset,
     students, setStudents,
-    selected, setSelected,
+    searched, setSearched,
     edits, setEdits,
-    searchText, setSearchText,
     rows, setRows,
   };
 
@@ -148,7 +169,7 @@ export default function Users() {
     axios.get('/api/admin/students/list').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data?.students) {
-        setSelected(null);
+        setSearched(null);
 
         for (const student of data.students) {
           student.search = student.name.toLowerCase() +
@@ -168,43 +189,48 @@ export default function Users() {
   }, [reset]);
 
   React.useEffect(() => {
-    if (searchText === null) {
+    if (students.length === 0) {
       return;
     }
 
-    if (searchText === '') {
-      setRows(students);
-      return;
+    if (searched === null && students.length > 0) {
+      return setRows(students);
     }
-    const lowerSearchText = searchText.toLowerCase();
-    const filtered = students.filter((row) => (
-      row.search.match(lowerSearchText)
-    ));
-    setRows(filtered);
-  }, [searchText]);
+
+    setRows([searched]);
+  }, [searched]);
 
   return (
-    <Grid container spacing={2} justify={'center'} alignItems={'center'} style={{height: '100%'}}>
-      <Grid item xs={12} md={6} key={'search'}>
+    <Grid container spacing={2} justify={'center'} alignItems={'center'}>
+      <Grid item xs={12}>
+        <Typography variant="h6">
+          Anubis
+        </Typography>
+        <Typography variant={'subtitle1'} color={'textSecondary'}>
+          Student Management
+        </Typography>
+      </Grid>
+      <Grid item xs={12} md={4} key={'search'}>
         <Paper className={classes.paper}>
-          <TextField
-            color={'primary'}
-            label={'Search users'}
-            className={classes.input}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon/>
-                </InputAdornment>
-              ),
-            }}
-          />
+          <div className={classes.autocomplete}>
+            <Autocomplete
+              blurOnSelect
+              fullWidth={false}
+              options={students}
+              getOptionLabel={(option) => option.name}
+              onChange={(_, value) => setSearched(value)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={'Search users'}
+                />
+              )}
+            />
+          </div>
         </Paper>
       </Grid>
-      <Grid item xs={12} md={10} key={'user-table'} style={{height: '100%'}}>
-        <Paper className={clsx(classes.paper, classes.fullHeightWidth)}>
+      <Grid item xs={12} md={10} key={'user-table'}>
+        <Paper className={clsx(classes.paper, classes.dataGridPaper)}>
           <div className={classes.dataGrid}>
             <DataGrid
               pagination
@@ -217,7 +243,6 @@ export default function Users() {
                   {columnField: 'name', operatorValue: 'contains', value: ''},
                 ],
               }}
-              onRowClick={({row: {id}}) => setSelected(id)}
             />
           </div>
         </Paper>

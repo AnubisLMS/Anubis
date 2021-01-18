@@ -15,12 +15,14 @@ from anubis.models import (
     Assignment,
     Course,
     User,
-    TheiaSession
+    TheiaSession,
+    AssignmentQuestion,
 )
 from anubis.utils.auth import require_admin
 from anubis.utils.decorators import json_response
 from anubis.utils.http import success_response
 from anubis.utils.data import rand
+from anubis.utils.questions import assign_questions
 
 seed = Blueprint("admin-seed", __name__, url_prefix="/admin/seed")
 
@@ -36,7 +38,7 @@ def randnetid():
 
 def create_assignment(course, users):
     # Assignment 1 uniq
-    a = Assignment(
+    assignment = Assignment(
         name="uniq",
         pipeline_image="registry.osiris.services/anubis/assignment/1",
         hidden=False,
@@ -48,9 +50,20 @@ def create_assignment(course, users):
         ide_enabled=True,
     )
 
+    for i in range(random.randint(2, 4)):
+        b, c = random.randint(1,5), random.randint(1, 5)
+        assignment_question = AssignmentQuestion(
+            question=f'What is {c} + {b}?',
+            solution=f'{c+b}',
+            sequence=i,
+            code_question=False,
+            assignment=assignment,
+        )
+        db.session.add(assignment_question)
+
     tests = []
     for i in range(random.randint(1, 5)):
-        tests.append(AssignmentTest(name=f"test {i}", assignment=a))
+        tests.append(AssignmentTest(name=f"test {i}", assignment=assignment))
 
     submissions = []
     repos = []
@@ -58,14 +71,14 @@ def create_assignment(course, users):
     for user in users:
         repos.append(AssignmentRepo(
             owner=user,
-            assignment=a,
+            assignment=assignment,
             repo_url="https://github.com/wabscale/xv6-public.git",
             github_username=user.github_username,
         ))
 
         theia_sessions.append(TheiaSession(
             owner=user,
-            assignment=a,
+            assignment=assignment,
             repo=repos[-1],
             active=False,
             ended=datetime.now(),
@@ -79,7 +92,7 @@ def create_assignment(course, users):
                     commit=randstr(),
                     state="Waiting for resources...",
                     owner=user,
-                    assignment=a,
+                    assignment=assignment,
                     repo=repos[-1],
                 ))
 
@@ -87,9 +100,9 @@ def create_assignment(course, users):
     db.session.add_all(submissions)
     db.session.add_all(theia_sessions)
     db.session.add_all(repos)
-    db.session.add(a)
+    db.session.add(assignment)
 
-    return a, tests, submissions, repos
+    return assignment, tests, submissions, repos
 
 
 def create_students(n=10):
@@ -147,12 +160,16 @@ def private_seed():
 
     students = create_students(130) + [me]
     course = create_course(students)
-    _, _, submissions, _ = create_assignment(course, students)
+    assignment, _, submissions, _ = create_assignment(course, students)
 
     db.session.commit()
 
     # Init models
     for submission in submissions:
         submission.init_submission_models()
+        submission.processed = random.randint(0, 1) == 1
+        db.session.commit()
+
+    assign_questions(assignment)
 
     return success_response("seeded")

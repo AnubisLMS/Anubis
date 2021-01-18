@@ -41,11 +41,25 @@ def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str
     )
 
 
+@assignments.route('/get/<string:id>')
+@require_admin()
+@json_response
+def admin_assignments_get_id(id):
+    assignment = Assignment.query.filter(Assignment.id == id).first()
+
+    if assignment is None:
+        return error_response('Assignment does not exist')
+
+    return success_response({
+        'assignment': assignment.data
+    })
+
+
 @assignments.route('/list')
 @require_admin()
 @json_response
 def admin_assignments_list():
-    all_assignments = Assignment.query.all()
+    all_assignments = Assignment.query.order_by(Assignment.due_date.desc()).all()
 
     return success_response({
         'assignments': [

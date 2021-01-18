@@ -10,6 +10,7 @@ import SubmissionSummary from '../../Components/Public/Submission/SubmissionSumm
 import SubmissionBuild from '../../Components/Public/Submission/SubmissionBuild';
 import SubmissionTests from '../../Components/Public/Submission/SubmissionTests';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
+import {translateSubmission} from '../../Utils/submission';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -68,11 +69,6 @@ const regrade = ({commit, submission, setSubmission, setStep, setErrorStop}, enq
       enqueueSnackbar(error.toString(), {variant: 'error'});
     });
 };
-
-const translateSubmission = ({created, assignment_due, ...other}) => ({
-  date_submitted: created.split(' ')[1], timestamp: new Date(created), time_submitted: created.split(' ')[0],
-  assignment_due, on_time: new Date(created) <= new Date(assignment_due), created, ...other,
-});
 
 
 export default function Submission() {
@@ -167,9 +163,7 @@ export default function Submission() {
       <Grid item xs={12} md={4} key={'summary'}>
         <SubmissionSummary
           submission={submission}
-          onTime={submission.on_time}
           regrade={regrade(pageState, enqueueSnackbar)}
-          enqueueSnackbar={enqueueSnackbar}
           stop={errorStop}
         />
       </Grid>

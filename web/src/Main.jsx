@@ -1,9 +1,8 @@
 import React from 'react';
 import {Redirect, Route, Switch} from 'react-router-dom';
-import {admin_nav, footer_nav, not_shown_nav, public_nav} from './navconfig';
-import AuthContext from '../Contexts/AuthContext';
+import {admin_nav, footer_nav, not_shown_nav, public_nav} from './Navigation/navconfig';
 
-export default function MainSwitch({user}) {
+export default function Main({user}) {
   return (
     <Switch>
       {public_nav.map(({children}) => children.map(({path, Page}) => (
@@ -32,7 +31,7 @@ export default function MainSwitch({user}) {
         <Redirect to={'/about'}/>
       </Route>
       <Route>
-            404 not found
+        404 not found
       </Route>
     </Switch>
   );

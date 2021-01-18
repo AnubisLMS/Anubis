@@ -8,6 +8,7 @@ def register_public_views(app):
     from anubis.views.public.assignments import assignments
     from anubis.views.public.static import static
     from anubis.views.public.courses import courses
+    from anubis.views.public.questions import questions
 
     views = [
         auth,
@@ -19,6 +20,7 @@ def register_public_views(app):
         assignments,
         static,
         courses,
+        questions,
     ]
 
     for view in views:

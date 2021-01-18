@@ -67,7 +67,7 @@ def public_whoami():
     """
     u: User = current_user()
     if u is None:
-        return success_response(None)
+        return success_response({})
     return success_response(
         {
             "user": u.data,

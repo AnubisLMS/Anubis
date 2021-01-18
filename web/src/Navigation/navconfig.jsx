@@ -23,6 +23,9 @@ import Submission from '../Pages/Public/Submission';
 import AdminUsers from '../Pages/Admin/Users';
 import AdminUser from '../Pages/Admin/User';
 import AdminAssignments from '../Pages/Admin/Assignments';
+import AdminStats from '../Pages/Admin/Stats';
+import AdminAssignmentStats from '../Pages/Admin/AssignmentStats';
+import AdminSubmissionStats from '../Pages/Admin/SubmissionStats';
 
 export const footer_nav = [{
   id: 'About',
@@ -86,15 +89,15 @@ export const admin_nav = [
   },
   {
     id: 'Assignments',
-    icon: <PieChartIcon/>,
+    icon: <AssignmentOutlinedIcon/>,
     path: '/admin/assignments',
     Page: AdminAssignments,
   },
   {
-    id: 'Courses',
-    icon: <SettingsIcon/>,
-    path: '/admin/courses',
-    Page: Courses,
+    id: 'Autograde Results',
+    icon: <PieChartIcon/>,
+    path: '/admin/stats',
+    Page: AdminStats,
   },
 ];
 
@@ -108,6 +111,16 @@ export const not_shown_nav = [
     id: 'User',
     path: '/admin/user',
     Page: AdminUser,
+  },
+  {
+    id: 'AdminAssignmentStats',
+    path: '/admin/stats/assignment',
+    Page: AdminAssignmentStats,
+  },
+  {
+    id: 'AdminSubmissionStats',
+    path: '/admin/stats/submission',
+    Page: AdminSubmissionStats,
   },
 ];
 
