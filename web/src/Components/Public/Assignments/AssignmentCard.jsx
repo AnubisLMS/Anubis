@@ -19,7 +19,6 @@ import grey from '@material-ui/core/colors/grey';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    flexGrow: 1,
     minWidth: 210,
   },
   pos: {

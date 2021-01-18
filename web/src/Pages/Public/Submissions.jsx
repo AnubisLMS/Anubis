@@ -82,7 +82,7 @@ export default function Submissions() {
           <AuthContext.Consumer>
             {(user) => (
               <Typography variant={'subtitle1'} color={'textSecondary'}>
-                {user.name}&apos;s Submissions
+                {user?.name}&apos;s Submissions
               </Typography>
             )}
           </AuthContext.Consumer>

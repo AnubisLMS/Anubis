@@ -14,16 +14,7 @@ export default function Questions({assignment_id}) {
   if (loading) return <CircularProgress/>;
   if (error) return <Redirect to={`/error`}/>;
 
-  function translateQuestion({response, question}) {
-    return {
-      question: question.question, codeQuestion: question.code_question, codeLanguage: question.code_language,
-      sequence: question.sequence, response: response,
-    };
-  }
-
-  const questions = data.questions.map(translateQuestion);
-
-  if (questions.length === 0) {
+  if (data.questions.length === 0) {
     return <React.Fragment/>;
   }
 
@@ -33,7 +24,7 @@ export default function Questions({assignment_id}) {
         <Typography variant="body1">
           Questions
         </Typography>
-        <QuestionGrid questions={questions}/>
+        <QuestionGrid questions={data.questions}/>
       </React.Fragment>
     </Zoom>
   );

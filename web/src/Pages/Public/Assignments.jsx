@@ -10,6 +10,7 @@ import useGet from '../../hooks/useGet';
 import useQuery from '../../hooks/useQuery';
 
 import AssignmentCard from '../../Components/Public/Assignments/AssignmentCard';
+import Typography from '@material-ui/core/Typography';
 
 
 export default function AssignmentView() {
@@ -36,24 +37,26 @@ export default function AssignmentView() {
   });
 
   return (
-    <Grid container>
+    <Grid container spacing={4}>
       <Grid item xs={12}>
-        <Grid container justify="left" spacing={4}>
-          {data.assignments.map(translateAssignmentData).map((assignment, pos) => (
-            <Grow
-              key={assignment.assignmentId}
-              in={true}
-              style={{transformOrigin: '0 0 0'}}
-              {...({timeout: 300 * (pos + 1)})}
-            >
-              <Grid item>
-                <AssignmentCard assignment={assignment}/>
-              </Grid>
-            </Grow>
-          ))}
-
-        </Grid>
+        <Typography variant="h6">
+          Anubis
+        </Typography>
+        <Typography variant={'subtitle1'} color={'textSecondary'}>
+          Assignments
+        </Typography>
       </Grid>
+      {data.assignments.map(translateAssignmentData).map((assignment, pos) => (
+        <Grid item xs={12} md={3} key={assignment.assignmentId}>
+          <Grow
+            in={true}
+            style={{transformOrigin: '0 0 0'}}
+            {...({timeout: 300 * (pos + 1)})}
+          >
+            <AssignmentCard assignment={assignment}/>
+          </Grow>
+        </Grid>
+      ))}
     </Grid>
   );
 }
