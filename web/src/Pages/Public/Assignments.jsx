@@ -1,43 +1,41 @@
-import React from 'react';
-
-import {Redirect} from 'react-router-dom';
+import React, {useState} from 'react';
 
 import Grid from '@material-ui/core/Grid';
 import Grow from '@material-ui/core/Grow';
-import CircularProgress from '@material-ui/core/CircularProgress';
-
-import useGet from '../../hooks/useGet';
 import useQuery from '../../hooks/useQuery';
 
 import AssignmentCard from '../../Components/Public/Assignments/AssignmentCard';
 import Typography from '@material-ui/core/Typography';
+import axios from 'axios';
+import standardErrorHandler from '../../Utils/standardErrorHandler';
+import {useSnackbar} from 'notistack';
+import standardStatusHandler from '../../Utils/standardStatusHandler';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Button from '@material-ui/core/Button';
+import IDEDialog from '../../Components/Public/IDE/IDEDialog';
 
 
 export default function AssignmentView() {
   const query = useQuery();
-  const [{loading, error, data}] = useGet(
-    '/api/public/assignments/',
-    query.course ? {course: query.course} : {});
+  const {enqueueSnackbar} = useSnackbar();
+  const [assignments, setAssignments] = useState([]);
+  const [selectedTheia, setSelectedTheia] = useState(null);
 
-  if (loading) return <CircularProgress/>;
-  if (error) return <Redirect to={`/error`}/>;
-
-  const translateAssignmentData = ({
-    id,
-    name,
-    due_date,
-    course,
-    description,
-    has_submission,
-    github_classroom_link,
-  }, index) => ({
-    courseCode: course.class_code, assignmentId: id, assignmentTitle: name, dueDate: due_date,
-    hasSubmission: has_submission, assignmentDescription: description,
-    assignmentNumber: data.assignments.length - index, githubClassroomLink: github_classroom_link,
-  });
+  React.useEffect(() => {
+    axios.get('/api/public/assignments/', {params: {courseId: query.get('courseId')}}).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data) {
+        setAssignments(data.assignments);
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  }, []);
 
   return (
-    <Grid container spacing={4}>
+    <Grid container spacing={4} justify={'center'}>
       <Grid item xs={12}>
         <Typography variant="h6">
           Anubis
@@ -46,17 +44,23 @@ export default function AssignmentView() {
           Assignments
         </Typography>
       </Grid>
-      {data.assignments.map(translateAssignmentData).map((assignment, pos) => (
-        <Grid item xs={12} md={3} key={assignment.assignmentId}>
-          <Grow
-            in={true}
-            style={{transformOrigin: '0 0 0'}}
-            {...({timeout: 300 * (pos + 1)})}
-          >
-            <AssignmentCard assignment={assignment}/>
-          </Grow>
+      <IDEDialog selectedTheia={selectedTheia} setSelectedTheia={setSelectedTheia}/>
+      <Grid item/>
+      <Grid item xs={12} md={10}>
+        <Grid container spacing={4}>
+          {assignments.map((assignment, pos) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={assignment.id}>
+              <Grow
+                in={true}
+                style={{transformOrigin: '0 0 0'}}
+                {...({timeout: 300 * (pos + 1)})}
+              >
+                <AssignmentCard assignment={assignment} setSelectedTheia={setSelectedTheia}/>
+              </Grow>
+            </Grid>
+          ))}
         </Grid>
-      ))}
+      </Grid>
     </Grid>
   );
 }

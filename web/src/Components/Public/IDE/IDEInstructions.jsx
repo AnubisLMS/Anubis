@@ -20,7 +20,7 @@ export default function IDEInstructions() {
 
   return (
     <div>
-      <Button variant="contained" color="primary" onClick={handleClickOpen}>
+      <Button color="primary" onClick={handleClickOpen}>
         View Instructions
       </Button>
       <Dialog

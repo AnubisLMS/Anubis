@@ -17,6 +17,7 @@ from anubis.models import (
     User,
     TheiaSession,
     AssignmentQuestion,
+    AssignedStudentQuestion,
 )
 from anubis.utils.auth import require_admin
 from anubis.utils.decorators import json_response
@@ -137,6 +138,8 @@ def create_course(users):
 def private_seed():
     # Yeet
     TheiaSession.query.delete()
+    AssignedStudentQuestion.query.delete()
+    AssignmentQuestion.query.delete()
     SubmissionTestResult.query.delete()
     SubmissionBuild.query.delete()
     Submission.query.delete()

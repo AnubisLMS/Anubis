@@ -68,13 +68,7 @@ export default function Submissions() {
 
   return (
     <div className={classes.root}>
-      <Grid
-        container
-        direction="row"
-        justify="center"
-        alignItems="center"
-        spacing={6}
-      >
+      <Grid container justify="center" spacing={4}>
         <Grid item xs={12}>
           <Typography variant="h6">
             CS-UY 3224
@@ -88,26 +82,23 @@ export default function Submissions() {
           </AuthContext.Consumer>
         </Grid>
 
-        {/* Questions */}
-        {!!assignment_id ? (
-          <Grid item xs={12}>
-            <Questions assignment_id={assignment_id}/>
-          </Grid>
-        ) : null}
+        <Grid item/>
 
-        {/* Submissions subheading */}
-        <Grid item xs={12}>
-          <Typography variant="body1">
-            Submissions
-          </Typography>
+        <Grid item xs={12} md={10}>
+          <Grid container spacing={4}>
+            {/* Questions */}
+            {!!assignment_id ? (
+              <Grid item xs={12}>
+                <Questions assignment_id={assignment_id}/>
+              </Grid>
+            ) : null}
+
+            {/* Table */}
+            <Grid item xs>
+              <SubmissionsTable rows={submissions}/>
+            </Grid>
+          </Grid>
         </Grid>
-
-        {/* Table */}
-        <Zoom in={true} timeout={200}>
-          <Grid item xs>
-            <SubmissionsTable rows={submissions}/>
-          </Grid>
-        </Zoom>
       </Grid>
     </div>
   );

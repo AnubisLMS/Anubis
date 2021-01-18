@@ -169,7 +169,8 @@ export default function AssignmentStats() {
           </div>
         </Paper>
       </Grid>
-      <Grid item xs={12} md={10}>
+      <Grid item/>
+      <Grid item xs={12} md={10} lg={8}>
         <Paper className={classes.paper}>
           <DataGrid
             className={classes.dataGrid}

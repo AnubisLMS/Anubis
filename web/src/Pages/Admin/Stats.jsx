@@ -11,6 +11,7 @@ import {Paper} from '@material-ui/core';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
 import Typography from '@material-ui/core/Typography';
+import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -18,16 +19,19 @@ const useStyles = makeStyles((theme) => ({
   },
   paper: {
     flex: 1,
-    minHeight: 700,
+    padding: theme.spacing(1),
+  },
+  dataGridPaper: {
+    height: 700,
   },
 }));
 
 
 const useColumns = () => ([
-  {field: 'id', headerName: 'ID', width: 150},
-  {field: 'unique_code', headerName: 'Unique Code', width: 150},
   {field: 'name', headerName: 'Assignment Name', width: 200},
   {field: 'due_date', headerName: 'Due Date', type: 'dateTime', width: 200},
+  {field: 'id', headerName: 'ID', width: 150},
+  {field: 'unique_code', headerName: 'Unique Code', width: 150},
 ]);
 
 const sortModel = [
@@ -58,7 +62,7 @@ export default function Stats() {
   }
 
   return (
-    <Grid container spacing={2} justify={'center'}>
+    <Grid container spacing={4} justify={'center'}>
       <Grid item xs={12}>
         <Typography variant="h6">
           Anubis
@@ -67,8 +71,8 @@ export default function Stats() {
           Autograded Assignments
         </Typography>
       </Grid>
-      <Grid item xs={12} md={6}>
-        <Paper className={classes.paper}>
+      <Grid item xs={12} md={8}>
+        <Paper className={clsx(classes.paper, classes.dataGridPaper)}>
           <DataGrid
             sortModel={sortModel}
             columns={columns}

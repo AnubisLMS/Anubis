@@ -14,7 +14,6 @@ import PieChartIcon from '@material-ui/icons/PieChart';
 import About from '../Pages/Public/About';
 import Courses from '../Pages/Public/Courses';
 import Assignments from '../Pages/Public/Assignments';
-import IDE from '../Pages/Public/IDE';
 import Profile from '../Pages/Public/Profile';
 import Repos from '../Pages/Public/Repos';
 import Submissions from '../Pages/Public/Submissions';
@@ -56,12 +55,6 @@ export const public_nav = [
         icon: <AssessmentIcon/>,
         path: '/courses/assignments/submissions',
         Page: Submissions,
-      },
-      {
-        id: 'Anubis IDE',
-        icon: <CodeOutlinedIcon/>,
-        path: '/ide',
-        Page: IDE,
       },
       {
         id: 'Repos',

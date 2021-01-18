@@ -15,9 +15,7 @@ assignments = Blueprint(
 
 @assignments.route("/")
 @require_user()
-@log_endpoint(
-    "public-assignments", lambda: "get assignments {}".format(get_request_ip())
-)
+@log_endpoint("public-assignments")
 @json_response
 def public_assignments():
     """
@@ -30,13 +28,13 @@ def public_assignments():
     """
 
     # Get optional class filter from get query
-    class_name = request.args.get("class", default=None)
+    course_id = request.args.get("courseId", default=None)
 
     # Load current user
     user: User = current_user()
 
     # Get (possibly cached) assignment data
-    assignment_data = get_assignments(user.netid, class_name)
+    assignment_data = get_assignments(user.netid, course_id)
 
     # Iterate over assignments, getting their data
     return success_response({"assignments": assignment_data})

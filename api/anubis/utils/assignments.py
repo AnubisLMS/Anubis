@@ -37,13 +37,13 @@ def get_courses(netid: str):
 
 
 @cache.memoize(timeout=60, unless=is_debug)
-def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], None]:
+def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], None]:
     """
     Get all the current assignments for a netid. Optionally specify a class_name
     to filter by class.
 
     :param netid: netid of user
-    :param class_name: optional class name
+    :param course_id: optional class name
     :return: List[Assignment.data]
     """
     # Load user
@@ -54,8 +54,8 @@ def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], 
         return None
 
     filters = []
-    if class_name is not None:
-        filters.append(Course.name == class_name)
+    if course_id is not None:
+        filters.append(Course.id == course_id)
 
     assignments = (
         Assignment.query.join(Course)

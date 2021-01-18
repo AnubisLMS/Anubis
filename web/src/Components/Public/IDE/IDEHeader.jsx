@@ -9,46 +9,27 @@ import CloseOutlinedIcon from '@material-ui/icons/CloseOutlined';
 import red from '@material-ui/core/colors/red';
 import HelpOutlineOutlinedIcon from '@material-ui/icons/HelpOutlineOutlined';
 import {makeStyles} from '@material-ui/core/styles';
+import clsx from 'clsx';
 
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    flexShrink: 0,
-    marginLeft: theme.spacing(2.5),
+    marginBottom: theme.spacing(2),
   },
-  instructions: {
-    paddingTop: theme.spacing(1),
-    paddingLeft: theme.spacing(1),
-  },
-  available: {
+  inline: {
     display: 'inline',
+  },
+  smallText: {
+    fontSize: 13,
   },
 }));
 
-export default function IDEHeader({session_available}) {
+export default function IDEHeader({sessionsAvailable}) {
   const classes = useStyles();
 
   return (
-    <React.Fragment>
-      <Typography variant="h6">
-        Anubis Cloud IDE
-      </Typography>
-      <Tooltip
-        title={session_available ? 'Anubis Cloud IDE Available' : 'Anubis Cloud IDE Not Available'}
-        className={classes.available}
-      >
-        <IconButton>
-          {session_available ?
-            <CheckOutlinedIcon style={{color: green[500]}} fontSize={'large'}/> :
-            <CloseOutlinedIcon style={{color: red[500]}} fontSize={'large'}/>}
-        </IconButton>
-      </Tooltip>
-      <Typography variant={'body1'} className={classes.available}>
-        {session_available ?
-          'Anubis Cloud IDE session resources are currently available for use' :
-          'Anubis Cloud IDE session resources are currently not available for use'}
-      </Typography>
-      <Tooltip title={session_available ?
+    <div className={classes.root}>
+      <Tooltip title={sessionsAvailable ?
         'Anubis Cloud IDE session resources are currently available for use. Go to the assignment ' +
         'page to select which assignment you would like to launch an Anubis Cloud IDE for.' :
         'The maximum quota of Anubis Cloud IDE sessions on our servers has been reached. ' +
@@ -57,6 +38,18 @@ export default function IDEHeader({session_available}) {
           <HelpOutlineOutlinedIcon fontSize={'small'}/>
         </IconButton>
       </Tooltip>
-    </React.Fragment>
+      <Tooltip title={sessionsAvailable ? 'Anubis Cloud IDE Available' : 'Anubis Cloud IDE Not Available'}>
+        <IconButton>
+          {sessionsAvailable ?
+            <CheckOutlinedIcon style={{color: green[500]}} fontSize={'small'}/> :
+            <CloseOutlinedIcon style={{color: red[500]}} fontSize={'small'}/>}
+        </IconButton>
+      </Tooltip>
+      <Typography variant={'body1'} className={clsx(classes.inline, classes.smallText)}>
+        {sessionsAvailable ?
+          'Session resources available' :
+          'Session resources are not available'}
+      </Typography>
+    </div>
   );
 }

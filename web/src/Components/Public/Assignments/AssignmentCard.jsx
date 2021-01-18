@@ -10,12 +10,10 @@ import Typography from '@material-ui/core/Typography';
 import AlarmIcon from '@material-ui/icons/Alarm';
 import EventNoteIcon from '@material-ui/icons/EventNote';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import PublishIcon from '@material-ui/icons/Publish';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import red from '@material-ui/core/colors/red';
 import green from '@material-ui/core/colors/green';
-import blue from '@material-ui/core/colors/blue';
-import grey from '@material-ui/core/colors/grey';
+import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -54,10 +52,8 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
   },
-  mainTitle: {
-    fontWeight: 600,
-    fontSize: 20,
-    letterspacing: 0.4,
+  button: {
+    margin: theme.spacing(0.5),
   },
 }));
 
@@ -75,19 +71,18 @@ const remainingTime = (dueDate) => {
   return timeLeft;
 };
 
-export default function AssignmentCard(props) {
-  const {
-    courseCode,
-    assignmentNumber,
-    assignmentTitle,
-    assignmentId,
-    dueDate,
-    hasSubmission,
-    githubClassroomLink,
-  } = props.assignment;
+export default function AssignmentCard({assignment, setSelectedTheia}) {
   const classes = useStyles();
+  const {
+    id,
+    name,
+    due_date,
+    course: {course_code},
+    has_submission,
+    github_classroom_link,
+  } = assignment;
 
-  const [timeLeft] = useState(remainingTime(dueDate));
+  const [timeLeft] = useState(remainingTime(due_date));
   const timerComponents = [];
   Object.keys(timeLeft).forEach((interval) => {
     if (!timeLeft[interval]) {
@@ -100,44 +95,40 @@ export default function AssignmentCard(props) {
     );
   });
 
-  const ideMaxTime = new Date(dueDate);
+  const ideMaxTime = new Date(due_date);
   ideMaxTime.setDate(ideMaxTime.getDate() + 7);
   const ideEnabled = new Date() < ideMaxTime;
 
-  const githubLinkEnabled = typeof githubClassroomLink === 'string';
+  const githubLinkEnabled = typeof github_classroom_link === 'string';
 
   return (
     <Card className={classes.root}>
       <CardActionArea
         component={Link}
-        to={`/courses/assignments/submissions?assignmentId=${assignmentId}`}>
+        to={`/courses/assignments/submissions?assignmentId=${id}`}>
         <CardContent>
 
-          <Typography className={classes.title} color="textSecondary" gutterBottom>
-            {courseCode}
+          <Typography variant={'subtitle1'} color="textSecondary" gutterBottom>
+            {course_code}
           </Typography>
 
-          <Typography className={classes.mainTitle}>
-            {assignmentTitle}
-          </Typography>
-
-          <Typography className={classes.pos} color="textSecondary">
-            {`Assignment ${assignmentNumber}`}
+          <Typography variant={'h6'}>
+            {name}
           </Typography>
 
           <div className={classes.datePos}>
             <EventNoteIcon style={{marginRight: 7}}/>
-            <p className={classes.dateText}> {` Due: ${(new Date(dueDate)).toLocaleDateString()}`} </p>
+            <p className={classes.dateText}> {` Due: ${(new Date(due_date)).toLocaleDateString()}`} </p>
           </div>
 
-          <div className={classes.statusPos} style={hasSubmission ? {} : {color: red[500]}}>
-            {hasSubmission ?
+          <div className={classes.statusPos} style={has_submission ? {} : {color: red[500]}}>
+            {has_submission ?
               <CheckCircleIcon style={{color: green[500], marginRight: 6}}/> :
               <AlarmIcon style={{marginRight: 7}}/>
             }
 
             <p className={classes.statusText}>
-              {hasSubmission ?
+              {has_submission ?
                 'Assignment Submitted' :
                 timerComponents.length ?
                   timerComponents[0] :
@@ -148,23 +139,28 @@ export default function AssignmentCard(props) {
       </CardActionArea>
       <CardActions className={classes.actionList}>
         <Button
-          style={{color: ideEnabled ? blue[500] : grey[500]}} size="small"
-          startIcon={<PublishIcon style={{color: ideEnabled ? blue[500] : grey[500]}}/>}
+          size={'small'}
+          variant={'contained'}
+          color={'primary'}
+          className={classes.button}
+          startIcon={<CodeOutlinedIcon/>}
           disabled={!ideEnabled}
-          component={'a'}
-          href={`/api/public/ide/initialize/${assignmentId}`}
+          onClick={() => setSelectedTheia(assignment)}
         >
-          Launch Anubis Cloud IDE
+          Anubis Cloud IDE
         </Button>
         <Button
-          style={{color: githubLinkEnabled ? blue[500] : grey[500]}}
-          startIcon={<GitHubIcon style={{color: githubLinkEnabled ? blue[500] : grey[500]}}/>}
+          size={'small'}
+          variant={'contained'}
+          color={'primary'}
+          startIcon={<GitHubIcon/>}
+          className={classes.button}
           disabled={!githubLinkEnabled}
           component={'a'}
-          href={githubClassroomLink}
+          href={github_classroom_link}
           target={'_blank'}
         >
-          Create assignment repo
+          Create repo
         </Button>
       </CardActions>
     </Card>

@@ -46,7 +46,7 @@ export default function SubmissionStats() {
 
   return (
     <div className={classes.root}>
-      <Grid container spacing={1}>
+      <Grid container spacing={4} justify={'center'}>
         <Grid item xs={12}>
           <Typography variant="h6">
             Anubis
@@ -58,21 +58,24 @@ export default function SubmissionStats() {
             Results for {assignment?.name}
           </Typography>
         </Grid>
-        <Grid item xs={12}>
-          <StudentCard student={student}/>
-        </Grid>
-        <Grid item xs={12}>
-          <QuestionsCard questions={questions}/>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <SubmissionSummary submission={submission} regrade={() => {
-          }}/>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <SubmissionBuild build={submission?.build}/>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <SubmissionTests tests={submission?.tests}/>
+        <Grid item xs={12} md={10}>
+          <Grid container spacing={1}>
+            <Grid item xs={12}>
+              <StudentCard student={student}/>
+            </Grid>
+            <Grid item xs={12}>
+              <QuestionsCard questions={questions}/>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <SubmissionSummary submission={submission} regrade={() => null}/>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <SubmissionBuild build={submission?.build}/>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <SubmissionTests tests={submission?.tests}/>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
     </div>
