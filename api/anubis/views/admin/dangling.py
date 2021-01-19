@@ -22,7 +22,7 @@ def private_dangling():
     """
 
     dangling_ = Submission.query.filter(
-        Submission.owner_id is None,
+        Submission.owner_id == None,
     ).all()
     dangling_ = [a.data for a in dangling_]
 

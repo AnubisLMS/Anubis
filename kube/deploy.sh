@@ -14,16 +14,46 @@ fi
 
 if ! kubectl get secrets -n anubis | grep api &> /dev/null; then
     read -s -p "Anubis DB Password: " DB_PASS
+    read -s -p "Anubis REDIS Password: " REDIS_PASS
     kubectl create secret generic api \
             --from-literal=database-uri=mysql+pymysql://anubis:${DB_PASS}@mariadb.mariadb.svc.cluster.local/anubis \
             --from-literal=database-password=${DB_PASS} \
+            --from-literal=redis-password=${REDIS_PASS} \
             --from-literal=secret-key=$(head -c10 /dev/urandom | openssl sha1 -hex | awk '{print $2}') \
             -n anubis
 fi
 
 
+if ! helm list -n anubis | awk '{print $1}' | grep elasticsearch &> /dev/null; then
+    # Install a minimal elasticsearch and kibana deployments
+    echo 'Adding elasticsearch + kibana'
+    helm install elasticsearch \
+         --set name=elasticsearch \
+         --set master.persistence.size=4Gi \
+         --set data.persistence.size=4Gi \
+         --set master.replicas=2 \
+         --set coordinating.replicas=2 \
+         --set data.replicas=2 \
+         --set global.kibanaEnabled=true \
+         --set fullnameOverride=elasticsearch \
+         --set global.coordinating.name=coordinating \
+         --namespace anubis \
+         bitnami/elasticsearch
+
+    read -s -p "Anubis REDIS Password: " REDIS_PASS
+    # Install a minimal redis deployment
+    echo 'Adding redis'
+    helm install redis \
+         --set fullnameOverride=redis \
+         --set password=${REDIS_PASS} \
+         --set cluster.enabled=false \
+         --namespace anubis \
+         bitnami/redis
+fi
+
+
 pushd ..
-docker-compose build --parallel api web logstash static theia-proxy theia-init theia-sidecar
+docker-compose build --parallel api web logstash theia-proxy theia-init theia-sidecar
 if ! docker image ls | awk '{print $1}' | grep 'registry.osiris.services/anubis/api-dev' &>/dev/null; then
    docker-compose build api-dev
 fi
@@ -33,22 +63,11 @@ fi
 if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia-xv6$' &>/dev/null; then
     docker-compose build theia-xv6
 fi
-docker-compose push api web logstash static theia-admin theia-xv6 theia-proxy theia-init theia-sidecar
+docker-compose push api web logstash theia-admin theia-xv6 theia-proxy theia-init theia-sidecar
 popd
 
-
-helm upgrade anubis . -n anubis $@
-
-# kubectl apply \
-#         -f config/api.yml \
-#         -f config/web-static.yml \
-#         -f config/elk.yml \
-#         -f config/redis.yml \
-#         -f config/pipeline-api.yml \
-#         -f config/rpc-workers.yml
-
-
-# kubectl rollout restart deployments.apps/api -n anubis
-# kubectl rollout restart deployments.apps/web -n anubis
-# kubectl rollout restart deployments.apps/pipeline-api -n anubis
-# kubectl rollout restart deployments.apps/rpc-workers  -n anubis
+if ! helm list -n anubis | awk '{print $1}' | grep anubis &> /dev/null; then
+    exec helm install anubis . -n anubis $@
+else
+    exec helm upgrade anubis . -n anubis $@
+fi

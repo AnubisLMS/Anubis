@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 
-cd $(dirname $(realpath $0))
+set -e
 
-API_ROOT="$(realpath ..)"
+cd $(dirname $0)
 
-for test_file in $(find -name '*test.py'); do
-    echo "${test_file}"
-    env PYTHONPATH=${API_ROOT}:${PYTHONPATH} python3 ${test_file}
-done
+TEST_ROOT="$(pwd)"
+API_ROOT="$(pwd)/.."
+
+pushd ..
+make venv
+source venv/bin/activate
+popd
+
+env PYTHONPATH="${TEST_ROOT}:${API_ROOT}" pytest -p no:warnings

@@ -12,6 +12,7 @@ from anubis.utils.decorators import json_endpoint
 from anubis.utils.data import is_debug
 
 auth = Blueprint("public-auth", __name__, url_prefix="/public/auth")
+oauth = Blueprint("public-oauth", __name__, url_prefix="/public")
 
 
 @auth.route("/login")
@@ -20,7 +21,7 @@ def public_login():
     if is_debug():
         return "AUTH"
     return provider.authorize(
-        callback="https://anubis.osiris.services/api/public/auth/oauth"
+        callback="https://anubis.osiris.services/api/public/oauth"
     )
 
 
@@ -32,7 +33,7 @@ def public_logout():
     return r
 
 
-@auth.route("/oauth")
+@oauth.route("/oauth")
 @log_endpoint("public-oauth", lambda: "oauth")
 def public_oauth():
     next_url = request.args.get("next") or "/courses"

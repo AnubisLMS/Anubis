@@ -24,7 +24,7 @@ def admin_ide_initialize():
     session = TheiaSession.query.filter(
         TheiaSession.active,
         TheiaSession.owner_id == user.id,
-        TheiaSession.assignment_id is None,
+        TheiaSession.assignment_id == None,
     ).first()
 
     if session is not None:
@@ -66,7 +66,7 @@ def admin_ide_active():
     session = TheiaSession.query.filter(
         TheiaSession.active,
         TheiaSession.owner_id == user.id,
-        TheiaSession.assignment_id is None,
+        TheiaSession.assignment_id == None,
     ).first()
 
     if session is None:

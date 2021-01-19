@@ -20,7 +20,6 @@ spec:
     rollingUpdate:
       maxUnavailable: 1
       maxSurge: 1
-  revisionHistoryLimit: 10
   {{- end }}
   template:
     metadata:

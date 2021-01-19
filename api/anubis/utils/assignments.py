@@ -21,7 +21,7 @@ from anubis.utils.logger import logger
 from anubis.utils.questions import ingest_questions
 
 
-@cache.memoize(timeout=60, unless=is_debug)
+@cache.memoize(timeout=5, unless=is_debug)
 def get_courses(netid: str):
     """
     Get all classes a given netid is in
@@ -36,7 +36,7 @@ def get_courses(netid: str):
     return [c.data for c in classes]
 
 
-@cache.memoize(timeout=60, unless=is_debug)
+@cache.memoize(timeout=5, unless=is_debug)
 def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], None]:
     """
     Get all the current assignments for a netid. Optionally specify a class_name

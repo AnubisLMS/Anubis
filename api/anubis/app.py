@@ -39,7 +39,7 @@ def create_app():
 
     :return: Flask app
     """
-    from anubis.config import config
+    from anubis.config import Config
 
     # Import views
     from anubis.views.public import register_public_views
@@ -47,7 +47,7 @@ def create_app():
 
     # Create app
     app = Flask(__name__)
-    app.config.from_object(config)
+    app.config.from_object(Config())
 
     # Initialize app with all the extra services
     init_services(app)

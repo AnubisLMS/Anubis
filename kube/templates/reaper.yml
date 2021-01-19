@@ -30,6 +30,11 @@ spec:
               value: "0"
             - name: "LOGGER_NAME"
               value: "reaper"
+            - name: "REDIS_PASS"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: redis-password
             - name: DB_HOST
               value: mariadb.mariadb.svc.cluster.local
               # sqlalchemy uri

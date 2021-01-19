@@ -20,7 +20,7 @@ import {TextField} from '@material-ui/core';
 
 const joinCourse = (state, enqueueSnackbar) => () => {
   const {joinCode, setReset} = state;
-  axios.get(`/api/public/course/join/${joinCode}`).then((response) => {
+  axios.get(`/api/public/courses/join/${joinCode}`).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
     if (data.status.match(/Joined/)) {
       setReset((prev) => ++prev);

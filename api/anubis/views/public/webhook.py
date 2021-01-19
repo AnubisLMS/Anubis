@@ -57,6 +57,19 @@ def public_webhook():
         Assignment.unique_code.in_(webhook["repository"]["name"].split("-"))
     ).first()
 
+    # Verify that we can match this push to an assignment
+    if assignment is None:
+        logger.error(
+            "Could not find assignment",
+            extra={
+                "repo_url": repo_url,
+                "github_username": github_username,
+                "assignment_name": assignment_name,
+                "commit": commit,
+            },
+        )
+        return error_response("assignment not found"), 406
+
     # Get github username from the repository name
     repo_name_split = webhook["repository"]["name"].split("-")
     unique_code_index = repo_name_split.index(assignment.unique_code)
@@ -95,19 +108,6 @@ def public_webhook():
 
         esindex("new-repo", repo_url=repo_url, assignment=str(assignment))
         return success_response("initial commit")
-
-    # Verify that we can match this push to an assignment
-    if assignment is None:
-        logger.error(
-            "Could not find assignment",
-            extra={
-                "repo_url": repo_url,
-                "github_username": github_username,
-                "assignment_name": assignment_name,
-                "commit": commit,
-            },
-        )
-        return error_response("assignment not found"), 406
 
     repo = (
         AssignmentRepo.query.join(Assignment)

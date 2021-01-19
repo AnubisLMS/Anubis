@@ -9,6 +9,7 @@ import string
 import json
 import sys
 import os
+import functools
 
 os.environ["DEBUG"] = "1"
 os.environ["DISABLE_ELK"] = "1"
@@ -17,6 +18,36 @@ os.environ["CACHE_REDIS_HOST"] = "127.0.0.1"
 
 
 requests.get("http://localhost/api/admin/seed/")  # seed
+
+
+def initialize_env():
+    os.environ['DB_HOST'] = '127.0.0.1'
+    os.environ['REDIS_HOST'] = '127.0.0.1'
+    os.environ['DISABLE_ELK'] = '1'
+    os.environ['DEBUG'] = '1'
+
+    test_root = os.path.dirname(__file__)
+    api_root = os.path.dirname(test_root)
+
+    if test_root not in sys.path:
+        sys.path.append(test_root)
+
+    if api_root not in sys.path:
+        sys.path.append(api_root)
+
+
+def app_context(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        initialize_env()
+
+        from anubis.app import create_app
+        app = create_app()
+
+        with app.app_context():
+            return func(*args, **kwargs)
+
+    return wrapper
 
 
 def format_exception(e: Exception):
