@@ -11,5 +11,9 @@
     "redis": "^3.0.2",
     "universal-cookie": "^4.0.4",
     "url-parse": "^1.4.7"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.18.0"
   }
 }

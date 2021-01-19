@@ -19,6 +19,11 @@ export default function standardStatusHandler(response, enqueueSnackbar) {
     }
   }
 
+  if (response.status === 401) {
+    window.location = '/api/public/auth/login';
+    return;
+  }
+
   enqueueSnackbar('The api returned a error we don\'t know how to display :(', {variant: 'error'});
   return false;
 }

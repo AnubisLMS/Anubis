@@ -49,7 +49,10 @@ def json_response(func):
     return json_wrap
 
 
-def json_endpoint(required_fields: Union[List[str], List[Tuple], None] = None, only_required: bool = False):
+def json_endpoint(
+    required_fields: Union[List[str], List[Tuple], None] = None,
+    only_required: bool = False,
+):
     """
     Wrap a route so that it always converts data
     response to proper json.
@@ -66,13 +69,13 @@ def json_endpoint(required_fields: Union[List[str], List[Tuple], None] = None, o
         @wraps(func)
         def json_wrap(*args, **kwargs):
             if not request.headers.get("Content-Type", default=None).startswith(
-                    "application/json"
+                "application/json"
             ):
                 return {
-                           "success": False,
-                           "error": "Content-Type header is not application/json",
-                           "data": None,
-                       }, 406  # Not Acceptable
+                    "success": False,
+                    "error": "Content-Type header is not application/json",
+                    "data": None,
+                }, 406  # Not Acceptable
             json_data: dict = request.json
 
             if required_fields is not None:

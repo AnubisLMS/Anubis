@@ -33,8 +33,9 @@ def randstr(n=10):
 
 
 def randnetid():
-    return ''.join(random.choice(string.ascii_lowercase) for _ in range(3)) \
-           + ''.join(random.choice(string.digits) for _ in range(random.randint(2, 4)))
+    return "".join(random.choice(string.ascii_lowercase) for _ in range(3)) + "".join(
+        random.choice(string.digits) for _ in range(random.randint(2, 4))
+    )
 
 
 def create_assignment(course, users):
@@ -52,10 +53,10 @@ def create_assignment(course, users):
     )
 
     for i in range(random.randint(2, 4)):
-        b, c = random.randint(1,5), random.randint(1, 5)
+        b, c = random.randint(1, 5), random.randint(1, 5)
         assignment_question = AssignmentQuestion(
-            question=f'What is {c} + {b}?',
-            solution=f'{c+b}',
+            question=f"What is {c} + {b}?",
+            solution=f"{c+b}",
             sequence=i,
             code_question=False,
             assignment=assignment,
@@ -70,32 +71,49 @@ def create_assignment(course, users):
     repos = []
     theia_sessions = []
     for user in users:
-        repos.append(AssignmentRepo(
-            owner=user,
-            assignment=assignment,
-            repo_url="https://github.com/wabscale/xv6-public.git",
-            github_username=user.github_username,
-        ))
+        repos.append(
+            AssignmentRepo(
+                owner=user,
+                assignment=assignment,
+                repo_url="https://github.com/wabscale/xv6-public.git",
+                github_username=user.github_username,
+            )
+        )
 
-        theia_sessions.append(TheiaSession(
-            owner=user,
-            assignment=assignment,
-            repo=repos[-1],
-            active=False,
-            ended=datetime.now(),
-            state='state',
-            cluster_address='127.0.0.1'
-        ))
+        for _ in range(2):
+            theia_sessions.append(
+                TheiaSession(
+                    owner=user,
+                    assignment=assignment,
+                    repo_url=repos[-1].repo_url,
+                    active=False,
+                    ended=datetime.now(),
+                    state="state",
+                    cluster_address="127.0.0.1",
+                )
+            )
+        theia_sessions.append(
+            TheiaSession(
+                owner=user,
+                assignment=assignment,
+                repo_url=repos[-1].repo_url,
+                active=True,
+                state="state",
+                cluster_address="127.0.0.1",
+            )
+        )
 
         if random.randint(0, 3) != 0:
             for i in range(random.randint(1, 10)):
-                submissions.append(Submission(
-                    commit=randstr(),
-                    state="Waiting for resources...",
-                    owner=user,
-                    assignment=assignment,
-                    repo=repos[-1],
-                ))
+                submissions.append(
+                    Submission(
+                        commit=randstr(),
+                        state="Waiting for resources...",
+                        owner=user,
+                        assignment=assignment,
+                        repo=repos[-1],
+                    )
+                )
 
     db.session.add_all(tests)
     db.session.add_all(submissions)
@@ -108,21 +126,23 @@ def create_assignment(course, users):
 
 def create_students(n=10):
     students = []
-    for i in range(random.randint(n//2, n)):
-        students.append(User(
-            netid=randnetid(),
-            github_username=randstr(),
-            name=f"first last {i}",
-            is_admin=False,
-            is_superuser=False,
-        ))
+    for i in range(random.randint(n // 2, n)):
+        students.append(
+            User(
+                netid=randnetid(),
+                github_username=randstr(),
+                name=f"first last {i}",
+                is_admin=False,
+                is_superuser=False,
+            )
+        )
     db.session.add_all(students)
     return students
 
 
 def create_course(users):
     course = Course(
-        name='Intro to OS', course_code='CS-UY 3224', section="A", professor='Gustavo'
+        name="Intro to OS", course_code="CS-UY 3224", section="A", professor="Gustavo"
     )
     db.session.add(course)
 

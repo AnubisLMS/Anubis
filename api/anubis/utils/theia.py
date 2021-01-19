@@ -17,16 +17,14 @@ def get_n_available_sessions() -> Tuple[int, int]:
     """
     max_ides_config: Config = Config.query.filter(Config.key == "MAX_IDES").first()
 
-    active_ide_count: int = TheiaSession.query.filter(
-        TheiaSession.active == True
-    ).count()
+    active_ide_count: int = TheiaSession.query.filter(TheiaSession.active).count()
 
     max_ides = int(max_ides_config.value) if max_ides_config is not None else 50
 
     return active_ide_count, max_ides
 
 
-# @cache.memoize(timeout=60 * 5)
+@cache.memoize(timeout=60)
 def theia_redirect_url(theia_session_id: str, netid: str) -> str:
     """
     Generates the url for redirecting to the theia proxy for the given session.

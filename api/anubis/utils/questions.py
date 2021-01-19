@@ -90,7 +90,9 @@ def assign_questions(assignment: Assignment):
     # Go through students in the class and assign them questions
     assigned_questions = []
     students = (
-        User.query.join(InCourse).filter(InCourse.course_id == assignment.course_id).all()
+        User.query.join(InCourse)
+        .filter(InCourse.course_id == assignment.course_id)
+        .all()
     )
     for student in students:
         for sequence, qs in questions.items():

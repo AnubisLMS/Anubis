@@ -43,10 +43,10 @@ def public_submissions():
     user: User = current_user()
 
     if perspective_of_id is not None and not (user.is_admin or user.is_superuser):
-        return error_response('Bad Request'), 400
+        return error_response("Bad Request"), 400
 
-    logger.debug('id: ' + str(perspective_of_id))
-    logger.debug('id: ' + str(perspective_of_id or user.id))
+    logger.debug("id: " + str(perspective_of_id))
+    logger.debug("id: " + str(perspective_of_id or user.id))
 
     submissions_ = get_submissions(
         user_id=perspective_of_id or user.id,
@@ -55,14 +55,10 @@ def public_submissions():
     )
 
     if submissions_ is None:
-        return error_response('Bad Request'), 400
+        return error_response("Bad Request"), 400
 
     # Get submissions through cached function
-    return success_response(
-        {
-            "submissions": submissions_
-        }
-    )
+    return success_response({"submissions": submissions_})
 
 
 @submissions.route("/get/<string:commit>")
@@ -121,8 +117,8 @@ def public_regrade_commit(commit=None):
     # Find the submission
     submission: Submission = (
         Submission.query.join(User)
-            .filter(Submission.commit == commit, User.netid == user.netid)
-            .first()
+        .filter(Submission.commit == commit, User.netid == user.netid)
+        .first()
     )
 
     # Verify Ownership

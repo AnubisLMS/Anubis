@@ -40,8 +40,11 @@ pushd ..
 docker-compose build --parallel api web logstash theia-proxy theia-init theia-sidecar
 
 # Only build theia if it doesnt already exist (it's a long build)
-if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia$' &>/dev/null; then
-    docker-compose build theia
+if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia-admin$' &>/dev/null; then
+    docker-compose build theia-admin
+fi
+if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia-xv6$' &>/dev/null; then
+    docker-compose build theia-xz6
 fi
 popd
 

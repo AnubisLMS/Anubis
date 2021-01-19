@@ -31,8 +31,6 @@ services:
       - "DEBUG=1"
       - "DB_HOST=db"
       - "THEIA_DOMAIN=ide.localhost"
-    ports:
-      - 127.0.0.1:5000:5000
     volumes:
       - "./api:/opt/app"
     labels:
@@ -163,9 +161,13 @@ services:
     volumes:
       - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
 
-  theia:
+  theia-xv6:
     image: registry.osiris.services/anubis/theia:latest
-    build: ./theia/theia
+    build: ./theia/ide/xv6
+
+  theia-admin:
+    image: registry.osiris.services/anubis/theia:latest
+    build: ./theia/ide/admin
 
   theia-proxy:
     image: registry.osiris.services/anubis/theia-proxy:latest

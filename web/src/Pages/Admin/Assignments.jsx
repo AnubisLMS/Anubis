@@ -16,6 +16,8 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import Button from '@material-ui/core/Button';
 import {format} from 'date-fns';
 import Typography from '@material-ui/core/Typography';
+import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
+import IDEDialog from '../../Components/Admin/IDE/IDEDialog';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -57,6 +59,7 @@ export default function Assignments() {
   const [assignments, setAssignments] = useState([]);
   const [edits, setEdits] = useState(0);
   const [reset, setReset] = useState(0);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   React.useEffect(() => {
     axios.get('/api/admin/assignments/list').then((response) => {
@@ -96,7 +99,7 @@ export default function Assignments() {
     for (const assignment of assignments) {
       if (assignment.id === id) {
         axios.post(`/api/admin/assignments/save`, {assignment}).then((response) => {
-          const data = standardStatusHandler(response, enqueueSnackbar);
+          standardStatusHandler(response, enqueueSnackbar);
         }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
         return;
       }
@@ -115,6 +118,17 @@ export default function Assignments() {
           Assignment Management
         </Typography>
       </Grid>
+      <Grid item xs={12}>
+        <Button
+          variant={'contained'}
+          color={'primary'}
+          startIcon={<CodeOutlinedIcon/>}
+          onClick={() => setDialogOpen(true)}
+        >
+          Management IDE
+        </Button>
+      </Grid>
+      <IDEDialog open={dialogOpen} handleDialogToggle={() => setDialogOpen((prev) => !prev)}/>
       {assignments.map((assignment) => (
         <Grid item xs={8} key={assignment.id}>
           <Card>

@@ -8,6 +8,8 @@ from anubis.utils.http import success_response, error_response
 from anubis.utils.oauth import OAUTH_REMOTE_APP as provider
 from anubis.utils.submissions import fix_dangling
 from anubis.utils.auth import require_user
+from anubis.utils.decorators import json_endpoint
+from anubis.utils.data import is_debug
 
 auth = Blueprint("public-auth", __name__, url_prefix="/public/auth")
 
@@ -15,6 +17,8 @@ auth = Blueprint("public-auth", __name__, url_prefix="/public/auth")
 @auth.route("/login")
 @log_endpoint("public-login", lambda: "login")
 def public_login():
+    if is_debug():
+        return "AUTH"
     return provider.authorize(
         callback="https://anubis.osiris.services/api/public/auth/oauth"
     )
@@ -68,18 +72,26 @@ def public_whoami():
     u: User = current_user()
     if u is None:
         return success_response({})
+
+    status = None
+    if u.github_username is None:
+        status = "Please set your github username in your profile so we can identify your repos!"
+
     return success_response(
         {
             "user": u.data,
             "classes": get_courses(u.netid),
             "assignments": get_assignments(u.netid),
+            "status": status,
+            "variant": "warning",
         }
     )
 
 
-@auth.route('/set-github-username')
+@auth.route("/set-github-username", methods=["POST"])
 @require_user()
-def public_auth_set_github_username():
+@json_endpoint(required_fields=[("github_username", str)])
+def public_auth_set_github_username(github_username):
     """
     Sets a github username for the current user.
 
@@ -87,25 +99,23 @@ def public_auth_set_github_username():
     """
 
     user: User = current_user()
-    github_username = request.args.get('github-username', default=None)
 
     # Make sure github username was specified
     if github_username is None:
-        return error_response('github username not specified'), 400
+        return error_response("github username not specified")
 
     # Make sure the github username is not already being used
     other: User = User.query.filter(
-        User.github_username == github_username,
-        User.id != user.id
+        User.github_username == github_username, User.id != user.id
     ).first()
     if other is not None:
-        return error_response('github username is already taken'), 400
+        return error_response("github username is already taken")
 
     # Set github username and commit
     user.github_username = github_username
     db.session.add(user)
     db.session.commit()
 
-    return success_response({
-        'status': 'github username updated'
-    })
+    fix_dangling()
+
+    return success_response({"status": "github username updated"})

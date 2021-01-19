@@ -35,8 +35,8 @@ def private_stats_assignment(assignment_id, netid=None):
     :param netid:
     :return:
     """
-    limit = get_number_arg('limit', 10)
-    offset = get_number_arg('offset', 0)
+    limit = get_number_arg("limit", 10)
+    offset = get_number_arg("offset", 0)
 
     bests = bulk_stats(assignment_id, limit=limit, offset=offset)
     return success_response({"stats": bests})
@@ -49,14 +49,16 @@ def private_stats_for(assignment_id, user_id):
     assignment = Assignment.query.filter(
         Assignment.id == assignment_id,
     ).first()
-    user = User.query.filter(
-        User.id == user_id
-    ).first()
+    user = User.query.filter(User.id == user_id).first()
     submission_id = stats_for(user_id, assignment_id)
 
-    return success_response({"stats": stats_wrapper(
-        assignment, user.id, user.netid, user.name, submission_id
-    )})
+    return success_response(
+        {
+            "stats": stats_wrapper(
+                assignment, user.id, user.netid, user.name, submission_id
+            )
+        }
+    )
 
 
 @stats.route("/submission/<string:id>")

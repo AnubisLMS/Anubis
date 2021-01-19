@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Dict
 
-from flask import Blueprint, redirect
+from flask import Blueprint
 
 from anubis.models import User, TheiaSession, db, Assignment, AssignmentRepo
 from anubis.utils.auth import current_user, require_user
@@ -12,32 +12,11 @@ from anubis.utils.redis_queue import enqueue_ide_stop, enqueue_ide_initialize
 from anubis.utils.theia import (
     theia_redirect_url,
     get_n_available_sessions,
-    theia_list_all,
     theia_poll_ide,
-    theia_redirect,
 )
+from anubis.utils.logger import  logger
 
 ide = Blueprint("public-ide", __name__, url_prefix="/public/ide")
-
-
-@ide.route("/list")
-@log_endpoint("ide-list")
-@require_user()
-@json_response
-def public_ide_list():
-    """
-    List all sessions, active and inactive
-
-    :return:
-    """
-    user: User = current_user()
-
-    active_count, max_count = get_n_available_sessions()
-
-    return success_response({
-        "session_available": active_count < max_count,
-        "sessions": theia_list_all(user.id),
-    })
 
 
 @ide.route("/available")
@@ -52,9 +31,13 @@ def public_ide_available():
     """
     active_count, max_count = get_n_available_sessions()
 
-    return success_response({
-        "session_available": active_count < max_count,
-    })
+    logger.info(f'active {active_count} max {max_count}')
+
+    return success_response(
+        {
+            "session_available": active_count < max_count,
+        }
+    )
 
 
 @ide.route("/active/<string:assignment_id>")
@@ -70,7 +53,7 @@ def public_ide_active(assignment_id):
     user = current_user()
 
     session = TheiaSession.query.filter(
-        TheiaSession.active == True,
+        TheiaSession.active,
         TheiaSession.owner_id == user.id,
         TheiaSession.assignment_id == assignment_id,
     ).first()
@@ -78,9 +61,7 @@ def public_ide_active(assignment_id):
     if session is None:
         return success_response({"active": None})
 
-    return success_response({
-        "session": session.data
-    })
+    return success_response({"session": session.data})
 
 
 @ide.route("/stop/<string:theia_session_id>")
@@ -103,10 +84,12 @@ def public_ide_stop(theia_session_id: str) -> Dict[str, str]:
 
     enqueue_ide_stop(theia_session.id)
 
-    return success_response({
-        'status': 'Session stopped.',
-        'variant': 'warning',
-    })
+    return success_response(
+        {
+            "status": "Session stopped.",
+            "variant": "warning",
+        }
+    )
 
 
 @ide.route("/poll/<string:theia_session_id>")
@@ -126,9 +109,11 @@ def public_ide_poll(theia_session_id: str) -> Dict[str, str]:
     if session_data is None:
         return error_response("Can not find session")
 
+    loading = session_data["state"] == "Initializing"
     return success_response({
-        "loading": session_data['state'] == 'Initializing',
+        "loading": loading,
         "session": session_data,
+        "status": "Session is now ready." if not loading else None,
     })
 
 
@@ -176,23 +161,18 @@ def public_ide_initialize(assignment: Assignment):
     # Check for existing active session
     active_session = (
         TheiaSession.query.join(Assignment)
-        .filter(
+            .filter(
             TheiaSession.owner_id == user.id,
             TheiaSession.assignment_id == assignment.id,
-            TheiaSession.active == True,
-            Assignment.release_date <= datetime.now(),
-            Assignment.due_date + timedelta(days=7) >= datetime.now(),
+            TheiaSession.active,
         )
-        .first()
+            .first()
     )
     if active_session is not None:
-        return success_response({
-            "active": active_session.active,
-            "session": active_session.data
-        })
+        return success_response({"active": active_session.active, "session": active_session.data})
 
     if datetime.now() <= assignment.release_date:
-        return error_response('Assignment has not been released.')
+        return error_response("Assignment has not been released.")
 
     if assignment.due_date + timedelta(days=3 * 7) <= datetime.now():
         return error_response("Assignment due date passed over 3 weeks ago.")
@@ -203,15 +183,17 @@ def public_ide_initialize(assignment: Assignment):
         AssignmentRepo.assignment_id == assignment.id,
     ).first()
     if repo is None:
-        return redirect(
-            "/courses/assignments?error=Please create your assignment repo first."
+        return error_response(
+            "Anubis can not find your assignment repo. Please create one and set your github username."
         )
 
     # Create a new session
     session = TheiaSession(
         owner_id=user.id,
         assignment_id=assignment.id,
-        repo_id=repo.id,
+        repo_url=repo.repo_url,
+        network_locked=True,
+        privileged=False,
         active=True,
         state="Initializing",
     )
@@ -222,8 +204,10 @@ def public_ide_initialize(assignment: Assignment):
     enqueue_ide_initialize(session.id)
 
     # Redirect to proxy
-    return success_response({
-        "active": session.active,
-        "session": session.data,
-        "status": 'Session created',
-    })
+    return success_response(
+        {
+            "active": session.active,
+            "session": session.data,
+            "status": "Session created",
+        }
+    )

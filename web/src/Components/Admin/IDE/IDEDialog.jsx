@@ -1,20 +1,21 @@
 import React, {useState} from 'react';
+import clsx from 'clsx';
+import axios from 'axios';
+
+import green from '@material-ui/core/colors/green';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import {useSnackbar} from 'notistack';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
-import axios from 'axios';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
-import IDEHeader from './IDEHeader';
-import IDEInstructions from './IDEInstructions';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import {green} from '@material-ui/core/colors';
-import clsx from 'clsx';
+import IDEHeader from '../../Public/IDE/IDEHeader';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -64,7 +65,7 @@ const pollSession = (id, state, enqueueSnackbar, n = 0) => () => {
 
 
 const startSession = (state, enqueueSnackbar) => () => {
-  const {session, setSession, selectedTheia, setLoading} = state;
+  const {session, setSession, setLoading} = state;
   if (session) {
     const a = document.createElement('a');
     a.setAttribute('href', session.redirect_url);
@@ -74,8 +75,9 @@ const startSession = (state, enqueueSnackbar) => () => {
     a.click();
     return;
   }
+
   setLoading(true);
-  axios.get(`/api/public/ide/initialize/${selectedTheia.id}`).then((response) => {
+  axios.get(`/api/admin/ide/initialize`).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
     if (data.session) {
       if (data.session.state === 'Initializing') {
@@ -95,7 +97,7 @@ const stopSession = (state, enqueueSnackbar) => () => {
     return;
   }
   setLoading(true);
-  axios.get(`/api/public/ide/stop/${session.id}`).then((response) => {
+  axios.get(`/api/admin/ide/stop/${session.id}`).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
     if (data) {
       setSession(null);
@@ -104,7 +106,7 @@ const stopSession = (state, enqueueSnackbar) => () => {
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
-export default function IDEDialog({selectedTheia, setSelectedTheia}) {
+export default function IDEDialog({open, handleDialogToggle}) {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [sessionsAvailable, setSessionsAvailable] = useState(null);
@@ -121,20 +123,20 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
   }, []);
 
   React.useEffect(() => {
-    if (!selectedTheia) {
+    if (!open) {
       return null;
     }
 
-    axios.get(`/api/public/ide/active/${selectedTheia.id}`).then((response) => {
+    axios.get(`/api/admin/ide/active`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
         setSession(data.session);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
-  }, [selectedTheia]);
+  }, [open]);
 
   const state = {
-    selectedTheia, setSelectedTheia,
+    open, handleDialogToggle,
     sessionsAvailable, setSessionsAvailable,
     loading, setLoading,
     session, setSession,
@@ -142,17 +144,12 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
 
   return (
     <Dialog
-      open={selectedTheia !== null}
-      onClose={() => setSelectedTheia(null)}
+      open={open}
+      onClose={handleDialogToggle}
     >
       <DialogTitle>Anubis Cloud IDE</DialogTitle>
       <DialogContent>
         <IDEHeader sessionsAvailable={sessionsAvailable}/>
-        <DialogContentText>
-          By using the Anubis Cloud IDE, you are agreeing to a few things. Please read the
-          full instructions before use.
-        </DialogContentText>
-        <IDEInstructions/>
       </DialogContent>
       <DialogActions>
         <div className={classes.wrapper} hidden={!session}>
@@ -179,7 +176,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
           >
             {!session ? 'Launch Session' : 'Go to IDE'}
           </Button>
-          {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
+          {loading && <CircularProgress size={24} className={classes.buttonProgress}/>}
         </div>
       </DialogActions>
     </Dialog>

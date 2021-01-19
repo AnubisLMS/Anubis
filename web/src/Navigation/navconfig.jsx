@@ -25,6 +25,8 @@ import AdminAssignments from '../Pages/Admin/Assignments';
 import AdminStats from '../Pages/Admin/Stats';
 import AdminAssignmentStats from '../Pages/Admin/AssignmentStats';
 import AdminSubmissionStats from '../Pages/Admin/SubmissionStats';
+import AdminCourses from '../Pages/Admin/Courses';
+import AdminTheia from '../Pages/Admin/Theia';
 
 export const footer_nav = [{
   id: 'About',
@@ -81,6 +83,12 @@ export const admin_nav = [
     Page: AdminUsers,
   },
   {
+    id: 'Courses',
+    icon: <SchoolIcon/>,
+    path: '/admin/courses',
+    Page: AdminCourses,
+  },
+  {
     id: 'Assignments',
     icon: <AssignmentOutlinedIcon/>,
     path: '/admin/assignments',
@@ -91,6 +99,12 @@ export const admin_nav = [
     icon: <PieChartIcon/>,
     path: '/admin/stats',
     Page: AdminStats,
+  },
+  {
+    id: 'Anubis Cloud IDE',
+    icon: <CodeOutlinedIcon/>,
+    path: '/admin/ide',
+    Page: AdminTheia,
   },
 ];
 

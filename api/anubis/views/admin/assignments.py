@@ -41,32 +41,27 @@ def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str
     )
 
 
-@assignments.route('/get/<string:id>')
+@assignments.route("/get/<string:id>")
 @require_admin()
 @json_response
 def admin_assignments_get_id(id):
     assignment = Assignment.query.filter(Assignment.id == id).first()
 
     if assignment is None:
-        return error_response('Assignment does not exist')
+        return error_response("Assignment does not exist")
 
-    return success_response({
-        'assignment': assignment.data
-    })
+    return success_response({"assignment": assignment.data})
 
 
-@assignments.route('/list')
+@assignments.route("/list")
 @require_admin()
 @json_response
 def admin_assignments_list():
     all_assignments = Assignment.query.order_by(Assignment.due_date.desc()).all()
 
-    return success_response({
-        'assignments': [
-            row2dict(assignment)
-            for assignment in all_assignments
-        ]
-    })
+    return success_response(
+        {"assignments": [row2dict(assignment) for assignment in all_assignments]}
+    )
 
 
 @assignments.route("/save", methods=["POST"])
@@ -83,16 +78,14 @@ def private_assignment_save(assignment: dict):
     logger.info(json.dumps(assignment, indent=2))
 
     # Get assignment
-    assignment_id = assignment['id']
-    db_assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment_id = assignment["id"]
+    db_assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     # Make sure it exists
     if db_assignment is None:
         # Create it if it doens't exist
         db_assignment = Assignment()
-        assignment['id'] = rand()
+        assignment["id"] = rand()
         db.session.add(db_assignment)
 
     # Update all it's fields
@@ -107,9 +100,11 @@ def private_assignment_save(assignment: dict):
         return error_response(str(e))
 
     # Return status
-    return success_response({
-        'status': 'Assignment updated',
-    })
+    return success_response(
+        {
+            "status": "Assignment updated",
+        }
+    )
 
 
 @assignments.route("/sync", methods=["POST"])

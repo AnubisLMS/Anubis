@@ -10,14 +10,14 @@ build:
 run:
 	docker run \
 		-it \
-		-p 3000:3000 \
+		-p 5000:5000 \
 		-v "/home/jc/nyu/os/xv6-public:/home/project" \
 		anubis-theia
 
 debug:
 	docker run \
 		-it \
-		-p 3000:3000 \
+		-p 5000:5000 \
 		-v "/home/jc/nyu/os/xv6-public:/home/project" \
 		--entrypoint bash \
 		anubis-theia

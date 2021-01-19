@@ -30,9 +30,13 @@ class Config:
     def __init__(self):
         self.DEBUG = os.environ.get("DEBUG", default="0") == "1"
 
-        self.SECRET_KEY = os.environ.get(
-            "SECRET_KEY", default=hashlib.sha512(os.urandom(10)).hexdigest()
-        ) if not self.DEBUG else 'DEFAULT'
+        self.SECRET_KEY = (
+            os.environ.get(
+                "SECRET_KEY", default=hashlib.sha512(os.urandom(10)).hexdigest()
+            )
+            if not self.DEBUG
+            else "DEFAULT"
+        )
 
         self.SQLALCHEMY_DATABASE_URI = os.environ.get(
             "DATABASE_URI",
@@ -49,7 +53,9 @@ class Config:
         )
 
         # Redis
-        self.CACHE_REDIS_HOST = os.environ.get("CACHE_REDIS_HOST", default="redis-master")
+        self.CACHE_REDIS_HOST = os.environ.get(
+            "CACHE_REDIS_HOST", default="redis-master"
+        )
 
         # Logger
         self.LOGGER_NAME = os.environ.get("LOGGER_NAME", default="anubis-api")

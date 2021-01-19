@@ -226,8 +226,10 @@ def human_readable_to_bytes(size: str) -> int:
     size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
     size = size.split()  # divide '1 GB' into ['1', 'GB']
     num, unit = int(size[0]), size[1]
-    idx = size_name.index(unit)  # index in list of sizes determines power to raise it to
-    factor = 1024 ** idx  # ** is the "exponent" operator - you can use it instead of math.pow()
+    # index in list of sizes determines power to raise it to
+    idx = size_name.index(unit)
+    # ** is the "exponent" operator - you can use it instead of math.pow()
+    factor = 1024 ** idx
     return num * factor
 
 

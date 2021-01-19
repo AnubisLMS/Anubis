@@ -1,8 +1,10 @@
-FROM ubuntu:18.04 as common
+# https://github.com/theia-ide/theia-apps/tree/master/theia-cpp-docker
+
+FROM ubuntu:20.04 as common
 
 ARG NODE_VERSION=12.18.3
-
 ENV NODE_VERSION=$NODE_VERSION
+ENV DEBIAN_FRONTEND=noninteractive
 
 # User account
 RUN adduser --disabled-password --gecos '' --uid 1001 theia
@@ -63,16 +65,14 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
 
 FROM common as theia
 
-ARG GITHUB_TOKEN
 # Use "latest" or "next" version for Theia packages
-ARG version=latest
 # Optionally build a striped Theia application with no map file or .ts sources.
 # Makes image ~150MB smaller when enabled
-ARG strip=false
+ARG strip=true
 
 ENV DEBIAN_FRONTEND=noninteractive \
     YARN_VERSION=1.22.5 \
-    strip=$strip
+    strip=trye
 
 # Install Yarn
 # From: https://github.com/nodejs/docker-node/blob/6b8d86d6ad59e0d1e7a94cec2e909cad137a028f/8/Dockerfile
@@ -100,45 +100,38 @@ RUN set -ex \
 
 WORKDIR /home/theia
 
-ADD $version.package.json package.json
+COPY latest.package.json package.json
 
-RUN if [ "$strip" = "true" ]; then \
-yarn --pure-lockfile && \
-    NODE_OPTIONS="--max_old_space_size=4096" yarn theia build && \
-    yarn theia download:plugins && \
-    yarn --production && \
-    yarn autoclean --init && \
-    echo *.ts >> .yarnclean && \
-    echo *.ts.map >> .yarnclean && \
-    echo *.spec.* >> .yarnclean && \
-    yarn autoclean --force && \
-    yarn cache clean \
-;else \
-yarn --cache-folder ./ycache && rm -rf ./ycache && \
-     NODE_OPTIONS="--max_old_space_size=4096" yarn theia build && yarn theia download:plugins \
-;fi
+RUN yarn --pure-lockfile && \
+  NODE_OPTIONS="--max_old_space_size=4096" yarn theia build && \
+  yarn theia download:plugins && \
+  yarn --production && \
+  yarn autoclean --init && \
+  echo *.ts >> .yarnclean && \
+  echo *.ts.map >> .yarnclean && \
+  echo *.spec.* >> .yarnclean && \
+  yarn autoclean --force && \
+  yarn cache clean
 
 FROM common
 
 ARG LLVM=12
 ARG CMAKE_VERSION=3.18.1
-
-COPY --from=theia /home/theia /home/theia
-WORKDIR /home/theia
-
 # C/C++ Developer tools
 
 # Install clangd and clang-tidy from the public LLVM PPA (nightly build / development version)
 # And also the GDB debugger from the Ubuntu repos
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - && \
-  echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main" > /etc/apt/sources.list.d/llvm.list && \
+  echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal main" > /etc/apt/sources.list.d/llvm.list && \
   apt-get update && \
   apt-get install -y \
   gcc-multilib \
   g++-multilib \
+  python3 python3-pip \
   clangd-$LLVM \
   gdb \
   qemu-system-i386 && \
+  pip3 install supervisor && \
   rm -rf /var/lib/apt/lists/* && \
   ln -s /usr/bin/clangd-$LLVM /usr/bin/clangd
 
@@ -159,8 +152,8 @@ RUN chmod g+rw /home && \
     chown -R theia:theia /home/theia && \
     chown -R theia:theia /home/project;
 
-USER theia
-ENV SHELL=/bin/bash \
-    THEIA_DEFAULT_PLUGINS=local-dir:/home/theia/plugins
+COPY --from=theia /home/theia /home/theia
+WORKDIR /home/theia
+COPY supervisord.conf /supervisord.conf
 
-CMD [ "sh", "-c", "env -i THEIA_DEFAULT_PLUGINS=local-dir:/home/theia/plugins SHELL=/bin/bash PATH=/bin:/usr/bin:/usr/local/bin /usr/local/bin/node /home/theia/src-gen/backend/main.js /home/project --hostname=0.0.0.0 --port=5000" ]
+ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]

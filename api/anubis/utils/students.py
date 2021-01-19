@@ -9,10 +9,7 @@ def get_students(course_code=None):
     if course_code is not None:
         filters = [Course.course_code == course_code]
     return [
-        s.data
-        for s in User.query.join(InCourse).join(Course).filter(
-            *filters
-        ).all()
+        s.data for s in User.query.join(InCourse).join(Course).filter(*filters).all()
     ]
 
 
@@ -21,18 +18,24 @@ def get_students_in_class(class_id, offset=None, limit=None):
     if offset is not None and limit is not None:
         return [
             u.data
-            for u in User.query.join(InCourse).join(Course).filter(
+            for u in User.query.join(InCourse)
+            .join(Course)
+            .filter(
                 Course.id == class_id,
                 InCourse.owner_id == User.id,
-            ).limit(limit).offset(offset).all()
+            )
+            .limit(limit)
+            .offset(offset)
+            .all()
         ]
 
     return [
         u.data
-        for u in User.query.join(InCourse).join(Course).filter(
+        for u in User.query.join(InCourse)
+        .join(Course)
+        .filter(
             Course.id == class_id,
             InCourse.owner_id == User.id,
-        ).all()
+        )
+        .all()
     ]
-
-

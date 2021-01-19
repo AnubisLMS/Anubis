@@ -74,12 +74,11 @@ export default function App() {
                     <Nav
                       variant="temporary"
                       open={open}
-                      onClose={() => setOpen(false)}
-                      onOpen={() => setOpen(true)}
+                      onDrawerToggle={() => setOpen((prev) => !prev)}
                     />
                     <div className={classes.app}>
                       <Header
-                        onDrawerToggle={() => setOpen(!open)}
+                        onDrawerToggle={() => setOpen((prev) => !prev)}
                         user={user}
                       />
                       <main

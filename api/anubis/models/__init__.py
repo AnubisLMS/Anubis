@@ -87,6 +87,7 @@ class Course(db.Model):
             "professor": self.professor,
             "total_assignments": self.total_assignments,
             "open_assignment": self.open_assignments,
+            "join_code": self.id[:6],
         }
 
 
@@ -122,6 +123,7 @@ class Assignment(db.Model):
         default=lambda: base64.b16encode(os.urandom(4)).decode(),
     )
     ide_enabled = db.Column(db.Boolean, default=True)
+    theia_image = db.Column(db.String(128), default="registry.osiris.services/anubis/theia-xv6")
 
     # Dates
     release_date = db.Column(db.DateTime, nullable=False)
@@ -533,16 +535,18 @@ class TheiaSession(db.Model):
     # Foreign keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
     assignment_id = db.Column(
-        db.String(128), db.ForeignKey(Assignment.id), nullable=False
+        db.String(128), db.ForeignKey(Assignment.id), nullable=True
     )
-    repo_id = db.Column(
-        db.String(128), db.ForeignKey(AssignmentRepo.id), nullable=False
-    )
+    repo_url = db.Column(db.String(128), nullable=False)
 
     # Fields
     active = db.Column(db.Boolean, default=True)
     state = db.Column(db.String(128))
     cluster_address = db.Column(db.String(256), nullable=True, default=None)
+    image = db.Column(db.String(128), default="registry.osiris.services/anubis/theia-xv6")
+    options = db.Column(MutableJson, nullable=False, default=lambda: dict())
+    network_locked = db.Column(db.Boolean, default=True)
+    privileged = db.Column(db.Boolean, default=False)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
@@ -551,7 +555,6 @@ class TheiaSession(db.Model):
     last_proxy = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    repo = db.relationship(AssignmentRepo)
     owner = db.relationship(User)
     assignment = db.relationship(Assignment)
 
@@ -562,10 +565,10 @@ class TheiaSession(db.Model):
         return {
             "id": self.id,
             "assignment_id": self.assignment_id,
-            "assignment_name": self.assignment.name,
-            "course_code": self.assignment.course.course_code,
-            "repo_id": self.repo_id,
-            "repo_url": self.repo.repo_url,
+            "assignment_name": self.assignment.name if self.assignment_id is not None else None,
+            "course_code": self.assignment.course.course_code if self.assignment_id is not None else None,
+            "netid": self.owner.netid,
+            "repo_url": self.repo_url,
             "redirect_url": theia_redirect_url(self.id, self.owner.netid),
             "active": self.active,
             "state": self.state,

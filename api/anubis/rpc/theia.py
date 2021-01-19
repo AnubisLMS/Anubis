@@ -45,7 +45,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         image="registry.osiris.services/anubis/theia-init:latest",
         image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
         env=[
-            client.V1EnvVar(name="GIT_REPO", value=theia_session.repo.repo_url),
+            client.V1EnvVar(name="GIT_REPO", value=theia_session.repo_url),
             client.V1EnvVar(
                 name="GIT_CRED",
                 value_from=client.V1EnvVarSource(
@@ -63,15 +63,23 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         ],
     )
 
+    limits = {"cpu": "2", "memory": "500Mi"}
+    if 'limits' in theia_session.options:
+        limits = theia_session.options['limits']
+
+    requests = {"cpu": "250m", "memory": "100Mi"}
+    if 'requests' in theia_session.options:
+        requests = theia_session.options['requests']
+
     # Theia container
     theia_container = client.V1Container(
         name="theia",
-        image="registry.osiris.services/anubis/theia:latest",
+        image=theia_session.image,
         image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
-        ports=[client.V1ContainerPort(container_port=3000)],
+        ports=[client.V1ContainerPort(container_port=5000)],
         resources=client.V1ResourceRequirements(
-            limits={"cpu": "2", "memory": "500Mi"},
-            requests={"cpu": "250m", "memory": "100Mi"},
+            limits=limits,
+            requests=requests,
         ),
         volume_mounts=[
             client.V1VolumeMount(
@@ -79,6 +87,9 @@ def create_theia_pod_obj(theia_session: TheiaSession):
                 name=volume_name,
             )
         ],
+        security_context=client.V1SecurityContext(
+            privileged=theia_session.privileged,
+        )
     )
 
     # Sidecar container
@@ -104,6 +115,10 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         ],
     )
 
+    extra_labels = {}
+    if theia_session.network_locked:
+        extra_labels['network-policy'] = 'student'
+
     # Create pod
     pod = client.V1Pod(
         spec=client.V1PodSpec(
@@ -120,6 +135,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
                 "role": "theia-session",
                 "netid": theia_session.owner.netid,
                 "session": str(theia_session.id),
+                **extra_labels
             },
         ),
     )
@@ -171,9 +187,7 @@ def initialize_theia_session(theia_session_id: str):
         if theia_session is None:
             logger.error(
                 "Unable to find theia session rpc.initialize_theia_session",
-                extra={
-                    "theia_session_id": theia_session_id,
-                },
+                extra={"theia_session_id": theia_session_id},
             )
             return
 

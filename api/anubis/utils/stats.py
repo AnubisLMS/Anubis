@@ -12,13 +12,13 @@ def stats_for(student_id, assignment_id):
     best = None
     best_count = -1
     for submission in (
-            Submission.query.filter(
-                Submission.assignment_id == assignment_id,
-                Submission.owner_id == student_id,
-                Submission.processed,
-            )
-                    .order_by(Submission.created.desc())
-                    .all()
+        Submission.query.filter(
+            Submission.assignment_id == assignment_id,
+            Submission.owner_id == student_id,
+            Submission.processed,
+        )
+        .order_by(Submission.created.desc())
+        .all()
     ):
         correct_count = sum(
             map(lambda result: 1 if result.passed else 0, submission.test_results)
@@ -51,10 +51,8 @@ def stats_wrapper(assignment, user_id, netid, name, submission_id):
     else:
         submission = Submission.query.filter(Submission.id == submission_id).first()
         repo_path = parse("https://github.com/{}", submission.repo.repo_url)[0]
-        best_count = sum(
-            map(lambda x: 1 if x.passed else 0, submission.test_results)
-        )
-        late = "past due" if assignment.due_date < submission.created else 'on time'
+        best_count = sum(map(lambda x: 1 if x.passed else 0, submission.test_results))
+        late = "past due" if assignment.due_date < submission.created else "on time"
         late = "past grace" if assignment.grace_date < submission.created else late
         return {
             "id": netid,
@@ -82,8 +80,8 @@ def bulk_stats(assignment_id, netids=None, offset=0, limit=20):
     bests = []
 
     assignment = (
-            Assignment.query.filter_by(name=assignment_id).first()
-            or Assignment.query.filter_by(id=assignment_id).first()
+        Assignment.query.filter_by(name=assignment_id).first()
+        or Assignment.query.filter_by(id=assignment_id).first()
     )
     if assignment is None:
         return error_response("assignment does not exist")
@@ -94,12 +92,14 @@ def bulk_stats(assignment_id, netids=None, offset=0, limit=20):
 
     for student in students:
         submission_id = stats_for(student["id"], assignment.id)
-        bests.append(stats_wrapper(
-            assignment,
-            student['id'],
-            student['netid'],
-            student['name'],
-            submission_id,
-        ))
+        bests.append(
+            stats_wrapper(
+                assignment,
+                student["id"],
+                student["netid"],
+                student["name"],
+                submission_id,
+            )
+        )
 
     return bests

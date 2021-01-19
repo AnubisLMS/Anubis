@@ -24,7 +24,7 @@ def private_token_netid(netid):
         return error_response("User does not exist")
 
     if not is_debug() and other.is_superuser:
-        return error_response('You can not log in as a superuser.')
+        return error_response("You can not log in as a superuser.")
 
     token = create_token(other.netid)
     res = Response(

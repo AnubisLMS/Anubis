@@ -1,3 +1,6 @@
+from anubis.utils.auth import create_token
+from anubis.models import db, User
+from anubis.app import create_app
 import traceback
 import requests
 import hashlib
@@ -7,23 +10,22 @@ import json
 import sys
 import os
 
-os.environ['DEBUG'] = '1'
-os.environ['DISABLE_ELK'] = '1'
-os.environ['DB_HOST'] = '127.0.0.1'
-os.environ['CACHE_REDIS_HOST'] = '127.0.0.1'
+os.environ["DEBUG"] = "1"
+os.environ["DISABLE_ELK"] = "1"
+os.environ["DB_HOST"] = "127.0.0.1"
+os.environ["CACHE_REDIS_HOST"] = "127.0.0.1"
 
-from anubis.app import create_app
-from anubis.models import db, User
-from anubis.utils.auth import create_token
 
-requests.get('http://localhost/api/admin/seed/')  # seed
+requests.get("http://localhost/api/admin/seed/")  # seed
 
 
 def format_exception(e: Exception):
     exception_list = traceback.format_stack()
     exception_list = exception_list[:-2]
     exception_list.extend(traceback.format_tb(sys.exc_info()[2]))
-    exception_list.extend(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1]))
+    exception_list.extend(
+        traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])
+    )
 
     exception_str = "Traceback (most recent call last):\n"
     exception_str += "".join(exception_list)
@@ -36,13 +38,19 @@ def format_exception(e: Exception):
 
 def print_full_error(e, r):
     print("Printing only the traceback above the current stack frame")
-    print("".join(traceback.format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])))
+    print(
+        "".join(
+            traceback.format_exception(
+                sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
+            )
+        )
+    )
     print()
     print("Printing the full traceback as if we had not caught it here...")
     print()
     format_exception(e)
     print(r.text)
-    print(f'status_code={r.status_code}')
+    print(f"status_code={r.status_code}")
     print(r.url)
     exit(1)
 
@@ -55,7 +63,13 @@ def _create_user_session(url: str, name: str, netid: str, admin: bool, superuser
     """
 
     # Create user in db
-    user = User(netid=netid, name=name, github_username=netid, is_admin=admin, is_superuser=superuser)
+    user = User(
+        netid=netid,
+        name=name,
+        github_username=netid,
+        is_admin=admin,
+        is_superuser=superuser,
+    )
     db.session.add(user)
     db.session.commit()
 
@@ -64,7 +78,7 @@ def _create_user_session(url: str, name: str, netid: str, admin: bool, superuser
 
     # Create requests session
     session = requests.session()
-    session.cookies['token'] = token
+    session.cookies["token"] = token
     r = session.get(url + "/public/auth/whoami")
 
     try:
@@ -79,18 +93,20 @@ def _create_user_session(url: str, name: str, netid: str, admin: bool, superuser
 
 
 def create_name() -> str:
-    name_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'names.json')
+    name_file_path = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "names.json"
+    )
     name_file = open(name_file_path)
     names = json.load(name_file)
 
-    return f'{random.choice(names)} {random.choice(names)}'
+    return f"{random.choice(names)} {random.choice(names)}"
 
 
 def create_netid(name: str) -> str:
-    initials = ''.join(word[0].lower() for word in name.split())
-    numbers = ''.join(random.choice(string.digits) for _ in range(3))
+    initials = "".join(word[0].lower() for word in name.split())
+    numbers = "".join(random.choice(string.digits) for _ in range(3))
 
-    return f'{initials}{numbers}'
+    return f"{initials}{numbers}"
 
 
 class TestSession(object):
@@ -104,12 +120,16 @@ class TestSession(object):
     # data ->> {'email': 'test.abcyf.1@pc.email', ...}
     """
 
-    def __init__(self, domain: str = 'localhost', port: int = 80, admin=False, superuser=False):
+    def __init__(
+        self, domain: str = "localhost", port: int = 80, admin=False, superuser=False
+    ):
         self.url = f"http://{domain}:{port}/api"
         self.timings = []
         self.name = create_name()
         self.netid = create_netid(self.name)
-        self._session = _create_user_session(self.url, self.name, self.netid, admin, superuser)
+        self._session = _create_user_session(
+            self.url, self.name, self.netid, admin, superuser
+        )
 
     @staticmethod
     def _verify_success(r):
@@ -146,7 +166,16 @@ class TestSession(object):
                 response = r.json()["data"]
         return response
 
-    def _make_request(self, path, request_func, return_request, should_succeed, should_fail, skip_verify, **kwargs):
+    def _make_request(
+        self,
+        path,
+        request_func,
+        return_request,
+        should_succeed,
+        should_fail,
+        skip_verify,
+        **kwargs,
+    ):
         # Make the request
         r = request_func(self.url + path, **kwargs)
 
@@ -162,33 +191,67 @@ class TestSession(object):
         # return filtered data
         return response
 
-    def get(self, path, return_request=False,
-            should_succeed=True, should_fail=False, skip_verify=False, **kwargs):
+    def get(
+        self,
+        path,
+        return_request=False,
+        should_succeed=True,
+        should_fail=False,
+        skip_verify=False,
+        **kwargs,
+    ):
         return self._make_request(
-            path, self._session.get, return_request,
-            should_succeed, should_fail, skip_verify,
-            **kwargs
+            path,
+            self._session.get,
+            return_request,
+            should_succeed,
+            should_fail,
+            skip_verify,
+            **kwargs,
         )
 
-    def post(self, path, return_request=False,
-             should_succeed=True, should_fail=False, skip_verify=False, **kwargs):
+    def post(
+        self,
+        path,
+        return_request=False,
+        should_succeed=True,
+        should_fail=False,
+        skip_verify=False,
+        **kwargs,
+    ):
         return self._make_request(
-            path, self._session.post, return_request,
-            should_succeed, should_fail, skip_verify,
-            **kwargs
+            path,
+            self._session.post,
+            return_request,
+            should_succeed,
+            should_fail,
+            skip_verify,
+            **kwargs,
         )
 
-    def post_json(self, path, json, return_request=False,
-                  should_succeed=True, should_fail=False, skip_verify=False, **kwargs):
-        kwargs['json'] = json
-        if 'headers' not in kwargs:
-            kwargs['headers'] = dict()
-        kwargs['headers']['Content-Type'] = 'application/json'
+    def post_json(
+        self,
+        path,
+        json,
+        return_request=False,
+        should_succeed=True,
+        should_fail=False,
+        skip_verify=False,
+        **kwargs,
+    ):
+        kwargs["json"] = json
+        if "headers" not in kwargs:
+            kwargs["headers"] = dict()
+        kwargs["headers"]["Content-Type"] = "application/json"
 
         return self._make_request(
-            path, self._session.post, return_request,
-            should_succeed, should_fail, skip_verify,
-            **kwargs
+            path,
+            self._session.post,
+            return_request,
+            should_succeed,
+            should_fail,
+            skip_verify,
+            **kwargs,
         )
 
 
@@ -203,6 +266,7 @@ def run_main(func):
 
 
 if __name__ == "__main__":
+
     def test_this_file():
         ts = TestSession()
         ts.get("/public/auth/whoami")

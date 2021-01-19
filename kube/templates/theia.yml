@@ -114,6 +114,7 @@ spec:
     matchLabels:
       app: theia
       role: theia-session
+      network-policy: student
   policyTypes:
   - Ingress
   - Egress
