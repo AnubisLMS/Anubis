@@ -14,7 +14,7 @@ spec:
     matchLabels:
       app: pipeline-api
   replicas: {{ .Values.pipeline_api.replicas }}
-  {{- if .Values.api.rollingUpdates }}
+  {{- if .Values.rollingUpdates }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -32,14 +32,10 @@ spec:
       - name: pipeline-api
         image: {{ .Values.api.image }}:{{ .Values.api.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
-        #resources:
-        #  { {- toYaml .Values.api.resources | nindent 10 } }
         ports:
         - name: web
           containerPort: 5000
         env:
-        # - name: "DEBUG"
-        #   value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
         - name: "LOGGER_NAME"
           value: "pipeline-api"
         # Gunicorn workers

@@ -1,4 +1,3 @@
-
 debug: false
 rollingUpdates: true
 healthChecks: true
@@ -15,9 +14,6 @@ api:
 
   image: "registry.osiris.services/anubis/api"
   tag: "latest"
-  resources:
-    requests:
-      memory: "500Mi"
 
 static:
   replicas: 3
@@ -35,12 +31,6 @@ pipeline_api:
   workers: 2
 
   healthCheck: true
-
-  resources:
-    limits:
-      memory: "500Mi"
-    requests:
-      memory: "500Mi"
 
 web:
   replicas: 2

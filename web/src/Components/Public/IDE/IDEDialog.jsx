@@ -115,7 +115,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
     axios.get('/api/public/ide/available').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
-        setSessionsAvailable(data.sessions_available);
+        setSessionsAvailable(data.session_available);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, []);

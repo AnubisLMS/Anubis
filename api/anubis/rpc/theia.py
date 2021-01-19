@@ -25,7 +25,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
                 "app": "theia",
                 "role": "session-storage",
                 "netid": theia_session.owner.netid,
-                "session": str(theia_session.id),
+                "session": theia_session.id,
             },
         ),
         spec=client.V1PersistentVolumeClaimSpec(
@@ -64,12 +64,12 @@ def create_theia_pod_obj(theia_session: TheiaSession):
     )
 
     limits = {"cpu": "2", "memory": "500Mi"}
-    if 'limits' in theia_session.options:
-        limits = theia_session.options['limits']
+    if "limits" in theia_session.options:
+        limits = theia_session.options["limits"]
 
     requests = {"cpu": "250m", "memory": "100Mi"}
-    if 'requests' in theia_session.options:
-        requests = theia_session.options['requests']
+    if "requests" in theia_session.options:
+        requests = theia_session.options["requests"]
 
     # Theia container
     theia_container = client.V1Container(
@@ -89,7 +89,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         ],
         security_context=client.V1SecurityContext(
             privileged=theia_session.privileged,
-        )
+        ),
     )
 
     # Sidecar container
@@ -117,7 +117,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
 
     extra_labels = {}
     if theia_session.network_locked:
-        extra_labels['network-policy'] = 'student'
+        extra_labels["network-policy"] = "student"
 
     # Create pod
     pod = client.V1Pod(
@@ -134,8 +134,8 @@ def create_theia_pod_obj(theia_session: TheiaSession):
                 "app": "theia",
                 "role": "theia-session",
                 "netid": theia_session.owner.netid,
-                "session": str(theia_session.id),
-                **extra_labels
+                "session": theia_session.id,
+                **extra_labels,
             },
         ),
     )

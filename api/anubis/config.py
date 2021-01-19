@@ -30,13 +30,7 @@ class Config:
     def __init__(self):
         self.DEBUG = os.environ.get("DEBUG", default="0") == "1"
 
-        self.SECRET_KEY = (
-            os.environ.get(
-                "SECRET_KEY", default=hashlib.sha512(os.urandom(10)).hexdigest()
-            )
-            if not self.DEBUG
-            else "DEFAULT"
-        )
+        self.SECRET_KEY = os.environ.get("SECRET_KEY", default="DEBUG")
 
         self.SQLALCHEMY_DATABASE_URI = os.environ.get(
             "DATABASE_URI",

@@ -3,16 +3,9 @@ const httpProxy = require("http-proxy");
 const Knex = require("knex");
 const jwt = require("jsonwebtoken");
 const Cookie = require("universal-cookie");
-const Redis = require("redis");
 const urlparse = require("url-parse");
 
-const SECRET_KEY = process.env.SECRET_KEY || 'DEBUG';
-
-const redis = Redis.createClient({host: "redis"});
-
-redis.on("error", function (error) {
-  console.error(error);
-});
+const SECRET_KEY = process.env.SECRET_KEY ?? 'DEBUG';
 
 const knex = Knex({
   client: "mysql",
@@ -72,6 +65,7 @@ const parse_req = req => {
 
 const initialize = (req, res, url, query) => {
   // Authenticate the token in the http query
+  console.log(`token: ${query.get('token')}`)
   const query_token = authenticate(query.get('token'));
   if (query_token === null) {
     res.writeHead(302, {location: 'https://anubis.osiris.services/error'});
@@ -178,4 +172,5 @@ process.on('uncaughtException', function(error) {
 })
 
 console.log("starting at 0.0.0.0:5000");
+console.log(`SECRET_KEY = ${SECRET_KEY}`);
 proxyServer.listen(5000);

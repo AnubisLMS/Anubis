@@ -14,7 +14,7 @@ from anubis.utils.theia import (
     get_n_available_sessions,
     theia_poll_ide,
 )
-from anubis.utils.logger import  logger
+from anubis.utils.logger import logger
 
 ide = Blueprint("public-ide", __name__, url_prefix="/public/ide")
 
@@ -30,8 +30,6 @@ def public_ide_available():
     :return:
     """
     active_count, max_count = get_n_available_sessions()
-
-    logger.info(f'active {active_count} max {max_count}')
 
     return success_response(
         {
@@ -110,11 +108,13 @@ def public_ide_poll(theia_session_id: str) -> Dict[str, str]:
         return error_response("Can not find session")
 
     loading = session_data["state"] == "Initializing"
-    return success_response({
-        "loading": loading,
-        "session": session_data,
-        "status": "Session is now ready." if not loading else None,
-    })
+    return success_response(
+        {
+            "loading": loading,
+            "session": session_data,
+            "status": "Session is now ready." if not loading else None,
+        }
+    )
 
 
 @ide.route("/redirect-url/<string:theia_session_id>")
@@ -161,15 +161,17 @@ def public_ide_initialize(assignment: Assignment):
     # Check for existing active session
     active_session = (
         TheiaSession.query.join(Assignment)
-            .filter(
+        .filter(
             TheiaSession.owner_id == user.id,
             TheiaSession.assignment_id == assignment.id,
             TheiaSession.active,
         )
-            .first()
+        .first()
     )
     if active_session is not None:
-        return success_response({"active": active_session.active, "session": active_session.data})
+        return success_response(
+            {"active": active_session.active, "session": active_session.data}
+        )
 
     if datetime.now() <= assignment.release_date:
         return error_response("Assignment has not been released.")

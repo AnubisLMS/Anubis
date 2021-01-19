@@ -14,7 +14,7 @@ from anubis.utils.redis_queue import rpc_enqueue, enqueue_ide_stop
 ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 
 
-@ide.route('/initialize')
+@ide.route("/initialize")
 @require_admin()
 @log_endpoint("admin-ide-initialize")
 @json_response
@@ -22,15 +22,17 @@ def admin_ide_initialize():
     user = current_user()
 
     session = TheiaSession.query.filter(
-        TheiaSession.active == True,
+        TheiaSession.active,
         TheiaSession.owner_id == user.id,
-        TheiaSession.assignment_id == None,
+        TheiaSession.assignment_id is None,
     ).first()
 
     if session is not None:
-        return success_response({
-            'session': session.data,
-        })
+        return success_response(
+            {
+                "session": session.data,
+            }
+        )
 
     # Create a new session
     session = TheiaSession(
@@ -38,7 +40,8 @@ def admin_ide_initialize():
         assignment_id=None,
         network_locked=False,
         privileged=True,
-        repo_url="https://github.com/os3224/assignment-tests.git",
+        image="registry.osiris.services/anubis/theia-admin",
+        repo_url="https://github.com/os3224/anubis-assignment-tests.git",
         active=True,
         state="Initializing",
     )
@@ -48,13 +51,12 @@ def admin_ide_initialize():
     # Send kube resource initialization rpc job
     enqueue_ide_initialize(session.id)
 
-    return success_response({
-        'session': session.data,
-        'status': 'Admin IDE Initialized.'
-    })
+    return success_response(
+        {"session": session.data, "status": "Admin IDE Initialized."}
+    )
 
 
-@ide.route('/active')
+@ide.route("/active")
 @require_admin()
 @log_endpoint("admin-ide-active")
 @json_response
@@ -62,19 +64,19 @@ def admin_ide_active():
     user = current_user()
 
     session = TheiaSession.query.filter(
-        TheiaSession.active == True,
+        TheiaSession.active,
         TheiaSession.owner_id == user.id,
-        TheiaSession.assignment_id == None,
+        TheiaSession.assignment_id is None,
     ).first()
 
     if session is None:
-        return success_response({
-            'session': None
-        })
+        return success_response({"session": None})
 
-    return success_response({
-        'session': session.data,
-    })
+    return success_response(
+        {
+            "session": session.data,
+        }
+    )
 
 
 @ide.route("/list")
@@ -89,14 +91,10 @@ def admin_ide_list():
     """
 
     # Get all active sessions
-    sessions = TheiaSession.query.filter(
-        TheiaSession.active == True
-    ).all()
+    sessions = TheiaSession.query.filter(TheiaSession.active).all()
 
     # Hand back response
-    return success_response({
-        'sessions': [session.data for session in sessions]
-    })
+    return success_response({"sessions": [session.data for session in sessions]})
 
 
 @ide.route("/stop/<string:id>")
@@ -110,12 +108,10 @@ def admin_ide_stop_id(id: str):
     :return:
     """
 
-    session = TheiaSession.query.filter(
-        TheiaSession.id == id
-    ).first()
+    session = TheiaSession.query.filter(TheiaSession.id == id).first()
 
     if session is None:
-        return error_response('Session does not exist.')
+        return error_response("Session does not exist.")
 
     session.active = False
     session.ended = datetime.now()
@@ -125,9 +121,7 @@ def admin_ide_stop_id(id: str):
     enqueue_ide_stop(session.id)
 
     # Hand back response
-    return success_response({
-        "status": "Session Killed."
-    })
+    return success_response({"status": "Session Killed."})
 
 
 @ide.route("/reap-all")
@@ -147,6 +141,6 @@ def private_ide_reap_all():
     rpc_enqueue(reap_all_theia_sessions, tuple())
 
     # Hand back status
-    return success_response({
-        "status": "Reap job enqueued. Session cleanup will take a minute."
-    })
+    return success_response(
+        {"status": "Reap job enqueued. Session cleanup will take a minute."}
+    )

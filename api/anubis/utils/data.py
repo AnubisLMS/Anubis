@@ -218,8 +218,11 @@ def split_chunks(lst, n):
     return _chunks
 
 
-def rand():
-    return sha256(urandom(32)).hexdigest()
+def rand(max_len=None):
+    rand_hash = sha256(urandom(32)).hexdigest()
+    if max_len is not None:
+        return rand_hash[:max_len]
+    return rand_hash
 
 
 def human_readable_to_bytes(size: str) -> int:

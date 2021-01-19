@@ -3,8 +3,6 @@
 # - Logstash
 # - Kibana
 
-
----
 ## Logstash
 apiVersion: apps/v1
 kind: Deployment

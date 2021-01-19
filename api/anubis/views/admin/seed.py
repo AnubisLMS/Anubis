@@ -181,7 +181,7 @@ def private_seed():
     )
     db.session.add(me)
 
-    students = create_students(130) + [me]
+    students = create_students(50) + [me]
     course = create_course(students)
     assignment, _, submissions, _ = create_assignment(course, students)
 

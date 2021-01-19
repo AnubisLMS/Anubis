@@ -1,8 +1,8 @@
-"""empty message
+"""add-theia-options
 
-Revision ID: 225057bf9bcb
+Revision ID: 265635dac5b6
 Revises: 0be9593348ba
-Create Date: 2021-01-18 20:44:15.586287
+Create Date: 2021-01-19 10:52:29.171727
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = "225057bf9bcb"
+revision = "265635dac5b6"
 down_revision = "0be9593348ba"
 branch_labels = None
 depends_on = None

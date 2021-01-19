@@ -1,5 +1,5 @@
 def register_pipeline_views(app):
-    from anubis.views.pipeline import pipeline
+    from anubis.views.pipeline.pipeline import pipeline
 
     views = [
         pipeline,

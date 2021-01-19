@@ -17,8 +17,6 @@ RUN yarn --pure-lockfile && \
 
 FROM node:${NODE_VERSION}
 
-COPY cli /cli
-COPY supervisord.conf /supervisord.conf
 
 # PYTHON Version
 ARG PY_VERSION=3.9.1
@@ -41,7 +39,7 @@ RUN apt-get update \
   && python3 get-pip.py \
   && rm get-pip.py \
   && pip3 install --upgrade pip \
-  && pip3 install --upgrade python-language-server flake8 autopep8 pylint supervisor /cli \
+  && pip3 install --upgrade python-language-server flake8 autopep8 pylint supervisor \
   && apt-get clean \
   && apt-get auto-remove -y \
   && rm -rf /var/cache/apt/* \
@@ -56,5 +54,9 @@ RUN apt-get update \
   && usermod -aG docker theia
 
 COPY --from=0 /home/theia /home/theia
+
+COPY cli /cli
+COPY supervisord.conf /supervisord.conf
+RUN pip3 install /cli
 
 ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]
