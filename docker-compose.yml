@@ -162,11 +162,11 @@ services:
       - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
 
   theia-xv6:
-    image: registry.osiris.services/anubis/theia:latest
+    image: registry.osiris.services/anubis/theia-xv6:latest
     build: ./theia/ide/xv6
 
   theia-admin:
-    image: registry.osiris.services/anubis/theia:latest
+    image: registry.osiris.services/anubis/theia-admin:latest
     build: ./theia/ide/admin
 
   theia-proxy:
