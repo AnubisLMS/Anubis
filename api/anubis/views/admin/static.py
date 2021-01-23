@@ -15,6 +15,21 @@ from anubis.utils.auth import require_admin
 static = Blueprint("admin-static", __name__, url_prefix="/admin/static")
 
 
+@static.route('/delete/<string:static_id>')
+@require_admin()
+@json_response
+def static_delete_static_id(static_id: str):
+    StaticFile.query.filter(
+        StaticFile.id == static_id
+    ).delete()
+    db.session.commit()
+
+    return success_response({
+        'status': 'File deleted',
+        'variant': 'warning',
+    })
+
+
 @static.route("/list")
 @require_admin()
 @json_response
@@ -31,7 +46,11 @@ def static_public_list():
     limit = get_number_arg("limit", default_value=20)
     offset = get_number_arg("offset", default_value=0)
 
-    public_files = StaticFile.query.limit(limit).offset(offset).all()
+    public_files = StaticFile.query\
+        .order_by(StaticFile.created.desc())\
+        .limit(limit)\
+        .offset(offset)\
+        .all()
 
     return success_response(
         {"files": [public_file.data for public_file in public_files]}
@@ -39,7 +58,7 @@ def static_public_list():
 
 
 @static.route("/upload", methods=["POST"])
-@require_admin()
+@require_admin(unless_debug=True)
 @json_response
 def static_public_upload():
     """
@@ -56,7 +75,7 @@ def static_public_upload():
 
     # If the path was not specified, then create some hash for it
     if path is None:
-        path = "/" + rand()
+        path = "/" + rand(16)
 
     # Pull file from request
     stream, filename = get_request_file_stream(with_filename=True)
@@ -88,7 +107,7 @@ def static_public_upload():
 
     return success_response(
         {
-            "status": "uploaded",
+            "status": f"{filename} uploaded",
             "blob": blob.data,
         }
     )

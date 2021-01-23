@@ -31,15 +31,18 @@ export default function SubmissionStats() {
   const [questions, setQuestions] = useState([]);
   const [submission, setSubmission] = useState(null);
 
+  const assignmentId = query.get('assignmentId');
+  const netid = query.get('netid');
+
   React.useEffect(() => {
-    axios.get(`/api/admin/stats/submission/${query.get('submissionId')}`).then((response) => {
+    axios.get(`/api/admin/stats/submission/${assignmentId}/${netid}`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
         setStudent(data.student);
         setCourse(data.course);
         setAssignment(data.assignment);
         setQuestions(data.questions);
-        setSubmission(translateSubmission(data.submission));
+        setSubmission(data.submission ? translateSubmission(data.submission) : 'No submission');
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, []);

@@ -71,7 +71,7 @@ export default function Submissions() {
       <Grid container justify="center" spacing={4}>
         <Grid item xs={12}>
           <Typography variant="h6">
-            CS-UY 3224
+            Anubis
           </Typography>
           <AuthContext.Consumer>
             {(user) => (

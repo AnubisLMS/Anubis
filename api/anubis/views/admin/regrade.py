@@ -7,7 +7,7 @@ from anubis.utils.decorators import json_response
 from anubis.utils.auth import require_admin
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response
-from anubis.utils.redis_queue import enqueue_webhook, rpc_enqueue
+from anubis.utils.rpc import enqueue_webhook, rpc_enqueue
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 

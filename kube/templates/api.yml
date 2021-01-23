@@ -107,6 +107,7 @@ metadata:
     component: migrate
 spec:
   backoffLimit: 4
+  ttlSecondsAfterFinished: 30
   template:
     spec:
       restartPolicy: Never

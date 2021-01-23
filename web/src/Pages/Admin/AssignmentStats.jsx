@@ -134,7 +134,7 @@ export default function AssignmentStats() {
   }, [searched]);
 
   if (selected) {
-    return <Redirect to={`/admin/stats/submission?submissionId=${selected.submission.id}`}/>;
+    return <Redirect to={`/admin/stats/submission?assignmentId=${assignment.id}&netid=${selected.id}`}/>;
   }
 
   return (

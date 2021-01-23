@@ -10,6 +10,7 @@ import PublicIcon from '@material-ui/icons/Public';
 import GroupIcon from '@material-ui/icons/Group';
 import SettingsIcon from '@material-ui/icons/Settings';
 import PieChartIcon from '@material-ui/icons/PieChart';
+import AttachFileIcon from '@material-ui/icons/AttachFile';
 
 import About from '../Pages/Public/About';
 import Courses from '../Pages/Public/Courses';
@@ -27,6 +28,7 @@ import AdminAssignmentStats from '../Pages/Admin/AssignmentStats';
 import AdminSubmissionStats from '../Pages/Admin/SubmissionStats';
 import AdminCourses from '../Pages/Admin/Courses';
 import AdminTheia from '../Pages/Admin/Theia';
+import AdminStatic from '../Pages/Admin/Static';
 
 export const footer_nav = [{
   id: 'About',
@@ -105,6 +107,12 @@ export const admin_nav = [
     icon: <CodeOutlinedIcon/>,
     path: '/admin/ide',
     Page: AdminTheia,
+  },
+  {
+    id: 'Static',
+    icon: <AttachFileIcon/>,
+    path: '/admin/static',
+    Page: AdminStatic,
   },
 ];
 

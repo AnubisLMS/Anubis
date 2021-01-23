@@ -9,22 +9,20 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
 import {DataGrid} from '@material-ui/data-grid';
-import {Paper} from '@material-ui/core';
-import clsx from 'clsx';
+import Paper from '@material-ui/core/Paper';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import Fab from '@material-ui/core/Fab';
+import RefreshIcon from '@material-ui/icons/Refresh';
+import Tooltip from '@material-ui/core/Tooltip';
 
 
 const useStyles = makeStyles((theme) => ({
   paper: {
-    flex: 1,
+    minHeight: 700,
     padding: theme.spacing(1),
-  },
-  dataGridPaper: {
-    height: 700,
   },
   dataGrid: {
     height: '100%',
-    display: 'flex',
   },
   button: {
     margin: theme.spacing(1),
@@ -94,7 +92,7 @@ export default function Theia() {
       const data = standardStatusHandler(response, enqueueSnackbar);
 
       if (data) {
-        setSessions(data.sessions);
+        setSessions([...data.sessions]);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [reset]);
@@ -113,24 +111,38 @@ export default function Theia() {
           Course Management
         </Typography>
       </Grid>
+      <Grid item xs={12}>
+        <Button
+          variant={'contained'}
+          color={'secondary'}
+          className={classes.button}
+          onClick={stopAllSessions(state, enqueueSnackbar)}
+        >
+          Kill All Sessions
+        </Button>
+        <Tooltip title={'Reload session data'}>
+          <Fab
+            size={'small'}
+            className={classes.button}
+            color={'primary'}
+            onClick={() => setReset((prev) => ++prev)}
+          >
+            <RefreshIcon/>
+          </Fab>
+        </Tooltip>
+      </Grid>
       <Grid item/>
       <Grid item xs={12} md={10}>
         <Grid container spacing={4}>
-          <Paper className={clsx(classes.paper, classes.dataGridPaper)}>
-            <Button
-              variant={'contained'}
-              color={'secondary'}
-              className={classes.button}
-              onClick={stopAllSessions(state, enqueueSnackbar)}
-            >
-              Kill All Sessions
-            </Button>
-            <DataGrid
-              className={classes.dataGrid}
-              columns={columns}
-              rows={rows}
-            />
-          </Paper>
+          <Grid item xs={12}>
+            <Paper className={classes.paper}>
+              <DataGrid
+                className={classes.dataGrid}
+                columns={columns}
+                rows={rows}
+              />
+            </Paper>
+          </Grid>
         </Grid>
       </Grid>
     </Grid>

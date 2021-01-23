@@ -7,6 +7,7 @@ from anubis.rpc.theia import (
     reap_theia_session,
     reap_stale_theia_sessions,
 )
+from anubis.rpc.seed import seed_debug
 from anubis.config import config
 
 
@@ -43,3 +44,7 @@ def enqueue_ide_stop(*args):
 def enqueue_ide_reap_stale(*args):
     """Reap stale ide resources"""
     rpc_enqueue(reap_stale_theia_sessions, *args)
+
+
+def seed():
+    rpc_enqueue(seed_debug, [])

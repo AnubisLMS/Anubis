@@ -117,7 +117,7 @@ class Assignment(db.Model):
     name = db.Column(db.String(256), nullable=False, unique=True)
     hidden = db.Column(db.Boolean, default=False)
     description = db.Column(db.Text, nullable=True)
-    github_classroom_url = db.Column(db.String(256), nullable=True)
+    github_classroom_url = db.Column(db.String(256), nullable=True, default=None)
     pipeline_image = db.Column(db.String(256), unique=True, nullable=True)
     unique_code = db.Column(
         db.String(8),
@@ -599,7 +599,7 @@ class StaticFile(db.Model):
     filename = db.Column(db.String(256))
     path = db.Column(db.String(256))
     content_type = db.Column(db.String(128))
-    blob = db.Column(db.BLOB)
+    blob = db.Column(db.LargeBinary(length=(2**32)-1))
     hidden = db.Column(db.Boolean)
 
     # Timestamps
@@ -612,5 +612,7 @@ class StaticFile(db.Model):
             "id": self.id,
             "content_type": self.content_type,
             "filename": self.filename,
+            "path": self.path,
             "hidden": self.hidden,
+            "uploaded": str(self.created)
         }

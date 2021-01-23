@@ -8,8 +8,8 @@ from anubis.utils.auth import require_admin, current_user
 from anubis.utils.decorators import json_response
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import success_response, error_response
-from anubis.utils.redis_queue import enqueue_ide_initialize
-from anubis.utils.redis_queue import rpc_enqueue, enqueue_ide_stop
+from anubis.utils.rpc import enqueue_ide_initialize
+from anubis.utils.rpc import rpc_enqueue, enqueue_ide_stop
 
 ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 
@@ -42,6 +42,7 @@ def admin_ide_initialize():
         privileged=True,
         image="registry.osiris.services/anubis/theia-admin",
         repo_url="https://github.com/os3224/anubis-assignment-tests.git",
+        options={'limits': {'cpu': '4', 'memory': '4Gi'}},
         active=True,
         state="Initializing",
     )

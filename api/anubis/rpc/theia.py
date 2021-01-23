@@ -179,7 +179,7 @@ def initialize_theia_session(theia_session_id: str):
                 )
             )
             time.sleep(1)
-            from anubis.utils.redis_queue import enqueue_ide_initialize
+            from anubis.utils.rpc import enqueue_ide_initialize
 
             enqueue_ide_initialize(theia_session_id)
             return

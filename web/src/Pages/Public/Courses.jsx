@@ -16,6 +16,14 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import {TextField} from '@material-ui/core';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+
+
+const useStyles = makeStyles((theme) => ({
+  inline: {
+    display: 'inline',
+  },
+}));
 
 
 const joinCourse = (state, enqueueSnackbar) => () => {
@@ -30,6 +38,7 @@ const joinCourse = (state, enqueueSnackbar) => () => {
 
 
 export default function CourseView() {
+  const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [courses, setCourses] = useState([]);
   const [joinCode, setJoinCode] = useState(null);
@@ -55,48 +64,55 @@ export default function CourseView() {
   return (
     <Grid container spacing={4} justify={'center'}>
       <Grid item xs={12}>
-        <Typography variant="h6">
-          Anubis
-        </Typography>
-        <Typography variant={'subtitle1'} color={'textSecondary'}>
-          Courses
-        </Typography>
-      </Grid>
+        <Grid container spacing={4} alignItems={'center'}>
+          <Grid item>
+            <Typography variant="h6">
+              Anubis
+            </Typography>
+            <Typography variant={'subtitle1'} color={'textSecondary'}>
+              Courses
+            </Typography>
+          </Grid>
 
-      <Grid item xs={12}>
-        <Button color={'primary'} variant={'contained'} onClick={() => setJoinOpen(true)}>
-          Join Class
-        </Button>
-        <Dialog
-          open={joinOpen}
-          onClose={() => setJoinOpen(false)}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">Join an Anubis Class</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              Provide your join code here to join your class!
-            </DialogContentText>
-            <TextField
-              placeholder={'Join Code'}
-              variant={'outlined'}
-              style={{width: '100%'}}
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value)}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button
-              color="primary"
-              variant={'contained'}
-              onClick={joinCourse(state, enqueueSnackbar)}
-              autoFocus
-            >
-              Join
-            </Button>
-          </DialogActions>
-        </Dialog>
+          <Grid item>
+            <div className={classes.inline}>
+              <Button color={'primary'} variant={'contained'} onClick={() => setJoinOpen(true)}>
+                Join Class
+              </Button>
+              <Dialog
+                open={joinOpen}
+                onClose={() => setJoinOpen(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+              >
+                <DialogTitle id="alert-dialog-title">Join an Anubis Class</DialogTitle>
+                <DialogContent>
+                  <DialogContentText id="alert-dialog-description">
+                    Provide your join code here to join your class!
+                  </DialogContentText>
+                  <TextField
+                    placeholder={'Join Code'}
+                    variant={'outlined'}
+                    style={{width: '100%'}}
+                    value={joinCode}
+                    onChange={(e) => setJoinCode(e.target.value)}
+                  />
+                </DialogContent>
+                <DialogActions>
+                  <Button
+                    color="primary"
+                    variant={'contained'}
+                    onClick={joinCourse(state, enqueueSnackbar)}
+                    autoFocus
+                  >
+                    Join
+                  </Button>
+                </DialogActions>
+              </Dialog>
+            </div>
+          </Grid>
+        </Grid>
+
       </Grid>
       <Grid item/>
 

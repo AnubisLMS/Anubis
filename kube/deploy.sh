@@ -53,16 +53,13 @@ fi
 
 
 pushd ..
-docker-compose build --parallel api web logstash theia-proxy theia-init theia-sidecar
-if ! docker image ls | awk '{print $1}' | grep 'registry.osiris.services/anubis/api-dev' &>/dev/null; then
-   docker-compose build api-dev
-fi
 if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia-admin$' &>/dev/null; then
-    docker-compose build theia-admin
+    EXTRA_BUILD="theia-admin"
 fi
 if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia-xv6$' &>/dev/null; then
-    docker-compose build theia-xv6
+    EXTRA_BUILD="${EXTRA_BUILD} theia-xv6"
 fi
+docker-compose build --parallel api web logstash theia-proxy theia-init theia-sidecar ${EXTRA_BUILD}
 docker-compose push api web logstash theia-admin theia-xv6 theia-proxy theia-init theia-sidecar
 popd
 

@@ -23,7 +23,7 @@ ARG PY_VERSION=3.9.1
 RUN apt-get update \
   && apt-get upgrade -y \
   && apt-get install -y make build-essential libssl-dev \
-  && apt-get install -y libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
+  && apt-get install -y libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm htop \
   && apt-get install -y libncurses5-dev  libncursesw5-dev xz-utils tk-dev \
   && curl "https://get.docker.com/" | sh \
   && wget https://www.python.org/ftp/python/$PY_VERSION/Python-$PY_VERSION.tgz \

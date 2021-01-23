@@ -20,6 +20,7 @@ import {makeStyles} from '@material-ui/core/styles';
 import TableCell from '@material-ui/core/TableCell';
 import Divider from '@material-ui/core/Divider';
 import {useSnackbar} from 'notistack';
+import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -31,6 +32,12 @@ const useStyles = makeStyles((theme) => ({
   divider: {
     backgroundColor: '#999',
   },
+  inline: {
+    display: 'inline',
+  },
+  margin: {
+    margin: theme.spacing(1),
+  },
 }));
 
 export default function SubmissionSummary({submission, regrade, stop = false}) {
@@ -39,6 +46,19 @@ export default function SubmissionSummary({submission, regrade, stop = false}) {
 
   if (!submission) {
     return null;
+  }
+
+  if (typeof submission === 'string') {
+    return (
+      <div>
+        <Tooltip title={'No submission was captured for this student.'}>
+          <CancelIcon color={'secondary'}/>
+        </Tooltip>
+        <Typography variant={'h5'} className={clsx(classes.inline, classes.margin)}>
+          {submission}
+        </Typography>
+      </div>
+    );
   }
 
   const testsPassed = submission.tests.filter((test) => test.result.passed).length;

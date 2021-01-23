@@ -1,5 +1,5 @@
-PERSISTENT_SERVICES := db traefik kibana elasticsearch-coordinating redis-master logstash adminer
-RESTART_ALWAYS_SERVICES := api web
+PERSISTENT_SERVICES := db traefik kibana elasticsearch-coordinating redis-master logstash adminer 
+RESTART_ALWAYS_SERVICES := api web rpc-worker
 PUSH_SERVICES := api web logstash theia-init theia-proxy theia-admin theia-xv6
 BUILD_ALLWAYS := api web
 

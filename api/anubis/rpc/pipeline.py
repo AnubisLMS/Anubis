@@ -100,7 +100,7 @@ def test_repo(submission_id: str):
     :param submission_id: submission.id of to test
     """
     from anubis.app import create_app
-    from anubis.utils.redis_queue import enqueue_webhook
+    from anubis.utils.rpc import enqueue_webhook
 
     app = create_app()
 

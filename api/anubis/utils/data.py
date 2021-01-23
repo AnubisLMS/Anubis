@@ -24,7 +24,7 @@ def jsonify(data, status_code=200):
     """
     Wrap a data response to set proper headers for json
     """
-    res = Response(dumps(data, indent=0))
+    res = Response(dumps(data))
     res.status_code = status_code
     res.headers["Content-Type"] = "application/json"
     res.headers["Access-Control-Allow-Origin"] = (

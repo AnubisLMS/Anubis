@@ -8,7 +8,7 @@ from anubis.utils.auth import current_user, require_user
 from anubis.utils.decorators import json_response, load_from_id
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response
-from anubis.utils.redis_queue import enqueue_ide_stop, enqueue_ide_initialize
+from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_initialize
 from anubis.utils.theia import (
     theia_redirect_url,
     get_n_available_sessions,
