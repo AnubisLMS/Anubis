@@ -35,7 +35,8 @@ def create_assignment(course, users):
     # Assignment 1 uniq
     assignment = Assignment(
         name="uniq",
-        pipeline_image="registry.osiris.services/anubis/assignment/1",
+        unique_code='575ba490',
+        pipeline_image="registry.osiris.services/anubis/assignment/575ba490",
         hidden=False,
         release_date=datetime.now() - timedelta(hours=2),
         due_date=datetime.now() + timedelta(hours=2),
@@ -56,7 +57,7 @@ def create_assignment(course, users):
         db.session.add(assignment_question)
 
     tests = []
-    for i in range(random.randint(1, 5)):
+    for i in range(random.randint(3, 5)):
         tests.append(AssignmentTest(name=f"test {i}", assignment=assignment))
 
     submissions = []
@@ -179,7 +180,20 @@ def seed_main():
     # Init models
     for submission in submissions:
         submission.init_submission_models()
-        submission.processed = random.randint(0, 1) == 1
+        submission.processed = True
+
+        build_pass = random.randint(0, 2) != 0
+        submission.build.passed = build_pass
+        submission.build.stdout = 'blah blah blah build'
+
+        if build_pass:
+            for test_result in submission.test_results:
+                test_passed = random.randint(0, 3) != 0
+                test_result.passed = test_passed
+
+                test_result.message = 'Test passed' if test_passed else 'Test failed'
+                test_result.stdout = 'blah blah blah test output'
+
         db.session.commit()
 
     assign_questions(assignment)

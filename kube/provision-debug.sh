@@ -30,6 +30,8 @@ minikube start \
          --feature-gates=TTLAfterFinished=true \
          --ports=80:80,443:443 \
          --network-plugin=cni \
+         --cpus=$(( $(nproc) / 2 )) \
+         --memory="$(( $(free -h | nice grep -i 'mem' | awk '{print substr($2, 1, length($2)-2)}') / 2 ))Gi" \
          --cni=calico
 
 # Give the cluster a second

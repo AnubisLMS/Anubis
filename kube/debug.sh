@@ -35,6 +35,11 @@ fi
 # to the minikube node's docker daemon.
 eval $(minikube docker-env)
 
+# Build demo assignment pipeline image
+pushd ../demo
+./build.sh
+popd
+
 pushd ..
 # Only build theia if it doesnt already exist (it's a long build)
 if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia-admin$' &>/dev/null; then
