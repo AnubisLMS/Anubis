@@ -30,7 +30,7 @@ export default function Repos() {
         <AuthContext.Consumer>
           {(user) => (
             <Typography variant={'subtitle1'} color={'textSecondary'}>
-              {user.name}&apos;s Repos
+              {user?.name}&apos;s Repos
             </Typography>
           )}
         </AuthContext.Consumer>

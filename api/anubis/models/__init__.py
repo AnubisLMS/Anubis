@@ -1,7 +1,7 @@
 import base64
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_json import MutableJson
@@ -144,8 +144,11 @@ class Assignment(db.Model):
             "id": self.id,
             "name": self.name,
             "due_date": str(self.due_date),
+            "hidden": self.hidden,
             "course": self.course.data,
             "description": self.description,
+            "ide_enabled": self.ide_enabled,
+            "ide_active": self.due_date + timedelta(days=3 * 7) > datetime.now(),
             "github_classroom_link": self.github_classroom_url,
             "tests": [t.data for t in self.tests],
         }

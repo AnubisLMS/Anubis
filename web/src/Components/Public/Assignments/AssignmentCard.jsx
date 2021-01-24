@@ -80,6 +80,7 @@ export default function AssignmentCard({assignment, setSelectedTheia}) {
     course: {course_code},
     has_submission,
     github_classroom_link,
+    ide_active,
   } = assignment;
 
   const [timeLeft] = useState(remainingTime(due_date));
@@ -94,10 +95,6 @@ export default function AssignmentCard({assignment, setSelectedTheia}) {
       </span>,
     );
   });
-
-  const ideMaxTime = new Date(due_date);
-  ideMaxTime.setDate(ideMaxTime.getDate() + 7);
-  const ideEnabled = new Date() < ideMaxTime;
 
   const githubLinkEnabled = typeof github_classroom_link === 'string';
 
@@ -144,7 +141,7 @@ export default function AssignmentCard({assignment, setSelectedTheia}) {
           color={'primary'}
           className={classes.button}
           startIcon={<CodeOutlinedIcon/>}
-          disabled={!ideEnabled}
+          disabled={!ide_active}
           onClick={() => setSelectedTheia(assignment)}
         >
           Anubis Cloud IDE

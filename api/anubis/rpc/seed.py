@@ -73,28 +73,28 @@ def create_assignment(course, users):
             )
         )
 
-        for _ in range(2):
-            theia_sessions.append(
-                TheiaSession(
-                    owner=user,
-                    assignment=assignment,
-                    repo_url=repos[-1].repo_url,
-                    active=False,
-                    ended=datetime.now(),
-                    state="state",
-                    cluster_address="127.0.0.1",
-                )
-            )
-        theia_sessions.append(
-            TheiaSession(
-                owner=user,
-                assignment=assignment,
-                repo_url=repos[-1].repo_url,
-                active=True,
-                state="state",
-                cluster_address="127.0.0.1",
-            )
-        )
+        # for _ in range(2):
+        #     theia_sessions.append(
+        #         TheiaSession(
+        #             owner=user,
+        #             assignment=assignment,
+        #             repo_url=repos[-1].repo_url,
+        #             active=False,
+        #             ended=datetime.now(),
+        #             state="state",
+        #             cluster_address="127.0.0.1",
+        #         )
+        #     )
+        # theia_sessions.append(
+        #     TheiaSession(
+        #         owner=user,
+        #         assignment=assignment,
+        #         repo_url=repos[-1].repo_url,
+        #         active=True,
+        #         state="state",
+        #         cluster_address="127.0.0.1",
+        #     )
+        # )
 
         if random.randint(0, 3) != 0:
             for i in range(random.randint(1, 10)):
