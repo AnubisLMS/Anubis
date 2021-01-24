@@ -9,7 +9,7 @@ LINT_FILES := $(shell find $(LINT_DIRECTORIES) -name '*.py' | xargs)
 all: venv
 
 venv:
-	virtualenv -p `which python3.8` venv
+	virtualenv -p `which python3` venv
 	./venv/bin/pip install -r ./requirements.txt -r ./requirements-dev.txt
 
 debug:

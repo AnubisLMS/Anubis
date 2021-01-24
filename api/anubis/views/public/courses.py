@@ -36,6 +36,9 @@ def public_courses_join(join_code):
     """
     user: User = current_user()
 
+    if len(join_code) != 6:
+        return error_response('Please give a valid join code')
+
     course = Course.query.filter(Course.id.like(join_code + "%")).first()
 
     if course is None:
@@ -44,7 +47,7 @@ def public_courses_join(join_code):
     in_course = InCourse.query.filter(
         InCourse.course_id == course.id,
         InCourse.owner_id == user.id,
-    )
+    ).first()
 
     if in_course is not None:
         return success_response(

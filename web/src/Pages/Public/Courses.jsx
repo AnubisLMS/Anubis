@@ -30,8 +30,10 @@ const joinCourse = (state, enqueueSnackbar) => () => {
   const {joinCode, setReset} = state;
   axios.get(`/api/public/courses/join/${joinCode}`).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
-    if (data.status.match(/Joined/)) {
-      setReset((prev) => ++prev);
+    if (data) {
+      if (data.status.match(/Joined/)) {
+        setReset((prev) => ++prev);
+      }
     }
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
