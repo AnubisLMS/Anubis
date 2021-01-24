@@ -1,3 +1,5 @@
+import string
+
 from flask import Blueprint
 
 from anubis.models import db, User, InCourse, Course
@@ -8,6 +10,22 @@ from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import success_response, error_response
 
 courses = Blueprint("public-courses", __name__, url_prefix="/public/courses")
+
+
+def valid_join_code(join_code: str) -> bool:
+    """
+    Validate code to make sure that all the characters are ok.
+
+    :param join_code:
+    :return:
+    """
+
+    # Create a valid charset from all ascii letters and numbers
+    valid_chars = set(string.ascii_letters + string.digits)
+
+    # Make sure the join code is 6 chars long, and
+    # all the chars exist in the valid_chars set.
+    return len(join_code) == 6 and all(c in valid_chars for c in join_code)
 
 
 @courses.route("/")
@@ -36,7 +54,7 @@ def public_courses_join(join_code):
     """
     user: User = current_user()
 
-    if len(join_code) != 6:
+    if not valid_join_code(join_code):
         return error_response('Please give a valid join code')
 
     course = Course.query.filter(Course.id.like(join_code + "%")).first()
