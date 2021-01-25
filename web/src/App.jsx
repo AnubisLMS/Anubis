@@ -19,6 +19,7 @@ import Nav from './Navigation/Nav';
 import Error from './Components/Error';
 import Footer from './Components/Footer';
 import Header from './Components/Header';
+import DeviceWarning from './Components/DeviceWarning';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -66,6 +67,7 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <div className={classes.root}>
         <SnackbarProvider maxSnack={5}>
+          <DeviceWarning/>
           <Router>
             <AuthWrapper>
               <AuthContext.Consumer>

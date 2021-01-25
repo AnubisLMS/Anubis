@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Change into the directory that this script is in
-cd $(dirname $(realpath $0))
+cd $(dirname $0)
 
 # Stop if any command has an error
 set -e
@@ -14,7 +14,22 @@ minikube delete
 # Start a new minikube cluster
 echo 'staring minikube...' 1>&2
 
-# The calico cni is super importaint for the minikube debugging. It is up
+# The minikube cluster needs significant resources. These lines calculate half the number of CPU cores,
+# and half the RAM of the current machine. These are upper limits for the cluster, not reservations.
+if uname -a | grep -i linux &> /dev/null; then
+    # On linux, we can use the standard unix commands for
+    # getting the core and memory resources
+    CPUS=$(( $(nproc) / 2 ))
+    MEM="$(( $(free -h | nice grep -i 'mem' | awk '{print substr($2, 1, length($2)-2)}') / 2 ))Gi"
+else
+    # On MacOS, we'll need to calculate the CPUs and cores
+    # using sysctl. nproc and free are too cool for MacOS
+    # apparently...
+    CPUS=$(( $(sysctl -n hw.ncpu) / 2 ))
+    MEM="$(( $(( $(sysctl -n hw.memsize) / 1048576 )) / 2 ))Mi"
+fi
+
+# The calico cni is super important for the minikube debugging. It is up
 # to the networking layer to enforce any and all networking policies. The
 # default minikube networking layer does not enforce this. To simulate prod
 # networking, we need the calico networking layer.
@@ -30,8 +45,8 @@ minikube start \
          --feature-gates=TTLAfterFinished=true \
          --ports=80:80,443:443 \
          --network-plugin=cni \
-         --cpus=$(( $(nproc) / 2 )) \
-         --memory="$(( $(free -h | nice grep -i 'mem' | awk '{print substr($2, 1, length($2)-2)}') / 2 ))Gi" \
+         --cpus=${CPUS} \
+         --memory=${MEM} \
          --cni=calico
 
 # Give the cluster a second

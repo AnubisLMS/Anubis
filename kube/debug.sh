@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Change into the directory that this script is in
-cd $(dirname $(realpath $0))
+cd $(dirname $0)
 
 # Stop if any commands have an error
 set -e

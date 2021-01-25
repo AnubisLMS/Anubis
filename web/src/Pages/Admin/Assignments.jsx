@@ -64,7 +64,14 @@ export default function Assignments() {
   React.useEffect(() => {
     axios.get('/api/admin/assignments/list').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      if (data) {
+      if (data?.assignments) {
+        for (const assignment of data.assignments) {
+          for (const field of editableFields) {
+            if (field.type === 'datetime') {
+              assignment[field.field] = new Date(assignment[field.field].replace(/-/g, '/'));
+            }
+          }
+        }
         setAssignments(data.assignments);
       }
     }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
@@ -83,7 +90,7 @@ export default function Assignments() {
         }
 
         if (datetime) {
-          assignment[field] = format(e, 'yyyy-MM-dd HH:mm:ss');
+          assignment[field] = e;
           break;
         }
 
@@ -166,7 +173,6 @@ export default function Assignments() {
                       </Grid>
                     );
                   case 'datetime':
-                    const date = new Date(assignment[field]);
                     return (
                       <Grid item xs={12} key={field}>
                         <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -174,13 +180,13 @@ export default function Assignments() {
                             margin="normal"
                             label={label}
                             format="yyyy-MM-dd"
-                            value={date}
+                            value={assignment[field]}
                             onChange={updateField(assignment.id, field, false, true)}
                           />
                           <KeyboardTimePicker
                             margin="normal"
                             label="Time"
-                            value={date}
+                            value={assignment[field]}
                             onChange={updateField(assignment.id, field, false, true)}
                           />
                         </MuiPickersUtilsProvider>

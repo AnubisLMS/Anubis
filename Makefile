@@ -58,7 +58,7 @@ mindebug: build
 	docker-compose up -d traefik db redis-master logstash
 	docker-compose up \
 		-d --force-recreate \
-		api web
+		api web rpc-worker
 	@echo 'running migrations'
 	make -C api migrations
 	@echo 'seed: http://localhost/api/admin/seed/'

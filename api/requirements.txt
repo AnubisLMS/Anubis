@@ -17,7 +17,7 @@ python-dotenv
 python-geoip-geolite2
 python-geoip-python3
 python-logstash
-python-magic
+python-magic==0.4.18
 pytz
 redis
 rq

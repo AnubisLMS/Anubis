@@ -31,6 +31,7 @@ services:
       - "DEBUG=1"
       - "DB_HOST=db"
       - "THEIA_DOMAIN=ide.localhost"
+      - "MIGRATE=1"
     volumes:
       - "./api:/opt/app"
     labels:
