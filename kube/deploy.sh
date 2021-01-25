@@ -59,7 +59,7 @@ fi
 if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia-xv6$' &>/dev/null; then
     EXTRA_BUILD="${EXTRA_BUILD} theia-xv6"
 fi
-docker-compose build --parallel api web logstash theia-proxy theia-init theia-sidecar ${EXTRA_BUILD}
+docker-compose build --parallel --pull api web logstash theia-proxy theia-init theia-sidecar ${EXTRA_BUILD}
 docker-compose push api web logstash theia-admin theia-xv6 theia-proxy theia-init theia-sidecar
 popd
 

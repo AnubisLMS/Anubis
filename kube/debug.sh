@@ -47,7 +47,7 @@ if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anu
 fi
 
 # Build services in parallel to speed things up
-docker-compose build --parallel api web logstash theia-proxy theia-init theia-sidecar ${EXTRA_BUILD}
+docker-compose build --parallel --pull api web logstash theia-proxy theia-init theia-sidecar ${EXTRA_BUILD}
 popd
 
 # Figure out if we are upgrading or installing

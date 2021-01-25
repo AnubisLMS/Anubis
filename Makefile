@@ -34,11 +34,11 @@ help:
 
 .PHONY: build        # Build all docker images
 build:
-	docker-compose build --parallel $(BUILD_ALLWAYS)
+	docker-compose build --parallel --pull $(BUILD_ALLWAYS)
 
 .PHONY: push         # Push images to registry.osiris.services (requires vpn)
 push:
-	docker-compose build --parallel $(PUSH_SERVICES)
+	docker-compose build --parallel --pull $(PUSH_SERVICES)
 	docker-compose push $(PUSH_SERVICES)
 
 .PHONY: debug        # Start the cluster in debug mode
