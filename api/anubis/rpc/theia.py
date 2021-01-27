@@ -122,6 +122,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
     # Create pod
     pod = client.V1Pod(
         spec=client.V1PodSpec(
+            hostname='anubis-ide',
             init_containers=[init_container],
             containers=[theia_container, sidecar_container],
             volumes=[client.V1Volume(name=volume_name)],
@@ -318,9 +319,9 @@ def check_active_pods():
     # Build set of active pod session ids
     active_pod_ids = set()
     for pod in active_pods.items:
-        active_pod_ids.add(int(pod.metadata.labels["session"]))
+        active_pod_ids.add(pod.metadata.labels["session"])
 
-    # Build set of active db sesion ids
+    # Build set of active db session ids
     active_db_ids = set()
     for active_db_session in active_db_sessions:
         active_db_ids.add(active_db_session.id)
@@ -347,7 +348,7 @@ def check_active_pods():
     # Update database entries
     TheiaSession.query.filter(
         TheiaSession.id.in_(list(stale_db_ids)),
-    ).update(active=False)
+    ).update({TheiaSession.active: False}, False)
     db.session.commit()
 
 
@@ -423,6 +424,7 @@ def reap_all_theia_sessions(*_):
 
 def reap_stale_theia_sessions(*_):
     from anubis.app import create_app
+    from anubis.config import config as _config
 
     app = create_app()
     config.load_incluster_config()
@@ -436,22 +438,24 @@ def reap_stale_theia_sessions(*_):
         )
 
         for n, pod in enumerate(resp.items):
-            session_id = int(pod.metadata.labels["session"])
+            session_id = pod.metadata.labels["session"]
             theia_session: TheiaSession = TheiaSession.query.filter(
                 TheiaSession.id == session_id
             ).first()
+            theia_session.cluster_address = pod.status.pod_ip
 
             # Make sure we have a session to work on
             if theia_session is None:
                 continue
 
             # If the session is younger than 6 hours old, continue
-            if datetime.now() <= theia_session.created + timedelta(hours=6):
+            if datetime.now() <= theia_session.created + _config.THEIA_TIMEOUT:
+                logger.info(f'NOT reaping session {theia_session.id}')
                 continue
 
             # Log deletion
             logger.info(
-                "deleting theia session pod: {}".format(session_id),
+                "REAPING theia session pod: {}".format(session_id),
                 extra={"session": theia_session.data},
             )
 

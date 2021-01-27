@@ -24,7 +24,7 @@ static:
 
 reaper:
   enable: true
-  schedule: "*/15 * * * *"
+  schedule: "*/5 * * * *"
 
 pipeline_api:
   replicas: 2

@@ -48,6 +48,7 @@ def reap_theia_sessions():
 
 
 def reap_stats():
+    from anubis.config import config
     """
     Calculate stats for recent submissions
 
@@ -58,7 +59,7 @@ def reap_stats():
     ).having(
         and_(
             Assignment.release_date == func.max(Assignment.release_date),
-            Assignment.release_date > datetime.now() - timedelta(days=60),
+            Assignment.release_date > datetime.now() - config.STATS_REAP_DURATION,
         )
     ).all()
 
