@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Union
+from typing import Union, Tuple
 
 from flask import request
 
@@ -72,7 +72,7 @@ def get_number_arg(arg_name: str = "number", default_value: int = 10) -> int:
         return default_value
 
 
-def get_request_file_stream() -> Union[bytes, None]:
+def get_request_file_stream(with_filename=False) -> Union[bytes, None, Tuple[bytes, str]]:
     """
     Get first file uploaded in the request. Will return None if
     there is no file uploaded.
@@ -84,8 +84,15 @@ def get_request_file_stream() -> Union[bytes, None]:
     if len(request.files) != 1:
         return None
 
+    # Get file from request
+    file = list(request.files.values())[0]
+
+    # If they want the filename too
+    if with_filename:
+        return file.stream.read(), file.filename
+
     # Read its stream
-    return list(request.files.values())[0].stream.read()
+    return file.stream.read()
 
 
 def get_request_days_offset():

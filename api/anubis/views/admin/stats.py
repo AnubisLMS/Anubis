@@ -2,22 +2,21 @@ import json
 
 from flask import Blueprint, request
 
-from anubis.models import Submission
+from anubis.models import Submission, Assignment, User
 from anubis.utils.cache import cache
 from anubis.utils.decorators import json_response, load_from_id
 from anubis.utils.auth import require_admin
 from anubis.utils.elastic import log_endpoint
-from anubis.utils.http import success_response
+from anubis.utils.http import success_response, error_response, get_number_arg
 from anubis.utils.questions import get_assigned_questions
-from anubis.utils.students import get_students, bulk_stats
+from anubis.utils.students import get_students
+from anubis.utils.stats import bulk_stats, stats_for, stats_wrapper
 
 stats = Blueprint("admin-stats", __name__, url_prefix="/admin/stats")
 
 
 @stats.route("/assignment/<assignment_id>")
-@stats.route("/assignment/<assignment_id>/<netid>")
-@require_admin
-@log_endpoint("cli", lambda: "stats")
+@require_admin()
 @json_response
 def private_stats_assignment(assignment_id, netid=None):
     """
@@ -36,46 +35,76 @@ def private_stats_assignment(assignment_id, netid=None):
     :param netid:
     :return:
     """
-    netids = request.args.get("netids", None)
-    force = request.args.get("force", False)
+    limit = get_number_arg("limit", 10)
+    offset = get_number_arg("offset", 0)
 
-    if force is not False:
-        cache.clear()
-
-    if netids is not None:
-        netids = json.loads(netids)
-    elif netid is not None:
-        netids = [netid]
-    else:
-        netids = list(map(lambda x: x["netid"], get_students()))
-
-    bests = bulk_stats(assignment_id, netids)
+    bests = bulk_stats(assignment_id, limit=limit, offset=offset)
     return success_response({"stats": bests})
 
 
-@stats.route("/submission/<int:id>")
-@require_admin
-@log_endpoint("cli", lambda: "submission-stats")
-@load_from_id(Submission, verify_owner=False)
+@stats.route("/for/<assignment_id>/<user_id>")
+@require_admin()
 @json_response
-def private_submission_stats_id(submission: Submission):
+def private_stats_for(assignment_id, user_id):
+    assignment = Assignment.query.filter(
+        Assignment.id == assignment_id,
+    ).first()
+    user = User.query.filter(User.id == user_id).first()
+    submission_id = stats_for(user_id, assignment_id)
+
+    return success_response(
+        {
+            "stats": stats_wrapper(
+                assignment, user.id, user.netid, user.name, submission_id
+            )
+        }
+    )
+
+
+@stats.route("/submission/<string:assignment_id>/<string:netid>")
+@require_admin()
+@log_endpoint("cli", lambda: "submission-stats")
+@json_response
+def private_submission_stats_id(assignment_id: str, netid: str):
     """
     Get absolutely everything we have for specific submission.
 
     * This is can be a lot of data *
 
-    :param submission:
+    :param assignment_id:
+    :param netid:
     :return:
     """
 
+    user = User.query.filter(
+        User.netid == netid
+    ).first()
+    if user is None:
+        return error_response('User does not exist')
+
+    assignment = Assignment.query.filter(
+        Assignment.id == assignment_id
+    ).first()
+    if assignment is None:
+        return error_response('Assignment does not exist')
+
+    submission_id = stats_for(user.id, assignment.id)
+
+    submission_full_data = None
+    if submission_id is not None:
+        submission = Submission.query.filter(
+            Submission.id == submission_id
+        ).first()
+        submission_full_data = submission.full_data
+
     return success_response(
         {
-            "student": submission.owner.data,
-            "submission": submission.full_data,
-            "assignment": submission.assignment.data,
+            "student": user.data,
+            "submission": submission_full_data,
+            "assignment": assignment.data,
             "questions": get_assigned_questions(
-                submission.assignment.id, submission.owner.id
+                assignment.id, user.id, True
             ),
-            "class": submission.assignment.course.data,
+            "course": assignment.course.data,
         }
     )

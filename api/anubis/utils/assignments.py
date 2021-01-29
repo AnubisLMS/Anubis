@@ -8,7 +8,7 @@ from sqlalchemy import or_, and_
 from anubis.models import (
     db,
     Course,
-    InClass,
+    InCourse,
     User,
     Assignment,
     Submission,
@@ -21,8 +21,8 @@ from anubis.utils.logger import logger
 from anubis.utils.questions import ingest_questions
 
 
-@cache.memoize(timeout=60, unless=is_debug)
-def get_classes(netid: str):
+@cache.memoize(timeout=5, unless=is_debug)
+def get_courses(netid: str):
     """
     Get all classes a given netid is in
 
@@ -30,20 +30,20 @@ def get_classes(netid: str):
     :return:
     """
     # Query for classes
-    classes = Course.query.join(InClass).join(User).filter(User.netid == netid).all()
+    classes = Course.query.join(InCourse).join(User).filter(User.netid == netid).all()
 
     # Convert to list of data representation
     return [c.data for c in classes]
 
 
-@cache.memoize(timeout=60, unless=is_debug)
-def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], None]:
+@cache.memoize(timeout=5, unless=is_debug)
+def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], None]:
     """
     Get all the current assignments for a netid. Optionally specify a class_name
     to filter by class.
 
     :param netid: netid of user
-    :param class_name: optional class name
+    :param course_id: optional class name
     :return: List[Assignment.data]
     """
     # Load user
@@ -54,12 +54,12 @@ def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], 
         return None
 
     filters = []
-    if class_name is not None:
-        filters.append(Course.name == class_name)
+    if course_id is not None:
+        filters.append(Course.id == course_id)
 
     assignments = (
         Assignment.query.join(Course)
-        .join(InClass)
+        .join(InCourse)
         .join(User)
         .filter(
             User.netid == netid,
@@ -89,39 +89,38 @@ def get_assignments(netid: str, class_name=None) -> Union[List[Dict[str, str]], 
 
 @cache.memoize(timeout=3, unless=is_debug)
 def get_submissions(
-    netid: str, class_name=None, assignment_name=None, assignment_id=None
+    user_id=None, course_id=None, assignment_id=None
 ) -> Union[List[Dict[str, str]], None]:
     """
     Get all submissions for a given netid. Cache the results. Optionally specify
     a class_name and / or assignment_name for additional filtering.
 
-    :param netid: netid of student
-    :param class_name: name of class
+    :param user_id:
+    :param course_id:
     :param assignment_id: id of assignment
-    :param assignment_name: name of assignment
     :return:
     """
+
     # Load user
-    user = get_user(netid)
+    owner = User.query.filter(User.id == user_id).first()
 
     # Verify user exists
-    if user is None:
+    if owner is None:
         return None
 
     # Build filters
     filters = []
-    if class_name is not None:
-        filters.append(Course.name == class_name)
-    if assignment_name is not None:
-        filters.append(Assignment.name == assignment_name)
+    if course_id is not None and course_id != "":
+        filters.append(Course.id == course_id)
+    if user_id is not None and user_id != "":
+        filters.append(User.id == user_id)
     if assignment_id is not None:
         filters.append(Assignment.id == assignment_id)
 
-    owner = User.query.filter(User.netid == netid).first()
     submissions = (
         Submission.query.join(Assignment)
         .join(Course)
-        .join(InClass)
+        .join(InCourse)
         .join(User)
         .filter(Submission.owner_id == owner.id, *filters)
         .all()

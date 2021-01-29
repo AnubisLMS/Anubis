@@ -9,14 +9,21 @@ LINT_FILES := $(shell find $(LINT_DIRECTORIES) -name '*.py' | xargs)
 all: venv
 
 venv:
-	virtualenv -p `which python3.8` venv
+	virtualenv -p `which python3` venv
 	./venv/bin/pip install -r ./requirements.txt -r ./requirements-dev.txt
+
+debug:
+	make -C .. debug
 
 yeetdb:
 	make -C .. yeetdb
 
 cleanyeetdb:
 	make -C .. cleanyeetdb
+
+.PHONY: migrations       # Run alembic migrations
+migrations: venv
+	./venv/bin/alembic upgrade head
 
 .PHONY: lint             # Run autopep8 then black on lint directories
 lint: venv

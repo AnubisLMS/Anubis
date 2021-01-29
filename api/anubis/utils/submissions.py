@@ -1,6 +1,6 @@
 from anubis.models import Submission, AssignmentRepo, User, db
 from anubis.utils.http import error_response, success_response
-from anubis.utils.redis_queue import enqueue_webhook
+from anubis.utils.rpc import enqueue_webhook
 
 
 def bulk_regrade_submission(submissions):
@@ -48,7 +48,7 @@ def fix_dangling():
     """
     fixed = []
 
-    dangling_repos = AssignmentRepo.query.filter(AssignmentRepo.owner_id is None).all()
+    dangling_repos = AssignmentRepo.query.filter(AssignmentRepo.owner_id == None).all()
     for dr in dangling_repos:
         owner = User.query.filter(User.github_username == dr.github_username).first()
 
@@ -64,7 +64,7 @@ def fix_dangling():
                 fixed.append(s.data)
                 enqueue_webhook(s.id)
 
-    dangling_submissions = Submission.query.filter(Submission.owner_id is None).all()
+    dangling_submissions = Submission.query.filter(Submission.owner_id == None).all()
     for s in dangling_submissions:
         dr = AssignmentRepo.query.filter(
             AssignmentRepo.id == s.assignment_repo_id

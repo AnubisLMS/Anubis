@@ -31,8 +31,7 @@ services:
       - "DEBUG=1"
       - "DB_HOST=db"
       - "THEIA_DOMAIN=ide.localhost"
-    ports:
-      - 127.0.0.1:5000:5000
+      - "MIGRATE=1"
     volumes:
       - "./api:/opt/app"
     labels:
@@ -45,23 +44,6 @@ services:
       - "traefik.http.routers.api-public.rule=Host(`localhost`) && PathPrefix(`/api/`)"
       - "traefik.http.routers.api-public.entrypoints=http,https"
       - "traefik.http.routers.api-public.middlewares=strip-api@docker"
-
-  api-dev:
-    image: registry.osiris.services/anubis/api-dev:latest
-    build:
-      context: ./api
-      dockerfile: Dockerfile.dev
-    environment:
-      - "DISABLE_ELK=1"
-      - "DB_HOST=db"
-      - "DEBUG=1"
-    command: ./docker-entrypoint-dev.sh
-    ports:
-      - "127.0.0.1:5003:5003"
-    volumes:
-      - "./api:/opt/app"
-    labels:
-      - "traefik.enable=false"
 
   pipeline-api:
     build: ./api
@@ -163,9 +145,13 @@ services:
     volumes:
       - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
 
-  theia:
-    image: registry.osiris.services/anubis/theia:latest
-    build: ./theia/theia
+  theia-xv6:
+    image: registry.osiris.services/anubis/theia-xv6:latest
+    build: ./theia/ide/xv6
+
+  theia-admin:
+    image: registry.osiris.services/anubis/theia-admin:latest
+    build: ./theia/ide/admin
 
   theia-proxy:
     image: registry.osiris.services/anubis/theia-proxy:latest

@@ -92,7 +92,7 @@ def cleanup_jobs(batch_v1) -> int:
     return active_count
 
 
-def test_repo(submission_id: int):
+def test_repo(submission_id: str):
     """
     This function should launch the appropriate testing container
     for the assignment, passing along the function arguments.
@@ -100,7 +100,7 @@ def test_repo(submission_id: int):
     :param submission_id: submission.id of to test
     """
     from anubis.app import create_app
-    from anubis.utils.redis_queue import enqueue_webhook
+    from anubis.utils.rpc import enqueue_webhook
 
     app = create_app()
 

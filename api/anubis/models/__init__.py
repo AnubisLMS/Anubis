@@ -1,7 +1,7 @@
 import base64
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_json import MutableJson
@@ -11,8 +11,10 @@ from anubis.utils.data import rand
 db = SQLAlchemy()
 
 
-def default_id() -> db.Column:
-    return db.Column(db.String(128), primary_key=True, default=rand)
+def default_id(max_len=None) -> db.Column:
+    return db.Column(
+        db.String(128), primary_key=True, default=lambda: rand(max_len or 32)
+    )
 
 
 class Config(db.Model):
@@ -40,9 +42,6 @@ class User(db.Model):
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    repos = db.relationship("AssignmentRepo", cascade="all,delete")
-    in_class = db.relationship("InClass", cascade="all,delete")
-
     @property
     def data(self):
         return {
@@ -68,8 +67,6 @@ class Course(db.Model):
     section = db.Column(db.String(256), nullable=True)
     professor = db.Column(db.String(256), nullable=False)
 
-    in_class = db.relationship("InClass", cascade="all,delete")
-
     @property
     def total_assignments(self):
         return self.open_assignments
@@ -92,11 +89,12 @@ class Course(db.Model):
             "professor": self.professor,
             "total_assignments": self.total_assignments,
             "open_assignment": self.open_assignments,
+            "join_code": self.id[:6],
         }
 
 
-class InClass(db.Model):
-    __tablename__ = "in_class"
+class InCourse(db.Model):
+    __tablename__ = "in_course"
 
     # Foreign Keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
@@ -119,7 +117,7 @@ class Assignment(db.Model):
     name = db.Column(db.String(256), nullable=False, unique=True)
     hidden = db.Column(db.Boolean, default=False)
     description = db.Column(db.Text, nullable=True)
-    github_classroom_url = db.Column(db.String(256), nullable=True)
+    github_classroom_url = db.Column(db.String(256), nullable=True, default=None)
     pipeline_image = db.Column(db.String(256), unique=True, nullable=True)
     unique_code = db.Column(
         db.String(8),
@@ -127,6 +125,9 @@ class Assignment(db.Model):
         default=lambda: base64.b16encode(os.urandom(4)).decode(),
     )
     ide_enabled = db.Column(db.Boolean, default=True)
+    theia_image = db.Column(
+        db.String(128), default="registry.osiris.services/anubis/theia-xv6"
+    )
 
     # Dates
     release_date = db.Column(db.DateTime, nullable=False)
@@ -143,8 +144,11 @@ class Assignment(db.Model):
             "id": self.id,
             "name": self.name,
             "due_date": str(self.due_date),
+            "hidden": self.hidden,
             "course": self.course.data,
             "description": self.description,
+            "ide_enabled": self.ide_enabled,
+            "ide_active": self.due_date + timedelta(days=3 * 7) > datetime.now(),
             "github_classroom_link": self.github_classroom_url,
             "tests": [t.data for t in self.tests],
         }
@@ -154,7 +158,7 @@ class Assignment(db.Model):
         return {
             "assignment": {
                 "name": str,
-                "class": str,
+                "course": str,
                 "unique_code": str,
                 "hidden": bool,
                 "github_classroom_url": str,
@@ -298,7 +302,16 @@ class AssignedStudentQuestion(db.Model):
         """
 
         return {
+            "id": self.id,
+            "response": self.response,
             "question": self.question.data,
+        }
+
+    @property
+    def full_data(self):
+        return {
+            "id": self.id,
+            "question": self.question.full_data,
             "response": self.response,
         }
 
@@ -413,7 +426,7 @@ class Submission(db.Model):
             "id": self.id,
             "assignment_name": self.assignment.name,
             "assignment_due": str(self.assignment.due_date),
-            "class_code": self.assignment.course.course_code,
+            "course_code": self.assignment.course.course_code,
             "commit": self.commit,
             "processed": self.processed,
             "state": self.state,
@@ -497,7 +510,7 @@ class SubmissionBuild(db.Model):
 
     # Fields
     stdout = db.Column(db.Text)
-    passed = db.Column(db.Boolean)
+    passed = db.Column(db.Boolean, default=None)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
@@ -524,21 +537,25 @@ class TheiaSession(db.Model):
     __tablename__ = "theia_session"
 
     # id
-    id = default_id()
+    id = default_id(32)
 
     # Foreign keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
     assignment_id = db.Column(
-        db.String(128), db.ForeignKey(Assignment.id), nullable=False
+        db.String(128), db.ForeignKey(Assignment.id), nullable=True
     )
-    repo_id = db.Column(
-        db.String(128), db.ForeignKey(AssignmentRepo.id), nullable=False
-    )
+    repo_url = db.Column(db.String(128), nullable=False)
 
     # Fields
     active = db.Column(db.Boolean, default=True)
     state = db.Column(db.String(128))
     cluster_address = db.Column(db.String(256), nullable=True, default=None)
+    image = db.Column(
+        db.String(128), default="registry.osiris.services/anubis/theia-xv6"
+    )
+    options = db.Column(MutableJson, nullable=False, default=lambda: dict())
+    network_locked = db.Column(db.Boolean, default=True)
+    privileged = db.Column(db.Boolean, default=False)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
@@ -547,7 +564,6 @@ class TheiaSession(db.Model):
     last_proxy = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    repo = db.relationship(AssignmentRepo)
     owner = db.relationship(User)
     assignment = db.relationship(Assignment)
 
@@ -558,10 +574,14 @@ class TheiaSession(db.Model):
         return {
             "id": self.id,
             "assignment_id": self.assignment_id,
-            "assignment_name": self.assignment.name,
-            "class_name": self.assignment.course.course_code,
-            "repo_id": self.repo_id,
-            "repo_url": self.repo.repo_url,
+            "assignment_name": self.assignment.name
+            if self.assignment_id is not None
+            else None,
+            "course_code": self.assignment.course.course_code
+            if self.assignment_id is not None
+            else None,
+            "netid": self.owner.netid,
+            "repo_url": self.repo_url,
             "redirect_url": theia_redirect_url(self.id, self.owner.netid),
             "active": self.active,
             "state": self.state,
@@ -582,7 +602,7 @@ class StaticFile(db.Model):
     filename = db.Column(db.String(256))
     path = db.Column(db.String(256))
     content_type = db.Column(db.String(128))
-    blob = db.Column(db.BLOB)
+    blob = db.Column(db.LargeBinary(length=(2**32)-1))
     hidden = db.Column(db.Boolean)
 
     # Timestamps
@@ -595,5 +615,7 @@ class StaticFile(db.Model):
             "id": self.id,
             "content_type": self.content_type,
             "filename": self.filename,
+            "path": self.path,
             "hidden": self.hidden,
+            "uploaded": str(self.created)
         }

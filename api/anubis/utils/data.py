@@ -4,6 +4,7 @@ from json import dumps
 from os import environ, urandom
 from smtplib import SMTP
 from typing import Union, Tuple
+from datetime import datetime
 
 from flask import Response
 
@@ -217,5 +218,34 @@ def split_chunks(lst, n):
     return _chunks
 
 
-def rand():
-    return sha256(urandom(32)).hexdigest()
+def rand(max_len=None):
+    rand_hash = sha256(urandom(32)).hexdigest()
+    if max_len is not None:
+        return rand_hash[:max_len]
+    return rand_hash
+
+
+def human_readable_to_bytes(size: str) -> int:
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    size = size.split()  # divide '1 GB' into ['1', 'GB']
+    num, unit = int(size[0]), size[1]
+    # index in list of sizes determines power to raise it to
+    idx = size_name.index(unit)
+    # ** is the "exponent" operator - you can use it instead of math.pow()
+    factor = 1024 ** idx
+    return num * factor
+
+
+def row2dict(row):
+    d = {}
+
+    for column in row.__table__.columns:
+        value = getattr(row, column.name)
+
+        if isinstance(value, datetime):
+            d[column.name] = str(value)
+            continue
+
+        d[column.name] = value
+
+    return d

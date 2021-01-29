@@ -5,12 +5,13 @@ from flask import Blueprint, Response
 from anubis.models import User
 from anubis.utils.auth import create_token, require_admin
 from anubis.utils.http import error_response, success_response
+from anubis.utils.data import is_debug
 
 auth = Blueprint("admin-auth", __name__, url_prefix="/admin/auth")
 
 
 @auth.route("/token/<netid>")
-@require_admin
+@require_admin(unless_debug=True)
 def private_token_netid(netid):
     """
     For debugging, you can use this to sign in as the given user.
@@ -18,13 +19,18 @@ def private_token_netid(netid):
     :param netid:
     :return:
     """
-    user = User.query.filter_by(netid=netid).first()
-    if user is None:
+    other = User.query.filter_by(netid=netid).first()
+    if other is None:
         return error_response("User does not exist")
-    token = create_token(user.netid)
+
+    if not is_debug() and other.is_superuser:
+        return error_response("You can not log in as a superuser.")
+
+    token = create_token(other.netid)
     res = Response(
         json.dumps(success_response(token)),
         headers={"Content-Type": "application/json"},
     )
     res.set_cookie("token", token, httponly=True)
+
     return res

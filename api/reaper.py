@@ -2,8 +2,8 @@ from flask import has_request_context
 from datetime import datetime, timedelta
 from anubis.app import create_app
 from anubis.models import db, Submission, Assignment, TheiaSession
-from anubis.utils.students import bulk_stats
-from anubis.utils.redis_queue import enqueue_ide_stop, enqueue_ide_reap_stale
+from anubis.utils.stats import bulk_stats
+from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_reap_stale
 from sqlalchemy import func, and_
 import json
 
@@ -48,6 +48,7 @@ def reap_theia_sessions():
 
 
 def reap_stats():
+    from anubis.config import config
     """
     Calculate stats for recent submissions
 
@@ -58,7 +59,7 @@ def reap_stats():
     ).having(
         and_(
             Assignment.release_date == func.max(Assignment.release_date),
-            Assignment.release_date > datetime.now() - timedelta(days=60),
+            Assignment.release_date > datetime.now() - config.STATS_REAP_DURATION,
         )
     ).all()
 

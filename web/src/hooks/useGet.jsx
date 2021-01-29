@@ -11,32 +11,38 @@ export default function useGet(path, params) {
     loading: true, error: null, data: null,
   });
 
-  if (!params) params = {};
-  if (!state.loading) return state;
-
-  const searchParams = new URLSearchParams();
-  for (const key of Object.keys(params)) {
-    searchParams.append(key, params[key]);
+  function reset() {
+    setState({
+      loading: true, error: null, data: null,
+    });
   }
 
-  axios.get(path, searchParams)
-      .then(function(data) {
+  if (!params) params = {};
+  if (!state.loading) return [state, reset];
+
+  if (state.loading) {
+    axios.get(path, {params})
+      .then(function(response) {
         setState({
           loading: false,
-          error: !data.data.success,
-          data: data.data.data,
+          error: !response.data.success,
+          data: response.data.data,
         });
       })
       .catch(function(error) {
-        if (error.response && error.response.status === 401) {
-          window.location = '/api/public/auth/login';
+        if (!error.response) {
+          setState({loading: false, error: error, data: null});
+        } else if (error.response.status === 401) {
+          window.location = '/error';
+        } else {
+          setState({
+            loading: false,
+            error,
+            data: null,
+          });
         }
-        setState({
-          loading: false,
-          error: error,
-          data: null,
-        });
       });
+  }
 
-  return state;
+  return [state, reset];
 }

@@ -15,7 +15,7 @@ const useSytles = makeStyles((theme) => ({
   },
 }));
 
-export default function Nav({mobileOpen, setMobileOpen}) {
+export default function Nav({open, onDrawerToggle}) {
   const classes = useSytles();
 
   return (
@@ -24,8 +24,8 @@ export default function Nav({mobileOpen, setMobileOpen}) {
         <NavList
           PaperProps={{style: {width: drawerWidth}}}
           variant="temporary"
-          open={mobileOpen}
-          onClose={() => setMobileOpen(!mobileOpen)}
+          open={open}
+          onClose={onDrawerToggle}
         />
       </Hidden>
       <Hidden xsDown implementation="css">

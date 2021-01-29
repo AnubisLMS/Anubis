@@ -14,13 +14,12 @@ spec:
     matchLabels:
       app: api
   replicas: {{ .Values.api.replicas }}
-  {{- if .Values.api.rollingUpdates }}
+  {{- if .Values.rollingUpdates }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 1
       maxSurge: 1
-  revisionHistoryLimit: 3
   {{- end }}
   template:
     metadata:
@@ -37,11 +36,11 @@ spec:
         ports:
         - name: web
           containerPort: 5000
-        resources:
-         {{- toYaml .Values.api.resources | nindent 10 }}
         env:
         - name: "DEBUG"
           value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+        - name: "MIGRATE"
+          value: "1"
         - name: "DISABLE_ELK"
           value: "0"
         # Gunicorn workers
@@ -49,7 +48,7 @@ spec:
           value: {{ .Values.api.workers | quote }}
         {{- if .Values.api.gunicorn_options }}
         - name: "GUNICORN_OPTIONS"
-          value: {{ .Values.api.gunicorn_options }}
+          value: {{ .Values.api.gunicorn_options | quote }}
         {{- end }}
         - name: "SECRET_KEY"
           valueFrom:
@@ -75,10 +74,10 @@ spec:
               name: api
               key: database-uri
         - name: "REDIS_PASS"
-        valueFrom:
-          secretKeyRef:
-            name: api
-            key: redis-password
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: redis-password
         - name: "THEIA_DOMAIN"
           value: {{ .Values.theia.proxy.domain | quote }}
         {{- if .Values.api.healthCheck }}
@@ -94,6 +93,41 @@ spec:
       # Mail container
       - name: smtp
         image: namshi/smtp
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate
+  namespace: {{ .Release.Namespace }}
+  labels:
+    job: db-migrate
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    component: migrate
+spec:
+  backoffLimit: 4
+  ttlSecondsAfterFinished: 30
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: db-migrate
+        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        command: ["alembic", "upgrade", "head"]
+        env:
+        # sqlalchemy uri
+        - name: "DATABASE_URI"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-uri
+        - name: "REDIS_PASS"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: redis-password
 
 ---
 apiVersion: apps/v1
@@ -130,7 +164,6 @@ spec:
             memory: "200Mi"
           requests:
             memory: "100Mi"
-
 
 ---
 apiVersion: v1

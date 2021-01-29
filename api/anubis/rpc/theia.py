@@ -25,7 +25,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
                 "app": "theia",
                 "role": "session-storage",
                 "netid": theia_session.owner.netid,
-                "session": str(theia_session.id),
+                "session": theia_session.id,
             },
         ),
         spec=client.V1PersistentVolumeClaimSpec(
@@ -45,7 +45,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         image="registry.osiris.services/anubis/theia-init:latest",
         image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
         env=[
-            client.V1EnvVar(name="GIT_REPO", value=theia_session.repo.repo_url),
+            client.V1EnvVar(name="GIT_REPO", value=theia_session.repo_url),
             client.V1EnvVar(
                 name="GIT_CRED",
                 value_from=client.V1EnvVarSource(
@@ -63,15 +63,23 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         ],
     )
 
+    limits = {"cpu": "2", "memory": "500Mi"}
+    if "limits" in theia_session.options:
+        limits = theia_session.options["limits"]
+
+    requests = {"cpu": "250m", "memory": "100Mi"}
+    if "requests" in theia_session.options:
+        requests = theia_session.options["requests"]
+
     # Theia container
     theia_container = client.V1Container(
         name="theia",
-        image="registry.osiris.services/anubis/theia:latest",
+        image=theia_session.image,
         image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
-        ports=[client.V1ContainerPort(container_port=3000)],
+        ports=[client.V1ContainerPort(container_port=5000)],
         resources=client.V1ResourceRequirements(
-            limits={"cpu": "2", "memory": "500Mi"},
-            requests={"cpu": "250m", "memory": "100Mi"},
+            limits=limits,
+            requests=requests,
         ),
         volume_mounts=[
             client.V1VolumeMount(
@@ -79,6 +87,9 @@ def create_theia_pod_obj(theia_session: TheiaSession):
                 name=volume_name,
             )
         ],
+        security_context=client.V1SecurityContext(
+            privileged=theia_session.privileged,
+        ),
     )
 
     # Sidecar container
@@ -104,9 +115,14 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         ],
     )
 
+    extra_labels = {}
+    if theia_session.network_locked:
+        extra_labels["network-policy"] = "student"
+
     # Create pod
     pod = client.V1Pod(
         spec=client.V1PodSpec(
+            hostname='anubis-ide',
             init_containers=[init_container],
             containers=[theia_container, sidecar_container],
             volumes=[client.V1Volume(name=volume_name)],
@@ -119,7 +135,8 @@ def create_theia_pod_obj(theia_session: TheiaSession):
                 "app": "theia",
                 "role": "theia-session",
                 "netid": theia_session.owner.netid,
-                "session": str(theia_session.id),
+                "session": theia_session.id,
+                **extra_labels,
             },
         ),
     )
@@ -127,7 +144,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
     return pod, pvc
 
 
-def initialize_theia_session(theia_session_id: int):
+def initialize_theia_session(theia_session_id: str):
     """
     Create the kube resources for a theia session. Will update database entries if necessary.
 
@@ -163,7 +180,7 @@ def initialize_theia_session(theia_session_id: int):
                 )
             )
             time.sleep(1)
-            from anubis.utils.redis_queue import enqueue_ide_initialize
+            from anubis.utils.rpc import enqueue_ide_initialize
 
             enqueue_ide_initialize(theia_session_id)
             return
@@ -171,9 +188,7 @@ def initialize_theia_session(theia_session_id: int):
         if theia_session is None:
             logger.error(
                 "Unable to find theia session rpc.initialize_theia_session",
-                extra={
-                    "theia_session_id": theia_session_id,
-                },
+                extra={"theia_session_id": theia_session_id},
             )
             return
 
@@ -234,7 +249,7 @@ def initialize_theia_session(theia_session_id: int):
         db.session.commit()
 
 
-def reap_theia_session_resources(theia_session_id: int):
+def reap_theia_session_resources(theia_session_id: str):
     """Mark theia session resources for deletion in kube"""
     v1 = client.CoreV1Api()
 
@@ -304,9 +319,9 @@ def check_active_pods():
     # Build set of active pod session ids
     active_pod_ids = set()
     for pod in active_pods.items:
-        active_pod_ids.add(int(pod.metadata.labels["session"]))
+        active_pod_ids.add(pod.metadata.labels["session"])
 
-    # Build set of active db sesion ids
+    # Build set of active db session ids
     active_db_ids = set()
     for active_db_session in active_db_sessions:
         active_db_ids.add(active_db_session.id)
@@ -333,11 +348,11 @@ def check_active_pods():
     # Update database entries
     TheiaSession.query.filter(
         TheiaSession.id.in_(list(stale_db_ids)),
-    ).update(active=False)
+    ).update({TheiaSession.active: False}, False)
     db.session.commit()
 
 
-def reap_theia_session(theia_session_id: int):
+def reap_theia_session(theia_session_id: str):
     from anubis.app import create_app
 
     app = create_app()
@@ -409,6 +424,7 @@ def reap_all_theia_sessions(*_):
 
 def reap_stale_theia_sessions(*_):
     from anubis.app import create_app
+    from anubis.config import config as _config
 
     app = create_app()
     config.load_incluster_config()
@@ -422,22 +438,24 @@ def reap_stale_theia_sessions(*_):
         )
 
         for n, pod in enumerate(resp.items):
-            session_id = int(pod.metadata.labels["session"])
+            session_id = pod.metadata.labels["session"]
             theia_session: TheiaSession = TheiaSession.query.filter(
                 TheiaSession.id == session_id
             ).first()
+            theia_session.cluster_address = pod.status.pod_ip
 
             # Make sure we have a session to work on
             if theia_session is None:
                 continue
 
             # If the session is younger than 6 hours old, continue
-            if datetime.now() <= theia_session.created + timedelta(hours=6):
+            if datetime.now() <= theia_session.created + _config.THEIA_TIMEOUT:
+                logger.info(f'NOT reaping session {theia_session.id}')
                 continue
 
             # Log deletion
             logger.info(
-                "deleting theia session pod: {}".format(session_id),
+                "REAPING theia session pod: {}".format(session_id),
                 extra={"session": theia_session.data},
             )
 

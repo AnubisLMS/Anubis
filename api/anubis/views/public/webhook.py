@@ -6,7 +6,7 @@ from anubis.models import (
     AssignmentRepo,
     db,
     Course,
-    InClass,
+    InCourse,
     Submission,
 )
 from anubis.utils.data import is_debug
@@ -14,7 +14,7 @@ from anubis.utils.decorators import json_response
 from anubis.utils.elastic import log_endpoint, esindex
 from anubis.utils.http import error_response, success_response
 from anubis.utils.logger import logger
-from anubis.utils.redis_queue import enqueue_webhook
+from anubis.utils.rpc import enqueue_webhook
 
 webhook = Blueprint("public-webhook", __name__, url_prefix="/public/webhook")
 
@@ -48,14 +48,27 @@ def public_webhook():
 
     # Load the basics from the webhook
     repo_url = webhook["repository"]["url"]
-    github_username = webhook["pusher"]["name"]
+    pusher_username = webhook["pusher"]["name"]
     commit = webhook["after"]
-    assignment_name = webhook["repository"]["name"][: -(len(github_username) + 1)]
+    assignment_name = webhook["repository"]["name"][: -(len(pusher_username) + 1)]
 
     # Attempt to find records for the relevant models
     assignment = Assignment.query.filter(
         Assignment.unique_code.in_(webhook["repository"]["name"].split("-"))
     ).first()
+
+    # Verify that we can match this push to an assignment
+    if assignment is None:
+        logger.error(
+            "Could not find assignment",
+            extra={
+                "repo_url": repo_url,
+                "pusher_username": pusher_username,
+                "assignment_name": assignment_name,
+                "commit": commit,
+            },
+        )
+        return error_response("assignment not found"), 406
 
     # Get github username from the repository name
     repo_name_split = webhook["repository"]["name"].split("-")
@@ -67,6 +80,13 @@ def public_webhook():
         User.github_username.in_([github_username1, github_username2])
     ).first()
 
+    github_username_guess = github_username1
+    if user is None:
+        if any(github_username_guess.endswith(i) for i in ['-1', '-2', '-3']):
+            github_username_guess = github_username2
+    else:
+        github_username_guess = user.github_username
+
     # The before Hash will be all 0s on for the first hash.
     # We will want to ignore both this first push (the initialization of the repo)
     # and all branches that are not master.
@@ -77,7 +97,8 @@ def public_webhook():
             "new student repo ",
             extra={
                 "repo_url": repo_url,
-                "github_username": github_username,
+                "github_username": github_username_guess,
+                "pusher": pusher_username,
                 "assignment_name": assignment_name,
                 "commit": commit,
             },
@@ -96,26 +117,13 @@ def public_webhook():
         esindex("new-repo", repo_url=repo_url, assignment=str(assignment))
         return success_response("initial commit")
 
-    # Verify that we can match this push to an assignment
-    if assignment is None:
-        logger.error(
-            "Could not find assignment",
-            extra={
-                "repo_url": repo_url,
-                "github_username": github_username,
-                "assignment_name": assignment_name,
-                "commit": commit,
-            },
-        )
-        return error_response("assignment not found"), 406
-
     repo = (
         AssignmentRepo.query.join(Assignment)
         .join(Course)
-        .join(InClass)
+        .join(InCourse)
         .join(User)
         .filter(
-            User.github_username == github_username,
+            User.github_username == github_username_guess,
             Assignment.unique_code == assignment.unique_code,
             AssignmentRepo.repo_url == repo_url,
         )
@@ -125,7 +133,6 @@ def public_webhook():
     logger.debug(
         "webhook data",
         extra={
-            "github_username": github_username,
             "assignment": assignment.name,
             "repo_url": repo_url,
             "commit": commit,
@@ -141,7 +148,7 @@ def public_webhook():
                 "Invalid github organization in webhook.",
                 extra={
                     "repo_url": repo_url,
-                    "github_username": github_username,
+                    "pusher_username": pusher_username,
                     "assignment_name": assignment_name,
                     "commit": commit,
                 },
@@ -154,7 +161,7 @@ def public_webhook():
             owner=user,
             assignment=assignment,
             repo_url=repo_url,
-            github_username=github_username,
+            github_username=github_username_guess,
         )
         db.session.add(repo)
         db.session.commit()
@@ -164,7 +171,7 @@ def public_webhook():
             "not push to master",
             extra={
                 "repo_url": repo_url,
-                "github_username": github_username,
+                "github_username": github_username_guess,
                 "assignment_name": assignment_name,
                 "commit": commit,
             },
@@ -189,17 +196,17 @@ def public_webhook():
     # the submission will stay in a "dangling" state
     if user is None:
         logger.warning(
-            "dangling submission from {}".format(github_username),
+            "dangling submission from {}".format(github_username_guess),
             extra={
                 "repo_url": repo_url,
-                "github_username": github_username,
+                "github_username": github_username_guess,
                 "assignment_name": assignment_name,
                 "commit": commit,
             },
         )
         esindex(
             type="error",
-            logs="dangling submission by: " + github_username,
+            logs="dangling submission by: " + github_username_guess,
             submission=submission.data,
             neitd=None,
         )

@@ -1,7 +1,8 @@
-PERSISTENT_SERVICES := db traefik kibana elasticsearch-coordinating redis-master logstash adminer
-RESTART_ALWAYS_SERVICES := api web
-PUSH_SERVICES := api web logstash
+PERSISTENT_SERVICES := db traefik kibana elasticsearch-coordinating redis-master logstash adminer 
+RESTART_ALWAYS_SERVICES := api web rpc-worker
+PUSH_SERVICES := api web logstash theia-init theia-proxy theia-admin theia-xv6
 BUILD_ALLWAYS := api web
+
 
 
 CURRENT_DIR := $(shell basename $$(pwd) | tr '[:upper:]' '[:lower:]')
@@ -33,10 +34,11 @@ help:
 
 .PHONY: build        # Build all docker images
 build:
-	docker-compose build --parallel $(BUILD_ALLWAYS)
+	docker-compose build --parallel --pull $(BUILD_ALLWAYS)
 
 .PHONY: push         # Push images to registry.osiris.services (requires vpn)
-push: build
+push:
+	docker-compose build --parallel --pull $(PUSH_SERVICES)
 	docker-compose push $(PUSH_SERVICES)
 
 .PHONY: debug        # Start the cluster in debug mode
@@ -45,12 +47,32 @@ debug: build
 	docker-compose up \
 		-d --force-recreate \
 		$(RESTART_ALWAYS_SERVICES)
+	@echo 'Waiting a moment before running migrations'
+	sleep 3
+	@echo 'running migrations'
+	make -C api migrations
+	@echo 'seed: http://localhost/api/admin/seed/'
+	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
+	@echo 'site: http://localhost/'
+
+.PHONY: mindebug     # Start the minimal cluster in debug mode
+mindebug: build
+	docker-compose up -d traefik db redis-master logstash
+	docker-compose up \
+		-d --force-recreate \
+		api web rpc-worker
+	@echo 'Waiting a moment before running migrations'
+	sleep 3
+	@echo 'running migrations'
+	make -C api migrations
+	@echo 'seed: http://localhost/api/admin/seed/'
+	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
+	@echo 'site: http://localhost/'
 
 
 .PHONY: jupyter      # Start he jupyterhub container
 jupyter:
 	docker-compose up --force-recreate --build api-dev
-
 
 .PHONY: deploy       # Start the cluster in production mode
 deploy: check build restart

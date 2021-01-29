@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Change into the directory that this script is in
-cd $(dirname $(realpath $0))
+cd $(dirname $0)
 
 # Stop if any commands have an error
 set -e
@@ -35,14 +35,19 @@ fi
 # to the minikube node's docker daemon.
 eval $(minikube docker-env)
 
-pushd ..
-# Build services in parallel to speed things up
-docker-compose build --parallel api web logstash theia-proxy theia-init theia-sidecar
+# Build demo assignment pipeline image
+pushd ../demo
+./build.sh
+popd
 
+pushd ..
 # Only build theia if it doesnt already exist (it's a long build)
-if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia$' &>/dev/null; then
-    docker-compose build theia
+if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia-admin$' &>/dev/null; then
+    EXTRA_BUILD="theia-admin theia-xv6"
 fi
+
+# Build services in parallel to speed things up
+docker-compose build --parallel --pull api web logstash theia-proxy theia-init theia-sidecar ${EXTRA_BUILD}
 popd
 
 # Figure out if we are upgrading or installing
@@ -73,3 +78,9 @@ kubectl rollout restart deployments.apps/web -n anubis
 kubectl rollout restart deployments.apps/pipeline-api -n anubis
 kubectl rollout restart deployments.apps/rpc-workers  -n anubis
 kubectl rollout restart deployments.apps/theia-proxy  -n anubis
+
+
+echo
+echo 'seed: https://localhost/api/admin/seed/'
+echo 'auth: https://localhost/api/admin/auth/token/jmc1283'
+echo 'site: https://localhost/'

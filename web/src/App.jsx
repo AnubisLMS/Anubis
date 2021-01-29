@@ -1,21 +1,25 @@
 import React, {useState} from 'react';
 
-import {BrowserRouter as Router, Redirect, Route} from 'react-router-dom';
-
+import {BrowserRouter as Router} from 'react-router-dom';
 import {SnackbarProvider} from 'notistack';
-
 import clsx from 'clsx';
 
 import {makeStyles, ThemeProvider} from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
-import theme from './theme';
-import MainSwitch from './Navigation/MainSwitch';
+import {drawerWidth} from './Navigation/navconfig';
+import theme from './Theme/Dark';
+
+import AuthContext from './Contexts/AuthContext';
+
+import AuthWrapper from './Components/AuthWrapper';
+import Main from './Main';
 import useQuery from './hooks/useQuery';
 import Nav from './Navigation/Nav';
 import Error from './Components/Error';
-import {drawerWidth} from './Navigation/navconfig';
 import Footer from './Components/Footer';
+import Header from './Components/Header';
+import DeviceWarning from './Components/DeviceWarning';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -23,15 +27,6 @@ const useStyles = makeStyles(() => ({
     height: '100%',
     width: '100%',
     backgroundImage: `url(/curvylines.png)`,
-    // flexDirection: 'column',
-  },
-  drawerHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: theme.spacing(0, 1),
-    // necessary for content to be below app bar
-    ...theme.mixins.toolbar,
-    justifyContent: 'flex-end',
   },
   content: {
     flexGrow: 1,
@@ -55,18 +50,10 @@ const useStyles = makeStyles(() => ({
     }),
     marginLeft: 0,
   },
-  footer: {
-    padding: theme.spacing(2),
-    bottom: '0',
-    left: '0',
-    textAlign: 'center',
-    position: 'fixed',
-    width: '100%',
-  },
-  chip: {
-    padding: theme.spacing(1),
-    width: '100%',
-    textAlign: 'center',
+  app: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
   },
 }));
 
@@ -80,30 +67,36 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <div className={classes.root}>
         <SnackbarProvider maxSnack={5}>
+          <DeviceWarning/>
           <Router>
-            <CssBaseline>
-              <Route exact path={'/'}>
-                <Redirect to={'/about'}/>
-              </Route>
-
-              <Nav
-                variant="temporary"
-                open={open}
-                onClose={() => setOpen(false)}
-                onOpen={() => setOpen(true)}
-              />
-
-              <main
-                className={clsx(classes.content, classes.main, {
-                  [classes.contentShift]: open,
-                })}
-              >
-                <Error show={showError} onDelete={() => setShowError(false)}/>
-                <MainSwitch/>
-
-                <Footer/>
-              </main>
-            </CssBaseline>
+            <AuthWrapper>
+              <AuthContext.Consumer>
+                {(user) => (
+                  <CssBaseline>
+                    <Nav
+                      variant="temporary"
+                      open={open}
+                      onDrawerToggle={() => setOpen((prev) => !prev)}
+                    />
+                    <div className={classes.app}>
+                      <Header
+                        onDrawerToggle={() => setOpen((prev) => !prev)}
+                        user={user}
+                      />
+                      <main
+                        className={clsx(classes.content, classes.main, {
+                          [classes.contentShift]: open,
+                        })}
+                      >
+                        <Error show={showError} onDelete={() => setShowError(false)}/>
+                        <Main user={user}/>
+                      </main>
+                      <Footer/>
+                    </div>
+                  </CssBaseline>
+                )}
+              </AuthContext.Consumer>
+            </AuthWrapper>
           </Router>
         </SnackbarProvider>
       </div>

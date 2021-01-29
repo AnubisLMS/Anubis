@@ -39,7 +39,7 @@ def create_app():
 
     :return: Flask app
     """
-    from anubis.config import config
+    from anubis.config import Config
 
     # Import views
     from anubis.views.public import register_public_views
@@ -47,7 +47,7 @@ def create_app():
 
     # Create app
     app = Flask(__name__)
-    app.config.from_object(config)
+    app.config.from_object(Config())
 
     # Initialize app with all the extra services
     init_services(app)
@@ -69,7 +69,7 @@ def create_pipeline_app():
     :return: Flask app
     """
     from anubis.config import config
-    from anubis.views.pipeline.pipeline import pipeline
+    from anubis.views.pipeline import register_pipeline_views
 
     # Create app
     app = Flask(__name__)
@@ -79,6 +79,6 @@ def create_pipeline_app():
     init_services(app)
 
     # register blueprints
-    app.register_blueprint(pipeline)
+    register_pipeline_views(app)
 
     return app

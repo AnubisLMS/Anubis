@@ -1,12 +1,11 @@
 import logging
 import os
-import hashlib
+from datetime import timedelta
 
 
 class Config:
-    SECRET_KEY = os.environ.get(
-        "SECRET_KEY", default=hashlib.sha512(os.urandom(10)).hexdigest()
-    )
+    SECRET_KEY = None
+    STATS_REAP_DURATION = timedelta(days=60)
 
     # sqlalchemy
     SQLALCHEMY_DATABASE_URI = None
@@ -28,9 +27,13 @@ class Config:
 
     # Theia config
     THEIA_DOMAIN = ""
+    THEIA_TIMEOUT = timedelta(hours=6)
 
     def __init__(self):
         self.DEBUG = os.environ.get("DEBUG", default="0") == "1"
+
+        self.SECRET_KEY = os.environ.get("SECRET_KEY", default="DEBUG")
+
         self.SQLALCHEMY_DATABASE_URI = os.environ.get(
             "DATABASE_URI",
             default="mysql+pymysql://anubis:anubis@{}/anubis".format(
@@ -46,7 +49,13 @@ class Config:
         )
 
         # Redis
-        self.CACHE_REDIS_HOST = os.environ.get("CACHE_REDIS_HOST", default="redis")
+        self.CACHE_REDIS_HOST = os.environ.get(
+            "CACHE_REDIS_HOST", default="redis-master"
+        )
+
+        self.CACHE_REDIS_PASSWORD = os.environ.get(
+            "REDIS_PASS", default="anubis"
+        )
 
         # Logger
         self.LOGGER_NAME = os.environ.get("LOGGER_NAME", default="anubis-api")
@@ -55,6 +64,7 @@ class Config:
         self.THEIA_DOMAIN = os.environ.get(
             "THEIA_DOMAIN", default="ide.anubis.osiris.services"
         )
+        self.THEIA_TIMEOUT = timedelta(hours=6) if not self.DEBUG else timedelta(minutes=2)
 
         logging.info(
             "Starting with DATABASE_URI: {}".format(self.SQLALCHEMY_DATABASE_URI)

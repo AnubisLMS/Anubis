@@ -7,23 +7,38 @@ import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import AccountCircleOutlinedIcon from '@material-ui/icons/AccountCircleOutlined';
 import PublicIcon from '@material-ui/icons/Public';
+import GroupIcon from '@material-ui/icons/Group';
+import SettingsIcon from '@material-ui/icons/Settings';
+import PieChartIcon from '@material-ui/icons/PieChart';
+import AttachFileIcon from '@material-ui/icons/AttachFile';
 
-import About from '../Pages/About';
-import Courses from '../Pages/Courses';
-import Assignments from '../Pages/Assignments';
-import IDE from '../Pages/IDE';
-import Profile from '../Pages/Profile';
-import Repos from '../Pages/Repos';
-import Submissions from '../Pages/Submissions';
+import About from '../Pages/Public/About';
+import Courses from '../Pages/Public/Courses';
+import Assignments from '../Pages/Public/Assignments';
+import Profile from '../Pages/Public/Profile';
+import Repos from '../Pages/Public/Repos';
+import Submissions from '../Pages/Public/Submissions';
+import Submission from '../Pages/Public/Submission';
 
-export const footerconfig = [{
+import AdminUsers from '../Pages/Admin/Users';
+import AdminUser from '../Pages/Admin/User';
+import AdminAssignments from '../Pages/Admin/Assignments';
+import AdminStats from '../Pages/Admin/Stats';
+import AdminAssignmentStats from '../Pages/Admin/AssignmentStats';
+import AdminSubmissionStats from '../Pages/Admin/SubmissionStats';
+import AdminCourses from '../Pages/Admin/Courses';
+import AdminTheia from '../Pages/Admin/Theia';
+import AdminStatic from '../Pages/Admin/Static';
+
+export const footer_nav = [{
   id: 'About',
   icon: <PublicIcon/>,
+  exact: true,
   path: '/about',
   Page: About,
 }];
 
-export const navconfig = [
+export const public_nav = [
   {
     id: 'Anubis',
     children: [
@@ -40,22 +55,16 @@ export const navconfig = [
         Page: Assignments,
       },
       {
-        id: 'Repos',
-        icon: <GitHubIcon/>,
-        path: '/repos',
-        Page: Repos,
-      },
-      {
         id: 'Submissions',
         icon: <AssessmentIcon/>,
         path: '/courses/assignments/submissions',
         Page: Submissions,
       },
       {
-        id: 'Anubis IDE',
-        icon: <CodeOutlinedIcon/>,
-        path: '/ide',
-        Page: IDE,
+        id: 'Repos',
+        icon: <GitHubIcon/>,
+        path: '/repos',
+        Page: Repos,
       },
       {
         id: 'Profile',
@@ -64,6 +73,69 @@ export const navconfig = [
         Page: Profile,
       },
     ],
+  },
+];
+
+
+export const admin_nav = [
+  {
+    id: 'Students',
+    icon: <GroupIcon/>,
+    path: '/admin/users',
+    Page: AdminUsers,
+  },
+  {
+    id: 'Courses',
+    icon: <SchoolIcon/>,
+    path: '/admin/courses',
+    Page: AdminCourses,
+  },
+  {
+    id: 'Assignments',
+    icon: <AssignmentOutlinedIcon/>,
+    path: '/admin/assignments',
+    Page: AdminAssignments,
+  },
+  {
+    id: 'Autograde Results',
+    icon: <PieChartIcon/>,
+    path: '/admin/stats',
+    Page: AdminStats,
+  },
+  {
+    id: 'Anubis Cloud IDE',
+    icon: <CodeOutlinedIcon/>,
+    path: '/admin/ide',
+    Page: AdminTheia,
+  },
+  {
+    id: 'Static',
+    icon: <AttachFileIcon/>,
+    path: '/admin/static',
+    Page: AdminStatic,
+  },
+];
+
+export const not_shown_nav = [
+  {
+    id: 'Submission',
+    path: '/submission',
+    Page: Submission,
+  },
+  {
+    id: 'User',
+    path: '/admin/user',
+    Page: AdminUser,
+  },
+  {
+    id: 'AdminAssignmentStats',
+    path: '/admin/stats/assignment',
+    Page: AdminAssignmentStats,
+  },
+  {
+    id: 'AdminSubmissionStats',
+    path: '/admin/stats/submission',
+    Page: AdminSubmissionStats,
   },
 ];
 

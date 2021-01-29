@@ -1,0 +1,28 @@
+assignment:
+  name: "demo (No submission)"
+  class: "CS-UY 3224"
+  hidden: false
+  # Optionally specify the github classroom link
+  # for students to get their repo.
+  github_classroom_url: ""
+
+  # Don't change these!
+  unique_code: "575ba490"
+  pipeline_image: "registry.osiris.services/anubis/assignment/575ba490"
+
+  # Specify the importaint dates here
+  date:
+    release: "2020-12-12 22:42:37"
+    due: "2020-12-19 22:42:37"
+    grace: "2020-12-19 22:42:37"
+
+  # This description will be shown to the user on the Anubis website.
+  description: |
+    This is a very long description that encompases the entire assignment
+
+  # Uncomment this section if you want to have question pools
+  questions:
+    - sequence: 1
+      questions:
+        - q: "What is 3*4?"
+          a: "12"

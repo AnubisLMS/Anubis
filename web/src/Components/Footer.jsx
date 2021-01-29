@@ -9,15 +9,16 @@ const useStyles = makeStyles((theme) => ({
     left: '0',
     textAlign: 'center',
     position: 'fixed',
+    height: '50px',
     width: '100%',
   },
 }));
 
-export default function Footer() {
+export default function Footer(props) {
   const classes = useStyles();
 
   return (
-    <footer className={classes.footer}>
+    <footer className={classes.footer} {...props}>
       {window.location.pathname !== '/about' ?
         <Copyright/> :
         null}

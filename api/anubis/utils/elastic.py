@@ -52,7 +52,7 @@ def log_endpoint(log_type, message_func=None):
                             if location is not None
                             else location,
                             "ip": ip,
-                            "timestamp": datetime.utcnow(),
+                            "timestamp": str(datetime.utcnow()),
                         }
                     },
                 )

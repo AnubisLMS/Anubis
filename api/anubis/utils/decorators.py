@@ -49,7 +49,10 @@ def json_response(func):
     return json_wrap
 
 
-def json_endpoint(required_fields: Union[List[str], List[Tuple], None] = None):
+def json_endpoint(
+    required_fields: Union[List[str], List[Tuple], None] = None,
+    only_required: bool = False,
+):
     """
     Wrap a route so that it always converts data
     response to proper json.
@@ -110,15 +113,24 @@ def json_endpoint(required_fields: Union[List[str], List[Tuple], None] = None):
             # the required fields), and lastly
             # the kwargs that were passed in.
             if required_fields is not None:
+
+                # We can optionally specify only_required to
+                # skip this step. Here we are adding the key
+                # values from the posted json to the kwargs
+                # of the function. This is potentially destructive
+                # as it will overwrite any keys already in the
+                # kwargs with the values in the json.
+                if not only_required:
+                    for key, value in json_data.items():
+                        if key not in required_fields:
+                            kwargs[key] = value
+
+                # Call the function while trying to maintain a
+                # logical order to the arguments
                 return func(
                     *args,
-                    *(json_data[field] for field in required_fields),
-                    **{
-                        key: value
-                        for key, value in json_data.items()
-                        if key not in required_fields
-                    },
-                    **kwargs
+                    **{field: json_data[field] for field in required_fields},
+                    **kwargs,
                 )
             return func(json_data, *args, **kwargs)
 
@@ -143,7 +155,7 @@ def check_submission_token(func):
     """
 
     @wraps(func)
-    def wrapper(submission_id: int):
+    def wrapper(submission_id: str):
         submission = Submission.query.filter(Submission.id == submission_id).first()
         token = request.args.get("token", default=None)
 

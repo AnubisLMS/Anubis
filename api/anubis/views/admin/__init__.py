@@ -7,8 +7,21 @@ def register_admin_views(app):
     from anubis.views.admin.regrade import regrade
     from anubis.views.admin.stats import stats
     from anubis.views.admin.static import static
+    from anubis.views.admin.users import students
+    from anubis.views.admin.courses import courses_
 
-    views = [ide, auth, assignments, seed, questions, regrade, stats, static]
+    views = [
+        ide,
+        auth,
+        assignments,
+        seed,
+        questions,
+        regrade,
+        stats,
+        static,
+        students,
+        courses_,
+    ]
 
     for view in views:
         app.register_blueprint(view)
