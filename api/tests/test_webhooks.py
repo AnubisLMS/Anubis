@@ -2,8 +2,8 @@ import json
 
 import requests
 
-from utils import app_context
-from anubis.models import Assignment
+from utils import app_context, do_seed
+from anubis.models import User, Assignment, AssignmentRepo, Submission
 import os
 import hashlib
 
@@ -47,14 +47,19 @@ def gen_commit():
 
 
 @app_context
-def test_webhooks():
+def do_webhook_tests():
     assignment = Assignment.query.first()
+    user = User.query.filter_by(github_username='wabscale').first()
 
     r = post_webhook(gen_webhook(assignment.name, assignment.unique_code, "wabscale", "0" * 40, "0" * 40)).json()
     assert r['data'] == 'initial commit'
+    assert AssignmentRepo.query.filter_by(assignment_id=assignment.id, owner_id=user.id).first() is not None
+    assert AssignmentRepo.query.filter_by(assignment_id=assignment.id, owner_id=user.id).count() == 1
 
     r = post_webhook(gen_webhook(assignment.name, assignment.unique_code, "wabscale")).json()
     assert r['data'] != 'initial commit'
+    assert AssignmentRepo.query.filter_by(assignment_id=assignment.id, owner_id=user.id).first() is not None
+    assert AssignmentRepo.query.filter_by(assignment_id=assignment.id, owner_id=user.id).count() == 1
 
     r = post_webhook(gen_webhook(assignment.name, assignment.unique_code + 'abc', "wabscale")).json()
     assert r['data'] is None
@@ -68,6 +73,11 @@ def test_webhooks():
 
     r = post_webhook(gen_webhook(assignment.name, assignment.unique_code, "wabscale")).json()
     assert r['data'] == 'submission accepted'
+
+
+def test_webhooks():
+    do_seed()
+    do_webhook_tests()
 
 
 if __name__ == '__main__':

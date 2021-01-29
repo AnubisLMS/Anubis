@@ -47,6 +47,8 @@ debug: build
 	docker-compose up \
 		-d --force-recreate \
 		$(RESTART_ALWAYS_SERVICES)
+	@echo 'Waiting a moment before running migrations'
+	sleep 3
 	@echo 'running migrations'
 	make -C api migrations
 	@echo 'seed: http://localhost/api/admin/seed/'
@@ -59,6 +61,8 @@ mindebug: build
 	docker-compose up \
 		-d --force-recreate \
 		api web rpc-worker
+	@echo 'Waiting a moment before running migrations'
+	sleep 3
 	@echo 'running migrations'
 	make -C api migrations
 	@echo 'seed: http://localhost/api/admin/seed/'

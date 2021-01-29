@@ -17,9 +17,6 @@ os.environ["DB_HOST"] = "127.0.0.1"
 os.environ["CACHE_REDIS_HOST"] = "127.0.0.1"
 
 
-requests.get("http://localhost/api/admin/seed/")  # seed
-
-
 def initialize_env():
     os.environ['DB_HOST'] = '127.0.0.1'
     os.environ['REDIS_HOST'] = '127.0.0.1'
@@ -48,6 +45,12 @@ def app_context(func):
             return func(*args, **kwargs)
 
     return wrapper
+
+
+@app_context
+def do_seed():
+    from anubis.rpc.seed import seed_main
+    seed_main()
 
 
 def format_exception(e: Exception):

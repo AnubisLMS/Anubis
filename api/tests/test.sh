@@ -12,4 +12,6 @@ make venv
 source venv/bin/activate
 popd
 
-env PYTHONPATH="${TEST_ROOT}:${API_ROOT}" pytest -p no:warnings
+
+export PYTHONPATH="${TEST_ROOT}:${API_ROOT}"
+exec pytest -p no:warnings $@
