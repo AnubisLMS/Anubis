@@ -93,7 +93,7 @@ def private_assignment_save(assignment: dict):
     # Update all it's fields
     for key, value in assignment.items():
         if 'date' in key:
-            value = dateparse(value)
+            value = dateparse(value.replace('T', ' ').replace('Z', ''))
         setattr(db_assignment, key, value)
 
     # Attempt to commit

@@ -14,7 +14,6 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import Button from '@material-ui/core/Button';
-import {format} from 'date-fns';
 import Typography from '@material-ui/core/Typography';
 import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
 import IDEDialog from '../../Components/Admin/IDE/IDEDialog';
@@ -51,6 +50,11 @@ const editableFields = [
   {field: 'due_date', label: 'Due Date', type: 'datetime'},
   {field: 'grace_date', label: 'Grace Date', type: 'datetime'},
 ];
+
+const nonStupidDatetimeFormat = (date) => (
+  `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ` +
+  `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+);
 
 
 export default function Assignments() {
@@ -105,7 +109,13 @@ export default function Assignments() {
   const saveAssignment = (id) => () => {
     for (const assignment of assignments) {
       if (assignment.id === id) {
-        axios.post(`/api/admin/assignments/save`, {assignment}).then((response) => {
+        const conv_assignment = {
+          ...assignment,
+          release_date: nonStupidDatetimeFormat(assignment.release_date),
+          due_date: nonStupidDatetimeFormat(assignment.due_date),
+          grace_date: nonStupidDatetimeFormat(assignment.grace_date),
+        };
+        axios.post(`/api/admin/assignments/save`, {assignment: conv_assignment}).then((response) => {
           standardStatusHandler(response, enqueueSnackbar);
         }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
         return;
