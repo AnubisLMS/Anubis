@@ -77,6 +77,7 @@ class Course(db.Model):
         return Assignment.query.filter(
             Assignment.course_id == self.id,
             Assignment.release_date <= now,
+            Assignment.hidden == False,
         ).count()
 
     @property

@@ -1,17 +1,19 @@
+import json
+
+from dateutil.parser import parse as dateparse
 from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
-import json
 
 from anubis.models import db, Assignment, User
 from anubis.utils.assignments import assignment_sync
 from anubis.utils.auth import require_admin
+from anubis.utils.data import rand
 from anubis.utils.data import row2dict
 from anubis.utils.decorators import load_from_id, json_response, json_endpoint
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response
-from anubis.utils.questions import get_assigned_questions
-from anubis.utils.data import rand
 from anubis.utils.logger import logger
+from anubis.utils.questions import get_assigned_questions
 
 assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
 
@@ -90,6 +92,8 @@ def private_assignment_save(assignment: dict):
 
     # Update all it's fields
     for key, value in assignment.items():
+        if 'date' in key:
+            value = dateparse(value)
         setattr(db_assignment, key, value)
 
     # Attempt to commit
@@ -108,10 +112,10 @@ def private_assignment_save(assignment: dict):
 
 
 @assignments.route("/sync", methods=["POST"])
-@require_admin()
+@require_admin(unless_debug=True)
 @log_endpoint("cli", lambda: "assignment-sync")
 @json_endpoint(required_fields=[("assignment", dict)])
-def private_assignment_sync(assignment_data: dict):
+def private_assignment_sync(assignment: dict):
     """
     Sync assignment data from the CLI. This should be used to create and update assignment data.
 
@@ -128,7 +132,7 @@ def private_assignment_sync(assignment_data: dict):
           "due": "{week_from_now}",
           "grace": "{week_from_now}"
         },
-        "description": "This is a very long description that encompases the entire assignment\n",
+        "description": "This is a very long description that encompasses the entire assignment\n",
         "questions": [
           {
             "sequence": 1,
@@ -172,7 +176,7 @@ def private_assignment_sync(assignment_data: dict):
     """
 
     # Create or update assignment
-    message, success = assignment_sync(assignment_data)
+    message, success = assignment_sync(assignment)
 
     # If there was an error, pass it back
     if not success:
