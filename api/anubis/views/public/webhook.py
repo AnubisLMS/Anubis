@@ -188,7 +188,7 @@ def public_webhook():
         return error_response("not push to master")
 
     submission = Submission.query.filter_by(commit=commit).first()
-    if submissions is None:
+    if submission is None:
         # Create a shiny new submission
         submission = Submission(
             assignment=assignment,
@@ -199,6 +199,8 @@ def public_webhook():
         )
         db.session.add(submission)
         db.session.commit()
+    elif submission.created < datetime.now() - timedelta(minutes=3):
+        return success_response({ 'status': 'already created' })
 
     # Create the related submission models
     submission.init_submission_models()
