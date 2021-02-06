@@ -187,16 +187,18 @@ def public_webhook():
         )
         return error_response("not push to master")
 
-    # Create a shiny new submission
-    submission = Submission(
-        assignment=assignment,
-        repo=repo,
-        owner=user,
-        commit=commit,
-        state="Waiting for resources...",
-    )
-    db.session.add(submission)
-    db.session.commit()
+    submission = Submission.query.filter_by(commit=commit).first()
+    if submissions is None:
+        # Create a shiny new submission
+        submission = Submission(
+            assignment=assignment,
+            repo=repo,
+            owner=user,
+            commit=commit,
+            state="Waiting for resources...",
+        )
+        db.session.add(submission)
+        db.session.commit()
 
     # Create the related submission models
     submission.init_submission_models()
