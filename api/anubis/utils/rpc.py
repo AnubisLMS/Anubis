@@ -18,7 +18,7 @@ def rpc_enqueue(func, *args):
     :func callable: any callable object
     :args tuple: ordered arguments for function
     """
-    with Redis(host="redis-master", password=config.CACHE_REDIS_PASSWORD) as conn:
+    with Redis(host=config.CACHE_REDIS_HOST, password=config.CACHE_REDIS_PASSWORD) as conn:
         q = Queue(connection=conn)
         q.enqueue(func, *args)
         conn.close()

@@ -27,6 +27,8 @@ services:
     image: registry.osiris.services/anubis/api:latest
     build: ./api
     command: sh -c "while true; do python3 dev.py; sleep 1; done"
+    ports:
+      - 5000:5000
     environment:
       - "DEBUG=1"
       - "DB_HOST=db"

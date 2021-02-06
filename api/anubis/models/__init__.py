@@ -53,6 +53,12 @@ class User(db.Model):
             "is_superuser": self.is_superuser,
         }
 
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return f'<User {self.netid} {self.github_username}>'
+
 
 class Course(db.Model):
     __tablename__ = "course"

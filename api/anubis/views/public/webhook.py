@@ -105,14 +105,22 @@ def public_webhook():
         )
 
         if user is not None:
-            repo = AssignmentRepo(
-                owner=user,
-                assignment=assignment,
-                repo_url=repo_url,
-                github_username=user.github_username,
-            )
-            db.session.add(repo)
-            db.session.commit()
+            repo_exists = AssignmentRepo.query.filter(
+                AssignmentRepo.assignment_id == assignment.id,
+                AssignmentRepo.github_username == user.github_username
+            ).first() is not None
+
+            if not repo_exists:
+                repo = AssignmentRepo(
+                    owner=user,
+                    assignment=assignment,
+                    repo_url=repo_url,
+                    github_username=user.github_username,
+                )
+                db.session.add(repo)
+                db.session.commit()
+                logger.info(f'{user.github_username} {user.id} {assignment.id}')
+                logger.info(f'new repo {repo}')
 
         esindex("new-repo", repo_url=repo_url, assignment=str(assignment))
         return success_response("initial commit")
