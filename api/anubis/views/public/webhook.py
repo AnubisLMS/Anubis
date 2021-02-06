@@ -29,6 +29,7 @@ def webhook_log_msg():
 
 
 @webhook.route("/", methods=["POST"])
+@webhook.route("/backup", methods=["POST"])
 @log_endpoint("webhook", webhook_log_msg)
 @json_response
 def public_webhook():
