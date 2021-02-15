@@ -39,9 +39,10 @@ const useStyles = makeStyles(() => ({
   },
   main: {
     width: '100%',
-    height: '100%',
+    // height: '100%',
     flexDirection: 'column',
     // background: '#eaeff1',
+    marginBottom: theme.spacing(5),
   },
   contentShift: {
     transition: theme.transitions.create('margin', {

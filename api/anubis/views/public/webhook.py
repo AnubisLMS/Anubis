@@ -95,7 +95,7 @@ def public_webhook():
     if webhook["before"] == "0000000000000000000000000000000000000000":
         # Record that a new repo was created (and therefore, someone just
         # started their assignment)
-        logger.info(
+        logger.debug(
             "new student repo ",
             extra={
                 "repo_url": repo_url,

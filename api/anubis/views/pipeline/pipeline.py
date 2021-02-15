@@ -11,9 +11,9 @@ from anubis.utils.logger import logger
 pipeline = Blueprint("pipeline", __name__, url_prefix="/pipeline")
 
 
-@pipeline.route("/report/panic/<int:submission_id>", methods=["POST"])
-@json_response
+@pipeline.route("/report/panic/<string:submission_id>", methods=["POST"])
 @check_submission_token
+@json_response
 def pipeline_report_panic(submission: Submission):
     """
     POSTed json should be of the shape:
@@ -59,7 +59,7 @@ def pipeline_report_panic(submission: Submission):
     return success_response("Panic successfully reported")
 
 
-@pipeline.route("/report/build/<int:submission_id>", methods=["POST"])
+@pipeline.route("/report/build/<string:submission_id>", methods=["POST"])
 @check_submission_token
 @json_endpoint(required_fields=[("stdout", str), ("passed", bool)])
 def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **kwargs):
@@ -108,7 +108,7 @@ def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **k
     return success_response("Build successfully reported.")
 
 
-@pipeline.route("/report/test/<int:submission_id>", methods=["POST"])
+@pipeline.route("/report/test/<string:submission_id>", methods=["POST"])
 @check_submission_token
 @json_endpoint(
     required_fields=[
@@ -186,7 +186,7 @@ def pipeline_report_test(
     return success_response("Test data successfully added.")
 
 
-@pipeline.route("/report/state/<int:submission_id>", methods=["POST"])
+@pipeline.route("/report/state/<string:submission_id>", methods=["POST"])
 @check_submission_token
 @json_endpoint(required_fields=[("state", str)])
 def pipeline_report_state(submission: Submission, state: str, **kwargs):
