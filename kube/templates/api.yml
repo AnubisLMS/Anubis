@@ -27,8 +27,8 @@ spec:
         app: api
     spec:
       # dnsPolicy: Default
-      # nodeSelector:
-      #   datacenter: sdc
+      nodeSelector:
+        datacenter: mtc
       containers:
       - name: api
         image: {{ .Values.api.image }}:{{ .Values.api.tag }}
@@ -40,7 +40,7 @@ spec:
         - name: "DEBUG"
           value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
         - name: "MIGRATE"
-          value: "1"
+          value: "0"
         - name: "DISABLE_ELK"
           value: "0"
         # Gunicorn workers

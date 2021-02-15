@@ -1,4 +1,4 @@
-from anubis.utils.logger import get_logger
+from anubis.utils.logger import logger
 
 
 def rpc_bulk_regrade(submissions):
@@ -6,7 +6,6 @@ def rpc_bulk_regrade(submissions):
     from anubis.utils.submissions import bulk_regrade_submission
 
     app = create_app()
-    logger = get_logger()
 
     logger.info(
         "bulk regrading {}".format(submissions),

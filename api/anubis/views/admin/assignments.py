@@ -112,7 +112,7 @@ def private_assignment_save(assignment: dict):
 
 
 @assignments.route("/sync", methods=["POST"])
-@require_admin(unless_debug=True)
+@require_admin(unless_debug=True, unless_vpn=True)
 @log_endpoint("cli", lambda: "assignment-sync")
 @json_endpoint(required_fields=[("assignment", dict)])
 def private_assignment_sync(assignment: dict):
