@@ -135,8 +135,8 @@ def main(debug, username, password):
     assignment_base = os.path.abspath(os.path.join(os.path.dirname(__file__), 'assignment'))
 
     if debug:
-        # click.echo('Debug mode is %s' % ('on' if debug else 'off'))
-        API_URL = 'http://localhost:5000'
+        click.echo('Debug mode is %s' % ('on' if debug else 'off'))
+        API_URL = 'http://localhost/api'
 
     if username is not None or password is not None:
         c_username, c_password = load_auth()
@@ -169,7 +169,7 @@ def sync():
     import assignment
     import utils
     assignment_meta['assignment']['tests'] = list(utils.registered_tests.keys())
-    r = post_json('/private/assignment/sync', assignment_meta)
+    r = post_json('/admin/assignments/sync', assignment_meta)
     click.echo(json.dumps(r.json(), indent=2))
 
 

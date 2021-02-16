@@ -115,7 +115,7 @@ RUN yarn --pure-lockfile && \
 
 FROM common
 
-ARG LLVM=12
+ARG LLVM=10
 ARG CMAKE_VERSION=3.18.1
 # C/C++ Developer tools
 

@@ -167,10 +167,10 @@ def admin_students_toggle_superuser(id: str):
     if user.id == other.id:
         return error_response("You can not toggle your own permission.")
 
-    other.is_admin = not other.is_admin
+    other.is_superuser = not other.is_superuser
     db.session.commit()
 
-    if other.is_admin:
+    if other.is_superuser:
         return success_response(
             {"status": f"{other.name} is now a superuser", "variant": "warning"}
         )

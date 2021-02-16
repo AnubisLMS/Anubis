@@ -179,7 +179,6 @@ export default function Users() {
         }
 
         setStudents(data.students);
-        setRows(data.students);
       } else {
         enqueueSnackbar('Unable to fetch students', {variant: 'error'});
       }
@@ -199,6 +198,10 @@ export default function Users() {
 
     setRows([searched]);
   }, [searched]);
+
+  React.useEffect(() => {
+    setRows(students);
+  }, [students]);
 
   return (
     <Grid container spacing={2} justify={'center'} alignItems={'center'}>

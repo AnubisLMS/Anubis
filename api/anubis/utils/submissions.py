@@ -23,7 +23,7 @@ def regrade_submission(submission):
     :return: dict response
     """
 
-    if isinstance(submission, int):
+    if isinstance(submission, str):
         submission = Submission.query.filter_by(id=submission).first()
         if submission is None:
             return error_response("could not find submission")

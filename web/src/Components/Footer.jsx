@@ -1,6 +1,10 @@
 import Copyright from './Copyright';
 import React from 'react';
 import {makeStyles} from '@material-ui/core/styles';
+import {
+  Switch,
+  Route,
+} from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   footer: {
@@ -19,9 +23,12 @@ export default function Footer(props) {
 
   return (
     <footer className={classes.footer} {...props}>
-      {window.location.pathname !== '/about' ?
-        <Copyright/> :
-        null}
+      <Switch>
+        <Route exact path={'/about'}/>
+        <Route>
+          <Copyright/>
+        </Route>
+      </Switch>
     </footer>
   );
 }

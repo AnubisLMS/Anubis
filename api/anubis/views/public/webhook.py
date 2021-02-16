@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from datetime import datetime, timedelta
 
 from anubis.models import (
     Assignment,
@@ -29,6 +30,7 @@ def webhook_log_msg():
 
 
 @webhook.route("/", methods=["POST"])
+@webhook.route("/backup", methods=["POST"])
 @log_endpoint("webhook", webhook_log_msg)
 @json_response
 def public_webhook():
@@ -93,7 +95,7 @@ def public_webhook():
     if webhook["before"] == "0000000000000000000000000000000000000000":
         # Record that a new repo was created (and therefore, someone just
         # started their assignment)
-        logger.info(
+        logger.debug(
             "new student repo ",
             extra={
                 "repo_url": repo_url,
@@ -105,14 +107,22 @@ def public_webhook():
         )
 
         if user is not None:
-            repo = AssignmentRepo(
-                owner=user,
-                assignment=assignment,
-                repo_url=repo_url,
-                github_username=user.github_username,
-            )
-            db.session.add(repo)
-            db.session.commit()
+            repo_exists = AssignmentRepo.query.filter(
+                AssignmentRepo.assignment_id == assignment.id,
+                AssignmentRepo.github_username == user.github_username
+            ).first() is not None
+
+            if not repo_exists:
+                repo = AssignmentRepo(
+                    owner=user,
+                    assignment=assignment,
+                    repo_url=repo_url,
+                    github_username=user.github_username,
+                )
+                db.session.add(repo)
+                db.session.commit()
+                logger.info(f'{user.github_username} {user.id} {assignment.id}')
+                logger.info(f'new repo {repo}')
 
         esindex("new-repo", repo_url=repo_url, assignment=str(assignment))
         return success_response("initial commit")
@@ -178,16 +188,20 @@ def public_webhook():
         )
         return error_response("not push to master")
 
-    # Create a shiny new submission
-    submission = Submission(
-        assignment=assignment,
-        repo=repo,
-        owner=user,
-        commit=commit,
-        state="Waiting for resources...",
-    )
-    db.session.add(submission)
-    db.session.commit()
+    submission = Submission.query.filter_by(commit=commit).first()
+    if submission is None:
+        # Create a shiny new submission
+        submission = Submission(
+            assignment=assignment,
+            repo=repo,
+            owner=user,
+            commit=commit,
+            state="Waiting for resources...",
+        )
+        db.session.add(submission)
+        db.session.commit()
+    elif submission.created < datetime.now() - timedelta(minutes=3):
+        return success_response({ 'status': 'already created' })
 
     # Create the related submission models
     submission.init_submission_models()

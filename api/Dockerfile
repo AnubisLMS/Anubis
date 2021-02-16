@@ -7,7 +7,7 @@ WORKDIR /opt/app
 COPY requirements.txt requirements.txt
 
 RUN apk add --update --no-cache mariadb-client git curl tzdata gcc musl-dev libmagic \
-  && pip3 install -r ./requirements.txt \
+  && pip3 install --no-cache-dir -r ./requirements.txt \
   && adduser -D anubis \
   && chown anubis:anubis -R /opt/app \
   && ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime

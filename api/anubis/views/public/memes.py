@@ -6,7 +6,7 @@ from anubis.utils.logger import logger
 memes = Blueprint("public-memes", __name__, url_prefix="/public/memes")
 
 
-@memes.route("/memes")
+@memes.route("/")
 @log_endpoint("rick-roll", lambda: "rick-roll")
 def public_memes():
     logger.info("rick-roll")

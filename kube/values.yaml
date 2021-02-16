@@ -48,7 +48,7 @@ theia:
   enable: true
 
   proxy:
-    replicas: 3
+    replicas: 10
     domain: "ide.anubis.osiris.services"
     image: "registry.osiris.services/anubis/theia-proxy"
     tag: "latest"

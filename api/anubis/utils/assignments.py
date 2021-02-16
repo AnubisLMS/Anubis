@@ -13,6 +13,7 @@ from anubis.models import (
     Assignment,
     Submission,
     AssignmentTest,
+    AssignmentRepo,
 )
 from anubis.utils.auth import get_user
 from anubis.utils.cache import cache
@@ -81,6 +82,13 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
                 User.netid == netid,
             )
             .first()
+            is not None
+        )
+        assignment_data["has_repo"] = (
+            AssignmentRepo.query.filter(
+                AssignmentRepo.owner_id == user.id,
+                AssignmentRepo.assignment_id == assignment_data['id'],
+            ).first()
             is not None
         )
 

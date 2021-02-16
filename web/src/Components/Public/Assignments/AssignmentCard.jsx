@@ -81,6 +81,7 @@ export default function AssignmentCard({assignment, setSelectedTheia}) {
     has_submission,
     github_classroom_link,
     ide_active,
+    has_repo,
   } = assignment;
 
   const [timeLeft] = useState(remainingTime(due_date));
@@ -141,7 +142,7 @@ export default function AssignmentCard({assignment, setSelectedTheia}) {
           color={'primary'}
           className={classes.button}
           startIcon={<CodeOutlinedIcon/>}
-          disabled={!ide_active}
+          disabled={!ide_active || !has_repo}
           onClick={() => setSelectedTheia(assignment)}
         >
           Anubis Cloud IDE
@@ -152,7 +153,7 @@ export default function AssignmentCard({assignment, setSelectedTheia}) {
           color={'primary'}
           startIcon={<GitHubIcon/>}
           className={classes.button}
-          disabled={!githubLinkEnabled}
+          disabled={!githubLinkEnabled || has_repo}
           component={'a'}
           href={github_classroom_link}
           target={'_blank'}

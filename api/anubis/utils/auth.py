@@ -9,7 +9,7 @@ from flask import request
 from anubis.config import config
 from anubis.models import User
 from anubis.utils.data import is_debug
-from anubis.utils.http import error_response
+from anubis.utils.http import error_response, get_request_ip
 
 
 def get_user(netid: Union[str, None]) -> Union[User, None]:
@@ -137,13 +137,14 @@ def require_user(unless_debug=False):
     return decorator
 
 
-def require_admin(unless_debug=False):
+def require_admin(unless_debug=False, unless_vpn=False):
     """
     Wrap a function to require an admin to be logged in.
     If they are not logged in, they will get an Unathed
     error response with status code 401.
 
     :param unless_debug:
+    :param unless_vpn:
     :return:
     """
 
@@ -153,6 +154,10 @@ def require_admin(unless_debug=False):
             # Get the user in the current
             # request context.
             user = current_user()
+
+            # Bypass auth if vpn
+            if unless_vpn and get_request_ip() == '128.238.66.211':
+                return func(*args, **kwargs)
 
             # Bypass auth if the api is in debug
             # mode and unless_debug is true.
@@ -174,13 +179,14 @@ def require_admin(unless_debug=False):
     return decorator
 
 
-def require_superuser(unless_debug=False):
+def require_superuser(unless_debug=False, unless_vpn=False):
     """
     Wrap a function to require an superuser to be logged in.
     If they are not logged in, they will get an Unathed
     error response with status code 401.
 
     :param unless_debug:
+    :param unless_vpn:
     :return:
     """
 
@@ -190,6 +196,10 @@ def require_superuser(unless_debug=False):
             # Get the user in the current
             # request context.
             user = current_user()
+
+            # Bypass auth if vpn
+            if unless_vpn and get_request_ip() == '128.238.66.211':
+                return func(*args, **kwargs)
 
             # Bypass auth if the api is in debug
             # mode and unless_debug is true.

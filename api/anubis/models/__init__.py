@@ -1,5 +1,4 @@
 import base64
-import logging
 import os
 from datetime import datetime, timedelta
 
@@ -7,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_json import MutableJson
 
 from anubis.utils.data import rand
+from anubis.utils.logger import logger
 
 db = SQLAlchemy()
 
@@ -53,6 +53,12 @@ class User(db.Model):
             "is_superuser": self.is_superuser,
         }
 
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return f'<User {self.netid} {self.github_username}>'
+
 
 class Course(db.Model):
     __tablename__ = "course"
@@ -77,6 +83,7 @@ class Course(db.Model):
         return Assignment.query.filter(
             Assignment.course_id == self.id,
             Assignment.release_date <= now,
+            Assignment.hidden == False,
         ).count()
 
     @property
@@ -359,7 +366,8 @@ class Submission(db.Model):
 
         :return:
         """
-        logging.info("initializing submission {}".format(self.id))
+
+        logger.debug("initializing submission {}".format(self.id))
 
         # If the models already exist, yeet
         if len(self.test_results) != 0:
@@ -373,7 +381,7 @@ class Submission(db.Model):
         # Find tests for the current assignment
         tests = AssignmentTest.query.filter_by(assignment_id=self.assignment_id).all()
 
-        logging.debug("found tests: {}".format(list(map(lambda x: x.data, tests))))
+        logger.debug("found tests: {}".format(list(map(lambda x: x.data, tests))))
 
         for test in tests:
             tr = SubmissionTestResult(submission=self, assignment_test=test)
@@ -412,7 +420,7 @@ class Submission(db.Model):
             submission_id=self.id,
         ).all()
 
-        logging.error("Loaded tests {}".format(tests))
+        logger.debug("Loaded tests {}".format(tests))
 
         # Convert to dictionary data
         return [
