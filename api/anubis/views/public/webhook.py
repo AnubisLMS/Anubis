@@ -16,6 +16,7 @@ from anubis.utils.elastic import log_endpoint, esindex
 from anubis.utils.http import error_response, success_response
 from anubis.utils.logger import logger
 from anubis.utils.rpc import enqueue_webhook
+from anubis.utils.webhook import parse_webhook, guess_github_username, check_repo
 
 webhook = Blueprint("public-webhook", __name__, url_prefix="/public/webhook")
 
@@ -46,17 +47,12 @@ def public_webhook():
     if not (content_type == "application/json" and x_github_event == "push"):
         return error_response("Unable to verify webhook")
 
-    webhook = request.json
-
     # Load the basics from the webhook
-    repo_url = webhook["repository"]["url"]
-    pusher_username = webhook["pusher"]["name"]
-    commit = webhook["after"]
-    assignment_name = webhook["repository"]["name"][: -(len(pusher_username) + 1)]
+    repo_url, repo_name, pusher_username, commit, before, ref = parse_webhook(request.json)
 
     # Attempt to find records for the relevant models
     assignment = Assignment.query.filter(
-        Assignment.unique_code.in_(webhook["repository"]["name"].split("-"))
+        Assignment.unique_code.in_(repo_name.split("-"))
     ).first()
 
     # Verify that we can match this push to an assignment
@@ -66,33 +62,18 @@ def public_webhook():
             extra={
                 "repo_url": repo_url,
                 "pusher_username": pusher_username,
-                "assignment_name": assignment_name,
                 "commit": commit,
             },
         )
         return error_response("assignment not found"), 406
 
     # Get github username from the repository name
-    repo_name_split = webhook["repository"]["name"].split("-")
-    unique_code_index = repo_name_split.index(assignment.unique_code)
-    repo_name_split = repo_name_split[unique_code_index + 1 :]
-    github_username1 = "-".join(repo_name_split)
-    github_username2 = "-".join(repo_name_split[:-1])
-    user = User.query.filter(
-        User.github_username.in_([github_username1, github_username2])
-    ).first()
-
-    github_username_guess = github_username1
-    if user is None:
-        if any(github_username_guess.endswith(i) for i in ['-1', '-2', '-3']):
-            github_username_guess = github_username2
-    else:
-        github_username_guess = user.github_username
+    user, github_username_guess = guess_github_username(assignment, repo_name)
 
     # The before Hash will be all 0s on for the first hash.
     # We will want to ignore both this first push (the initialization of the repo)
     # and all branches that are not master.
-    if webhook["before"] == "0000000000000000000000000000000000000000":
+    if before == "0000000000000000000000000000000000000000":
         # Record that a new repo was created (and therefore, someone just
         # started their assignment)
         logger.debug(
@@ -101,28 +82,11 @@ def public_webhook():
                 "repo_url": repo_url,
                 "github_username": github_username_guess,
                 "pusher": pusher_username,
-                "assignment_name": assignment_name,
                 "commit": commit,
             },
         )
 
-        if user is not None:
-            repo_exists = AssignmentRepo.query.filter(
-                AssignmentRepo.assignment_id == assignment.id,
-                AssignmentRepo.github_username == user.github_username
-            ).first() is not None
-
-            if not repo_exists:
-                repo = AssignmentRepo(
-                    owner=user,
-                    assignment=assignment,
-                    repo_url=repo_url,
-                    github_username=user.github_username,
-                )
-                db.session.add(repo)
-                db.session.commit()
-                logger.info(f'{user.github_username} {user.id} {assignment.id}')
-                logger.info(f'new repo {repo}')
+        check_repo(assignment, repo_url, github_username_guess, user)
 
         esindex("new-repo", repo_url=repo_url, assignment=str(assignment))
         return success_response("initial commit")
@@ -159,7 +123,6 @@ def public_webhook():
                 extra={
                     "repo_url": repo_url,
                     "pusher_username": pusher_username,
-                    "assignment_name": assignment_name,
                     "commit": commit,
                 },
             )
@@ -167,22 +130,14 @@ def public_webhook():
 
     # if we dont have a record of the repo, then add it
     if repo is None:
-        repo = AssignmentRepo(
-            owner=user,
-            assignment=assignment,
-            repo_url=repo_url,
-            github_username=github_username_guess,
-        )
-        db.session.add(repo)
-        db.session.commit()
+        repo = check_repo(assignment, repo_url, github_username_guess, user)
 
-    if webhook["ref"] != "refs/heads/master":
+    if ref != "refs/heads/master":
         logger.warning(
             "not push to master",
             extra={
                 "repo_url": repo_url,
                 "github_username": github_username_guess,
-                "assignment_name": assignment_name,
                 "commit": commit,
             },
         )
@@ -214,7 +169,6 @@ def public_webhook():
             extra={
                 "repo_url": repo_url,
                 "github_username": github_username_guess,
-                "assignment_name": assignment_name,
                 "commit": commit,
             },
         )

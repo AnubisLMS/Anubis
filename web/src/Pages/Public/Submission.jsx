@@ -53,7 +53,7 @@ const regrade = ({commit, submission, setSubmission, setStep, setErrorStop}, enq
   }
 
   axios
-    .get(`/api/public/regrade/${commit}`)
+    .get(`/api/public/submissions/regrade/${commit}`)
     .then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {

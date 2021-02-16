@@ -35,6 +35,11 @@ spec:
                 secretKeyRef:
                   name: api
                   key: redis-password
+            - name: "GITHUB_TOKEN"
+              valueFrom:
+                secretKeyRef:
+                  name: git
+                  key: token
             - name: DB_HOST
               value: mariadb.mariadb.svc.cluster.local
               # sqlalchemy uri

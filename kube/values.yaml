@@ -9,6 +9,8 @@ api:
   replicas: 3
   workers: 4
 
+  datacenter: "mtc"
+
   healthCheck: true
   gunicorn_options: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
 
