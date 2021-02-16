@@ -67,6 +67,7 @@ helm ${HELM_COMMAND} anubis . -n anubis \
      --set "pipeline_api.replicas=1" \
      --set "rpc_workers.replicas=1" \
      --set "theia.proxy.replicas=1" \
+     --set "api.datacenter=false" \
      --set "theia.proxy.domain=ide.localhost" \
      --set "rollingUpdates=false" \
      --set "domain=localhost" \
