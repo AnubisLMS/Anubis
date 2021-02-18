@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 from sqlalchemy import func, and_
 
 from anubis.app import create_app
-from anubis.models import db, Submission, Assignment, TheiaSession
-from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_reap_stale
+from anubis.models import db, Submission, Assignment, AssignmentRepo, TheiaSession
+from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_reap_stale, enqueue_webhook
 from anubis.utils.stats import bulk_stats
 from anubis.utils.webhook import check_repo, guess_github_username, parse_webhook
 
@@ -140,8 +140,33 @@ def reap_repos():
         user, github_username = guess_github_username(assignment, repo_name)
         repo = check_repo(assignment, repo_url, github_username, user)
 
+        # submissions = []
+        # for submission in Submission.query.filter(Submission.assignment_repo_id == repo.id).all():
+        #     if submission.owner_id != user.id:
+        #         submission.owner_id = repo.owner_id
+        #         submissions.append(submission.id)
+        # db.session.commit()
+        # for sid in submissions:
+        #     enqueue_webhook(sid)
+
+        # r = AssignmentRepo.query.filter(AssignmentRepo.repo_url == repo_url).first()
+        # if r is not None:
+        #     if r.owner_id != user.id:
+        #         print(r.repo_url, user.name)
+        #         # r.owner_id = user.id
+        #         # submissions = []
+        #         # for submission in Submission.query.filter(
+        #         #         Submission.assignment_repo_id == r.id
+        #         # ).all():
+        #         #     submission.owner_id = user.id
+        #         #     submissions.append(submission.id)
+        #         #
+        #         # # db.session.commit()
+        #         # for sid in submissions:
+        #         #     enqueue_webhook(sid)
+
         if repo:
-            print(f'checked repo: {repo.repo_url}')
+            print(f'checked repo: {repo_name} {github_username} {user} {repo.id}')
 
 
 def reap():
