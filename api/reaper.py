@@ -94,7 +94,27 @@ def reap_repos():
         return
 
     # Do graphql nonsense
-    query = 'query{organization(login:"os3224"){repositories(first:100,orderBy:{field:CREATED_AT,direction:DESC}){nodes{name url}}}}'
+    query = '''
+    query{
+  organization(login:"os3224"){
+    repositories(first:100,orderBy:{field:CREATED_AT,direction:DESC}){
+      nodes{
+        ref(qualifiedName:"master") {
+      target {
+        ... on Commit {
+          history(first: 20) {
+            edges { node { oid } }
+          }
+        }
+      }
+        }
+        name 
+        url
+      }
+    }
+  }
+}
+    '''
     url = 'https://api.github.com/graphql'
     json = {'query': query}
     headers = {'Authorization': 'token %s' % token}
@@ -114,8 +134,8 @@ def reap_repos():
     assignments = dict()
 
     # Parse out repo name and url from graphql response
-    repos = map(lambda node: (node['name'], node['url']), repositories)
-    for repo_name, repo_url in repos:
+    repos = map(lambda node: (node['name'], node['url'], node['ref']), repositories)
+    for repo_name, repo_url, ref in repos:
         assignment = None
 
         # Try to get the assignment object from running map
@@ -140,14 +160,33 @@ def reap_repos():
         user, github_username = guess_github_username(assignment, repo_name)
         repo = check_repo(assignment, repo_url, github_username, user)
 
-        # submissions = []
-        # for submission in Submission.query.filter(Submission.assignment_repo_id == repo.id).all():
-        #     if submission.owner_id != user.id:
-        #         submission.owner_id = repo.owner_id
-        #         submissions.append(submission.id)
-        # db.session.commit()
-        # for sid in submissions:
-        #     enqueue_webhook(sid)
+        submissions = []
+        for submission in Submission.query.filter(Submission.assignment_repo_id == repo.id).all():
+            if submission.owner_id != user.id:
+                submission.owner_id = repo.owner_id
+                print(submission.owner.name)
+                submissions.append(submission.id)
+        db.session.commit()
+        for sid in submissions:
+            enqueue_webhook(sid)
+
+        for commit in map(lambda x: x['node']['oid'], ref['target']['history']['edges']):
+            submission = Submission.query.filter(
+                Submission.commit == commit
+            ).first()
+            if submission is None:
+                print(f'found missing submission {github_username} {commit}')
+                submission = Submission(
+                    commit=commit,
+                    owner=user,
+                    assignment=assignment,
+                    repo=repo,
+                    state="Waiting for resources...",
+                )
+                db.session.add(submission)
+                db.session.commit()
+                submission.init_submission_models()
+                enqueue_webhook(submission.id)
 
         # r = AssignmentRepo.query.filter(AssignmentRepo.repo_url == repo_url).first()
         # if r is not None:
