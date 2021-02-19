@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import func, and_
 
 from anubis.app import create_app
-from anubis.models import db, Submission, Assignment, AssignmentRepo, TheiaSession
+from anubis.models import db, Submission, Assignment, AssignmentRepo, TheiaSession, SubmissionBuild
 from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_reap_stale, enqueue_webhook
 from anubis.utils.stats import bulk_stats
 from anubis.utils.webhook import check_repo, guess_github_username, parse_webhook
@@ -64,13 +64,22 @@ def reap_stats():
     ).having(
         and_(
             Assignment.release_date == func.max(Assignment.release_date),
-            Assignment.release_date > datetime.now() - config.STATS_REAP_DURATION,
+            Assignment.due_date + config.STATS_REAP_DURATION > datetime.now(),
         )
     ).all()
 
     print(json.dumps({
         'reaping assignments:': [assignment.data for assignment in recent_assignments]
     }, indent=2))
+
+    for assignment in recent_assignments:
+        for submission in Submission.query.filter(
+            Submission.assignment_id == assignment.id,
+            Submission.build == None,
+        ).all():
+            if submission.build is None:
+                submission.init_submission_models()
+                enqueue_webhook(submission.id)
 
     for assignment in recent_assignments:
         bulk_stats(assignment.id)

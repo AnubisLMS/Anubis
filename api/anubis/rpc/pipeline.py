@@ -125,6 +125,9 @@ def test_repo(submission_id: str):
             )
             return
 
+        if submission.build is None:
+            submission.init_submission_models()
+
         logger.debug(
             "Found submission {}".format(submission_id),
             extra={"submission": submission.data},
