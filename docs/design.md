@@ -9,54 +9,59 @@
 \pagebreak
 
 # Contents
-- [Overview](#overview)
-    - [Elevator Pitch](#elevator-pitch)
-- [Services](#services)
-    - [Traefik](#traefik)
-    - [API](#api)
-        - [Zones](#zones)
-        - [Responsibilities](#responsibilities)
-        - [SSO Authentication](#sso-authentication)
-    - [Submission Pipeline](#submission-pipeline)
-        - [Kube Job](#kube-job)
-        - [Submission State Reporting](#submission-state-reporting)
-        - [Stages](#stages)
+- [1. Overview](#1-overview)
+    - [1.1 Elevator Pitch](#11-elevator-pitch)
+    - [1.2 Motivations](#12-motivations)
+- [2. Services](#2-services)
+    - [2.1 Traefik](#21-traefik)
+    - [2.2 API](#22-api)
+        - [2.2.1 Zones](#221-zones)
+        - [2.2.2 Responsibilities](#222-responsibilities)
+        - [2.2.3 SSO Authentication](#223-sso-authentication)
+    - [2.3 Submission Pipeline](#23-submission-pipeline)
+        - [2.3.1 Kube Job](#231-kube-job)
+        - [2.3.2 Submission State Reporting](#232-submission-state-reporting)
+        - [2.3.3 Stages](#233-stages)
             - [Clone](#clone)
             - [Build](#build)
             - [Test](#test)
-    - [Web Frontend](#web-frontend)
-        - [Autograde Results]()
-    - [Anubis Cloud IDE](#anubis-cloud-ide)
-        - [IDE Frontend](#ide-frontend)
-        - [Theia Pod Design](#theia-pod-design)
-    - [Datastores](#datastores)
-        - [Mariadb](#mariadb)
-        - [Elasticsearch](#elasticsearch)
-        - [Kibana](#kibana)
-        - [Redis + RQWorker](#redis--rqworker)
-    - [Logging](#logging)
-        - [logstash](#logstash)
-- [Deployment](#deployment)
-    - [Kubernetes](#kubernetes)
-        - [Rolling Updates](#rolling-updates)
-        - [Longhorn](#longhorn)
-        - [OSIRIS Space Cluster](#the-osiris-space-cluster)
-    - [Github](#github)
-        - [Organization](#organization)
-        - [Classroom](#classroom)
-- [CLI](#cli)
-    - [Installing](#installing-the-cli)
-    - [Usage](#cli-usage)
-- [Assignments](#assignments)
-    - [Creating a new Assignment](#creating-a-new-assignment)
-        - [Writing Tests](#writing-tests)
-        - [Uploading Tests](#uploading-tests)
+    - [2.4 Web Frontend](#24-web-frontend)
+        - [2.4.1 Autograde Results](#241-autograde-results)
+    - [2.5 Anubis Cloud IDE](#25-anubis-cloud-ide)
+        - [2.5.1 IDE Frontend](#251-ide-frontend)
+        - [2.5.2 Theia Pod Design](#252-theia-pod-design)
+    - [2.6 Datastores](#26-datastores)
+        - [2.6.1 Mariadb](#261-mariadb)
+        - [2.6.2 Elasticsearch](#262-elasticsearch)
+        - [2.6.3 Kibana](#263-kibana)
+        - [2.6.4 Redis + RQWorker](#264-redis--rqworker)
+    - [2.7 Logging](#27-logging)
+        - [2.7.1 logstash](#271-logstash)
+- [3. Deployment](#3-deployment)
+    - [3.1 Kubernetes](#31-kubernetes)
+        - [3.1.1 Helm Chart](#311-helm-chart)
+        - [3.1.2 Rolling Updates](#312-rolling-updates)
+        - [3.1.3 Longhorn](#313-longhorn)
+        - [2.1.4 OSIRIS Space Cluster](#314-the-osiris-space-cluster)
+        - [3.1.5 Nodes](#315-nodes)
+        - [3.1.6 Networking](#316-networking)
+        - [3.1.7 Shared Services](#317-shared-services)
+    - [3.2 Github](#32-github)
+        - [3.2.1 Organization](#321-organization)
+        - [3.2.2 Classroom](#322-classroom)
+- [4. CLI](#4-cli)
+    - [4.1 CLI Install](#41-installing-the-cli)
+    - [4.2 CLI Usage](#42-cli-usage)
+- [5. Assignments](#5-assignments)
+    - [5.1 Creating a new Assignment](#51-creating-a-new-assignment)
+    - [5.2 Writing Tests](#52-writing-tests)
+    - [5.3 Uploading Tests](#53-uploading-tests)
 
 \pagebreak
 
-## Overview
+## 1 Overview
 
-### Elevator Pitch
+### 1.1 Elevator Pitch
 
 At its core, Anubis is a tool to give Intro to OS students live feedback from their homework assignments 
 while they are working on them. Instead of having students submit a patch file, through github classrooms 
@@ -65,13 +70,14 @@ is simply by submitting before the deadline. Students can then push, and therefo
 they would like before the deadline.
 
 When a student pushes to their assignment repo, a job is launched in the Anubis cluster. That job will build
-their repo, run tests on the results, and store the results in the [datastore](#datastore).
+their repo, run tests on the results, and store the results in the [datastore](#26-datastores).
 
-Students can then navigate to the anubis website, where they will sign in through [NYU SSO](#sso). From there, 
+Students can then navigate to the anubis website, where they will sign in through [NYU SSO](#223-sso-authentication). 
+From there, 
 they will be able to see all the current and past assignments, and submissions for their classes. They are able 
 to view all relevant data from their build and tests for a given submission. There they can request a regrade, 
 there by launching a new submission pipeline. While the submission still being processed, the frontend will poll 
-the [API](#api) for updates. In this, the frontend will be constantly updating while the submission is being 
+the [API](#22-api) for updates. In this, the frontend will be constantly updating while the submission is being 
 processed, giving a live and interactive feel to the frontend. Once a submission is processed Anubis will show 
 the students logs from their tests, and builds along with which tests passed and which failed.
 
@@ -81,13 +87,15 @@ that students can access in the browser. What makes these so powerful is that st
 and type commands right into a bash shell which will be run in the remote container. With this setup students
 have access to a fully insolated and prebuilt linux environment at a click of a button.
 
-### Motivations
+### 1.2 Motivations
 
 The purpose of this paper is to both explain the design, and the features of the Anubis autograder.
 
-## Services
+\pagebreak
 
-### Traefik
+## 2 Services
+
+### 2.1 Traefik
 
 For our edge router, we use [traefik](https://docs.traefik.io/). Traefik will be what actually 
 listens on the servers external ports. All external traffic will be routed through Traefik. Above all else, 
@@ -104,12 +112,12 @@ being accessed externally. Namely, the basic authentication for certain paths (a
 > One thing to note here is that when being accessed from within the cluster, none of these rules 
 > apply as we would be connecting directly to services.
 
-### API
+### 2.2 API
 
 The API is the backbone of anubis. It is where all the heavy lifting is done. The service relies on both 
-the [elasticsearch](#elasticsearch) and [mariadb](#mariadb) data stores to maintain state.
+the [elasticsearch](#262-elasticsearch) and [mariadb](#261-mariadb) data stores to maintain state.
 
-#### Zones
+#### 2.2.1 Zones
 
 The API is split into two distinct, and uniquely treated zones. There is a `public` and a `admin` zone. 
 All endpoints for Anubis fall within one of these zones.
@@ -118,7 +126,7 @@ These zones are simply paths that are treated differently depending on where the
 for the admin zone external requests will require you to be marked as an admin. By adding this simple level of 
 authentication, we can lock down a section of the more sensitive API to only those authenticated from the outside.
 
-#### Responsibilities
+#### 2.2.2 Responsibilities
 
 The Anubis API is responsible for handling most basic IO, and state managing that happens on the cluster. 
 Some of this includes:
@@ -130,7 +138,7 @@ Some of this includes:
 - Handling regrade requests
 - Initializing new IDE sessions
 
-#### SSO Authentication
+#### 2.2.3 SSO Authentication
 
 To authenticate with the api, a token is required. The only way to get one of these tokens is through NYU 
 Single Sign On. By doing this, we are outsourcing our authentication. This saves a whole lot of headaches 
@@ -143,14 +151,14 @@ with a token. From there, they will be logged into Anubis.
 
 All of this is about 20 lines on our end. All that is necessary are some keys from NYU IT.
 
-### Submission Pipeline
+### 2.3 Submission Pipeline
 
-#### Kube Job
+#### 2.3.1 Kube Job
 
 A given submission pipeline is of the form of a Kubernetes [Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/).
 These jobs have some built in assurances. A job is configurable to continue to launch new containers if a Pod fails.
 
-#### Submission State Reporting
+#### 2.3.2 Submission State Reporting
 
 At each and every stage of a submission pipeline, the job will report to the api with a state update. This state is 
 in the form of a string that describes what is currently happening at that moment. This data can then be passed along 
@@ -158,12 +166,12 @@ to a user that is watching their pipeline be processed live.
 
 Each unique per-assignment pipeline is packaged in the form of a docker image.
 
-> See [Creating a new Assignment](#creating-a-new-assignment)
+> See [Creating a new Assignment](#51-creating-a-new-assignment)
 
 > An error at any stage of the submissions pipeline will result in an error being reported to the API, and 
 > the container exiting.
 
-#### Stages
+#### 2.3.3 Stages
 
 It is important to note that at each stage of the submission pipeline, we will be moving execution back and 
 forth between two users. There will be the entrypoint program managing the container as user `anubis`. The 
@@ -183,10 +191,10 @@ student user can read or write to (other than /tmp of course).
 
 At this stage we hand execution off to student code for the first time. We will be building the student 
 code _as the `student` user_. The command for building the container will be specified by on a per-assignment
-basis. The std-out of the build will be captured by the `anubis` user.
+basis. The stdout of the build will be captured by the `anubis` user.
 
 Once built, a build report will be sent to the API, along with a state update for the submission. If the 
-student is on the submission page, then they should be see the build info shortly thereafter.
+student is on the submission page, then they should be able to see the build info shortly thereafter.
 
 ##### Test
 
@@ -198,7 +206,7 @@ of the last test before continuing to the next.
 Once we reach the last test, we send off a separate notification to the API indicating the completion of 
 the pipeline. It is at that point that the API marks the submission as processed.
 
-### Web Frontend
+### 2.4 Web Frontend
 
 The frontend is designed to be a simple reflection of the backend data. Once authenticated, users will 
 be able to see the classes they are a part of, current and past assignments, and all their submissions. 
@@ -222,7 +230,7 @@ for all the known repos for that user. If it sees commits that were not previous
 not delivering a webhook), then it will create and enqueue the new submissions.
 
 
-#### Autograde Results
+#### 2.4.1 Autograde Results
 
 Getting the autograde results is as easy as searching a name in the autograde results panel. You will
 be taken to a page like this where the calculated best submission is shown. The best submission is the
@@ -238,7 +246,7 @@ heavily cached. Results are updated hourly.*
 ![Autograde Results](./img/autograde-results.png)
 
 
-### Anubis Cloud IDE
+### 2.5 Anubis Cloud IDE
 
 One of the more exciting new features is that of the cloud ide. Leveraging some magic that Kubernetes
 and containers give us, we can provide a fully insolated IDE environment for all ~130 concurrently.
@@ -251,7 +259,7 @@ we are able to compile in only the plugins we actually need/use. This is very us
 the default theia-cpp image down from 4GiB to ~1.5GiB. This is still an annoyingly large image, but hey, it's
 not 4GiB.
 
-#### IDE Frontend
+#### 2.5.1 IDE Frontend
 
 Once students have created their repo, they will be able to launch a theia session for a given assignment. At that
 time, we clone exactly what is in github into a theia pod.
@@ -267,7 +275,7 @@ and starting the websocket connection, then students will have the following the
 Something to point out here is that this looks, feels, and acts exactly as VSCode, but it is accessed over the 
 internet. We can even load some VSCode plugins into the builds. 
 
-#### Theia Pod Design
+#### 2.5.2 Theia Pod Design
 
 The pod design requires some distributed finesse. There are a couple of things about theia that make it so that
 we need to do some rather fancy things in Kubernetes to make the setup work.
@@ -298,7 +306,7 @@ Space Cluster,
 we would be able to have maybe 20-30 concurrent users using cloud virtual machines. With our containerized theia,
 we can handle all ~130 students at the same time with room to breath.
 
-#### Reclaiming Theia Resources
+#### 2.5.3 Reclaiming Theia Resources
 
 The theia sessions are often forgotten about. Students often create an IDE server, work on it for a bit, then forget
 about it. Due to this, we have a time to live of 6 hours for each session. A cronjob runs every 5 minutes to look
@@ -309,7 +317,7 @@ showing the duration of a theia session for the final exam. Just about 40% of se
 
 ![Theia Cumulative Duration](./img/theia3.png)
 
-#### Management IDE
+#### 2.5.4 Management IDE
 
 Separate from the student xv6 IDE, there is also an admin build of theia that has some extra things. On the assignments
 page of the admin panel, any TA or professor can launch their own admin IDE. In this IDE, the assignment-tests
@@ -319,9 +327,9 @@ assignments.
 
 ![Management IDE](./img/theia4.png)
 
-### Datastores
+### 2.6 Datastores
 
-#### Mariadb
+#### 2.6.1 Mariadb
 
 Anubis will use the OSIRIS Space Clusters existing MariaDB cluster. That cluster is made from 
 [bitnami's MariaDB chart](https://hub.kubeapps.com/charts/bitnami/mariadb). It runs with 3 read-only 
@@ -352,10 +360,10 @@ helm install mariadb \
      bitnami/mariadb
 ```
 
-#### Elasticsearch
+#### 2.6.2 Elasticsearch
 
 Anubis uses elasticsearch as a search engine for logging, and event tracking. The 
-[elastic ecosystem](https://www.elastic.co/) has other tools like [kibana](#kibana) and [logstash](#logstash)
+[elastic ecosystem](https://www.elastic.co/) has other tools like [kibana](#263-kibana) and [logstash](#271-logstash)
 for visualizing data, and logging. Other than the visualization features, elastic allows us to simply start 
 throwing data at it without defining any meaningful shape. This allows us to just log events and data into 
 elastic to be retrieved, and visualized later.
@@ -381,7 +389,7 @@ helm install elasticsearch \
      bitnami/elasticsearch
 ```
 
-#### Kibana
+#### 2.6.3 Kibana
 
 The Anubis autograder generates a lot of data. We have intense logging, and event tracking on every service.
 When something happens on the cluster, it will be indexed into elastic. [Kibana](https://www.elastic.co/kibana) 
@@ -403,23 +411,7 @@ This incredibly precise view into the actual data that can be generated on a pla
 something that sets it apart from its competitors. We can show meaningful statistics to the professors and TAs 
 on the platform about what went well with their assignment, and where students struggled.
 
-### Logging
-
-> _When it doubt, just log it_
-
-#### Logstash
-
-Logstash itself is a service that your applications can ship their logs to before being indexed into elasticsearch.
-Its purpose is to act as a natural buffer of log data. It is able to interface with elasticsearch, adjusting the 
-speed of log ingestion as needed. In addition to acting as a buffer, it also enriches the data that it sees. For 
-example, the logstash python client will not only ship the log message, but also the file that the log is coming 
-from, along with which node the log is coming from.
-
-This centralized, and persistent logging is indexed into elasticsearch, and accessed via kiaban. Anubis uses logstash
-on its API and submission pipeline.
-
-
-#### Redis + RQWorker
+#### 2.6.4 Redis + RQWorker
 
 Redis has two purposes in Anubis. It is used by flask-caching to cache some endpoint and function 
 results. For most all the functions that are heavy on the database, the results are cached for a specified period
@@ -441,24 +433,61 @@ helm install redis \
      bitnami/redis
 ```
 
+### 2.7 Logging
 
-## Deployment
+> _When it doubt, just log it_
 
-### Kubernetes
+#### 2.7.1 Logstash
+
+Logstash itself is a service that your applications can ship their logs to before being indexed into elasticsearch.
+Its purpose is to act as a natural buffer of log data. It is able to interface with elasticsearch, adjusting the 
+speed of log ingestion as needed. In addition to acting as a buffer, it also enriches the data that it sees. For 
+example, the logstash python client will not only ship the log message, but also the file that the log is coming 
+from, along with which node the log is coming from.
+
+This centralized, and persistent logging is indexed into elasticsearch, and accessed via kiaban. Anubis uses logstash
+on its API and submission pipeline.
+
+\pagebreak
+
+## 3 Deployment
+
+### 3.1 Kubernetes
 
 The main goal with moving to Kubernetes from a simple single server docker-compose setup was scalability. We needed 
 to scale our load horizontally. No longer was adding more RAM and CPU cores to the VM viable. With more users, we 
 have a greater load. Kubernetes allows us to distribute this load across the servers in the clusters quite easily.
 
 In moving to Kube, we are also now able to make guarantees about availability. In theory, even if sections of 
-physical servers on the cluster go offline Anubis will still remain available. [More on that later...](#the-osiris-space-cluster)
+physical servers on the cluster go offline Anubis will still remain available. 
+[More on that later...](#314-the-osiris-space-cluster)
 
 
-#### Helm
+#### 3.1.1 Helm Chart
 
-Anubis itself is packaged as a helm chart. Both mariadb and elasticsearch need to be setup separately.
+Anubis itself is packaged as a helm chart. Both mariadb and elasticsearch need to be setup separately. There
+are several options for how to deploy anubis that can be specified when running the deploy script at `kube/deploy.sh`.
+Notable options are deploying in debug mode, or restricting access to only the OSIRIS vpn. Options passed
+to the deploy script will be then passed to helm.
 
-#### Rolling Updates
+
+```shell
+# Deploy with anubis only being accessable from the OSIRIS vpn
+./kube/deploy.sh --set vpnOnly=true
+
+# Deploy in debug mode
+./kube/deploy.sh --set debug=true
+
+# Set the number of replicas for the api service to a specific value
+./kube/deploy.sh --set api.replicas=5
+
+# Disable rolling updates
+./kube/deploy.sh --set rollingUpdates=false
+```
+
+A full list of options can be found in the values.yaml file at `kube/values.yaml`.
+
+#### 3.1.2 Rolling Updates
 
 In the decisions that were made when considering when expanding Anubis, availability was of the most important. 
 Specifically we needed to move to a platform that would allow us to do _zero_ downtime deploys. Kubernetes has 
@@ -469,7 +498,7 @@ Of all the features of Kubernetes that Anubis leverages, none are quite as impor
 Anubis API can be updated to a new version with _zero_ downtime. This means we can live patch the API with new 
 versions, with little to no degradation in service.
 
-#### Longhorn
+#### 3.1.3 Longhorn
 
 The Kubernetes [StorageClass](https://kubernetes.io/docs/concepts/storage/storage-classes/) that the Space Cluster 
 supports is Longhorn. It allows us to have replicated data volumes with scheduled snapshots and backups.
@@ -484,7 +513,7 @@ as simple as checking some boxes. You can see here our mariadb master image with
 
 ![Longhorn Volume Management](./img/longhorn-mariadb.png)
 
-#### The OSIRIS Space Cluster
+#### 3.1.4 The OSIRIS Space Cluster
 
 The OSIRIS Space Cluster is a k3s Kubernetes cluster that is managed by the OSIRIS Lab at NYU Tandon. It is 
 primarily used for research and website hosting. It was designed by John Cunniff to be highly redundant, even 
@@ -493,13 +522,13 @@ in the case of a networking outage / natural disaster.
 Its nodes are split between a datacenter in Manhattan and one in Brooklyn. A whole lot has to fail 
 before the cluster gets in a state where it cannot heal itself.
 
-##### Nodes
+##### 3.1.5 Nodes
 
 The cluster is comprised of servers that are evenly distributed between the South Data Center (SDC) in lower 
 Manhattan and MetroTech Center (MTC) in Rogers Hall in Brooklyn. The nodes are connected via the internal 
 OSIRIS network.
 
-##### Networking
+##### 3.1.6 Networking
 
 There are multiple so called "Ingress Nodes" in both the MTC and SDC. These are nodes that have both public IP
 addresses and internal OSIRIS IP addresses. These nodes handle all inbound traffic to the cluster via Traefik.
@@ -512,7 +541,7 @@ The public IP addresses that are used are made up of both NYU, and POLY IP addre
 purposeful. It will guarantee that even in the event of a network outage at Poly or NYU, the cluster will 
 remain able to handle ingress.
 
-##### Shared Services
+##### 3.1.7 Shared Services
 
 The space cluster has a few shared internal services. Namely, there is a shared replicated, and backed up
 MariaDB instance which Anubis will use a datastore. There is also an instance of 
@@ -521,9 +550,9 @@ The Space Cluster also provides Longhorn for persistent data.
 
 ![Kubernetes Dashboard](./img/kube-dashboard1.png)
 
-### Github
+### 3.2 Github
 
-#### Organization
+#### 3.2.1 Organization
 
 Each class that will need a github organization to put all its repos under. The only members of that organization 
 should be the professor and TAs.
@@ -532,7 +561,7 @@ The organization should be set up to have push event webhooks to anubis. The end
 to is `https://anubis.osiris.services/api/public/webhook/`. That endpoint will be hit when there is a push to a 
 repo in that organization.
 
-#### Classroom
+#### 3.2.2 Classroom
 
 [Github classroom](https://classroom.github.com/) is used to create, and distribute repos for assignments.
 There you can create assignments that will pull from a template repo of your choosing. A link will be generated 
@@ -550,16 +579,16 @@ github asking for permission from a .edu email providing their title and whatnot
 > before the semester starts.
 
 
-## CLI
+## 4 CLI
 
-### Installing the CLI
+### 4.1 Installing the CLI
 
 The command line interface for anubis is packaged as a simple pip package. To install it, make sure 
 you have python3 and pip installed, then from the anubis repo run `make cli`. This will run the pip 
 install command necessary for installing the cli globally. If that was successful, then the `anubis` 
 command will be installed.
 
-### CLI Usage
+### 4.2 CLI Usage
 
 The main purposes of the CLI is for making it a bit easier for admins to make private API calls. In some 
 cases it will handle the input and output of files.
@@ -583,13 +612,13 @@ Some use cases would be:
 - Adding, Updating and Listing class data
 - Packaging a new assignment tests, and sending its data off to the cluster
 
-## Assignments
+## 5 Assignments
 
-### Creating a new Assignment
+### 5.1 Creating a new Assignment
 
 Using the anubis cli, you can initialize a new assignment using `anubis assignment init <name of assignment>`
 
-#### Writing Tests
+### 5.2 Writing Tests
 
 All the files to build and run a complete anubis pipeline image will be dropped into the new directory.
 
@@ -646,7 +675,7 @@ lowers the privileges way down so that even if the student pushes something mali
 enough where they can not do much. It also adds timeouts to their commands. Boxing student code in like this
 is absolutely essential. Do not underestimate the creative and surprising ways students will find to break things.
  
-#### Uploading Tests
+### 5.3 Uploading Tests
 
 Now you have your tests. That's great. The next thing you need to do is push the image to the docker registry and
 upload the assignment data to anubis. This is as simple as running two commands:
