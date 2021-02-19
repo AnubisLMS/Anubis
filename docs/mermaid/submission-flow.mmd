@@ -15,7 +15,9 @@ graph LR
         end
 
         subgraph submissionp [submision pipeline]
-            submission[submission pipeline]
+            subgraph submission [processing]
+                clone --> build --> test --> report
+            end
             pipeapi[pipeline api]
         end
 
@@ -24,7 +26,7 @@ graph LR
     github --> |webhook| api
     api -.-> |push job| rpcw
     api -.-> db
-    rpcw -.-> |kube job create| submission
-    submission --> pipeapi
+    rpcw -.-> |kube job create| clone
+    report -.-> pipeapi
     pipeapi -.-> db
     end
