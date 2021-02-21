@@ -169,16 +169,18 @@ def reap_repos():
         user, github_username = guess_github_username(assignment, repo_name)
         repo = check_repo(assignment, repo_url, github_username, user)
 
+        # Check for broken submissions
         submissions = []
         for submission in Submission.query.filter(Submission.assignment_repo_id == repo.id).all():
             if submission.owner_id != user.id:
+                print(f'found broken submission {submission.id}')
                 submission.owner_id = repo.owner_id
-                print(submission.owner.name)
                 submissions.append(submission.id)
         db.session.commit()
         for sid in submissions:
             enqueue_webhook(sid)
 
+        # Check for missing submissions
         for commit in map(lambda x: x['node']['oid'], ref['target']['history']['edges']):
             submission = Submission.query.filter(
                 Submission.commit == commit

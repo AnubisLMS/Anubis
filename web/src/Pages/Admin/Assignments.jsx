@@ -155,8 +155,9 @@ export default function Assignments() {
                   switch (type) {
                   case 'string':
                     return (
-                      <Grid item xs key={field}>
+                      <Grid item xs={12} md={6} key={field}>
                         <TextField
+                          fullWidth
                           disabled={disabled}
                           variant={'outlined'}
                           label={label}

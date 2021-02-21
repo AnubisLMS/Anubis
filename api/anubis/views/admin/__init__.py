@@ -9,6 +9,7 @@ def register_admin_views(app):
     from anubis.views.admin.static import static
     from anubis.views.admin.users import students
     from anubis.views.admin.courses import courses_
+    from anubis.views.admin.config import config_
 
     views = [
         ide,
@@ -21,6 +22,7 @@ def register_admin_views(app):
         static,
         students,
         courses_,
+        config_,
     ]
 
     for view in views:

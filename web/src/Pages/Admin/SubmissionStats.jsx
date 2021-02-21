@@ -62,8 +62,8 @@ export default function SubmissionStats() {
           </Typography>
         </Grid>
         <Grid item xs={12} md={10}>
-          <Grid container spacing={1}>
-            <Grid item xs={12}>
+          <Grid container spacing={2}>
+            <Grid item xs>
               <StudentCard student={student}/>
             </Grid>
             <Grid item xs={12}>

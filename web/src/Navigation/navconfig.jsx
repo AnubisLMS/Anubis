@@ -29,6 +29,7 @@ import AdminSubmissionStats from '../Pages/Admin/SubmissionStats';
 import AdminCourses from '../Pages/Admin/Courses';
 import AdminTheia from '../Pages/Admin/Theia';
 import AdminStatic from '../Pages/Admin/Static';
+import AdminConfig from '../Pages/Admin/Config';
 
 export const footer_nav = [{
   id: 'About',
@@ -113,6 +114,12 @@ export const admin_nav = [
     icon: <AttachFileIcon/>,
     path: '/admin/static',
     Page: AdminStatic,
+  },
+  {
+    id: 'Config',
+    icon: <SettingsIcon/>,
+    path: '/admin/config',
+    Page: AdminConfig,
   },
 ];
 

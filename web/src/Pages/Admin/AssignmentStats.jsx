@@ -1,21 +1,25 @@
 import React, {useState} from 'react';
-import Grid from '@material-ui/core/Grid';
-import {DataGrid} from '@material-ui/data-grid';
 import axios from 'axios';
-import useQuery from '../../hooks/useQuery';
-import standardStatusHandler from '../../Utils/standardStatusHandler';
 import {useSnackbar} from 'notistack';
-import standardErrorHandler from '../../Utils/standardErrorHandler';
+import {Redirect} from 'react-router-dom';
+
+import {DataGrid} from '@material-ui/data-grid';
+import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import IconButton from '@material-ui/core/IconButton';
-import CheckOutlinedIcon from '@material-ui/icons/Check';
-import CancelIcon from '@material-ui/icons/Cancel';
 import Tooltip from '@material-ui/core/Tooltip';
-import {Redirect} from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
+
+import CheckOutlinedIcon from '@material-ui/icons/Check';
+import CancelIcon from '@material-ui/icons/Cancel';
+
+import useQuery from '../../hooks/useQuery';
+import standardStatusHandler from '../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../Utils/standardErrorHandler';
+import {NotInterested} from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -40,13 +44,36 @@ const useColumns = () => ([
   {field: 'netid', headerName: 'Netid'},
   {field: 'name', headerName: 'Name', width: 130},
   {
-    field: 'build_passed', headerName: 'Build Passed', width: 150,
+    field: 'submission',
+    headerName: 'Submitted',
+    width: 150,
     renderCell: (params) => (
-      <Tooltip title={params.value ? 'Build Succeeded' : 'Build Failed'}>
-        <IconButton style={{color: params.value ? 'green' : 'yellow'}}>
-          {params.value ? <CheckOutlinedIcon/> : <CancelIcon/>}
+      <Tooltip title={params.value === null ? 'No Submission' : 'Submitted'}>
+        <IconButton style={{color: params.value === null ? 'red' : 'green'}}>
+          {params.value === null ? <CancelIcon/> : <CheckOutlinedIcon/>}
         </IconButton>
       </Tooltip>
+    ),
+  },
+  {
+    field: 'build_passed', headerName: 'Build Passed', width: 150,
+    renderCell: (params) => (
+      <React.Fragment>
+        {params.row.submission !== null ? (
+          <Tooltip title={params.value ? 'Build Succeeded' : 'Build Failed'}>
+            <IconButton style={{color: params.value ? 'green' : 'yellow'}}>
+              {params.value ? <CheckOutlinedIcon/> : <CancelIcon/>}
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Tooltip title={'No Submission'}>
+            <IconButton style={{color: 'grey'}}>
+              <NotInterested/>
+            </IconButton>
+          </Tooltip>
+        )}
+
+      </React.Fragment>
     ),
   },
   {
@@ -82,7 +109,7 @@ export default function AssignmentStats() {
 
   React.useEffect(() => {
     setLoading(true);
-    const offset = pageSize*(page - 1);
+    const offset = pageSize * (page - 1);
     const limit = pageSize;
     axios.get(
       `/api/admin/stats/assignment/${query.get('assignmentId')}`,
@@ -96,7 +123,7 @@ export default function AssignmentStats() {
           state.push({id: j++});
         }
         let i = 0;
-        for (let k=offset; k < offset+limit; ++k) {
+        for (let k = offset; k < offset + limit; ++k) {
           state[k] = data.stats[i++];
         }
         return [...state];

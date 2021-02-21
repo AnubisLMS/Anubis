@@ -24,6 +24,13 @@ class Config(db.Model):
     key = db.Column(db.String(128), primary_key=True)
     value = db.Column(db.String(2048))
 
+    @property
+    def data(self):
+        return {
+            'key': self.key,
+            'value': self.value,
+        }
+
 
 class User(db.Model):
     __tablename__ = "user"
