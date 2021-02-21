@@ -117,7 +117,7 @@ def public_webhook():
     if not is_debug():
         # Make sure that the repo we're about to process actually belongs to
         # our organization
-        if not webhook["repository"]["full_name"].startswith("os3224/"):
+        if not request.json["repository"]["full_name"].startswith("os3224/"):
             logger.error(
                 "Invalid github organization in webhook.",
                 extra={

@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 from sqlalchemy import func, and_
 
 from anubis.app import create_app
-from anubis.models import db, Submission, Assignment, TheiaSession
-from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_reap_stale
+from anubis.models import db, Submission, Assignment, AssignmentRepo, TheiaSession, SubmissionBuild
+from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_reap_stale, enqueue_webhook
 from anubis.utils.stats import bulk_stats
 from anubis.utils.webhook import check_repo, guess_github_username, parse_webhook
 
@@ -64,13 +64,22 @@ def reap_stats():
     ).having(
         and_(
             Assignment.release_date == func.max(Assignment.release_date),
-            Assignment.release_date > datetime.now() - config.STATS_REAP_DURATION,
+            Assignment.due_date + config.STATS_REAP_DURATION > datetime.now(),
         )
     ).all()
 
     print(json.dumps({
         'reaping assignments:': [assignment.data for assignment in recent_assignments]
     }, indent=2))
+
+    for assignment in recent_assignments:
+        for submission in Submission.query.filter(
+            Submission.assignment_id == assignment.id,
+            Submission.build == None,
+        ).all():
+            if submission.build is None:
+                submission.init_submission_models()
+                enqueue_webhook(submission.id)
 
     for assignment in recent_assignments:
         bulk_stats(assignment.id)
@@ -94,7 +103,27 @@ def reap_repos():
         return
 
     # Do graphql nonsense
-    query = 'query{organization(login:"os3224"){repositories(first:100,orderBy:{field:CREATED_AT,direction:DESC}){nodes{name url}}}}'
+    query = '''
+    query{
+  organization(login:"os3224"){
+    repositories(first:100,orderBy:{field:CREATED_AT,direction:DESC}){
+      nodes{
+        ref(qualifiedName:"master") {
+      target {
+        ... on Commit {
+          history(first: 20) {
+            edges { node { oid } }
+          }
+        }
+      }
+        }
+        name 
+        url
+      }
+    }
+  }
+}
+    '''
     url = 'https://api.github.com/graphql'
     json = {'query': query}
     headers = {'Authorization': 'token %s' % token}
@@ -114,8 +143,8 @@ def reap_repos():
     assignments = dict()
 
     # Parse out repo name and url from graphql response
-    repos = map(lambda node: (node['name'], node['url']), repositories)
-    for repo_name, repo_url in repos:
+    repos = map(lambda node: (node['name'], node['url'], node['ref']), repositories)
+    for repo_name, repo_url, ref in repos:
         assignment = None
 
         # Try to get the assignment object from running map
@@ -140,8 +169,52 @@ def reap_repos():
         user, github_username = guess_github_username(assignment, repo_name)
         repo = check_repo(assignment, repo_url, github_username, user)
 
+        submissions = []
+        for submission in Submission.query.filter(Submission.assignment_repo_id == repo.id).all():
+            if submission.owner_id != user.id:
+                submission.owner_id = repo.owner_id
+                print(submission.owner.name)
+                submissions.append(submission.id)
+        db.session.commit()
+        for sid in submissions:
+            enqueue_webhook(sid)
+
+        for commit in map(lambda x: x['node']['oid'], ref['target']['history']['edges']):
+            submission = Submission.query.filter(
+                Submission.commit == commit
+            ).first()
+            if submission is None:
+                print(f'found missing submission {github_username} {commit}')
+                submission = Submission(
+                    commit=commit,
+                    owner=user,
+                    assignment=assignment,
+                    repo=repo,
+                    state="Waiting for resources...",
+                )
+                db.session.add(submission)
+                db.session.commit()
+                submission.init_submission_models()
+                enqueue_webhook(submission.id)
+
+        # r = AssignmentRepo.query.filter(AssignmentRepo.repo_url == repo_url).first()
+        # if r is not None:
+        #     if r.owner_id != user.id:
+        #         print(r.repo_url, user.name)
+        #         # r.owner_id = user.id
+        #         # submissions = []
+        #         # for submission in Submission.query.filter(
+        #         #         Submission.assignment_repo_id == r.id
+        #         # ).all():
+        #         #     submission.owner_id = user.id
+        #         #     submissions.append(submission.id)
+        #         #
+        #         # # db.session.commit()
+        #         # for sid in submissions:
+        #         #     enqueue_webhook(sid)
+
         if repo:
-            print(f'checked repo: {repo.repo_url}')
+            print(f'checked repo: {repo_name} {github_username} {user} {repo.id}')
 
 
 def reap():

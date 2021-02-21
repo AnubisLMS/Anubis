@@ -60,7 +60,7 @@ def stats_wrapper(assignment, user_id, netid, name, submission_id):
             "netid": netid,
             "name": name,
             "submission": submission.data,
-            "build_passed": submission.build.passed,
+            "build_passed": submission.build.passed if submission.build is not None else False,
             "tests_passed": best_count,
             "total_tests": len(submission.test_results),
             "full_stats": "https://anubis.osiris.services/api/private/submission/{}".format(

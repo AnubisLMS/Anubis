@@ -29,7 +29,8 @@ def guess_github_username(assignment, repo_name):
     github_username1 = "-".join(repo_name_split)
     github_username2 = "-".join(repo_name_split[:-1])
     user = User.query.filter(
-        User.github_username.in_([github_username1, github_username2])
+        User.github_username.in_([github_username1, github_username2]),
+        User.github_username != ''
     ).first()
 
     github_username_guess = github_username1
