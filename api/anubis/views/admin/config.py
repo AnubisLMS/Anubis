@@ -20,7 +20,7 @@ def config_list():
 
 
 @config_.route('/save', methods=['POST'])
-@require_admin(unless_debug=True, unless_vpn=True)
+@require_admin(unless_debug=True)
 @json_endpoint(required_fields=[('config', list)])
 def config_add(config, **_):
     """
@@ -60,10 +60,10 @@ def config_add(config, **_):
                 key=key,
                 value=value
             )
-            db.session.add(db_item)
 
         # Update the value
         db_item.value = value
+        db.session.add(db_item)
 
     # Commit the changes
     db.session.commit()

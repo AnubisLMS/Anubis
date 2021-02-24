@@ -34,9 +34,9 @@ const saveConfig = (config, enqueueSnackbar) => {
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
-const updateRow = (index, item, setConfig) => (_, row) => {
+const updateRow = (index, item, setConfig) => (e) => {
   setConfig((prev) => {
-    prev[index][item] = row;
+    prev[index][item] = e.target.value;
     return [...prev];
   });
 };
@@ -47,7 +47,9 @@ const updateAction = (index, setConfig, enqueueSnackbar) => () => {
     prev[index]['action'] = (
       action === 'edit' ? 'disabled' : 'edit'
     );
-    saveConfig(prev, enqueueSnackbar);
+    if (prev[index]['action'] === 'disabled') {
+      saveConfig(prev, enqueueSnackbar);
+    }
     return [...prev];
   });
 };

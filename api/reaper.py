@@ -28,17 +28,15 @@ def reap_stale_submissions():
 
     # Find and update stale submissions
     Submission.query.filter(
-        Submission.last_updated < datetime.now() - timedelta(minutes=15),
-        Submission.processed == False
+        Submission.last_updated < datetime.now() - timedelta(minutes=30),
+        Submission.processed == False,
     ).update({
         Submission.processed: True,
-        Submission.state: "Reaped after timeout"
+        Submission.state: "Reaped after timeout",
     }, False)
 
     # Commit any changes
     db.session.commit()
-
-    print("")
 
 
 def reap_theia_sessions():
@@ -199,21 +197,21 @@ def reap_repos():
                 submission.init_submission_models()
                 enqueue_webhook(submission.id)
 
-        # r = AssignmentRepo.query.filter(AssignmentRepo.repo_url == repo_url).first()
-        # if r is not None:
-        #     if r.owner_id != user.id:
-        #         print(r.repo_url, user.name)
-        #         # r.owner_id = user.id
-        #         # submissions = []
-        #         # for submission in Submission.query.filter(
-        #         #         Submission.assignment_repo_id == r.id
-        #         # ).all():
-        #         #     submission.owner_id = user.id
-        #         #     submissions.append(submission.id)
-        #         #
-        #         # # db.session.commit()
-        #         # for sid in submissions:
-        #         #     enqueue_webhook(sid)
+        r = AssignmentRepo.query.filter(AssignmentRepo.repo_url == repo_url).first()
+        if r is not None:
+            if r.owner_id != user.id:
+                print(f'fixing broken repo owner {r.id}')
+                r.owner_id = user.id
+                submissions = []
+                for submission in Submission.query.filter(
+                        Submission.assignment_repo_id == r.id
+                ).all():
+                    submission.owner_id = user.id
+                    submissions.append(submission.id)
+
+                db.session.commit()
+                for sid in submissions:
+                    enqueue_webhook(sid)
 
         if repo:
             print(f'checked repo: {repo_name} {github_username} {user} {repo.id}')
