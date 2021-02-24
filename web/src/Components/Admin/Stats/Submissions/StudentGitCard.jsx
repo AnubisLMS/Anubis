@@ -17,7 +17,12 @@ const useStyles = makeStyles((theme) => ({
 
 export default function StudentGitCard({submission}) {
   const classes = useStyles();
-  const {commit, repo} = submission;
+
+  if (!submission) {
+    return null;
+  }
+
+  const {commit='', repo=''} = submission;
   const shortCommit = (commit ?? '').substr(0, 6);
 
   return (
