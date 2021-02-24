@@ -16,7 +16,7 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
-import IDEDialog from '../../Components/Admin/IDE/IDEDialog';
+import ManagementIDEDialog from '../../Components/Admin/IDE/ManagementIDEDialog';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -145,7 +145,7 @@ export default function Assignments() {
           Management IDE
         </Button>
       </Grid>
-      <IDEDialog open={dialogOpen} handleDialogToggle={() => setDialogOpen((prev) => !prev)}/>
+      <ManagementIDEDialog open={dialogOpen} handleDialogToggle={() => setDialogOpen((prev) => !prev)}/>
       {assignments.map((assignment) => (
         <Grid item xs={8} key={assignment.id}>
           <Card>

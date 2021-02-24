@@ -1,5 +1,6 @@
 import base64
 import os
+import json
 from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
@@ -605,6 +606,16 @@ class TheiaSession(db.Model):
             "last_heartbeat": str(self.last_heartbeat),
             "last_proxy": str(self.last_proxy),
             "last_updated": str(self.last_updated),
+        }
+
+    @property
+    def settings(self):
+        return {
+            'image': self.image,
+            'repo_url': self.repo_url,
+            'options': json.dumps(self.options),
+            'privileged': self.privileged,
+            'network_locked': self.network_locked
         }
 
 

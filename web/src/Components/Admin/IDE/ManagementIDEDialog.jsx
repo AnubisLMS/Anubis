@@ -1,21 +1,25 @@
 import React, {useState} from 'react';
 import clsx from 'clsx';
 import axios from 'axios';
+import {useSnackbar} from 'notistack';
 
 import green from '@material-ui/core/colors/green';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import {useSnackbar} from 'notistack';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import TextField from '@material-ui/core/TextField';
+import Grid from '@material-ui/core/Grid';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import IDEHeader from '../../Public/IDE/IDEHeader';
-
+import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -41,6 +45,10 @@ const useStyles = makeStyles((theme) => ({
   left: {
     float: 'left',
   },
+  disclaimer: {
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
+  },
 }));
 
 
@@ -65,7 +73,7 @@ const pollSession = (id, state, enqueueSnackbar, n = 0) => () => {
 
 
 const startSession = (state, enqueueSnackbar) => () => {
-  const {session, setSession, setLoading} = state;
+  const {session, settings, setSession, setLoading, setSettings} = state;
   if (session) {
     const a = document.createElement('a');
     a.setAttribute('href', session.redirect_url);
@@ -77,8 +85,11 @@ const startSession = (state, enqueueSnackbar) => () => {
   }
 
   setLoading(true);
-  axios.get(`/api/admin/ide/initialize`).then((response) => {
+  axios.post(`/api/admin/ide/initialize-custom`, {settings}).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
+    if (data.settings) {
+      setSettings(data.settings);
+    }
     if (data.session) {
       if (data.session.state === 'Initializing') {
         pollSession(data.session.id, state, enqueueSnackbar)();
@@ -106,12 +117,19 @@ const stopSession = (state, enqueueSnackbar) => () => {
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
-export default function IDEDialog({open, handleDialogToggle}) {
+export default function ManagementIDEDialog({open, handleDialogToggle}) {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [sessionsAvailable, setSessionsAvailable] = useState(null);
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState(false);
+  const [settings, setSettings] = useState({
+    image: 'registry.osiris.services/anubis/theia-admin',
+    repo_url: 'https://github.com/os3224/anubis-assignment-tests',
+    options: '{"limits": {"cpu": "4", "memory": "4Gi"}, "autosave": true}',
+    privileged: true,
+    network_locked: false,
+  });
 
   React.useEffect(() => {
     axios.get('/api/public/ide/available').then((response) => {
@@ -129,17 +147,32 @@ export default function IDEDialog({open, handleDialogToggle}) {
 
     axios.get(`/api/admin/ide/active`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      if (data) {
+      if (data.settings) {
+        setSettings(data.settings);
+      }
+      if (data.session) {
         setSession(data.session);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [open]);
+
+  const updateSetting = (key) => (e) => {
+    setSettings((prev) => {
+      if (typeof prev[key] === 'string') {
+        prev[key] = e.target.value;
+      } else if (typeof prev[key] === 'boolean') {
+        prev[key] = !prev[key];
+      }
+      return {...prev};
+    });
+  };
 
   const state = {
     open, handleDialogToggle,
     sessionsAvailable, setSessionsAvailable,
     loading, setLoading,
     session, setSession,
+    settings, setSettings,
   };
 
   return (
@@ -149,7 +182,59 @@ export default function IDEDialog({open, handleDialogToggle}) {
     >
       <DialogTitle>Anubis Cloud IDE</DialogTitle>
       <DialogContent>
-        <IDEHeader sessionsAvailable={sessionsAvailable}/>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <IDEHeader sessionsAvailable={sessionsAvailable}/>
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant={'body2'} className={classes.disclaimer}>
+              These are the default settings for the management IDE. Unless you want to
+              launch a custom session, you should not change these values.
+            </Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth label="Theia Image" variant="outlined"
+              value={settings.image} onChange={updateSetting('image')}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth label="Repo URL" variant="outlined"
+              value={settings.repo_url} onChange={updateSetting('repo_url')}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth label="Options JSON" variant="outlined"
+              value={settings.options} onChange={updateSetting('options')}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={settings.privileged} onChange={updateSetting('privileged')}
+                  name="privileged" color="primary"
+                />
+              }
+              labelPlacement={'end'}
+              label="Privileged"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={settings.network_locked} onChange={updateSetting('network_locked')}
+                  name="network_locked" color="primary"
+                />
+              }
+              labelPlacement={'end'}
+              label="Network Locked"
+            />
+          </Grid>
+        </Grid>
       </DialogContent>
       <DialogActions>
         <div className={classes.wrapper} hidden={!session}>

@@ -15,6 +15,7 @@ def get_theia_pod_name(theia_session: TheiaSession) -> str:
 
 def create_theia_pod_obj(theia_session: TheiaSession):
     name = get_theia_pod_name(theia_session)
+    containers = []
 
     # PVC
     volume_name = name + "-volume"
@@ -91,29 +92,36 @@ def create_theia_pod_obj(theia_session: TheiaSession):
             privileged=theia_session.privileged,
         ),
     )
+    containers.append(theia_container)
+
+    autosave = True
+    if 'autosave' in theia_session.options:
+        autosave = theia_session.options['autosave']
 
     # Sidecar container
-    sidecar_container = client.V1Container(
-        name="sidecar",
-        image="registry.osiris.services/anubis/theia-sidecar:latest",
-        image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
-        env=[
-            client.V1EnvVar(
-                name="GIT_CRED",
-                value_from=client.V1EnvVarSource(
-                    secret_key_ref=client.V1SecretKeySelector(
-                        name="git", key="credentials"
-                    )
+    if autosave:
+        sidecar_container = client.V1Container(
+            name="sidecar",
+            image="registry.osiris.services/anubis/theia-sidecar:latest",
+            image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
+            env=[
+                client.V1EnvVar(
+                    name="GIT_CRED",
+                    value_from=client.V1EnvVarSource(
+                        secret_key_ref=client.V1SecretKeySelector(
+                            name="git", key="credentials"
+                        )
+                    ),
                 ),
-            ),
-        ],
-        volume_mounts=[
-            client.V1VolumeMount(
-                mount_path="/home/project",
-                name=volume_name,
-            )
-        ],
-    )
+            ],
+            volume_mounts=[
+                client.V1VolumeMount(
+                    mount_path="/home/project",
+                    name=volume_name,
+                )
+            ],
+        )
+        containers.append(sidecar_container)
 
     extra_labels = {}
     if theia_session.network_locked:
@@ -124,7 +132,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         spec=client.V1PodSpec(
             hostname='anubis-ide',
             init_containers=[init_container],
-            containers=[theia_container, sidecar_container],
+            containers=containers,
             volumes=[client.V1Volume(name=volume_name)],
             dns_policy="None",
             dns_config=client.V1PodDNSConfig(nameservers=["1.1.1.1"]),
