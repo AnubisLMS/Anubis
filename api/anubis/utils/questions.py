@@ -223,7 +223,7 @@ def get_all_questions(assignment: Assignment) -> Dict[int, List[Dict[str, str]]]
     }
 
 
-@cache.memoize(timeout=60 * 60, unless=is_debug)
+@cache.memoize(timeout=1, unless=is_debug)
 def get_assigned_questions(assignment_id: str, user_id: str, full=False):
     # Get assigned questions
     assigned_questions = AssignedStudentQuestion.query.filter(
