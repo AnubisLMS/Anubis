@@ -1,20 +1,27 @@
 import React, {useState} from 'react';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import clsx from 'clsx';
+import axios from 'axios';
 import {useSnackbar} from 'notistack';
+
+import green from '@material-ui/core/colors/green';
+import Grid from '@material-ui/core/Grid';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
-import axios from 'axios';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
-import IDEHeader from './IDEHeader';
 import IDEInstructions from './IDEInstructions';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import {green} from '@material-ui/core/colors';
-import clsx from 'clsx';
+import IDEHeader from './IDEHeader';
+import Typography from '@material-ui/core/Typography';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -62,9 +69,8 @@ const pollSession = (id, state, enqueueSnackbar, n = 0) => () => {
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
-
 const startSession = (state, enqueueSnackbar) => () => {
-  const {session, setSession, selectedTheia, setLoading} = state;
+  const {autosaveEnabled, session, setSession, selectedTheia, setLoading} = state;
   if (session) {
     const a = document.createElement('a');
     a.setAttribute('href', session.redirect_url);
@@ -74,8 +80,10 @@ const startSession = (state, enqueueSnackbar) => () => {
     a.click();
     return;
   }
+
+  const params = {autosave: autosaveEnabled};
   setLoading(true);
-  axios.get(`/api/public/ide/initialize/${selectedTheia.id}`).then((response) => {
+  axios.get(`/api/public/ide/initialize/${selectedTheia.id}`, {params}).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
     if (data.session) {
       if (data.session.state === 'Initializing') {
@@ -88,9 +96,8 @@ const startSession = (state, enqueueSnackbar) => () => {
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
-
 const stopSession = (state, enqueueSnackbar) => () => {
-  const {session, setSession, setLoading} = state;
+  const {session, setAutosaveEnabled, setSession, setLoading} = state;
   if (!session) {
     return;
   }
@@ -99,6 +106,7 @@ const stopSession = (state, enqueueSnackbar) => () => {
     const data = standardStatusHandler(response, enqueueSnackbar);
     if (data) {
       setSession(null);
+      setAutosaveEnabled(true);
     }
     setLoading(false);
   }).catch(standardErrorHandler(enqueueSnackbar));
@@ -110,11 +118,12 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
   const [sessionsAvailable, setSessionsAvailable] = useState(null);
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState(false);
+  const [autosaveEnabled, setAutosaveEnabled] = useState(true);
 
   React.useEffect(() => {
     axios.get('/api/public/ide/available').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      if (data) {
+      if (data.session_available) {
         setSessionsAvailable(data.session_available);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
@@ -127,8 +136,12 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
 
     axios.get(`/api/public/ide/active/${selectedTheia.id}`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      if (data) {
+      if (data.session) {
         setSession(data.session);
+      }
+      if (data?.session?.autosave !== undefined) {
+        console.log('autosave', data.session.autosave);
+        setAutosaveEnabled(data.autosaveEnabled);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [selectedTheia]);
@@ -138,6 +151,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
     sessionsAvailable, setSessionsAvailable,
     loading, setLoading,
     session, setSession,
+    autosaveEnabled, setAutosaveEnabled,
   };
 
   return (
@@ -147,12 +161,41 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
     >
       <DialogTitle>Anubis Cloud IDE</DialogTitle>
       <DialogContent>
-        <IDEHeader sessionsAvailable={sessionsAvailable}/>
-        <DialogContentText>
-          By using the Anubis Cloud IDE, you are agreeing to a few things. Please read the
-          full instructions before use.
-        </DialogContentText>
-        <IDEInstructions/>
+        <Grid
+          container
+          direction="row"
+          justify="flex-end"
+          alignItems="center"
+        >
+          <Grid item xs={12}>
+            <IDEHeader sessionsAvailable={sessionsAvailable}/>
+          </Grid>
+          <Grid item xs={12}>
+            <DialogContentText>
+              By using the Anubis Cloud IDE, you are agreeing to a few things. Please read the
+              full instructions before use.
+            </DialogContentText>
+          </Grid>
+          <Grid item xs={12}>
+            <IDEInstructions/>
+          </Grid>
+          <FormControlLabel
+            checked={autosaveEnabled}
+            onChange={() => setAutosaveEnabled(!autosaveEnabled)}
+            control={<Switch color={'primary'}/>}
+            label={
+              <Typography color={autosaveEnabled ? '' : 'secondary'} variant={'body1'}>
+                {autosaveEnabled ?
+                  'Autosave Enabled' :
+                  (
+                    'With autosave disabled you are responsible for saving your progress. ' +
+                    'No exceptions will be made for lost work!'
+                  )}
+              </Typography>
+            }
+            labelPlacement="start"
+          />
+        </Grid>
       </DialogContent>
       <DialogActions>
         <div className={classes.wrapper} hidden={!session}>
@@ -179,7 +222,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
           >
             {!session ? 'Launch Session' : 'Go to IDE'}
           </Button>
-          {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
+          {loading && <CircularProgress size={24} className={classes.buttonProgress}/>}
         </div>
       </DialogActions>
     </Dialog>

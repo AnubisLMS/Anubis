@@ -606,6 +606,7 @@ class TheiaSession(db.Model):
             "last_heartbeat": str(self.last_heartbeat),
             "last_proxy": str(self.last_proxy),
             "last_updated": str(self.last_updated),
+            "autosave": self.options.get('autosave', True),
         }
 
     @property
