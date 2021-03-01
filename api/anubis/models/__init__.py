@@ -1,5 +1,6 @@
 import base64
 import os
+import json
 from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
@@ -23,6 +24,13 @@ class Config(db.Model):
     # Fields
     key = db.Column(db.String(128), primary_key=True)
     value = db.Column(db.String(2048))
+
+    @property
+    def data(self):
+        return {
+            'key': self.key,
+            'value': self.value,
+        }
 
 
 class User(db.Model):
@@ -598,6 +606,17 @@ class TheiaSession(db.Model):
             "last_heartbeat": str(self.last_heartbeat),
             "last_proxy": str(self.last_proxy),
             "last_updated": str(self.last_updated),
+            "autosave": self.options.get('autosave', True),
+        }
+
+    @property
+    def settings(self):
+        return {
+            'image': self.image,
+            'repo_url': self.repo_url,
+            'options': json.dumps(self.options),
+            'privileged': self.privileged,
+            'network_locked': self.network_locked
         }
 
 

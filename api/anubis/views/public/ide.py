@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Dict
 
-from flask import Blueprint
+from flask import Blueprint, request
 
 from anubis.models import User, TheiaSession, db, Assignment, AssignmentRepo
 from anubis.utils.auth import current_user, require_user
@@ -31,11 +31,9 @@ def public_ide_available():
     """
     active_count, max_count = get_n_available_sessions()
 
-    return success_response(
-        {
-            "session_available": active_count < max_count,
-        }
-    )
+    return success_response({
+        "session_available": active_count < max_count,
+    })
 
 
 @ide.route("/active/<string:assignment_id>")
@@ -59,7 +57,9 @@ def public_ide_active(assignment_id):
     if session is None:
         return success_response({"active": None})
 
-    return success_response({"session": session.data})
+    return success_response({
+        "session": session.data,
+    })
 
 
 @ide.route("/stop/<string:theia_session_id>")
@@ -189,6 +189,9 @@ def public_ide_initialize(assignment: Assignment):
             "Anubis can not find your assignment repo. Please create one and set your github username."
         )
 
+    autosave = request.args.get('autosave', 'true') == 'true'
+    logger.info(f'autosave {autosave}')
+
     # Create a new session
     session = TheiaSession(
         owner_id=user.id,
@@ -198,6 +201,7 @@ def public_ide_initialize(assignment: Assignment):
         privileged=False,
         active=True,
         state="Initializing",
+        options={'autosave': autosave}
     )
     db.session.add(session)
     db.session.commit()

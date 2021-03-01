@@ -11,7 +11,7 @@ from anubis.utils.questions import (
     assign_questions,
 )
 
-questions = Blueprint("admin-questions", __name__, url_prefix="/admin-questions")
+questions = Blueprint("admin-questions", __name__, url_prefix="/admin/questions")
 
 
 @questions.route("/hard-reset/<string:unique_code>")

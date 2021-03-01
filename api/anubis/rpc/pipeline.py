@@ -36,8 +36,8 @@ def create_pipeline_job_obj(client, submission):
             ),
         ],
         resources=client.V1ResourceRequirements(
-            limits={"cpu": "2", "memory": "500Mi"},
-            requests={"cpu": "500m", "memory": "250Mi"},
+            limits={"cpu": "2", "memory": "750Mi"},
+            requests={"cpu": "500m", "memory": "100Mi"},
         ),
     )
     # Create and configure a spec section

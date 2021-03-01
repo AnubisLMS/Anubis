@@ -11,6 +11,7 @@ import SubmissionSummary from '../../Components/Public/Submission/SubmissionSumm
 import SubmissionBuild from '../../Components/Public/Submission/SubmissionBuild';
 import SubmissionTests from '../../Components/Public/Submission/SubmissionTests';
 import QuestionsCard from '../../Components/Public/Questions/QuestionsCard';
+import StudentGitCard from '../../Components/Admin/Stats/Submissions/StudentGitCard';
 
 import {translateSubmission} from '../../Utils/submission';
 import Typography from '@material-ui/core/Typography';
@@ -62,9 +63,12 @@ export default function SubmissionStats() {
           </Typography>
         </Grid>
         <Grid item xs={12} md={10}>
-          <Grid container spacing={1}>
-            <Grid item xs={12}>
+          <Grid container spacing={2}>
+            <Grid item xs>
               <StudentCard student={student}/>
+            </Grid>
+            <Grid item xs>
+              <StudentGitCard submission={submission}/>
             </Grid>
             <Grid item xs={12}>
               <QuestionsCard questions={questions}/>

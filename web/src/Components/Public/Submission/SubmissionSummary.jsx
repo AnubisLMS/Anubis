@@ -24,7 +24,7 @@ import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: '75%',
+    width: '100%',
   },
   title: {
     margin: theme.spacing(1),

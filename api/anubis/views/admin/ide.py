@@ -1,11 +1,12 @@
 from datetime import datetime
+import json
 
 from flask import Blueprint
 
 from anubis.models import db, TheiaSession
 from anubis.rpc.theia import reap_all_theia_sessions
 from anubis.utils.auth import require_admin, current_user
-from anubis.utils.decorators import json_response
+from anubis.utils.decorators import json_response, json_endpoint
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import success_response, error_response
 from anubis.utils.rpc import enqueue_ide_initialize
@@ -28,11 +29,10 @@ def admin_ide_initialize():
     ).first()
 
     if session is not None:
-        return success_response(
-            {
-                "session": session.data,
-            }
-        )
+        return success_response({
+            "session": session.data,
+            "settings": session.settings,
+        })
 
     # Create a new session
     session = TheiaSession(
@@ -52,9 +52,66 @@ def admin_ide_initialize():
     # Send kube resource initialization rpc job
     enqueue_ide_initialize(session.id)
 
-    return success_response(
-        {"session": session.data, "status": "Admin IDE Initialized."}
+    return success_response({
+        "session": session.data,
+        "settings": session.settings,
+        "status": "Admin IDE Initialized."
+    })
+
+
+@ide.route("/initialize-custom", methods=["POST"])
+@require_admin()
+@log_endpoint("admin-ide-initialize")
+@json_endpoint([('settings', dict)])
+def admin_ide_initialize_custom(settings: dict, **_):
+    """
+
+
+
+    :param settings:
+    :param _:
+    :return:
+    """
+    user = current_user()
+
+    session = TheiaSession.query.filter(
+        TheiaSession.active,
+        TheiaSession.owner_id == user.id,
+        TheiaSession.assignment_id == None,
+    ).first()
+
+    if session is not None:
+        return success_response({"session": session.data})
+
+    network_locked = settings.get('network_locked', False)
+    privileged = settings.get('privileged', True)
+    image = settings.get('image', 'registry.osiris.services/anubis/theia-admin')
+    repo_url = settings.get('repo_url', 'https://github.com/os3224/anubis-assignment-tests')
+    options_str = settings.get('options', '{"limits": {"cpu": "4", "memory": "4Gi"}}')
+
+    try:
+        options = json.loads(options_str)
+    except json.JSONDecodeError:
+        return error_response('Can not parse JSON options'), 400
+
+    # Create a new session
+    session = TheiaSession(
+        owner_id=user.id, assignment_id=None,
+        network_locked=network_locked, privileged=privileged,
+        image=image, repo_url=repo_url, options=options,
+        active=True, state="Initializing",
     )
+    db.session.add(session)
+    db.session.commit()
+
+    # Send kube resource initialization rpc job
+    enqueue_ide_initialize(session.id)
+
+    return success_response({
+        "session": session.data,
+        "settings": session.settings,
+        "status": "Admin IDE Initialized."
+    })
 
 
 @ide.route("/active")
@@ -73,11 +130,10 @@ def admin_ide_active():
     if session is None:
         return success_response({"session": None})
 
-    return success_response(
-        {
-            "session": session.data,
-        }
-    )
+    return success_response({
+        "session": session.data,
+        "settings": session.settings,
+    })
 
 
 @ide.route("/list")
