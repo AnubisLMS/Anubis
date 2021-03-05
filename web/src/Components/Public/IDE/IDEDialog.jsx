@@ -180,6 +180,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
             <IDEInstructions/>
           </Grid>
           <FormControlLabel
+            disabled={!!session}
             checked={autosaveEnabled}
             onChange={() => setAutosaveEnabled(!autosaveEnabled)}
             control={<Switch color={'primary'}/>}

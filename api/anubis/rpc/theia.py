@@ -72,12 +72,22 @@ def create_theia_pod_obj(theia_session: TheiaSession):
     if "requests" in theia_session.options:
         requests = theia_session.options["requests"]
 
+    autosave = True
+    if 'autosave' in theia_session.options:
+        autosave = theia_session.options['autosave']
+
     # Theia container
     theia_container = client.V1Container(
         name="theia",
         image=theia_session.image,
         image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
         ports=[client.V1ContainerPort(container_port=5000)],
+        env=[
+            client.V1EnvVar(
+                name='AUTOSAVE',
+                value='ON' if autosave else 'OFF',
+            ),
+        ],
         resources=client.V1ResourceRequirements(
             limits=limits,
             requests=requests,
@@ -93,10 +103,6 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         ),
     )
     containers.append(theia_container)
-
-    autosave = True
-    if 'autosave' in theia_session.options:
-        autosave = theia_session.options['autosave']
 
     # Sidecar container
     if autosave:
