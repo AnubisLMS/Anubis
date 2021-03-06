@@ -17,6 +17,15 @@ def create_pipeline_job_obj(client, submission):
     :param submission:
     :return:
     """
+
+    requirements = {
+        'limits': {"cpu": "2", "memory": "750Mi"},
+        'requests': {"cpu": "500m", "memory": "100Mi"},
+    }
+
+    if is_debug():
+        requirements = {}
+
     container = client.V1Container(
         name="pipeline",
         image=submission.assignment.pipeline_image,
@@ -35,10 +44,7 @@ def create_pipeline_job_obj(client, submission):
                 ),
             ),
         ],
-        resources=client.V1ResourceRequirements(
-            limits={"cpu": "2", "memory": "750Mi"},
-            requests={"cpu": "500m", "memory": "100Mi"},
-        ),
+        resources=client.V1ResourceRequirements(**requirements),
     )
     # Create and configure a spec section
     template = client.V1PodTemplateSpec(

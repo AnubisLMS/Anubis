@@ -155,5 +155,7 @@ RUN chmod g+rw /home && \
 COPY --from=theia /home/theia /home/theia
 WORKDIR /home/theia
 COPY supervisord.conf /supervisord.conf
+COPY autosave /usr/local/bin/autosave
+COPY autosave-dump.sh /autosave-dump.sh
 
 ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]

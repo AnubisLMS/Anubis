@@ -1,14 +1,23 @@
-FROM alpine:latest
+FROM python:3-alpine
 
 RUN adduser -D -u 1001 theia \
-  && apk add --update --no-cache dcron git busybox-suid
+  && apk add --update --no-cache dcron git busybox-suid \
+  && pip3 install --no-cache-dir flask supervisor gunicorn
+
+USER theia
+RUN git config --global user.email noreply@anubis.osiris.services \
+  && git config --global user.name os3224-robot \
+  && git config --global credential.store helper \
+  && git config --global credential.helper 'store --file ~/.git-credentials'
+USER root
 
 VOLUME /home/project
 
-COPY entrypoint.sh /entrypoint.sh
+COPY supervisord.conf /supervisord.conf
+COPY autosave-loop.sh /autosave-loop.sh
 COPY autosave.sh /autosave.sh
+COPY app.py /app.py
 
-USER theia
-ENTRYPOINT /entrypoint.sh
+ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]
 
 
