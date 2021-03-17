@@ -23,7 +23,6 @@ def init_services(app):
     @app.route("/")
     def index():
         Config.query.all()
-        logger.debug('health')
         cache_health()
         return "Healthy"
 
