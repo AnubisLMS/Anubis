@@ -58,6 +58,7 @@ export default function Blog() {
           <CardHeader
             avatar={<Avatar src={'/logo512.png'}/>}
             title={'The Elevator Pitch for Anubis'}
+            titleTypographyProps={{variant: 'h6'}}
             subheader={'2021-03-17'}
           />
           <CardContent>

@@ -448,6 +448,7 @@ class Submission(db.Model):
             "state": self.state,
             "created": str(self.created),
             "last_updated": str(self.last_updated),
+            "error": self.errors is not None,
         }
 
     @property

@@ -97,14 +97,21 @@ export default function Submission() {
       const newSubmission = translateSubmission(data.submission);
       setSubmission(newSubmission);
 
+      if (newSubmission.error || newSubmission.build.passed === false) {
+        setErrorStop(true);
+        return;
+      }
+
+      setErrorStop(false);
+
       if (!submission) {
         return continueSubscribe();
       }
 
       if (submission.build.passed !== newSubmission.build.passed) {
-        if (newSubmission.build.passed) {
+        if (newSubmission.build.passed === true) {
           enqueueSnackbar('Build passed', {variant: 'success'});
-        } else {
+        } else if (newSubmission.build.passed === false) {
           setErrorStop(true);
           return enqueueSnackbar('Build failed', {variant: 'error'});
         }
@@ -114,7 +121,7 @@ export default function Submission() {
         const oldTest = submission.tests[index];
         const newTest = newSubmission.tests[index];
 
-        if (oldTest.result.passed !== newTest.result.passed) {
+        if (oldTest.result.passed === null && newTest.result.passed !== null) {
           enqueueSnackbar(
             `${newTest.test.name} ${newTest.result.passed ? 'passed' : 'failed'}`,
             {variant: (newTest.result.passed ? 'success' : 'error')});
@@ -191,3 +198,4 @@ export default function Submission() {
     </Grid>
   );
 }
+
