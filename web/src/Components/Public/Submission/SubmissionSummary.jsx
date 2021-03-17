@@ -21,6 +21,7 @@ import TableCell from '@material-ui/core/TableCell';
 import Divider from '@material-ui/core/Divider';
 import {useSnackbar} from 'notistack';
 import clsx from 'clsx';
+import Fab from '@material-ui/core/Fab';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -40,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SubmissionSummary({submission, regrade, stop = false}) {
+export default function SubmissionSummary({submission, regrade, stop}) {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
 
@@ -63,6 +64,28 @@ export default function SubmissionSummary({submission, regrade, stop = false}) {
 
   const testsPassed = submission.tests.filter((test) => test.result.passed).length;
   const totalTests = submission.tests.length;
+
+  const ReloadIcon = () => (
+    <Tooltip title={'regrade'}>
+      <Fab
+        onClick={() => regrade(submission.commitHash, enqueueSnackbar)}
+        size={'small'}
+        color={'primary'}
+      >
+        <RefreshIcon/>
+      </Fab>
+    </Tooltip>
+  );
+
+  const LoadingIcon = () => (
+    <Tooltip title={submission.state}>
+      <IconButton
+        onClick={() => regrade(submission.commitHash, enqueueSnackbar)}
+      >
+        <CircularProgress size="1em"/>
+      </IconButton>
+    </Tooltip>
+  );
 
   return (
     <Card className={classes.root}>
@@ -134,14 +157,11 @@ export default function SubmissionSummary({submission, regrade, stop = false}) {
             {/* Submission state */}
             <ListItem>
               <ListItemIcon>
-                <Tooltip title={!submission.processed ? submission.state : 'regrade'}>
-                  <IconButton component="div" onClick={() =>
-                    regrade(submission.commitHash, enqueueSnackbar)}>
-                    {(submission.processed && !stop) ?
-                      <RefreshIcon color={'primary'}/> :
-                      <CircularProgress size="1em"/>}
-                  </IconButton>
-                </Tooltip>
+                {stop ? <ReloadIcon/> : (
+                  submission.processed ?
+                    <ReloadIcon/> :
+                    <LoadingIcon/>
+                )}
               </ListItemIcon>
               <ListItemText primary={submission.state}/>
             </ListItem>

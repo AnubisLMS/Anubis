@@ -9,11 +9,11 @@ def init_services(app):
     :param app: Flask app
     :return:
     """
-    from anubis.models import db
-    from anubis.utils.cache import cache
+    from anubis.config import config
+    from anubis.models import db, Config
+    from anubis.utils.cache import cache, cache_health
     from anubis.utils.migrate import migrate
     from anubis.utils.elastic import add_global_error_handler
-    from anubis.config import config
 
     # Init services
     db.init_app(app)
@@ -22,7 +22,9 @@ def init_services(app):
 
     @app.route("/")
     def index():
-        return "Hello there..."
+        Config.query.all()
+        cache_health()
+        return "Healthy"
 
     # Add ELK stuff
     if not config.DISABLE_ELK:

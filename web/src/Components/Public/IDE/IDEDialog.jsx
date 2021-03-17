@@ -140,8 +140,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
         setSession(data.session);
       }
       if (data?.session?.autosave !== undefined) {
-        console.log('autosave', data.session.autosave);
-        setAutosaveEnabled(data.autosaveEnabled);
+        setAutosaveEnabled(data.session.autosave);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [selectedTheia]);

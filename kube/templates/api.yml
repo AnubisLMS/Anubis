@@ -84,12 +84,11 @@ spec:
           value: {{ .Values.theia.proxy.domain | quote }}
         {{- if .Values.api.healthCheck }}
         livenessProbe:
-          exec:
-            command:
-              - curl
-              - http://localhost:5000/
-          initialDelaySeconds: 10
-          periodSeconds: 5
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 3
         {{- end }}
 
       # Mail container

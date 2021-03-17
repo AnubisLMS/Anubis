@@ -7,7 +7,7 @@ from kubernetes import config, client
 
 from anubis.models import Config, Submission
 from anubis.utils.logger import logger
-
+from anubis.utils.data import is_debug
 
 def create_pipeline_job_obj(client, submission):
     """

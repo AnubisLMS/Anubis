@@ -50,17 +50,25 @@ export default function SubmissionTests({tests, stop}) {
             <div className={classes.wrapper}>
               <Fab
                 aria-label="save"
-                color={test.result.passed === false ? 'secondary' : 'primary'}
+                color={stop ? 'secondary' : (test.result.passed === false ? 'secondary' : 'primary')}
               >
-                {test.result.passed === null ? (
-                  <AssessmentIcon/>
-                ) : (test.result.passed === true && !stop) ? (
-                  <CheckCircleIcon/>
-                ) : (test.result.passed === false || stop) ? (
+                {stop ? (
                   <CancelIcon/>
-                ) : null}
+                ) : (
+                  <React.Fragment>
+                    {test.result.passed === null ? (
+                      <AssessmentIcon/>
+                    ) : (test.result.passed === true) ? (
+                      <CheckCircleIcon/>
+                    ) : (test.result.passed === false) ? (
+                      <CancelIcon/>
+                    ) : null}
+                  </React.Fragment>
+                )}
               </Fab>
-              {test.result.passed === null && <CircularProgress size={68} className={classes.fabProgress}/>}
+              {stop ? null : (
+                test.result.passed === null && <CircularProgress size={68} className={classes.fabProgress}/>
+              )}
             </div>
             <Typography className={classes.heading}>{test.test.name}</Typography>
           </AccordionSummary>

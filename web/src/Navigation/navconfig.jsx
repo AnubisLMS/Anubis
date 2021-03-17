@@ -11,6 +11,7 @@ import GroupIcon from '@material-ui/icons/Group';
 import SettingsIcon from '@material-ui/icons/Settings';
 import PieChartIcon from '@material-ui/icons/PieChart';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
+import BookIcon from '@material-ui/icons/Book';
 
 import About from '../Pages/Public/About';
 import Courses from '../Pages/Public/Courses';
@@ -19,6 +20,7 @@ import Profile from '../Pages/Public/Profile';
 import Repos from '../Pages/Public/Repos';
 import Submissions from '../Pages/Public/Submissions';
 import Submission from '../Pages/Public/Submission';
+import Blog from '../Pages/Public/Blog';
 
 import AdminUsers from '../Pages/Admin/Users';
 import AdminUser from '../Pages/Admin/User';
@@ -31,13 +33,22 @@ import AdminTheia from '../Pages/Admin/Theia';
 import AdminStatic from '../Pages/Admin/Static';
 import AdminConfig from '../Pages/Admin/Config';
 
-export const footer_nav = [{
-  id: 'About',
-  icon: <PublicIcon/>,
-  exact: true,
-  path: '/about',
-  Page: About,
-}];
+export const footer_nav = [
+  {
+    id: 'About',
+    icon: <PublicIcon/>,
+    exact: true,
+    path: '/about',
+    Page: About,
+  },
+  {
+    id: 'Blog',
+    icon: <BookIcon/>,
+    exact: true,
+    path: '/blog',
+    Page: Blog,
+  },
+];
 
 export const public_nav = [
   {
