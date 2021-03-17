@@ -111,7 +111,8 @@ export default function Blog() {
             <Typography gutterBottom className={classes.typography}>
               New in version v2.2.0, there is now the Anubis Cloud IDE. Using some
               kubernetes magic, we are able to
-              host [theia](https://theia-ide.org/) servers for individual students.
+              host <Link target={'_blank'} href={'https://theia-ide.org/'}>
+              Theia</Link> servers for individual students.
               These are essentially
               VSCode instances
               that students can access in the browser. What makes these so powerful
@@ -137,6 +138,11 @@ export default function Blog() {
               className={classes.media}
               image="/theia-fullscreen.png"
             />
+
+            <Typography gutterBottom className={classes.typography}>
+              Does any of this sound appealing to you? Reach out to us to see if Anubis is
+              something that can benefit your class!
+            </Typography>
 
             <Typography variant={'body2'} className={classes.author}>
               - John Cunniff
