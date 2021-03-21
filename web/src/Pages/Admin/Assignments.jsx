@@ -45,7 +45,7 @@ const editableFields = [
   {field: 'pipeline_image', label: 'Pipeline Image', disabled: true},
   {field: 'unique_code', label: 'Unique Code', disabled: true},
   {field: 'hidden', label: 'Hidden', type: 'boolean'},
-  {field: 'ide_enable', label: 'Theia Enabled', type: 'boolean'},
+  {field: 'ide_enabled', label: 'Theia Enabled', type: 'boolean'},
   {field: 'release_date', label: 'Release Date', type: 'datetime'},
   {field: 'due_date', label: 'Due Date', type: 'datetime'},
   {field: 'grace_date', label: 'Grace Date', type: 'datetime'},

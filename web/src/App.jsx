@@ -52,7 +52,7 @@ const useStyles = makeStyles(() => ({
     marginLeft: 0,
   },
   app: {
-    flex: '1 0 auto',
+    flex: 1,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',

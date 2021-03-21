@@ -38,8 +38,8 @@ RUN apt-get update \
   && rm Python-$PY_VERSION.tgz \
   && python3 get-pip.py \
   && rm get-pip.py \
-  && pip3 install --upgrade pip \
-  && pip3 install --upgrade python-language-server flake8 autopep8 pylint supervisor \
+  && pip3 install --upgrade --no-cache-dir pip \
+  && pip3 install --upgrade --no-cache-dir python-language-server flake8 autopep8 pylint supervisor \
   && apt-get clean \
   && apt-get auto-remove -y \
   && rm -rf /var/cache/apt/* \
