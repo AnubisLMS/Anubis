@@ -1,5 +1,5 @@
 import React from 'react';
-import {isBrowser, isChrome, isFirefox, browserName} from 'react-device-detect';
+import {browserName, isBrowser, isChrome, isFirefox} from 'react-device-detect';
 import {useSnackbar} from 'notistack';
 
 export default function DeviceWarning() {
@@ -20,7 +20,6 @@ export default function DeviceWarning() {
     if (!isBrowser) {
       enqueueSnackbar('The Anubis website may not work well ' +
         'outside of a desktop browser!', {variant: 'warning'});
-      return;
     }
   }, []);
 

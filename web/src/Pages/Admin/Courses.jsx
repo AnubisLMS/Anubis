@@ -16,7 +16,6 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import Button from '@material-ui/core/Button';
 import {format} from 'date-fns';
 import Typography from '@material-ui/core/Typography';
-import standardErrorHandler from '../../Utils/standardErrorHandler';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -210,7 +209,7 @@ export default function Courses() {
                     className={classes.button}
                     onClick={saveCourse(course.id)}
                   >
-                Save
+                    Save
                   </Button>
                 </CardActionArea>
               </Card>

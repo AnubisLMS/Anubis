@@ -1,7 +1,7 @@
 from flask import Blueprint
 
-from anubis.models import Assignment
-from anubis.utils.decorators import json_response
+from anubis.models import db, Assignment, AssignmentQuestion
+from anubis.utils.decorators import json_response, json_endpoint
 from anubis.utils.auth import require_admin
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response
@@ -51,6 +51,39 @@ def private_questions_hard_reset_unique_code(unique_code: str):
     return success_response({"status": "questions deleted"})
 
 
+@questions.route("/update/<string:assignment_question_id>", methods=["POST"])
+@require_admin()
+@log_endpoint("")
+@json_endpoint(required_fields=[('question', dict)])
+def admin_questions_update(assignment_question_id: str, question: dict):
+    """
+    Update the text for a question
+
+    :param assignment_question_id:
+    :param question:
+    :return:
+    """
+
+    db_assignment_question = AssignmentQuestion.query.filter(
+        AssignmentQuestion.id == assignment_question_id
+    ).first()
+    db_assignment_question: AssignmentQuestion
+
+    if db_assignment_question is None:
+        return error_response('question not found')
+
+    db_assignment_question.question = question['question']
+    db_assignment_question.solution = question['solution']
+    db_assignment_question.code_language = question['code_language']
+    db_assignment_question.sequence = question['sequence']
+
+    db.session.commit()
+
+    return success_response({
+        'status': 'Question updated'
+    })
+
+
 @questions.route("/get/<string:unique_code>")
 @require_admin()
 @log_endpoint("cli", lambda: "questions get")
@@ -70,7 +103,40 @@ def private_questions_get_unique_code(unique_code: str):
     if assignment is None:
         return error_response("Unable to find assignment")
 
-    return get_all_questions(assignment)
+    assignment_questions = AssignmentQuestion.query.filter(
+        AssignmentQuestion.assignment_id == assignment.id,
+    ).order_by(AssignmentQuestion.sequence).all()
+
+    return success_response({
+        'questions': [
+            assignment_question.full_data
+            for assignment_question in assignment_questions
+        ]
+    })
+
+
+@questions.route("/get-assignments/<string:unique_code>")
+@require_admin()
+@log_endpoint("cli", lambda: "questions get")
+@json_response
+def private_questions_get_assignments_unique_code(unique_code: str):
+    """
+    Get all questions for the given assignment.
+
+    :param unique_code:
+    :return:
+    """
+
+    # Try to find assignment
+    assignment: Assignment = Assignment.query.filter(
+        Assignment.unique_code == unique_code
+    ).first()
+    if assignment is None:
+        return error_response("Unable to find assignment")
+
+    return success_response({
+        'questions': get_all_questions(assignment)
+    })
 
 
 @questions.route("/assign/<string:unique_code>")
@@ -99,4 +165,7 @@ def private_questions_assign_unique_code(unique_code: str):
     assigned_questions = assign_questions(assignment)
 
     # Pass back the response
-    return success_response({"assigned": assigned_questions})
+    return success_response({
+        'assigned': assigned_questions,
+        'status': 'Questions assigned'
+    })

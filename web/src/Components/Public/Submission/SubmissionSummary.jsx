@@ -17,7 +17,6 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import React from 'react';
 import {makeStyles} from '@material-ui/core/styles';
-import TableCell from '@material-ui/core/TableCell';
 import Divider from '@material-ui/core/Divider';
 import {useSnackbar} from 'notistack';
 import clsx from 'clsx';

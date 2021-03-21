@@ -1,32 +1,24 @@
-import CardContent from '@material-ui/core/CardContent';
 import React, {useState} from 'react';
-import Typography from '@material-ui/core/Typography';
-import Card from '@material-ui/core/Card';
-
-import ReactMarkdownWithHtml from 'react-markdown/with-html';
-import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
-import {dark} from 'react-syntax-highlighter/dist/esm/styles/prism';
+import {useSnackbar} from 'notistack';
+import axios from 'axios';
 import gfm from 'remark-gfm';
-import {makeStyles} from '@material-ui/core/styles';
+import ReactMarkdownWithHtml from 'react-markdown/with-html';
+
+import Typography from '@material-ui/core/Typography';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import Accordion from '@material-ui/core/Accordion';
-import AceEditor from 'react-ace';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Grid from '@material-ui/core/Grid';
 
+import QuestionEditor from './QuestionEditor';
+import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../../Utils/standardErrorHandler';
 
 import 'ace-builds/src-min-noconflict/theme-monokai';
 import 'ace-builds/src-min-noconflict/mode-c_cpp';
 import 'ace-builds/src-min-noconflict/mode-markdown';
-import CardActionArea from '@material-ui/core/CardActionArea';
-import Button from '@material-ui/core/Button';
-import axios from 'axios';
-import standardStatusHandler from '../../../Utils/standardStatusHandler';
-import standardErrorHandler from '../../../Utils/standardErrorHandler';
-import {useSnackbar} from 'notistack';
-import QuestionEditor from './QuestionEditor';
-
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -87,7 +79,7 @@ export default function QuestionsCard({questions}) {
         {questions.sort(({question: q1}, {question: q2}) => q1.sequence - q2.sequence).map(({id, question}, index) => (
           <Grid item xs={12} md={6} key={`question-${question.sequence}`} className={classes.question}>
             <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
                 <Typography className={classes.heading}>Question {question.sequence}</Typography>
               </AccordionSummary>
 

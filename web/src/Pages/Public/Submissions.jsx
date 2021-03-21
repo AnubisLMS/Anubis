@@ -1,11 +1,7 @@
 import React, {useState} from 'react';
 import {makeStyles} from '@material-ui/core/styles';
-import {Redirect} from 'react-router-dom';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
-import Zoom from '@material-ui/core/Zoom';
 import Typography from '@material-ui/core/Typography';
-import useGet from '../../hooks/useGet';
 import {SubmissionsTable} from '../../Components/Public/Submissions/SubmissionsTable';
 import useQuery from '../../hooks/useQuery';
 import Questions from '../../Components/Public/Questions/Questions';
@@ -53,11 +49,13 @@ export default function Submissions() {
   React.useEffect(() => {
     axios.get(
       `/api/public/submissions/`,
-      {params: {
-        assignmentId: query.get('assignmentId'),
-        courseId: query.get('courseId'),
-        userId: query.get('userId'),
-      }},
+      {
+        params: {
+          assignmentId: query.get('assignmentId'),
+          courseId: query.get('courseId'),
+          userId: query.get('userId'),
+        },
+      },
     ).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       setSubmissions(data.submissions

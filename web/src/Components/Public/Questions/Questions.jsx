@@ -1,11 +1,12 @@
-import useQuery from '../../../hooks/useQuery';
-import useGet from '../../../hooks/useGet';
 import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import {Redirect} from 'react-router-dom';
+
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Zoom from '@material-ui/core/Zoom';
 import Typography from '@material-ui/core/Typography';
+
 import QuestionGrid from './QuestionGrid';
+import useGet from '../../../hooks/useGet';
 
 export default function Questions({assignment_id}) {
   const [{loading, error, data}] = useGet(`/api/public/assignments/questions/get/${assignment_id}`);

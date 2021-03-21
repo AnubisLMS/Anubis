@@ -251,7 +251,7 @@ class AssignmentQuestion(db.Model):
     solution = db.Column(db.Text, nullable=True)
     sequence = db.Column(db.Integer, index=True, nullable=False)
     code_question = db.Column(db.Boolean, default=False)
-    code_language = db.Column(db.String(128), nullable=True, default=None)
+    code_language = db.Column(db.String(128), nullable=True, default='')
     placeholder = db.Column(db.Text, nullable=True, default="")
 
     # Relationships
