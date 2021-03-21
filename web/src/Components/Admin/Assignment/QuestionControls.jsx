@@ -22,12 +22,12 @@ import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import downloadTextFile from '../../../Utils/downloadTextFile';
 
 const resetWarning = 'This will delete all question assignments. ' +
-  'This action can not be undone. ' +
+  'This action cannot be undone. ' +
   'After assigning new questions, students may have a different set of assigned questions. ' +
   'Do not use this if you are not sure what you are doing.';
 
 const hardResetWarning = 'This will delete all assignments and questions for the assignments. ' +
-  'This action can not be undone. ' +
+  'This action cannot be undone. ' +
   'You will need to re-sync the assignment to get the questions back. ' +
   'Do not use this fi you are not sure what you are doing.';
 

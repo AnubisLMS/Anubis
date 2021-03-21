@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from anubis.models import db, Assignment, AssignmentQuestion
+from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQuestion
 from anubis.utils.decorators import json_response, json_endpoint
 from anubis.utils.auth import require_admin
 from anubis.utils.elastic import log_endpoint
@@ -85,8 +85,8 @@ def private_questions_reset_assignments_unique_code(unique_code: str):
     if assignment is None:
         return error_response("Unable to find assignment")
 
-    AssignmentQuestion.query.filter(
-        AssignmentQuestion.assignment_id == assignment.id
+    AssignedStudentQuestion.query.filter(
+        AssignedStudentQuestion.assignment_id == assignment.id
     ).delete()
     db.session.commit()
 
