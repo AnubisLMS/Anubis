@@ -14,7 +14,7 @@ from anubis.utils.data import _verify_data_shape, is_debug
 
 
 def get_question_sequence_mapping(
-    questions: List[AssignmentQuestion],
+        questions: List[AssignmentQuestion],
 ) -> Dict[int, List[AssignmentQuestion]]:
     """
     Get mapping of sequence to question mapping from list of questions
@@ -91,8 +91,8 @@ def assign_questions(assignment: Assignment):
     assigned_questions = []
     students = (
         User.query.join(InCourse)
-        .filter(InCourse.course_id == assignment.course_id)
-        .all()
+            .filter(InCourse.course_id == assignment.course_id)
+            .all()
     )
     for student in students:
         for sequence, qs in questions.items():

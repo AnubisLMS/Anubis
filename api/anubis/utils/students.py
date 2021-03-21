@@ -19,23 +19,23 @@ def get_students_in_class(class_id, offset=None, limit=None):
         return [
             u.data
             for u in User.query.join(InCourse)
-            .join(Course)
-            .filter(
+                .join(Course)
+                .filter(
                 Course.id == class_id,
                 InCourse.owner_id == User.id,
             )
-            .limit(limit)
-            .offset(offset)
-            .all()
+                .limit(limit)
+                .offset(offset)
+                .all()
         ]
 
     return [
         u.data
         for u in User.query.join(InCourse)
-        .join(Course)
-        .filter(
+            .join(Course)
+            .filter(
             Course.id == class_id,
             InCourse.owner_id == User.id,
         )
-        .all()
+            .all()
     ]

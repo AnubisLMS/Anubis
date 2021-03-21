@@ -34,10 +34,10 @@ def admin_students_info_id(id: str):
     # Get courses student is in
     courses = (
         Course.query.join(InCourse)
-        .filter(
+            .filter(
             InCourse.owner_id == student.id,
         )
-        .all()
+            .all()
     )
 
     return success_response(
@@ -68,9 +68,9 @@ def admin_students_submissions_id(id: str):
         Submission.query.filter(
             Submission.owner_id == student.id,
         )
-        .orderby(Submission.created.desc())
-        .limit(limit)
-        .all()
+            .orderby(Submission.created.desc())
+            .limit(limit)
+            .all()
     )
 
     return success_response(

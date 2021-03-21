@@ -8,13 +8,13 @@ from anubis.utils.auth import current_user, require_user
 from anubis.utils.decorators import json_response, load_from_id
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response
+from anubis.utils.logger import logger
 from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_initialize
 from anubis.utils.theia import (
     theia_redirect_url,
     get_n_available_sessions,
     theia_poll_ide,
 )
-from anubis.utils.logger import logger
 
 ide = Blueprint("public-ide", __name__, url_prefix="/public/ide")
 
@@ -161,12 +161,12 @@ def public_ide_initialize(assignment: Assignment):
     # Check for existing active session
     active_session = (
         TheiaSession.query.join(Assignment)
-        .filter(
+            .filter(
             TheiaSession.owner_id == user.id,
             TheiaSession.assignment_id == assignment.id,
             TheiaSession.active,
         )
-        .first()
+            .first()
     )
     if active_session is not None:
         return success_response(

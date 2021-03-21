@@ -60,36 +60,36 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
 
     assignments = (
         Assignment.query.join(Course)
-        .join(InCourse)
-        .join(User)
-        .filter(
+            .join(InCourse)
+            .join(User)
+            .filter(
             User.netid == netid,
             Assignment.hidden == False,
             Assignment.release_date <= datetime.now(),
             *filters
         )
-        .order_by(Assignment.due_date.desc())
-        .all()
+            .order_by(Assignment.due_date.desc())
+            .all()
     )
 
     a = [a.data for a in assignments]
     for assignment_data in a:
         assignment_data["has_submission"] = (
-            Submission.query.join(User)
-            .join(Assignment)
-            .filter(
-                Assignment.id == assignment_data["id"],
-                User.netid == netid,
-            )
-            .first()
-            is not None
+                Submission.query.join(User)
+                .join(Assignment)
+                .filter(
+                    Assignment.id == assignment_data["id"],
+                    User.netid == netid,
+                )
+                .first()
+                is not None
         )
         assignment_data["has_repo"] = (
-            AssignmentRepo.query.filter(
-                AssignmentRepo.owner_id == user.id,
-                AssignmentRepo.assignment_id == assignment_data['id'],
-            ).first()
-            is not None
+                AssignmentRepo.query.filter(
+                    AssignmentRepo.owner_id == user.id,
+                    AssignmentRepo.assignment_id == assignment_data['id'],
+                ).first()
+                is not None
         )
 
     return a
@@ -97,7 +97,7 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
 
 @cache.memoize(timeout=3, unless=is_debug)
 def get_submissions(
-    user_id=None, course_id=None, assignment_id=None
+        user_id=None, course_id=None, assignment_id=None
 ) -> Union[List[Dict[str, str]], None]:
     """
     Get all submissions for a given netid. Cache the results. Optionally specify
@@ -127,11 +127,11 @@ def get_submissions(
 
     submissions = (
         Submission.query.join(Assignment)
-        .join(Course)
-        .join(InCourse)
-        .join(User)
-        .filter(Submission.owner_id == owner.id, *filters)
-        .all()
+            .join(Course)
+            .join(InCourse)
+            .join(User)
+            .filter(Submission.owner_id == owner.id, *filters)
+            .all()
     )
 
     return [s.full_data for s in submissions]
@@ -175,10 +175,10 @@ def assignment_sync(assignment_data):
     db.session.commit()
 
     for i in AssignmentTest.query.filter(
-        and_(
-            AssignmentTest.assignment_id == assignment.id,
-            AssignmentTest.name.notin_(assignment_data["tests"]),
-        )
+            and_(
+                AssignmentTest.assignment_id == assignment.id,
+                AssignmentTest.name.notin_(assignment_data["tests"]),
+            )
     ).all():
         db.session.delete(i)
     db.session.commit()
@@ -189,8 +189,8 @@ def assignment_sync(assignment_data):
                 Assignment.id == assignment.id,
                 AssignmentTest.name == test_name,
             )
-            .join(Assignment)
-            .first()
+                .join(Assignment)
+                .first()
         )
 
         if assignment_test is None:

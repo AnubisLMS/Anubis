@@ -1,12 +1,12 @@
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from kubernetes import config, client
 
 from anubis.models import db, Config, TheiaSession
-from anubis.utils.logger import logger
 from anubis.utils.elastic import esindex
+from anubis.utils.logger import logger
 
 
 def get_theia_pod_name(theia_session: TheiaSession) -> str:

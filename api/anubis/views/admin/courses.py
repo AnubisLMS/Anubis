@@ -3,9 +3,9 @@ from sqlalchemy.exc import IntegrityError, DataError
 
 from anubis.models import db, Course
 from anubis.utils.auth import require_admin
+from anubis.utils.data import row2dict
 from anubis.utils.decorators import json_response, json_endpoint
 from anubis.utils.http import success_response, error_response
-from anubis.utils.data import row2dict
 
 courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
 

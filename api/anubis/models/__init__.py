@@ -1,6 +1,6 @@
 import base64
-import os
 import json
+import os
 from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
@@ -634,7 +634,7 @@ class StaticFile(db.Model):
     filename = db.Column(db.String(256))
     path = db.Column(db.String(256))
     content_type = db.Column(db.String(128))
-    blob = db.Column(db.LargeBinary(length=(2**32)-1))
+    blob = db.Column(db.LargeBinary(length=(2 ** 32) - 1))
     hidden = db.Column(db.Boolean)
 
     # Timestamps

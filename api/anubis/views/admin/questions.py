@@ -1,9 +1,9 @@
-from flask import Blueprint
 import sqlalchemy.exc
+from flask import Blueprint
 
 from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQuestion
-from anubis.utils.decorators import json_response, json_endpoint
 from anubis.utils.auth import require_admin
+from anubis.utils.decorators import json_response, json_endpoint
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response
 from anubis.utils.questions import (

@@ -1,10 +1,10 @@
+from datetime import datetime
 from email.mime.text import MIMEText
 from hashlib import sha256
 from json import dumps
 from os import environ, urandom
 from smtplib import SMTP
 from typing import Union, Tuple
-from datetime import datetime
 
 from flask import Response
 
@@ -214,7 +214,7 @@ def split_chunks(lst, n):
     """
     _chunks = []
     for i in range(0, len(lst), n):
-        _chunks.append(lst[i : i + n])
+        _chunks.append(lst[i: i + n])
     return _chunks
 
 

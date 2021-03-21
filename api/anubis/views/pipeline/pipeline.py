@@ -119,12 +119,12 @@ def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **k
     ]
 )
 def pipeline_report_test(
-    submission: Submission,
-    test_name: str,
-    passed: bool,
-    message: str,
-    stdout: str,
-    **kwargs
+        submission: Submission,
+        test_name: str,
+        passed: bool,
+        message: str,
+        stdout: str,
+        **kwargs
 ):
     """
     POSTed json should be of the shape:

@@ -1,11 +1,11 @@
+import hashlib
 import json
+import os
 
 import requests
 
+from anubis.models import db, User, Assignment, InCourse, Course
 from utils import app_context, do_seed
-from anubis.models import db, User, Assignment, AssignmentRepo, Submission, InCourse, Course
-import os
-import hashlib
 
 
 def pp(data: dict):
@@ -68,7 +68,8 @@ def do_webhook_tests_user(github_username):
                                  charset='utf8mb4')
 
     assignment = Assignment.query.filter_by(name='uniq').first()
-    r = post_webhook(gen_webhook(assignment.name, assignment.unique_code, user.github_username, "0" * 40, "0" * 40)).json()
+    r = post_webhook(
+        gen_webhook(assignment.name, assignment.unique_code, user.github_username, "0" * 40, "0" * 40)).json()
     assert r['data'] == 'initial commit'
     with connection.cursor() as cursor:
         cursor.execute(

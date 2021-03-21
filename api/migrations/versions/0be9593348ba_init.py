@@ -5,9 +5,8 @@ Revises:
 Create Date: 2021-01-08 20:02:32.175135
 
 """
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "0be9593348ba"
@@ -40,7 +39,7 @@ def upgrade():
         sa.Column("filename", sa.String(length=256), nullable=True),
         sa.Column("path", sa.String(length=256), nullable=True),
         sa.Column("content_type", sa.String(length=128), nullable=True),
-        sa.Column("blob", sa.LargeBinary(length=(2**32)-1), nullable=True),
+        sa.Column("blob", sa.LargeBinary(length=(2 ** 32) - 1), nullable=True),
         sa.Column("hidden", sa.Boolean(), nullable=True),
         sa.Column("created", sa.DateTime(), nullable=True),
         sa.Column("last_updated", sa.DateTime(), nullable=True),

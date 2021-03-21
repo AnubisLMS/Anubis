@@ -7,7 +7,6 @@ from anubis.models import TheiaSession, User, Config
 from anubis.utils.auth import create_token
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug
-from anubis.utils.logger import logger
 
 
 @cache.memoize(timeout=5, unless=is_debug)
@@ -52,9 +51,9 @@ def theia_list_all(user_id: str, limit: int = 10):
         TheiaSession.query.filter(
             TheiaSession.owner_id == user_id,
         )
-        .order_by(TheiaSession.created.desc())
-        .limit(limit)
-        .all()
+            .order_by(TheiaSession.created.desc())
+            .limit(limit)
+            .all()
     )
 
     return [theia_session.data for theia_session in theia_sessions]
