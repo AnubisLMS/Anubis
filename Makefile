@@ -1,7 +1,6 @@
 PERSISTENT_SERVICES := db traefik kibana elasticsearch-coordinating redis-master logstash adminer
-RESTART_ALWAYS_SERVICES := api web rpc-worker
+RESTART_ALWAYS_SERVICES := api web-dev rpc-worker
 PUSH_SERVICES := api web logstash theia-init theia-proxy theia-admin theia-xv6
-BUILD_ALLWAYS := api web
 
 
 
@@ -39,7 +38,7 @@ deploy:
 
 .PHONY: build        # Build all docker images
 build:
-	docker-compose build --parallel --pull $(BUILD_ALLWAYS)
+	docker-compose build --parallel --pull
 
 .PHONY: push         # Push images to registry.osiris.services (requires vpn)
 push:
@@ -47,7 +46,7 @@ push:
 	docker-compose push $(PUSH_SERVICES)
 
 .PHONY: debug        # Start the cluster in debug mode
-debug: build
+debug:
 	docker-compose up -d $(PERSISTENT_SERVICES)
 	docker-compose up \
 		-d --force-recreate \

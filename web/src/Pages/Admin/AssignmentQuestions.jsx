@@ -21,6 +21,7 @@ export default function AssignmentQuestions() {
   const {enqueueSnackbar} = useSnackbar();
   const match = useParams();
   const [questions, setQuestions] = useState([]);
+  const [reset, setReset] = useState(0);
 
   React.useEffect(() => {
     axios.get(`/api/admin/questions/get/${match.code}`).then((response) => {
@@ -29,7 +30,11 @@ export default function AssignmentQuestions() {
         setQuestions(data.questions);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
-  }, []);
+  }, [reset]);
+
+  const reload = () => {
+    setReset((prev) => ++prev);
+  };
 
   const updateQuestion = (index) => (question) => {
     setQuestions((prev) => {
@@ -42,6 +47,14 @@ export default function AssignmentQuestions() {
     const question = questions[index];
     axios.post(`/api/admin/questions/update/${question.id}`, {question}).then((response) => {
       standardStatusHandler(response, enqueueSnackbar);
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  };
+
+  const deleteQuestion = (index) => () => {
+    const question = questions[index];
+    axios.get(`/api/admin/questions/delete/${question.id}`).then((response) => {
+      standardStatusHandler(response, enqueueSnackbar);
+      reload();
     }).catch(standardErrorHandler(enqueueSnackbar));
   };
 
@@ -60,6 +73,7 @@ export default function AssignmentQuestions() {
           <QuestionControls
             questions={questions}
             uniqueCode={match.code}
+            reload={reload}
           />
         </Grid>
         {questions.map((question, index) => (
@@ -68,6 +82,8 @@ export default function AssignmentQuestions() {
               assignmentQuestion={question}
               updateQuestion={updateQuestion(index)}
               saveQuestion={saveQuestion(index)}
+              deleteQuestion={deleteQuestion(index)}
+              reload={reload}
             />
           </Grid>
         ))}

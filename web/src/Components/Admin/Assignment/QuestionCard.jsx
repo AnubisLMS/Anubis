@@ -15,6 +15,9 @@ import Grid from '@material-ui/core/Grid';
 import Input from '@material-ui/core/Input';
 import TextField from '@material-ui/core/TextField';
 import SaveIcon from '@material-ui/icons/Save';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -28,6 +31,9 @@ const useStyles = makeStyles((theme) => ({
   padding1: {
     padding: theme.spacing(1),
   },
+  padding2: {
+    padding: theme.spacing(2),
+  },
   margin1: {
     margin: theme.spacing(1),
   },
@@ -38,9 +44,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function QuestionCard({assignmentQuestion, updateQuestion, saveQuestion}) {
+export default function QuestionCard({assignmentQuestion, updateQuestion, saveQuestion, deleteQuestion, reload}) {
   const classes = useStyles();
-  const {sequence = 0, question = '', solution = '', code_language = ''} = assignmentQuestion;
+  const {
+    sequence = 0,
+    question = '',
+    solution = '',
+    code_language = '',
+    code_question = false,
+  } = assignmentQuestion;
 
   return (
     <Card>
@@ -71,6 +83,20 @@ export default function QuestionCard({assignmentQuestion, updateQuestion, saveQu
           </Grid>
 
           <Grid item xs={12}>
+            <FormControlLabel
+              className={classes.padding2}
+              value={code_question}
+              control={
+                <Switch
+                  checked={code_question}
+                  color={'primary'}
+                  onClick={() => updateQuestion({...assignmentQuestion, code_question: !code_question})}
+                />
+              }
+              label={'Code Question'}
+              labelPlacement="start"
+            />
+
             <TextField
               variant={'outlined'}
               label={'Question Code Language'}
@@ -149,6 +175,15 @@ export default function QuestionCard({assignmentQuestion, updateQuestion, saveQu
           onClick={saveQuestion}
         >
           Save
+        </Button>
+        <Button
+          size="small"
+          color={'secondary'}
+          variant={'contained'}
+          startIcon={<DeleteForeverIcon/>}
+          onClick={deleteQuestion}
+        >
+          Delete
         </Button>
       </CardActions>
     </Card>

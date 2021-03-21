@@ -1,8 +1,6 @@
 import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
-
-import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
@@ -20,6 +18,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import downloadTextFile from '../../../Utils/downloadTextFile';
+import AddIcon from '@material-ui/icons/Add';
 
 const resetWarning = 'This will delete all question assignments. ' +
   'This action cannot be undone. ' +
@@ -31,7 +30,7 @@ const hardResetWarning = 'This will delete all assignments and questions for the
   'You will need to re-sync the assignment to get the questions back. ' +
   'Do not use this fi you are not sure what you are doing.';
 
-export default function QuestionControls({uniqueCode}) {
+export default function QuestionControls({uniqueCode, reload}) {
   const {enqueueSnackbar} = useSnackbar();
   const [verify, setVerify] = useState(null);
 
@@ -67,6 +66,13 @@ export default function QuestionControls({uniqueCode}) {
     }).catch(standardErrorHandler(enqueueSnackbar));
   };
 
+  const addQuestion = () => {
+    axios.get(`/api/admin/questions/add/${uniqueCode}`).then((response) => {
+      standardStatusHandler(response, enqueueSnackbar);
+      reload();
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  };
+
   return (
     <React.Fragment>
       <Dialog
@@ -98,7 +104,7 @@ export default function QuestionControls({uniqueCode}) {
           <Grid container spacing={2}>
 
             {/* Assign questions button */}
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <Tooltip title={'Assign questions to students'}>
                 <Button
                   fullWidth
@@ -107,13 +113,28 @@ export default function QuestionControls({uniqueCode}) {
                   variant={'contained'}
                   onClick={assignQuestions}
                 >
-                Assign Questions
+                  Assign Questions
+                </Button>
+              </Tooltip>
+            </Grid>
+
+            {/* Add question button */}
+            <Grid item xs={12} sm={4}>
+              <Tooltip title={'Add question'}>
+                <Button
+                  fullWidth
+                  startIcon={<AddIcon/>}
+                  color={'primary'}
+                  variant={'contained'}
+                  onClick={addQuestion}
+                >
+                  Add New Question
                 </Button>
               </Tooltip>
             </Grid>
 
             {/* Reset questions icon */}
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <Tooltip title={'Download question assignments'}>
                 <Button
                   fullWidth
@@ -122,7 +143,7 @@ export default function QuestionControls({uniqueCode}) {
                   variant={'contained'}
                   onClick={downloadQuestionAssignments}
                 >
-                Download question assignments
+                  Download question assignments
                 </Button>
               </Tooltip>
             </Grid>
@@ -141,7 +162,7 @@ export default function QuestionControls({uniqueCode}) {
                     action: resetQuestionAssignments,
                   })}
                 >
-                Reset Question Assignments
+                  Reset Question Assignments
                 </Button>
               </Tooltip>
             </Grid>
@@ -160,7 +181,7 @@ export default function QuestionControls({uniqueCode}) {
                     action: hardResetQuestions,
                   })}
                 >
-                Hard Reset Questions
+                  Hard Reset Questions
                 </Button>
               </Tooltip>
             </Grid>

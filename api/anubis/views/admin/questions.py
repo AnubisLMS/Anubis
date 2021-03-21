@@ -1,4 +1,5 @@
 from flask import Blueprint
+import sqlalchemy.exc
 
 from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQuestion
 from anubis.utils.decorators import json_response, json_endpoint
@@ -12,6 +13,59 @@ from anubis.utils.questions import (
 )
 
 questions = Blueprint("admin-questions", __name__, url_prefix="/admin/questions")
+
+
+@questions.route("/add/<string:unique_code>")
+@require_admin()
+@log_endpoint("cli", lambda: "question hard reset")
+@json_response
+def private_questions_add_unique_code(unique_code: str):
+    # Try to find assignment
+    assignment: Assignment = Assignment.query.filter(
+        Assignment.unique_code == unique_code
+    ).first()
+    if assignment is None:
+        return error_response("Unable to find assignment"), 400
+
+    aq = AssignmentQuestion(
+        assignment_id=assignment.id,
+        sequence=0,
+        question='',
+        solution='',
+        code_question=False,
+        code_language='',
+        placeholder='',
+    )
+    db.session.add(aq)
+    db.session.commit()
+
+    return success_response({
+        "status": "Question added",
+    })
+
+
+@questions.route("/delete/<string:assignment_question_id>")
+@require_admin()
+@json_response
+def private_questions_del(assignment_question_id: str):
+    aq = AssignmentQuestion.query.filter(
+        AssignmentQuestion.id == assignment_question_id,
+    ).first()
+    if aq is None:
+        return error_response('Could not find question'), 400
+
+    try:
+        AssignmentQuestion.query.filter(
+            AssignmentQuestion.id == assignment_question_id,
+        ).delete()
+        db.session.commit()
+    except sqlalchemy.exc.IntegrityError:
+        return error_response('Question is already assigned to students. Reset assignments to delete.')
+
+    return success_response({
+        "status": "Question deleted",
+        'variant': 'warning',
+    })
 
 
 @questions.route("/hard-reset/<string:unique_code>")
@@ -120,6 +174,7 @@ def admin_questions_update(assignment_question_id: str, question: dict):
     db_assignment_question.question = question['question']
     db_assignment_question.solution = question['solution']
     db_assignment_question.code_language = question['code_language']
+    db_assignment_question.code_question = question['code_question']
     db_assignment_question.sequence = question['sequence']
 
     db.session.commit()
@@ -150,7 +205,7 @@ def private_questions_get_unique_code(unique_code: str):
 
     assignment_questions = AssignmentQuestion.query.filter(
         AssignmentQuestion.assignment_id == assignment.id,
-    ).order_by(AssignmentQuestion.sequence).all()
+    ).order_by(AssignmentQuestion.sequence, AssignmentQuestion.created.desc()).all()
 
     return success_response({
         'questions': [
