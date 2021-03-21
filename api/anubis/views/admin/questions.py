@@ -48,7 +48,52 @@ def private_questions_hard_reset_unique_code(unique_code: str):
     # Hard reset questions
     hard_reset_questions(assignment)
 
-    return success_response({"status": "questions deleted"})
+    return success_response({
+        "status": "Questions hard reset",
+        'variant': 'warning',
+    })
+
+
+@questions.route("/reset-assignments/<string:unique_code>")
+@require_admin()
+@log_endpoint("cli", lambda: "reset question assignments")
+@json_response
+def private_questions_reset_assignments_unique_code(unique_code: str):
+    """
+    This endpoint should be used very sparingly. When this is hit,
+    assuming the assignment exists, it will delete all questions
+    for the given assignment. This is potentially very destructive,
+    because you will not be able to get the question assignments
+    back without a database backup.
+
+    * If you chose to use this half way into an assignment without
+    being able to reset, you will need to assign new questions to
+    students! *
+
+    If you end up needing to re-assign questions, this has the
+    potential to create a great deal of confusion among students.
+
+    ** Be careful with this one **
+
+    :param unique_code:
+    :return:
+    """
+    # Try to find assignment
+    assignment: Assignment = Assignment.query.filter(
+        Assignment.unique_code == unique_code
+    ).first()
+    if assignment is None:
+        return error_response("Unable to find assignment")
+
+    AssignmentQuestion.query.filter(
+        AssignmentQuestion.assignment_id == assignment.id
+    ).delete()
+    db.session.commit()
+
+    return success_response({
+        "status": "Questions assignments reset",
+        'variant': 'warning',
+    })
 
 
 @questions.route("/update/<string:assignment_question_id>", methods=["POST"])
@@ -117,7 +162,7 @@ def private_questions_get_unique_code(unique_code: str):
 
 @questions.route("/get-assignments/<string:unique_code>")
 @require_admin()
-@log_endpoint("cli", lambda: "questions get")
+@log_endpoint("cli", lambda: "get question assignments")
 @json_response
 def private_questions_get_assignments_unique_code(unique_code: str):
     """
