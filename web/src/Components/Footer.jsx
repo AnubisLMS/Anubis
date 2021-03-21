@@ -1,10 +1,7 @@
 import Copyright from './Copyright';
 import React from 'react';
 import {makeStyles} from '@material-ui/core/styles';
-import {
-  Switch,
-  Route,
-} from 'react-router-dom';
+import {Route, Switch} from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   footer: {

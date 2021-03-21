@@ -1,23 +1,16 @@
 import React, {useState} from 'react';
-
-import Grid from '@material-ui/core/Grid';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
-import standardStatusHandler from '../../Utils/standardStatusHandler';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
+
+import Grid from '@material-ui/core/Grid';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import TextField from '@material-ui/core/TextField';
-import DateFnsUtils from '@date-io/date-fns';
-import {KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider} from '@material-ui/pickers';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
-import CardActionArea from '@material-ui/core/CardActionArea';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
-import ManagementIDEDialog from '../../Components/Admin/IDE/ManagementIDEDialog';
 
+import standardStatusHandler from '../../Utils/standardStatusHandler';
+import ManagementIDEDialog from '../../Components/Admin/IDE/ManagementIDEDialog';
+import AssignmentCard from '../../Components/Admin/Assignment/AssignmentCard';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -39,22 +32,22 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const nonStupidDatetimeFormat = (date) => (
+  `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ` +
+  `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+);
+
 const editableFields = [
   {field: 'name', label: 'Assignment Name'},
   {field: 'github_classroom_url', label: 'Github Classroom URL'},
   {field: 'pipeline_image', label: 'Pipeline Image', disabled: true},
   {field: 'unique_code', label: 'Unique Code', disabled: true},
   {field: 'hidden', label: 'Hidden', type: 'boolean'},
-  {field: 'ide_enable', label: 'Theia Enabled', type: 'boolean'},
+  {field: 'ide_enabled', label: 'Theia Enabled', type: 'boolean'},
   {field: 'release_date', label: 'Release Date', type: 'datetime'},
   {field: 'due_date', label: 'Due Date', type: 'datetime'},
   {field: 'grace_date', label: 'Grace Date', type: 'datetime'},
 ];
-
-const nonStupidDatetimeFormat = (date) => (
-  `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ` +
-  `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-);
 
 
 export default function Assignments() {
@@ -126,7 +119,7 @@ export default function Assignments() {
   };
 
   return (
-    <Grid container spacing={1} justify={'center'} alignItems={'center'}>
+    <Grid container spacing={2} justify={'center'} alignItems={'center'}>
       <Grid item xs={12}>
         <Typography variant="h6">
           Anubis
@@ -148,77 +141,12 @@ export default function Assignments() {
       <ManagementIDEDialog open={dialogOpen} handleDialogToggle={() => setDialogOpen((prev) => !prev)}/>
       {assignments.map((assignment) => (
         <Grid item xs={8} key={assignment.id}>
-          <Card>
-            <CardContent>
-              <Grid container spacing={2}>
-                {editableFields.map(({field, label, disabled = false, type = 'string'}) => {
-                  switch (type) {
-                  case 'string':
-                    return (
-                      <Grid item xs={12} md={6} key={field}>
-                        <TextField
-                          fullWidth
-                          disabled={disabled}
-                          variant={'outlined'}
-                          label={label}
-                          value={assignment[field]}
-                          onChange={updateField(assignment.id, field)}
-                        />
-                      </Grid>
-                    );
-                  case 'boolean':
-                    return (
-                      <Grid item xs={12} key={field}>
-                        <FormControlLabel
-                          value={assignment[field]}
-                          control={
-                            <Switch
-                              checked={assignment[field]}
-                              color={'primary'}
-                              onClick={updateField(assignment.id, field, true)}
-                            />
-                          }
-                          label={label}
-                          labelPlacement="end"
-                        />
-                      </Grid>
-                    );
-                  case 'datetime':
-                    return (
-                      <Grid item xs={12} key={field}>
-                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                          <KeyboardDatePicker
-                            margin="normal"
-                            label={label}
-                            format="yyyy-MM-dd"
-                            value={assignment[field]}
-                            onChange={updateField(assignment.id, field, false, true)}
-                          />
-                          <KeyboardTimePicker
-                            margin="normal"
-                            label="Time"
-                            value={assignment[field]}
-                            onChange={updateField(assignment.id, field, false, true)}
-                          />
-                        </MuiPickersUtilsProvider>
-                      </Grid>
-                    );
-                  }
-                })}
-              </Grid>
-            </CardContent>
-            <CardActionArea>
-              <Button
-                size={'small'}
-                color={'primary'}
-                variant={'contained'}
-                className={classes.button}
-                onClick={saveAssignment(assignment.id)}
-              >
-                Save
-              </Button>
-            </CardActionArea>
-          </Card>
+          <AssignmentCard
+            assignment={assignment}
+            saveAssignment={saveAssignment}
+            editableFields={editableFields}
+            updateField={updateField}
+          />
         </Grid>
       ))}
     </Grid>

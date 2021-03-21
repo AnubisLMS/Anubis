@@ -1,16 +1,13 @@
 from flask import Blueprint, request
 
 from anubis.models import User, Submission
-
 from anubis.utils.assignments import get_submissions
 from anubis.utils.auth import current_user, require_user
-from anubis.utils.cache import cache
-from anubis.utils.data import is_debug
 from anubis.utils.decorators import json_response
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response
-from anubis.utils.submissions import regrade_submission
 from anubis.utils.logger import logger
+from anubis.utils.submissions import regrade_submission
 
 submissions = Blueprint(
     "public-submissions", __name__, url_prefix="/public/submissions"
@@ -117,8 +114,8 @@ def public_regrade_commit(commit=None):
     # Find the submission
     submission: Submission = (
         Submission.query.join(User)
-        .filter(Submission.commit == commit, User.netid == user.netid)
-        .first()
+            .filter(Submission.commit == commit, User.netid == user.netid)
+            .first()
     )
 
     # Verify Ownership

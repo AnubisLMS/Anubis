@@ -4,9 +4,9 @@ import sys
 from logging.config import fileConfig
 
 from alembic import context
+from dotenv import load_dotenv
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from dotenv import load_dotenv
 
 if os.environ.get("DB_HOST", None) is None:
     os.environ["DB_HOST"] = "127.0.0.1"
@@ -21,7 +21,6 @@ try:
 except ImportError:
     sys.path.append(os.getcwd())
     from anubis.app import create_app
-
 
 app = create_app()
 

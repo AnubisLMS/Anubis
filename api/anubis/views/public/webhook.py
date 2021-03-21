@@ -1,5 +1,6 @@
-from flask import Blueprint, request
 from datetime import datetime, timedelta
+
+from flask import Blueprint, request
 
 from anubis.models import (
     Assignment,
@@ -23,8 +24,8 @@ webhook = Blueprint("public-webhook", __name__, url_prefix="/public/webhook")
 
 def webhook_log_msg():
     if (
-        request.headers.get("Content-Type", None) == "application/json"
-        and request.headers.get("X-GitHub-Event", None) == "push"
+            request.headers.get("Content-Type", None) == "application/json"
+            and request.headers.get("X-GitHub-Event", None) == "push"
     ):
         return request.json["pusher"]["name"]
     return None
@@ -93,15 +94,15 @@ def public_webhook():
 
     repo = (
         AssignmentRepo.query.join(Assignment)
-        .join(Course)
-        .join(InCourse)
-        .join(User)
-        .filter(
+            .join(Course)
+            .join(InCourse)
+            .join(User)
+            .filter(
             User.github_username == github_username_guess,
             Assignment.unique_code == assignment.unique_code,
             AssignmentRepo.repo_url == repo_url,
         )
-        .first()
+            .first()
     )
 
     logger.debug(
@@ -156,7 +157,7 @@ def public_webhook():
         db.session.add(submission)
         db.session.commit()
     elif submission.created < datetime.now() - timedelta(minutes=3):
-        return success_response({ 'status': 'already created' })
+        return success_response({'status': 'already created'})
 
     # Create the related submission models
     submission.init_submission_models()

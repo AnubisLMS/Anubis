@@ -29,9 +29,9 @@ def public_set_github_username():
         return error_response("Your username can not have spaces")
 
     if not (
-        all(i in (string.ascii_letters + string.digits + "-") for i in github_username)
-        and not github_username.startswith("-")
-        and not github_username.endswith("-")
+            all(i in (string.ascii_letters + string.digits + "-") for i in github_username)
+            and not github_username.startswith("-")
+            and not github_username.endswith("-")
     ):
         return error_response(
             "Github usernames may only contain alphanumeric characters "
@@ -42,8 +42,8 @@ def public_set_github_username():
     logger.info(str(u.last_updated + timedelta(hours=1)) + " - " + str(datetime.now()))
 
     if (
-        u.github_username is not None
-        and u.last_updated + timedelta(hours=1) < datetime.now()
+            u.github_username is not None
+            and u.last_updated + timedelta(hours=1) < datetime.now()
     ):
         return error_response(
             "Github usernames can only be "

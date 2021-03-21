@@ -1,5 +1,4 @@
 from flask import Flask
-from anubis.utils.logger import logger
 
 
 def init_services(app):

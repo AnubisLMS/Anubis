@@ -57,12 +57,11 @@ spec:
               key: database-uri
         {{- if .Values.pipeline_api.healthCheck }}
         livenessProbe:
-          exec:
-            command:
-              - curl
-              - http://localhost:5000/
-          initialDelaySeconds: 120
-          periodSeconds: 5
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 3
         {{- end }}
 
 

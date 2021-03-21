@@ -25,8 +25,10 @@ const useStyles = makeStyles(() => ({
   root: {
     display: 'flex',
     height: '100%',
+    minHeight: '100vh',
     width: '100%',
     backgroundImage: `url(/curvylines.png)`,
+    backgroundRepeat: 'repeat',
   },
   content: {
     flexGrow: 1,
@@ -39,9 +41,7 @@ const useStyles = makeStyles(() => ({
   },
   main: {
     width: '100%',
-    // height: '100%',
     flexDirection: 'column',
-    // background: '#eaeff1',
     marginBottom: theme.spacing(5),
   },
   contentShift: {
@@ -55,6 +55,7 @@ const useStyles = makeStyles(() => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
+    height: '100%',
   },
 }));
 
@@ -63,6 +64,7 @@ export default function App() {
   const query = useQuery();
   const [open, setOpen] = useState(true);
   const [showError, setShowError] = useState(!!query.get('error'));
+
 
   return (
     <ThemeProvider theme={theme}>
@@ -79,7 +81,7 @@ export default function App() {
                       open={open}
                       onDrawerToggle={() => setOpen((prev) => !prev)}
                     />
-                    <div className={classes.app}>
+                    <div className={classes.app} id={'app'}>
                       <Header
                         onDrawerToggle={() => setOpen((prev) => !prev)}
                         user={user}
@@ -91,8 +93,8 @@ export default function App() {
                       >
                         <Error show={showError} onDelete={() => setShowError(false)}/>
                         <Main user={user}/>
+                        <Footer/>
                       </main>
-                      <Footer/>
                     </div>
                   </CssBaseline>
                 )}

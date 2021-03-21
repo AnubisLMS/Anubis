@@ -1,7 +1,6 @@
-PERSISTENT_SERVICES := db traefik kibana elasticsearch-coordinating redis-master logstash adminer 
-RESTART_ALWAYS_SERVICES := api web rpc-worker
+PERSISTENT_SERVICES := db traefik kibana elasticsearch-coordinating redis-master logstash adminer
+RESTART_ALWAYS_SERVICES := api web-dev rpc-worker
 PUSH_SERVICES := api web logstash theia-init theia-proxy theia-admin theia-xv6
-BUILD_ALLWAYS := api web
 
 
 
@@ -32,9 +31,14 @@ help:
 	@echo 'Available make targets:'
 	@grep PHONY: Makefile | cut -d: -f2 | sed '1d;s/^/make/'
 
+.PHONY: deploy       # Deploy Anubis to cluster
+deploy:
+	./kube/deploy.sh
+	./kube/restart.sh
+
 .PHONY: build        # Build all docker images
 build:
-	docker-compose build --parallel --pull $(BUILD_ALLWAYS)
+	docker-compose build --parallel --pull
 
 .PHONY: push         # Push images to registry.osiris.services (requires vpn)
 push:
@@ -42,7 +46,7 @@ push:
 	docker-compose push $(PUSH_SERVICES)
 
 .PHONY: debug        # Start the cluster in debug mode
-debug: build
+debug:
 	docker-compose up -d $(PERSISTENT_SERVICES)
 	docker-compose up \
 		-d --force-recreate \
@@ -69,35 +73,11 @@ mindebug: build
 	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
 	@echo 'site: http://localhost/'
 
-
-.PHONY: jupyter      # Start he jupyterhub container
-jupyter:
-	docker-compose up --force-recreate --build api-dev
-
-.PHONY: deploy       # Start the cluster in production mode
-deploy: check build restart
-
-.PHONY: backup       # Backup database to file
-backup:
-	./scripts/backup.sh
-
-.PHONY: restore      # Restore to most recent backup
-restore:
-	./scripts/restore.sh
-
 yeetdb:
 	docker-compose kill db
 	docker-compose rm -f
 	docker volume rm anubis_db_data
 	docker-compose up -d --force-recreate db
-
-.PHONY: cleandata    # yeet data
-cleandata:
-	docker-compose kill
-	docker-compose rm -f
-	if [ -n "${VOLUMES}" ]; then \
-		docker volume rm $(VOLUMES); \
-	fi
 
 .PHONY: clean        # Clean up volumes, images and data
 clean:

@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
+
 from flask import Blueprint
 
 from anubis.models import Submission, Assignment
 from anubis.rpc.batch import rpc_bulk_regrade
+from anubis.utils.auth import require_admin
 from anubis.utils.data import split_chunks
 from anubis.utils.decorators import json_response
-from anubis.utils.auth import require_admin
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response, get_number_arg
 from anubis.utils.rpc import enqueue_webhook, rpc_enqueue

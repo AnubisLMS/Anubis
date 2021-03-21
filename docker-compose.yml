@@ -76,6 +76,11 @@ services:
   web:
     image: registry.osiris.services/anubis/web:latest
     build: ./web
+
+  web-dev:
+    image: node:alpine
+    user: 1000:1000
+    working_dir: /opt/app
     command: sh -c 'yarn && yarn run start'
     environment:
       NODE_ENV: development

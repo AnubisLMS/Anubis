@@ -5,7 +5,7 @@ from anubis.utils.assignments import get_assignments
 from anubis.utils.auth import current_user, require_user
 from anubis.utils.decorators import json_response, load_from_id, json_endpoint
 from anubis.utils.elastic import log_endpoint
-from anubis.utils.http import get_request_ip, success_response
+from anubis.utils.http import success_response
 from anubis.utils.questions import get_assigned_questions
 
 assignments = Blueprint(
@@ -66,7 +66,7 @@ def public_assignment_questions_id(assignment: Assignment):
 @load_from_id(AssignedStudentQuestion, verify_owner=True)
 @json_endpoint(required_fields=[("response", str)])
 def public_assignment_questions_save_id(
-    assigned_question: AssignedStudentQuestion, response: str, **kwargs
+        assigned_question: AssignedStudentQuestion, response: str, **kwargs
 ):
     """
     Save response for a given assignment question

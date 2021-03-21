@@ -6,8 +6,9 @@ import kubernetes
 from kubernetes import config, client
 
 from anubis.models import Config, Submission
-from anubis.utils.logger import logger
 from anubis.utils.data import is_debug
+from anubis.utils.logger import logger
+
 
 def create_pipeline_job_obj(client, submission):
     """
@@ -31,6 +32,7 @@ def create_pipeline_job_obj(client, submission):
         image=submission.assignment.pipeline_image,
         image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
         env=[
+            client.V1EnvVar(name="NETID", value=submission.owner.netid),
             client.V1EnvVar(name="TOKEN", value=submission.token),
             client.V1EnvVar(name="COMMIT", value=submission.commit),
             client.V1EnvVar(name="GIT_REPO", value=submission.repo.repo_url),

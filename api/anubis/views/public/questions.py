@@ -31,8 +31,8 @@ def public_questions_save(id: str, response: str):
         return error_response("Assigned question does not exist")
 
     if (
-        not (user.is_admin or user.is_superuser)
-        and assigned_question.owner_id != user.id
+            not (user.is_admin or user.is_superuser)
+            and assigned_question.owner_id != user.id
     ):
         return error_response("Assigned question does not exist")
 

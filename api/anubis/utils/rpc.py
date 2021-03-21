@@ -1,14 +1,14 @@
 from redis import Redis
 from rq import Queue
 
+from anubis.config import config
 from anubis.rpc.pipeline import test_repo
+from anubis.rpc.seed import seed_debug
 from anubis.rpc.theia import (
     initialize_theia_session,
     reap_theia_session,
     reap_stale_theia_sessions,
 )
-from anubis.rpc.seed import seed_debug
-from anubis.config import config
 
 
 def rpc_enqueue(func, *args):

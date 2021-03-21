@@ -1,6 +1,4 @@
 from anubis.models import db, User, AssignmentRepo
-from anubis.utils.logger import logger
-from sqlalchemy import or_
 
 
 def parse_webhook(webhook):

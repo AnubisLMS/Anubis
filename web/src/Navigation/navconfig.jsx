@@ -32,6 +32,7 @@ import AdminCourses from '../Pages/Admin/Courses';
 import AdminTheia from '../Pages/Admin/Theia';
 import AdminStatic from '../Pages/Admin/Static';
 import AdminConfig from '../Pages/Admin/Config';
+import AdminAssignmentQuestions from '../Pages/Admin/AssignmentQuestions';
 
 export const footer_nav = [
   {
@@ -154,6 +155,11 @@ export const not_shown_nav = [
     id: 'AdminSubmissionStats',
     path: '/admin/stats/submission',
     Page: AdminSubmissionStats,
+  },
+  {
+    id: '',
+    path: '/admin/assignment/questions/:code',
+    Page: AdminAssignmentQuestions,
   },
 ];
 

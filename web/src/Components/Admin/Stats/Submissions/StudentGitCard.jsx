@@ -22,7 +22,7 @@ export default function StudentGitCard({submission}) {
     return null;
   }
 
-  const {commit='', repo=''} = submission;
+  const {commit = '', repo = ''} = submission;
   const shortCommit = (commit ?? '').substr(0, 6);
 
   return (

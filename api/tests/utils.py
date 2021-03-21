@@ -1,15 +1,16 @@
-from anubis.utils.auth import create_token
-from anubis.models import db, User
-from anubis.app import create_app
-import traceback
-import requests
-import hashlib
+import functools
+import json
+import os
 import random
 import string
-import json
 import sys
-import os
-import functools
+import traceback
+
+import requests
+
+from anubis.app import create_app
+from anubis.models import db, User
+from anubis.utils.auth import create_token
 
 os.environ["DEBUG"] = "1"
 os.environ["DISABLE_ELK"] = "1"
@@ -155,7 +156,7 @@ class TestSession(object):
     """
 
     def __init__(
-        self, domain: str = "localhost", port: int = 80, admin=False, superuser=False
+            self, domain: str = "localhost", port: int = 80, admin=False, superuser=False
     ):
         self.url = f"http://{domain}:{port}/api"
         self.timings = []
@@ -201,14 +202,14 @@ class TestSession(object):
         return response
 
     def _make_request(
-        self,
-        path,
-        request_func,
-        return_request,
-        should_succeed,
-        should_fail,
-        skip_verify,
-        **kwargs,
+            self,
+            path,
+            request_func,
+            return_request,
+            should_succeed,
+            should_fail,
+            skip_verify,
+            **kwargs,
     ):
         # Make the request
         r = request_func(self.url + path, **kwargs)
@@ -226,13 +227,13 @@ class TestSession(object):
         return response
 
     def get(
-        self,
-        path,
-        return_request=False,
-        should_succeed=True,
-        should_fail=False,
-        skip_verify=False,
-        **kwargs,
+            self,
+            path,
+            return_request=False,
+            should_succeed=True,
+            should_fail=False,
+            skip_verify=False,
+            **kwargs,
     ):
         return self._make_request(
             path,
@@ -245,13 +246,13 @@ class TestSession(object):
         )
 
     def post(
-        self,
-        path,
-        return_request=False,
-        should_succeed=True,
-        should_fail=False,
-        skip_verify=False,
-        **kwargs,
+            self,
+            path,
+            return_request=False,
+            should_succeed=True,
+            should_fail=False,
+            skip_verify=False,
+            **kwargs,
     ):
         return self._make_request(
             path,
@@ -264,14 +265,14 @@ class TestSession(object):
         )
 
     def post_json(
-        self,
-        path,
-        json,
-        return_request=False,
-        should_succeed=True,
-        should_fail=False,
-        skip_verify=False,
-        **kwargs,
+            self,
+            path,
+            json,
+            return_request=False,
+            should_succeed=True,
+            should_fail=False,
+            skip_verify=False,
+            **kwargs,
     ):
         kwargs["json"] = json
         if "headers" not in kwargs:
@@ -300,9 +301,9 @@ def run_main(func):
 
 
 if __name__ == "__main__":
-
     def test_this_file():
         ts = TestSession()
         ts.get("/public/auth/whoami")
+
 
     run_main(test_this_file)

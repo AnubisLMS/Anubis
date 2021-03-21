@@ -163,11 +163,11 @@ proxyServer.on("error", function (error) {
   console.error(error);
 })
 
-proxy.on('error', function(error) {
+proxy.on('error', function (error) {
   console.error(error);
 })
 
-process.on('uncaughtException', function(error) {
+process.on('uncaughtException', function (error) {
   console.error(error);
 })
 

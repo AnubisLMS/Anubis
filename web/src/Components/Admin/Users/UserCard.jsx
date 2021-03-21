@@ -15,7 +15,6 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import Grid from '@material-ui/core/Grid';
-import {Gif} from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   root: {

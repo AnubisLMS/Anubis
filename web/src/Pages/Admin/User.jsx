@@ -9,7 +9,6 @@ import axios from 'axios';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import {useSnackbar} from 'notistack';
 import Typography from '@material-ui/core/Typography';
-import Hidden from '@material-ui/core/Hidden';
 
 
 export default function User() {

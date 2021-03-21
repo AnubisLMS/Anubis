@@ -1,7 +1,9 @@
 from flask import Blueprint, request
 
 from anubis.models import db, StaticFile
+from anubis.utils.auth import require_admin
 from anubis.utils.data import rand
+from anubis.utils.decorators import json_response
 from anubis.utils.files import get_mime_type
 from anubis.utils.http import (
     get_number_arg,
@@ -9,8 +11,6 @@ from anubis.utils.http import (
     success_response,
     error_response,
 )
-from anubis.utils.decorators import json_response
-from anubis.utils.auth import require_admin
 
 static = Blueprint("admin-static", __name__, url_prefix="/admin/static")
 
@@ -46,10 +46,10 @@ def static_public_list():
     limit = get_number_arg("limit", default_value=20)
     offset = get_number_arg("offset", default_value=0)
 
-    public_files = StaticFile.query\
-        .order_by(StaticFile.created.desc())\
-        .limit(limit)\
-        .offset(offset)\
+    public_files = StaticFile.query \
+        .order_by(StaticFile.created.desc()) \
+        .limit(limit) \
+        .offset(offset) \
         .all()
 
     return success_response(

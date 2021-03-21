@@ -20,7 +20,7 @@
     "markdown-to-jsx": "^7.1.2",
     "notistack": "^1.0.3",
     "react": "^17.0.1",
-    "react-ace": "^9.2.0",
+    "react-ace": "^9.3.0",
     "react-device-detect": "^1.15.0",
     "react-dom": "^17.0.1",
     "react-markdown": "^5.0.2",

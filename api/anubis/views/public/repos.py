@@ -25,10 +25,10 @@ def public_repos():
 
     repos: List[AssignmentRepo] = (
         AssignmentRepo.query.join(Assignment)
-        .filter(AssignmentRepo.owner_id == user.id)
-        .distinct(AssignmentRepo.repo_url)
-        .order_by(Assignment.release_date.desc())
-        .all()
+            .filter(AssignmentRepo.owner_id == user.id)
+            .distinct(AssignmentRepo.repo_url)
+            .order_by(Assignment.release_date.desc())
+            .all()
     )
 
     return success_response({"repos": [repo.data for repo in repos]})

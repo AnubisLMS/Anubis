@@ -1,15 +1,11 @@
-import json
-
-from flask import Blueprint, request
+from flask import Blueprint
 
 from anubis.models import Submission, Assignment, User
-from anubis.utils.cache import cache
-from anubis.utils.decorators import json_response, load_from_id
 from anubis.utils.auth import require_admin
+from anubis.utils.decorators import json_response
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import success_response, error_response, get_number_arg
 from anubis.utils.questions import get_assigned_questions
-from anubis.utils.students import get_students
 from anubis.utils.stats import bulk_stats, stats_for, stats_wrapper
 
 stats = Blueprint("admin-stats", __name__, url_prefix="/admin/stats")

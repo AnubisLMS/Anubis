@@ -34,8 +34,8 @@ def log_endpoint(log_type, message_func=None):
             ip = get_request_ip()
             location = geolite2.lookup(ip)
             longitude, latitude = location.location[::-1] \
-                            if location is not None \
-                            else [0, 0]
+                if location is not None \
+                else [0, 0]
 
             # Skip indexing if the app has ELK disabled
             if not config.DISABLE_ELK:
