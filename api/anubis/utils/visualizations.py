@@ -48,33 +48,40 @@ def get_usage_plot():
 
     assignments = Assignment.query.filter(
         Assignment.hidden == False,
-        Assignment.release_date >= datetime.now(),
+        Assignment.release_date <= datetime.now(),
     ).all()
     submissions = get_submissions()
     theia_sessions = get_theia_sessions()
 
     fig, axs = plt.subplots(2, 1, figsize=(12, 10))
 
+    legend_handles0 = []
+    legend_handles1 = []
+
     # assignment release line
     for assignment in assignments:
-        axs[0].axvline(x=assignment.release_date.date(), color='red', label=f'{assignment.name} release')
-        axs[1].axvline(x=assignment.release_date.date(), color='red', label=f'{assignment.name} release')
+        legend_handles0.append(
+            axs[0].axvline(x=assignment.release_date.date(), color='red', label=f'{assignment.name} release')
+        )
+        legend_handles1.append(
+            axs[1].axvline(x=assignment.release_date.date(), color='red', label=f'{assignment.name} release')
+        )
 
     # submissions over hour line
     submissions.groupby(['assignment_id', 'created'])['id'] \
         .count().reset_index().rename(columns={'id': 'count'}).groupby('assignment_id') \
-        .plot(x='created', y='count', label='submissions', ax=axs[0])
+        .plot(x='created', label=None, ax=axs[0])
 
     # ides over hour line
     theia_sessions.groupby(['assignment_id', 'created'])['id'] \
         .count().reset_index().rename(columns={'id': 'count'}).groupby('assignment_id') \
         .plot(x='created', y='count', label='IDE sessions', color='green', ax=axs[1])
 
-    axs[0].legend(loc='upper center')
+    axs[0].legend(handles=legend_handles0, loc='upper center')
     axs[0].set(title='Anubis usage over time', ylabel='count')
     axs[0].grid(True)
 
-    axs[1].legend(loc='upper center')
+    axs[1].legend(handles=legend_handles1, loc='upper center')
     axs[1].set(ylabel='count')
     axs[1].grid(True)
 

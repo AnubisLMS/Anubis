@@ -1,18 +1,13 @@
 import React from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
-import {useSnackbar} from 'notistack';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardHeader from '@material-ui/core/CardHeader';
-import {Avatar} from '@material-ui/core';
+import Avatar from '@material-ui/core/Avatar';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    flex: 1,
-  },
   usage: {
     height: 0,
     paddingTop: '83.33%', // 16:9
@@ -21,7 +16,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Visuals() {
   const classes = useStyles();
-  const {enqueueSnackbar} = useSnackbar();
 
   return (
     <Grid container spacing={2} justify={'center'}>
@@ -35,7 +29,7 @@ export default function Visuals() {
       </Grid>
       <Grid item/>
       <Grid item xs={12} md={10}>
-        <Card>
+        <Card className={classes.card}>
           <CardHeader
             avatar={<Avatar src={'/logo512.png'}/>}
             title={'Anubis Usage over time'}
