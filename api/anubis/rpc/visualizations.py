@@ -1,7 +1,7 @@
 from anubis.utils.visualizations import get_usage_plot
 
 
-def create_visuals():
+def create_visuals(*_, **__):
     """
     Create visuals files to be cached in redis.
 
@@ -11,4 +11,5 @@ def create_visuals():
     app = create_app()
 
     with app.app_context():
-        get_usage_plot()
+        with app.request_context():
+            get_usage_plot()

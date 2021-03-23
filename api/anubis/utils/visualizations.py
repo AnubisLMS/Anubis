@@ -78,11 +78,11 @@ def get_usage_plot():
         .plot(x='created', y='count', label='IDE sessions', color='green', ax=axs[1])
 
     axs[0].legend(handles=legend_handles0, loc='upper center')
-    axs[0].set(title='Anubis usage over time', ylabel='count')
+    axs[0].set(title='Submissions over time', ylabel='count')
     axs[0].grid(True)
 
     axs[1].legend(handles=legend_handles1, loc='upper center')
-    axs[1].set(ylabel='count')
+    axs[1].set(title='Cloud IDEs over time', ylabel='count')
     axs[1].grid(True)
 
     file_bytes = BytesIO()

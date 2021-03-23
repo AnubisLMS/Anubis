@@ -51,5 +51,5 @@ def seed():
     rpc_enqueue(seed_debug, [])
 
 
-def create_visuals():
+def create_visuals(*_):
     rpc_enqueue(create_visuals_, [])
