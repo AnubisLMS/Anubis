@@ -4,16 +4,19 @@ FROM node:${NODE_VERSION}
 ARG version=latest
 WORKDIR /home/theia
 ADD $version.package.json ./package.json
-RUN yarn --pure-lockfile && \
-    NODE_OPTIONS="--max_old_space_size=4096" yarn theia build && \
-    yarn theia download:plugins && \
-    yarn --production && \
-    yarn autoclean --init && \
-    echo *.ts >> .yarnclean && \
-    echo *.ts.map >> .yarnclean && \
-    echo *.spec.* >> .yarnclean && \
-    yarn autoclean --force && \
-    yarn cache clean
+RUN yarn --pure-lockfile \
+  && NODE_OPTIONS="--max_old_space_size=4096" yarn theia build \
+  && yarn theia download:plugins \
+  && yarn --production \
+  && yarn autoclean --init \
+  && echo *.ts >> .yarnclean \
+  && echo *.ts.map >> .yarnclean \
+  && echo *.spec.* >> .yarnclean \
+  && yarn autoclean --force \
+  && yarn cache clean \
+  && rm -rf /usr/share/doc \
+  && rm -rf /home/theia/node_modules/.cache \
+  && rm -rf /usr/local/share/.cache
 
 FROM node:${NODE_VERSION}
 
@@ -45,6 +48,9 @@ RUN apt-get update \
   && rm -rf /var/cache/apt/* \
   && rm -rf /var/lib/apt/lists/* \
   && rm -rf /tmp/* \
+  && rm -rf /usr/share/doc \
+  && rm -rf /root/.cache \
+  && rm -rf /home/theia/node_modules/.cache \
   && adduser --disabled-password --gecos '' --uid 1001 theia \
   && mkdir -p /home/project \
   && chmod g+rw /home \

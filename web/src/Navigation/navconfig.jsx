@@ -12,6 +12,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import PieChartIcon from '@material-ui/icons/PieChart';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import BookIcon from '@material-ui/icons/Book';
+import TimelineIcon from '@material-ui/icons/Timeline';
 
 import About from '../Pages/Public/About';
 import Courses from '../Pages/Public/Courses';
@@ -21,6 +22,7 @@ import Repos from '../Pages/Public/Repos';
 import Submissions from '../Pages/Public/Submissions';
 import Submission from '../Pages/Public/Submission';
 import Blog from '../Pages/Public/Blog';
+import Visuals from '../Pages/Public/Visuals';
 
 import AdminUsers from '../Pages/Admin/Users';
 import AdminUser from '../Pages/Admin/User';
@@ -41,6 +43,13 @@ export const footer_nav = [
     exact: true,
     path: '/about',
     Page: About,
+  },
+  {
+    id: 'Visuals',
+    icon: <TimelineIcon/>,
+    exact: true,
+    path: '/visuals',
+    Page: Visuals,
   },
   {
     id: 'Blog',

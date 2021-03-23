@@ -9,6 +9,7 @@ from anubis.rpc.theia import (
     reap_theia_session,
     reap_stale_theia_sessions,
 )
+from anubis.rpc.visualizations import create_visuals as create_visuals_
 
 
 def rpc_enqueue(func, *args):
@@ -48,3 +49,7 @@ def enqueue_ide_reap_stale(*args):
 
 def seed():
     rpc_enqueue(seed_debug, [])
+
+
+def create_visuals():
+    rpc_enqueue(create_visuals_, [])

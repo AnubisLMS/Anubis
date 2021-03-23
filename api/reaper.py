@@ -8,7 +8,7 @@ from sqlalchemy import func, and_
 
 from anubis.app import create_app
 from anubis.models import db, Submission, Assignment, AssignmentRepo, TheiaSession, SubmissionBuild
-from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_reap_stale, enqueue_webhook
+from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_reap_stale, enqueue_webhook, create_visuals
 from anubis.utils.stats import bulk_stats
 from anubis.utils.webhook import check_repo, guess_github_username, parse_webhook
 
@@ -225,6 +225,7 @@ def reap():
         reap_stale_submissions()
         enqueue_ide_reap_stale()
         reap_repos()
+        create_visuals()
 
         with app.test_request_context():
             # Calculate bulk stats (pre-process stats calls)

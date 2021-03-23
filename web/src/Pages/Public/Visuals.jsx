@@ -1,0 +1,54 @@
+import React from 'react';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import Grid from '@material-ui/core/Grid';
+import {useSnackbar} from 'notistack';
+import Typography from '@material-ui/core/Typography';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import CardMedia from '@material-ui/core/CardMedia';
+import CardHeader from '@material-ui/core/CardHeader';
+import {Avatar} from '@material-ui/core';
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flex: 1,
+  },
+  usage: {
+    height: 0,
+    paddingTop: '83.33%', // 16:9
+  },
+}));
+
+export default function Visuals() {
+  const classes = useStyles();
+  const {enqueueSnackbar} = useSnackbar();
+
+  return (
+    <Grid container spacing={2} justify={'center'}>
+      <Grid item xs={12}>
+        <Typography variant="h6">
+          Anubis
+        </Typography>
+        <Typography variant={'subtitle1'} color={'textSecondary'}>
+          Visuals
+        </Typography>
+      </Grid>
+      <Grid item/>
+      <Grid item xs={12} md={10}>
+        <Card>
+          <CardHeader
+            avatar={<Avatar src={'/logo512.png'}/>}
+            title={'Anubis Usage over time'}
+            titleTypographyProps={{variant: 'h6'}}
+            subheader={'re-generated every 5 minutes'}
+          />
+          <CardMedia
+            className={classes.usage}
+            image={'/api/public/visuals/usage'}
+            title={'Anubis usage'}
+          />
+        </Card>
+      </Grid>
+    </Grid>
+  );
+}
