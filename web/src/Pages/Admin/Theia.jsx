@@ -14,6 +14,10 @@ import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import Fab from '@material-ui/core/Fab';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import Tooltip from '@material-ui/core/Tooltip';
+import GitHubIcon from '@material-ui/icons/GitHub';
+import IconButton from '@material-ui/core/IconButton';
+import CheckIcon from '@material-ui/icons/Check';
+import CancelIcon from '@material-ui/icons/Cancel';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -52,8 +56,21 @@ const stopAllSessions = (state, enqueueSnackbar) => () => {
 const useColumns = (state, enqueueSnackbar) => ([
   {field: 'netid', headerName: 'Netid'},
   {field: 'state', headerName: 'State'},
-  {field: 'course_code', headerName: 'Course', width: 150},
-  {field: 'created', headerName: 'Created', type: 'dateTime', width: 200},
+  {field: 'course_code', headerName: 'Course', width: 120},
+  {field: 'assignment_name', headerName: 'Assignment', width: 110},
+  {field: 'created', headerName: 'Created', type: 'dateTime', width: 170},
+  {field: 'autosave', headerName: 'Autosave', width: 100, renderCell: ({row}) => (
+    <IconButton color={row.autosave ? 'primary' : 'secondary'}>
+      {row.autosave ? <CheckIcon/> : <CancelIcon/>}
+    </IconButton>
+  )},
+  {
+    field: 'repo_url', headerName: 'Repo', width: 75, renderCell: ({row}) => (
+      <IconButton color={'primary'} component={'a'} href={row.repo_url} target={'_blank'}>
+        <GitHubIcon/>
+      </IconButton>
+    ),
+  },
   {
     field: 'kill', headerName: 'End Session', width: 150, renderCell: ({row}) => (
       <Button
@@ -137,6 +154,7 @@ export default function Theia() {
           <Grid item xs={12}>
             <Paper className={classes.paper}>
               <DataGrid
+                disableColumnMenu={true}
                 className={classes.dataGrid}
                 columns={columns}
                 rows={rows}

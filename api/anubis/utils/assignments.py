@@ -58,19 +58,16 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
     if course_id is not None:
         filters.append(Course.id == course_id)
 
-    assignments = (
-        Assignment.query.join(Course)
-            .join(InCourse)
-            .join(User)
-            .filter(
+    # Only hide assignments if user is not admin
+    if not (user.is_admin or user.is_superuser):
+        filters.append(Assignment.release_date <= datetime.now())
+        filters.append(Assignment.hidden == False)
+
+    assignments = Assignment.query\
+        .join(Course).join(InCourse).join(User).filter(
             User.netid == netid,
-            Assignment.hidden == False,
-            Assignment.release_date <= datetime.now(),
             *filters
-        )
-            .order_by(Assignment.due_date.desc())
-            .all()
-    )
+        ).order_by(Assignment.due_date.desc()).all()
 
     a = [a.data for a in assignments]
     for assignment_data in a:
