@@ -32,14 +32,14 @@ export default function Visuals() {
         <Card className={classes.card}>
           <CardHeader
             avatar={<Avatar src={'/logo512.png'}/>}
-            title={'Anubis Usage over time'}
+            title={'Anubis Usage Over Time'}
             titleTypographyProps={{variant: 'h6'}}
             subheader={'re-generated every 5 minutes'}
           />
           <CardMedia
             className={classes.usage}
             image={'/api/public/visuals/usage'}
-            title={'Anubis usage'}
+            title={'Anubis Usage'}
           />
         </Card>
       </Grid>
