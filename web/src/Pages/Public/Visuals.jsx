@@ -28,7 +28,7 @@ export default function Visuals() {
         </Typography>
       </Grid>
       <Grid item/>
-      <Grid item xs={12} sm={10} md={8} lg={8} xl={6}>
+      <Grid item xs={12} sm={12} md={10} lg={8} xl={6}>
         <Card className={classes.card}>
           <CardHeader
             avatar={<Avatar src={'/logo512.png'}/>}

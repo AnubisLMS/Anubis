@@ -13,4 +13,5 @@ fi
 for mmdf in $(find -name '*.mmd'); do
     echo "rendering ${mmdf}"
     node_modules/.bin/mmdc -i ${mmdf} -o ../img/${mmdf}.png -b transparent -t forest
+    node_modules/.bin/mmdc -i ${mmdf} -o ../img/${mmdf}.svg -b transparent -t forest
 done

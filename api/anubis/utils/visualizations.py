@@ -34,17 +34,21 @@ def get_theia_sessions() -> pd.DataFrame:
     )
     theia_sessions['created'] = theia_sessions['created'].apply(lambda date: pd.to_datetime(date).round('H'))
     theia_sessions['ended'] = theia_sessions['ended'].apply(lambda date: pd.to_datetime(date).round('H'))
-    theia_sessions['duration'] = theia_sessions[['ended', 'created']].apply(
-        lambda row: (row[0] - row[1]).seconds / 60, axis=1)
+    if len(theia_sessions) > 0:
+        theia_sessions['duration'] = theia_sessions[['ended', 'created']].apply(
+            lambda row: (row[0] - row[1]).seconds / 60, axis=1)
+    else:
+        theia_sessions['duration'] = []
     theia_sessions = theia_sessions[
         np.abs(theia_sessions.duration - theia_sessions.duration.mean()) <= (3 * theia_sessions.duration.std())
     ]  # Drop outliers based on duration
     return theia_sessions
 
 
-@cache.cached(timeout=300, unless=is_debug)
+@cache.cached(timeout=360, unless=is_debug)
 def get_usage_plot():
     import matplotlib.pyplot as plt
+    import matplotlib.colors as mcolors
 
     assignments = Assignment.query.filter(
         Assignment.hidden == False,
@@ -58,15 +62,6 @@ def get_usage_plot():
     legend_handles0 = []
     legend_handles1 = []
 
-    # assignment release line
-    for assignment in assignments:
-        legend_handles0.append(
-            axs[0].axvline(x=assignment.release_date.date(), color='red', label=f'{assignment.name} release')
-        )
-        legend_handles1.append(
-            axs[1].axvline(x=assignment.release_date.date(), color='red', label=f'{assignment.name} release')
-        )
-
     # submissions over hour line
     submissions.groupby(['assignment_id', 'created'])['id'] \
         .count().reset_index().rename(columns={'id': 'count'}).groupby('assignment_id') \
@@ -75,14 +70,33 @@ def get_usage_plot():
     # ides over hour line
     theia_sessions.groupby(['assignment_id', 'created'])['id'] \
         .count().reset_index().rename(columns={'id': 'count'}).groupby('assignment_id') \
-        .plot(x='created', y='count', label='IDE sessions', color='green', ax=axs[1])
+        .plot(x='created', label=None, ax=axs[1])
+
+    # assignment release line
+    for color, assignment in zip(mcolors.TABLEAU_COLORS, assignments):
+        legend_handles0.append(
+            axs[0].axvline(
+                x=assignment.due_date.date(),
+                color='red',
+                label=f'{assignment.name}',
+                ymax=0.1,
+            )
+        )
+        legend_handles1.append(
+            axs[1].axvline(
+                x=assignment.due_date.date(),
+                color='red',
+                label=f'{assignment.name}',
+                ymax=0.1,
+            )
+        )
 
     axs[0].legend(handles=legend_handles0, loc='upper center')
-    axs[0].set(title='Submissions over time', ylabel='count')
+    axs[0].set(title='Submissions over time', xlabel='time', ylabel='count')
     axs[0].grid(True)
 
     axs[1].legend(handles=legend_handles1, loc='upper center')
-    axs[1].set(title='Cloud IDEs over time', ylabel='count')
+    axs[1].set(title='Cloud IDEs over time', xlabel='time', ylabel='count')
     axs[1].grid(True)
 
     file_bytes = BytesIO()
