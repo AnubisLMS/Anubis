@@ -29,10 +29,10 @@ reaper:
   schedule: "*/5 * * * *"
 
 pipeline_api:
-  replicas: 2
+  replicas: 3
   workers: 2
 
-  healthCheck: true
+  healthCheck: false
 
 web:
   replicas: 2
@@ -44,7 +44,7 @@ logstash:
   tag: "latest"
 
 rpc_workers:
-  replicas: 10
+  replicas: 20
 
 theia:
   enable: true
