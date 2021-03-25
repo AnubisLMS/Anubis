@@ -49,6 +49,9 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(4),
     fontSize: 16,
   },
+  markdown: {
+    margin: theme.spacing(1),
+  },
 }));
 
 

@@ -41,13 +41,8 @@ pushd ../demo
 popd
 
 pushd ..
-# Only build theia if it doesnt already exist (it's a long build)
-if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia-admin$' &>/dev/null; then
-    EXTRA_BUILD="theia-admin theia-xv6"
-fi
-
 # Build services in parallel to speed things up
-docker-compose build --parallel --pull api web logstash theia-proxy theia-init theia-sidecar ${EXTRA_BUILD}
+docker-compose build --parallel --pull api web logstash theia-proxy theia-init theia-sidecar
 popd
 
 # Figure out if we are upgrading or installing
@@ -85,3 +80,8 @@ echo
 echo 'seed: https://localhost/api/admin/seed/'
 echo 'auth: https://localhost/api/admin/auth/token/jmc1283'
 echo 'site: https://localhost/'
+
+# Only build theia if it doesnt already exist (it's a long build)
+if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia-admin$' &>/dev/null; then
+    docker-compose build --parallel theia-admin theia-xv6
+fi

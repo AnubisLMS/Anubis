@@ -13,17 +13,17 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rpc-workers
+  name: rpc-default
   namespace: {{ .Release.Namespace }}
   labels:
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
-    component: pipeline-rpc-workers
+    component: pipeline-rpc-default
 
 spec:
   selector:
     matchLabels:
-      app: rpc-workers
+      app: rpc-default
   replicas: {{ .Values.rpc_workers.replicas }}
   {{- if .Values.rollingUpdates }}
   strategy:
@@ -35,15 +35,15 @@ spec:
   template:
     metadata:
       labels:
-        app: rpc-workers
+        app: rpc-default
     spec:
       serviceAccountName: pipeline-rpc
       dnsPolicy: ClusterFirst
       containers:
-      - name: anubis-rpc-worker
+      - name: anubis-rpc-default
         image: {{ .Values.api.image }}:{{ .Values.api.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
-        command: ["./rq-worker.sh"]
+        command: ["./rq-worker.sh", "default"]
         env:
         - name: "DEBUG"
           value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}

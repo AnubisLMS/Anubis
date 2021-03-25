@@ -30,6 +30,7 @@ def reap_stale_submissions():
     Submission.query.filter(
         Submission.last_updated < datetime.now() - timedelta(minutes=30),
         Submission.processed == False,
+        Submission.state != 'regrading',
     ).update({
         Submission.processed: True,
         Submission.state: "Reaped after timeout",

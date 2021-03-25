@@ -195,7 +195,7 @@ def private_ide_reap_all():
     """
 
     # Send reap job to rpc cluster
-    rpc_enqueue(reap_all_theia_sessions, tuple())
+    rpc_enqueue(reap_all_theia_sessions, 'theia', args=tuple())
 
     # Hand back status
     return success_response(

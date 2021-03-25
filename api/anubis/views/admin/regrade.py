@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from flask import Blueprint
 
-from anubis.models import Submission, Assignment
+from anubis.models import Submission, Assignment, User, Course, InCourse
 from anubis.rpc.batch import rpc_bulk_regrade
 from anubis.utils.auth import require_admin
 from anubis.utils.data import split_chunks
@@ -71,11 +71,26 @@ def private_regrade_assignment(assignment_name):
 
     extra = []
     hours = get_number_arg('hours', default_value=-1)
+    not_processed = get_number_arg('not_processed', default_value=-1)
+    processed = get_number_arg('processed', default_value=-1)
+    reaped = get_number_arg('reaped', default_value=-1)
 
     # Add hours to filter query
     if hours > 0:
         extra.append(
             Submission.created > datetime.now() - timedelta(hours=hours)
+        )
+    if processed == 1:
+        extra.append(
+            Submission.processed == True,
+        )
+    if not_processed == 1:
+        extra.append(
+            Submission.processed == False,
+        )
+    if reaped == 1:
+        extra.append(
+            Submission.state == 'Reaped after timeout',
         )
 
     # Find the assignment
@@ -96,7 +111,7 @@ def private_regrade_assignment(assignment_name):
 
     # Enqueue each chunk as a job for the rpc workers
     for chunk in submission_chunks:
-        rpc_enqueue(rpc_bulk_regrade, chunk)
+        rpc_enqueue(rpc_bulk_regrade, 'default', args=[chunk])
 
     # Pass back the enqueued status
     return success_response({

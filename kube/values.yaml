@@ -44,7 +44,7 @@ logstash:
   tag: "latest"
 
 rpc_workers:
-  replicas: 20
+  replicas: 10
 
 theia:
   enable: true

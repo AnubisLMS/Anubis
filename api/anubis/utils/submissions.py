@@ -35,7 +35,7 @@ def regrade_submission(submission):
 
     submission: Submission
     submission.processed = False
-    submission.state = "Waiting for resources..."
+    submission.state = "regrading"
     submission.last_updated = datetime.now()
     submission.init_submission_models()
 
