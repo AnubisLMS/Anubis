@@ -53,7 +53,11 @@ export default function Assignments({classes}) {
             version 1.0 and are complex multi stage jobs.
           </Typography>
           <div className={classes.imgbox}>
-            <img className={classes.img} src={'/submission-flow.mmd.svg'} alt={'submission flow svg'}/>
+            <img
+              className={classes.img}
+              src={'https://anubis.osiris.services/api/public/static/b88665d8c43989e0'}
+              alt={'submission flow svg'}
+            />
           </div>
           <Typography gutterBottom className={classes.typography}>
             Github first reports a push to the Anubis api by a webhook. At this point, the submission
@@ -95,7 +99,11 @@ export default function Assignments({classes}) {
           </Typography>
           <div/>
           <div className={classes.imgbox}>
-            <img className={classes.img} src={'/anubis-assignment-pipeline.gif'} alt={'pipeline progress gif'}/>
+            <img
+              className={classes.img}
+              src={'https://anubis.osiris.services/api/public/static/f5d922b0dd893817'}
+              alt={'pipeline progress gif'}
+            />
           </div>
 
 

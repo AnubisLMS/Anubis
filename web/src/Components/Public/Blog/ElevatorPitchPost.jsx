@@ -61,7 +61,7 @@ export default function ElevatorPitch({classes}) {
           </Typography>
           <CardMedia
             className={classes.media16x9}
-            image="/autograde-results-1.png"
+            image="https://anubis.osiris.services/api/public/static/82255026ec8ec6d2"
           />
 
           <Typography gutterBottom color={'textSecondary'} className={classes.subtitle}>
@@ -95,7 +95,7 @@ export default function ElevatorPitch({classes}) {
           </Typography>
           <CardMedia
             className={classes.media16x9}
-            image="/theia-fullscreen.png"
+            image="https://anubis.osiris.services/api/public/static/c99e89d478b73ad6"
           />
 
           <Typography gutterBottom className={classes.typography}>

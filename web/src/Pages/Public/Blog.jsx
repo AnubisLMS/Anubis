@@ -4,6 +4,7 @@ import Grid from '@material-ui/core/Grid';
 
 import AssignmentPost from '../../Components/Public/Blog/AssignmentPost';
 import ElevatorPitchPost from '../../Components/Public/Blog/ElevatorPitchPost';
+import AssignmentPackagingPost from '../../Components/Public/Blog/AssignmentPackagingPost';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -52,6 +53,11 @@ const useStyles = makeStyles((theme) => ({
   markdown: {
     margin: theme.spacing(1),
   },
+  bullet: {
+    display: 'inline-block',
+    margin: '0 2px',
+    transform: 'scale(0.8)',
+  },
 }));
 
 
@@ -66,6 +72,9 @@ export default function Blog() {
       alignItems="center"
       spacing={4}
     >
+      <Grid item xs={12}>
+        <AssignmentPackagingPost classes={classes}/>
+      </Grid>
       <Grid item xs={12}>
         <AssignmentPost classes={classes}/>
       </Grid>
