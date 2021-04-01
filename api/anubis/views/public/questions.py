@@ -1,7 +1,7 @@
 from flask import Blueprint
 from sqlalchemy.exc import IntegrityError, DataError
 
-from anubis.models import db, AssignedStudentQuestion, User
+from anubis.models import db, AssignedStudentQuestion, AssignedQuestionResponse, User
 from anubis.utils.auth import require_user, current_user
 from anubis.utils.decorators import json_endpoint
 from anubis.utils.http import success_response, error_response
@@ -36,15 +36,17 @@ def public_questions_save(id: str, response: str):
     ):
         return error_response("Assigned question does not exist")
 
-    assigned_question.response = response
+    res = AssignedQuestionResponse(
+        assigned_question_id=assigned_question.id,
+        response=response
+    )
+    db.session.add(res)
 
     try:
         db.session.commit()
     except (IntegrityError, DataError):
         return error_response("Server was unable to save your response.")
 
-    return success_response(
-        {
-            "status": "Response Saved",
-        }
-    )
+    return success_response({
+        "status": "Response Saved",
+    })

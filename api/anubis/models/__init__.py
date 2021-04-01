@@ -291,9 +291,6 @@ class AssignedStudentQuestion(db.Model):
     # id
     id = default_id()
 
-    # Fields
-    response = db.Column(db.Text, nullable=False, default="")
-
     # Foreign Keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id))
     assignment_id = db.Column(
@@ -308,9 +305,10 @@ class AssignedStudentQuestion(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Relationships
-    owner = db.relationship(User, cascade="all,delete")
-    assignment = db.relationship(Assignment, cascade="all,delete")
-    question = db.relationship(AssignmentQuestion, cascade="all,delete")
+    owner = db.relationship(User)
+    assignment = db.relationship(Assignment)
+    question = db.relationship(AssignmentQuestion)
+    responses = db.relationship('AssignedQuestionResponse', cascade='all,delete')
 
     @property
     def data(self):
@@ -319,10 +317,17 @@ class AssignedStudentQuestion(db.Model):
 
         :return:
         """
+        response = AssignedQuestionResponse.query.filter(
+            AssignedQuestionResponse.assigned_question_id == self.id,
+        ).order_by(AssignedQuestionResponse.created.desc()).first()
+
+        raw_response = self.question.placeholder
+        if response is not None:
+            raw_response = response.response
 
         return {
             "id": self.id,
-            "response": self.response,
+            "response": raw_response,
             "question": self.question.data,
         }
 
@@ -333,6 +338,25 @@ class AssignedStudentQuestion(db.Model):
             "question": self.question.full_data,
             "response": self.response,
         }
+
+
+class AssignedQuestionResponse(db.Model):
+    __tablename__ = "assigned_student_response"
+
+    # id
+    id = default_id()
+
+    # Foreign Keys
+    assigned_question_id = db.Column(
+        db.String(128), db.ForeignKey(AssignedStudentQuestion.id), index=True, nullable=False
+    )
+
+    # Fields
+    response = db.Column(db.TEXT, default='', nullable=False)
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
 
 class Submission(db.Model):
