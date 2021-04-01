@@ -62,9 +62,20 @@ services:
     labels:
       - "traefik.enable=false"
 
-  rpc-worker:
+  rpc-default:
     build: ./api
-    command: "rq worker -u redis://:anubis@redis-master"
+    command: "rq worker -u redis://:anubis@redis-master default"
+    environment:
+      - "DEBUG=1"
+      - "DB_HOST=db"
+    volumes:
+      - "./api:/opt/app"
+    labels:
+      - "traefik.enable=false"
+
+  rpc-theia:
+    build: ./api
+    command: "rq worker -u redis://:anubis@redis-master theia"
     environment:
       - "DEBUG=1"
       - "DB_HOST=db"
