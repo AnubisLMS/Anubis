@@ -333,10 +333,18 @@ class AssignedStudentQuestion(db.Model):
 
     @property
     def full_data(self):
+        response = AssignedQuestionResponse.query.filter(
+            AssignedQuestionResponse.assigned_question_id == self.id,
+        ).order_by(AssignedQuestionResponse.created.desc()).first()
+
+        raw_response = self.question.placeholder
+        if response is not None:
+            raw_response = response.response
+
         return {
             "id": self.id,
             "question": self.question.full_data,
-            "response": self.response,
+            "response": raw_response,
         }
 
 
