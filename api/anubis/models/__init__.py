@@ -115,8 +115,8 @@ class InCourse(db.Model):
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), primary_key=True)
 
-    owner = db.relationship(User, cascade="all,delete")
-    course = db.relationship(Course, cascade="all,delete")
+    owner = db.relationship(User)
+    course = db.relationship(Course)
 
 
 class Assignment(db.Model):
@@ -149,7 +149,7 @@ class Assignment(db.Model):
     due_date = db.Column(db.DateTime, nullable=False)
     grace_date = db.Column(db.DateTime, nullable=True)
 
-    course = db.relationship(Course, cascade="all,delete", backref="assignments")
+    course = db.relationship(Course, backref="assignments")
     tests = db.relationship("AssignmentTest", cascade="all,delete")
     repos = db.relationship("AssignmentRepo", cascade="all,delete")
 
@@ -203,8 +203,8 @@ class AssignmentRepo(db.Model):
     repo_url = db.Column(db.String(128), nullable=False)
 
     # Relationships
-    owner = db.relationship(User, cascade="all,delete")
-    assignment = db.relationship(Assignment, cascade="all,delete")
+    owner = db.relationship(User)
+    assignment = db.relationship(Assignment)
     submissions = db.relationship("Submission", cascade="all,delete")
 
     @property
@@ -230,7 +230,7 @@ class AssignmentTest(db.Model):
     name = db.Column(db.String(128), index=True)
 
     # Relationships
-    assignment = db.relationship(Assignment, cascade="all,delete")
+    assignment = db.relationship(Assignment)
 
     @property
     def data(self):
@@ -259,7 +259,7 @@ class AssignmentQuestion(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Relationships
-    assignment = db.relationship(Assignment, cascade="all,delete", backref="questions")
+    assignment = db.relationship(Assignment, backref="questions")
 
     shape = {"question": str, "solution": str, "sequence": int}
 
@@ -291,9 +291,6 @@ class AssignedStudentQuestion(db.Model):
     # id
     id = default_id()
 
-    # Fields
-    response = db.Column(db.Text, nullable=False, default="")
-
     # Foreign Keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id))
     assignment_id = db.Column(
@@ -308,9 +305,10 @@ class AssignedStudentQuestion(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Relationships
-    owner = db.relationship(User, cascade="all,delete")
-    assignment = db.relationship(Assignment, cascade="all,delete")
-    question = db.relationship(AssignmentQuestion, cascade="all,delete")
+    owner = db.relationship(User)
+    assignment = db.relationship(Assignment)
+    question = db.relationship(AssignmentQuestion)
+    responses = db.relationship('AssignedQuestionResponse', cascade='all,delete')
 
     @property
     def data(self):
@@ -319,20 +317,54 @@ class AssignedStudentQuestion(db.Model):
 
         :return:
         """
+        response = AssignedQuestionResponse.query.filter(
+            AssignedQuestionResponse.assigned_question_id == self.id,
+        ).order_by(AssignedQuestionResponse.created.desc()).first()
+
+        raw_response = self.question.placeholder
+        if response is not None:
+            raw_response = response.response
 
         return {
             "id": self.id,
-            "response": self.response,
+            "response": raw_response,
             "question": self.question.data,
         }
 
     @property
     def full_data(self):
+        response = AssignedQuestionResponse.query.filter(
+            AssignedQuestionResponse.assigned_question_id == self.id,
+        ).order_by(AssignedQuestionResponse.created.desc()).first()
+
+        raw_response = self.question.placeholder
+        if response is not None:
+            raw_response = response.response
+
         return {
             "id": self.id,
             "question": self.question.full_data,
-            "response": self.response,
+            "response": raw_response,
         }
+
+
+class AssignedQuestionResponse(db.Model):
+    __tablename__ = "assigned_student_response"
+
+    # id
+    id = default_id()
+
+    # Foreign Keys
+    assigned_question_id = db.Column(
+        db.String(128), db.ForeignKey(AssignedStudentQuestion.id), index=True, nullable=False
+    )
+
+    # Fields
+    response = db.Column(db.TEXT, default='', nullable=False)
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
 
 class Submission(db.Model):
@@ -366,11 +398,11 @@ class Submission(db.Model):
     )
 
     # Relationships
-    owner = db.relationship(User, cascade="all,delete")
-    assignment = db.relationship(Assignment, cascade="all,delete")
+    owner = db.relationship(User)
+    assignment = db.relationship(Assignment)
     build = db.relationship("SubmissionBuild", cascade="all,delete", uselist=False)
     test_results = db.relationship("SubmissionTestResult", cascade="all,delete")
-    repo = db.relationship(AssignmentRepo, cascade="all,delete")
+    repo = db.relationship(AssignmentRepo)
 
     def init_submission_models(self):
         """
@@ -491,8 +523,8 @@ class SubmissionTestResult(db.Model):
     passed = db.Column(db.Boolean)
 
     # Relationships
-    submission = db.relationship(Submission, cascade="all,delete")
-    assignment_test = db.relationship(AssignmentTest, cascade="all,delete")
+    submission = db.relationship(Submission)
+    assignment_test = db.relationship(AssignmentTest)
 
     @property
     def data(self):
@@ -538,7 +570,7 @@ class SubmissionBuild(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Relationships
-    submission = db.relationship(Submission, cascade="all,delete")
+    submission = db.relationship(Submission)
 
     @property
     def data(self):

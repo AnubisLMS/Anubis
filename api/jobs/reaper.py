@@ -1,16 +1,16 @@
 import json
 import os
-import requests
 import traceback
 from datetime import datetime, timedelta
 
+import requests
 from sqlalchemy import func, and_
 
 from anubis.app import create_app
-from anubis.models import db, Submission, Assignment, AssignmentRepo, TheiaSession, SubmissionBuild
+from anubis.models import db, Submission, Assignment, AssignmentRepo, TheiaSession
 from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_reap_stale, enqueue_webhook
 from anubis.utils.stats import bulk_stats
-from anubis.utils.webhook import check_repo, guess_github_username, parse_webhook
+from anubis.utils.webhook import check_repo, guess_github_username
 
 
 def reap_stale_submissions():
@@ -30,6 +30,7 @@ def reap_stale_submissions():
     Submission.query.filter(
         Submission.last_updated < datetime.now() - timedelta(minutes=30),
         Submission.processed == False,
+        Submission.state != 'regrading',
     ).update({
         Submission.processed: True,
         Submission.state: "Reaped after timeout",
@@ -72,8 +73,8 @@ def reap_stats():
 
     for assignment in recent_assignments:
         for submission in Submission.query.filter(
-            Submission.assignment_id == assignment.id,
-            Submission.build == None,
+                Submission.assignment_id == assignment.id,
+                Submission.build == None,
         ).all():
             if submission.build is None:
                 submission.init_submission_models()

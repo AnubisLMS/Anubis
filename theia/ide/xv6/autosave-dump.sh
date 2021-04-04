@@ -1,3 +1,3 @@
 #!/bin/bash
 
-echo ${AUTOSAVE} > /AUTOSAVE
+echo ${AUTOSAVE} > /tmp/AUTOSAVE

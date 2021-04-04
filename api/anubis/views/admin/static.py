@@ -87,6 +87,9 @@ def static_public_upload():
     # Figure out content type
     mime_type = get_mime_type(stream)
 
+    if mime_type == 'image/svg':
+        mime_type = 'image/svg+xml'
+
     # Check to see if blob path already exists
     blob = StaticFile.query.filter(StaticFile.path == path).first()
 

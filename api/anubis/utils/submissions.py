@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from anubis.models import Submission, AssignmentRepo, User, db
 from anubis.utils.http import error_response, success_response
 from anubis.utils.rpc import enqueue_webhook
@@ -31,8 +33,10 @@ def regrade_submission(submission):
     if not submission.processed:
         return error_response("submission currently being processed")
 
+    submission: Submission
     submission.processed = False
-    submission.state = "Waiting for resources..."
+    submission.state = "regrading"
+    submission.last_updated = datetime.now()
     submission.init_submission_models()
 
     enqueue_webhook(submission.id)

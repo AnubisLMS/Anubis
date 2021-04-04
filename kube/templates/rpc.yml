@@ -13,18 +13,17 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rpc-workers
+  name: rpc-default
   namespace: {{ .Release.Namespace }}
   labels:
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
-    component: pipeline-rpc-workers
-
+    component: pipeline-rpc-default
 spec:
   selector:
     matchLabels:
-      app: rpc-workers
-  replicas: {{ .Values.rpc_workers.replicas }}
+      app: rpc-default
+  replicas: {{ .Values.rpc.default.replicas }}
   {{- if .Values.rollingUpdates }}
   strategy:
     type: RollingUpdate
@@ -35,15 +34,15 @@ spec:
   template:
     metadata:
       labels:
-        app: rpc-workers
+        app: rpc-default
     spec:
       serviceAccountName: pipeline-rpc
       dnsPolicy: ClusterFirst
       containers:
-      - name: anubis-rpc-worker
+      - name: anubis-rpc-default
         image: {{ .Values.api.image }}:{{ .Values.api.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
-        command: ["./rq-worker.sh"]
+        command: ["./rq-worker.sh", "default"]
         env:
         - name: "DEBUG"
           value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
@@ -60,6 +59,70 @@ spec:
             secretKeyRef:
               name: api
               key: redis-password
+        - name: "SECRET_KEY"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: secret-key
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rpc-theia
+  namespace: {{ .Release.Namespace }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    component: pipeline-rpc-theia
+spec:
+  selector:
+    matchLabels:
+      app: rpc-theia
+  replicas: {{ .Values.rpc.theia.replicas }}
+  {{- if .Values.rollingUpdates }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        app: rpc-theia
+    spec:
+      serviceAccountName: pipeline-rpc
+      dnsPolicy: ClusterFirst
+      containers:
+      - name: anubis-rpc-theia
+        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        command: ["./rq-worker.sh", "theia"]
+        env:
+        - name: "DEBUG"
+          value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+        - name: "IMAGE_PULL_POLICY"
+          value: {{ .Values.imagePullPolicy }}
+        # sqlalchemy uri
+        - name: "DATABASE_URI"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-uri
+        - name: "REDIS_PASS"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: redis-password
+        - name: "SECRET_KEY"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: secret-key
+
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

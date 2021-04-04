@@ -1,2 +1,5 @@
 *.tar.gz
 venv
+__pycache__
+*.pyc
+*.a

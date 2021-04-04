@@ -41,13 +41,8 @@ pushd ../demo
 popd
 
 pushd ..
-# Only build theia if it doesnt already exist (it's a long build)
-if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia-admin$' &>/dev/null; then
-    EXTRA_BUILD="theia-admin theia-xv6"
-fi
-
 # Build services in parallel to speed things up
-docker-compose build --parallel --pull api web logstash theia-proxy theia-init theia-sidecar ${EXTRA_BUILD}
+docker-compose build --parallel --pull api web logstash theia-proxy theia-init theia-sidecar
 popd
 
 # Figure out if we are upgrading or installing
@@ -65,7 +60,8 @@ helm ${HELM_COMMAND} anubis . -n anubis \
      --set "api.replicas=1" \
      --set "web.replicas=1" \
      --set "pipeline_api.replicas=1" \
-     --set "rpc_workers.replicas=1" \
+     --set "rpc.default.replicas=1" \
+     --set "rpc.theia.replicas=1" \
      --set "theia.proxy.replicas=1" \
      --set "api.datacenter=false" \
      --set "theia.proxy.domain=ide.localhost" \
@@ -77,7 +73,8 @@ helm ${HELM_COMMAND} anubis . -n anubis \
 kubectl rollout restart deployments.apps/api -n anubis
 kubectl rollout restart deployments.apps/web -n anubis
 kubectl rollout restart deployments.apps/pipeline-api -n anubis
-kubectl rollout restart deployments.apps/rpc-workers  -n anubis
+kubectl rollout restart deployments.apps/rpc-default  -n anubis
+kubectl rollout restart deployments.apps/rpc-theia  -n anubis
 kubectl rollout restart deployments.apps/theia-proxy  -n anubis
 
 
@@ -85,3 +82,8 @@ echo
 echo 'seed: https://localhost/api/admin/seed/'
 echo 'auth: https://localhost/api/admin/auth/token/jmc1283'
 echo 'site: https://localhost/'
+
+# Only build theia if it doesnt already exist (it's a long build)
+if ! docker image ls | awk '{print $1}' | grep -w '^registry.osiris.services/anubis/theia-admin$' &>/dev/null; then
+    docker-compose build --parallel theia-admin theia-xv6
+fi

@@ -22,3 +22,6 @@ pytz
 redis
 rq
 sqlalchemy-json
+pandas
+matplotlib
+numpy

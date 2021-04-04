@@ -22,8 +22,10 @@ spec:
           - name: reaper
             image: "{{ .Values.api.image }}:{{ .Values.api.tag }}"
             imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
-            command: ["python3", "reaper.py"]
+            command: ["python3", "jobs/reaper.py"]
             env:
+            - name: "PYTHONPATH"
+              value: "/opt/app"
             - name: "DEBUG"
               value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
             - name: "DISABLE_ELK"

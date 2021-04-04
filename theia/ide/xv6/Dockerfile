@@ -158,4 +158,5 @@ COPY supervisord.conf /supervisord.conf
 COPY autosave /usr/local/bin/autosave
 COPY autosave-dump.sh /autosave-dump.sh
 
+USER theia
 ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]

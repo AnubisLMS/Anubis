@@ -104,7 +104,6 @@ def assign_questions(assignment: Assignment):
                 owner=student,
                 assignment=assignment,
                 question=selected_question,
-                response=selected_question.placeholder,
             )
             assigned_questions.append(assigned_question.data)
             db.session.add(assigned_question)

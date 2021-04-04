@@ -14,6 +14,7 @@ from anubis.models import (
     Submission,
     AssignmentTest,
     AssignmentRepo,
+    SubmissionTestResult,
 )
 from anubis.utils.auth import get_user
 from anubis.utils.cache import cache
@@ -58,19 +59,16 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
     if course_id is not None:
         filters.append(Course.id == course_id)
 
-    assignments = (
-        Assignment.query.join(Course)
-            .join(InCourse)
-            .join(User)
-            .filter(
+    # Only hide assignments if user is not admin
+    if not (user.is_admin or user.is_superuser):
+        filters.append(Assignment.release_date <= datetime.now())
+        filters.append(Assignment.hidden == False)
+
+    assignments = Assignment.query\
+        .join(Course).join(InCourse).join(User).filter(
             User.netid == netid,
-            Assignment.hidden == False,
-            Assignment.release_date <= datetime.now(),
             *filters
-        )
-            .order_by(Assignment.due_date.desc())
-            .all()
-    )
+        ).order_by(Assignment.due_date.desc()).all()
 
     a = [a.data for a in assignments]
     for assignment_data in a:
@@ -174,13 +172,19 @@ def assignment_sync(assignment_data):
     db.session.add(assignment)
     db.session.commit()
 
-    for i in AssignmentTest.query.filter(
+    for assignment_test in AssignmentTest.query.filter(
             and_(
                 AssignmentTest.assignment_id == assignment.id,
                 AssignmentTest.name.notin_(assignment_data["tests"]),
             )
     ).all():
-        db.session.delete(i)
+        SubmissionTestResult.query.filter(
+            SubmissionTestResult.assignment_test_id == assignment_test.id,
+        ).delete()
+        AssignmentTest.query.filter(
+            AssignmentTest.assignment_id == assignment.id,
+            AssignmentTest.name == assignment_test.name,
+        ).delete()
     db.session.commit()
 
     for test_name in assignment_data["tests"]:
