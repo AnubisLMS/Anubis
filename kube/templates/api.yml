@@ -8,7 +8,6 @@ metadata:
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
     component: api
-
 spec:
   selector:
     matchLabels:
@@ -90,10 +89,6 @@ spec:
           initialDelaySeconds: 15
           periodSeconds: 3
         {{- end }}
-
-      # Mail container
-      - name: smtp
-        image: namshi/smtp
 
 ---
 apiVersion: batch/v1

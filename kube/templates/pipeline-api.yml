@@ -68,11 +68,6 @@ spec:
           initialDelaySeconds: 15
           periodSeconds: 3
         {{- end }}
-
-
-      # Mail container
-      - name: smtp
-        image: namshi/smtp
 ---
 apiVersion: v1
 kind: Service

@@ -1,3 +1,4 @@
+import traceback
 from datetime import datetime, timedelta
 from functools import wraps
 from typing import Union
@@ -10,6 +11,7 @@ from anubis.config import config
 from anubis.models import User
 from anubis.utils.data import is_debug
 from anubis.utils.http import error_response, get_request_ip
+from anubis.utils.logger import logger
 
 
 def get_user(netid: Union[str, None]) -> Union[User, None]:
@@ -46,6 +48,7 @@ def current_user() -> Union[User, None]:
     try:
         decoded = jwt.decode(token, config.SECRET_KEY, algorithms=["HS256"])
     except Exception as e:
+        logger.error('AUTH decode error\n' + traceback.format_exc())
         return None
 
     # Make sure there is a netid in the jwt
@@ -71,7 +74,7 @@ def get_token() -> Union[str, None]:
 
     return request.headers.get("token", default=None) or request.cookies.get(
         "token", default=None
-    )
+    ) or request.args.get('token', default=None)
 
 
 def create_token(netid: str, **extras) -> Union[str, None]:

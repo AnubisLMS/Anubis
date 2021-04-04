@@ -14,6 +14,7 @@ from anubis.models import (
     Submission,
     AssignmentTest,
     AssignmentRepo,
+    SubmissionTestResult,
 )
 from anubis.utils.auth import get_user
 from anubis.utils.cache import cache
@@ -171,13 +172,19 @@ def assignment_sync(assignment_data):
     db.session.add(assignment)
     db.session.commit()
 
-    for i in AssignmentTest.query.filter(
+    for assignment_test in AssignmentTest.query.filter(
             and_(
                 AssignmentTest.assignment_id == assignment.id,
                 AssignmentTest.name.notin_(assignment_data["tests"]),
             )
     ).all():
-        db.session.delete(i)
+        SubmissionTestResult.query.filter(
+            SubmissionTestResult.assignment_test_id == assignment_test.id,
+        ).delete()
+        AssignmentTest.query.filter(
+            AssignmentTest.assignment_id == assignment.id,
+            AssignmentTest.name == assignment_test.name,
+        ).delete()
     db.session.commit()
 
     for test_name in assignment_data["tests"]:

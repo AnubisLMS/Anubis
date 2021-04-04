@@ -14,6 +14,7 @@ import click
 import requests
 import yaml
 
+INCLUSTER = False
 API_URL = 'https://anubis.osiris.services/api'
 conf_dir = os.path.join(os.environ.get("HOME"), ".anubis")
 conf_file = os.path.join(os.environ.get("HOME"), ".anubis/config.json")
@@ -39,7 +40,7 @@ def init_conf():
         os.makedirs(conf_dir, exist_ok=True)
 
     if not os.path.isfile(conf_file):
-        set_conf({"auth": {"username": None, "password": None}})
+        set_conf({"auth": {"username": None, "password": None}, "incluster": False})
 
 
 def load_auth():
@@ -69,18 +70,24 @@ def post_json(path: str, data: dict, params=None):
     if params is None:
         params = {}
 
+    kwargs = {}
     auth = load_auth()
-    if auth == (None, None):
-        click.echo(click.style('You need to sign in', fg='red'))
-        click.echo(click.style('anubis -u username -p password ...', fg='red'))
-        exit(0)
+
+    if INCLUSTER:
+        params['token'] = INCLUSTER
+    else:
+        if auth == (None, None):
+            click.echo(click.style('You need to sign in', fg='red'))
+            click.echo(click.style('anubis -u username -p password ...', fg='red'))
+            exit(0)
+        kwargs['auth'] = auth
 
     r = requests.post(
         API_URL + path,
         headers={'Content-Type': 'application/json'},
         params=params,
         json=data,
-        auth=auth,
+        **kwargs
     )
 
     if r.status_code != 200:
@@ -101,16 +108,22 @@ def get_json(path: str, params=None):
     if params is None:
         params = {}
 
+    kwargs = {}
     auth = load_auth()
-    if auth == (None, None):
-        click.echo(click.style('You need to sign in', fg='red'))
-        click.echo(click.style('anubis -u username -p password ...', fg='red'))
-        exit(0)
+
+    if INCLUSTER:
+        params['token'] = INCLUSTER
+    else:
+        if auth == (None, None):
+            click.echo(click.style('You need to sign in', fg='red'))
+            click.echo(click.style('anubis -u username -p password ...', fg='red'))
+            exit(0)
+        kwargs['auth'] = auth
 
     r = requests.get(
         API_URL + path,
         params=params,
-        auth=auth,
+        **kwargs
     )
 
     assert r.status_code == 200
@@ -132,7 +145,15 @@ def safe_filename(filename: str) -> str:
 def main(debug, username, password):
     global assignment_base
     global API_URL
+    global INCLUSTER
     assignment_base = os.path.abspath(os.path.join(os.path.dirname(__file__), 'assignment'))
+
+    conf = load_conf()
+
+    if conf.get('incluster', False):
+        click.echo('detecting incluster mode')
+        API_URL = 'http://anubis:5000'
+        INCLUSTER = conf['incluster']
 
     if debug:
         click.echo('Debug mode is %s' % ('on' if debug else 'off'))
@@ -153,6 +174,12 @@ def assignment():
 @main.group()
 def questions():
     pass
+
+
+@main.command()
+def whoami():
+    r = get_json('/public/auth/whoami')
+    click.echo(json.dumps(r.json(), indent=2))
 
 
 @questions.command()

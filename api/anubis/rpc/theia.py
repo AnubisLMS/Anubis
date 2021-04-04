@@ -7,6 +7,8 @@ from kubernetes import config, client
 from anubis.models import db, Config, TheiaSession
 from anubis.utils.elastic import esindex
 from anubis.utils.logger import logger
+from anubis.utils.auth import create_token
+import base64
 
 
 def get_theia_pod_name(theia_session: TheiaSession) -> str:
@@ -76,6 +78,13 @@ def create_theia_pod_obj(theia_session: TheiaSession):
     if 'autosave' in theia_session.options:
         autosave = theia_session.options['autosave']
 
+    extra_env = []
+    if theia_session.owner.is_admin or theia_session.owner.is_superuser:
+        extra_env.append(client.V1EnvVar(
+            name='INCLUSTER',
+            value=base64.b64encode(create_token(theia_session.owner.netid).encode()).decode(),
+        ))
+
     # Theia container
     theia_container = client.V1Container(
         name="theia",
@@ -87,6 +96,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
                 name='AUTOSAVE',
                 value='ON' if autosave else 'OFF',
             ),
+            *extra_env,
         ],
         resources=client.V1ResourceRequirements(
             limits=limits,
@@ -130,8 +140,11 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         containers.append(sidecar_container)
 
     extra_labels = {}
+    spec_extra = {}
     if theia_session.network_locked:
         extra_labels["network-policy"] = "student"
+        spec_extra['dns_policy'] = "None"
+        spec_extra["dns_config"] = client.V1PodDNSConfig(nameservers=["1.1.1.1"])
 
     # Create pod
     pod = client.V1Pod(
@@ -140,8 +153,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
             init_containers=[init_container],
             containers=containers,
             volumes=[client.V1Volume(name=volume_name)],
-            dns_policy="None",
-            dns_config=client.V1PodDNSConfig(nameservers=["1.1.1.1"]),
+            **spec_extra
         ),
         metadata=client.V1ObjectMeta(
             name="theia-{}-{}".format(theia_session.owner.netid, theia_session.id),

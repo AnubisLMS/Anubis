@@ -60,7 +60,8 @@ helm ${HELM_COMMAND} anubis . -n anubis \
      --set "api.replicas=1" \
      --set "web.replicas=1" \
      --set "pipeline_api.replicas=1" \
-     --set "rpc_workers.replicas=1" \
+     --set "rpc.default.replicas=1" \
+     --set "rpc.theia.replicas=1" \
      --set "theia.proxy.replicas=1" \
      --set "api.datacenter=false" \
      --set "theia.proxy.domain=ide.localhost" \
@@ -72,7 +73,8 @@ helm ${HELM_COMMAND} anubis . -n anubis \
 kubectl rollout restart deployments.apps/api -n anubis
 kubectl rollout restart deployments.apps/web -n anubis
 kubectl rollout restart deployments.apps/pipeline-api -n anubis
-kubectl rollout restart deployments.apps/rpc-workers  -n anubis
+kubectl rollout restart deployments.apps/rpc-default  -n anubis
+kubectl rollout restart deployments.apps/rpc-theia  -n anubis
 kubectl rollout restart deployments.apps/theia-proxy  -n anubis
 
 

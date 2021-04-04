@@ -43,8 +43,12 @@ logstash:
   image: "registry.osiris.services/anubis/logstash"
   tag: "latest"
 
-rpc_workers:
-  replicas: 10
+rpc:
+  default:
+    replicas: 5
+    
+  theia:
+    replicas: 5
 
 theia:
   enable: true
