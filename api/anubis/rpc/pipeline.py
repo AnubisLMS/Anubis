@@ -154,7 +154,6 @@ def test_repo(submission_id: str):
                 extra={"submission_id": submission_id},
             )
             enqueue_webhook(submission_id)
-            time.sleep(1)
             exit(0)
 
         # Create job object

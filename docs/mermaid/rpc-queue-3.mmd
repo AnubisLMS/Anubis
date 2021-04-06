@@ -1,0 +1,30 @@
+graph LR
+    subgraph Anubis
+
+    api((API))
+
+    subgraph RPC default Queue
+    djob3
+    djob2
+    djob2
+    djob3[job3] -.-> djob2[...] -.-> djob1[job1]
+    end
+
+    subgraph RPC theia Queue
+    job4[New Theia Start Job]
+    end
+
+    subgraph RPC default worker pool
+    dworker[worker]
+    end
+
+    subgraph RPC theia worker pool
+    tworker[worker]
+    end
+
+    api -->|enqueue theia start| job4
+    api -->|enqueue regrade| djob3
+    djob1 -->|dequeue| dworker
+    job4 -->|dequeue| tworker
+
+    end

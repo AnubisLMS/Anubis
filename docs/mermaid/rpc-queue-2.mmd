@@ -4,7 +4,8 @@ graph LR
     api((API))
 
     subgraph RPC Queue
-    job4[New Theia Start Job] -.-> job3 -.-> job2 -.-> job1
+    job4[New Theia Start Job]
+    job4 -.-> job3 -.-> job2[...] -.-> job1
     end
 
     subgraph RPC worker pool

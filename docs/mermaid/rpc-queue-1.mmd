@@ -4,7 +4,7 @@ graph LR
     api((API))
 
     subgraph RPC Queue
-    job3 -.-> job2 -.-> job1
+    job3 -.-> job2[...] -.-> job1
     end
 
     subgraph RPC worker pool

@@ -31,18 +31,16 @@ def rpc_enqueue(func, queue=None, args=None):
 
 def enqueue_webhook(*args):
     """Enqueues a test job"""
-    rpc_enqueue(test_repo, args=args)
+    rpc_enqueue(test_repo, queue='default', args=args)
 
 
 def enqueue_ide_initialize(*args):
     """Enqueue an ide initialization job"""
-
-    rpc_enqueue(initialize_theia_session, 'theia', args=args)
+    rpc_enqueue(initialize_theia_session, queue='theia', args=args)
 
 
 def enqueue_ide_stop(*args):
     """Reap theia session kube resources"""
-
     rpc_enqueue(reap_theia_session, queue='theia', args=args)
 
 
@@ -52,8 +50,10 @@ def enqueue_ide_reap_stale(*args):
 
 
 def seed():
-    rpc_enqueue(seed_debug)
+    """Enqueue debug seed data"""
+    rpc_enqueue(seed_debug, queue='default')
 
 
 def create_visuals(*_):
-    rpc_enqueue(create_visuals_)
+    """Enqueue create visuals"""
+    rpc_enqueue(create_visuals_, queue='default')
