@@ -5,25 +5,25 @@ import {admin_nav, footer_nav, not_shown_nav, public_nav} from './Navigation/nav
 export default function Main({user}) {
   return (
     <Switch>
-      {public_nav.map(({children}) => children.map(({path, Page}) => (
-        <Route exact path={path} key={path}>
+      {public_nav.map(({children}) => children.map(({path, Page, exact=true}) => (
+        <Route exact={exact} path={path} key={path}>
           <Page/>
         </Route>
       )))}
-      {footer_nav.map(({path, Page}) => (
-        <Route exact path={path} key={`path-${path}`}>
+      {footer_nav.map(({path, Page, exact=true}) => (
+        <Route exact={exact} path={path} key={`path-${path}`}>
           <Page/>
         </Route>
       ))}
-      {admin_nav.map(({path, Page}) => (
-        <Route exact path={path} key={`path-${path}`}>
+      {admin_nav.map(({path, Page, exact=true}) => (
+        <Route exact={exact} path={path} key={`path-${path}`}>
           {user && user.is_admin ? (
             <Page/>
           ) : null}
         </Route>
       ))}
-      {not_shown_nav.map(({path, Page}) => (
-        <Route exact path={path} key={`path-${path}`}>
+      {not_shown_nav.map(({path, Page, exact=true}) => (
+        <Route exact={exact} path={path} key={`path-${path}`}>
           <Page/>
         </Route>
       ))}

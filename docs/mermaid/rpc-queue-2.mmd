@@ -1,0 +1,17 @@
+graph LR
+    subgraph Anubis
+
+    api((API))
+
+    subgraph RPC Queue
+    job4[New Theia Start Job] -.-> job3 -.-> job2 -.-> job1
+    end
+
+    subgraph RPC worker pool
+    worker
+    end
+
+    api -->|enqueue| job4
+    job1 -->|dequeue| worker
+
+    end
