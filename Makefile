@@ -60,11 +60,11 @@ debug:
 	@echo 'site: http://localhost/'
 
 .PHONY: mindebug     # Start the minimal cluster in debug mode
-mindebug: build
+mindebug:
 	docker-compose up -d traefik db redis-master logstash
 	docker-compose up \
 		-d --force-recreate \
-		api web rpc-worker
+		api web rpc-default rpc-theia
 	@echo 'Waiting a moment before running migrations'
 	sleep 3
 	@echo 'running migrations'
