@@ -7,10 +7,12 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-
-import {admin_nav, footer_nav, public_nav} from '../../Navigation/navconfig';
 import ExitToAppOutlinedIcon from '@material-ui/icons/ExitToAppOutlined';
 import LaunchOutlinedIcon from '@material-ui/icons/LaunchOutlined';
+import {isWidthDown} from '@material-ui/core/withWidth';
+
+
+import {admin_nav, footer_nav, public_nav} from '../../Navigation/navconfig';
 import NavItem from './NavItem';
 import AuthContext from '../../Contexts/AuthContext';
 
@@ -54,22 +56,26 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function NavList({...other}) {
+export default function NavList({open, handleDrawerClose}) {
   const classes = useStyles();
   const [pathname, setPathname] = useState(window.location.pathname);
+  const onClickWrap = (func) => () => {
+    func();
+    // 960px is the size of md
+    if (open && window.innerWidth < 960) {
+      handleDrawerClose();
+    }
+  };
 
   return (
-    <Drawer variant="permanent" {...other}>
+    <div>
       <List disablePadding>
-        <ListItem className={clsx(classes.firebase, classes.item, classes.itemCategory)} key={0}>
-          Anubis
-        </ListItem>
         {public_nav.map(({id, children}) => (
           <React.Fragment key={`${id}-thing`}>
             {children.map(({id: childId, icon, path}) => (
               <NavItem
                 key={childId}
-                onClick={() => setPathname(path)}
+                onClick={onClickWrap(() => setPathname(path))}
                 childId={childId}
                 icon={icon}
                 path={path}
@@ -140,6 +146,6 @@ export default function NavList({...other}) {
           </ListItem>
         </List>
       </div>
-    </Drawer>
+    </div>
   );
 }
