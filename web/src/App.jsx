@@ -101,7 +101,7 @@ const useStyles = makeStyles(() => ({
 export default function App() {
   const classes = useStyles();
   const query = useQuery();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(window.innerWidth >= 960); // 960px is md
   const [showError, setShowError] = useState(!!query.get('error'));
 
   const handleDrawerOpen = () => {
@@ -109,7 +109,6 @@ export default function App() {
   };
 
   const handleDrawerClose = () => {
-    console.log('aaaa');
     setOpen(false);
   };
 

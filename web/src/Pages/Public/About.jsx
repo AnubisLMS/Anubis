@@ -49,10 +49,10 @@ export default function About() {
           </Typography>
         </Grid>
 
-        <Grid item xs>
+        <Grid item xs={12} md={6}>
           <John/>
         </Grid>
-        <Grid item xs>
+        <Grid item xs={12} md={6}>
           <Somto/>
         </Grid>
       </Grid>

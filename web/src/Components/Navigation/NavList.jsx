@@ -102,7 +102,7 @@ export default function NavList({open, handleDrawerClose}) {
                   {admin_nav.map(({id: childId, icon, path}) => (
                     <NavItem
                       key={childId}
-                      onClick={() => setPathname(path)}
+                      onClick={onClickWrap(() => setPathname(path))}
                       childId={childId}
                       icon={icon}
                       path={path}
@@ -121,7 +121,7 @@ export default function NavList({open, handleDrawerClose}) {
           {footer_nav.map(({id: childId, icon, path}) => (
             <NavItem
               key={childId}
-              onClick={() => setPathname(path)}
+              onClick={onClickWrap(() => setPathname(path))}
               childId={childId}
               icon={icon}
               path={path}
