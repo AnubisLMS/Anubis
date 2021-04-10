@@ -33,6 +33,7 @@ const useStyles = makeStyles(() => ({
   main: {
     width: '100%',
     flexDirection: 'column',
+    padding: theme.spacing(6, 4),
     marginBottom: theme.spacing(5),
   },
   app: {
@@ -81,6 +82,7 @@ const useStyles = makeStyles(() => ({
     },
   },
   appBar: {
+    // height: 50,
     transition: theme.transitions.create(['margin', 'width'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -139,6 +141,7 @@ export default function App() {
                           [classes.contentShift]: open,
                         })}
                       >
+                        <div className={classes.drawerHeader} />
                         <Error show={showError} onDelete={() => setShowError(false)}/>
                         <Main user={user}/>
                         <Footer/>
