@@ -8,9 +8,30 @@ from anubis.utils.students import get_students_in_class
 
 
 @cache.memoize(timeout=5 * 60, unless=is_debug)
-def stats_for(student_id, assignment_id):
+def autograde(student_id, assignment_id):
+    """
+    Get the stats for a specific student on a specific assignment.
+
+    Pulls all submissions, then finds the most recent one that
+    has the most tests that passed.
+
+    * This function is heavily cached as it is IO intensive on the DB *
+
+    :param student_id:
+    :param assignment_id:
+    :return:
+    """
+
+    # best is the best submission seen so far
     best = None
+
+    # best_count is the most tests that have
+    # passed for this student so far
     best_count = -1
+
+    # Iterate over all submissions for this student, tracking
+    # the best submission so far (based on number of tests passed).
+    # We start from the oldest submission and move to the newest.
     for submission in (
             Submission.query.filter(
                 Submission.assignment_id == assignment_id,
@@ -20,17 +41,38 @@ def stats_for(student_id, assignment_id):
                     .order_by(Submission.created.desc())
                     .all()
     ):
+
+        # Calculate the number of tests that passed in this submission
         correct_count = sum(
             map(lambda result: 1 if result.passed else 0, submission.test_results)
         )
 
+        # If the number of passed tests in this assignment is as good
+        # or better as the best seen so far, update the running best.
         if correct_count >= best_count:
             best_count = correct_count
             best = submission
+
+    # return the submission id of the best if there is one, otherwise None
     return best.id if best is not None else None
 
 
-def stats_wrapper(assignment, user_id, netid, name, submission_id):
+def stats_wrapper(assignment: Assignment, user_id: str, netid: str, name: str, submission_id: str) -> dict:
+    """
+    The autograde results require quite of bit more information than
+    just the id of the best submission. This function takes some high level
+    information about the best submission, and breaks it down into a large
+    dictionary of all the relevant data for the autograde result.
+
+    * The admin panel uses all this extra data added by this function *
+
+    :param assignment:
+    :param user_id:
+    :param netid:
+    :param name:
+    :param submission_id:
+    :return:
+    """
     if submission_id is None:
         # no submission
         return {
@@ -76,9 +118,27 @@ def stats_wrapper(assignment, user_id, netid, name, submission_id):
 
 
 @cache.memoize(timeout=60 * 60, unless=is_debug)
-def bulk_stats(assignment_id, netids=None, offset=0, limit=20):
+def bulk_autograde(assignment_id, netids=None, offset=0, limit=20):
+    """
+    Bulk autograde an assignment. Optionally specify a subset of netids.
+
+    The offset and limit are used here to have the results of this function
+    move as a window of the results.
+
+    * Calculating the autograde results is very IO intensive on the db. For this,
+    these results are heavily cached. *
+
+    :param assignment_id:
+    :param netids:
+    :param offset:
+    :param limit:
+    :return:
+    """
+
+    # Running list of the best submissions for each student
     bests = []
 
+    # Find the assignment object
     assignment = (
             Assignment.query.filter_by(name=assignment_id).first()
             or Assignment.query.filter_by(id=assignment_id).first()
@@ -86,13 +146,18 @@ def bulk_stats(assignment_id, netids=None, offset=0, limit=20):
     if assignment is None:
         return error_response("assignment does not exist")
 
+    # Get the list of students to get autograde results for
     students = get_students_in_class(assignment.course_id, offset=offset, limit=limit)
     if netids is not None:
         students = filter(lambda x: x["netid"] in netids, students)
 
+    # Run through each of the students, getting the autograde results for each
     for student in students:
-        submission_id = stats_for(student["id"], assignment.id)
+        # Get the best submission for this student from this assignment
+        submission_id = autograde(student["id"], assignment.id)
         bests.append(
+            # Use the stats_wrapper function to add all the necessary
+            # metadata for the submission.
             stats_wrapper(
                 assignment,
                 student["id"],

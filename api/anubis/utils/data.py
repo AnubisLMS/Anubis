@@ -218,7 +218,14 @@ def split_chunks(lst, n):
     return _chunks
 
 
-def rand(max_len=None):
+def rand(max_len: int = None):
+    """
+    Get a relatively random hex string of up
+    to max_len.
+
+    :param max_len:
+    :return:
+    """
     rand_hash = sha256(urandom(32)).hexdigest()
     if max_len is not None:
         return rand_hash[:max_len]
@@ -226,7 +233,17 @@ def rand(max_len=None):
 
 
 def human_readable_to_bytes(size: str) -> int:
-    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    """
+    Convert a string in the form of 5GB and get an integer value
+    for the number of bytes in that data size.
+
+    >>> human_readable_to_bytes('1 GiB')
+    >>> 1073741824
+
+    :param size:
+    :return:
+    """
+    size_name = ("B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB")
     size = size.split()  # divide '1 GB' into ['1', 'GB']
     num, unit = int(size[0]), size[1]
     # index in list of sizes determines power to raise it to
@@ -236,16 +253,25 @@ def human_readable_to_bytes(size: str) -> int:
     return num * factor
 
 
-def row2dict(row):
-    d = {}
+def row2dict(row) -> dict:
+    """
+    Convert an sqlalchemy object to a dictionary from its column
+    values. This function looks at internal sqlalchemy fields
+    to create a raw dictionary from the columns in the table.
+
+    :param row:
+    :return:
+    """
+
+    raw = {}
 
     for column in row.__table__.columns:
         value = getattr(row, column.name)
 
         if isinstance(value, datetime):
-            d[column.name] = str(value)
+            raw[column.name] = str(value)
             continue
 
-        d[column.name] = value
+        raw[column.name] = value
 
-    return d
+    return raw
