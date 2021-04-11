@@ -9,7 +9,7 @@ from anubis.utils.data import split_chunks
 from anubis.utils.decorators import json_response
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response, get_number_arg
-from anubis.utils.rpc import enqueue_webhook, rpc_enqueue
+from anubis.utils.rpc import enqueue_autograde_pipeline, rpc_enqueue
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 
@@ -38,7 +38,7 @@ def private_regrade_submission(commit):
     s.init_submission_models()
 
     # Enqueue the submission pipeline
-    enqueue_webhook(s.id)
+    enqueue_autograde_pipeline(s.id)
 
     # Return status
     return success_response({"submission": s.data, "user": s.owner.data})

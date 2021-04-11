@@ -29,7 +29,7 @@ def rpc_enqueue(func, queue=None, args=None):
         conn.close()
 
 
-def enqueue_webhook(*args):
+def enqueue_autograde_pipeline(*args):
     """Enqueues a test job"""
     rpc_enqueue(test_repo, queue='default', args=args)
 
