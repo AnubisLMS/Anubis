@@ -16,6 +16,7 @@ from anubis.models import (
     TheiaSession,
     AssignmentQuestion,
     AssignedStudentQuestion,
+    AssignedQuestionResponse,
 )
 from anubis.utils.data import rand
 from anubis.utils.questions import assign_questions
@@ -149,6 +150,7 @@ def create_course(users):
 def seed_main():
     # Yeet
     TheiaSession.query.delete()
+    AssignedQuestionResponse.query.delete()
     AssignedStudentQuestion.query.delete()
     AssignmentQuestion.query.delete()
     SubmissionTestResult.query.delete()

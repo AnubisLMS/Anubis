@@ -18,17 +18,18 @@ def bulk_regrade_submission(submissions: List[Submission]) -> List[dict]:
 
     # enqueue regrade jobs for each submissions
     for submission in submissions:
-        response.append(regrade_submission(submission))
+        response.append(regrade_submission(submission, queue='regrade'))
 
     # Pass back a list of all the regrade return dictionaries
     return response
 
 
-def regrade_submission(submission: Union[Submission, str]) -> dict:
+def regrade_submission(submission: Union[Submission, str], queue: str = 'default') -> dict:
     """
     Regrade a submission
 
     :param submission: Union[Submissions, str]
+    :param queue:
     :return: dict response
     """
 
@@ -57,7 +58,7 @@ def regrade_submission(submission: Union[Submission, str]) -> dict:
     submission.init_submission_models()
 
     # Enqueue the submission job
-    enqueue_autograde_pipeline(submission.id)
+    enqueue_autograde_pipeline(submission.id, queue=queue)
 
     return success_response({
         "message": "regrade started"

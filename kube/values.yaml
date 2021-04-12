@@ -45,9 +45,10 @@ logstash:
 
 rpc:
   default:
-    replicas: 5
-    
+    replicas: 5    
   theia:
+    replicas: 5    
+  regrade:
     replicas: 5
 
 theia:

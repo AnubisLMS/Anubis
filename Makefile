@@ -1,5 +1,5 @@
 PERSISTENT_SERVICES := db traefik kibana elasticsearch-coordinating redis-master logstash adminer
-RESTART_ALWAYS_SERVICES := api web-dev rpc-default rpc-theia
+RESTART_ALWAYS_SERVICES := api web-dev rpc-default rpc-theia rpc-regrade
 PUSH_SERVICES := api web logstash theia-init theia-proxy theia-admin theia-xv6
 
 
@@ -55,6 +55,7 @@ debug:
 	sleep 3
 	@echo 'running migrations'
 	make -C api migrations
+	@echo ''
 	@echo 'seed: http://localhost/api/admin/seed/'
 	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
 	@echo 'site: http://localhost/'
@@ -69,6 +70,7 @@ mindebug:
 	sleep 3
 	@echo 'running migrations'
 	make -C api migrations
+	@echo ''
 	@echo 'seed: http://localhost/api/admin/seed/'
 	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
 	@echo 'site: http://localhost/'

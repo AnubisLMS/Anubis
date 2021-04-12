@@ -100,7 +100,7 @@ def cleanup_jobs(batch_v1) -> int:
     return active_count
 
 
-def test_repo(submission_id: str):
+def create_submission_pipeline(submission_id: str):
     """
     This function should launch the appropriate testing container
     for the assignment, passing along the function arguments.
