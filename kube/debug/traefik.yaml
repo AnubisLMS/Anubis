@@ -1,16 +1,3 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: traefik
-
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  namespace: traefik
-  name: traefik-ingress-controller
-
----
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -18,7 +5,6 @@ metadata:
   name: traefik
   labels:
     app: traefik
-
 spec:
   selector:
     matchLabels:
@@ -34,14 +20,10 @@ spec:
         app: traefik
     spec:
       serviceAccountName: traefik-ingress-controller
-      nodeSelector:
-        traefik: ingress
-
       hostNetwork: true
       containers:
       - name: traefik
         image: traefik:v2.2
-        # imagePullPolicy: IfNotPresent
         securityContext:
           capabilities:
             add:
@@ -49,62 +31,19 @@ spec:
             drop:
             - ALL
         args:
-          - "--accesslog"
-          - "--accesslog.filepath=/data/access.log"
-          - "--accesslog.format=json"
+          - "--api.dashboard=true"
+          - "--api.insecure=true"
+          - "--log.level=debug"
           - "--providers.kubernetescrd=true"
-
           - "--entrypoints.web.address=:80"
-          - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-          - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
           - "--entrypoints.websecure.address=:443"
-          
-          - "--certificatesresolvers.tls.acme.tlschallenge"
-          - "--certificatesresolvers.tls.acme.httpchallenge.entrypoint=web"
-          - "--certificatesresolvers.tls.acme.email=osiris@osiris.cyber.nyu.edu"
-          - "--certificatesresolvers.tls.acme.storage=/data/acme.json"
-          # Please note that this is the staging Let's Encrypt server.
-          # Once you get things working, you should remove that whole line altogether.
-
-        # ports:
-        # - name: web
-        #   containerPort: 80
-        #   hostPort: 80
-        # - name: websecure
-        #   containerPort: 443
-        #   hostPort: 443
-
-
-        volumeMounts:
-        - name: data
-          mountPath: /data
-
-      volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: traefik-data
 
 ---
-apiVersion: batch/v1
-kind: Job
+apiVersion: v1
+kind: ServiceAccount
 metadata:
-  name: traefik-data-permission
   namespace: traefik
-spec:
-  template:
-    spec:
-      restartPolicy: OnFailure
-      containers:
-      - name: volume-permissions
-        image: busybox:1.31.1
-        command: ["sh", "-c", "chmod -Rv 600 /data/*"]
-        volumeMounts:
-        - name: data
-          mountPath: /data
-      volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: traefik-data
+  name: traefik-ingress-controller
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -123,7 +62,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: ingressroutes.traefik.containo.us
-
 spec:
   group: traefik.containo.us
   version: v1alpha1
@@ -132,13 +70,11 @@ spec:
     plural: ingressroutes
     singular: ingressroute
   scope: Namespaced
-
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: middlewares.traefik.containo.us
-
 spec:
   group: traefik.containo.us
   version: v1alpha1
@@ -147,13 +83,11 @@ spec:
     plural: middlewares
     singular: middleware
   scope: Namespaced
-
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: ingressroutetcps.traefik.containo.us
-
 spec:
   group: traefik.containo.us
   version: v1alpha1
@@ -162,13 +96,11 @@ spec:
     plural: ingressroutetcps
     singular: ingressroutetcp
   scope: Namespaced
-
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: ingressrouteudps.traefik.containo.us
-
 spec:
   group: traefik.containo.us
   version: v1alpha1
@@ -177,13 +109,11 @@ spec:
     plural: ingressrouteudps
     singular: ingressrouteudp
   scope: Namespaced
-
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: tlsoptions.traefik.containo.us
-
 spec:
   group: traefik.containo.us
   version: v1alpha1
@@ -192,13 +122,11 @@ spec:
     plural: tlsoptions
     singular: tlsoption
   scope: Namespaced
-
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: tlsstores.traefik.containo.us
-
 spec:
   group: traefik.containo.us
   version: v1alpha1
@@ -207,13 +135,11 @@ spec:
     plural: tlsstores
     singular: tlsstore
   scope: Namespaced
-
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: traefikservices.traefik.containo.us
-
 spec:
   group: traefik.containo.us
   version: v1alpha1
@@ -222,13 +148,11 @@ spec:
     plural: traefikservices
     singular: traefikservice
   scope: Namespaced
-
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: traefik-ingress-controller
-
 rules:
   - apiGroups:
       - ""
@@ -268,13 +192,11 @@ rules:
       - get
       - list
       - watch
-
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: traefik-ingress-controller
-
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

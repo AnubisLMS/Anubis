@@ -73,6 +73,22 @@ mindebug:
 	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
 	@echo 'site: http://localhost/'
 
+.PHONY: mkdebug      # Start minikube debug
+mkdebug:
+	./kube/debug/provision.sh
+	@echo ''
+	@echo 'seed: http://localhost/api/admin/seed/'
+	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
+	@echo 'site: http://localhost/'
+
+.PHONY: mkrestart    # Restart minikube debug
+mkrestart:
+	./kube/debug/restart.sh
+	@echo ''
+	@echo 'seed: http://localhost/api/admin/seed/'
+	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
+	@echo 'site: http://localhost/'
+
 yeetdb:
 	docker-compose kill db
 	docker-compose rm -f

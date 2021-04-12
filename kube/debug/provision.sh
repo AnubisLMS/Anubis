@@ -2,6 +2,7 @@
 
 # Change into the directory that this script is in
 cd $(dirname $0)
+cd ..
 
 # Stop if any command has an error
 set -e
@@ -66,7 +67,7 @@ kubectl label node minikube traefik=ingress --overwrite
 # Install a basic traefik configuration. This was pretty much entirely
 # pulled from the traefik documentation somewhere around traefik v2.1.
 echo 'Adding traefik resources...'
-kubectl apply -f ./traefik.yml
+kubectl apply -f ./debug/traefik.yaml
 
 # Add the bitnami helm charts
 helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -112,6 +113,10 @@ helm install redis \
      --namespace anubis \
      bitnami/redis
 
+if [ -f debug/init-secrets.sh ]; then
+    bash debug/init-secrets.sh
+fi
+
 # Run the debug.sh script to build, then install all the stuff
 # for anubis.
-exec ./debug.sh
+exec ./debug/restart.sh
