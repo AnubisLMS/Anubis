@@ -5,12 +5,12 @@ import {Route, Switch} from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   footer: {
-    padding: theme.spacing(2),
+    paddingBottom: theme.spacing(2),
     bottom: '0',
     left: '0',
     textAlign: 'center',
     position: 'fixed',
-    height: '50px',
+    height: '30px',
     width: '100%',
   },
 }));
