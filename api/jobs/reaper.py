@@ -171,6 +171,8 @@ def reap_repos():
         # Check for broken submissions
         submissions = []
         for submission in Submission.query.filter(Submission.assignment_repo_id == repo.id).all():
+            if submission is None:
+                continue
             if submission.owner_id != user.id:
                 print(f'found broken submission {submission.id}')
                 submission.owner_id = repo.owner_id
