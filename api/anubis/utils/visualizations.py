@@ -45,7 +45,7 @@ def get_theia_sessions() -> pd.DataFrame:
     return theia_sessions
 
 
-@cache.cached(timeout=360, unless=is_debug)
+@cache.memoize(timeout=360, unless=is_debug)
 def get_usage_plot():
     import matplotlib.pyplot as plt
     import matplotlib.colors as mcolors

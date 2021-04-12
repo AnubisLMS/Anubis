@@ -5,7 +5,7 @@ from anubis.utils.cache import cache
 from anubis.utils.data import is_debug
 
 
-@cache.cached(timeout=60, unless=is_debug)
+@cache.memoize(timeout=60, unless=is_debug)
 def get_students(course_code: str = None) -> List[Dict[str, dict]]:
     """
     Get students by course code. If no course code is specified,
@@ -33,7 +33,7 @@ def get_students(course_code: str = None) -> List[Dict[str, dict]]:
     ]
 
 
-@cache.cached(timeout=60, unless=is_debug)
+@cache.memoize(timeout=60, unless=is_debug)
 def get_students_in_class(course_id, offset=None, limit=None):
     """
     Similar to the get_students function, this function
