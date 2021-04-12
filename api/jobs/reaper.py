@@ -168,6 +168,9 @@ def reap_repos():
         user, github_username = guess_github_username(assignment, repo_name)
         repo = check_repo(assignment, repo_url, github_username, user)
 
+        if user is None:
+            continue
+
         # Check for broken submissions
         submissions = []
         for submission in Submission.query.filter(Submission.assignment_repo_id == repo.id).all():
