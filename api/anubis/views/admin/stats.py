@@ -6,7 +6,7 @@ from anubis.utils.decorators import json_response
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import success_response, error_response, get_number_arg
 from anubis.utils.questions import get_assigned_questions
-from anubis.utils.stats import bulk_stats, stats_for, stats_wrapper
+from anubis.utils.stats import bulk_autograde, autograde, stats_wrapper
 
 stats = Blueprint("admin-stats", __name__, url_prefix="/admin/stats")
 
@@ -34,7 +34,7 @@ def private_stats_assignment(assignment_id, netid=None):
     limit = get_number_arg("limit", 10)
     offset = get_number_arg("offset", 0)
 
-    bests = bulk_stats(assignment_id, limit=limit, offset=offset)
+    bests = bulk_autograde(assignment_id, limit=limit, offset=offset)
     return success_response({"stats": bests})
 
 
@@ -46,7 +46,7 @@ def private_stats_for(assignment_id, user_id):
         Assignment.id == assignment_id,
     ).first()
     user = User.query.filter(User.id == user_id).first()
-    submission_id = stats_for(user_id, assignment_id)
+    submission_id = autograde(user_id, assignment_id)
 
     return success_response(
         {
@@ -84,7 +84,7 @@ def private_submission_stats_id(assignment_id: str, netid: str):
     if assignment is None:
         return error_response('Assignment does not exist')
 
-    submission_id = stats_for(user.id, assignment.id)
+    submission_id = autograde(user.id, assignment.id)
 
     submission_full_data = None
     if submission_id is not None:

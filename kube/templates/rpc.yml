@@ -121,6 +121,62 @@ spec:
             secretKeyRef:
               name: api
               key: secret-key
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rpc-regrade
+  namespace: {{ .Release.Namespace }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    component: pipeline-rpc-regrade
+spec:
+  selector:
+    matchLabels:
+      app: rpc-regrade
+  replicas: {{ .Values.rpc.regrade.replicas }}
+  {{- if .Values.rollingUpdates }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        app: rpc-regrade
+    spec:
+      serviceAccountName: pipeline-rpc
+      dnsPolicy: ClusterFirst
+      containers:
+      - name: anubis-rpc-regrade
+        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        command: ["./rq-worker.sh", "regrade"]
+        env:
+        - name: "DEBUG"
+          value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+        - name: "IMAGE_PULL_POLICY"
+          value: {{ .Values.imagePullPolicy }}
+        # sqlalchemy uri
+        - name: "DATABASE_URI"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-uri
+        - name: "REDIS_PASS"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: redis-password
+        - name: "SECRET_KEY"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: secret-key
 
 
 ---

@@ -1,22 +1,16 @@
 import React from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
+import {Switch, Route} from 'react-router-dom';
 
 import AssignmentPost from '../../Components/Public/Blog/AssignmentPost';
 import ElevatorPitchPost from '../../Components/Public/Blog/ElevatorPitchPost';
 import AssignmentPackagingPost from '../../Components/Public/Blog/AssignmentPackagingPost';
+import MidtermRetroPost from '../../Components/Public/Blog/MidtermRetroPost';
 
 const useStyles = makeStyles((theme) => ({
   card: {
     maxWidth: 1028,
-  },
-  imgbox: {
-    width: '100%',
-    marginTop: theme.spacing(2),
-  },
-  img: {
-    width: '100%',
-    height: '100%',
   },
   media: {
     height: 0,
@@ -60,6 +54,25 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const posts = [
+  {
+    Component: MidtermRetroPost,
+    path: '/blog/midterm-retro',
+  },
+  {
+    Component: AssignmentPackagingPost,
+    path: '/blog/assignment-packaging',
+  },
+  {
+    Component: AssignmentPost,
+    path: '/blog/packaging',
+  },
+  {
+    Component: ElevatorPitchPost,
+    path: '/blog/elevator-pitch',
+  },
+];
+
 
 export default function Blog() {
   const classes = useStyles();
@@ -72,15 +85,21 @@ export default function Blog() {
       alignItems="center"
       spacing={4}
     >
-      <Grid item xs={12}>
-        <AssignmentPackagingPost classes={classes}/>
-      </Grid>
-      <Grid item xs={12}>
-        <AssignmentPost classes={classes}/>
-      </Grid>
-      <Grid item xs={12}>
-        <ElevatorPitchPost classes={classes}/>
-      </Grid>
+      <Switch>
+        <Route exact path="/blog">
+          {posts.map(({Component, path}, index) => (
+            <Grid item xs={12} key={`post-preview-${index}`}>
+              <Component classes={classes} preview={path}/>
+            </Grid>
+          ))}
+        </Route>
+        {posts.map(({Component, path}, index) => (
+          <Route exact path={path} key={`post-${index}`}>
+            <Component classes={classes} preview={false}/>
+          </Route>
+        ))}
+      </Switch>
+
     </Grid>
   );
 }

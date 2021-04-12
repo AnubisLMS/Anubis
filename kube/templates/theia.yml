@@ -76,30 +76,6 @@ spec:
 
 ---
 
-# Public Ingress Route /api/public/*
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: ingress.route.theia.public
-  namespace: anubis
-  labels:
-    app: theia
-
-spec:
-  entryPoints:
-    - websecure
-  routes:
-  - kind: Rule
-    match: Host(`{{ .Values.theia.proxy.domain }}`)
-    services:
-    - name: theia-proxy
-      port: 5000
-  tls:
-    certResolver: tls
-
-
----
-
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

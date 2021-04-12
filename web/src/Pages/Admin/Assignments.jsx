@@ -40,6 +40,7 @@ const nonStupidDatetimeFormat = (date) => (
 const editableFields = [
   {field: 'name', label: 'Assignment Name'},
   {field: 'github_classroom_url', label: 'Github Classroom URL'},
+  {field: 'theia_image', label: 'Theia Image'},
   {field: 'pipeline_image', label: 'Pipeline Image', disabled: true},
   {field: 'unique_code', label: 'Unique Code', disabled: true},
   {field: 'hidden', label: 'Hidden', type: 'boolean'},

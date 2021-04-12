@@ -2,7 +2,7 @@ from redis import Redis
 from rq import Queue
 
 from anubis.config import config
-from anubis.rpc.pipeline import test_repo
+from anubis.rpc.pipeline import create_submission_pipeline
 from anubis.rpc.seed import seed_debug
 from anubis.rpc.theia import (
     initialize_theia_session,
@@ -29,20 +29,18 @@ def rpc_enqueue(func, queue=None, args=None):
         conn.close()
 
 
-def enqueue_webhook(*args):
+def enqueue_autograde_pipeline(*args, queue: str = 'default'):
     """Enqueues a test job"""
-    rpc_enqueue(test_repo, args=args)
+    rpc_enqueue(create_submission_pipeline, queue=queue, args=args)
 
 
 def enqueue_ide_initialize(*args):
     """Enqueue an ide initialization job"""
-
-    rpc_enqueue(initialize_theia_session, 'theia', args=args)
+    rpc_enqueue(initialize_theia_session, queue='theia', args=args)
 
 
 def enqueue_ide_stop(*args):
     """Reap theia session kube resources"""
-
     rpc_enqueue(reap_theia_session, queue='theia', args=args)
 
 
@@ -51,9 +49,11 @@ def enqueue_ide_reap_stale(*args):
     rpc_enqueue(reap_stale_theia_sessions, queue='theia', args=args)
 
 
-def seed():
-    rpc_enqueue(seed_debug)
+def enqueue_seed():
+    """Enqueue debug seed data"""
+    rpc_enqueue(seed_debug, queue='default')
 
 
-def create_visuals(*_):
-    rpc_enqueue(create_visuals_)
+def enqueue_create_visuals(*_):
+    """Enqueue create visuals"""
+    rpc_enqueue(create_visuals_, queue='default')

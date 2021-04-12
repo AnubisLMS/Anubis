@@ -1,6 +1,6 @@
 import traceback
 from datetime import datetime
-from typing import Union, List, Dict
+from typing import Union, List, Dict, Tuple
 
 from dateutil.parser import parse as date_parse, ParserError
 from sqlalchemy import or_, and_
@@ -64,11 +64,11 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
         filters.append(Assignment.release_date <= datetime.now())
         filters.append(Assignment.hidden == False)
 
-    assignments = Assignment.query\
+    assignments = Assignment.query \
         .join(Course).join(InCourse).join(User).filter(
-            User.netid == netid,
-            *filters
-        ).order_by(Assignment.due_date.desc()).all()
+        User.netid == netid,
+        *filters
+    ).order_by(Assignment.due_date.desc()).all()
 
     a = [a.data for a in assignments]
     for assignment_data in a:
@@ -135,7 +135,17 @@ def get_submissions(
     return [s.full_data for s in submissions]
 
 
-def assignment_sync(assignment_data):
+def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
+    """
+    Take an assignment_data dictionary from a assignment meta.yaml
+    and update any and all existing data about the assignment.
+
+    * This includes the assignment object fields, assignment tests,
+    and assignment questions. *
+
+    :param assignment_data:
+    :return:
+    """
     assignment = Assignment.query.filter(
         Assignment.unique_code == assignment_data["unique_code"]
     ).first()
@@ -170,24 +180,31 @@ def assignment_sync(assignment_data):
         return "Unable to parse datetime", 406
 
     db.session.add(assignment)
-    db.session.commit()
 
+    # Go through assignment tests, and delete those that are now
+    # not in the assignment data.
     for assignment_test in AssignmentTest.query.filter(
             and_(
                 AssignmentTest.assignment_id == assignment.id,
                 AssignmentTest.name.notin_(assignment_data["tests"]),
             )
     ).all():
+        # Delete any and all submission test results that are still outstanding
+        # for an assignment test that will be deleted.
         SubmissionTestResult.query.filter(
             SubmissionTestResult.assignment_test_id == assignment_test.id,
         ).delete()
+
+        # Delete the assignment test
         AssignmentTest.query.filter(
             AssignmentTest.assignment_id == assignment.id,
             AssignmentTest.name == assignment_test.name,
         ).delete()
-    db.session.commit()
 
+    # Run though the tests in the assignment data
     for test_name in assignment_data["tests"]:
+
+        # Find if the assignment test exists
         assignment_test = (
             AssignmentTest.query.filter(
                 Assignment.id == assignment.id,
@@ -197,14 +214,19 @@ def assignment_sync(assignment_data):
                 .first()
         )
 
+        # Create the assignment test if it did not already exist
         if assignment_test is None:
             assignment_test = AssignmentTest(assignment=assignment, name=test_name)
             db.session.add(assignment_test)
-            db.session.commit()
 
-    accepted, ignored, rejected = ingest_questions(
-        assignment_data["questions"], assignment
-    )
-    question_message = {"accepted": accepted, "ignored": ignored, "rejected": rejected}
+    # Sync the questions in the assignment data
+    question_message = None
+    if 'questions' in assignment_data:
+        accepted, ignored, rejected = ingest_questions(
+            assignment_data["questions"], assignment
+        )
+        question_message = {"accepted": accepted, "ignored": ignored, "rejected": rejected}
+
+    db.session.commit()
 
     return {"assignment": assignment.data, "questions": question_message}, True

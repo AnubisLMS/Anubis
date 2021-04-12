@@ -21,6 +21,18 @@ def parse_webhook(webhook):
 
 
 def guess_github_username(assignment, repo_name):
+    """
+    In order to match a webhook to a user, we need to know the github username
+    that the repo in question was made for. The github username is in the name
+    of the repo.
+
+    This function takes the name of the repo, and does some parsing tricks to
+    take a fairly confident guess as to what the github username is.
+
+    :param assignment:
+    :param repo_name:
+    :return:
+    """
     repo_name_split = repo_name.split("-")
     unique_code_index = repo_name_split.index(assignment.unique_code)
     repo_name_split = repo_name_split[unique_code_index + 1:]
@@ -41,17 +53,35 @@ def guess_github_username(assignment, repo_name):
     return user, github_username_guess
 
 
-def check_repo(assignment, repo_url, github_username, user=None):
+def check_repo(assignment, repo_url, github_username, user=None) -> AssignmentRepo:
+    """
+    While processing the webhook, we need to check to see if we have
+    record of the repo. This function takes what it needs to create
+    the record of the repo if it didn't already exist.
+
+    :param assignment:
+    :param repo_url:
+    :param github_username:
+    :param user:
+    :return:
+    """
+
+    # if the user is not None, then the submission is
+    # not dangling.
     if user is not None:
         repo = AssignmentRepo.query.filter(
             AssignmentRepo.assignment_id == assignment.id,
             AssignmentRepo.owner == user,
         ).first()
+        
+    # If the user is None, then the submission is
+    # dangling.
     else:
         repo = AssignmentRepo.query.filter(
             AssignmentRepo.repo_url == repo_url
         ).first()
 
+    # If the repo did not exist, then create it.
     if repo is None:
         repo = AssignmentRepo(
             owner=user,
@@ -62,4 +92,5 @@ def check_repo(assignment, repo_url, github_username, user=None):
         db.session.add(repo)
         db.session.commit()
 
+    # Return the repo object
     return repo

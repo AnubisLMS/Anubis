@@ -1,5 +1,5 @@
 PERSISTENT_SERVICES := db traefik kibana elasticsearch-coordinating redis-master logstash adminer
-RESTART_ALWAYS_SERVICES := api web-dev rpc-default rpc-theia
+RESTART_ALWAYS_SERVICES := api web-dev rpc-default rpc-theia rpc-regrade
 PUSH_SERVICES := api web logstash theia-init theia-proxy theia-admin theia-xv6
 
 
@@ -55,20 +55,38 @@ debug:
 	sleep 3
 	@echo 'running migrations'
 	make -C api migrations
+	@echo ''
 	@echo 'seed: http://localhost/api/admin/seed/'
 	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
 	@echo 'site: http://localhost/'
 
 .PHONY: mindebug     # Start the minimal cluster in debug mode
-mindebug: build
+mindebug:
 	docker-compose up -d traefik db redis-master logstash
 	docker-compose up \
 		-d --force-recreate \
-		api web rpc-worker
+		api web rpc-default rpc-theia
 	@echo 'Waiting a moment before running migrations'
 	sleep 3
 	@echo 'running migrations'
 	make -C api migrations
+	@echo ''
+	@echo 'seed: http://localhost/api/admin/seed/'
+	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
+	@echo 'site: http://localhost/'
+
+.PHONY: mkdebug      # Start minikube debug
+mkdebug:
+	./kube/debug/provision.sh
+	@echo ''
+	@echo 'seed: http://localhost/api/admin/seed/'
+	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
+	@echo 'site: http://localhost/'
+
+.PHONY: mkrestart    # Restart minikube debug
+mkrestart:
+	./kube/debug/restart.sh
+	@echo ''
 	@echo 'seed: http://localhost/api/admin/seed/'
 	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
 	@echo 'site: http://localhost/'

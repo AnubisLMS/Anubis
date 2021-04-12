@@ -100,7 +100,7 @@ def cleanup_jobs(batch_v1) -> int:
     return active_count
 
 
-def test_repo(submission_id: str):
+def create_submission_pipeline(submission_id: str):
     """
     This function should launch the appropriate testing container
     for the assignment, passing along the function arguments.
@@ -108,7 +108,7 @@ def test_repo(submission_id: str):
     :param submission_id: submission.id of to test
     """
     from anubis.app import create_app
-    from anubis.utils.rpc import enqueue_webhook
+    from anubis.utils.rpc import enqueue_autograde_pipeline
 
     app = create_app()
 
@@ -153,8 +153,7 @@ def test_repo(submission_id: str):
                 "TOO many jobs - re-enqueue {}".format(submission_id),
                 extra={"submission_id": submission_id},
             )
-            enqueue_webhook(submission_id)
-            time.sleep(1)
+            enqueue_autograde_pipeline(submission_id)
             exit(0)
 
         # Create job object

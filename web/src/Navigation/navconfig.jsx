@@ -54,7 +54,7 @@ export const footer_nav = [
   {
     id: 'Blog',
     icon: <BookIcon/>,
-    exact: true,
+    exact: false,
     path: '/blog',
     Page: Blog,
   },

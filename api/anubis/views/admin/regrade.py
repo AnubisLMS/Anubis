@@ -1,20 +1,43 @@
 from datetime import datetime, timedelta
+import math
 
 from flask import Blueprint
+from sqlalchemy import or_
 
-from anubis.models import Submission, Assignment, User, Course, InCourse
+from anubis.models import Submission, Assignment
 from anubis.rpc.batch import rpc_bulk_regrade
 from anubis.utils.auth import require_admin
 from anubis.utils.data import split_chunks
 from anubis.utils.decorators import json_response
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import error_response, success_response, get_number_arg
-from anubis.utils.rpc import enqueue_webhook, rpc_enqueue
+from anubis.utils.rpc import enqueue_autograde_pipeline, rpc_enqueue
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 
 
-@regrade.route("/submission/<commit>")
+@regrade.route("/status/<string:assignment_id>")
+@require_admin()
+@json_response
+def admin_regrade_status(assignment_id: str):
+    processing = Submission.query.filter(
+        Submission.assignment_id == assignment_id,
+        Submission.processed == False,
+    ).count()
+
+    total = Submission.query.filter(
+        Submission.assignment_id == assignment_id,
+    ).count()
+
+    return success_response({
+        'percent': f'{math.ceil(((total - processing)/total)*100)}% of submissions processed',
+        'processing': processing,
+        'processed': total - processing,
+        'total': total,
+    })
+
+
+@regrade.route("/submission/<string:commit>")
 @require_admin()
 @log_endpoint("cli", lambda: "regrade-commit")
 @json_response
@@ -38,17 +61,17 @@ def private_regrade_submission(commit):
     s.init_submission_models()
 
     # Enqueue the submission pipeline
-    enqueue_webhook(s.id)
+    enqueue_autograde_pipeline(s.id)
 
     # Return status
     return success_response({"submission": s.data, "user": s.owner.data})
 
 
-@regrade.route("/<assignment_name>")
+@regrade.route("/assignment/<string:assignment_id>")
 @require_admin()
 @log_endpoint("cli", lambda: "regrade")
 @json_response
-def private_regrade_assignment(assignment_name):
+def private_regrade_assignment(assignment_id):
     """
     This route is used to restart / re-enqueue jobs.
 
@@ -65,7 +88,7 @@ def private_regrade_assignment(assignment_name):
 
     This solution isn't the fastest, but it gets the job done.
 
-    :param assignment_name: name of assignment to regrade
+    :param assignment_id: name of assignment to regrade
     :return:
     """
 
@@ -94,7 +117,9 @@ def private_regrade_assignment(assignment_name):
         )
 
     # Find the assignment
-    assignment = Assignment.query.filter_by(name=assignment_name).first()
+    assignment = Assignment.query.filter(
+        or_(Assignment.id == assignment_id, Assignment.name == assignment_id)
+    ).first()
     if assignment is None:
         return error_response("cant find assignment")
 
@@ -104,6 +129,7 @@ def private_regrade_assignment(assignment_name):
         Submission.owner_id is not None,
         *extra
     ).all()
+    submission_count = len(submissions)
 
     # Split the submissions into bite sized chunks
     submission_ids = [s.id for s in submissions]
@@ -111,10 +137,10 @@ def private_regrade_assignment(assignment_name):
 
     # Enqueue each chunk as a job for the rpc workers
     for chunk in submission_chunks:
-        rpc_enqueue(rpc_bulk_regrade, 'default', args=[chunk])
+        rpc_enqueue(rpc_bulk_regrade, 'regrade', args=[chunk])
 
     # Pass back the enqueued status
     return success_response({
-        "status": "chunks enqueued",
+        "status": f"{submission_count} submissions enqueued.",
         "submissions": submission_ids,
     })

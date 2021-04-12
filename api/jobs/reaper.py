@@ -8,8 +8,8 @@ from sqlalchemy import func, and_
 
 from anubis.app import create_app
 from anubis.models import db, Submission, Assignment, AssignmentRepo, TheiaSession
-from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_reap_stale, enqueue_webhook
-from anubis.utils.stats import bulk_stats
+from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_reap_stale, enqueue_autograde_pipeline
+from anubis.utils.stats import bulk_autograde
 from anubis.utils.webhook import check_repo, guess_github_username
 
 
@@ -78,10 +78,10 @@ def reap_stats():
         ).all():
             if submission.build is None:
                 submission.init_submission_models()
-                enqueue_webhook(submission.id)
+                enqueue_autograde_pipeline(submission.id)
 
     for assignment in recent_assignments:
-        bulk_stats(assignment.id)
+        bulk_autograde(assignment.id)
 
 
 def reap_repos():
@@ -168,16 +168,21 @@ def reap_repos():
         user, github_username = guess_github_username(assignment, repo_name)
         repo = check_repo(assignment, repo_url, github_username, user)
 
+        if user is None:
+            continue
+
         # Check for broken submissions
         submissions = []
         for submission in Submission.query.filter(Submission.assignment_repo_id == repo.id).all():
+            if submission is None:
+                continue
             if submission.owner_id != user.id:
                 print(f'found broken submission {submission.id}')
                 submission.owner_id = repo.owner_id
                 submissions.append(submission.id)
         db.session.commit()
         for sid in submissions:
-            enqueue_webhook(sid)
+            enqueue_autograde_pipeline(sid)
 
         # Check for missing submissions
         for commit in map(lambda x: x['node']['oid'], ref['target']['history']['edges']):
@@ -196,7 +201,7 @@ def reap_repos():
                 db.session.add(submission)
                 db.session.commit()
                 submission.init_submission_models()
-                enqueue_webhook(submission.id)
+                enqueue_autograde_pipeline(submission.id)
 
         r = AssignmentRepo.query.filter(AssignmentRepo.repo_url == repo_url).first()
         if r is not None:
@@ -212,7 +217,7 @@ def reap_repos():
 
                 db.session.commit()
                 for sid in submissions:
-                    enqueue_webhook(sid)
+                    enqueue_autograde_pipeline(sid)
 
         if repo:
             print(f'checked repo: {repo_name} {github_username} {user} {repo.id}')

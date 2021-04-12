@@ -30,19 +30,41 @@ const useStyles = makeStyles(() => ({
     backgroundImage: `url(/curvylines.png)`,
     backgroundRepeat: 'repeat',
   },
+  main: {
+    width: '100%',
+    flexDirection: 'column',
+    padding: theme.spacing(6, 4),
+    marginBottom: theme.spacing(5),
+  },
+  app: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  },
+  drawer: {
+    width: drawerWidth,
+    flexShrink: 0,
+  },
+  drawerPaper: {
+    width: drawerWidth,
+  },
+  drawerHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: theme.spacing(0, 1),
+    // necessary for content to be below app bar
+    ...theme.mixins.toolbar,
+  },
   content: {
     flexGrow: 1,
-    padding: theme.spacing(6, 4),
+    padding: theme.spacing(3),
+    marginBottom: '20px',
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
     marginLeft: -drawerWidth,
-  },
-  main: {
-    width: '100%',
-    flexDirection: 'column',
-    marginBottom: theme.spacing(5),
   },
   contentShift: {
     transition: theme.transitions.create('margin', {
@@ -51,19 +73,45 @@ const useStyles = makeStyles(() => ({
     }),
     marginLeft: 0,
   },
-  app: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
+  menuButton: {
+    marginLeft: -theme.spacing(1),
+  },
+  avatar: {
+    'display': 'flex',
+    '& > *': {
+      margin: theme.spacing(1),
+    },
+  },
+  appBar: {
+    // height: 50,
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+  },
+  appBarShift: {
+    width: `calc(100% - ${drawerWidth}px)`,
+    marginLeft: drawerWidth,
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
   },
 }));
 
 export default function App() {
   const classes = useStyles();
   const query = useQuery();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(window.innerWidth >= 960); // 960px is md
   const [showError, setShowError] = useState(!!query.get('error'));
+
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
 
 
   return (
@@ -77,20 +125,23 @@ export default function App() {
                 {(user) => (
                   <CssBaseline>
                     <Nav
-                      variant="temporary"
+                      classes={classes}
                       open={open}
-                      onDrawerToggle={() => setOpen((prev) => !prev)}
+                      handleDrawerClose={handleDrawerClose}
                     />
                     <div className={classes.app} id={'app'}>
                       <Header
                         onDrawerToggle={() => setOpen((prev) => !prev)}
                         user={user}
+                        classes={classes}
+                        open={open}
                       />
                       <main
-                        className={clsx(classes.content, classes.main, {
+                        className={clsx(classes.content, {
                           [classes.contentShift]: open,
                         })}
                       >
+                        <div className={classes.drawerHeader} />
                         <Error show={showError} onDelete={() => setShowError(false)}/>
                         <Main user={user}/>
                         <Footer/>

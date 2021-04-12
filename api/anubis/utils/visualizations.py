@@ -45,7 +45,29 @@ def get_theia_sessions() -> pd.DataFrame:
     return theia_sessions
 
 
-@cache.cached(timeout=360, unless=is_debug)
+# def theia_propagate_usage(df: pd.DataFrame) -> pd.DataFrame:
+#     # df.reset_index(inplace=True)
+#     df.set_index('created', inplace=True, drop=True)
+#     for created in df.index:
+#         count = df.loc[created]['count']
+#         assignment_id = df.loc[created]['assignment_id']
+#         for i in range(1, 7):
+#             idx = pd.to_datetime(created + timedelta(hours=i))
+#             if idx in df.index:
+#                 logger.info(df.loc[idx])
+#                 df.loc[idx]['count'] += count
+#             else:
+#                 df.append(pd.DataFrame(
+#                     [[assignment_id, count]],
+#                     index=[idx],
+#                     columns=df.columns,
+#                 ))
+#                 logger.info(df.loc[idx])
+#         break
+#     return df
+
+
+@cache.memoize(timeout=360, unless=is_debug)
 def get_usage_plot():
     import matplotlib.pyplot as plt
     import matplotlib.colors as mcolors
@@ -77,25 +99,37 @@ def get_usage_plot():
         legend_handles0.append(
             axs[0].axvline(
                 x=assignment.due_date.date(),
-                color='red',
+                color=color,
+                linestyle='dotted',
                 label=f'{assignment.name}',
-                ymax=0.1,
             )
         )
         legend_handles1.append(
             axs[1].axvline(
                 x=assignment.due_date.date(),
-                color='red',
+                color=color,
+                linestyle='dotted',
                 label=f'{assignment.name}',
-                ymax=0.1,
             )
         )
 
-    axs[0].legend(handles=legend_handles0, loc='upper center')
+    utcnow = datetime.utcnow().replace(microsecond=0)
+
+    axs[0].text(
+        0.97, 0.9, f'Generated {utcnow} UTC',
+        transform=axs[0].transAxes, fontsize=12, color='gray', alpha=0.5,
+        ha='right', va='center',
+    )
+    axs[0].legend(handles=legend_handles0, loc='upper left')
     axs[0].set(title='Submissions over time', xlabel='time', ylabel='count')
     axs[0].grid(True)
 
-    axs[1].legend(handles=legend_handles1, loc='upper center')
+    axs[1].text(
+        0.97, 0.9, f'Generated {utcnow} UTC',
+        transform=axs[1].transAxes, fontsize=12, color='gray', alpha=0.5,
+        ha='right', va='center',
+    )
+    axs[1].legend(handles=legend_handles1, loc='upper left')
     axs[1].set(title='Cloud IDEs over time', xlabel='time', ylabel='count')
     axs[1].grid(True)
 
