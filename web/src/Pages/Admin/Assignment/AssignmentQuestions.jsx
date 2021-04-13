@@ -4,11 +4,11 @@ import Grid from '@material-ui/core/Grid';
 import {useSnackbar} from 'notistack';
 import {useParams} from 'react-router-dom';
 import axios from 'axios';
-import standardErrorHandler from '../../Utils/standardErrorHandler';
-import standardStatusHandler from '../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../../Utils/standardErrorHandler';
+import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import Typography from '@material-ui/core/Typography';
-import QuestionCard from '../../Components/Admin/Assignment/QuestionCard';
-import QuestionControls from '../../Components/Admin/Assignment/QuestionControls';
+import QuestionCard from '../../../Components/Admin/Assignment/QuestionCard';
+import QuestionControls from '../../../Components/Admin/Assignment/QuestionControls';
 
 const useStyles = makeStyles((theme) => ({
   root: {

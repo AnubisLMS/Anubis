@@ -30,6 +30,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -195,7 +196,7 @@ export default function AssignmentCard({assignment, editableFields, updateField,
             className={classes.button}
             startIcon={<SaveIcon/>}
           >
-          Save
+            Save
           </Button>
           <Button
             size={'small'}
@@ -205,18 +206,28 @@ export default function AssignmentCard({assignment, editableFields, updateField,
             onClick={() => setWarningOpen(true)}
             startIcon={<RefreshIcon/>}
           >
-          Regrade
+            Regrade
           </Button>
           <Button
             size={'small'}
             color={'primary'}
             variant={'contained'}
-            className={classes.buttonRight}
+            className={clsx(classes.buttonRight, classes.button)}
             component={Link}
             to={`/admin/assignment/questions/${assignment.unique_code}`}
             startIcon={<EditIcon/>}
           >
-          Edit Questions
+            Edit Questions
+          </Button>
+          <Button
+            size={'small'}
+            color={'primary'}
+            variant={'contained'}
+            component={Link}
+            to={`/admin/assignment/tests/${assignment.id}`}
+            startIcon={<EditIcon/>}
+          >
+            Edit Tests
           </Button>
         </CardActions>
       </Card>

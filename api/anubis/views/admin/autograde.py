@@ -6,12 +6,12 @@ from anubis.utils.decorators import json_response
 from anubis.utils.elastic import log_endpoint
 from anubis.utils.http import success_response, error_response, get_number_arg
 from anubis.utils.questions import get_assigned_questions
-from anubis.utils.stats import bulk_autograde, autograde, stats_wrapper
+from anubis.utils.autograde import bulk_autograde, autograde, stats_wrapper
 
-stats = Blueprint("admin-stats", __name__, url_prefix="/admin/stats")
+autograde_ = Blueprint("admin-autograde", __name__, url_prefix="/admin/autograde")
 
 
-@stats.route("/assignment/<assignment_id>")
+@autograde_.route("/assignment/<assignment_id>")
 @require_admin()
 @json_response
 def private_stats_assignment(assignment_id, netid=None):
@@ -38,7 +38,7 @@ def private_stats_assignment(assignment_id, netid=None):
     return success_response({"stats": bests})
 
 
-@stats.route("/for/<assignment_id>/<user_id>")
+@autograde_.route("/for/<assignment_id>/<user_id>")
 @require_admin()
 @json_response
 def private_stats_for(assignment_id, user_id):
@@ -57,7 +57,7 @@ def private_stats_for(assignment_id, user_id):
     )
 
 
-@stats.route("/submission/<string:assignment_id>/<string:netid>")
+@autograde_.route("/submission/<string:assignment_id>/<string:netid>")
 @require_admin()
 @log_endpoint("cli", lambda: "submission-stats")
 @json_response
@@ -91,13 +91,13 @@ def private_submission_stats_id(assignment_id: str, netid: str):
         submission = Submission.query.filter(
             Submission.id == submission_id
         ).first()
-        submission_full_data = submission.full_data
+        submission_full_data = submission.admin_data
 
     return success_response(
         {
             "student": user.data,
             "submission": submission_full_data,
-            "assignment": assignment.data,
+            "assignment": assignment.full_data,
             "questions": get_assigned_questions(
                 assignment.id, user.id, True
             ),

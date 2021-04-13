@@ -5,7 +5,7 @@ from flask import request, Blueprint
 from anubis.models import Submission, SubmissionTestResult
 from anubis.models import db
 from anubis.utils.decorators import json_response, check_submission_token, json_endpoint
-from anubis.utils.http import error_response, success_response
+from anubis.utils.http import success_response
 from anubis.utils.logger import logger
 
 pipeline = Blueprint("pipeline", __name__, url_prefix="/pipeline")
@@ -172,7 +172,9 @@ def pipeline_report_test(
         logger.error(
             "Invalid submission test result reported", extra={"request": request.json}
         )
-        return error_response("Invalid"), 406
+        return success_response({
+            'status': "invalid test name"
+        })
 
     # Update the fields
     submission_test_result.passed = passed

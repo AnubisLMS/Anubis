@@ -15,11 +15,11 @@ import TextField from '@material-ui/core/TextField';
 
 import CheckOutlinedIcon from '@material-ui/icons/Check';
 import CancelIcon from '@material-ui/icons/Cancel';
+import NotInterested from '@material-ui/icons/NotInterested';
 
-import useQuery from '../../hooks/useQuery';
-import standardStatusHandler from '../../Utils/standardStatusHandler';
-import standardErrorHandler from '../../Utils/standardErrorHandler';
-import {NotInterested} from '@material-ui/icons';
+import useQuery from '../../../hooks/useQuery';
+import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../../Utils/standardErrorHandler';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -83,7 +83,7 @@ const useColumns = () => ([
 ]);
 
 
-export default function AssignmentStats() {
+export default function AutogradeAssignments() {
   const query = useQuery();
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
@@ -112,7 +112,7 @@ export default function AssignmentStats() {
     const offset = pageSize * (page - 1);
     const limit = pageSize;
     axios.get(
-      `/api/admin/stats/assignment/${query.get('assignmentId')}`,
+      `/api/admin/autograde/assignment/${query.get('assignmentId')}`,
       {params: {limit, offset}},
     ).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
@@ -152,7 +152,7 @@ export default function AssignmentStats() {
       return setRows(stats);
     }
 
-    axios.get(`/api/admin/stats/for/${assignment.id}/${searched.id}`).then((response) => {
+    axios.get(`/api/admin/autograde/for/${assignment.id}/${searched.id}`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
         setRows([data.stats]);
@@ -161,7 +161,7 @@ export default function AssignmentStats() {
   }, [searched]);
 
   if (selected) {
-    return <Redirect to={`/admin/stats/submission?assignmentId=${assignment.id}&netid=${selected.id}`}/>;
+    return <Redirect to={`/admin/autograde/submission?assignmentId=${assignment.id}&netid=${selected.id}`}/>;
   }
 
   return (

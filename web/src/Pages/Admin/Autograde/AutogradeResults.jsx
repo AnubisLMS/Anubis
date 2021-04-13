@@ -8,8 +8,8 @@ import {DataGrid} from '@material-ui/data-grid';
 import Grid from '@material-ui/core/Grid';
 import {Paper} from '@material-ui/core';
 
-import standardStatusHandler from '../../Utils/standardStatusHandler';
-import standardErrorHandler from '../../Utils/standardErrorHandler';
+import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
 
@@ -41,7 +41,7 @@ const sortModel = [
   },
 ];
 
-export default function Stats() {
+export default function AutogradeResults() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [assignments, setAssignments] = useState([]);
@@ -58,7 +58,7 @@ export default function Stats() {
   }, []);
 
   if (selected) {
-    return <Redirect to={`/admin/stats/assignment?assignmentId=${selected.id}`}/>;
+    return <Redirect to={`/admin/autograde/assignment?assignmentId=${selected.id}`}/>;
   }
 
   return (

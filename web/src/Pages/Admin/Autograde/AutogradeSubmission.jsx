@@ -3,17 +3,17 @@ import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
-import useQuery from '../../hooks/useQuery';
-import standardStatusHandler from '../../Utils/standardStatusHandler';
-import standardErrorHandler from '../../Utils/standardErrorHandler';
-import StudentCard from '../../Components/Admin/Stats/Submissions/StudentCard';
-import SubmissionSummary from '../../Components/Public/Submission/SubmissionSummary';
-import SubmissionBuild from '../../Components/Public/Submission/SubmissionBuild';
-import SubmissionTests from '../../Components/Public/Submission/SubmissionTests';
-import QuestionsCard from '../../Components/Public/Questions/QuestionsCard';
-import StudentGitCard from '../../Components/Admin/Stats/Submissions/StudentGitCard';
+import useQuery from '../../../hooks/useQuery';
+import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../../Utils/standardErrorHandler';
+import StudentCard from '../../../Components/Admin/Stats/Submissions/StudentCard';
+import SubmissionSummary from '../../../Components/Public/Submission/SubmissionSummary';
+import SubmissionBuild from '../../../Components/Public/Submission/SubmissionBuild';
+import SubmissionTests from '../../../Components/Public/Submission/SubmissionTests';
+import QuestionsCard from '../../../Components/Public/Questions/QuestionsCard';
+import StudentGitCard from '../../../Components/Admin/Stats/Submissions/StudentGitCard';
 
-import {translateSubmission} from '../../Utils/submission';
+import {translateSubmission} from '../../../Utils/submission';
 import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SubmissionStats() {
+export default function AutogradeSubmission() {
   const classes = useStyles();
   const query = useQuery();
   const {enqueueSnackbar} = useSnackbar();
@@ -36,7 +36,7 @@ export default function SubmissionStats() {
   const netid = query.get('netid');
 
   React.useEffect(() => {
-    axios.get(`/api/admin/stats/submission/${assignmentId}/${netid}`).then((response) => {
+    axios.get(`/api/admin/autograde/submission/${assignmentId}/${netid}`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
         setStudent(data.student);

@@ -8,9 +8,9 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
 
-import standardStatusHandler from '../../Utils/standardStatusHandler';
-import ManagementIDEDialog from '../../Components/Admin/IDE/ManagementIDEDialog';
-import AssignmentCard from '../../Components/Admin/Assignment/AssignmentCard';
+import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import ManagementIDEDialog from '../../../Components/Admin/IDE/ManagementIDEDialog';
+import AssignmentCard from '../../../Components/Admin/Assignment/AssignmentCard';
 
 const useStyles = makeStyles((theme) => ({
   root: {

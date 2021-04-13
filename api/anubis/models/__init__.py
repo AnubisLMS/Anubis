@@ -165,8 +165,14 @@ class Assignment(db.Model):
             "ide_enabled": self.ide_enabled,
             "ide_active": self.due_date + timedelta(days=3 * 7) > datetime.now(),
             "github_classroom_link": self.github_classroom_url,
-            "tests": [t.data for t in self.tests],
+            "tests": [t.data for t in self.tests if t.hidden is False],
         }
+
+    @property
+    def full_data(self):
+        data = self.data
+        data['tests'] = [t.data for t in self.tests]
+        return data
 
     @property
     def meta_shape(self):
@@ -228,13 +234,18 @@ class AssignmentTest(db.Model):
 
     # Fields
     name = db.Column(db.String(128), index=True)
+    hidden = db.Column(db.Boolean, default=False)
 
     # Relationships
     assignment = db.relationship(Assignment)
 
     @property
     def data(self):
-        return {"name": self.name}
+        return {
+            "id": self.id,
+            "name": self.name,
+            "hidden": self.hidden
+        }
 
 
 class AssignmentQuestion(db.Model):
@@ -441,17 +452,13 @@ class Submission(db.Model):
         db.session.commit()
 
     @property
-    def url(self):
-        return "https://anubis.osiris.services/submission/{}".format(self.commit)
-
-    @property
     def netid(self):
         if self.owner is not None:
             return self.owner.netid
         return "null"
 
     @property
-    def tests(self):
+    def visible_tests(self):
         """
         Get a list of dictionaries of the matching Test, and TestResult
         for the current submission.
@@ -460,11 +467,30 @@ class Submission(db.Model):
         """
 
         # Query for matching AssignmentTests, and TestResults
-        tests = SubmissionTestResult.query.filter_by(
-            submission_id=self.id,
+        tests = SubmissionTestResult.query.join(AssignmentTest).filter(
+            SubmissionTestResult.submission_id == self.id,
+            AssignmentTest.hidden == False,
         ).all()
 
-        logger.debug("Loaded tests {}".format(tests))
+        # Convert to dictionary data
+        return [
+            {"test": result.assignment_test.data, "result": result.data}
+            for result in tests
+        ]
+
+    @property
+    def all_tests(self):
+        """
+        Get a list of dictionaries of the matching Test, and TestResult
+        for the current submission.
+
+        :return:
+        """
+
+        # Query for matching AssignmentTests, and TestResults
+        tests = SubmissionTestResult.query.join(AssignmentTest).filter(
+            SubmissionTestResult.submission_id == self.id,
+        ).all()
 
         # Convert to dictionary data
         return [
@@ -493,7 +519,18 @@ class Submission(db.Model):
 
         # Add connected models
         data["repo"] = self.repo.repo_url
-        data["tests"] = self.tests
+        data["tests"] = self.visible_tests
+        data["build"] = self.build.data if self.build is not None else None
+
+        return data
+
+    @property
+    def admin_data(self):
+        data = self.data
+
+        # Add connected models
+        data["repo"] = self.repo.repo_url
+        data["tests"] = self.all_tests
         data["build"] = self.build.data if self.build is not None else None
 
         return data

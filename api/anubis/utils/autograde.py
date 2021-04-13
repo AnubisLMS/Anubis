@@ -101,7 +101,7 @@ def stats_wrapper(assignment: Assignment, user_id: str, netid: str, name: str, s
             "user_id": user_id,
             "netid": netid,
             "name": name,
-            "submission": submission.data,
+            "submission": submission.admin_data,
             "build_passed": submission.build.passed if submission.build is not None else False,
             "tests_passed": best_count,
             "total_tests": len(submission.test_results),
