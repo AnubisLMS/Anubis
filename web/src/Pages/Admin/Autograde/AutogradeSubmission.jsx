@@ -74,7 +74,7 @@ export default function AutogradeSubmission() {
               <QuestionsCard questions={questions}/>
             </Grid>
             <Grid item xs={12} md={4}>
-              <SubmissionSummary submission={submission} regrade={() => null}/>
+              <SubmissionSummary submission={submission} regrade={null}/>
             </Grid>
             <Grid item xs={12} md={4}>
               <SubmissionBuild build={submission?.build}/>

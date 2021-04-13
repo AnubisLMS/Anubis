@@ -130,16 +130,8 @@ export default function Assignments() {
         </Typography>
       </Grid>
       <Grid item xs={12}>
-        <Button
-          variant={'contained'}
-          color={'primary'}
-          startIcon={<CodeOutlinedIcon/>}
-          onClick={() => setDialogOpen(true)}
-        >
-          Management IDE
-        </Button>
+        <ManagementIDEDialog/>
       </Grid>
-      <ManagementIDEDialog open={dialogOpen} handleDialogToggle={() => setDialogOpen((prev) => !prev)}/>
       {assignments.map((assignment) => (
         <Grid item xs={8} key={assignment.id}>
           <AssignmentCard

@@ -17,9 +17,9 @@ const useStyles = makeStyles((theme) => ({
     minHeight: 700,
     padding: theme.spacing(1),
   },
-  dataGrid: {
-    height: '100%',
-  },
+  // dataGrid: {
+  //   height: '100%',
+  // },
   button: {
     margin: theme.spacing(1),
   },
@@ -122,16 +122,19 @@ export default function Static() {
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <Paper className={classes.paper}>
-                <DataGrid
-                  pagination
-                  page={page}
-                  pageSize={pageSize}
-                  onPageChange={(value) => setPage(value.page)}
-                  onPageSizeChange={(value) => setPageSize(value.pageSize)}
-                  className={classes.dataGrid}
-                  columns={columns}
-                  rows={rows}
-                />
+                <div style={{height: 700}}>
+                  <DataGrid
+                    pagination
+                    page={page}
+                    pageSize={pageSize}
+                    rowsPerPageOptions={[10, 20, 30]}
+                    onPageChange={(value) => setPage(value.page)}
+                    onPageSizeChange={(value) => setPageSize(value.pageSize)}
+                    className={classes.dataGrid}
+                    columns={columns}
+                    rows={rows}
+                  />
+                </div>
               </Paper>
             </Grid>
           </Grid>

@@ -18,6 +18,7 @@ import GitHubIcon from '@material-ui/icons/GitHub';
 import IconButton from '@material-ui/core/IconButton';
 import CheckIcon from '@material-ui/icons/Check';
 import CancelIcon from '@material-ui/icons/Cancel';
+import ManagementIDEDialog from '../../Components/Admin/IDE/ManagementIDEDialog';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -29,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
   },
   button: {
-    margin: theme.spacing(1),
+    marginRight: theme.spacing(1),
   },
 }));
 
@@ -125,8 +126,11 @@ export default function Theia() {
           Anubis
         </Typography>
         <Typography variant={'subtitle1'} color={'textSecondary'}>
-          Course Management
+          Cloud IDE Management
         </Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <ManagementIDEDialog/>
       </Grid>
       <Grid item xs={12}>
         <Button
