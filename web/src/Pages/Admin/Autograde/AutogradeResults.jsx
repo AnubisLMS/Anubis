@@ -18,11 +18,14 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
   },
   paper: {
-    flex: 1,
+    // flex: 1,
     padding: theme.spacing(1),
   },
   dataGridPaper: {
     height: 700,
+  },
+  dataGrid: {
+    height: '100%',
   },
 }));
 
@@ -72,8 +75,9 @@ export default function AutogradeResults() {
         </Typography>
       </Grid>
       <Grid item xs={12} md={8}>
-        <Paper className={clsx(classes.paper, classes.dataGridPaper)}>
+        <Paper className={clsx(classes.dataGridPaper, classes.paper)}>
           <DataGrid
+            className={classes.dataGrid}
             sortModel={sortModel}
             columns={columns}
             rows={assignments}

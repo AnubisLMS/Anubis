@@ -23,7 +23,7 @@ import standardErrorHandler from '../../../Utils/standardErrorHandler';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
-    minHeight: 700,
+    height: 700,
     padding: theme.spacing(1),
   },
   dataGrid: {
