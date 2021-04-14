@@ -7,6 +7,7 @@ import AssignmentPost from '../../Components/Public/Blog/AssignmentPost';
 import ElevatorPitchPost from '../../Components/Public/Blog/ElevatorPitchPost';
 import AssignmentPackagingPost from '../../Components/Public/Blog/AssignmentPackagingPost';
 import MidtermRetroPost from '../../Components/Public/Blog/MidtermRetroPost';
+import TheiaIDEPost from '../../Components/Public/Blog/TheiaIDEPost';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -55,6 +56,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const posts = [
+  {
+    Component: TheiaIDEPost,
+    path: '/blog/anubis-cloud-ide',
+  },
   {
     Component: MidtermRetroPost,
     path: '/blog/midterm-retro',
