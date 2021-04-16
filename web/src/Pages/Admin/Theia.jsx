@@ -1,14 +1,12 @@
 import React, {useState} from 'react';
-
-import Grid from '@material-ui/core/Grid';
-import {useSnackbar} from 'notistack';
 import axios from 'axios';
-import standardStatusHandler from '../../Utils/standardStatusHandler';
+import {useSnackbar} from 'notistack';
+
+import {DataGrid} from '@material-ui/data-grid';
+import Grid from '@material-ui/core/Grid';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import standardErrorHandler from '../../Utils/standardErrorHandler';
-import {DataGrid} from '@material-ui/data-grid';
 import Paper from '@material-ui/core/Paper';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import Fab from '@material-ui/core/Fab';
@@ -18,6 +16,9 @@ import GitHubIcon from '@material-ui/icons/GitHub';
 import IconButton from '@material-ui/core/IconButton';
 import CheckIcon from '@material-ui/icons/Check';
 import CancelIcon from '@material-ui/icons/Cancel';
+
+import standardStatusHandler from '../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../Utils/standardErrorHandler';
 import ManagementIDEDialog from '../../Components/Admin/IDE/ManagementIDEDialog';
 
 

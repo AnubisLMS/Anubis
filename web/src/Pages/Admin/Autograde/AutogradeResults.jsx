@@ -1,17 +1,17 @@
 import React, {useState} from 'react';
-import Redirect from 'react-router-dom/Redirect';
+import clsx from 'clsx';
 import axios from 'axios';
+import Redirect from 'react-router-dom/Redirect';
 import {useSnackbar} from 'notistack';
 
-import makeStyles from '@material-ui/core/styles/makeStyles';
 import {DataGrid} from '@material-ui/data-grid';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
-import {Paper} from '@material-ui/core';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
 
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
-import Typography from '@material-ui/core/Typography';
-import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
   root: {

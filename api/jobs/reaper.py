@@ -9,7 +9,7 @@ from sqlalchemy import func, and_
 from anubis.app import create_app
 from anubis.models import db, Submission, Assignment, AssignmentRepo, TheiaSession
 from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_reap_stale, enqueue_autograde_pipeline
-from anubis.utils.stats import bulk_autograde
+from anubis.utils.autograde import bulk_autograde
 from anubis.utils.webhook import check_repo, guess_github_username
 
 

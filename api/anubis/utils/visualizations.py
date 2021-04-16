@@ -67,7 +67,7 @@ def get_theia_sessions() -> pd.DataFrame:
 #     return df
 
 
-@cache.memoize(timeout=360, unless=is_debug)
+@cache.memoize(timeout=420, unless=is_debug)
 def get_usage_plot():
     import matplotlib.pyplot as plt
     import matplotlib.colors as mcolors
@@ -98,7 +98,7 @@ def get_usage_plot():
     for color, assignment in zip(mcolors.TABLEAU_COLORS, assignments):
         legend_handles0.append(
             axs[0].axvline(
-                x=assignment.due_date.date(),
+                x=assignment.due_date,
                 color=color,
                 linestyle='dotted',
                 label=f'{assignment.name}',
@@ -106,7 +106,7 @@ def get_usage_plot():
         )
         legend_handles1.append(
             axs[1].axvline(
-                x=assignment.due_date.date(),
+                x=assignment.due_date,
                 color=color,
                 linestyle='dotted',
                 label=f'{assignment.name}',

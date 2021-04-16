@@ -1,11 +1,17 @@
 import React, {useState} from 'react';
+import axios from 'axios';
+import {useSnackbar} from 'notistack';
+
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
-import {useSnackbar} from 'notistack';
-import axios from 'axios';
-import useQuery from '../../../hooks/useQuery';
+import Typography from '@material-ui/core/Typography';
+
+import {translateSubmission} from '../../../Utils/submission';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
+
+import useQuery from '../../../hooks/useQuery';
+
 import StudentCard from '../../../Components/Admin/Stats/Submissions/StudentCard';
 import SubmissionSummary from '../../../Components/Public/Submission/SubmissionSummary';
 import SubmissionBuild from '../../../Components/Public/Submission/SubmissionBuild';
@@ -13,8 +19,6 @@ import SubmissionTests from '../../../Components/Public/Submission/SubmissionTes
 import QuestionsCard from '../../../Components/Public/Questions/QuestionsCard';
 import StudentGitCard from '../../../Components/Admin/Stats/Submissions/StudentGitCard';
 
-import {translateSubmission} from '../../../Utils/submission';
-import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
   root: {
