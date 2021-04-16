@@ -93,7 +93,7 @@ export default function AutogradeAssignments() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pageSize, setPageSize] = useState(10);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [selected, setSelected] = useState(null);
   const [searched, setSearched] = useState(null);
   const columns = useColumns();
@@ -109,7 +109,7 @@ export default function AutogradeAssignments() {
 
   React.useEffect(() => {
     setLoading(true);
-    const offset = pageSize * (page - 1);
+    const offset = pageSize * (page);
     const limit = pageSize;
     axios.get(
       `/api/admin/autograde/assignment/${query.get('assignmentId')}`,
