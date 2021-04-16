@@ -74,7 +74,7 @@ const useColumns = (state, enqueueSnackbar) => ([
 export default function Static() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [files, setFiles] = useState([]);
   const [rows, setRows] = useState([]);
