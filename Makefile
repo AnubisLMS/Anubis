@@ -33,8 +33,8 @@ help:
 
 .PHONY: deploy       # Deploy Anubis to cluster
 deploy:
-	./kube/deploy.sh
-	./kube/restart.sh
+	./k8s/deploy.sh
+	./k8s/restart.sh
 
 .PHONY: build        # Build all docker images
 build:
@@ -77,7 +77,7 @@ mindebug:
 
 .PHONY: mkdebug      # Start minikube debug
 mkdebug:
-	./kube/debug/provision.sh
+	./k8s/debug/provision.sh
 	@echo ''
 	@echo 'seed: http://localhost/api/admin/seed/'
 	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
@@ -85,7 +85,7 @@ mkdebug:
 
 .PHONY: mkrestart    # Restart minikube debug
 mkrestart:
-	./kube/debug/restart.sh
+	./k8s/debug/restart.sh
 	@echo ''
 	@echo 'seed: http://localhost/api/admin/seed/'
 	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
