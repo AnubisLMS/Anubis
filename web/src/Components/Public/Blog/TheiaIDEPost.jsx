@@ -35,13 +35,13 @@ export default function TheiaIDEPost({classes, preview = false}) {
           {!preview ? (
             <React.Fragment>
               {/* Theia IDE */}
-              <Typography className={classes.subheader}>
-                Theia IDE
-              </Typography>
               <BlogImg
                 src={'https://anubis.osiris.services/api/public/static/80edb046dfae7c0f'}
                 alt={'theia-logo.png'}
               />
+              <Typography className={classes.subheader}>
+                Theia IDE
+              </Typography>
               <Typography className={classes.typography}>
                 Each Anubis Cloud IDE is a
                 <Link href={'https://theia-ide.org/'} target={'_blank'}>{' '}Theia IDE{' '}</Link>

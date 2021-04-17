@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(4),
     marginBottom: theme.spacing(1),
     marginLeft: theme.spacing(1),
-    color: 'textSecondary',
+    color: theme.palette.text.secondary,
   },
   typography: {
     fontSize: 16,
