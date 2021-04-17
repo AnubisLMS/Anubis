@@ -64,7 +64,7 @@ docker-compose push api web logstash theia-admin theia-xv6 theia-proxy theia-ini
 popd
 
 if ! helm list -n anubis | awk '{print $1}' | grep anubis &> /dev/null; then
-    exec helm install anubis . -n anubis $@
+    exec helm install anubis ./chart -n anubis $@
 else
-    exec helm upgrade anubis . -n anubis $@
+    exec helm upgrade anubis ./chart -n anubis $@
 fi

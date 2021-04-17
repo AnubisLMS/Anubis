@@ -48,7 +48,7 @@ popd
 
 # Upgrade or install minimal anubis cluster in debug mode
 helm upgrade \
-     --install anubis . \
+     --install anubis ./chart \
      --namespace anubis \
      --set "imagePullPolicy=IfNotPresent" \
      --set "elasticsearch.storageClassName=standard" \
