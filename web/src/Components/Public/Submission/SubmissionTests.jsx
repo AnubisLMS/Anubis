@@ -11,11 +11,20 @@ import green from '@material-ui/core/colors/green';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Fab from '@material-ui/core/Fab';
 import AssessmentIcon from '@material-ui/icons/Assessment';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import {Tooltip} from '@material-ui/core';
+import IconButton from '@material-ui/core/IconButton';
 
 const useStyles = makeStyles((theme) => ({
   heading: {
     padding: theme.spacing(2),
+    alignItems: 'center',
     display: 'flex',
+  },
+  hiddenIcon: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
   },
   wrapper: {
     margin: theme.spacing(1),
@@ -71,6 +80,15 @@ export default function SubmissionTests({tests, stop}) {
               )}
             </div>
             <Typography className={classes.heading}>{test.test.name}</Typography>
+            {test.test.hidden ? (
+              <div className={classes.hiddenIcon}>
+                <Tooltip title={'Test hidden to students'}>
+                  <IconButton>
+                    <HighlightOffIcon/>
+                  </IconButton>
+                </Tooltip>
+              </div>
+            ) : null}
           </AccordionSummary>
           <AccordionDetails>
             <div>
