@@ -2,11 +2,12 @@ import json
 
 from flask import request, Blueprint
 
-from anubis.models import Submission, SubmissionTestResult
+from anubis.models import Submission, SubmissionTestResult, AssignmentTest
 from anubis.models import db
 from anubis.utils.decorators import json_response, check_submission_token, json_endpoint
 from anubis.utils.http import success_response
 from anubis.utils.logger import logger
+from parse import parse
 
 pipeline = Blueprint("pipeline", __name__, url_prefix="/pipeline")
 
@@ -219,8 +220,19 @@ def pipeline_report_state(submission: Submission, state: str, **kwargs):
     processed = request.args.get("processed", default="0")
     submission.processed = processed != "0"
 
+    hidden_test = False
+    match = parse('Running test: {}', state)
+    if match:
+        test_name = match[0]
+        assignment_test = AssignmentTest.query.filter(
+            AssignmentTest.assignment_id == submission.assignment_id,
+            AssignmentTest.name == test_name
+        ).first()
+        hidden_test = assignment_test is not None and assignment_test.hidden
+
     # Update state field
-    submission.state = state
+    if not hidden_test:
+        submission.state = state
 
     # If processed was specified and is of type bool, then update that too
     if "processed" in request.json and isinstance(request.json["processed"], bool):

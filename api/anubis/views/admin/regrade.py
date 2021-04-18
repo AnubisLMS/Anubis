@@ -29,8 +29,12 @@ def admin_regrade_status(assignment_id: str):
         Submission.assignment_id == assignment_id,
     ).count()
 
+    percent = 0
+    if total > 0:
+        percent = math.ceil(((total - processing) / total) * 100)
+
     return success_response({
-        'percent': f'{math.ceil(((total - processing)/total)*100)}% of submissions processed',
+        'percent': f'{percent}% of submissions processed',
         'processing': processing,
         'processed': total - processing,
         'total': total,
