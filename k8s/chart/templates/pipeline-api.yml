@@ -5,9 +5,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: pipeline-api
+    role: pipeline-api
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
-    component: anubis-pipline-api
 
 spec:
   selector:
@@ -25,6 +25,7 @@ spec:
     metadata:
       labels:
         app: pipeline-api
+        role: pipeline-api
     spec:
       dnsPolicy: ClusterFirst
       containers:

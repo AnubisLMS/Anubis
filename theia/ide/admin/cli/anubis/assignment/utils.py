@@ -156,21 +156,52 @@ def trim(stdout: str) -> typing.List[str]:
     return stdout_lines
 
 
-def verify_expected(stdout_lines: typing.List[str], expected_lines: typing.List[str], test_result: TestResult):
+def verify_expected(
+    stdout_lines: typing.List[str],
+    expected_lines: typing.List[str],
+    test_result: TestResult,
+    case_sensitive=True,
+    search=False
+):
     """
     Check to lists of strings for quality. Will strip off whitespace
     from each line before checking for equality.
-
     :param stdout_lines:
     :param expected_lines:
     :param test_result:
+    :param case_sensitive:
+    :param search:
     :return:
     """
-    def test_lines(a: typing.List[str], b: typing.List[str]):
-        return len(a) == len(b) \
-               and all(_a.strip() == _b.strip() for _a, _b in zip(a, b))
 
-    if not test_lines(stdout_lines, expected_lines):
+    def search_lines(a: typing.List[str], b: typing.List[str]):
+        if not case_sensitive:
+            a = list(map(lambda x: x.lower(), a))
+        found = []
+        for line in b:
+            l = line.strip()
+            if not case_sensitive:
+                l = l.lower()
+            for _aindex, _aline in enumerate(a):
+                if l in _aline:
+                    found.append(_aindex)
+                    break
+            else:
+                found.append(-1)
+        if -1 in found:
+            return False
+
+        return list(sorted(found)) == found
+
+    def test_lines(a: typing.List[str], b: typing.List[str]):
+        if case_sensitive:
+            return len(a) == len(b) \
+               and all(_a.strip() == _b.strip() for _a, _b in zip(a, b))
+        return len(a) == len(b) \
+               and all(_a.lower().strip() == _b.lower().strip() for _a, _b in zip(a, b))
+
+    compare_func = search_lines if search else test_lines
+    if not compare_func(stdout_lines, expected_lines):
         test_result.stdout += 'your lines:\n' + '\n'.join(stdout_lines) + '\n\n' \
                               + 'we expected:\n' + '\n'.join(expected_lines)
         test_result.message = 'Did not receive expected output'

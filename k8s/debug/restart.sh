@@ -36,11 +36,6 @@ fi
 # to the minikube node's docker daemon.
 eval $(minikube docker-env)
 
-# Build demo assignment pipeline image
-pushd ../demo
-./build.sh
-popd
-
 pushd ..
 # Build services in parallel to speed things up
 docker-compose build --parallel --pull api web logstash theia-proxy theia-init theia-sidecar
@@ -58,8 +53,11 @@ helm upgrade \
      --set "pipeline_api.replicas=1" \
      --set "rpc.default.replicas=1" \
      --set "rpc.theia.replicas=1" \
+     --set "rpc.regrade.replicas=1" \
      --set "theia.proxy.replicas=1" \
      --set "api.datacenter=false" \
+     --set "reaper.suspend=true" \
+     --set "visuals.suspend=true" \
      --set "theia.proxy.domain=ide.localhost" \
      --set "rollingUpdates=false" \
      --set "domain=localhost" \
@@ -68,7 +66,8 @@ helm upgrade \
 # Restart the most common deployments
 kubectl rollout restart deployments.apps/api -n anubis
 kubectl rollout restart deployments.apps/web -n anubis
+kubectl rollout restart deployments.apps/rpc-default -n anubis
+kubectl rollout restart deployments.apps/rpc-theia -n anubis
+kubectl rollout restart deployments.apps/rpc-regrade -n anubis
 kubectl rollout restart deployments.apps/pipeline-api -n anubis
-kubectl rollout restart deployments.apps/rpc-default  -n anubis
-kubectl rollout restart deployments.apps/rpc-theia  -n anubis
-kubectl rollout restart deployments.apps/theia-proxy  -n anubis
+kubectl rollout restart deployments.apps/theia-proxy -n anubis

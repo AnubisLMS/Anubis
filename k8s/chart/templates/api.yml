@@ -5,9 +5,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: api
+    role: api
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
-    component: api
 spec:
   selector:
     matchLabels:
@@ -24,6 +24,7 @@ spec:
     metadata:
       labels:
         app: api
+        role: api
     spec:
       # dnsPolicy: Default
       {{- if .Values.api.datacenter }}

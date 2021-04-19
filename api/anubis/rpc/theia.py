@@ -66,20 +66,12 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         ],
     )
 
-    limits = {"cpu": "2", "memory": "500Mi"}
-    if "limits" in theia_session.options:
-        limits = theia_session.options["limits"]
-
-    requests = {"cpu": "250m", "memory": "100Mi"}
-    if "requests" in theia_session.options:
-        requests = theia_session.options["requests"]
-
-    autosave = True
-    if 'autosave' in theia_session.options:
-        autosave = theia_session.options['autosave']
+    limits = theia_session.options.get('limits', {"cpu": "2", "memory": "500Mi"})
+    requests = theia_session.options.get('requests', {"cpu": "250m", "memory": "100Mi"})
+    autosave = theia_session.options.get('autosave', True)
 
     extra_env = []
-    if theia_session.owner.is_admin or theia_session.owner.is_superuser:
+    if theia_session.options.get('credentials', False):
         extra_env.append(client.V1EnvVar(
             name='INCLUSTER',
             value=base64.b64encode(create_token(theia_session.owner.netid).encode()).decode(),
@@ -110,6 +102,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         ],
         security_context=client.V1SecurityContext(
             privileged=theia_session.privileged,
+            # capabilities=client.V1Capabilities(add=['SYS_ADMIN', 'NET_ADMIN'])
         ),
     )
     containers.append(theia_container)
@@ -141,10 +134,18 @@ def create_theia_pod_obj(theia_session: TheiaSession):
 
     extra_labels = {}
     spec_extra = {}
+
+    # If network locked, then set the network policy to student
+    # and dns to 1.1.1.1
     if theia_session.network_locked:
         extra_labels["network-policy"] = "student"
         spec_extra['dns_policy'] = "None"
         spec_extra["dns_config"] = client.V1PodDNSConfig(nameservers=["1.1.1.1"])
+
+    # If the network is not locked, then we still need to apply
+    # the admin policy.
+    else:
+        extra_labels["network-policy"] = "admin"
 
     # Create pod
     pod = client.V1Pod(

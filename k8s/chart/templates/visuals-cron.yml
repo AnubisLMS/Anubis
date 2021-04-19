@@ -11,7 +11,8 @@ metadata:
     release: {{ .Release.Name | quote }}
     component: "anubis-visuals"
 spec:
-  schedule: {{ .Values.reaper.schedule | quote }}
+  schedule: {{ .Values.visuals.schedule | quote }}
+  suspend: {{ .Values.visuals.suspend }}
   concurrencyPolicy: Replace
   jobTemplate:
     spec:

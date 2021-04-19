@@ -17,9 +17,7 @@ def get_n_available_sessions() -> Tuple[int, int]:
     :return:
     """
     max_ides_config: Config = Config.query.filter(Config.key == "MAX_IDES").first()
-
     active_ide_count: int = TheiaSession.query.filter(TheiaSession.active).count()
-
     max_ides = int(max_ides_config.value) if max_ides_config is not None else 50
 
     return active_ide_count, max_ides
@@ -34,8 +32,10 @@ def theia_redirect_url(theia_session_id: str, netid: str) -> str:
     :param netid:
     :return:
     """
+    scheme = 'https' if not is_debug() else 'http'
 
-    return "https://{}/initialize?token={}&anubis=1".format(
+    return "{}://{}/initialize?token={}&anubis=1".format(
+        scheme,
         config.THEIA_DOMAIN,
         create_token(netid, session_id=theia_session_id),
     )

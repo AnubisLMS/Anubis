@@ -8,18 +8,13 @@ imagePullPolicy: "Always"
 api:
   replicas: 3
   workers: 4
-
   datacenter: "mtc"
-
-  healthCheck: true
   gunicorn_options: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
-
   image: "registry.osiris.services/anubis/api"
   tag: "latest"
 
 static:
   replicas: 3
-
   image: "registry.osiris.services/anubis/static"
   tag: "latest"
   healthCheck: true
@@ -27,12 +22,16 @@ static:
 reaper:
   enable: true
   schedule: "*/5 * * * *"
+  suspend: false
+
+visuals:
+  enable: true
+  schedule: "*/5 * * * *"
+  suspend: false
 
 pipeline_api:
   replicas: 3
   workers: 2
-
-  healthCheck: false
 
 web:
   replicas: 2
@@ -53,7 +52,6 @@ rpc:
 
 theia:
   enable: true
-
   proxy:
     replicas: 10
     domain: "ide.anubis.osiris.services"

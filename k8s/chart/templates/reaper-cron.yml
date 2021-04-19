@@ -12,6 +12,7 @@ metadata:
     component: "anubis-reaper"
 spec:
   schedule: {{ .Values.reaper.schedule | quote }}
+  suspend: {{ .Values.reaper.suspend }}
   concurrencyPolicy: Replace
   jobTemplate:
     spec:

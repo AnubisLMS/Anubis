@@ -67,6 +67,7 @@ kubectl label node minikube traefik=ingress --overwrite
 # Install a basic traefik configuration. This was pretty much entirely
 # pulled from the traefik documentation somewhere around traefik v2.1.
 echo 'Adding traefik resources...'
+kubectl create ns traefik
 kubectl apply -f ./debug/traefik.yaml
 
 # Add the bitnami helm charts
