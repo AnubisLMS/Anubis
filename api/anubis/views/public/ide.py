@@ -173,11 +173,12 @@ def public_ide_initialize(assignment: Assignment):
             {"active": active_session.active, "session": active_session.data}
         )
 
-    if datetime.now() <= assignment.release_date:
-        return error_response("Assignment has not been released.")
+    if not (user.is_admin or user.is_superuser):
+        if datetime.now() <= assignment.release_date:
+            return error_response("Assignment has not been released.")
 
-    if assignment.due_date + timedelta(days=3 * 7) <= datetime.now():
-        return error_response("Assignment due date passed over 3 weeks ago.")
+        if assignment.due_date + timedelta(days=3 * 7) <= datetime.now():
+            return error_response("Assignment due date passed over 3 weeks ago.")
 
     # Make sure we have a repo we can use
     repo = AssignmentRepo.query.filter(
