@@ -36,7 +36,7 @@ export default function TheiaIDEPost({classes, preview = false}) {
             <React.Fragment>
               {/* Theia IDE */}
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/80edb046dfae7c0f'}
+                src={'/api/public/static/80edb046dfae7c0f'}
                 alt={'theia-logo.png'}
               />
               <Typography className={classes.subheader}>
@@ -78,7 +78,7 @@ export default function TheiaIDEPost({classes, preview = false}) {
                 assignment. At that time, we clone exactly what is in github into a theia pod.
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/f43c253a3c781101'}
+                src={'/api/public/static/f43c253a3c781101'}
                 alt={'theia1'}
               />
               <Typography className={classes.typography}>
@@ -87,7 +87,7 @@ export default function TheiaIDEPost({classes, preview = false}) {
                 the session, and starting the websocket connection, then students will have the following theia IDE.
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/002315b86f8b557f'}
+                src={'/api/public/static/002315b86f8b557f'}
                 alt={'theia2'}
               />
               <Typography className={classes.typography}>
@@ -116,7 +116,7 @@ export default function TheiaIDEPost({classes, preview = false}) {
                 http and websockets) to the pod.
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/0de69b0786007e60'}
+                src={'/api/public/static/0de69b0786007e60'}
                 alt={'theia-init-1'}
               />
               <Typography className={classes.typography}>
@@ -134,7 +134,7 @@ export default function TheiaIDEPost({classes, preview = false}) {
                 running in the background while staying completely hidden from the user.
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/9e023fa2714d8cdd'}
+                src={'/api/public/static/9e023fa2714d8cdd'}
                 alt={'theia-pod.mmd.png'}
               />
 
@@ -164,7 +164,7 @@ export default function TheiaIDEPost({classes, preview = false}) {
                 theia session for the final exam. Just about 40% of sessions hit the 6-hour timeout.
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/52f59217b8caaa02'}
+                src={'/api/public/static/52f59217b8caaa02'}
                 alt={'theia3'}
               />
 

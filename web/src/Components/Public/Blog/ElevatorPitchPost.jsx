@@ -8,6 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import Link from '@material-ui/core/Link';
 import CardMedia from '@material-ui/core/CardMedia';
 import Card from '@material-ui/core/Card';
+import BlogImg from './BlogImg';
 
 
 export default function ElevatorPitch({classes, preview = false}) {
@@ -21,6 +22,10 @@ export default function ElevatorPitch({classes, preview = false}) {
           subheader={'2021-03-17'}
         />
         <CardContent>
+          <div style={{display: 'flex', justifyContent: 'center', marginBottom: 20, height: 350}}>
+            <img src={'/logo512.png'} alt={'logo'}/>
+          </div>
+
           <Typography gutterBottom className={classes.subtitle} style={{marginTop: 0}}>
             What you gain by using Anubis
           </Typography>
@@ -72,8 +77,7 @@ export default function ElevatorPitch({classes, preview = false}) {
                 kubernetes magic, we are able to
                 host <Link target={'_blank'} href={'https://theia-ide.org/'}>
                 Theia</Link> servers for individual students.
-                These are essentially
-                VSCode instances
+                These are essentially VSCode instances
                 that students can access in the browser. What makes these so powerful
                 is that students can access a terminal
                 and type commands right into a bash shell which will be run in the
@@ -95,7 +99,7 @@ export default function ElevatorPitch({classes, preview = false}) {
               </Typography>
               <CardMedia
                 className={classes.media16x9}
-                image="https://anubis.osiris.services/api/public/static/c99e89d478b73ad6"
+                image="/api/public/static/c99e89d478b73ad6"
               />
 
               <Typography gutterBottom color={'textSecondary'} className={classes.subtitle}>
@@ -125,7 +129,7 @@ export default function ElevatorPitch({classes, preview = false}) {
               </Typography>
               <CardMedia
                 className={classes.media16x9}
-                image="https://anubis.osiris.services/api/public/static/82255026ec8ec6d2"
+                image="/api/public/static/82255026ec8ec6d2"
               />
 
               <Typography gutterBottom className={classes.subtitle}>

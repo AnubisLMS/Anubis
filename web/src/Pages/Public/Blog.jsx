@@ -1,13 +1,14 @@
 import React from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
-import {Switch, Route} from 'react-router-dom';
+import {Route, Switch} from 'react-router-dom';
 
 import AssignmentPost from '../../Components/Public/Blog/AssignmentPost';
 import ElevatorPitchPost from '../../Components/Public/Blog/ElevatorPitchPost';
 import AssignmentPackagingPost from '../../Components/Public/Blog/AssignmentPackagingPost';
 import MidtermRetroPost from '../../Components/Public/Blog/MidtermRetroPost';
 import TheiaIDEPost from '../../Components/Public/Blog/TheiaIDEPost';
+import Divider from '@material-ui/core/Divider';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -53,9 +54,19 @@ const useStyles = makeStyles((theme) => ({
     margin: '0 2px',
     transform: 'scale(0.8)',
   },
+  divider: {
+    // width: '100%',
+    height: 3,
+    marginTop: theme.spacing(3),
+  },
 }));
 
 const posts = [
+  {
+    Component: ElevatorPitchPost,
+    path: '/blog/elevator-pitch',
+    divider: true,
+  },
   {
     Component: TheiaIDEPost,
     path: '/blog/anubis-cloud-ide',
@@ -71,10 +82,6 @@ const posts = [
   {
     Component: AssignmentPost,
     path: '/blog/packaging',
-  },
-  {
-    Component: ElevatorPitchPost,
-    path: '/blog/elevator-pitch',
   },
 ];
 
@@ -92,9 +99,12 @@ export default function Blog() {
     >
       <Switch>
         <Route exact path="/blog">
-          {posts.map(({Component, path}, index) => (
+          {posts.map(({Component, path, divider = false}, index) => (
             <Grid item xs={12} key={`post-preview-${index}`}>
               <Component classes={classes} preview={path}/>
+              {divider ? (
+                <Divider className={classes.divider} variant={'middle'}/>
+              ) : null}
             </Grid>
           ))}
         </Route>

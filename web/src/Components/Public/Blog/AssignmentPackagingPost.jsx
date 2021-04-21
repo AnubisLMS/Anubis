@@ -74,7 +74,7 @@ export default function AssignmentPackagingPost({classes, preview = false}) {
                 your very own assignment template.
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/b176c707620f500b'}
+                src={'/api/public/static/b176c707620f500b'}
                 alt={'demo assignment'}
               />
 
@@ -89,7 +89,7 @@ export default function AssignmentPackagingPost({classes, preview = false}) {
                 international friendly format like UTC.
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/dcf6dc895dcb75f2'}
+                src={'/api/public/static/dcf6dc895dcb75f2'}
                 alt={'demo assignment'}
               />
 
@@ -120,7 +120,7 @@ export default function AssignmentPackagingPost({classes, preview = false}) {
                 Building
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/243d6d28714e96f5'}
+                src={'/api/public/static/243d6d28714e96f5'}
                 alt={'demo build'}
               />
               <Typography className={classes.typography}/>
@@ -146,7 +146,7 @@ export default function AssignmentPackagingPost({classes, preview = false}) {
                 Tests
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/14da736d560a86e6'}
+                src={'/api/public/static/14da736d560a86e6'}
                 alt={'demo tests'}
               />
               <Typography gutterBottom className={classes.typography}>
@@ -175,11 +175,11 @@ export default function AssignmentPackagingPost({classes, preview = false}) {
               </Typography>
 
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/ee0d3c5a5684fa68'}
+                src={'/api/public/static/ee0d3c5a5684fa68'}
                 alt={'demo sync'}
               />
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/71f11b54ad2e38f4'}
+                src={'/api/public/static/71f11b54ad2e38f4'}
                 alt={'demo push'}
               />
 
