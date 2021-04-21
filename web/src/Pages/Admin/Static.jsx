@@ -37,7 +37,6 @@ const deleteFile = (id, state, enqueueSnackbar) => () => {
 
 const useColumns = (state, enqueueSnackbar) => ([
   {field: 'id', headerName: 'ID'},
-  {field: 'filename', headerName: 'File Name', width: 300},
   {field: 'content_type', headerName: 'Content Type', width: 150},
   {
     field: 'path', headerName: 'URL', width: 200, renderCell: ({row}) => (
@@ -48,9 +47,9 @@ const useColumns = (state, enqueueSnackbar) => ([
           style={{display: 'inline'}}
           component={'a'}
           target={'_blank'}
-          href={`${window.location.origin}/api/public/static${row.path}`}
+          href={`${window.location.origin}/api/public/static${row.path}/${row.filename}`}
         >
-          {row.path}
+          {row.filename}
         </Typography>
       </div>
     ),
