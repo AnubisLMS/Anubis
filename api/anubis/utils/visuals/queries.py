@@ -1,4 +1,3 @@
-
 time_to_pass_test_sql = """
 select 
     at.name as assignment_test, 
@@ -36,4 +35,44 @@ from submission_test_result str
 where a.id = :assignment_id and at.id = :assignment_test_id
 group by at.name, u.id
 order by time_to_pass;
+"""
+
+assignment_test_pass_count_sql = """
+select sum(n)
+from (select 1 as n
+      from submission_test_result str
+               join assignment_test at on str.assignment_test_id = at.id
+               join submission s2 on str.submission_id = s2.id
+               join assignment a on s2.assignment_id = a.id
+               join user u on s2.owner_id = u.id
+      where at.id = :assignment_test_id
+      group by u.id
+      having sum(str.passed) > 0) a
+"""
+
+assignment_test_fail_count_sql = """
+select sum(n)
+from (select 1 as n
+      from submission_test_result str
+               join assignment_test at on str.assignment_test_id = at.id
+               join submission s2 on str.submission_id = s2.id
+               join assignment a on s2.assignment_id = a.id
+               join user u on s2.owner_id = u.id
+      where at.id = :assignment_test_id
+      group by u.id
+      having sum(str.passed) = 0) a
+"""
+
+assignment_test_fail_nosub_sql = """
+select sum(n)
+from (select 1 as n
+      from user u
+               where u.id not in (
+          select u2.id as uid
+          from submission s
+                   join user u2 on s.owner_id = u2.id
+                   join assignment a2 on s.assignment_id = a2.id
+          where a2.id = :assignment_id
+      )
+      group by u.id) a;
 """
