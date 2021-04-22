@@ -4,7 +4,8 @@ from anubis.utils.visuals.usage import get_usage_plot
 from anubis.utils.services.cache import cache
 from anubis.utils.http.data import is_debug
 
-visuals = Blueprint('visuals', __name__, url_prefix='/public/visuals')
+
+visuals = Blueprint('public-visuals', __name__, url_prefix='/public/visuals')
 
 
 @visuals.route('/usage')
@@ -16,4 +17,3 @@ def public_visuals_usage():
     response.headers['Content-Type'] = 'image/png'
 
     return response
-

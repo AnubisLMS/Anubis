@@ -20,6 +20,7 @@ import NotInterested from '@material-ui/icons/NotInterested';
 import useQuery from '../../../hooks/useQuery';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
+import AssignmentTestTimes from '../../../Components/Admin/Visuals/AssignmentTestTimes';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -37,6 +38,9 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: theme.spacing(1),
     paddingLeft: theme.spacing(1),
     paddingRight: theme.spacing(1),
+  },
+  graphPaper: {
+    margin: theme.spacing(0, 1),
   },
 }));
 
@@ -96,7 +100,17 @@ export default function AutogradeAssignments() {
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState(null);
   const [searched, setSearched] = useState(null);
+  const [assignmentTestTimeData, setAssignmentTestTimeData] = useState({});
   const columns = useColumns();
+
+  React.useEffect(() => {
+    axios.get(`/api/admin/visuals/assignment/${query.get('assignmentId')}`).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data?.assignment_test_times) {
+        setAssignmentTestTimeData(data.assignment_test_times);
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  }, []);
 
   React.useEffect(() => {
     axios.get('/api/admin/students/list').then((response) => {
@@ -176,6 +190,18 @@ export default function AutogradeAssignments() {
         <Typography variant={'subtitle1'} color={'textSecondary'}>
           Results for {assignment?.name}
         </Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <div style={{display: 'flex', justifyContent: 'center'}}>
+          {Object.keys(assignmentTestTimeData).map((key) => (
+            <Paper key={key} className={classes.graphPaper}>
+              <AssignmentTestTimes
+                title={key}
+                data={assignmentTestTimeData[key]}
+              />
+            </Paper>
+          ))}
+        </div>
       </Grid>
       <Grid item xs={12} md={4} key={'search'}>
         <Paper className={classes.searchPaper}>
