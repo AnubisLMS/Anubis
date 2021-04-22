@@ -27,28 +27,27 @@ fi
 if ! helm list -n anubis | awk '{print $1}' | grep elasticsearch &> /dev/null; then
     # Install a minimal elasticsearch and kibana deployments
     echo 'Adding elasticsearch + kibana'
-    helm install elasticsearch \
-         --set name=elasticsearch \
-         --set master.persistence.size=4Gi \
-         --set data.persistence.size=4Gi \
-         --set master.replicas=2 \
-         --set coordinating.replicas=2 \
-         --set data.replicas=2 \
-         --set global.kibanaEnabled=true \
-         --set fullnameOverride=elasticsearch \
-         --set global.coordinating.name=coordinating \
-         --namespace anubis \
-         bitnami/elasticsearch
+    helm  upgrade --install elasticsearch bitnami/elasticsearch \
+        --set name=elasticsearch \
+        --set master.persistence.size=4Gi \
+        --set data.persistence.size=4Gi \
+        --set master.replicas=2 \
+        --set coordinating.replicas=2 \
+        --set data.replicas=2 \
+        --set global.kibanaEnabled=true \
+        --set fullnameOverride=elasticsearch \
+        --set global.coordinating.name=coordinating \
+        --namespace anubis
 
     read -s -p "Anubis REDIS Password: " REDIS_PASS
     # Install a minimal redis deployment
     echo 'Adding redis'
-    helm install redis \
-         --set fullnameOverride=redis \
-         --set password=${REDIS_PASS} \
-         --set cluster.enabled=false \
-         --namespace anubis \
-         bitnami/redis
+    helm upgrade --install redis bitnami/redis \
+        --set fullnameOverride=redis \
+        --set global.redis.password=${REDIS_PASS} \
+        --set architecture=standalone \
+        --set master.persistence.enabled=false \
+        --namespace anubis
 fi
 
 

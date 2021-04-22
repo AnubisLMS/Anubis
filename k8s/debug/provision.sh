@@ -79,40 +79,38 @@ helm repo update
 # here.
 echo 'Adding mariadb'
 kubectl create namespace mariadb
-helm install mariadb \
-     --set 'auth.rootPassword=anubis' \
-     --set 'volumePermissions.enabled=true' \
-     --set 'auth.username=anubis' \
-     --set 'auth.database=anubis' \
-     --set 'auth.password=anubis' \
-     --set 'replication.enabled=false' \
-     --namespace mariadb \
-     bitnami/mariadb
+helm upgrade --install mariadb bitnami/mariadb \
+    --set 'auth.rootPassword=anubis' \
+    --set 'volumePermissions.enabled=true' \
+    --set 'auth.username=anubis' \
+    --set 'auth.database=anubis' \
+    --set 'auth.password=anubis' \
+    --set 'replication.enabled=false' \
+    --namespace mariadb
 
 # Install a minimal elasticsearch and kibana deployments
 echo 'Adding elasticsearch + kibana'
 kubectl create namespace anubis
-helm install elasticsearch \
-     --set name=elasticsearch \
-     --set master.persistence.size=1Gi \
-     --set data.persistence.size=1Gi \
-     --set master.replicas=1 \
-     --set coordinating.replicas=1 \
-     --set data.replicas=1 \
-     --set global.kibanaEnabled=true \
-     --set fullnameOverride=elasticsearch \
-     --set global.coordinating.name=coordinating \
-     --namespace anubis \
-     bitnami/elasticsearch
+helm upgrade --install elasticsearch bitnami/elasticsearch \
+    --set name=elasticsearch \
+    --set master.persistence.size=1Gi \
+    --set data.persistence.size=1Gi \
+    --set master.replicas=1 \
+    --set coordinating.replicas=1 \
+    --set data.replicas=1 \
+    --set global.kibanaEnabled=true \
+    --set fullnameOverride=elasticsearch \
+    --set global.coordinating.name=coordinating \
+    --namespace anubis
 
 # Install a minimal redis deployment
 echo 'Adding redis'
-helm install redis \
-     --set fullnameOverride=redis \
-     --set password=anubis \
-     --set cluster.enabled=false \
-     --namespace anubis \
-     bitnami/redis
+helm upgrade --install redis bitnami/redis \
+    --set fullnameOverride=redis \
+    --set global.redis.password=anubis \
+    --set architecture=standalone \
+    --set master.persistence.enabled=false \
+    --namespace anubis
 
 if [ -f debug/init-secrets.sh ]; then
     bash debug/init-secrets.sh
