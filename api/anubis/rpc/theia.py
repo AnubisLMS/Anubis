@@ -5,9 +5,9 @@ from datetime import datetime
 from kubernetes import config, client
 
 from anubis.models import db, Config, TheiaSession
-from anubis.utils.elastic import esindex
-from anubis.utils.logger import logger
-from anubis.utils.auth import create_token
+from anubis.utils.services.elastic import esindex
+from anubis.utils.services.logger import logger
+from anubis.utils.users.auth import create_token
 import base64
 
 
@@ -206,7 +206,7 @@ def initialize_theia_session(theia_session_id: str):
                     theia_session_id
                 )
             )
-            from anubis.utils.rpc import enqueue_ide_initialize
+            from anubis.utils.services.rpc import enqueue_ide_initialize
 
             enqueue_ide_initialize(theia_session_id)
             return

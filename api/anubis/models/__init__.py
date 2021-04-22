@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_json import MutableJson
 
-from anubis.utils.data import rand
-from anubis.utils.logger import logger
+from anubis.utils.http.data import rand
+from anubis.utils.services.logger import logger
 
 db = SQLAlchemy()
 
@@ -659,7 +659,7 @@ class TheiaSession(db.Model):
 
     @property
     def data(self):
-        from anubis.utils.theia import theia_redirect_url
+        from anubis.utils.services.theia import theia_redirect_url
 
         return {
             "id": self.id,

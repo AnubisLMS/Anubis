@@ -2,11 +2,11 @@ import sqlalchemy.exc
 from flask import Blueprint
 
 from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQuestion
-from anubis.utils.auth import require_admin
-from anubis.utils.decorators import json_response, json_endpoint
-from anubis.utils.elastic import log_endpoint
-from anubis.utils.http import error_response, success_response
-from anubis.utils.questions import (
+from anubis.utils.users.auth import require_admin
+from anubis.utils.http.decorators import json_response, json_endpoint
+from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.http.https import error_response, success_response
+from anubis.utils.assignment.questions import (
     hard_reset_questions,
     get_all_questions,
     assign_questions,

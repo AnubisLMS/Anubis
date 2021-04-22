@@ -1,12 +1,12 @@
 from flask import Blueprint, request
 
 from anubis.models import User, Assignment, AssignedStudentQuestion, db
-from anubis.utils.assignments import get_assignments
-from anubis.utils.auth import current_user, require_user
-from anubis.utils.decorators import json_response, load_from_id, json_endpoint
-from anubis.utils.elastic import log_endpoint
-from anubis.utils.http import success_response
-from anubis.utils.questions import get_assigned_questions
+from anubis.utils.assignment.assignments import get_assignments
+from anubis.utils.users.auth import current_user, require_user
+from anubis.utils.http.decorators import json_response, load_from_id, json_endpoint
+from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.http.https import success_response
+from anubis.utils.assignment.questions import get_assigned_questions
 
 assignments = Blueprint(
     "public-assignments", __name__, url_prefix="/public/assignments"

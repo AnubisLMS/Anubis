@@ -4,8 +4,8 @@ from datetime import datetime
 from io import BytesIO
 
 from anubis.models import Assignment, Submission, TheiaSession
-from anubis.utils.cache import cache
-from anubis.utils.data import is_debug
+from anubis.utils.services.cache import cache
+from anubis.utils.http.data import is_debug
 
 
 def get_submissions() -> pd.DataFrame:

@@ -4,13 +4,13 @@ from typing import Dict
 from flask import Blueprint, request
 
 from anubis.models import User, TheiaSession, db, Assignment, AssignmentRepo
-from anubis.utils.auth import current_user, require_user
-from anubis.utils.decorators import json_response, load_from_id
-from anubis.utils.elastic import log_endpoint
-from anubis.utils.http import error_response, success_response
-from anubis.utils.logger import logger
-from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_initialize
-from anubis.utils.theia import (
+from anubis.utils.users.auth import current_user, require_user
+from anubis.utils.http.decorators import json_response, load_from_id
+from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.http.https import error_response, success_response
+from anubis.utils.services.logger import logger
+from anubis.utils.services.rpc import enqueue_ide_stop, enqueue_ide_initialize
+from anubis.utils.services.theia import (
     theia_redirect_url,
     get_n_available_sessions,
     theia_poll_ide,

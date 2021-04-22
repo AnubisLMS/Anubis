@@ -2,8 +2,8 @@ from datetime import datetime
 from typing import List, Union
 
 from anubis.models import Submission, AssignmentRepo, User, db
-from anubis.utils.http import error_response, success_response
-from anubis.utils.rpc import enqueue_autograde_pipeline
+from anubis.utils.http.https import error_response, success_response
+from anubis.utils.services.rpc import enqueue_autograde_pipeline
 
 
 def bulk_regrade_submission(submissions: List[Submission]) -> List[dict]:

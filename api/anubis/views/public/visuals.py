@@ -1,8 +1,8 @@
 from flask import Blueprint, make_response
 
-from anubis.utils.visualizations import get_usage_plot
-from anubis.utils.cache import cache
-from anubis.utils.data import is_debug
+from anubis.utils.visuals.usage import get_usage_plot
+from anubis.utils.services.cache import cache
+from anubis.utils.http.data import is_debug
 
 visuals = Blueprint('visuals', __name__, url_prefix='/public/visuals')
 

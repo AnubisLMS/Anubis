@@ -1,12 +1,12 @@
 from flask import Blueprint
 
 from anubis.models import db, User, Course, InCourse, Submission
-from anubis.utils.auth import require_admin, current_user
-from anubis.utils.cache import cache
-from anubis.utils.data import is_debug
-from anubis.utils.decorators import json_response, json_endpoint
-from anubis.utils.http import success_response, error_response, get_number_arg
-from anubis.utils.students import get_students
+from anubis.utils.users.auth import require_admin, current_user
+from anubis.utils.services.cache import cache
+from anubis.utils.http.data import is_debug
+from anubis.utils.http.decorators import json_response, json_endpoint
+from anubis.utils.http.https import success_response, error_response, get_number_arg
+from anubis.utils.users.students import get_students
 
 students = Blueprint("admin-students", __name__, url_prefix="/admin/students")
 

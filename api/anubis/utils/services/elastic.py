@@ -8,8 +8,8 @@ from geoip import geolite2
 from werkzeug import exceptions
 
 from anubis.config import config
-from anubis.utils.http import get_request_ip
-from anubis.utils.logger import logger
+from anubis.utils.http.https import get_request_ip
+from anubis.utils.services.logger import logger
 
 
 def log_endpoint(log_type, message_func=None):

@@ -18,8 +18,8 @@ from anubis.models import (
     AssignedStudentQuestion,
     AssignedQuestionResponse,
 )
-from anubis.utils.data import rand
-from anubis.utils.questions import assign_questions
+from anubis.utils.http.data import rand
+from anubis.utils.assignment.questions import assign_questions
 
 
 def rand_str(n=10):

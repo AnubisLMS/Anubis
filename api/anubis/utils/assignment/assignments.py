@@ -16,11 +16,11 @@ from anubis.models import (
     AssignmentRepo,
     SubmissionTestResult,
 )
-from anubis.utils.auth import get_user
-from anubis.utils.cache import cache
-from anubis.utils.data import is_debug
-from anubis.utils.logger import logger
-from anubis.utils.questions import ingest_questions
+from anubis.utils.users.auth import get_user
+from anubis.utils.services.cache import cache
+from anubis.utils.http.data import is_debug
+from anubis.utils.services.logger import logger
+from anubis.utils.assignment.questions import ingest_questions
 
 
 @cache.memoize(timeout=5, unless=is_debug)

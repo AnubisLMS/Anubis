@@ -1,11 +1,11 @@
 from flask import Blueprint
 
 from anubis.models import Submission
-from anubis.utils.auth import require_admin
-from anubis.utils.decorators import json_response
-from anubis.utils.elastic import log_endpoint
-from anubis.utils.http import success_response
-from anubis.utils.submissions import fix_dangling
+from anubis.utils.users.auth import require_admin
+from anubis.utils.http.decorators import json_response
+from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.http.https import success_response
+from anubis.utils.assignment.submissions import fix_dangling
 
 dangling = Blueprint("admin-dangling", __name__, url_prefix="/admin/dangling")
 
