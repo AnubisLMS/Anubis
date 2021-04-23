@@ -25,7 +25,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         metadata=client.V1ObjectMeta(
             name=volume_name,
             labels={
-                "app": "theia",
+                "app.kubernetes.io/name": "theia",
                 "role": "session-storage",
                 "netid": theia_session.owner.netid,
                 "session": theia_session.id,
@@ -159,7 +159,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         metadata=client.V1ObjectMeta(
             name="theia-{}-{}".format(theia_session.owner.netid, theia_session.id),
             labels={
-                "app": "theia",
+                "app.kubernetes.io/name": "theia",
                 "role": "theia-session",
                 "netid": theia_session.owner.netid,
                 "session": theia_session.id,
@@ -291,7 +291,7 @@ def reap_theia_session_resources(theia_session_id: str):
     # Delete the pods
     v1.delete_collection_namespaced_pod(
         namespace="anubis",
-        label_selector="app=theia,role=theia-session,session={}".format(
+        label_selector="app.kubernetes.io/name=theia,role=theia-session,session={}".format(
             theia_session_id
         ),
         propagation_policy="Background",
@@ -300,7 +300,7 @@ def reap_theia_session_resources(theia_session_id: str):
     # Delete the pvc
     v1.delete_collection_namespaced_persistent_volume_claim(
         namespace="anubis",
-        label_selector="app=theia,role=session-storage,session={}".format(
+        label_selector="app.kubernetes.io/name=theia,role=session-storage,session={}".format(
             theia_session_id
         ),
         propagation_policy="Background",
@@ -312,7 +312,7 @@ def list_theia_pods():
     v1 = client.CoreV1Api()
 
     pods = v1.list_namespaced_pod(
-        namespace="anubis", label_selector="app=theia,role=theia-session"
+        namespace="anubis", label_selector="app.kubernetes.io/name=theia,role=theia-session"
     )
 
     return pods
@@ -460,7 +460,7 @@ def reap_stale_theia_sessions(*_):
 
     with app.app_context():
         resp = v1.list_namespaced_pod(
-            namespace="anubis", label_selector="app=theia,role=theia-session"
+            namespace="anubis", label_selector="app.kubernetes.io/name=theia,role=theia-session"
         )
 
         for n, pod in enumerate(resp.items):

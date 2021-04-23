@@ -51,7 +51,7 @@ def create_pipeline_job_obj(client, submission):
     # Create and configure a spec section
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(
-            labels={"app": "submission-pipeline", "role": "submission-pipeline-worker"}
+            labels={"app.kubernetes.io/name": "submission-pipeline", "role": "submission-pipeline-worker"}
         ),
         spec=client.V1PodSpec(restart_policy="Never", containers=[container]),
     )
