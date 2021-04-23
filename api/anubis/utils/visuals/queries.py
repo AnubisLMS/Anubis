@@ -8,6 +8,8 @@ from submission_test_result str
          join assignment a on at.assignment_id = a.id
          join submission s on s.id = str.submission_id
          join user u on s.owner_id = u.id
+         join in_course ic on u.id = ic.owner_id
+         inner join course c on c.id = ic.course_id and a.course_id = c.id
          join (
     /* first submissions where it passed */
     select s.id as sid, u.id as uid, at.id as atid, s.created as created
@@ -16,6 +18,8 @@ from submission_test_result str
              join submission_test_result str on at.id = str.assignment_test_id
              join submission s on str.submission_id = s.id
              join user u on u.id = s.owner_id
+             join in_course ic on u.id = ic.owner_id
+             inner join course c on c.id = ic.course_id and a.course_id = c.id
     where str.passed = 1 and a.id = :assignment_id and at.id = :assignment_test_id
     group by at.name, u.id
     having min(s.created)
@@ -28,6 +32,8 @@ from submission_test_result str
              join user u on u.id = s.owner_id
              join assignment_test at on at.assignment_id = a.id
              join submission_test_result str on str.submission_id = s.id
+             join in_course ic on u.id = ic.owner_id
+             inner join course c on c.id = ic.course_id and a.course_id = c.id
     where a.id = :assignment_id and at.id = :assignment_test_id
     group by at.name, u.id
     having min(s.created)
@@ -45,6 +51,8 @@ from (select 1 as n
                join submission s2 on str.submission_id = s2.id
                join assignment a on s2.assignment_id = a.id
                join user u on s2.owner_id = u.id
+             join in_course ic on u.id = ic.owner_id
+             inner join course c on c.id = ic.course_id and a.course_id = c.id
       where at.id = :assignment_test_id
       group by u.id
       having sum(str.passed) > 0) a
@@ -58,6 +66,8 @@ from (select 1 as n
                join submission s2 on str.submission_id = s2.id
                join assignment a on s2.assignment_id = a.id
                join user u on s2.owner_id = u.id
+             join in_course ic on u.id = ic.owner_id
+             inner join course c on c.id = ic.course_id and a.course_id = c.id
       where at.id = :assignment_test_id
       group by u.id
       having sum(str.passed) = 0) a
@@ -72,6 +82,8 @@ from (select 1 as n
           from submission s
                    join user u2 on s.owner_id = u2.id
                    join assignment a2 on s.assignment_id = a2.id
+                   join in_course ic on u2.id = ic.owner_id
+             inner join course c on c.id = ic.course_id and a2.course_id = c.id
           where a2.id = :assignment_id
       )
       group by u.id) a;
