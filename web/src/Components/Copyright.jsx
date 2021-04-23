@@ -6,7 +6,7 @@ export default function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
-      <Link href={'/api/public/memes/'}>
+      <Link href={'/api/public/memes/'} target={'_blank'}>
         Memes
       </Link>{' '}
       {new Date().getFullYear()}
