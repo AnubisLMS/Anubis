@@ -10,7 +10,7 @@ from anubis.models import (
     InCourse,
 )
 from anubis.utils.services.cache import cache
-from anubis.utils.http.data import _verify_data_shape, is_debug
+from anubis.utils.data import _verify_data_shape, is_debug
 
 
 def get_question_sequence_mapping(

@@ -6,7 +6,7 @@ import kubernetes
 from kubernetes import config, client
 
 from anubis.models import Config, Submission
-from anubis.utils.http.data import is_debug
+from anubis.utils.data import is_debug
 from anubis.utils.services.logger import logger
 
 

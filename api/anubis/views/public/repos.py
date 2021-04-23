@@ -4,7 +4,7 @@ from flask import Blueprint
 
 from anubis.models import User, AssignmentRepo, Assignment
 from anubis.utils.users.auth import current_user, require_user
-from anubis.utils.http.decorators import json_response
+from anubis.utils.decorators import json_response
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import success_response
 

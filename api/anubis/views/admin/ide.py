@@ -6,7 +6,7 @@ from flask import Blueprint
 from anubis.models import db, TheiaSession
 from anubis.rpc.theia import reap_all_theia_sessions
 from anubis.utils.users.auth import require_admin, current_user
-from anubis.utils.http.decorators import json_response, json_endpoint
+from anubis.utils.decorators import json_response, json_endpoint
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import success_response, error_response
 from anubis.utils.services.rpc import enqueue_ide_initialize

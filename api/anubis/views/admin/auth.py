@@ -4,7 +4,7 @@ from flask import Blueprint, Response
 
 from anubis.models import User
 from anubis.utils.users.auth import create_token, require_admin
-from anubis.utils.http.data import is_debug
+from anubis.utils.data import is_debug
 from anubis.utils.http.https import error_response, success_response
 
 auth = Blueprint("admin-auth", __name__, url_prefix="/admin/auth")

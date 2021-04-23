@@ -7,9 +7,9 @@ from sqlalchemy.exc import DataError, IntegrityError
 from anubis.models import db, Assignment, User, AssignmentTest, SubmissionTestResult
 from anubis.utils.assignment.assignments import assignment_sync
 from anubis.utils.users.auth import require_admin
-from anubis.utils.http.data import rand
-from anubis.utils.http.data import row2dict
-from anubis.utils.http.decorators import load_from_id, json_response, json_endpoint
+from anubis.utils.data import rand
+from anubis.utils.data import row2dict
+from anubis.utils.decorators import load_from_id, json_response, json_endpoint
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import error_response, success_response
 from anubis.utils.services.logger import logger

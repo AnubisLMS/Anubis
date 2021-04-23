@@ -6,7 +6,7 @@ from flask import request
 
 from anubis.models import Submission
 from anubis.utils.users.auth import current_user
-from anubis.utils.http.data import jsonify, _verify_data_shape
+from anubis.utils.data import jsonify, _verify_data_shape
 from anubis.utils.http.https import error_response
 
 

@@ -2,7 +2,7 @@ from flask import Blueprint
 
 from anubis.models import db, Config
 from anubis.utils.users.auth import require_admin
-from anubis.utils.http.decorators import json_response, json_endpoint
+from anubis.utils.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response
 
 config_ = Blueprint('config', __name__, url_prefix='/admin/config')

@@ -18,7 +18,7 @@ from anubis.models import (
     AssignedStudentQuestion,
     AssignedQuestionResponse,
 )
-from anubis.utils.http.data import rand
+from anubis.utils.data import rand
 from anubis.utils.assignment.questions import assign_questions
 
 

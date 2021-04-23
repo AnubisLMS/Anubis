@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError, DataError
 
 from anubis.models import db, AssignedStudentQuestion, AssignedQuestionResponse, User
 from anubis.utils.users.auth import require_user, current_user
-from anubis.utils.http.decorators import json_endpoint
+from anubis.utils.decorators import json_endpoint
 from anubis.utils.http.https import success_response, error_response
 
 questions = Blueprint("public-questions", __name__, url_prefix="/public/questions")

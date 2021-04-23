@@ -18,7 +18,7 @@ from anubis.models import (
 )
 from anubis.utils.users.auth import get_user
 from anubis.utils.services.cache import cache
-from anubis.utils.http.data import is_debug
+from anubis.utils.data import is_debug
 from anubis.utils.services.logger import logger
 from anubis.utils.assignment.questions import ingest_questions
 

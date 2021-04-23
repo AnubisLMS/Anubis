@@ -9,7 +9,7 @@ from flask import request
 
 from anubis.config import config
 from anubis.models import User
-from anubis.utils.http.data import is_debug
+from anubis.utils.data import is_debug
 from anubis.utils.http.https import error_response, get_request_ip
 from anubis.utils.services.logger import logger
 

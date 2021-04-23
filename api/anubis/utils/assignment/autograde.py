@@ -2,7 +2,7 @@ from parse import parse
 
 from anubis.models import Submission, Assignment
 from anubis.utils.services.cache import cache
-from anubis.utils.http.data import is_debug
+from anubis.utils.data import is_debug
 from anubis.utils.http.https import error_response
 from anubis.utils.users.students import get_students_in_class
 

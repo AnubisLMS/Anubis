@@ -11,8 +11,8 @@ from anubis.models import (
     InCourse,
     Submission,
 )
-from anubis.utils.http.data import is_debug
-from anubis.utils.http.decorators import json_response
+from anubis.utils.data import is_debug
+from anubis.utils.decorators import json_response
 from anubis.utils.services.elastic import log_endpoint, esindex
 from anubis.utils.http.https import error_response, success_response
 from anubis.utils.services.logger import logger

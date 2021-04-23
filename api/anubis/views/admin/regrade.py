@@ -7,8 +7,8 @@ from sqlalchemy import or_
 from anubis.models import Submission, Assignment
 from anubis.rpc.batch import rpc_bulk_regrade
 from anubis.utils.users.auth import require_admin
-from anubis.utils.http.data import split_chunks
-from anubis.utils.http.decorators import json_response
+from anubis.utils.data import split_chunks
+from anubis.utils.decorators import json_response
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import error_response, success_response, get_number_arg
 from anubis.utils.services.rpc import enqueue_autograde_pipeline, rpc_enqueue

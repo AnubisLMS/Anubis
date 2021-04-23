@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_json import MutableJson
 
-from anubis.utils.http.data import rand
+from anubis.utils.data import rand
 from anubis.utils.services.logger import logger
 
 db = SQLAlchemy()

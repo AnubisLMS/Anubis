@@ -2,7 +2,7 @@ from typing import List, Dict
 
 from anubis.models import User, InCourse, Course
 from anubis.utils.services.cache import cache
-from anubis.utils.http.data import is_debug
+from anubis.utils.data import is_debug
 
 
 @cache.memoize(timeout=60, unless=is_debug)

@@ -1,8 +1,8 @@
 from flask import Blueprint
 
 from anubis.utils.users.auth import require_admin
-from anubis.utils.http.data import is_debug
-from anubis.utils.http.decorators import json_response
+from anubis.utils.data import is_debug
+from anubis.utils.decorators import json_response
 from anubis.utils.http.https import success_response, error_response
 from anubis.utils.services.rpc import enqueue_seed as seed_
 

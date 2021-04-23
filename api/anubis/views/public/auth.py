@@ -3,8 +3,8 @@ from flask import Blueprint, make_response, redirect, request
 from anubis.models import User, db
 from anubis.utils.assignment.assignments import get_courses, get_assignments
 from anubis.utils.users.auth import create_token, current_user, require_user
-from anubis.utils.http.data import is_debug
-from anubis.utils.http.decorators import json_endpoint
+from anubis.utils.data import is_debug
+from anubis.utils.decorators import json_endpoint
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import success_response, error_response
 from anubis.utils.services.oauth import OAUTH_REMOTE_APP as provider

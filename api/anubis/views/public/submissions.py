@@ -3,7 +3,7 @@ from flask import Blueprint, request
 from anubis.models import User, Submission
 from anubis.utils.assignment.assignments import get_submissions
 from anubis.utils.users.auth import current_user, require_user
-from anubis.utils.http.decorators import json_response
+from anubis.utils.decorators import json_response
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import error_response, success_response
 from anubis.utils.services.logger import logger

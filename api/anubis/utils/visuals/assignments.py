@@ -9,7 +9,7 @@ from anubis.utils.visuals.queries import (
     assignment_test_fail_count_sql,
     assignment_test_pass_count_sql,
 )
-from anubis.utils.http.data import is_debug
+from anubis.utils.data import is_debug
 
 
 @cache.memoize(timeout=60, unless=is_debug)
