@@ -10,9 +10,9 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: theia
-      role: theia-session
+      app.kubernetes.io/name: theia
       network-policy: student
+      role: theia-session
   policyTypes:
   - Ingress
   - Egress
@@ -20,8 +20,8 @@ spec:
   - from:
     - podSelector:
         matchLabels:
-          app: theia
-          role: proxy
+          app.kubernetes.io/name: theia
+          component: proxy
     ports:
     - protocol: TCP
       port: 5000
@@ -132,7 +132,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: theia
+      app.kubernetes.io/name: theia
       network-policy: admin
       role: theia-session
   policyTypes:
@@ -186,7 +186,8 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: api
+      app.kubernetes.io/name: anubis
+      component: api
   ingress:
     - from:
         - namespaceSelector: {}

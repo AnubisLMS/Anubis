@@ -4,14 +4,15 @@ metadata:
   name: web
   namespace: {{ .Release.Namespace }}
   labels:
-    app: web
+    app.kubernetes.io/name: web
+    component: static
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
-
 spec:
   selector:
     matchLabels:
-      app: web
+      app.kubernetes.io/name: web
+      component: static
   replicas: {{ .Values.web.replicas }}
   {{- if .Values.rollingUpdates }}
   strategy:
@@ -23,7 +24,8 @@ spec:
   template:
     metadata:
       labels:
-        app: web
+        app.kubernetes.io/name: web
+        component: static
     spec:
       dnsPolicy: ClusterFirst
       containers:
@@ -48,14 +50,15 @@ metadata:
   name: web
   namespace: {{ .Release.Namespace }}
   labels:
-    app: web
+    app.kubernetes.io/name: web
+    component: static
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
-
 spec:
   type: NodePort
   selector:
-    app: web
+    app.kubernetes.io/name: web
+    component: static
   ports:
   - name: web
     port: 3000

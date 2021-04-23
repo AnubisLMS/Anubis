@@ -10,18 +10,18 @@ metadata:
   name: logstash
   namespace: {{ .Release.Namespace }}
   labels:
-    app: logstash
+    app.kubernetes.io/name: logstash
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 
 spec:
   selector:
     matchLabels:
-      app: logstash
+      app.kubernetes.io/name: logstash
   template:
     metadata:
       labels:
-        app: logstash
+        app.kubernetes.io/name: logstash
         ecosystem: elk
     spec:
       containers:
@@ -41,10 +41,10 @@ metadata:
   name: logstash
   namespace: anubis
   labels:
-    app: logstash
+    app.kubernetes.io/name: logstash
 spec:
   selector:
-    app: logstash
+    app.kubernetes.io/name: logstash
   ports:
   - name: logstash
     protocol: UDP

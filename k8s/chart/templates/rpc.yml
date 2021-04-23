@@ -4,9 +4,9 @@ metadata:
   name: pipeline-rpc
   namespace: {{ .Release.Namespace }}
   labels:
+    component: pipeline-rpc
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
-    component: pipeline-rpc
 
 ---
 
@@ -16,13 +16,15 @@ metadata:
   name: rpc-default
   namespace: {{ .Release.Namespace }}
   labels:
+    app.kubernetes.io/name: rpc-default
+    component: rpc-default
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
-    component: pipeline-rpc-default
 spec:
   selector:
     matchLabels:
-      app: rpc-default
+      app.kubernetes.io/name: rpc-default
+      component: rpc-default
   replicas: {{ .Values.rpc.default.replicas }}
   {{- if .Values.rollingUpdates }}
   strategy:
@@ -34,7 +36,8 @@ spec:
   template:
     metadata:
       labels:
-        app: rpc-default
+        app.kubernetes.io/name: rpc-default
+        component: rpc-default
     spec:
       serviceAccountName: pipeline-rpc
       dnsPolicy: ClusterFirst
@@ -66,20 +69,21 @@ spec:
               key: secret-key
 
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rpc-theia
   namespace: {{ .Release.Namespace }}
   labels:
+    app.kubernetes.io/name: rpc-theia
+    component: rpc-theia
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
-    component: pipeline-rpc-theia
 spec:
   selector:
     matchLabels:
-      app: rpc-theia
+      app.kubernetes.io/name: rpc-theia
+      component: rpc-theia
   replicas: {{ .Values.rpc.theia.replicas }}
   {{- if .Values.rollingUpdates }}
   strategy:
@@ -91,7 +95,8 @@ spec:
   template:
     metadata:
       labels:
-        app: rpc-theia
+        app.kubernetes.io/name: rpc-theia
+        component: rpc-theia
     spec:
       serviceAccountName: pipeline-rpc
       dnsPolicy: ClusterFirst
@@ -122,20 +127,21 @@ spec:
               name: api
               key: secret-key
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rpc-regrade
   namespace: {{ .Release.Namespace }}
   labels:
+    app.kubernetes.io/name: rpc-regrade
+    component: rpc-regrade
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
-    component: pipeline-rpc-regrade
 spec:
   selector:
     matchLabels:
-      app: rpc-regrade
+      app.kubernetes.io/name: rpc-regrade
+      component: rpc-regrade
   replicas: {{ .Values.rpc.regrade.replicas }}
   {{- if .Values.rollingUpdates }}
   strategy:
@@ -147,7 +153,8 @@ spec:
   template:
     metadata:
       labels:
-        app: rpc-regrade
+        app.kubernetes.io/name: rpc-regrade
+        component: rpc-regrade
     spec:
       serviceAccountName: pipeline-rpc
       dnsPolicy: ClusterFirst
@@ -177,8 +184,7 @@ spec:
             secretKeyRef:
               name: api
               key: secret-key
-
-
+---
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -186,18 +192,16 @@ metadata:
   name: pipeline-create-jobs
   namespace: {{ .Release.Namespace }}
   labels:
+    rbac.authorization.k8s.io/pipeline-create-jobs: "true"
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
-    rbac.authorization.k8s.io/pipeline-create-jobs: "true"
 rules:
 - apiGroups: ["batch", "extensions"]
   resources: ["jobs"]
   verbs: ["get", "list", "watch", "create", "delete"]
-
 - apiGroups: [""]
   resources: ["pods", "persistentvolumeclaims"]
   verbs: ["get", "list", "watch", "create", "delete", "deletecollection"]
-
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -207,7 +211,6 @@ metadata:
   labels:
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
-
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role

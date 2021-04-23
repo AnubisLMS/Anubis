@@ -4,12 +4,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: theia-proxy
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
   labels:
+    app.kubernetes.io/name: theia
+    component: proxy
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
-    component: theia-proxy
-
 spec:
   replicas: {{ .Values.theia.proxy.replicas }}
   {{- if .Values.rollingUpdates }}
@@ -21,13 +21,12 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      app: theia
+      app.kubernetes.io/name: theia
       component: proxy
   template:
     metadata:
       labels:
-        app: theia
-        role: proxy
+        app.kubernetes.io/name: theia
         component: proxy
     spec:
       containers:
@@ -57,11 +56,14 @@ apiVersion: v1
 kind: Service
 metadata:
   name: theia-proxy
-  namespace: anubis
-
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: theia
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
 spec:
   selector:
-    app: theia
+    app.kubernetes.io/name: theia
     component: proxy
   ports:
     - name: http-tcp

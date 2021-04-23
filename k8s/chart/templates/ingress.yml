@@ -7,7 +7,7 @@ metadata:
   name: strip-api
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis
+    app.kubernetes.io/name: anubis
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
@@ -23,7 +23,8 @@ metadata:
   name: ingress.route.anubis.api.public
   namespace: {{ .Release.Namespace }}
   labels:
-    app: api
+    app.kubernetes.io/name: anubis
+    component: api
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
@@ -36,7 +37,7 @@ spec:
   {{- end }}
   routes:
   - kind: Rule
-    match: Host(`{{ .Values.domain }}`) && PathPrefix(`/api/`)
+    match: Host(`{{ .Values.domain }}`) && PathPrefix(`/api`)
     middlewares:
     {{- if .Values.vpnOnly }}
     - name: whitelist-vpn
@@ -60,7 +61,8 @@ metadata:
   name: ingress.route.anubis.web
   namespace: {{ .Release.Namespace }}
   labels:
-    app: web
+    app.kubernetes.io/name: web
+    component: static
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
@@ -94,10 +96,12 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: ingress.route.theia.public
-  namespace: anubis
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: theia
-
+    app.kubernetes.io/name: theia
+    component: proxy
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
 spec:
   {{- if .Values.debug }}
   entryPoints:

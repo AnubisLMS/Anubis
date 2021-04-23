@@ -4,14 +4,15 @@ metadata:
   name: api
   namespace: {{ .Release.Namespace }}
   labels:
-    app: api
-    role: api
+    app.kubernetes.io/name: anubis
+    component: api
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
   selector:
     matchLabels:
-      app: api
+      app.kubernetes.io/name: anubis
+      component: api
   replicas: {{ .Values.api.replicas }}
   {{- if .Values.rollingUpdates }}
   strategy:
@@ -23,8 +24,8 @@ spec:
   template:
     metadata:
       labels:
-        app: api
-        role: api
+        app.kubernetes.io/name: anubis
+        component: api
     spec:
       # dnsPolicy: Default
       {{- if .Values.api.datacenter }}
@@ -99,9 +100,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     job: db-migrate
+    component: db-migrate
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
-    component: migrate
 spec:
   backoffLimit: 4
   ttlSecondsAfterFinished: 30
@@ -125,43 +126,6 @@ spec:
             secretKeyRef:
               name: api
               key: redis-password
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: adminer
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: adminer
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
-
-spec:
-  selector:
-    matchLabels:
-      app: adminer
-  template:
-    metadata:
-      labels:
-        app: adminer
-    spec:
-      dnsPolicy: ClusterFirst
-      containers:
-      - name: adminer
-        image: adminer:latest
-        env:
-        - name: "ADMINER_DEFAULT_SERVER"
-          value: "mariadb.mariadb.svc.cluster.local"
-        ports:
-        - name: adminer
-          containerPort: 8080
-        resources:
-          limits:
-            memory: "200Mi"
-          requests:
-            memory: "100Mi"
-
 ---
 apiVersion: v1
 kind: Service
@@ -169,31 +133,16 @@ metadata:
   name: anubis
   namespace: {{ .Release.Namespace }}
   labels:
-    app: api
+    app.kubernetes.io/name: anubis
+    component: api
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
   selector:
-    app: api
+    app.kubernetes.io/name: anubis
+    component: api
   ports:
   - name: web
     port: 5000
     targetPort: 5000
 
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: adminer
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: adminer
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
-spec:
-  selector:
-    app: adminer
-  ports:
-  - name: adminer
-    port: 5002
-    targetPort: 8080
