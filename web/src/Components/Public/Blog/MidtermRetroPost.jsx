@@ -143,7 +143,7 @@ export default function MidtermRetroPost({classes, preview = false}) {
                 work, then they do not have or know how to set up an alternative environment.
               </Typography>
               <Typography gutterBottom className={classes.typography}>
-                This problem was something I had known about for a while. Despite this, this {'"perfect storm"'}
+                This problem was something I had known about for a while. Despite this, this {'"perfect storm" '}
                 situation was so infrequent that it was something I deemed not worthy of the time to fix.
                 Whoops, that was that a mistake.
               </Typography>
@@ -213,7 +213,7 @@ export default function MidtermRetroPost({classes, preview = false}) {
                 the nodes pulling the updated images from the registry. Thankfully, everything just worked.
                 The old RPC worker pool was replaced with the two new ones. The RPC function calls were properly
                 putting jobs in the right place. This new arrangement alleviated the issues immediately.
-                Students could start their IDEs with no delay, and I could do by bulk regrades.
+                Students could start their IDEs with no delay, and I could do my bulk regrades.
               </Typography>
               {/* END Deploying the Patch */}
 
