@@ -4,8 +4,20 @@ const Knex = require("knex");
 const jwt = require("jsonwebtoken");
 const Cookie = require("universal-cookie");
 const urlparse = require("url-parse");
+const LRU = require("lru-cache");
 
 const SECRET_KEY = process.env.SECRET_KEY ?? 'DEBUG';
+
+const cache = new LRU({
+  max: 100,
+  length: function (n, key) {
+    return n * 2 + key.length
+  },
+  dispose: function (key, n) {
+    n.close()
+  },
+  maxAge: 1000 * 60 * 60,
+})
 
 const knex = Knex({
   client: "mysql",
@@ -36,14 +48,24 @@ const authenticate = token => {
 };
 
 const get_session_ip = session_id => {
-  return new Promise((resolve, reject) => {
+  const cached_ip = cache.get(session_id);
+  if (cached_ip) {
+    return new Promise((resolve) => {
+      resolve(cached_ip);
+    })
+  }
+  return new Promise((resolve) => {
     knex
       .first('cluster_address')
       .from('theia_session')
       .where('id', session_id)
       .then((row) => {
         console.log(`cluster_ip ${row.cluster_address}`)
-        resolve(row.cluster_address)
+        if (row.cluster_address) {
+          console.log(`caching cluster ip ${row.cluster_address}`)
+          cache.set(session_id, row.cluster_address);
+        }
+        resolve(row.cluster_address);
       });
   })
 }
