@@ -27,31 +27,20 @@ export default function Header({classes, open, onDrawerToggle, user}) {
       >
         <Toolbar>
           <Grid container spacing={1} alignItems="center">
-            {open ? (
-              <Grid item>
-                <IconButton
-                  onClick={onDrawerToggle}
-                  aria-label="close drawer"
-                >
-                  {theme.direction === 'ltr' ? <ChevronLeftIcon/> : <ChevronRightIcon/>}
-                </IconButton>
-              </Grid>
-            ) : (
-              <Grid item>
-                <IconButton
-                  color="inherit"
-                  aria-label="open drawer"
-                  onClick={onDrawerToggle}
-                  className={classes.menuButton}
-                >
-                  <MenuIcon/>
-                </IconButton>
-              </Grid>
-            )}
+            <Grid item>
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                onClick={onDrawerToggle}
+                className={classes.menuButton}
+              >
+                <MenuIcon/>
+              </IconButton>
+            </Grid>
             <Grid item xs/>
             <Grid item>
               <div className={classes.avatar}>
-                <Chip clickable label={user?.netid}/>
+                {user?.netid && <Chip clickable label={user?.netid}/>}
               </div>
             </Grid>
           </Grid>
