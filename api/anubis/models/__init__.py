@@ -41,24 +41,36 @@ class User(db.Model):
 
     # Fields
     netid = db.Column(db.String(128), primary_key=True, unique=True, index=True)
-    github_username = db.Column(db.String(128), index=True)
-    name = db.Column(db.String(128))
-    is_admin = db.Column(db.Boolean, nullable=False, default=False)
+    github_username = db.Column(db.TEXT, index=True)
+    name = db.Column(db.TEXT)
     is_superuser = db.Column(db.Boolean, nullable=False, default=False)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
+    ta_for = db.relationship('TAForCourse', cascade='all,delete')
+    professor_for = db.relationship('TAForCourse', cascade='all,delete')
+
     @property
     def data(self):
+        professor_for = [pf.data for pf in self.professor_for]
+        ta_for = [taf.data for taf in self.ta_for]
+        extra_for = []
+        if self.is_superuser:
+            courses = Course.query.all()
+            for course in courses:
+                extra_for.append({'id': course.id, 'name': course.name})
         return {
             "id": self.id,
             "netid": self.netid,
             "github_username": self.github_username,
             "name": self.name,
-            "is_admin": self.is_admin,
             "is_superuser": self.is_superuser,
+            "is_admin": len(professor_for) > 0 or len(ta_for) > 0 or self.is_superuser,
+            "professor_for": professor_for,
+            "ta_for": ta_for,
+            "admin_for": professor_for + ta_for + extra_for,
         }
 
     def __repr__(self):
@@ -75,11 +87,13 @@ class Course(db.Model):
     id = default_id()
 
     # Fields
-    name = db.Column(db.String(256), nullable=False)
-    course_code = db.Column(db.String(256), nullable=False)
-    semester = db.Column(db.String(256), nullable=True)
-    section = db.Column(db.String(256), nullable=True)
-    professor = db.Column(db.String(256), nullable=False)
+    name = db.Column(db.TEXT, nullable=False)
+    course_code = db.Column(db.TEXT, nullable=False)
+    semester = db.Column(db.TEXT, nullable=True)
+    section = db.Column(db.TEXT, nullable=True)
+    professor = db.Column(db.TEXT, nullable=False)
+    theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.osiris.services/anubis/xv6')
+    theia_default_options = db.Column(MutableJson, default=lambda: {"limits": {"cpu": "4", "memory": "4Gi"}})
 
     @property
     def total_assignments(self):
@@ -108,6 +122,46 @@ class Course(db.Model):
         }
 
 
+class TAForCourse(db.Model):
+    __tablename__ = "ta_for_course"
+
+    # Foreign Keys
+    owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
+    course_id = db.Column(db.String(128), db.ForeignKey(Course.id), primary_key=True)
+
+    owner = db.relationship(User, viewonly=True)
+    course = db.relationship(Course, viewonly=True)
+
+    @property
+    def data(self):
+        return {
+            'course': {
+                'id': self.course.id,
+                'name': self.course.name,
+            }
+        }
+
+
+class ProfessorForCourse(db.Model):
+    __tablename__ = "professor_for_course"
+
+    # Foreign Keys
+    owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
+    course_id = db.Column(db.String(128), db.ForeignKey(Course.id), primary_key=True)
+
+    owner = db.relationship(User, viewonly=True)
+    course = db.relationship(Course, viewonly=True)
+
+    @property
+    def data(self):
+        return {
+            'course': {
+                'id': self.course.id,
+                'name': self.course.name,
+            }
+        }
+
+
 class InCourse(db.Model):
     __tablename__ = "in_course"
 
@@ -129,20 +183,22 @@ class Assignment(db.Model):
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), index=True)
 
     # Fields
-    name = db.Column(db.String(256), nullable=False, unique=True)
+    name = db.Column(db.TEXT, nullable=False, unique=True)
     hidden = db.Column(db.Boolean, default=False)
-    description = db.Column(db.Text, nullable=True)
-    github_classroom_url = db.Column(db.String(256), nullable=True, default=None)
-    pipeline_image = db.Column(db.String(256), unique=True, nullable=True)
+    description = db.Column(db.TEXT, nullable=True)
+    github_classroom_url = db.Column(db.TEXT, nullable=True, default=None)
+    pipeline_image = db.Column(db.TEXT, unique=True, nullable=True)
     unique_code = db.Column(
         db.String(8),
         unique=True,
         default=lambda: base64.b16encode(os.urandom(4)).decode(),
     )
     ide_enabled = db.Column(db.Boolean, default=True)
+    autograde_enabled = db.Column(db.Boolean, default=True)
     theia_image = db.Column(
-        db.String(128), default="registry.osiris.services/anubis/theia-xv6"
+        db.TEXT, default="registry.osiris.services/anubis/theia-xv6"
     )
+    theia_options = db.Column(MutableJson, default=lambda: {})
 
     # Dates
     release_date = db.Column(db.DateTime, nullable=False)
@@ -163,6 +219,7 @@ class Assignment(db.Model):
             "course": self.course.data,
             "description": self.description,
             "ide_enabled": self.ide_enabled,
+            "autograde_enabled": self.autograde_enabled,
             "ide_active": self.due_date + timedelta(days=3 * 7) > datetime.now(),
             "github_classroom_link": self.github_classroom_url,
             "tests": [t.data for t in self.tests if t.hidden is False],
@@ -205,8 +262,8 @@ class AssignmentRepo(db.Model):
     )
 
     # Fields
-    github_username = db.Column(db.String(256), nullable=False)
-    repo_url = db.Column(db.String(128), nullable=False)
+    github_username = db.Column(db.TEXT, nullable=False)
+    repo_url = db.Column(db.TEXT, nullable=False)
 
     # Relationships
     owner = db.relationship(User)
@@ -233,11 +290,11 @@ class AssignmentTest(db.Model):
     assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id))
 
     # Fields
-    name = db.Column(db.String(128), index=True)
+    name = db.Column(db.TEXT, index=True)
     hidden = db.Column(db.Boolean, default=False)
 
     # Relationships
-    assignment = db.relationship(Assignment)
+    assignment = db.relationship(Assignment, viewonly=True)
 
     @property
     def data(self):
@@ -262,7 +319,7 @@ class AssignmentQuestion(db.Model):
     solution = db.Column(db.Text, nullable=True)
     sequence = db.Column(db.Integer, index=True, nullable=False)
     code_question = db.Column(db.Boolean, default=False)
-    code_language = db.Column(db.String(128), nullable=True, default='')
+    code_language = db.Column(db.TEXT, nullable=True, default='')
     placeholder = db.Column(db.Text, nullable=True, default="")
 
     # Timestamps
@@ -402,7 +459,7 @@ class Submission(db.Model):
     # Fields
     commit = db.Column(db.String(128), unique=True, index=True, nullable=False)
     processed = db.Column(db.Boolean, default=False)
-    state = db.Column(db.String(128), default="")
+    state = db.Column(db.TEXT, default="")
     errors = db.Column(MutableJson, default=None, nullable=True)
     token = db.Column(
         db.String(64), default=lambda: base64.b16encode(os.urandom(32)).decode()
@@ -410,10 +467,10 @@ class Submission(db.Model):
 
     # Relationships
     owner = db.relationship(User)
-    assignment = db.relationship(Assignment)
+    assignment = db.relationship(Assignment, viewonly=True)
     build = db.relationship("SubmissionBuild", cascade="all,delete", uselist=False)
     test_results = db.relationship("SubmissionTestResult", cascade="all,delete")
-    repo = db.relationship(AssignmentRepo)
+    repo = db.relationship(AssignmentRepo, viewonly=True)
 
     def init_submission_models(self):
         """
@@ -439,9 +496,9 @@ class Submission(db.Model):
         logger.debug("found tests: {}".format(list(map(lambda x: x.data, tests))))
 
         for test in tests:
-            tr = SubmissionTestResult(submission=self, assignment_test=test)
+            tr = SubmissionTestResult(submission_id=self.id, assignment_test_id=test.id)
             db.session.add(tr)
-        sb = SubmissionBuild(submission=self)
+        sb = SubmissionBuild(submission_id=self.id)
         db.session.add(sb)
 
         self.processed = False
@@ -607,7 +664,7 @@ class SubmissionBuild(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Relationships
-    submission = db.relationship(Submission)
+    submission = db.relationship(Submission, viewonly=True)
 
     @property
     def data(self):
@@ -628,6 +685,7 @@ class TheiaSession(db.Model):
 
     # id
     id = default_id(32)
+    course_id = db.Column(db.String(128), db.ForeignKey(Course.id), nullable=False, index=True)
 
     # Foreign keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
@@ -638,10 +696,10 @@ class TheiaSession(db.Model):
 
     # Fields
     active = db.Column(db.Boolean, default=True)
-    state = db.Column(db.String(128))
-    cluster_address = db.Column(db.String(256), nullable=True, default=None)
+    state = db.Column(db.TEXT)
+    cluster_address = db.Column(db.TEXT, nullable=True, default=None)
     image = db.Column(
-        db.String(128), default="registry.osiris.services/anubis/theia-xv6"
+        db.TEXT, default="registry.osiris.services/anubis/theia-xv6"
     )
     options = db.Column(MutableJson, nullable=False, default=lambda: dict())
     network_locked = db.Column(db.Boolean, default=True)
@@ -698,11 +756,12 @@ class StaticFile(db.Model):
     __tablename__ = "static_file"
 
     id = default_id()
+    course_id = db.Column(db.String(128), db.ForeignKey(Course.id), nullable=False, index=True)
 
     # Fields
-    filename = db.Column(db.String(256))
-    path = db.Column(db.String(256))
-    content_type = db.Column(db.String(128))
+    filename = db.Column(db.TEXT)
+    path = db.Column(db.TEXT)
+    content_type = db.Column(db.TEXT)
     blob = db.Column(db.LargeBinary(length=(2 ** 32) - 1))
     hidden = db.Column(db.Boolean)
 

@@ -3,7 +3,7 @@ from flask import Blueprint, request
 from anubis.models import db, StaticFile
 from anubis.utils.users.auth import require_admin
 from anubis.utils.data import rand
-from anubis.utils.decorators import json_response
+from anubis.utils.http.decorators import json_response
 from anubis.utils.http.files import get_mime_type
 from anubis.utils.http.https import (
     get_number_arg,
@@ -11,6 +11,7 @@ from anubis.utils.http.https import (
     success_response,
     error_response,
 )
+from anubis.utils.lms.course import get_course_context, assert_course_admin
 
 static = Blueprint("admin-static", __name__, url_prefix="/admin/static")
 
@@ -19,9 +20,13 @@ static = Blueprint("admin-static", __name__, url_prefix="/admin/static")
 @require_admin()
 @json_response
 def static_delete_static_id(static_id: str):
-    StaticFile.query.filter(
+    static_file = StaticFile.query.filter(
         StaticFile.id == static_id
-    ).delete()
+    ).first()
+
+    assert_course_admin(static_file.course_id)
+
+    db.session.delete(static_file)
     db.session.commit()
 
     return success_response({
@@ -43,10 +48,13 @@ def static_public_list():
     :return:
     """
 
+    course = get_course_context()
+
     limit = get_number_arg("limit", default_value=20)
     offset = get_number_arg("offset", default_value=0)
 
     public_files = StaticFile.query \
+        .filter(StaticFile.course_id == course.id) \
         .order_by(StaticFile.created.desc()) \
         .limit(limit) \
         .offset(offset) \
@@ -71,6 +79,7 @@ def static_public_upload():
     :return:
     """
 
+    course = get_course_context()
     path = request.args.get("path", default=None)
 
     # If the path was not specified, then create some hash for it
@@ -97,6 +106,7 @@ def static_public_upload():
     if blob is None:
         blob = StaticFile(
             path=path,
+            course_id=course.id,
         )
 
     # Update the fields

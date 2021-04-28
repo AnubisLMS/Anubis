@@ -3,14 +3,15 @@ from flask import Blueprint
 
 from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQuestion
 from anubis.utils.users.auth import require_admin
-from anubis.utils.decorators import json_response, json_endpoint
+from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import error_response, success_response
-from anubis.utils.assignment.questions import (
+from anubis.utils.lms.questions import (
     hard_reset_questions,
     get_all_questions,
     assign_questions,
 )
+from anubis.utils.lms.course import assert_course_admin, get_course_context
 
 questions = Blueprint("admin-questions", __name__, url_prefix="/admin/questions")
 
@@ -26,6 +27,8 @@ def private_questions_add_unique_code(unique_code: str):
     ).first()
     if assignment is None:
         return error_response("Unable to find assignment"), 400
+
+    assert_course_admin(assignment.course_id)
 
     aq = AssignmentQuestion(
         assignment_id=assignment.id,
@@ -49,11 +52,13 @@ def private_questions_add_unique_code(unique_code: str):
 @log_endpoint("admin", lambda: "delete question")
 @json_response
 def private_questions_del(assignment_question_id: str):
-    aq = AssignmentQuestion.query.filter(
+    assignment_question: AssignmentQuestion = AssignmentQuestion.query.filter(
         AssignmentQuestion.id == assignment_question_id,
     ).first()
-    if aq is None:
+    if assignment_question is None:
         return error_response('Could not find question'), 400
+
+    assert_course_admin(assignment_question.assignment.course_id)
 
     try:
         AssignmentQuestion.query.filter(
@@ -100,6 +105,8 @@ def private_questions_hard_reset_unique_code(unique_code: str):
     if assignment is None:
         return error_response("Unable to find assignment")
 
+    assert_course_admin(assignment.course_id)
+
     # Hard reset questions
     hard_reset_questions(assignment)
 
@@ -140,6 +147,8 @@ def private_questions_reset_assignments_unique_code(unique_code: str):
     if assignment is None:
         return error_response("Unable to find assignment")
 
+    assert_course_admin(assignment.course_id)
+
     AssignedStudentQuestion.query.filter(
         AssignedStudentQuestion.assignment_id == assignment.id
     ).delete()
@@ -164,10 +173,12 @@ def admin_questions_update(assignment_question_id: str, question: dict):
     :return:
     """
 
-    db_assignment_question = AssignmentQuestion.query.filter(
+    db_assignment_question: AssignmentQuestion = AssignmentQuestion.query.filter(
         AssignmentQuestion.id == assignment_question_id
     ).first()
     db_assignment_question: AssignmentQuestion
+
+    assert_course_admin(db_assignment_question.assignment.course_id)
 
     if db_assignment_question is None:
         return error_response('question not found')
@@ -204,6 +215,8 @@ def private_questions_get_unique_code(unique_code: str):
     if assignment is None:
         return error_response("Unable to find assignment")
 
+    assert_course_admin(assignment.course_id)
+
     assignment_questions = AssignmentQuestion.query.filter(
         AssignmentQuestion.assignment_id == assignment.id,
     ).order_by(AssignmentQuestion.sequence, AssignmentQuestion.created.desc()).all()
@@ -235,6 +248,8 @@ def private_questions_get_assignments_unique_code(unique_code: str):
     if assignment is None:
         return error_response("Unable to find assignment")
 
+    assert_course_admin(assignment.course_id)
+
     return success_response({
         'questions': get_all_questions(assignment)
     })
@@ -261,6 +276,8 @@ def private_questions_assign_unique_code(unique_code: str):
     ).first()
     if assignment is None:
         return error_response("Unable to find assignment")
+
+    assert_course_admin(assignment.course_id)
 
     # Assign the questions
     assigned_questions = assign_questions(assignment)

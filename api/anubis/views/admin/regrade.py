@@ -8,25 +8,30 @@ from anubis.models import Submission, Assignment
 from anubis.rpc.batch import rpc_bulk_regrade
 from anubis.utils.users.auth import require_admin
 from anubis.utils.data import split_chunks
-from anubis.utils.decorators import json_response
+from anubis.utils.http.decorators import json_response
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import error_response, success_response, get_number_arg
 from anubis.utils.services.rpc import enqueue_autograde_pipeline, rpc_enqueue
+from anubis.utils.http.decorators import load_from_id
+from anubis.utils.lms.course import get_course_context, assert_course_admin
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 
 
 @regrade.route("/status/<string:assignment_id>")
 @require_admin()
+@load_from_id(Assignment, verify_owner=False)
 @json_response
-def admin_regrade_status(assignment_id: str):
+def admin_regrade_status(assignment: Assignment):
+    assert_course_admin(assignment.course_id)
+
     processing = Submission.query.filter(
-        Submission.assignment_id == assignment_id,
+        Submission.assignment_id == assignment.id,
         Submission.processed == False,
     ).count()
 
     total = Submission.query.filter(
-        Submission.assignment_id == assignment_id,
+        Submission.assignment_id == assignment.id,
     ).count()
 
     percent = 0
@@ -54,12 +59,14 @@ def private_regrade_submission(commit):
     """
 
     # Find the submission
-    s = Submission.query.filter(
+    s: Submission = Submission.query.filter(
         Submission.commit == commit,
         Submission.owner_id is not None,
     ).first()
     if s is None:
         return error_response("not found")
+
+    assert_course_admin(s.assignment.course.id)
 
     # Reset submission in database
     s.init_submission_models()
@@ -126,6 +133,8 @@ def private_regrade_assignment(assignment_id):
     ).first()
     if assignment is None:
         return error_response("cant find assignment")
+
+    assert_course_admin(assignment.course_id)
 
     # Get all submissions that have an owner (not dangling)
     submissions = Submission.query.filter(

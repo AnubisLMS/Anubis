@@ -2,10 +2,11 @@ from flask import Blueprint
 from sqlalchemy.exc import IntegrityError, DataError
 
 from anubis.models import db, Course
-from anubis.utils.users.auth import require_admin
+from anubis.utils.users.auth import require_admin, require_superuser
 from anubis.utils.data import row2dict
-from anubis.utils.decorators import json_response, json_endpoint
+from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response
+from anubis.utils.lms.course import get_visible_courses, assert_course_superuser
 
 courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
 
@@ -14,19 +15,20 @@ courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
 @require_admin()
 @json_response
 def admin_courses_list():
-    courses = Course.query.all()
+    professor_courses, ta_courses = get_visible_courses()
 
-    return success_response(
-        {
-            "courses": [
-                {"join_code": course.id[:6], **row2dict(course)} for course in courses
-            ],
-        }
-    )
+    return success_response({
+        "ta_courses": [
+            {"join_code": course.id[:6], **row2dict(course)} for course in ta_courses
+        ],
+        "professor_courses": [
+            {"join_code": course.id[:6], **row2dict(course)} for course in professor_courses
+        ],
+    })
 
 
 @courses_.route("/new")
-@require_admin()
+@require_superuser()
 @json_response
 def admin_courses_new():
     course = Course(
@@ -38,12 +40,10 @@ def admin_courses_new():
     db.session.add(course)
     db.session.commit()
 
-    return success_response(
-        {
-            "course": course.data,
-            "status": "Created new course",
-        }
-    )
+    return success_response({
+        "course": course.data,
+        "status": "Created new course",
+    })
 
 
 @courses_.route("/save", methods=["POST"])
@@ -55,6 +55,8 @@ def admin_courses_save_id(course: dict):
 
     if db_course is None:
         return error_response("Course not found.")
+
+    assert_course_superuser(course_id)
 
     for key, value in course.items():
         setattr(db_course, key, value)

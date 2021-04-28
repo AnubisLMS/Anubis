@@ -1,8 +1,8 @@
 from flask import Blueprint
 
 from anubis.models import db, Config
-from anubis.utils.users.auth import require_admin
-from anubis.utils.decorators import json_response, json_endpoint
+from anubis.utils.users.auth import require_admin, require_superuser
+from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response
 
 config_ = Blueprint('config', __name__, url_prefix='/admin/config')
@@ -20,7 +20,7 @@ def config_list():
 
 
 @config_.route('/save', methods=['POST'])
-@require_admin(unless_debug=True)
+@require_superuser(unless_debug=True)
 @json_endpoint(required_fields=[('config', list)])
 def config_add(config, **_):
     """

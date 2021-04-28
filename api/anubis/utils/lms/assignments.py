@@ -17,10 +17,12 @@ from anubis.models import (
     SubmissionTestResult,
 )
 from anubis.utils.users.auth import get_user
+from anubis.utils.lms.course import is_course_admin
 from anubis.utils.services.cache import cache
 from anubis.utils.data import is_debug
 from anubis.utils.services.logger import logger
-from anubis.utils.assignment.questions import ingest_questions
+from anubis.utils.lms.questions import ingest_questions
+from anubis.utils.lms.course import assert_course_admin
 
 
 @cache.memoize(timeout=5, unless=is_debug)
@@ -55,20 +57,28 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
     if user is None:
         return None
 
-    filters = []
+    course_ids = []
+    in_courses = InCourse.query.join(Course).filter(
+        InCourse.owner_id == user.id,
+    ).all()
+
     if course_id is not None:
-        filters.append(Course.id == course_id)
+        course_ids = [course_id]
+    else:
+        course_ids = [in_course.course.id for in_course in in_courses]
 
-    # Only hide assignments if user is not admin
-    if not (user.is_admin or user.is_superuser):
-        filters.append(Assignment.release_date <= datetime.now())
-        filters.append(Assignment.hidden == False)
+    assignments = []
+    for course in course_ids:
+        filters = []
+        if not (user.is_superuser or is_course_admin(course_id)):
+            filters.append(Assignment.release_date <= datetime.now())
+            filters.append(Assignment.hidden == False)
 
-    assignments = Assignment.query \
-        .join(Course).join(InCourse).join(User).filter(
-        User.netid == netid,
-        *filters
-    ).order_by(Assignment.due_date.desc()).all()
+        course_assignments = Assignment.query.join(Course).filter(
+            Course.id == course,
+            *filters,
+        ).order_by(Assignment.due_date.desc()).all()
+        assignments.extend(course_assignments)
 
     a = [a.data for a in assignments]
     for assignment_data in a:
@@ -160,9 +170,11 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     if c is None:
         return "Unable to find class", False
 
+    assert_course_admin(c.id)
+
     # Check if it exists
     if assignment is None:
-        assignment = Assignment(unique_code=assignment_data["unique_code"])
+        assignment = Assignment(unique_code=assignment_data["unique_code"], course=c)
 
     # Update fields
     assignment.name = assignment_data["name"]
@@ -170,7 +182,6 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     assignment.description = assignment_data["description"]
     assignment.pipeline_image = assignment_data["pipeline_image"]
     assignment.github_classroom_url = assignment_data["github_classroom_url"]
-    assignment.course = c
     try:
         assignment.release_date = date_parse(assignment_data["date"]["release"])
         assignment.due_date = date_parse(assignment_data["date"]["due"])

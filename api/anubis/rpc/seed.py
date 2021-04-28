@@ -19,7 +19,7 @@ from anubis.models import (
     AssignedQuestionResponse,
 )
 from anubis.utils.data import rand
-from anubis.utils.assignment.questions import assign_questions
+from anubis.utils.lms.questions import assign_questions
 
 
 def rand_str(n=10):

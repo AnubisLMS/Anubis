@@ -113,7 +113,6 @@ export default function App() {
     setOpen(false);
   };
 
-
   return (
     <ThemeProvider theme={theme}>
       <div className={classes.root}>

@@ -3,9 +3,9 @@ import string
 from flask import Blueprint
 
 from anubis.models import db, User, InCourse, Course
-from anubis.utils.assignment.assignments import get_courses
+from anubis.utils.lms.assignments import get_courses
 from anubis.utils.users.auth import require_user, current_user
-from anubis.utils.decorators import json_response
+from anubis.utils.http.decorators import json_response
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import success_response, error_response
 

@@ -2,9 +2,10 @@ from flask import Blueprint
 
 from anubis.models import db, User, Course, InCourse, Submission
 from anubis.utils.users.auth import require_admin, current_user
+from anubis.utils.lms.course import get_course_context
 from anubis.utils.services.cache import cache
 from anubis.utils.data import is_debug
-from anubis.utils.decorators import json_response, json_endpoint
+from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response, get_number_arg
 from anubis.utils.users.students import get_students
 
@@ -16,7 +17,11 @@ students = Blueprint("admin-students", __name__, url_prefix="/admin/students")
 @json_response
 @cache.cached(timeout=5, unless=is_debug)
 def admin_students_list():
-    return success_response({"students": get_students()})
+    course = get_course_context()
+
+    return success_response({
+        "students": get_students(course_id=course.id)
+    })
 
 
 @students.route("/info/<string:id>")

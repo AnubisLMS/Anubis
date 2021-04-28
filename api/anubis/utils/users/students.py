@@ -6,7 +6,7 @@ from anubis.utils.data import is_debug
 
 
 @cache.memoize(timeout=60, unless=is_debug)
-def get_students(course_code: str = None) -> List[Dict[str, dict]]:
+def get_students(course_id: str = None, course_code: str = None) -> List[Dict[str, dict]]:
     """
     Get students by course code. If no course code is specified,
     then all courses will be considered.
@@ -14,6 +14,7 @@ def get_students(course_code: str = None) -> List[Dict[str, dict]]:
     * This response is cached for up to 60 seconds *
 
     :param course_code:
+    :param course_id:
     :return:
     """
 
@@ -22,7 +23,10 @@ def get_students(course_code: str = None) -> List[Dict[str, dict]]:
 
     # If a course code is specified, then add it to the filter
     if course_code is not None:
-        filters = [Course.course_code == course_code]
+        filters.append(Course.course_code == course_code)
+
+    if course_id is not None:
+        filters.append(Course.id == course_id)
 
     # Get all users, and break them into their data props
     return [

@@ -12,12 +12,12 @@ from anubis.models import (
     Submission,
 )
 from anubis.utils.data import is_debug
-from anubis.utils.decorators import json_response
+from anubis.utils.http.decorators import json_response
 from anubis.utils.services.elastic import log_endpoint, esindex
 from anubis.utils.http.https import error_response, success_response
 from anubis.utils.services.logger import logger
 from anubis.utils.services.rpc import enqueue_autograde_pipeline
-from anubis.utils.assignment.webhook import parse_webhook, guess_github_username, check_repo
+from anubis.utils.lms.webhook import parse_webhook, guess_github_username, check_repo
 
 webhook = Blueprint("public-webhook", __name__, url_prefix="/public/webhook")
 
@@ -93,10 +93,8 @@ def public_webhook():
         return success_response("initial commit")
 
     repo = (
-        AssignmentRepo.query.join(Assignment)
-            .join(Course)
-            .join(InCourse)
-            .join(User)
+        AssignmentRepo.query
+            .join(Assignment).join(Course).join(InCourse).join(User)
             .filter(
             User.github_username == github_username_guess,
             Assignment.unique_code == assignment.unique_code,
@@ -192,6 +190,11 @@ def public_webhook():
     )
 
     # if the github username is not found, create a dangling submission
-    enqueue_autograde_pipeline(submission.id)
+    if assignment.autograde_enabled:
+        enqueue_autograde_pipeline(submission.id)
+    else:
+        submission.processed = 1
+        submission.state = 'autograde disabled for this assignment'
+        db.session.commit()
 
     return success_response("submission accepted")

@@ -409,7 +409,7 @@ def reap_theia_session(theia_session_id: str):
         db.session.commit()
 
 
-def reap_all_theia_sessions(*_):
+def reap_all_theia_sessions(course_id: str):
     from anubis.app import create_app
 
     app = create_app()
@@ -419,7 +419,8 @@ def reap_all_theia_sessions(*_):
 
     with app.app_context():
         theia_sessions = TheiaSession.query.filter(
-            TheiaSession.active,
+            TheiaSession.active == True,
+            TheiaSession.course_id == course_id,
         ).all()
 
         for n, theia_session in enumerate(theia_sessions):

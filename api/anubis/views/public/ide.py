@@ -5,7 +5,7 @@ from flask import Blueprint, request
 
 from anubis.models import User, TheiaSession, db, Assignment, AssignmentRepo
 from anubis.utils.users.auth import current_user, require_user
-from anubis.utils.decorators import json_response, load_from_id
+from anubis.utils.http.decorators import json_response, load_from_id
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import error_response, success_response
 from anubis.utils.services.logger import logger
@@ -197,6 +197,7 @@ def public_ide_initialize(assignment: Assignment):
     session = TheiaSession(
         owner_id=user.id,
         assignment_id=assignment.id,
+        course_id=assignment.course.id,
         repo_url=repo.repo_url,
         network_locked=True,
         privileged=False,

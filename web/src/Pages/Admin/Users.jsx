@@ -40,23 +40,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-const toggleAdmin = (id, {setStudents, setEdits}, enqueueSnackbar) => () => {
-  axios.get(`/api/admin/students/toggle-admin/${id}`).then((response) => {
-    if (standardStatusHandler(response, enqueueSnackbar)) {
-      setStudents((students) => {
-        for (const student of students) {
-          if (student.id === id) {
-            student.is_admin = !student.is_admin;
-          }
-        }
-        return students;
-      });
-      setEdits((state) => ++state);
-    }
-  }).catch(standardErrorHandler(enqueueSnackbar));
-};
-
-
 const toggleSuperuser = (id, {setStudents, setEdits}, enqueueSnackbar) => () => {
   axios.get(`/api/admin/students/toggle-superuser/${id}`).then((response) => {
     if (standardStatusHandler(response, enqueueSnackbar)) {
@@ -116,20 +99,6 @@ const useColumns = (pageState, enqueueSnackbar) => ([
   {field: 'netid', headerName: 'netid'},
   {field: 'name', headerName: 'Name', width: 150},
   {field: 'github_username', headerName: 'Github Username', width: 200},
-  {
-    field: 'is_admin',
-    headerName: 'Admin',
-    renderCell: (params) => (
-      <React.Fragment>
-        <Switch
-          checked={params.row.is_admin}
-          color={'primary'}
-          onClick={toggleAdmin(params.row.id, pageState, enqueueSnackbar)}
-        />
-      </React.Fragment>
-    ),
-    width: 150,
-  },
   {
     field: 'is_superuser',
     headerName: 'Superuser',
