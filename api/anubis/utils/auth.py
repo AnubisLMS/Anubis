@@ -1,3 +1,4 @@
+import functools
 import traceback
 from datetime import datetime, timedelta
 from functools import wraps
@@ -148,6 +149,30 @@ def require_user(unless_debug=False):
     return decorator
 
 
+def _course_context_wrapper(function):
+    @functools.wraps(function)
+    def wrapper(*args, **kwargs):
+        try:
+            return function(*args, **kwargs )
+        except LackCourseContext:
+            logger.error(traceback.format_exc())
+            return error_response('Missing course context'), 400
+
+    return wrapper
+
+
+def _auth_context_wrapper(function):
+    @functools.wraps(function)
+    def wrapper(*args, **kwargs):
+        try:
+            return function(*args, **kwargs )
+        except AuthenticationError:
+            logger.error(traceback.format_exc())
+            return error_response('Unauthenticated'), 401
+
+    return wrapper
+
+
 def require_admin(unless_debug=False, unless_vpn=False):
     """
     Wrap a function to require an admin to be logged in.
@@ -161,6 +186,8 @@ def require_admin(unless_debug=False, unless_vpn=False):
 
     def decorator(func):
         @wraps(func)
+        @_auth_context_wrapper
+        @_course_context_wrapper
         def wrapper(*args, **kwargs):
             # Get the user in the current
             # request context.
@@ -179,25 +206,22 @@ def require_admin(unless_debug=False, unless_vpn=False):
             # in the current request context, and
             # that use is an admin.
             if user is None:
-                return error_response("Unauthenticated"), 401
+                raise AuthenticationError('Request is anonymous')
 
-            if user is not None:
-                ta = TAForCourse.query.filter(
-                    TAForCourse.owner_id == user.id).first()
-                prof = ProfessorForCourse.query.filter(
-                    ProfessorForCourse.owner_id == user.id).first()
-
-                if ta is None and prof is None and not user.is_superuser:
-                    return error_response("Unauthenticated"), 401
-
-            try:
-                # Pass the parameters to the
-                # decorated function.
+            if user.is_superuser:
                 return func(*args, **kwargs)
-            except AuthenticationError:
-                return error_response('Unauthenticated'), 401
-            except LackCourseContext:
-                return error_response('Missing course context'), 400
+
+            ta = TAForCourse.query.filter(
+                TAForCourse.owner_id == user.id).first()
+            prof = ProfessorForCourse.query.filter(
+                ProfessorForCourse.owner_id == user.id).first()
+
+            if ta is None and prof is None:
+                raise AuthenticationError('User is not ta or professor')
+
+            # Pass the parameters to the
+            # decorated function.
+            return func(*args, **kwargs)
 
         return wrapper
 
@@ -234,8 +258,13 @@ def require_superuser(unless_debug=False, unless_vpn=False):
             # Check that there is a user specified
             # in the current request context, and
             # that use is a superuser.
-            if user is None or user.is_superuser is False:
+            if user is None:
                 return error_response("Unauthenticated"), 401
+
+            # If the user is not a superuser, then return a 400 error
+            # so it will be displayed in a snackbar.
+            if user.is_superuser is False:
+                return error_response("Requires superuser"), 400
 
             # Pass the parameters to the
             # decorated function.

@@ -1,13 +1,14 @@
 from flask import Blueprint
 
 from anubis.models import db, User, Course, InCourse, Submission, Assignment
-from anubis.utils.users.auth import require_admin, current_user, require_superuser
+from anubis.utils.auth import require_admin, current_user, require_superuser
 from anubis.utils.lms.course import get_course_context
 from anubis.utils.services.cache import cache
 from anubis.utils.data import is_debug
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response, get_number_arg
-from anubis.utils.users.students import get_students
+from anubis.utils.lms.students import get_students
+from anubis.utils.lms.course import assert_course_superuser
 
 students = Blueprint("admin-students", __name__, url_prefix="/admin/students")
 
@@ -47,25 +48,22 @@ def admin_students_info_id(id: str):
         User.id == id,
     ).first()
 
+    course = get_course_context()
+
     # Check if student exists
     if student is None:
         return error_response("Student does not exist"), 400
 
     # Get courses student is in
-    courses = (
-        Course.query.join(InCourse)
-            .filter(
-            InCourse.owner_id == student.id,
-        )
-            .all()
-    )
+    courses = Course.query.join(InCourse).filter(
+        InCourse.owner_id == student.id,
+        InCourse.course_id == course.id,
+    ).all()
 
-    return success_response(
-        {
-            "student": student.data,
-            "courses": [course.data for course in courses],
-        }
-    )
+    return success_response({
+        "student": student.data,
+        "courses": [course.data for course in courses],
+    })
 
 
 @students.route("/submissions/<string:id>")
@@ -90,26 +88,22 @@ def admin_students_submissions_id(id: str):
         Submission.query.join(Assignment).filter(
             Submission.owner_id == student.id,
             Assignment.course_id == course.id,
-        )
-            .orderby(Submission.created.desc())
-            .limit(limit)
-            .all()
+        ).order_by(Submission.created.desc()).limit(limit).all()
     )
 
-    return success_response(
-        {
-            "student": student.data,
-            "submissions": [submission.data for submission in submissions],
-        }
-    )
+    return success_response({
+        "student": student.data,
+        "submissions": [submission.data for submission in submissions],
+    })
 
 
 @students.route("/update/<string:id>", methods=["POST"])
-@require_superuser()
+@require_admin()
 @json_endpoint(
     required_fields=[("name", str), ("github_username", str)], only_required=True
 )
 def admin_students_update_id(id: str, name: str = None, github_username: str = None):
+    user = current_user()
     student = User.query.filter(
         User.id == id,
     ).first()
@@ -117,6 +111,20 @@ def admin_students_update_id(id: str, name: str = None, github_username: str = N
     # Check if student exists
     if student is None:
         return error_response("Student does not exist"), 400
+
+    if student.is_superuser and not user.is_superuser:
+        return error_response('You cannot edit a superuser'), 400
+
+    course = get_course_context()
+    assert_course_superuser(course.id)
+
+    incourse = InCourse.query.filter(
+        InCourse.owner_id == student.id,
+        InCourse.course_id == course.id,
+    ).first()
+
+    if incourse is None:
+        return error_response('You cannot edit someone not in your course'), 400
 
     # Update fields
     student.name = name
@@ -126,11 +134,9 @@ def admin_students_update_id(id: str, name: str = None, github_username: str = N
     db.session.add(student)
     db.session.commit()
 
-    return success_response(
-        {
-            "status": "saved",
-        }
-    )
+    return success_response({
+        "status": "saved",
+    })
 
 
 @students.route("/toggle-superuser/<string:id>")

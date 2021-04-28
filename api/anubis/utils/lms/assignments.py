@@ -16,7 +16,7 @@ from anubis.models import (
     AssignmentRepo,
     SubmissionTestResult,
 )
-from anubis.utils.users.auth import get_user
+from anubis.utils.auth import get_user
 from anubis.utils.lms.course import is_course_admin
 from anubis.utils.services.cache import cache
 from anubis.utils.data import is_debug
@@ -161,10 +161,11 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     ).first()
 
     # Attempt to find the class
+    course_name = assignment_data.get('class', None) or assignment_data.get('course', None)
     c: Course = Course.query.filter(
         or_(
-            Course.name == assignment_data["class"],
-            Course.course_code == assignment_data["class"],
+            Course.name == course_name,
+            Course.course_code == course_name,
         )
     ).first()
     if c is None:

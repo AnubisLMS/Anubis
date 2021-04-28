@@ -1,3 +1,4 @@
+import functools
 from datetime import datetime
 from email.mime.text import MIMEText
 from hashlib import sha256
@@ -275,3 +276,25 @@ def row2dict(row) -> dict:
         raw[column.name] = value
 
     return raw
+
+
+def with_context(function):
+    """
+    This decorator is meant to save time and repetitive initialization
+    when using flask-sqlalchemy outside of an app_context.
+
+    :param function:
+    :return:
+    """
+    @functools.wraps(function)
+    def wrapper(*args, **kwargs):
+        from anubis.app import create_app
+
+        # Create app
+        app = create_app()
+
+        # Push an app context
+        with app.app_context():
+            return function(*args, **kwargs)
+
+    return wrapper

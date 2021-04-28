@@ -4,7 +4,7 @@ from datetime import timedelta, datetime
 from flask import Blueprint, request
 
 from anubis.models import User, db
-from anubis.utils.users.auth import current_user, require_user
+from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import error_response, success_response
@@ -38,18 +38,25 @@ def public_set_github_username():
             "or single hyphens, and cannot begin or end with a hyphen."
         )
 
+    other = User.query.filter(
+        User.id != u.id,
+        User.github_username == github_username
+    ).first()
+    if other:
+        return error_response('That github username is already taken!'), 400
+
     logger.info(str(u.last_updated))
     logger.info(str(u.last_updated + timedelta(hours=1)) + " - " + str(datetime.now()))
 
-    if (
-            u.github_username is not None
-            and u.last_updated + timedelta(hours=1) < datetime.now()
-    ):
-        return error_response(
-            "Github usernames can only be "
-            "changed one hour after first setting. "
-            "Email the TAs to reset your github username."
-        )  # reject their github username change
+    # if (
+    #         u.github_username is not None
+    #         and u.last_updated + timedelta(hours=1) < datetime.now()
+    # ):
+    #     return error_response(
+    #         "Github usernames can only be "
+    #         "changed one hour after first setting. "
+    #         "Email the TAs to reset your github username."
+    #     )  # reject their github username change
 
     u.github_username = github_username
     db.session.add(u)

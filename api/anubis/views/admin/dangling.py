@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 from anubis.models import Submission
-from anubis.utils.users.auth import require_superuser
+from anubis.utils.auth import require_superuser
 from anubis.utils.http.decorators import json_response
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import success_response
@@ -10,7 +10,7 @@ from anubis.utils.lms.submissions import fix_dangling
 dangling = Blueprint("admin-dangling", __name__, url_prefix="/admin/dangling")
 
 
-@dangling.route("/")
+@dangling.route("/list")
 @require_superuser()
 @log_endpoint("cli", lambda: "dangling")
 @json_response
@@ -61,4 +61,4 @@ def private_fix_dangling():
 
     :return:
     """
-    return fix_dangling()
+    return success_response({'fixed': fix_dangling()})

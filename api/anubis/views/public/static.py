@@ -17,6 +17,7 @@ def public_static(path: str, filename: str = None):
 
     * response is possibly cached *
 
+    :param filename:
     :param path:
     :return:
     """

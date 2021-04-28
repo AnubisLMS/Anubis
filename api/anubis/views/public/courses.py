@@ -4,7 +4,7 @@ from flask import Blueprint
 
 from anubis.models import db, User, InCourse, Course
 from anubis.utils.lms.assignments import get_courses
-from anubis.utils.users.auth import require_user, current_user
+from anubis.utils.auth import require_user, current_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import success_response, error_response
@@ -29,6 +29,7 @@ def valid_join_code(join_code: str) -> bool:
 
 
 @courses.route("/")
+@courses.route("/list")
 @require_user()
 @log_endpoint("public-classes")
 @json_response

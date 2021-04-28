@@ -45,6 +45,14 @@ push:
 	docker-compose build --parallel --pull $(PUSH_SERVICES)
 	docker-compose push $(PUSH_SERVICES)
 
+startup-links:
+	@echo ''
+	@echo 'seed: http://localhost/api/admin/seed/'
+	@echo 'auth: http://localhost/api/admin/auth/token/super'
+	@echo 'auth: http://localhost/api/admin/auth/token/ta'
+	@echo 'auth: http://localhost/api/admin/auth/token/professor'
+	@echo 'site: http://localhost/'
+
 .PHONY: debug        # Start the cluster in debug mode
 debug:
 	docker-compose up -d $(PERSISTENT_SERVICES)
@@ -55,10 +63,7 @@ debug:
 	sleep 3
 	@echo 'running migrations'
 	make -C api migrations
-	@echo ''
-	@echo 'seed: http://localhost/api/admin/seed/'
-	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
-	@echo 'site: http://localhost/'
+	make startup-links
 
 .PHONY: mindebug     # Start the minimal cluster in debug mode
 mindebug:
@@ -70,26 +75,17 @@ mindebug:
 	sleep 3
 	@echo 'running migrations'
 	make -C api migrations
-	@echo ''
-	@echo 'seed: http://localhost/api/admin/seed/'
-	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
-	@echo 'site: http://localhost/'
+	make startup-links
 
 .PHONY: mkdebug      # Start minikube debug
 mkdebug:
 	./k8s/debug/provision.sh
-	@echo ''
-	@echo 'seed: http://localhost/api/admin/seed/'
-	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
-	@echo 'site: http://localhost/'
+	make startup-links
 
 .PHONY: mkrestart    # Restart minikube debug
 mkrestart:
 	./k8s/debug/restart.sh
-	@echo ''
-	@echo 'seed: http://localhost/api/admin/seed/'
-	@echo 'auth: http://localhost/api/admin/auth/token/jmc1283'
-	@echo 'site: http://localhost/'
+	make startup-links
 
 yeetdb:
 	docker-compose kill db

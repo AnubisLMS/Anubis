@@ -50,7 +50,7 @@ class User(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     ta_for = db.relationship('TAForCourse', cascade='all,delete')
-    professor_for = db.relationship('TAForCourse', cascade='all,delete')
+    professor_for = db.relationship('ProfessorForCourse', cascade='all,delete')
 
     @property
     def data(self):
@@ -129,16 +129,14 @@ class TAForCourse(db.Model):
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), primary_key=True)
 
-    owner = db.relationship(User, viewonly=True)
-    course = db.relationship(Course, viewonly=True)
+    owner = db.relationship(User)
+    course = db.relationship(Course)
 
     @property
     def data(self):
         return {
-            'course': {
-                'id': self.course.id,
-                'name': self.course.name,
-            }
+            'id': self.course.id,
+            'name': self.course.name,
         }
 
 
@@ -149,16 +147,14 @@ class ProfessorForCourse(db.Model):
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), primary_key=True)
 
-    owner = db.relationship(User, viewonly=True)
-    course = db.relationship(Course, viewonly=True)
+    owner = db.relationship(User)
+    course = db.relationship(Course)
 
     @property
     def data(self):
         return {
-            'course': {
-                'id': self.course.id,
-                'name': self.course.name,
-            }
+            'id': self.course.id,
+            'name': self.course.name,
         }
 
 
@@ -294,7 +290,7 @@ class AssignmentTest(db.Model):
     hidden = db.Column(db.Boolean, default=False)
 
     # Relationships
-    assignment = db.relationship(Assignment, viewonly=True)
+    assignment = db.relationship(Assignment)
 
     @property
     def data(self):
@@ -467,10 +463,10 @@ class Submission(db.Model):
 
     # Relationships
     owner = db.relationship(User)
-    assignment = db.relationship(Assignment, viewonly=True)
+    assignment = db.relationship(Assignment)
     build = db.relationship("SubmissionBuild", cascade="all,delete", uselist=False)
     test_results = db.relationship("SubmissionTestResult", cascade="all,delete")
-    repo = db.relationship(AssignmentRepo, viewonly=True)
+    repo = db.relationship(AssignmentRepo)
 
     def init_submission_models(self):
         """
@@ -664,7 +660,7 @@ class SubmissionBuild(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Relationships
-    submission = db.relationship(Submission, viewonly=True)
+    submission = db.relationship(Submission)
 
     @property
     def data(self):

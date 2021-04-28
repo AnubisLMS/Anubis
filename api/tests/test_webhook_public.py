@@ -5,7 +5,7 @@ import os
 import requests
 
 from anubis.models import db, User, Assignment, InCourse, Course
-from utils import app_context, do_seed
+from anubis.utils.data import with_context
 
 
 def pp(data: dict):
@@ -36,8 +36,7 @@ def gen_webhook(name, code, username, after=None, before=None, ref="refs/heads/m
 
 def post_webhook(webhook):
     return requests.post(
-        'http://localhost:5000/public/webhook/',
-        json=webhook,
+        'http://localhost:5000/public/webhook/', json=webhook,
         headers={'Content-Type': 'application/json', 'X-GitHub-Event': 'push'},
     )
 
@@ -46,28 +45,30 @@ def gen_rand(n: int = 40):
     return hashlib.sha256(os.urandom(12)).hexdigest()[:n]
 
 
-@app_context
+@with_context
 def create_user(github_username: str):
     u = User(netid=gen_rand(6), name=gen_rand(6), github_username=github_username)
-    c = Course.query.first()
+    c = Course.query.filter(Course.name == 'Intro to OS').first()
     ic = InCourse(course=c, owner=u)
     db.session.add_all([u, ic])
     db.session.commit()
     return u.github_username
 
 
-@app_context
+@with_context
 def do_webhook_tests_user(github_username):
     user = User.query.filter_by(github_username=github_username).first()
 
     import pymysql
-    connection = pymysql.connect(host='localhost',
-                                 user='anubis',
-                                 password='anubis',
-                                 database='anubis',
-                                 charset='utf8mb4')
+    connection = pymysql.connect(
+        host='localhost',
+        user='anubis',
+        password='anubis',
+        database='anubis',
+        charset='utf8mb4'
+    )
 
-    assignment = Assignment.query.filter_by(name='uniq').first()
+    assignment = Assignment.query.join(Course).filter(Course.name == 'Intro to OS').first()
     r = post_webhook(
         gen_webhook(assignment.name, assignment.unique_code, user.github_username, "0" * 40, "0" * 40)).json()
     assert r['data'] == 'initial commit'
@@ -116,12 +117,10 @@ def do_webhook_tests_user(github_username):
 
 
 def test_webhooks():
-    do_seed()
-
     username1 = create_user(f'abc123')
     username2 = create_user(f'{gen_rand(3)}-{gen_rand(3)}')
 
-    do_webhook_tests_user('wabscale')
+    do_webhook_tests_user('superuser')
     do_webhook_tests_user(username1)
     do_webhook_tests_user(username2)
 

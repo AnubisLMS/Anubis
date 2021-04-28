@@ -3,7 +3,7 @@ from rq import Queue
 
 from anubis.config import config
 from anubis.rpc.pipeline import create_submission_pipeline
-from anubis.rpc.seed import seed_debug
+from anubis.rpc.seed import seed
 from anubis.rpc.theia import (
     initialize_theia_session,
     reap_theia_session,
@@ -51,7 +51,7 @@ def enqueue_ide_reap_stale(*args):
 
 def enqueue_seed():
     """Enqueue debug seed data"""
-    rpc_enqueue(seed_debug, queue='default')
+    rpc_enqueue(seed, queue='default')
 
 
 def enqueue_create_visuals(*_):

@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from anubis.utils.users.auth import require_admin
+from anubis.utils.auth import require_admin
 from anubis.utils.data import is_debug
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response, error_response

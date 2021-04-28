@@ -11,6 +11,7 @@ def register_admin_views(app):
     from anubis.views.admin.courses import courses_
     from anubis.views.admin.config import config_
     from anubis.views.admin.visuals import visuals_
+    from anubis.views.admin.dangling import dangling
 
     views = [
         ide,
@@ -25,6 +26,7 @@ def register_admin_views(app):
         courses_,
         config_,
         visuals_,
+        dangling,
     ]
 
     for view in views:

@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 from anubis.models import Submission, Assignment, User
-from anubis.utils.users.auth import require_admin
+from anubis.utils.auth import require_admin
 from anubis.utils.http.decorators import json_response
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import success_response, error_response, get_number_arg

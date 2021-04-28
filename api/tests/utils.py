@@ -1,16 +1,15 @@
-import functools
+import base64
 import json
 import os
-import random
-import string
 import sys
 import traceback
 
 import requests
 
 from anubis.app import create_app
-from anubis.models import db, User
-from anubis.utils.users.auth import create_token
+from anubis.models import db, User, Course, InCourse, TAForCourse, ProfessorForCourse, AssignmentRepo
+from anubis.utils.data import with_context
+from anubis.utils.seed import create_name, create_netid
 
 os.environ["DEBUG"] = "1"
 os.environ["DISABLE_ELK"] = "1"
@@ -32,26 +31,6 @@ def initialize_env():
 
     if api_root not in sys.path:
         sys.path.append(api_root)
-
-
-def app_context(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        initialize_env()
-
-        from anubis.app import create_app
-        app = create_app()
-
-        with app.app_context():
-            return func(*args, **kwargs)
-
-    return wrapper
-
-
-@app_context
-def do_seed():
-    from anubis.rpc.seed import seed_main
-    seed_main()
 
 
 def format_exception(e: Exception):
@@ -90,30 +69,58 @@ def print_full_error(e, r):
     exit(1)
 
 
-def _create_user_session(url: str, name: str, netid: str, admin: bool, superuser: bool):
-    """
-    Create a new user on the backend
+@with_context
+def create_user(permission: str = 'superuser', add_to_os: bool = True):
+    assert permission in ['superuser', 'professor', 'ta', 'student']
 
-    :return: requests session
-    """
+    name = create_name()
+    netid = create_netid(name)
 
     # Create user in db
     user = User(
         netid=netid,
         name=name,
         github_username=netid,
-        is_admin=admin,
-        is_superuser=superuser,
+        is_superuser=permission == 'superuser',
     )
     db.session.add(user)
+
+    course = Course.query.filter(Course.name == 'Intro to OS').first()
+
+    if add_to_os:
+        db.session.add(InCourse(
+            owner=user,
+            course=course,
+        ))
+    if permission == 'ta':
+        db.session.add(TAForCourse(
+            course=course,
+            owner=user,
+        ))
+    if permission == 'professor':
+        db.session.add(ProfessorForCourse(
+            course=course,
+            owner=user,
+        ))
     db.session.commit()
 
-    # Get user token
-    token = create_token(netid)
+    return netid
+
+
+def _create_user_session(url: str, netid: str = 'superuser', new: bool = False, add_to_os: bool = True):
+    """
+    Create a new user on the backend
+
+    :return: requests session
+    """
 
     # Create requests session
     session = requests.session()
-    session.cookies["token"] = token
+
+    if new:
+        netid = create_user(netid, add_to_os)
+
+    session.get(url + f'/admin/auth/token/{netid}')
     r = session.get(url + "/public/auth/whoami")
 
     try:
@@ -122,29 +129,16 @@ def _create_user_session(url: str, name: str, netid: str, admin: bool, superuser
         assert data["success"] is True
         assert data["data"] is not None
         assert data["error"] is None
+        admin_for = data['data']['user']['admin_for']
+        for i in admin_for:
+            if i['name'] == 'Intro to OS':
+                session.cookies['course'] = base64.urlsafe_b64encode(json.dumps(i).encode()).decode()
     except AssertionError as e:
         print_full_error(e, r)
-    return session
+    return session, netid
 
 
-def create_name() -> str:
-    name_file_path = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), "names.json"
-    )
-    name_file = open(name_file_path)
-    names = json.load(name_file)
-
-    return f"{random.choice(names)} {random.choice(names)}"
-
-
-def create_netid(name: str) -> str:
-    initials = "".join(word[0].lower() for word in name.split())
-    numbers = "".join(random.choice(string.digits) for _ in range(3))
-
-    return f"{initials}{numbers}"
-
-
-class TestSession(object):
+class Session(object):
     """
     This object will provide you with a functioning test session with
     a ransom user set up with it. You can call the get and post functions
@@ -156,14 +150,13 @@ class TestSession(object):
     """
 
     def __init__(
-            self, domain: str = "localhost", port: int = 80, admin=False, superuser=False
+            self, permission: str = 'superuser', new: bool = False, add_to_os: bool = True,
+            domain: str = "localhost", port: int = 80,
     ):
         self.url = f"http://{domain}:{port}/api"
         self.timings = []
-        self.name = create_name()
-        self.netid = create_netid(self.name)
-        self._session = _create_user_session(
-            self.url, self.name, self.netid, admin, superuser
+        self._session, self.netid = _create_user_session(
+            self.url, permission, new=new, add_to_os=add_to_os
         )
 
     @staticmethod
@@ -246,33 +239,17 @@ class TestSession(object):
         )
 
     def post(
-            self,
-            path,
-            return_request=False,
-            should_succeed=True,
-            should_fail=False,
-            skip_verify=False,
-            **kwargs,
+            self, path, return_request=False, should_succeed=True,
+            should_fail=False, skip_verify=False, **kwargs,
     ):
         return self._make_request(
-            path,
-            self._session.post,
-            return_request,
-            should_succeed,
-            should_fail,
-            skip_verify,
-            **kwargs,
+            path, self._session.post, return_request, should_succeed,
+            should_fail, skip_verify, **kwargs,
         )
 
     def post_json(
-            self,
-            path,
-            json,
-            return_request=False,
-            should_succeed=True,
-            should_fail=False,
-            skip_verify=False,
-            **kwargs,
+            self, path, json, return_request=False, should_succeed=True,
+            should_fail=False, skip_verify=False, **kwargs,
     ):
         kwargs["json"] = json
         if "headers" not in kwargs:
@@ -300,9 +277,58 @@ def run_main(func):
         return func()
 
 
+@with_context
+def create_repo(s: Session, assignment_id: str = None):
+    if assignment_id is None:
+        assignments = s.get('/public/assignments/list')['assignments']
+        assignment_id = assignments[0]['id']
+    user = User.query.filter(User.netid == s.netid).first()
+    db.session.add(AssignmentRepo(
+        owner=user,
+        assignment_id=assignment_id,
+        github_username=s.netid,
+        repo_url='https://github.com/wabscale/xv6-public',
+    ))
+    db.session.commit()
+
+
+@with_context
+def get_student_id():
+    student = User.query.filter(User.netid == 'student').first()
+    return student.id
+
+
+def permission_test(path, fail_for: list = None, method='get', after: callable = None, **kwargs):
+    def _test_permission(_path, _fail_for, _method, _after, **_kwargs):
+        sessions = {
+            'student': Session('student'),
+            'ta': Session('ta'),
+            'professor': Session('professor'),
+            'superuser': Session('superuser'),
+        }
+
+        for permission, session in sessions.items():
+            if _method == 'get':
+                request_func = session.get
+            elif _method == 'post':
+                request_func = session.post_json
+            else:
+                request_func = session.get
+            request_func(path, should_fail=permission in _fail_for, **_kwargs)
+
+            if _after is not None:
+                _after()
+
+    if fail_for is None:
+        fail_for = ['student']
+
+
+    return _test_permission(path, fail_for, method, after, **kwargs)
+
+
 if __name__ == "__main__":
     def test_this_file():
-        ts = TestSession()
+        ts = Session()
         ts.get("/public/auth/whoami")
 
 

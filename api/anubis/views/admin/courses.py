@@ -6,11 +6,12 @@ from anubis.utils.data import row2dict
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response
 from anubis.utils.lms.course import assert_course_superuser, get_course_context
-from anubis.utils.users.auth import require_admin, require_superuser, current_user
+from anubis.utils.auth import require_admin, require_superuser, current_user
 
 courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
 
 
+@courses_.route("/")
 @courses_.route("/list")
 @require_admin()
 @json_response
@@ -53,8 +54,9 @@ def admin_courses_save_id(course: dict):
 
     assert_course_superuser(course_id)
 
-    for key, value in course.items():
-        setattr(db_course, key, value)
+    for column in Course.__table__.columns:
+        if column.name in course:
+            setattr(db_course, column.name, course[column.name])
 
     try:
         db.session.commit()
@@ -192,6 +194,7 @@ def admin_course_make_professor_id(user_id: str):
     return success_response({
         'status': 'Professor added to course'
     })
+
 
 @courses_.route('/remove/professor/<string:user_id>')
 @require_superuser()

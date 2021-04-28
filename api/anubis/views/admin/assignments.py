@@ -6,7 +6,7 @@ from sqlalchemy.exc import DataError, IntegrityError
 
 from anubis.models import db, Assignment, User, AssignmentTest, SubmissionTestResult
 from anubis.utils.lms.assignments import assignment_sync
-from anubis.utils.users.auth import require_admin
+from anubis.utils.auth import require_admin
 from anubis.utils.data import rand
 from anubis.utils.data import row2dict
 from anubis.utils.http.decorators import load_from_id, json_response, json_endpoint
@@ -68,9 +68,9 @@ def admin_assignments_list():
         Assignment.course_id == course.id
     ).order_by(Assignment.due_date.desc()).all()
 
-    return success_response(
-        {"assignments": [row2dict(assignment) for assignment in all_assignments]}
-    )
+    return success_response({
+        "assignments": [row2dict(assignment) for assignment in all_assignments]
+    })
 
 
 @assignments.route('/tests/toggle-hide/<string:assignment_test_id>')

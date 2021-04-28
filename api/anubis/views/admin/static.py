@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 
 from anubis.models import db, StaticFile
-from anubis.utils.users.auth import require_admin
+from anubis.utils.auth import require_admin
 from anubis.utils.data import rand
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.files import get_mime_type
@@ -38,7 +38,7 @@ def static_delete_static_id(static_id: str):
 @static.route("/list")
 @require_admin()
 @json_response
-def static_public_list():
+def admin_static_list():
     """
     List all public blob files. Optionally specify a limit
     and an offset.
@@ -68,7 +68,7 @@ def static_public_list():
 @static.route("/upload", methods=["POST"])
 @require_admin(unless_debug=True)
 @json_response
-def static_public_upload():
+def admin_static_upload():
     """
     Upload a new public static file. The file will immediately be
     publicly available.
@@ -118,9 +118,7 @@ def static_public_upload():
     db.session.add(blob)
     db.session.commit()
 
-    return success_response(
-        {
-            "status": f"{filename} uploaded",
-            "blob": blob.data,
-        }
-    )
+    return success_response({
+        "status": f"{filename} uploaded",
+        "blob": blob.data,
+    })

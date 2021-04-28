@@ -6,14 +6,14 @@ from sqlalchemy import or_
 
 from anubis.models import Submission, Assignment
 from anubis.rpc.batch import rpc_bulk_regrade
-from anubis.utils.users.auth import require_admin
+from anubis.utils.auth import require_admin
 from anubis.utils.data import split_chunks
 from anubis.utils.http.decorators import json_response
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import error_response, success_response, get_number_arg
 from anubis.utils.services.rpc import enqueue_autograde_pipeline, rpc_enqueue
 from anubis.utils.http.decorators import load_from_id
-from anubis.utils.lms.course import get_course_context, assert_course_admin
+from anubis.utils.lms.course import assert_course_admin
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 

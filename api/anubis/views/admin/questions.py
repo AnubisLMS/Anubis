@@ -2,7 +2,7 @@ import sqlalchemy.exc
 from flask import Blueprint
 
 from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQuestion
-from anubis.utils.users.auth import require_admin
+from anubis.utils.auth import require_admin
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import error_response, success_response
@@ -11,7 +11,7 @@ from anubis.utils.lms.questions import (
     get_all_questions,
     assign_questions,
 )
-from anubis.utils.lms.course import assert_course_admin, get_course_context
+from anubis.utils.lms.course import assert_course_admin, assert_course_superuser
 
 questions = Blueprint("admin-questions", __name__, url_prefix="/admin/questions")
 
@@ -105,7 +105,7 @@ def private_questions_hard_reset_unique_code(unique_code: str):
     if assignment is None:
         return error_response("Unable to find assignment")
 
-    assert_course_admin(assignment.course_id)
+    assert_course_superuser(assignment.course_id)
 
     # Hard reset questions
     hard_reset_questions(assignment)
@@ -147,7 +147,7 @@ def private_questions_reset_assignments_unique_code(unique_code: str):
     if assignment is None:
         return error_response("Unable to find assignment")
 
-    assert_course_admin(assignment.course_id)
+    assert_course_superuser(assignment.course_id)
 
     AssignedStudentQuestion.query.filter(
         AssignedStudentQuestion.assignment_id == assignment.id
@@ -196,11 +196,11 @@ def admin_questions_update(assignment_question_id: str, question: dict):
     })
 
 
-@questions.route("/get/<string:unique_code>")
+@questions.route("/get-assignments/<string:unique_code>")
 @require_admin()
 @log_endpoint("admin", lambda: "questions get")
 @json_response
-def private_questions_get_unique_code(unique_code: str):
+def private_questions_get_assignments_unique_code(unique_code: str):
     """
     Get all questions for the given assignment.
 
@@ -229,11 +229,11 @@ def private_questions_get_unique_code(unique_code: str):
     })
 
 
-@questions.route("/get-assignments/<string:unique_code>")
+@questions.route("/get/<string:unique_code>")
 @require_admin()
 @log_endpoint("admin", lambda: "get question assignments")
 @json_response
-def private_questions_get_assignments_unique_code(unique_code: str):
+def private_questions_get_unique_code(unique_code: str):
     """
     Get all questions for the given assignment.
 

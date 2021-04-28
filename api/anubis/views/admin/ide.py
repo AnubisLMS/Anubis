@@ -5,7 +5,7 @@ from flask import Blueprint
 
 from anubis.models import db, TheiaSession
 from anubis.rpc.theia import reap_all_theia_sessions
-from anubis.utils.users.auth import require_admin, current_user
+from anubis.utils.auth import require_admin, current_user
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import success_response, error_response
@@ -16,53 +16,7 @@ from anubis.utils.lms.course import get_course_context
 ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 
 
-@ide.route("/initialize")
-@require_admin()
-@log_endpoint("admin-ide-initialize")
-@json_response
-def admin_ide_initialize():
-    user = current_user()
-    course = get_course_context()
-
-    session = TheiaSession.query.filter(
-        TheiaSession.active,
-        TheiaSession.owner_id == user.id,
-        TheiaSession.course_id == course.id,
-        TheiaSession.assignment_id == None,
-    ).first()
-
-    if session is not None:
-        return success_response({
-            "session": session.data,
-            "settings": session.settings,
-        })
-
-    # Create a new session
-    session = TheiaSession(
-        owner_id=user.id,
-        course_id=course.id,
-        assignment_id=None,
-        network_locked=False,
-        privileged=True,
-        image="registry.osiris.services/anubis/theia-admin",
-        repo_url="https://github.com/os3224/anubis-assignment-tests.git",
-        options={'limits': {'cpu': '4', 'memory': '4Gi'}},
-        active=True,
-        state="Initializing",
-    )
-    db.session.add(session)
-    db.session.commit()
-
-    # Send kube resource initialization rpc job
-    enqueue_ide_initialize(session.id)
-
-    return success_response({
-        "session": session.data,
-        "settings": session.settings,
-        "status": "Admin IDE Initialized."
-    })
-
-
+@ide.route("/initialize", methods=["POST"])
 @ide.route("/initialize-custom", methods=["POST"])
 @require_admin()
 @log_endpoint("admin-ide-initialize")

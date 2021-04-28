@@ -7,7 +7,7 @@ from kubernetes import config, client
 from anubis.models import db, Config, TheiaSession
 from anubis.utils.services.elastic import esindex
 from anubis.utils.services.logger import logger
-from anubis.utils.users.auth import create_token
+from anubis.utils.auth import create_token
 import base64
 
 
