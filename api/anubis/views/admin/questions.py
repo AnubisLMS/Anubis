@@ -4,14 +4,14 @@ from flask import Blueprint
 from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQuestion
 from anubis.utils.auth import require_admin
 from anubis.utils.http.decorators import json_response, json_endpoint
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import error_response, success_response
+from anubis.utils.lms.course import assert_course_admin, assert_course_superuser
 from anubis.utils.lms.questions import (
     hard_reset_questions,
     get_all_questions,
     assign_questions,
 )
-from anubis.utils.lms.course import assert_course_admin, assert_course_superuser
+from anubis.utils.services.elastic import log_endpoint
 
 questions = Blueprint("admin-questions", __name__, url_prefix="/admin/questions")
 

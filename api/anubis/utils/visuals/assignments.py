@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from anubis.models import db, AssignmentTest
+from anubis.utils.data import is_debug
 from anubis.utils.services.cache import cache
 from anubis.utils.visuals.queries import (
     time_to_pass_test_sql,
@@ -9,7 +10,6 @@ from anubis.utils.visuals.queries import (
     assignment_test_fail_count_sql,
     assignment_test_pass_count_sql,
 )
-from anubis.utils.data import is_debug
 
 
 @cache.memoize(timeout=60, unless=is_debug)

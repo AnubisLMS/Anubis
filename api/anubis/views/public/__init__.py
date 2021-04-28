@@ -25,7 +25,7 @@ def register_public_views(app):
         static,
         courses,
         questions,
-        memes,visuals,
+        memes, visuals,
     ]
 
     for view in views:

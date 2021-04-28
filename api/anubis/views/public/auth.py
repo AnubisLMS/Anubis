@@ -4,11 +4,11 @@ from anubis.models import User, db
 from anubis.utils.auth import create_token, current_user, require_user
 from anubis.utils.data import is_debug
 from anubis.utils.http.decorators import json_endpoint
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import success_response, error_response
-from anubis.utils.services.oauth import OAUTH_REMOTE_APP as provider
-from anubis.utils.lms.submissions import fix_dangling
 from anubis.utils.lms.course import get_course_context
+from anubis.utils.lms.submissions import fix_dangling
+from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.services.oauth import OAUTH_REMOTE_APP as provider
 
 auth = Blueprint("public-auth", __name__, url_prefix="/public/auth")
 oauth = Blueprint("public-oauth", __name__, url_prefix="/public")

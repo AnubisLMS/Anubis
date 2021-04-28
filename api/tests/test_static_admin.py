@@ -1,5 +1,6 @@
-import requests
 import io
+
+import requests
 
 from utils import Session
 

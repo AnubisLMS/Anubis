@@ -5,8 +5,10 @@ from typing import Dict
 from flask import Blueprint, request
 
 from anubis.models import User, TheiaSession, db, Assignment, AssignmentRepo
+from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response, load_from_id
 from anubis.utils.http.https import error_response, success_response
+from anubis.utils.lms.course import is_course_admin
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.logger import logger
 from anubis.utils.services.rpc import enqueue_ide_stop, enqueue_ide_initialize
@@ -15,8 +17,6 @@ from anubis.utils.services.theia import (
     get_n_available_sessions,
     theia_poll_ide,
 )
-from anubis.utils.auth import current_user, require_user
-from anubis.utils.lms.course import is_course_admin
 
 ide = Blueprint("public-ide", __name__, url_prefix="/public/ide")
 
@@ -222,4 +222,4 @@ def public_ide_initialize(assignment: Assignment):
         "active": session.active,
         "session": session.data,
         "status": "Session created",
-})
+    })

@@ -322,7 +322,6 @@ def permission_test(path, fail_for: list = None, method='get', after: callable =
     if fail_for is None:
         fail_for = ['student']
 
-
     return _test_permission(path, fail_for, method, after, **kwargs)
 
 

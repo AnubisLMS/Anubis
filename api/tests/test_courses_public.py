@@ -14,4 +14,3 @@ def test_courses_public():
     sn.get(f'/public/courses/join/{join_code}')
     courses = sn.get('/public/courses/list')['courses']
     assert len(courses) == 1
-

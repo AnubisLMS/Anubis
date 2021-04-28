@@ -286,6 +286,7 @@ def with_context(function):
     :param function:
     :return:
     """
+
     @functools.wraps(function)
     def wrapper(*args, **kwargs):
         from anubis.app import create_app

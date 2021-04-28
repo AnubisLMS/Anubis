@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta
 import math
+from datetime import datetime, timedelta
 
 from flask import Blueprint
 from sqlalchemy import or_
@@ -9,11 +9,11 @@ from anubis.rpc.batch import rpc_bulk_regrade
 from anubis.utils.auth import require_admin
 from anubis.utils.data import split_chunks
 from anubis.utils.http.decorators import json_response
-from anubis.utils.services.elastic import log_endpoint
-from anubis.utils.http.https import error_response, success_response, get_number_arg
-from anubis.utils.services.rpc import enqueue_autograde_pipeline, rpc_enqueue
 from anubis.utils.http.decorators import load_from_id
+from anubis.utils.http.https import error_response, success_response, get_number_arg
 from anubis.utils.lms.course import assert_course_admin
+from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.services.rpc import enqueue_autograde_pipeline, rpc_enqueue
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 

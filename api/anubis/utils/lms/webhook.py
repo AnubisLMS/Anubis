@@ -73,7 +73,7 @@ def check_repo(assignment, repo_url, github_username, user=None) -> AssignmentRe
             AssignmentRepo.assignment_id == assignment.id,
             AssignmentRepo.owner == user,
         ).first()
-        
+
     # If the user is None, then the submission is
     # dangling.
     else:

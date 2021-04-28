@@ -9,4 +9,3 @@ def test_autograde_admin():
     permission_test(f'/admin/autograde/assignment/{assignment_id}')
     permission_test(f'/admin/autograde/for/{assignment_id}/{student_id}')
     permission_test(f'/admin/autograde/submission/{assignment_id}/student')
-

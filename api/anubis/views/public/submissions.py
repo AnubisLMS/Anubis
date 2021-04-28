@@ -1,13 +1,13 @@
 from flask import Blueprint, request
 
 from anubis.models import User, Submission
-from anubis.utils.lms.assignments import get_submissions
 from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import error_response, success_response
-from anubis.utils.services.logger import logger
+from anubis.utils.lms.assignments import get_submissions
 from anubis.utils.lms.submissions import regrade_submission
+from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.services.logger import logger
 
 submissions = Blueprint(
     "public-submissions", __name__, url_prefix="/public/submissions"

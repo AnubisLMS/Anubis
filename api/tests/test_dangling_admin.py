@@ -1,4 +1,4 @@
-from utils import Session, permission_test
+from utils import permission_test
 
 
 def test_dangling_admin():

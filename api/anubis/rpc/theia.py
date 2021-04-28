@@ -1,3 +1,4 @@
+import base64
 import os
 import time
 from datetime import datetime
@@ -5,10 +6,9 @@ from datetime import datetime
 from kubernetes import config, client
 
 from anubis.models import db, Config, TheiaSession
+from anubis.utils.auth import create_token
 from anubis.utils.services.elastic import esindex
 from anubis.utils.services.logger import logger
-from anubis.utils.auth import create_token
-import base64
 
 
 def get_theia_pod_name(theia_session: TheiaSession) -> str:

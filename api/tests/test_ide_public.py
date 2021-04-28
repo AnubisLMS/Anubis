@@ -33,6 +33,3 @@ def test_ide_public():
     resp = s.get(f'/public/ide/active/{assignment_id}')
     assert not resp['active']
     assert 'session' not in resp
-
-
-

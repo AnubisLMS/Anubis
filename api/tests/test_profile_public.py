@@ -1,5 +1,5 @@
-from utils import Session
 from anubis.utils.data import rand
+from utils import Session
 
 
 def test_profile_public():
@@ -14,4 +14,3 @@ def test_profile_public():
         '/public/profile/set-github-username',
         params={'github_username': rand(8)},
     )
-

@@ -1,11 +1,11 @@
 from flask import Blueprint, request
 
 from anubis.models import User
-from anubis.utils.lms.assignments import get_assignments
 from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.http.https import success_response
+from anubis.utils.lms.assignments import get_assignments
+from anubis.utils.services.elastic import log_endpoint
 
 assignments = Blueprint(
     "public-assignments", __name__, url_prefix="/public/assignments"

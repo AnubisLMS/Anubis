@@ -17,12 +17,12 @@ from anubis.models import (
     SubmissionTestResult,
 )
 from anubis.utils.auth import get_user
-from anubis.utils.lms.course import is_course_admin
-from anubis.utils.services.cache import cache
 from anubis.utils.data import is_debug
-from anubis.utils.services.logger import logger
-from anubis.utils.lms.questions import ingest_questions
 from anubis.utils.lms.course import assert_course_admin
+from anubis.utils.lms.course import is_course_admin
+from anubis.utils.lms.questions import ingest_questions
+from anubis.utils.services.cache import cache
+from anubis.utils.services.logger import logger
 
 
 @cache.memoize(timeout=5, unless=is_debug)

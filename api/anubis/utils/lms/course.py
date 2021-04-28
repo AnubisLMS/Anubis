@@ -7,8 +7,8 @@ from typing import Union
 from flask import request
 
 from anubis.models import Course, TAForCourse, ProfessorForCourse
-from anubis.utils.services.logger import logger
 from anubis.utils.auth import LackCourseContext, current_user, AuthenticationError
+from anubis.utils.services.logger import logger
 
 
 def get_visible_courses():

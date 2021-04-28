@@ -1,12 +1,13 @@
-import numpy as np
-import pandas as pd
 from datetime import datetime
 from io import BytesIO
 from typing import List, Dict, Any
 
+import numpy as np
+import pandas as pd
+
 from anubis.models import Assignment, Submission, TheiaSession
-from anubis.utils.services.cache import cache
 from anubis.utils.data import is_debug
+from anubis.utils.services.cache import cache
 
 
 def get_submissions() -> pd.DataFrame:
@@ -42,7 +43,7 @@ def get_theia_sessions() -> pd.DataFrame:
         theia_sessions['duration'] = []
     theia_sessions = theia_sessions[
         np.abs(theia_sessions.duration - theia_sessions.duration.mean()) <= (3 * theia_sessions.duration.std())
-    ]  # Drop outliers based on duration
+        ]  # Drop outliers based on duration
     return theia_sessions
 
 

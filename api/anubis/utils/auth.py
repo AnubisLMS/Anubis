@@ -153,7 +153,7 @@ def _course_context_wrapper(function):
     @functools.wraps(function)
     def wrapper(*args, **kwargs):
         try:
-            return function(*args, **kwargs )
+            return function(*args, **kwargs)
         except LackCourseContext:
             logger.error(traceback.format_exc())
             return error_response('Missing course context'), 400
@@ -165,7 +165,7 @@ def _auth_context_wrapper(function):
     @functools.wraps(function)
     def wrapper(*args, **kwargs):
         try:
-            return function(*args, **kwargs )
+            return function(*args, **kwargs)
         except AuthenticationError:
             logger.error(traceback.format_exc())
             return error_response('Unauthenticated'), 401
@@ -273,5 +273,3 @@ def require_superuser(unless_debug=False, unless_vpn=False):
         return wrapper
 
     return decorator
-
-

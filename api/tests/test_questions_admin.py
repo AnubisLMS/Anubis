@@ -1,6 +1,5 @@
 from utils import Session, permission_test
 
-
 sample_question = {
     'question': 'question',
     'solution': 'solution',

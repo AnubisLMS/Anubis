@@ -4,13 +4,13 @@ import traceback
 from datetime import datetime, timedelta
 
 import requests
+from anubis.utils.assignment.autograde import bulk_autograde
+from anubis.utils.assignment.webhook import check_repo, guess_github_username
 from sqlalchemy import func, and_
 
 from anubis.app import create_app
 from anubis.models import db, Submission, Assignment, AssignmentRepo, TheiaSession
 from anubis.utils.services.rpc import enqueue_ide_stop, enqueue_ide_reap_stale, enqueue_autograde_pipeline
-from anubis.utils.assignment.autograde import bulk_autograde
-from anubis.utils.assignment.webhook import check_repo, guess_github_username
 
 
 def reap_stale_submissions():

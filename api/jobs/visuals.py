@@ -9,7 +9,6 @@ def main():
 
     with app.app_context():
         with app.test_request_context():
-
             # Create and cache the usage plot
             get_usage_plot()
 

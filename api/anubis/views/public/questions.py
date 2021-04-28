@@ -5,9 +5,8 @@ from anubis.models import db, Assignment, AssignedStudentQuestion, AssignedQuest
 from anubis.utils.auth import require_user, current_user
 from anubis.utils.http.decorators import json_endpoint, load_from_id, json_response
 from anubis.utils.http.https import success_response, error_response
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.lms.questions import get_assigned_questions
-
+from anubis.utils.services.elastic import log_endpoint
 
 questions = Blueprint("public-questions", __name__, url_prefix="/public/questions")
 

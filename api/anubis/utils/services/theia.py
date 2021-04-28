@@ -5,8 +5,8 @@ from werkzeug.utils import redirect
 from anubis.config import config
 from anubis.models import TheiaSession, User, Config
 from anubis.utils.auth import create_token
-from anubis.utils.services.cache import cache
 from anubis.utils.data import is_debug
+from anubis.utils.services.cache import cache
 
 
 @cache.memoize(timeout=5, unless=is_debug)

@@ -1,10 +1,10 @@
 from parse import parse
 
 from anubis.models import Submission, Assignment
-from anubis.utils.services.cache import cache
 from anubis.utils.data import is_debug
 from anubis.utils.http.https import error_response
 from anubis.utils.lms.students import get_students_in_class
+from anubis.utils.services.cache import cache
 
 
 @cache.memoize(timeout=5 * 60, unless=is_debug)

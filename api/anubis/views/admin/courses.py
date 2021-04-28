@@ -2,11 +2,11 @@ from flask import Blueprint
 from sqlalchemy.exc import IntegrityError, DataError
 
 from anubis.models import db, Course, TAForCourse, ProfessorForCourse, User
+from anubis.utils.auth import require_admin, require_superuser, current_user
 from anubis.utils.data import row2dict
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response
 from anubis.utils.lms.course import assert_course_superuser, get_course_context
-from anubis.utils.auth import require_admin, require_superuser, current_user
 
 courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
 

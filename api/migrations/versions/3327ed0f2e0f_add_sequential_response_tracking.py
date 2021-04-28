@@ -5,11 +5,12 @@ Revises: 24999cac49d5
 Create Date: 2021-04-01 00:30:31.115702
 
 """
-from alembic import op
-import sqlalchemy as sa
-from sqlalchemy.dialects import mysql
-from os import urandom
 from hashlib import sha256
+from os import urandom
+
+import sqlalchemy as sa
+from alembic import op
+from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
 revision = "3327ed0f2e0f"

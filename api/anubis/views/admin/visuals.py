@@ -1,11 +1,9 @@
 from flask import Blueprint
 
-
+from anubis.utils.auth import require_admin
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response
 from anubis.utils.visuals.assignments import get_assignment_visual_data
-from anubis.utils.auth import require_admin
-
 
 visuals_ = Blueprint('admin-visuals', __name__, url_prefix='/admin/visuals')
 

@@ -13,5 +13,3 @@ def test_students_admin():
         'name': 'student', 'github_username': 'student',
     }, fail_for=['student', 'ta'])
     permission_test(f'/admin/students/toggle-superuser/{student_id}', fail_for=['student', 'ta', 'professor'])
-
-
