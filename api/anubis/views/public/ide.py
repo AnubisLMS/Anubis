@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime, timedelta
 from typing import Dict
 
@@ -193,6 +194,9 @@ def public_ide_initialize(assignment: Assignment):
     autosave = request.args.get('autosave', 'true') == 'true'
     logger.info(f'autosave {autosave}')
 
+    options = copy.deepcopy(assignment.theia_options)
+    options['autosave'] = autosave
+
     # Create a new session
     session = TheiaSession(
         owner_id=user.id,
@@ -203,7 +207,7 @@ def public_ide_initialize(assignment: Assignment):
         privileged=False,
         active=True,
         state="Initializing",
-        options={'autosave': autosave}
+        options=options,
     )
     db.session.add(session)
     db.session.commit()

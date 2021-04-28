@@ -1,18 +1,20 @@
 import React, {useState} from 'react';
+import axios from 'axios';
+import {format} from 'date-fns';
+import {useSnackbar} from 'notistack';
+import {Route, Switch} from 'react-router-dom';
 
 import Grid from '@material-ui/core/Grid';
-import {useSnackbar} from 'notistack';
-import axios from 'axios';
-import standardStatusHandler from '../../Utils/standardStatusHandler';
 
+import Button from '@material-ui/core/Button';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-
-import {format} from 'date-fns';
 import Typography from '@material-ui/core/Typography';
-import standardErrorHandler from '../../Utils/standardErrorHandler';
+
 import CourseCard from '../../Components/Admin/Course/CourseCard';
 import AuthContext from '../../Contexts/AuthContext';
-import Button from '@material-ui/core/Button';
+import standardStatusHandler from '../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../Utils/standardErrorHandler';
+import CourseTasProfessors from '../../Components/Admin/Course/CourseTasProfessors';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -41,19 +43,15 @@ const editableFields = [
 export default function Courses() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
-  const [professorCourses, setProfessorCourses] = useState([]);
-  const [taCourses, setTaCourses] = useState([]);
+  const [course, setCourse] = useState([]);
   const [edits, setEdits] = useState(0);
   const [reset, setReset] = useState(0);
 
   React.useEffect(() => {
     axios.get('/api/admin/courses/list').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      if (data?.ta_courses) {
-        setTaCourses(data.ta_courses);
-      }
-      if (data?.professor_courses) {
-        setProfessorCourses(data.professor_courses);
+      if (data?.course) {
+        setCourse(data.course);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [reset]);
@@ -63,34 +61,23 @@ export default function Courses() {
       return;
     }
 
-    for (const course of professorCourses) {
-      if (course.id === id) {
-        if (toggle) {
-          course[field] = !course[field];
-          break;
-        }
-
-        if (datetime) {
-          course[field] = format(e, 'yyyy-MM-dd HH:mm:ss');
-          break;
-        }
-
+    if (course.id === id) {
+      if (toggle) {
+        course[field] = !course[field];
+      } else if (datetime) {
+        course[field] = format(e, 'yyyy-MM-dd HH:mm:ss');
+      } else {
         course[field] = e.target.value.toString();
-        break;
       }
     }
-    setProfessorCourses(professorCourses);
+    setCourse(course);
     setEdits((state) => ++state);
   };
 
-  const saveCourse = (id) => () => {
-    for (const course of professorCourses) {
-      if (course.id === id) {
-        axios.post(`/api/admin/courses/save`, {course}).then((response) => {
-          standardStatusHandler(response, enqueueSnackbar);
-        }).catch(standardErrorHandler(enqueueSnackbar));
-      }
-    }
+  const saveCourse = () => () => {
+    axios.post(`/api/admin/courses/save`, {course}).then((response) => {
+      standardStatusHandler(response, enqueueSnackbar);
+    }).catch(standardErrorHandler(enqueueSnackbar));
   };
 
   const createCourse = () => {
@@ -113,48 +100,51 @@ export default function Courses() {
           Course Management
         </Typography>
       </Grid>
-      <AuthContext.Consumer>
-        {(user) => (
-          <>
-            {!!user ? (
-              <Grid item xs={12}>
-                <Button
-                  variant={'contained'}
-                  color={'primary'}
-                  onClick={createCourse}
-                >
+      <Switch>
+        <Route path={'/admin/courses'} exact>
+          <AuthContext.Consumer>
+            {(user) => (
+              <>
+                {!!user ? (
+                  <Grid item xs={12}>
+                    <Button
+                      variant={'contained'}
+                      color={'primary'}
+                      onClick={createCourse}
+                    >
                   Create Course
-                </Button>
-              </Grid>
-            ) : null}
-          </>
-        )}
-      </AuthContext.Consumer>
+                    </Button>
+                  </Grid>
+                ) : null}
+              </>
+            )}
+          </AuthContext.Consumer>
+        </Route>
+      </Switch>
       <Grid item/>
       <Grid item xs={12} md={10}>
         <Grid container spacing={4}>
-          {professorCourses.map((course) => (
-            <Grid item xs={12} md={6} lg={4} key={course.id}>
-              <CourseCard
-                course={course}
-                editableFields={editableFields}
-                updateField={updateField}
-                saveCourse={saveCourse}
-                _disabled={false}
-              />
-            </Grid>
-          ))}
-          {taCourses.map((course) => (
-            <Grid item xs={12} md={6} lg={4} key={course.id}>
-              <CourseCard
-                course={course}
-                editableFields={editableFields}
-                updateField={updateField}
-                saveCourse={saveCourse}
-                _disabled={true}
-              />
-            </Grid>
-          ))}
+          <Switch>
+            <Route path={'/admin/courses'} exact={true}>
+              <React.Fragment>
+                <Grid item xs={12} md={6} key={course.id}>
+                  <CourseCard
+                    course={course}
+                    editableFields={editableFields}
+                    updateField={updateField}
+                    saveCourse={saveCourse}
+                    _disabled={false}
+                  />
+                </Grid>
+              </React.Fragment>
+            </Route>
+            <Route path={'/admin/courses/tas'} exact={false}>
+              <CourseTasProfessors base={'ta'}/>
+            </Route>
+            <Route path={'/admin/courses/professors'}>
+              <CourseTasProfessors base={'professor'}/>
+            </Route>
+          </Switch>
         </Grid>
       </Grid>
     </Grid>

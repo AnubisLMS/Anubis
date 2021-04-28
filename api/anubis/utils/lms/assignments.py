@@ -161,7 +161,7 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     ).first()
 
     # Attempt to find the class
-    c = Course.query.filter(
+    c: Course = Course.query.filter(
         or_(
             Course.name == assignment_data["class"],
             Course.course_code == assignment_data["class"],
@@ -174,7 +174,12 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
 
     # Check if it exists
     if assignment is None:
-        assignment = Assignment(unique_code=assignment_data["unique_code"], course=c)
+        assignment = Assignment(
+            theia_image=c.theia_default_image,
+            theia_options=c.theia_default_options,
+            unique_code=assignment_data["unique_code"],
+            course=c,
+        )
 
     # Update fields
     assignment.name = assignment_data["name"]

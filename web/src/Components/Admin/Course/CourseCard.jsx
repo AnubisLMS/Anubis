@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
@@ -10,6 +10,11 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import EditIcon from '@material-ui/icons/Edit';
+import yellow from '@material-ui/core/colors/yellow';
+import AuthContext from '../../../Contexts/AuthContext';
+import {Link} from 'react-router-dom';
+
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -85,17 +90,45 @@ export default function CourseCard({course, _disabled, editableFields, updateFie
         </Grid>
       </CardContent>
       {!_disabled ? (
-        <CardActionArea>
-          <Button
-            size={'small'}
-            color={'primary'}
-            variant={'contained'}
-            className={classes.button}
-            onClick={saveCourse(course.id)}
-          >
-            Save
-          </Button>
-        </CardActionArea>
+        <AuthContext.Consumer>
+          {(user) => (
+            <CardActionArea>
+              <Button
+                size={'small'}
+                color={'primary'}
+                variant={'contained'}
+                className={classes.button}
+                onClick={saveCourse(course.id)}
+              >
+                Save
+              </Button>
+              <Button
+                size={'small'}
+                startIcon={<EditIcon/>}
+                style={{backgroundColor: yellow[500]}}
+                variant={'contained'}
+                className={classes.button}
+                component={Link}
+                to={`/admin/courses/tas`}
+              >
+                Edit TAs
+              </Button>
+              {user.is_superuser && (
+                <Button
+                  size={'small'}
+                  startIcon={<EditIcon/>}
+                  style={{backgroundColor: yellow[500]}}
+                  variant={'contained'}
+                  className={classes.button}
+                  component={Link}
+                  to={`/admin/courses/professors`}
+                >
+                  Edit Professors
+                </Button>
+              )}
+            </CardActionArea>
+          )}
+        </AuthContext.Consumer>
       ) : null}
     </Card>
   );

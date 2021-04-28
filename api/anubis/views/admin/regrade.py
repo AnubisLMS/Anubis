@@ -18,7 +18,7 @@ from anubis.utils.lms.course import get_course_context, assert_course_admin
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 
 
-@regrade.route("/status/<string:assignment_id>")
+@regrade.route("/status/<string:id>")
 @require_admin()
 @load_from_id(Assignment, verify_owner=False)
 @json_response

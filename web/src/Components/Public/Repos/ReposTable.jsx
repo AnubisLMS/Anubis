@@ -41,7 +41,7 @@ export default function ReposTable({rows}) {
       <Table className={classes.table} aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell>Class</TableCell>
+            <TableCell>Course</TableCell>
             <TableCell>Assignment</TableCell>
             <TableCell>Github Username</TableCell>
             <TableCell>Repo URL</TableCell>
@@ -51,7 +51,7 @@ export default function ReposTable({rows}) {
           {rows.map((row) => (
             <TableRow key={row.assignment_name}>
               <TableCell component="th" scope="row">
-                {row.class_name}
+                {row.course_code}
               </TableCell>
               <TableCell>{row.assignment_name}</TableCell>
               <TableCell>{row.github_username}</TableCell>

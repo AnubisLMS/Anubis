@@ -112,6 +112,7 @@ export const admin_nav = [
     icon: <SchoolIcon/>,
     path: '/admin/courses',
     Page: AdminCourses,
+    exact: false,
   },
   {
     id: 'Assignments',

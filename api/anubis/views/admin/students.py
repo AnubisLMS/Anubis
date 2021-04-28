@@ -1,7 +1,7 @@
 from flask import Blueprint
 
-from anubis.models import db, User, Course, InCourse, Submission
-from anubis.utils.users.auth import require_admin, current_user
+from anubis.models import db, User, Course, InCourse, Submission, Assignment
+from anubis.utils.users.auth import require_admin, current_user, require_superuser
 from anubis.utils.lms.course import get_course_context
 from anubis.utils.services.cache import cache
 from anubis.utils.data import is_debug
@@ -12,10 +12,25 @@ from anubis.utils.users.students import get_students
 students = Blueprint("admin-students", __name__, url_prefix="/admin/students")
 
 
+@students.route('/list/basic')
+@require_admin()
+@json_response
+@cache.memoize(timeout=60, unless=is_debug)
+def admin_student_list_basic():
+    users = User.query.all()
+
+    return success_response({
+        'users': [
+            {'id': user.id, 'netid': user.netid}
+            for user in users
+        ]
+    })
+
+
 @students.route("/list")
 @require_admin()
 @json_response
-@cache.cached(timeout=5, unless=is_debug)
+@cache.memoize(timeout=60, unless=is_debug)
 def admin_students_list():
     course = get_course_context()
 
@@ -61,6 +76,8 @@ def admin_students_submissions_id(id: str):
         User.id == id,
     ).first()
 
+    course = get_course_context()
+
     # Check if student exists
     if student is None:
         return error_response("Student does not exist"), 400
@@ -70,8 +87,9 @@ def admin_students_submissions_id(id: str):
 
     # Get n most recent submissions from the user
     submissions = (
-        Submission.query.filter(
+        Submission.query.join(Assignment).filter(
             Submission.owner_id == student.id,
+            Assignment.course_id == course.id,
         )
             .orderby(Submission.created.desc())
             .limit(limit)
@@ -87,7 +105,7 @@ def admin_students_submissions_id(id: str):
 
 
 @students.route("/update/<string:id>", methods=["POST"])
-@require_admin()
+@require_superuser()
 @json_endpoint(
     required_fields=[("name", str), ("github_username", str)], only_required=True
 )
@@ -115,42 +133,8 @@ def admin_students_update_id(id: str, name: str = None, github_username: str = N
     )
 
 
-@students.route("/toggle-admin/<string:id>")
-@require_admin()
-@json_response
-def admin_students_toggle_admin(id: str):
-    """
-    Toggle the admin status for a user. Requires user to
-    be admin to be able to make this change.
-
-    :param id:
-    :return:
-    """
-    user: User = current_user()
-    other = User.query.filter(User.id == id).first()
-
-    if other is None:
-        return error_response("User could not be found")
-
-    if user.id == other.id:
-        return error_response("You can not toggle your own permission.")
-
-    other.is_admin = not other.is_admin
-    db.session.commit()
-
-    if other.is_admin:
-        return success_response(
-            {"status": f"{other.name} is now an admin", "variant": "warning"}
-        )
-
-    else:
-        return success_response(
-            {"status": f"{other.name} is no longer an admin", "variant": "success"}
-        )
-
-
 @students.route("/toggle-superuser/<string:id>")
-@require_admin()
+@require_superuser()
 @json_response
 def admin_students_toggle_superuser(id: str):
     """
