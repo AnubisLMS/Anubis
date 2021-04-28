@@ -7,7 +7,7 @@ from kubernetes import config, client
 
 from anubis.models import Config, Submission
 from anubis.utils.data import is_debug
-from anubis.utils.logger import logger
+from anubis.utils.services.logger import logger
 
 
 def create_pipeline_job_obj(client, submission):
@@ -51,7 +51,7 @@ def create_pipeline_job_obj(client, submission):
     # Create and configure a spec section
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(
-            labels={"app": "submission-pipeline", "role": "submission-pipeline-worker"}
+            labels={"app.kubernetes.io/name": "submission-pipeline", "role": "submission-pipeline-worker"}
         ),
         spec=client.V1PodSpec(restart_policy="Never", containers=[container]),
     )
@@ -108,7 +108,7 @@ def create_submission_pipeline(submission_id: str):
     :param submission_id: submission.id of to test
     """
     from anubis.app import create_app
-    from anubis.utils.rpc import enqueue_autograde_pipeline
+    from anubis.utils.services.rpc import enqueue_autograde_pipeline
 
     app = create_app()
 

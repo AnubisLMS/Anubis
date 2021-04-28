@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect
 
-from anubis.utils.elastic import log_endpoint
-from anubis.utils.logger import logger
+from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.services.logger import logger
 
 memes = Blueprint("public-memes", __name__, url_prefix="/public/memes")
 

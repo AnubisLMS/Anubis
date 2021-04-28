@@ -1,14 +1,12 @@
 import React, {useState} from 'react';
-
-import Grid from '@material-ui/core/Grid';
-import {useSnackbar} from 'notistack';
 import axios from 'axios';
-import standardStatusHandler from '../../Utils/standardStatusHandler';
+import {useSnackbar} from 'notistack';
+
+import {DataGrid} from '@material-ui/data-grid';
+import Grid from '@material-ui/core/Grid';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import standardErrorHandler from '../../Utils/standardErrorHandler';
-import {DataGrid} from '@material-ui/data-grid';
 import Paper from '@material-ui/core/Paper';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import Fab from '@material-ui/core/Fab';
@@ -19,17 +17,21 @@ import IconButton from '@material-ui/core/IconButton';
 import CheckIcon from '@material-ui/icons/Check';
 import CancelIcon from '@material-ui/icons/Cancel';
 
+import standardStatusHandler from '../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../Utils/standardErrorHandler';
+import ManagementIDEDialog from '../../Components/Admin/IDE/ManagementIDEDialog';
+
 
 const useStyles = makeStyles((theme) => ({
   paper: {
-    minHeight: 700,
+    height: 700,
     padding: theme.spacing(1),
   },
   dataGrid: {
     height: '100%',
   },
   button: {
-    margin: theme.spacing(1),
+    marginRight: theme.spacing(1),
   },
 }));
 
@@ -125,8 +127,11 @@ export default function Theia() {
           Anubis
         </Typography>
         <Typography variant={'subtitle1'} color={'textSecondary'}>
-          Course Management
+          Cloud IDE Management
         </Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <ManagementIDEDialog/>
       </Grid>
       <Grid item xs={12}>
         <Button

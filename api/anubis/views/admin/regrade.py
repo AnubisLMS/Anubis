@@ -6,12 +6,12 @@ from sqlalchemy import or_
 
 from anubis.models import Submission, Assignment
 from anubis.rpc.batch import rpc_bulk_regrade
-from anubis.utils.auth import require_admin
+from anubis.utils.users.auth import require_admin
 from anubis.utils.data import split_chunks
 from anubis.utils.decorators import json_response
-from anubis.utils.elastic import log_endpoint
-from anubis.utils.http import error_response, success_response, get_number_arg
-from anubis.utils.rpc import enqueue_autograde_pipeline, rpc_enqueue
+from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.http.https import error_response, success_response, get_number_arg
+from anubis.utils.services.rpc import enqueue_autograde_pipeline, rpc_enqueue
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 
@@ -29,8 +29,12 @@ def admin_regrade_status(assignment_id: str):
         Submission.assignment_id == assignment_id,
     ).count()
 
+    percent = 0
+    if total > 0:
+        percent = math.ceil(((total - processing) / total) * 100)
+
     return success_response({
-        'percent': f'{math.ceil(((total - processing)/total)*100)}% of submissions processed',
+        'percent': f'{percent}% of submissions processed',
         'processing': processing,
         'processed': total - processing,
         'total': total,

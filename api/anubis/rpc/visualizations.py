@@ -1,4 +1,4 @@
-from anubis.utils.visualizations import get_usage_plot
+from anubis.utils.visuals.usage import get_usage_plot
 
 
 def create_visuals(*_, **__):

@@ -57,7 +57,7 @@ export default function MidtermRetroPost({classes, preview = false}) {
                 the current job.
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/1c8d3c4d408e2187'}
+                src={'/api/public/static/1c8d3c4d408e2187'}
                 alt={'deployment'}
               />
               {/* END RPC in Anubis */}
@@ -91,7 +91,7 @@ export default function MidtermRetroPost({classes, preview = false}) {
                running, then we re-enqueue the rpc job.
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/110314255258e8a0'}
+                src={'/api/public/static/110314255258e8a0'}
                 alt={'rpc-max-jobs'}
               />
               {/* END Bulk Regrades */}
@@ -121,7 +121,7 @@ export default function MidtermRetroPost({classes, preview = false}) {
                 the spinner would just keep spinning. <i>Let me demonstrate...</i>
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/88a52255687d6d56'}
+                src={'/api/public/static/88a52255687d6d56'}
                 alt={'rpc-queue-1'}
               />
               <Typography gutterBottom className={classes.typography}>
@@ -131,7 +131,7 @@ export default function MidtermRetroPost({classes, preview = false}) {
                 into the same job queue.
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/6474ac1290150bfc'}
+                src={'/api/public/static/6474ac1290150bfc'}
                 alt={'rpc-queue-2'}
               />
               <Typography gutterBottom className={classes.typography}>
@@ -143,7 +143,7 @@ export default function MidtermRetroPost({classes, preview = false}) {
                 work, then they do not have or know how to set up an alternative environment.
               </Typography>
               <Typography gutterBottom className={classes.typography}>
-                This problem was something I had known about for a while. Despite this, this {'"perfect storm"'}
+                This problem was something I had known about for a while. Despite this, this {'"perfect storm" '}
                 situation was so infrequent that it was something I deemed not worthy of the time to fix.
                 Whoops, that was that a mistake.
               </Typography>
@@ -162,7 +162,7 @@ export default function MidtermRetroPost({classes, preview = false}) {
                 problems this design flaw introduced outweighed the risks.
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/079fde3fe6191089'}
+                src={'/api/public/static/079fde3fe6191089'}
                 alt={'rpc-queue-3'}
               />
               <Typography gutterBottom className={classes.typography}>
@@ -173,7 +173,7 @@ export default function MidtermRetroPost({classes, preview = false}) {
                 either default or theia queue for each of these functions.
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/3e79ceea4984cdbe'}
+                src={'/api/public/static/3e79ceea4984cdbe'}
                 alt={'rpc-functions'}
               />
               <Typography gutterBottom className={classes.typography}>
@@ -182,7 +182,7 @@ export default function MidtermRetroPost({classes, preview = false}) {
                 and find-replace &apos;default&apos; with &apos;theia&apos;.
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/ee5af57fa37971ce'}
+                src={'/api/public/static/ee5af57fa37971ce'}
                 alt={'rpc-both'}
               />
               <Typography gutterBottom className={classes.typography}>
@@ -205,7 +205,7 @@ export default function MidtermRetroPost({classes, preview = false}) {
                 It is almost like the more deploys I do, the more stressful they become.
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/b67a5c186ab65ce2'}
+                src={'/api/public/static/b67a5c186ab65ce2'}
                 alt={'deploy-anxiety'}
               />
               <Typography gutterBottom className={classes.typography}>
@@ -213,7 +213,7 @@ export default function MidtermRetroPost({classes, preview = false}) {
                 the nodes pulling the updated images from the registry. Thankfully, everything just worked.
                 The old RPC worker pool was replaced with the two new ones. The RPC function calls were properly
                 putting jobs in the right place. This new arrangement alleviated the issues immediately.
-                Students could start their IDEs with no delay, and I could do by bulk regrades.
+                Students could start their IDEs with no delay, and I could do my bulk regrades.
               </Typography>
               {/* END Deploying the Patch */}
 

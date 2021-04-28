@@ -2,9 +2,9 @@ from flask import Blueprint
 from sqlalchemy.exc import IntegrityError, DataError
 
 from anubis.models import db, AssignedStudentQuestion, AssignedQuestionResponse, User
-from anubis.utils.auth import require_user, current_user
+from anubis.utils.users.auth import require_user, current_user
 from anubis.utils.decorators import json_endpoint
-from anubis.utils.http import success_response, error_response
+from anubis.utils.http.https import success_response, error_response
 
 questions = Blueprint("public-questions", __name__, url_prefix="/public/questions")
 

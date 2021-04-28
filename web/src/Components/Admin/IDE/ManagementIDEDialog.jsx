@@ -20,6 +20,7 @@ import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import IDEHeader from '../../Public/IDE/IDEHeader';
 import Typography from '@material-ui/core/Typography';
+import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -117,16 +118,17 @@ const stopSession = (state, enqueueSnackbar) => () => {
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
-export default function ManagementIDEDialog({open, handleDialogToggle}) {
+export default function ManagementIDEDialog() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
+  const [open, setOpen] = useState(false);
   const [sessionsAvailable, setSessionsAvailable] = useState(null);
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState(false);
   const [settings, setSettings] = useState({
     image: 'registry.osiris.services/anubis/theia-admin',
     repo_url: 'https://github.com/os3224/anubis-assignment-tests',
-    options: '{"limits": {"cpu": "4", "memory": "4Gi"}, "autosave": true}',
+    options: '{"limits": {"cpu": "4", "memory": "4Gi"}, "autosave": true, "credentials": true}',
     privileged: true,
     network_locked: false,
   });
@@ -167,103 +169,121 @@ export default function ManagementIDEDialog({open, handleDialogToggle}) {
     });
   };
 
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
   const state = {
-    open, handleDialogToggle,
+    open, setOpen,
     sessionsAvailable, setSessionsAvailable,
     loading, setLoading,
     session, setSession,
     settings, setSettings,
+    handleClose, handleOpen,
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleDialogToggle}
-    >
-      <DialogTitle>Anubis Cloud IDE</DialogTitle>
-      <DialogContent>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <IDEHeader sessionsAvailable={sessionsAvailable}/>
+    <div>
+      <Button
+        variant={'contained'}
+        color={'primary'}
+        startIcon={<CodeOutlinedIcon/>}
+        onClick={handleOpen}
+      >
+        Management IDE
+      </Button>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+      >
+        <DialogTitle>Anubis Cloud IDE</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <IDEHeader sessionsAvailable={sessionsAvailable}/>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant={'body2'} className={classes.disclaimer}>
+                These are the default settings for the management IDE. Unless you want to
+                launch a custom session, you should not change these values.
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth label="Theia Image" variant="outlined"
+                value={settings.image} onChange={updateSetting('image')}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth label="Repo URL" variant="outlined"
+                value={settings.repo_url} onChange={updateSetting('repo_url')}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth label="Options JSON" variant="outlined"
+                value={settings.options} onChange={updateSetting('options')}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.privileged} onChange={updateSetting('privileged')}
+                    name="privileged" color="primary"
+                  />
+                }
+                labelPlacement={'end'}
+                label="Privileged"
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.network_locked} onChange={updateSetting('network_locked')}
+                    name="network_locked" color="primary"
+                  />
+                }
+                labelPlacement={'end'}
+                label="Network Locked"
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <Typography variant={'body2'} className={classes.disclaimer}>
-              These are the default settings for the management IDE. Unless you want to
-              launch a custom session, you should not change these values.
-            </Typography>
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth label="Theia Image" variant="outlined"
-              value={settings.image} onChange={updateSetting('image')}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth label="Repo URL" variant="outlined"
-              value={settings.repo_url} onChange={updateSetting('repo_url')}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth label="Options JSON" variant="outlined"
-              value={settings.options} onChange={updateSetting('options')}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.privileged} onChange={updateSetting('privileged')}
-                  name="privileged" color="primary"
-                />
-              }
-              labelPlacement={'end'}
-              label="Privileged"
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.network_locked} onChange={updateSetting('network_locked')}
-                  name="network_locked" color="primary"
-                />
-              }
-              labelPlacement={'end'}
-              label="Network Locked"
-            />
-          </Grid>
-        </Grid>
-      </DialogContent>
-      <DialogActions>
-        <div className={classes.wrapper} hidden={!session}>
-          <Button
-            onClick={stopSession(state, enqueueSnackbar)}
-            variant={'contained'}
-            color={'secondary'}
-            autoFocus
-          >
-            Stop Session
-          </Button>
-        </div>
-
-        <div className={classes.wrapper}>
-          <Button
-            className={clsx({
-              [classes.buttonSuccess]: session,
-            })}
-            disabled={loading || !sessionsAvailable}
-            onClick={startSession(state, enqueueSnackbar)}
-            variant={'contained'}
-            color={'primary'}
-            autoFocus
-          >
-            {!session ? 'Launch Session' : 'Go to IDE'}
-          </Button>
-          {loading && <CircularProgress size={24} className={classes.buttonProgress}/>}
-        </div>
-      </DialogActions>
-    </Dialog>
+        </DialogContent>
+        <DialogActions>
+          <div className={classes.wrapper} hidden={!session}>
+            <Button
+              onClick={stopSession(state, enqueueSnackbar)}
+              variant={'contained'}
+              color={'secondary'}
+              autoFocus
+            >
+              Stop Session
+            </Button>
+          </div>
+          <div className={classes.wrapper}>
+            <Button
+              className={clsx({
+                [classes.buttonSuccess]: session,
+              })}
+              disabled={loading || !sessionsAvailable}
+              onClick={startSession(state, enqueueSnackbar)}
+              variant={'contained'}
+              color={'primary'}
+              autoFocus
+            >
+              {!session ? 'Launch Session' : 'Go to IDE'}
+            </Button>
+            {loading && <CircularProgress size={24} className={classes.buttonProgress}/>}
+          </div>
+        </DialogActions>
+      </Dialog>
+    </div>
   );
 }

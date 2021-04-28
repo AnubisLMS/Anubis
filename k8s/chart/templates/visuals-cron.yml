@@ -1,0 +1,49 @@
+
+{{- if .Values.reaper.enable }}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: anubis-visuals
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: anubis-visuals
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    component: "anubis-visuals"
+spec:
+  schedule: {{ .Values.visuals.schedule | quote }}
+  suspend: {{ .Values.visuals.suspend }}
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: visuals
+            image: "{{ .Values.api.image }}:{{ .Values.api.tag }}"
+            imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+            command: ["python3", "jobs/visuals.py"]
+            env:
+            - name: "PYTHONPATH"
+              value: "/opt/app"
+            - name: "DEBUG"
+              value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+            - name: "DISABLE_ELK"
+              value: "0"
+            - name: "LOGGER_NAME"
+              value: "visuals"
+            - name: "REDIS_PASS"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: redis-password
+            - name: DB_HOST
+              value: mariadb.mariadb.svc.cluster.local
+              # sqlalchemy uri
+            - name: "DATABASE_URI"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-uri
+{{- end }}

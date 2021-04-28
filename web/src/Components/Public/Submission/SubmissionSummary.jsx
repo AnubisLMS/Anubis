@@ -155,13 +155,15 @@ export default function SubmissionSummary({submission, regrade, stop}) {
 
             {/* Submission state */}
             <ListItem>
-              <ListItemIcon>
-                {stop ? <ReloadIcon/> : (
-                  submission.processed ?
-                    <ReloadIcon/> :
-                    <LoadingIcon/>
-                )}
-              </ListItemIcon>
+              {!!regrade ? (
+                <ListItemIcon>
+                  {stop ? <ReloadIcon/> : (
+                    submission.processed ?
+                      <ReloadIcon/> :
+                      <LoadingIcon/>
+                  )}
+                </ListItemIcon>
+              ) : null}
               <ListItemText primary={submission.state}/>
             </ListItem>
 

@@ -64,7 +64,7 @@ class Config:
         self.THEIA_DOMAIN = os.environ.get(
             "THEIA_DOMAIN", default="ide.anubis.osiris.services"
         )
-        self.THEIA_TIMEOUT = timedelta(hours=6) if not self.DEBUG else timedelta(minutes=2)
+        self.THEIA_TIMEOUT = timedelta(hours=6)
 
         logging.info(
             "Starting with DATABASE_URI: {}".format(self.SQLALCHEMY_DATABASE_URI)

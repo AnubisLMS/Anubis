@@ -10,7 +10,7 @@ import requests
 
 from anubis.app import create_app
 from anubis.models import db, User
-from anubis.utils.auth import create_token
+from anubis.utils.users.auth import create_token
 
 os.environ["DEBUG"] = "1"
 os.environ["DISABLE_ELK"] = "1"

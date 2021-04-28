@@ -1,10 +1,13 @@
 from flask import Blueprint, make_response
 
-from anubis.utils.visualizations import get_usage_plot
-from anubis.utils.cache import cache
+from anubis.models import Assignment
+from anubis.utils.visuals.usage import get_usage_plot, get_submissions, get_raw_submissions
+from anubis.utils.services.cache import cache
 from anubis.utils.data import is_debug
+from anubis.utils.http.https import success_response
 
-visuals = Blueprint('visuals', __name__, url_prefix='/public/visuals')
+
+visuals = Blueprint('public-visuals', __name__, url_prefix='/public/visuals')
 
 
 @visuals.route('/usage')
@@ -17,3 +20,11 @@ def public_visuals_usage():
 
     return response
 
+
+@visuals.route('/raw-usage')
+def public_visuals_raw_usage():
+    usage = get_raw_submissions()
+
+    return success_response({
+        'usage': usage
+    })

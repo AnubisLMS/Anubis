@@ -249,7 +249,7 @@ heavily cached. Results are updated hourly.*
 ### 2.5 Anubis Cloud IDE
 
 One of the more exciting new features is that of the cloud ide. Leveraging some magic that Kubernetes
-and containers give us, we can provide a fully insolated IDE environment for all ~130 concurrently.
+and containers give us, we can provide a fully isolated IDE environment for all ~130 concurrently.
 
 The [Theia IDE](https://theia-ide.org/) is a basically a VSCode webserver. They have docker images for
 specific languages.

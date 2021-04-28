@@ -26,15 +26,16 @@ import Visuals from '../Pages/Public/Visuals';
 
 import AdminUsers from '../Pages/Admin/Users';
 import AdminUser from '../Pages/Admin/User';
-import AdminAssignments from '../Pages/Admin/Assignments';
-import AdminStats from '../Pages/Admin/Stats';
-import AdminAssignmentStats from '../Pages/Admin/AssignmentStats';
-import AdminSubmissionStats from '../Pages/Admin/SubmissionStats';
+import AdminAssignments from '../Pages/Admin/Assignment/Assignments';
+import AdminStats from '../Pages/Admin/Autograde/AutogradeResults';
+import AdminAssignmentStats from '../Pages/Admin/Autograde/AutogradeAssignments';
+import AdminSubmissionStats from '../Pages/Admin/Autograde/AutogradeSubmission';
 import AdminCourses from '../Pages/Admin/Courses';
 import AdminTheia from '../Pages/Admin/Theia';
 import AdminStatic from '../Pages/Admin/Static';
 import AdminConfig from '../Pages/Admin/Config';
-import AdminAssignmentQuestions from '../Pages/Admin/AssignmentQuestions';
+import AdminAssignmentQuestions from '../Pages/Admin/Assignment/AssignmentQuestions';
+import AdminAssignmentTests from '../Pages/Admin/Assignment/AssignmentTests';
 
 export const footer_nav = [
   {
@@ -121,7 +122,7 @@ export const admin_nav = [
   {
     id: 'Autograde Results',
     icon: <PieChartIcon/>,
-    path: '/admin/stats',
+    path: '/admin/autograde',
     Page: AdminStats,
   },
   {
@@ -157,18 +158,23 @@ export const not_shown_nav = [
   },
   {
     id: 'AdminAssignmentStats',
-    path: '/admin/stats/assignment',
+    path: '/admin/autograde/assignment',
     Page: AdminAssignmentStats,
   },
   {
     id: 'AdminSubmissionStats',
-    path: '/admin/stats/submission',
+    path: '/admin/autograde/submission',
     Page: AdminSubmissionStats,
   },
   {
     id: '',
     path: '/admin/assignment/questions/:code',
     Page: AdminAssignmentQuestions,
+  },
+  {
+    id: '',
+    path: '/admin/assignment/tests/:assignmentId',
+    Page: AdminAssignmentTests,
   },
 ];
 

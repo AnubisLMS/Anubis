@@ -58,7 +58,7 @@ export default function Assignments({classes, preview = false}) {
                 version 1.0 and are complex multi stage jobs.
               </Typography>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/b88665d8c43989e0'}
+                src={'/api/public/static/b88665d8c43989e0'}
                 alt={'submission flow svg'}
               />
               <Typography gutterBottom className={classes.typography}>
@@ -101,7 +101,7 @@ export default function Assignments({classes, preview = false}) {
               </Typography>
               <div/>
               <BlogImg
-                src={'https://anubis.osiris.services/api/public/static/f5d922b0dd893817'}
+                src={'/api/public/static/f5d922b0dd893817'}
                 alt={'pipeline progress gif'}
               />
 

@@ -129,15 +129,17 @@ export default function NavList({open, handleDrawerClose}) {
             />
           ))}
           <ListItem
-            button key="Login"
+            button
             component={'a'}
             href={'/api/public/auth/login'}
+            className={classes.item}
           >
             <ListItemIcon><ExitToAppOutlinedIcon/></ListItemIcon>
             <ListItemText primary={'Login'}/>
           </ListItem>
           <ListItem
-            button key="Logout"
+            button
+            className={classes.item}
             component={'a'}
             href={'/api/public/auth/logout'}
           >

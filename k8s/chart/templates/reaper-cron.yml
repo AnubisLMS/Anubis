@@ -1,0 +1,54 @@
+
+{{- if .Values.reaper.enable }}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: anubis-reaper
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: anubis-reaper
+    component: "anubis-reaper"
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  schedule: {{ .Values.reaper.schedule | quote }}
+  suspend: {{ .Values.reaper.suspend }}
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: reaper
+            image: "{{ .Values.api.image }}:{{ .Values.api.tag }}"
+            imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+            command: ["python3", "jobs/reaper.py"]
+            env:
+            - name: "PYTHONPATH"
+              value: "/opt/app"
+            - name: "DEBUG"
+              value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+            - name: "DISABLE_ELK"
+              value: "0"
+            - name: "LOGGER_NAME"
+              value: "reaper"
+            - name: "REDIS_PASS"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: redis-password
+            - name: "GITHUB_TOKEN"
+              valueFrom:
+                secretKeyRef:
+                  name: git
+                  key: token
+            - name: DB_HOST
+              value: mariadb.mariadb.svc.cluster.local
+              # sqlalchemy uri
+            - name: "DATABASE_URI"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-uri
+{{- end }}

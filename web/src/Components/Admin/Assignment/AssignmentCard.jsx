@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import {useSnackbar} from 'notistack';
 import {Link} from 'react-router-dom';
+import clsx from 'clsx';
 
 import {KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider} from '@material-ui/pickers';
 import makeStyles from '@material-ui/core/styles/makeStyles';
@@ -18,11 +19,7 @@ import yellow from '@material-ui/core/colors/yellow';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import Tooltip from '@material-ui/core/Tooltip';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+
 
 import SaveIcon from '@material-ui/icons/Save';
 import EditIcon from '@material-ui/icons/Edit';
@@ -30,6 +27,8 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import RegradeWarning from './RegradeWarning';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -50,10 +49,13 @@ const useStyles = makeStyles((theme) => ({
   card: {
     marginTop: theme.spacing(2),
   },
+  input: {
+    width: 42,
+  },
 }));
 
-const regradeAssignment = (id, enqueueSnackbar, setReset) => {
-  axios.get(`/api/admin/regrade/assignment/${id}`).then((response) => {
+const regradeAssignment = (id, enqueueSnackbar, setReset) => (params = {}) => {
+  axios.get(`/api/admin/regrade/assignment/${id}`, {params}).then((response) => {
     standardStatusHandler(response, enqueueSnackbar);
     setReset((prev) => ++prev);
   }).catch(standardErrorHandler(enqueueSnackbar));
@@ -77,44 +79,12 @@ export default function AssignmentCard({assignment, editableFields, updateField,
 
   return (
     <React.Fragment>
-      <Dialog
-        open={warningOpen}
-        onClose={() => setWarningOpen(false)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          Are you sure you want to proceed?
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            A regrade can take a very long time to complete. Please verify that
-            you would like to proceed with the regrade.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            color="primary"
-            onClick={() => setWarningOpen(false)}
-            variant={'contained'}
-            size={'small'}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              setWarningOpen(false);
-              regradeAssignment(assignment.id, enqueueSnackbar, setReset);
-            }}
-            style={{backgroundColor: yellow[500]}}
-            variant={'contained'}
-            size={'small'}
-            autoFocus
-          >
-            Regrade
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <RegradeWarning
+        warningOpen={warningOpen}
+        setWarningOpen={setWarningOpen}
+        regradeAssignment={regradeAssignment(assignment?.id, enqueueSnackbar, setReset)}
+      />
+
       <Card className={classes.card}>
         <CardContent>
           <Grid container spacing={2}>
@@ -195,7 +165,7 @@ export default function AssignmentCard({assignment, editableFields, updateField,
             className={classes.button}
             startIcon={<SaveIcon/>}
           >
-          Save
+            Save
           </Button>
           <Button
             size={'small'}
@@ -205,18 +175,28 @@ export default function AssignmentCard({assignment, editableFields, updateField,
             onClick={() => setWarningOpen(true)}
             startIcon={<RefreshIcon/>}
           >
-          Regrade
+            Regrade
           </Button>
           <Button
             size={'small'}
             color={'primary'}
             variant={'contained'}
-            className={classes.buttonRight}
+            className={clsx(classes.buttonRight, classes.button)}
             component={Link}
             to={`/admin/assignment/questions/${assignment.unique_code}`}
             startIcon={<EditIcon/>}
           >
-          Edit Questions
+            Edit Questions
+          </Button>
+          <Button
+            size={'small'}
+            color={'primary'}
+            variant={'contained'}
+            component={Link}
+            to={`/admin/assignment/tests/${assignment.id}`}
+            startIcon={<EditIcon/>}
+          >
+            Edit Tests
           </Button>
         </CardActions>
       </Card>

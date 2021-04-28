@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from anubis.app import create_app
-from anubis.utils.visualizations import get_usage_plot
+from anubis.utils.visuals.usage import get_usage_plot
 
 
 def main():

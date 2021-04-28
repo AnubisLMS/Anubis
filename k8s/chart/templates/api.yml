@@ -1,0 +1,148 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: anubis
+    component: api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: anubis
+      component: api
+  replicas: {{ .Values.api.replicas }}
+  {{- if .Values.rollingUpdates }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: anubis
+        component: api
+    spec:
+      # dnsPolicy: Default
+      {{- if .Values.api.datacenter }}
+      nodeSelector:
+        datacenter: {{ .Values.api.datacenter }}
+      {{- end }}
+      containers:
+      - name: api
+        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        ports:
+        - name: web
+          containerPort: 5000
+        env:
+        - name: "DEBUG"
+          value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+        - name: "MIGRATE"
+          value: "0"
+        - name: "DISABLE_ELK"
+          value: "0"
+        # Gunicorn workers
+        - name: "WORKERS"
+          value: {{ .Values.api.workers | quote }}
+        {{- if .Values.api.gunicorn_options }}
+        - name: "GUNICORN_OPTIONS"
+          value: {{ .Values.api.gunicorn_options | quote }}
+        {{- end }}
+        - name: "SECRET_KEY"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: secret-key
+        - name: "OAUTH_CONSUMER_KEY"
+          valueFrom:
+            secretKeyRef:
+              name: oauth
+              key: consumer-key
+        - name: "OAUTH_CONSUMER_SECRET"
+          valueFrom:
+            secretKeyRef:
+              name: oauth
+              key: consumer-secret
+        - name: DB_HOST
+          value: mariadb.mariadb.svc.cluster.local
+        # sqlalchemy uri
+        - name: "DATABASE_URI"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-uri
+        - name: "REDIS_PASS"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: redis-password
+        - name: "THEIA_DOMAIN"
+          value: {{ .Values.theia.proxy.domain | quote }}
+        {{- if .Values.api.healthCheck }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 3
+        {{- end }}
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate
+  namespace: {{ .Release.Namespace }}
+  labels:
+    job: db-migrate
+    component: db-migrate
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  backoffLimit: 4
+  ttlSecondsAfterFinished: 30
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: db-migrate
+        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        command: ["alembic", "upgrade", "head"]
+        env:
+        # sqlalchemy uri
+        - name: "DATABASE_URI"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-uri
+        - name: "REDIS_PASS"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: redis-password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: anubis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: anubis
+    component: api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  selector:
+    app.kubernetes.io/name: anubis
+    component: api
+  ports:
+  - name: web
+    port: 5000
+    targetPort: 5000
+

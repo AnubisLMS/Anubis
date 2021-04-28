@@ -1,11 +1,11 @@
 from flask import Blueprint, request
 
 from anubis.models import db, StaticFile
-from anubis.utils.auth import require_admin
+from anubis.utils.users.auth import require_admin
 from anubis.utils.data import rand
 from anubis.utils.decorators import json_response
-from anubis.utils.files import get_mime_type
-from anubis.utils.http import (
+from anubis.utils.http.files import get_mime_type
+from anubis.utils.http.https import (
     get_number_arg,
     get_request_file_stream,
     success_response,

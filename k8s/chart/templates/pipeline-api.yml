@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipeline-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: pipeline-api
+    component: api
+    role: pipeline-api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pipeline-api
+      component: api
+  replicas: {{ .Values.pipeline_api.replicas }}
+  {{- if .Values.rollingUpdates }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pipeline-api
+        component: api
+        role: pipeline-api
+    spec:
+      dnsPolicy: ClusterFirst
+      containers:
+      - name: pipeline-api
+        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        ports:
+        - name: web
+          containerPort: 5000
+        env:
+        - name: "LOGGER_NAME"
+          value: "pipeline-api"
+        # Gunicorn workers
+        - name: "WORKERS"
+          value: {{ .Values.pipeline_api.workers | quote }}
+        - name: "CREATE_APP_FUNCTION"
+          value: "create_pipeline_app"
+        - name: "SECRET_KEY"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: secret-key
+        - name: "REDIS_PASS"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: redis-password
+        - name: DB_HOST
+          value: mariadb.mariadb.svc.cluster.local
+        # sqlalchemy uri
+        - name: "DATABASE_URI"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-uri
+        {{- if .Values.pipeline_api.healthCheck }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 3
+        {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pipeline-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: pipeline-api
+    component: api
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+
+spec:
+  selector:
+    app.kubernetes.io/name: pipeline-api
+    component: api
+  ports:
+  - name: web
+    port: 5000
+    targetPort: 5000

@@ -4,16 +4,16 @@ from dateutil.parser import parse as dateparse
 from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
 
-from anubis.models import db, Assignment, User
-from anubis.utils.assignments import assignment_sync
-from anubis.utils.auth import require_admin
+from anubis.models import db, Assignment, User, AssignmentTest, SubmissionTestResult
+from anubis.utils.assignment.assignments import assignment_sync
+from anubis.utils.users.auth import require_admin
 from anubis.utils.data import rand
 from anubis.utils.data import row2dict
 from anubis.utils.decorators import load_from_id, json_response, json_endpoint
-from anubis.utils.elastic import log_endpoint
-from anubis.utils.http import error_response, success_response
-from anubis.utils.logger import logger
-from anubis.utils.questions import get_assigned_questions
+from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.http.https import error_response, success_response
+from anubis.utils.services.logger import logger
+from anubis.utils.assignment.questions import get_assigned_questions
 
 assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
 
@@ -52,7 +52,7 @@ def admin_assignments_get_id(id):
     if assignment is None:
         return error_response("Assignment does not exist")
 
-    return success_response({"assignment": assignment.data})
+    return success_response({"assignment": assignment.full_data})
 
 
 @assignments.route("/list")
@@ -64,6 +64,52 @@ def admin_assignments_list():
     return success_response(
         {"assignments": [row2dict(assignment) for assignment in all_assignments]}
     )
+
+
+@assignments.route('/tests/toggle-hide/<string:assignment_test_id>')
+@require_admin()
+@json_response
+def admin_assignment_tests_toggle_hide_assignment_test_id(assignment_test_id: str):
+    assignment_test = AssignmentTest.query.filter(
+        AssignmentTest.id == assignment_test_id,
+    ).first()
+    if assignment_test is None:
+        return error_response('test not found'), 406
+
+    assignment_test.hidden = not assignment_test.hidden
+    db.session.commit()
+
+    return success_response({
+        'status': 'test updated',
+        'assignment_test': assignment_test.data
+    })
+
+
+@assignments.route('/tests/delete/<string:assignment_test_id>')
+@require_admin()
+@json_response
+def admin_assignment_tests_delete_assignment_test_id(assignment_test_id: str):
+    assignment_test = AssignmentTest.query.filter(
+        AssignmentTest.id == assignment_test_id,
+    ).first()
+    if assignment_test is None:
+        return error_response('test not found'), 406
+
+    test_name = assignment_test.name
+
+    SubmissionTestResult.query.filter(
+        SubmissionTestResult.assignment_test_id == assignment_test.id,
+    ).delete()
+
+    AssignmentTest.query.filter(
+        AssignmentTest.id == assignment_test_id,
+    ).delete()
+    db.session.commit()
+
+    return success_response({
+        'status': f'{test_name} deleted',
+        'variant': 'warning',
+    })
 
 
 @assignments.route("/save", methods=["POST"])
@@ -85,7 +131,7 @@ def private_assignment_save(assignment: dict):
 
     # Make sure it exists
     if db_assignment is None:
-        # Create it if it doens't exist
+        # Create it if it doesn't exist
         db_assignment = Assignment()
         assignment["id"] = rand()
         db.session.add(db_assignment)

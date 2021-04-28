@@ -10,9 +10,9 @@ def init_services(app):
     """
     from anubis.config import config
     from anubis.models import db, Config
-    from anubis.utils.cache import cache, cache_health
-    from anubis.utils.migrate import migrate
-    from anubis.utils.elastic import add_global_error_handler
+    from anubis.utils.services.cache import cache, cache_health
+    from anubis.utils.services.migrate import migrate
+    from anubis.utils.services.elastic import add_global_error_handler
 
     # Init services
     db.init_app(app)

@@ -5,9 +5,9 @@ from datetime import datetime
 from kubernetes import config, client
 
 from anubis.models import db, Config, TheiaSession
-from anubis.utils.elastic import esindex
-from anubis.utils.logger import logger
-from anubis.utils.auth import create_token
+from anubis.utils.services.elastic import esindex
+from anubis.utils.services.logger import logger
+from anubis.utils.users.auth import create_token
 import base64
 
 
@@ -25,7 +25,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         metadata=client.V1ObjectMeta(
             name=volume_name,
             labels={
-                "app": "theia",
+                "app.kubernetes.io/name": "theia",
                 "role": "session-storage",
                 "netid": theia_session.owner.netid,
                 "session": theia_session.id,
@@ -66,20 +66,12 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         ],
     )
 
-    limits = {"cpu": "2", "memory": "500Mi"}
-    if "limits" in theia_session.options:
-        limits = theia_session.options["limits"]
-
-    requests = {"cpu": "250m", "memory": "100Mi"}
-    if "requests" in theia_session.options:
-        requests = theia_session.options["requests"]
-
-    autosave = True
-    if 'autosave' in theia_session.options:
-        autosave = theia_session.options['autosave']
+    limits = theia_session.options.get('limits', {"cpu": "2", "memory": "500Mi"})
+    requests = theia_session.options.get('requests', {"cpu": "250m", "memory": "100Mi"})
+    autosave = theia_session.options.get('autosave', True)
 
     extra_env = []
-    if theia_session.owner.is_admin or theia_session.owner.is_superuser:
+    if theia_session.options.get('credentials', False):
         extra_env.append(client.V1EnvVar(
             name='INCLUSTER',
             value=base64.b64encode(create_token(theia_session.owner.netid).encode()).decode(),
@@ -110,6 +102,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         ],
         security_context=client.V1SecurityContext(
             privileged=theia_session.privileged,
+            # capabilities=client.V1Capabilities(add=['SYS_ADMIN', 'NET_ADMIN'])
         ),
     )
     containers.append(theia_container)
@@ -141,10 +134,18 @@ def create_theia_pod_obj(theia_session: TheiaSession):
 
     extra_labels = {}
     spec_extra = {}
+
+    # If network locked, then set the network policy to student
+    # and dns to 1.1.1.1
     if theia_session.network_locked:
         extra_labels["network-policy"] = "student"
         spec_extra['dns_policy'] = "None"
         spec_extra["dns_config"] = client.V1PodDNSConfig(nameservers=["1.1.1.1"])
+
+    # If the network is not locked, then we still need to apply
+    # the admin policy.
+    else:
+        extra_labels["network-policy"] = "admin"
 
     # Create pod
     pod = client.V1Pod(
@@ -158,7 +159,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         metadata=client.V1ObjectMeta(
             name="theia-{}-{}".format(theia_session.owner.netid, theia_session.id),
             labels={
-                "app": "theia",
+                "app.kubernetes.io/name": "theia",
                 "role": "theia-session",
                 "netid": theia_session.owner.netid,
                 "session": theia_session.id,
@@ -205,7 +206,7 @@ def initialize_theia_session(theia_session_id: str):
                     theia_session_id
                 )
             )
-            from anubis.utils.rpc import enqueue_ide_initialize
+            from anubis.utils.services.rpc import enqueue_ide_initialize
 
             enqueue_ide_initialize(theia_session_id)
             return
@@ -290,7 +291,7 @@ def reap_theia_session_resources(theia_session_id: str):
     # Delete the pods
     v1.delete_collection_namespaced_pod(
         namespace="anubis",
-        label_selector="app=theia,role=theia-session,session={}".format(
+        label_selector="app.kubernetes.io/name=theia,role=theia-session,session={}".format(
             theia_session_id
         ),
         propagation_policy="Background",
@@ -299,7 +300,7 @@ def reap_theia_session_resources(theia_session_id: str):
     # Delete the pvc
     v1.delete_collection_namespaced_persistent_volume_claim(
         namespace="anubis",
-        label_selector="app=theia,role=session-storage,session={}".format(
+        label_selector="app.kubernetes.io/name=theia,role=session-storage,session={}".format(
             theia_session_id
         ),
         propagation_policy="Background",
@@ -311,7 +312,7 @@ def list_theia_pods():
     v1 = client.CoreV1Api()
 
     pods = v1.list_namespaced_pod(
-        namespace="anubis", label_selector="app=theia,role=theia-session"
+        namespace="anubis", label_selector="app.kubernetes.io/name=theia,role=theia-session"
     )
 
     return pods
@@ -459,7 +460,7 @@ def reap_stale_theia_sessions(*_):
 
     with app.app_context():
         resp = v1.list_namespaced_pod(
-            namespace="anubis", label_selector="app=theia,role=theia-session"
+            namespace="anubis", label_selector="app.kubernetes.io/name=theia,role=theia-session"
         )
 
         for n, pod in enumerate(resp.items):

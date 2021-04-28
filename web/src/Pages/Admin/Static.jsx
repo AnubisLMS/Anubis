@@ -17,9 +17,9 @@ const useStyles = makeStyles((theme) => ({
     minHeight: 700,
     padding: theme.spacing(1),
   },
-  dataGrid: {
-    height: '100%',
-  },
+  // dataGrid: {
+  //   height: '100%',
+  // },
   button: {
     margin: theme.spacing(1),
   },
@@ -37,7 +37,6 @@ const deleteFile = (id, state, enqueueSnackbar) => () => {
 
 const useColumns = (state, enqueueSnackbar) => ([
   {field: 'id', headerName: 'ID'},
-  {field: 'filename', headerName: 'File Name', width: 300},
   {field: 'content_type', headerName: 'Content Type', width: 150},
   {
     field: 'path', headerName: 'URL', width: 200, renderCell: ({row}) => (
@@ -48,9 +47,9 @@ const useColumns = (state, enqueueSnackbar) => ([
           style={{display: 'inline'}}
           component={'a'}
           target={'_blank'}
-          href={`${window.location.origin}/api/public/static${row.path}`}
+          href={`${window.location.origin}/api/public/static${row.path}/${row.filename}`}
         >
-          {row.path}
+          {row.filename}
         </Typography>
       </div>
     ),
@@ -74,7 +73,7 @@ const useColumns = (state, enqueueSnackbar) => ([
 export default function Static() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [files, setFiles] = useState([]);
   const [rows, setRows] = useState([]);
@@ -122,16 +121,19 @@ export default function Static() {
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <Paper className={classes.paper}>
-                <DataGrid
-                  pagination
-                  page={page}
-                  pageSize={pageSize}
-                  onPageChange={(value) => setPage(value.page)}
-                  onPageSizeChange={(value) => setPageSize(value.pageSize)}
-                  className={classes.dataGrid}
-                  columns={columns}
-                  rows={rows}
-                />
+                <div style={{height: 700}}>
+                  <DataGrid
+                    pagination
+                    page={page}
+                    pageSize={pageSize}
+                    rowsPerPageOptions={[10, 20, 30]}
+                    onPageChange={(value) => setPage(value.page)}
+                    onPageSizeChange={(value) => setPageSize(value.pageSize)}
+                    className={classes.dataGrid}
+                    columns={columns}
+                    rows={rows}
+                  />
+                </div>
               </Paper>
             </Grid>
           </Grid>

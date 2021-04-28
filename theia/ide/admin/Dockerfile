@@ -26,7 +26,7 @@ ARG PY_VERSION=3.9.3
 RUN set -eux; apt-get update \
   && apt-get upgrade -y --no-install-recommends \
   && apt-get install -y --no-install-recommends \
-    apt-transport-https ca-certificates curl gnupg lsb-release \
+    apt-transport-https ca-certificates curl gnupg lsb-release cgroupfs-mount \
   && curl -fsSL https://download.docker.com/linux/debian/gpg \
     | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg \
   && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
@@ -105,7 +105,6 @@ RUN pip3 install --no-cache-dir /cli \
   \( -type d -a \( -name test -o -name tests -o -name idle_test -o -name __pycache__ \) \) \
   -o \( -type f -a \( -name '*.pyc' -o -name '*.pyo' -o -name '*.a' \) \) \
   \) -exec rm -rf '{}' +
-COPY supervisord.conf /supervisord.conf
-COPY initialize-incluster.py /initialize-incluster.py
+COPY supervisord.conf initialize-incluster.py /
 
 ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]
