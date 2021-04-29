@@ -122,5 +122,9 @@ def public_regrade_commit(commit=None):
     if submission is None:
         return error_response("invalid commit hash or netid"), 406
 
+    # Check that autograde is enabled for the assignment
+    if not submission.assignment.autograde_enabled:
+        return error_response('Autograde is disabled for this assignment'), 400
+
     # Regrade
     return regrade_submission(submission)

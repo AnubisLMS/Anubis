@@ -65,6 +65,7 @@ def success_response(data: Union[dict, str, None]) -> dict:
 
 
 def get_number_arg(arg_name: str = "number", default_value: int = 10) -> int:
+    """TODO"""
     n = request.args.get(arg_name, default=default_value)
     try:
         return int(n)

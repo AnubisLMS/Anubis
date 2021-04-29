@@ -17,11 +17,6 @@ BUILT_IMAGES := $(shell \
 	2> /dev/null \
 )
 RUNNING_CONTAINERS := $(shell docker-compose ps -q)
-API_IP := $(shell docker network inspect anubis_default | \
-	jq '.[0].Containers | .[] | select(.Name == "anubis_api_1") | .IPv4Address' -r | \
-	awk '{print substr($$0, 1, index($$0, "/")-1)}' \
-	2> /dev/null \
-)
 VOLUMES := $(shell docker volume ls | awk '{if (match($$2, /^anubis_.*$$/)) {print $$2}}')
 
 

@@ -23,6 +23,7 @@ webhook = Blueprint("public-webhook", __name__, url_prefix="/public/webhook")
 
 
 def webhook_log_msg():
+    """TODO"""
     if (
             request.headers.get("Content-Type", None) == "application/json"
             and request.headers.get("X-GitHub-Event", None) == "push"
@@ -39,6 +40,8 @@ def public_webhook():
     """
     This route should be hit by the github when a push happens.
     We should take the the github repo url and enqueue it as a job.
+
+    :return:
     """
 
     content_type = request.headers.get("Content-Type", None)

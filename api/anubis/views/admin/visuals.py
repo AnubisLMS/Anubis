@@ -12,6 +12,7 @@ visuals_ = Blueprint('admin-visuals', __name__, url_prefix='/admin/visuals')
 @require_admin()
 @json_response
 def public_visuals_assignment_id(assignment_id: str):
+    """TODO"""
     return success_response({
         'assignment_data': get_assignment_visual_data(
             assignment_id

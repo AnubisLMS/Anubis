@@ -5,6 +5,7 @@ from anubis.models import StaticFile
 
 
 def get_mime_type(blob: bytes) -> str:
+    """TODO"""
     m = magic.Magic(mime=True)
     return m.from_buffer(blob)
 

@@ -11,6 +11,7 @@ visuals = Blueprint('public-visuals', __name__, url_prefix='/public/visuals')
 @visuals.route('/usage')
 @cache.cached(timeout=360, unless=is_debug)
 def public_visuals_usage():
+    """TODO"""
     blob = get_usage_plot()
 
     response = make_response(blob)

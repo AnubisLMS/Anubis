@@ -11,6 +11,7 @@ from anubis.utils.services.cache import cache
 
 
 def get_submissions() -> pd.DataFrame:
+    """TODO"""
     raw_submissions = Submission.query.join(Assignment).filter(Assignment.hidden == False).all()
     columns = ['id', 'owner_id', 'assignment_id', 'processed', 'created']
     submissions = pd.DataFrame(
@@ -25,6 +26,7 @@ def get_submissions() -> pd.DataFrame:
 
 
 def get_theia_sessions() -> pd.DataFrame:
+    """TODO"""
     raw_theia_sessions = TheiaSession.query.all()
     columns = ['id', 'owner_id', 'assignment_id', 'created', 'ended']
     theia_sessions = pd.DataFrame(
@@ -49,6 +51,7 @@ def get_theia_sessions() -> pd.DataFrame:
 
 @cache.memoize(timeout=10)
 def get_raw_submissions() -> List[Dict[str, Any]]:
+    """TODO"""
     submissions_df = get_submissions()
     data = submissions_df.groupby(['assignment_id', 'created'])['id'].count() \
         .reset_index().rename(columns={'id': 'count'}).to_dict()
@@ -100,6 +103,7 @@ def get_raw_submissions() -> List[Dict[str, Any]]:
 
 @cache.memoize(timeout=420, unless=is_debug)
 def get_usage_plot():
+    """TODO"""
     import matplotlib.pyplot as plt
     import matplotlib.colors as mcolors
 

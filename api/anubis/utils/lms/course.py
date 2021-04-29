@@ -12,6 +12,7 @@ from anubis.utils.services.logger import logger
 
 
 def get_visible_courses():
+    """TODO"""
     user = current_user()
 
     if user.is_superuser:
@@ -34,7 +35,10 @@ def get_visible_courses():
 
 
 def get_course_context(full_stop: bool = True) -> Union[None, Course]:
+    """TODO"""
+
     def _get_course_context():
+        """TODO"""
         course_raw = request.cookies.get('course', default=None)
         if course_raw is None:
             return None
@@ -64,10 +68,12 @@ def get_course_context(full_stop: bool = True) -> Union[None, Course]:
     context = _get_course_context()
     if context is None and full_stop:
         raise LackCourseContext()
+
     return context
 
 
 def is_course_superuser(course_id: str) -> bool:
+    """TODO"""
     user = current_user()
     if user.is_superuser:
         return True
@@ -81,6 +87,7 @@ def is_course_superuser(course_id: str) -> bool:
 
 
 def is_course_admin(course_id: str) -> bool:
+    """TODO"""
     user = current_user()
     if user.is_superuser:
         return True
@@ -98,15 +105,18 @@ def is_course_admin(course_id: str) -> bool:
 
 
 def assert_course_admin(course_id: str = None):
+    """TODO"""
     if not is_course_admin(course_id):
         raise AuthenticationError('Admin privileges missing')
 
 
 def assert_course_superuser(course_id: str = None):
+    """TODO"""
     if not is_course_superuser(course_id):
         raise AuthenticationError('Admin privileges missing')
 
 
 def assert_course_context(*expressions):
+    """TODO"""
     if not all(expressions):
         raise LackCourseContext()

@@ -23,6 +23,7 @@ regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 @load_from_id(Assignment, verify_owner=False)
 @json_response
 def admin_regrade_status(assignment: Assignment):
+    """TODO"""
     assert_course_admin(assignment.course_id)
 
     processing = Submission.query.filter(

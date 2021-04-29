@@ -20,6 +20,7 @@ static = Blueprint("admin-static", __name__, url_prefix="/admin/static")
 @require_admin()
 @json_response
 def static_delete_static_id(static_id: str):
+    """TODO"""
     static_file = StaticFile.query.filter(
         StaticFile.id == static_id
     ).first()

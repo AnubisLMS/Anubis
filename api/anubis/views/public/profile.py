@@ -18,6 +18,7 @@ profile = Blueprint("public-profile", __name__, url_prefix="/public/profile")
 @log_endpoint("public-set-github-username", lambda: "github username set")
 @json_response
 def public_set_github_username():
+    """TODO"""
     u: User = current_user()
 
     github_username = request.args.get("github_username", default=None)
@@ -44,19 +45,6 @@ def public_set_github_username():
     ).first()
     if other:
         return error_response('That github username is already taken!'), 400
-
-    logger.info(str(u.last_updated))
-    logger.info(str(u.last_updated + timedelta(hours=1)) + " - " + str(datetime.now()))
-
-    # if (
-    #         u.github_username is not None
-    #         and u.last_updated + timedelta(hours=1) < datetime.now()
-    # ):
-    #     return error_response(
-    #         "Github usernames can only be "
-    #         "changed one hour after first setting. "
-    #         "Email the TAs to reset your github username."
-    #     )  # reject their github username change
 
     u.github_username = github_username
     db.session.add(u)

@@ -1,16 +1,12 @@
 from datetime import datetime
 
-from anubis.app import create_app
+from anubis.utils.data import with_context
 from anubis.utils.visuals.usage import get_usage_plot
 
 
+@with_context
 def main():
-    app = create_app()
-
-    with app.app_context():
-        with app.test_request_context():
-            # Create and cache the usage plot
-            get_usage_plot()
+    get_usage_plot()
 
 
 if __name__ == "__main__":

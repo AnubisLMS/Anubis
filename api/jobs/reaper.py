@@ -4,8 +4,8 @@ import traceback
 from datetime import datetime, timedelta
 
 import requests
-from anubis.utils.assignment.autograde import bulk_autograde
-from anubis.utils.assignment.webhook import check_repo, guess_github_username
+from anubis.utils.lms.autograde import bulk_autograde
+from anubis.utils.lms.webhook import check_repo, guess_github_username
 from sqlalchemy import func, and_
 
 from anubis.app import create_app

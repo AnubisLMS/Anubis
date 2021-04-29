@@ -16,6 +16,7 @@ courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
 @require_admin()
 @json_response
 def admin_courses_list():
+    """TODO"""
     course = get_course_context()
 
     return success_response({
@@ -27,6 +28,7 @@ def admin_courses_list():
 @require_superuser()
 @json_response
 def admin_courses_new():
+    """TODO"""
     course = Course(
         name="placeholder",
         course_code="placeholder",
@@ -46,6 +48,7 @@ def admin_courses_new():
 @require_admin()
 @json_endpoint(required_fields=[("course", dict)])
 def admin_courses_save_id(course: dict):
+    """TODO"""
     course_id = course.get("id", None)
     db_course = Course.query.filter(Course.id == course_id).first()
 
@@ -71,6 +74,7 @@ def admin_courses_save_id(course: dict):
 @require_admin()
 @json_response
 def admin_course_list_tas():
+    """TODO"""
     course = get_course_context()
 
     tas = User.query.join(TAForCourse).filter(
@@ -94,6 +98,7 @@ def admin_course_list_tas():
 @require_admin()
 @json_response
 def admin_course_list_professors():
+    """TODO"""
     course = get_course_context()
 
     tas = User.query.join(ProfessorForCourse).filter(
@@ -117,6 +122,7 @@ def admin_course_list_professors():
 @require_admin()
 @json_response
 def admin_course_make_ta_id(user_id: str):
+    """TODO"""
     course = get_course_context()
 
     other = User.query.filter(User.id == user_id).first()
@@ -145,6 +151,7 @@ def admin_course_make_ta_id(user_id: str):
 @require_admin()
 @json_response
 def admin_course_remove_ta_id(user_id: str):
+    """TODO"""
     user = current_user()
     course = get_course_context()
     assert_course_superuser(course.id)
@@ -172,6 +179,7 @@ def admin_course_remove_ta_id(user_id: str):
 @require_superuser()
 @json_response
 def admin_course_make_professor_id(user_id: str):
+    """TODO"""
     course = get_course_context()
 
     other = User.query.filter(User.id == user_id).first()
@@ -200,6 +208,7 @@ def admin_course_make_professor_id(user_id: str):
 @require_superuser()
 @json_response
 def admin_course_remove_professor_id(user_id: str):
+    """TODO"""
     user = current_user()
     course = get_course_context()
 

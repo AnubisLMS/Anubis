@@ -16,10 +16,12 @@ from anubis.utils.services.logger import logger
 
 
 class AuthenticationError(Exception):
+    """TODO"""
     pass
 
 
 class LackCourseContext(Exception):
+    """TODO"""
     pass
 
 
@@ -150,6 +152,8 @@ def require_user(unless_debug=False):
 
 
 def _course_context_wrapper(function):
+    """TODO"""
+
     @functools.wraps(function)
     def wrapper(*args, **kwargs):
         try:
@@ -162,6 +166,8 @@ def _course_context_wrapper(function):
 
 
 def _auth_context_wrapper(function):
+    """TODO"""
+
     @functools.wraps(function)
     def wrapper(*args, **kwargs):
         try:

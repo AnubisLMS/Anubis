@@ -79,6 +79,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
 @log_endpoint("admin-ide-active")
 @json_response
 def admin_ide_active():
+    """TODO"""
     user = current_user()
 
     session = TheiaSession.query.filter(

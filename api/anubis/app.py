@@ -79,7 +79,7 @@ def create_pipeline_app():
     # Initialize app with all the extra services
     init_services(app)
 
-    # register blueprints
+    # register views
     register_pipeline_views(app)
 
     return app

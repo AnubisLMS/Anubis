@@ -42,6 +42,7 @@ def private_stats_assignment(assignment_id, netid=None):
 @require_admin()
 @json_response
 def private_stats_for(assignment_id, user_id):
+    """TODO"""
     assignment = Assignment.query.filter(
         Assignment.id == assignment_id,
     ).first()

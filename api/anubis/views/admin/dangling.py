@@ -19,8 +19,10 @@ def private_dangling():
     This route should hand back a json list of all submissions that are dangling.
     Dangling being that we have no netid to match to the github username that
     submitted the assignment.
-    """
 
+    :return:
+    """
+    # TODO
     dangling_ = Submission.query.filter(
         Submission.owner_id == None,
     ).all()
@@ -34,6 +36,7 @@ def private_dangling():
 @log_endpoint("reset-dangling", lambda: "reset-dangling")
 @json_response
 def private_reset_dangling():
+    """TODO"""
     resets = []
     for s in Submission.query.filter_by(owner_id=None).all():
         s.init_submission_models()

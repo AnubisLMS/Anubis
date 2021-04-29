@@ -21,6 +21,7 @@ questions = Blueprint("admin-questions", __name__, url_prefix="/admin/questions"
 @log_endpoint("admin", lambda: "add new question")
 @json_response
 def private_questions_add_unique_code(unique_code: str):
+    """TODO"""
     # Try to find assignment
     assignment: Assignment = Assignment.query.filter(
         Assignment.unique_code == unique_code

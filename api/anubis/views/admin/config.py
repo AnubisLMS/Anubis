@@ -12,6 +12,7 @@ config_ = Blueprint('config', __name__, url_prefix='/admin/config')
 @require_admin(unless_vpn=True)
 @json_response
 def config_list():
+    """TODO"""
     items = Config.query.all()
 
     return success_response({

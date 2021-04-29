@@ -57,6 +57,7 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
     if user is None:
         return None
 
+    # TODO
     course_ids = []
     in_courses = InCourse.query.join(Course).filter(
         InCourse.owner_id == user.id,

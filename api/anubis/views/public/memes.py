@@ -9,5 +9,6 @@ memes = Blueprint("public-memes", __name__, url_prefix="/public/memes")
 @memes.route("/")
 @log_endpoint("rick-roll", lambda: "rick-roll")
 def public_memes():
+    """TODO"""
     logger.info("rick-roll")
     return redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ&autoplay=1")

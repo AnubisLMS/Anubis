@@ -53,6 +53,7 @@ def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str
 @load_from_id(Assignment, verify_owner=False)
 @json_response
 def admin_assignments_get_id(assignment: Assignment):
+    """TODO"""
     course = get_course_context()
     assert_course_admin(assignment.course_id)
     assert_course_context(course.id == assignment.course_id)
@@ -63,6 +64,7 @@ def admin_assignments_get_id(assignment: Assignment):
 @require_admin()
 @json_response
 def admin_assignments_list():
+    """TODO"""
     course = get_course_context()
     all_assignments = Assignment.query.filter(
         Assignment.course_id == course.id
@@ -77,6 +79,7 @@ def admin_assignments_list():
 @require_admin()
 @json_response
 def admin_assignment_tests_toggle_hide_assignment_test_id(assignment_test_id: str):
+    """TODO"""
     course = get_course_context()
     assignment_test: AssignmentTest = AssignmentTest.query.filter(
         AssignmentTest.id == assignment_test_id,
@@ -100,6 +103,7 @@ def admin_assignment_tests_toggle_hide_assignment_test_id(assignment_test_id: st
 @require_admin()
 @json_response
 def admin_assignment_tests_delete_assignment_test_id(assignment_test_id: str):
+    """TODO"""
     course = get_course_context()
 
     assignment_test = AssignmentTest.query.filter(

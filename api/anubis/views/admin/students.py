@@ -18,6 +18,7 @@ students = Blueprint("admin-students", __name__, url_prefix="/admin/students")
 @json_response
 @cache.memoize(timeout=60, unless=is_debug)
 def admin_student_list_basic():
+    """TODO"""
     users = User.query.all()
 
     return success_response({
@@ -33,6 +34,7 @@ def admin_student_list_basic():
 @json_response
 @cache.memoize(timeout=60, unless=is_debug)
 def admin_students_list():
+    """TODO"""
     course = get_course_context()
 
     return success_response({
@@ -44,6 +46,7 @@ def admin_students_list():
 @require_admin()
 @json_response
 def admin_students_info_id(id: str):
+    """TODO"""
     student = User.query.filter(
         User.id == id,
     ).first()
@@ -70,6 +73,7 @@ def admin_students_info_id(id: str):
 @require_admin()
 @json_response
 def admin_students_submissions_id(id: str):
+    """TODO"""
     student = User.query.filter(
         User.id == id,
     ).first()
@@ -103,6 +107,7 @@ def admin_students_submissions_id(id: str):
     required_fields=[("name", str), ("github_username", str)], only_required=True
 )
 def admin_students_update_id(id: str, name: str = None, github_username: str = None):
+    """TODO"""
     user = current_user()
     student = User.query.filter(
         User.id == id,

@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from anubis.utils.auth import require_admin
+from anubis.utils.auth import require_superuser
 from anubis.utils.data import is_debug
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response, error_response
@@ -10,9 +10,10 @@ seed = Blueprint("admin-seed", __name__, url_prefix="/admin/seed")
 
 
 @seed.route("/")
-@require_admin(unless_debug=True)
+@require_superuser(unless_debug=True)
 @json_response
 def private_seed():
+    """TODO"""
     if not is_debug():
         return error_response('Seed only enabled in debug mode')
 

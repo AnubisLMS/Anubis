@@ -14,6 +14,7 @@ from anubis.utils.visuals.queries import (
 
 @cache.memoize(timeout=60, unless=is_debug)
 def get_assignment_visual_data(assignment_id: str):
+    """TODO"""
     assignment_tests = AssignmentTest.query.filter(
         AssignmentTest.assignment_id == assignment_id
     ).all()
@@ -30,6 +31,7 @@ def get_assignment_visual_data(assignment_id: str):
 
 
 def get_assignment_tests_pass_times(assignment_test: AssignmentTest):
+    """TODO"""
     result = db.session.execute(time_to_pass_test_sql, {
         'assignment_id': assignment_test.assignment_id,
         'assignment_test_id': assignment_test.id,
@@ -49,6 +51,7 @@ def get_assignment_tests_pass_times(assignment_test: AssignmentTest):
 
 
 def get_assignment_tests_pass_counts(assignment_test: AssignmentTest):
+    """TODO"""
     result = db.session.execute(assignment_test_fail_nosub_sql, {
         'assignment_id': assignment_test.assignment_id,
         'assignment_test_id': assignment_test.id,

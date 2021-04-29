@@ -11,6 +11,7 @@ from anubis.utils.http.https import error_response
 
 
 def load_from_id(model, verify_owner=True):
+    """TODO"""
     def wrapper(func):
         @wraps(func)
         def decorator(id, *args, **kwargs):

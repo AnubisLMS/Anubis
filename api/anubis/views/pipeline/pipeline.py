@@ -40,6 +40,7 @@ def pipeline_report_panic(submission: Submission):
         },
     )
 
+    # TODO
     submission.processed = True
     submission.state = (
         "Whoops! There was an error on our end. The error has been logged."
@@ -48,14 +49,6 @@ def pipeline_report_panic(submission: Submission):
 
     db.session.add(submission)
     db.session.commit()
-
-    # for user in User.query.filter(User.is_admin == True).all():
-    #     notify(user, panic_msg.format(
-    #         submission=json.dumps(submission.data, indent=2),
-    #         assignment=json.dumps(submission.assignment.data, indent=2),
-    #         user=json.dumps(submission.owner.data, indent=2),
-    #         panic=json.dumps(request.json, indent=2),
-    #     ), 'Anubis pipeline panic submission_id={}'.format(submission.id))
 
     return success_response("Panic successfully reported")
 
@@ -217,6 +210,7 @@ def pipeline_report_state(submission: Submission, state: str, **kwargs):
         },
     )
 
+    # TODO
     processed = request.args.get("processed", default="0")
     submission.processed = processed != "0"
 
