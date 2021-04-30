@@ -43,7 +43,7 @@ push:
 startup-links:
 	@echo ''
 	@echo 'seed: http://localhost/api/admin/seed/'
-	@echo 'auth: http://localhost/api/admin/auth/token/super'
+	@echo 'auth: http://localhost/api/admin/auth/token/superuser'
 	@echo 'auth: http://localhost/api/admin/auth/token/ta'
 	@echo 'auth: http://localhost/api/admin/auth/token/professor'
 	@echo 'site: http://localhost/'
