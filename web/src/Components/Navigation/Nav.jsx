@@ -2,7 +2,7 @@ import React from 'react';
 import Drawer from '@material-ui/core/Drawer';
 import Typography from '@material-ui/core/Typography';
 
-import NavList from '../Components/Navigation/NavList';
+import NavList from './NavList';
 
 export default function Nav({classes, open, handleDrawerClose}) {
   return (

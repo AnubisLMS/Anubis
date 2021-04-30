@@ -12,7 +12,7 @@ import LaunchOutlinedIcon from '@material-ui/icons/LaunchOutlined';
 import {isWidthDown} from '@material-ui/core/withWidth';
 
 
-import {admin_nav, footer_nav, public_nav} from '../../Navigation/navconfig';
+import {admin_nav, footer_nav, public_nav} from '../../navconfig';
 import NavItem from './NavItem';
 import AuthContext from '../../Contexts/AuthContext';
 

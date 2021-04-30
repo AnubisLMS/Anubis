@@ -7,7 +7,7 @@ import clsx from 'clsx';
 import {makeStyles, ThemeProvider} from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
-import {drawerWidth} from './Navigation/navconfig';
+import {drawerWidth} from './navconfig';
 import theme from './Theme/Dark';
 
 import AuthContext from './Contexts/AuthContext';
@@ -15,7 +15,7 @@ import AuthContext from './Contexts/AuthContext';
 import AuthWrapper from './Components/AuthWrapper';
 import Main from './Main';
 import useQuery from './hooks/useQuery';
-import Nav from './Navigation/Nav';
+import Nav from './Components/Navigation/Nav';
 import Error from './Components/Error';
 import Footer from './Components/Footer';
 import Header from './Components/Header';

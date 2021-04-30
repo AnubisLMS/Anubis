@@ -1,15 +1,15 @@
 import React, {useState} from 'react';
 import clsx from 'clsx';
+import axios from 'axios';
+import {useSnackbar} from 'notistack';
+import {Link} from 'react-router-dom';
 
-import makeStyles from '@material-ui/core/styles/makeStyles';
 import {DataGrid} from '@material-ui/data-grid/';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
-import axios from 'axios';
-import {useSnackbar} from 'notistack';
-import {Link} from 'react-router-dom';
 import PersonIcon from '@material-ui/icons/Person';
 import Fab from '@material-ui/core/Fab';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -19,6 +19,7 @@ import Typography from '@material-ui/core/Typography';
 
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
+import AuthContext from '../../Contexts/AuthContext';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -56,7 +57,7 @@ const toggleSuperuser = (id, {setStudents, setEdits}, enqueueSnackbar) => () => 
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
-const useColumns = (pageState, enqueueSnackbar) => ([
+const useColumns = (pageState, enqueueSnackbar) => (user) => ([
   {
     field: 'id',
     headerName: 'ID',
@@ -112,6 +113,7 @@ const useColumns = (pageState, enqueueSnackbar) => ([
       </React.Fragment>
     ),
     width: 150,
+    hide: !user.is_superuser,
   },
 ]);
 
@@ -204,18 +206,22 @@ export default function Users() {
       <Grid item xs={12} md={10} key={'user-table'}>
         <Paper className={clsx(classes.paper, classes.dataGridPaper)}>
           <div className={classes.dataGrid}>
-            <DataGrid
-              pagination
-              pageSize={10}
-              rowsPerPageOptions={[5, 10, 20]}
-              rows={rows}
-              columns={columns}
-              filterModel={{
-                items: [
-                  {columnField: 'name', operatorValue: 'contains', value: ''},
-                ],
-              }}
-            />
+            <AuthContext.Consumer>
+              {(user) => (
+                <DataGrid
+                  pagination
+                  pageSize={10}
+                  rowsPerPageOptions={[5, 10, 20]}
+                  rows={rows}
+                  columns={columns(user)}
+                  filterModel={{
+                    items: [
+                      {columnField: 'name', operatorValue: 'contains', value: ''},
+                    ],
+                  }}
+                />
+              )}
+            </AuthContext.Consumer>
           </div>
         </Paper>
       </Grid>
