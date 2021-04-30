@@ -108,7 +108,7 @@ export const admin_nav = [
     Page: AdminUsers,
   },
   {
-    id: 'Courses',
+    id: 'Course',
     icon: <SchoolIcon/>,
     path: '/admin/courses',
     Page: AdminCourses,

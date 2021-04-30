@@ -1,16 +1,18 @@
 import React, {useState} from 'react';
+import Cookies from 'universal-cookie';
 import {useSnackbar} from 'notistack';
 import clsx from 'clsx';
 
-import AppBar from '@material-ui/core/AppBar';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Toolbar from '@material-ui/core/Toolbar';
 import Chip from '@material-ui/core/Chip';
+import Button from '@material-ui/core/Button';
+import AppBar from '@material-ui/core/AppBar';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
-import Cookies from 'universal-cookie';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 
 export default function Header({classes, open, onDrawerToggle, user}) {
@@ -59,10 +61,20 @@ export default function Header({classes, open, onDrawerToggle, user}) {
                       cookie.remove('course', {path: '/'});
                       if (!!e) {
                         cookie.set('course', btoa(JSON.stringify(e)), {path: '/'});
-                        enqueueSnackbar(
-                          'You may need to reload the page for context change to take effect.',
-                          {variant: 'warning'},
-                        );
+                        enqueueSnackbar('You may need to reload the page', {
+                          variant: 'warning',
+                          action: (
+                            <Button
+                              size="small"
+                              startIcon={<RefreshIcon/>}
+                              color={'primary'}
+                              variant={'contained'}
+                              onClick={() => window.location.reload(true)}
+                            >
+                              Reload
+                            </Button>
+                          ),
+                        });
                       }
                       setCourse(e);
                     }}
