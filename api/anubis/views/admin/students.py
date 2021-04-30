@@ -71,24 +71,19 @@ def admin_students_info_id(id: str):
         User.id == id,
     ).first()
 
-    # Get the current course context
-    course = get_course_context()
-
     # Check if student exists
     if student is None:
         return error_response("Student does not exist")
 
+    assert_course_context(student)
+
     # Get courses student is in
     in_courses = InCourse.query.filter(
         InCourse.owner_id == student.id,
-        InCourse.course_id == course.id,
     ).all()
 
     # Get a list of all the course ids
     course_ids = list(map(lambda x: x.course_id, in_courses))
-
-    # Assert that the student is in the current course context
-    assert_course_context(course.id in course_ids)
 
     # Get the course objects
     courses = Course.query.filter(

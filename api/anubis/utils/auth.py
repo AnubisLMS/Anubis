@@ -140,9 +140,9 @@ def _course_context_wrapper(function):
     def wrapper(*args, **kwargs):
         try:
             return function(*args, **kwargs)
-        except LackCourseContext:
+        except LackCourseContext as e:
             logger.error(traceback.format_exc())
-            return error_response('Missing course context')
+            return error_response(str(e) or 'Please set your course context')
 
     return wrapper
 
@@ -162,9 +162,9 @@ def _auth_context_wrapper(function):
     def wrapper(*args, **kwargs):
         try:
             return function(*args, **kwargs)
-        except AuthenticationError:
+        except AuthenticationError as e:
             logger.error(traceback.format_exc())
-            return error_response('Unauthenticated'), 401
+            return error_response(str(e) or 'Unauthenticated'), 401
 
     return wrapper
 

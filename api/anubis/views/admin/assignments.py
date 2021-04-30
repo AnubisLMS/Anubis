@@ -36,9 +36,7 @@ def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str
     if user is None:
         return error_response("user not found")
 
-    course = get_course_context()
-    assert_course_admin(assignment.course_id)
-    assert_course_context(course.id == assignment.course_id)
+    assert_course_context(assignment)
 
     return success_response(
         {
@@ -60,16 +58,10 @@ def admin_assignments_get_id(assignment: Assignment):
     :param assignment:
     :return:
     """
-    # Get the course context
-    course = get_course_context()
-
-    # Verify that the current user is an admin for the course
-    # that the assignment is apart of
-    assert_course_admin(assignment.course_id)
 
     # Confirm that the assignment they are asking for is part
     # of this course
-    assert_course_context(course.id == assignment.course_id)
+    assert_course_context(assignment)
 
     # Pass back the full data
     return success_response({"assignment": assignment.full_data})
@@ -113,9 +105,6 @@ def admin_assignment_tests_toggle_hide_assignment_test_id(assignment_test_id: st
     :return:
     """
 
-    # Get the course context
-    course = get_course_context()
-
     # Pull the assignment test
     assignment_test: AssignmentTest = AssignmentTest.query.filter(
         AssignmentTest.id == assignment_test_id,
@@ -125,13 +114,9 @@ def admin_assignment_tests_toggle_hide_assignment_test_id(assignment_test_id: st
     if assignment_test is None:
         return error_response('test not found')
 
-    # Verify that the current user is an admin for the course the
-    # assignment test is apart of
-    assert_course_admin(assignment_test.assignment.course_id)
-
     # Verify that course the assignment test is apart of and
     # the course context match
-    assert_course_context(course.id == assignment_test.assignment.course_id)
+    assert_course_context(assignment_test)
 
     # Toggle the hidden field
     assignment_test.hidden = not assignment_test.hidden
@@ -156,9 +141,6 @@ def admin_assignment_tests_delete_assignment_test_id(assignment_test_id: str):
     :return:
     """
 
-    # Get the course context
-    course = get_course_context()
-
     # Pull the assignment test
     assignment_test = AssignmentTest.query.filter(
         AssignmentTest.id == assignment_test_id,
@@ -168,13 +150,9 @@ def admin_assignment_tests_delete_assignment_test_id(assignment_test_id: str):
     if assignment_test is None:
         return error_response('test not found')
 
-    # Verify that the current user is an admin for the course the
-    # assignment test is apart of
-    assert_course_admin(assignment_test.assignment.course_id)
-
     # Verify that course the assignment test is apart of and
     # the course context match
-    assert_course_context(course.id == assignment_test.assignment.course_id)
+    assert_course_context(assignment_test)
 
     # Save the test name so we can use it in the response
     test_name = assignment_test.name
@@ -223,9 +201,7 @@ def private_assignment_save(assignment: dict):
         assignment["id"] = rand()
         db.session.add(db_assignment)
 
-    course = get_course_context()
-    assert_course_admin(db_assignment.course_id)
-    assert_course_context(course.id == db_assignment.course_id)
+    assert_course_context(db_assignment)
 
     # Update all it's fields
     for key, value in assignment.items():

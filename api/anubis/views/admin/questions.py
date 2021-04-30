@@ -33,9 +33,6 @@ def admin_questions_add_unique_code(unique_code: str):
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Try to find assignment
     assignment: Assignment = Assignment.query.filter(
         Assignment.unique_code == unique_code
@@ -45,12 +42,8 @@ def admin_questions_add_unique_code(unique_code: str):
     if assignment is None:
         return error_response("Unable to find assignment")
 
-    # Verify that the current user is an admin for the course
-    # that the assignment is apart of
-    assert_course_admin(assignment.course_id)
-
     # Assert that the set course context matches the course of the assignment
-    assert_course_context(assignment.course_id == course.id)
+    assert_course_context(assignment)
 
     # Create a new, blank question
     aq = AssignmentQuestion(
@@ -85,9 +78,6 @@ def admin_questions_delete_question_id(assignment_question_id: str):
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Get the assignment question
     assignment_question: AssignmentQuestion = AssignmentQuestion.query.filter(
         AssignmentQuestion.id == assignment_question_id,
@@ -97,11 +87,8 @@ def admin_questions_delete_question_id(assignment_question_id: str):
     if assignment_question is None:
         return error_response('Could not find question')
 
-    # Assert that the course
-    assert_course_admin(assignment_question.assignment.course_id)
-
     # Assert that the set course context matches the course of the assignment
-    assert_course_context(assignment_question.assignment.course_id == course.id)
+    assert_course_context(assignment_question)
 
     try:
         # Try to delete the question
@@ -151,9 +138,6 @@ def private_questions_hard_reset_unique_code(unique_code: str):
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Try to find assignment
     assignment: Assignment = Assignment.query.filter(
         Assignment.unique_code == unique_code
@@ -167,7 +151,7 @@ def private_questions_hard_reset_unique_code(unique_code: str):
     assert_course_superuser(assignment.course_id)
 
     # Assert that the set course context matches the course of the assignment
-    assert_course_context(assignment.course_id == course.id)
+    assert_course_context(assignment)
 
     # Hard reset questions
     hard_reset_questions(assignment)
@@ -204,9 +188,6 @@ def private_questions_reset_assignments_unique_code(unique_code: str):
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Try to find assignment
     assignment: Assignment = Assignment.query.filter(
         Assignment.unique_code == unique_code
@@ -220,7 +201,7 @@ def private_questions_reset_assignments_unique_code(unique_code: str):
     assert_course_superuser(assignment.course_id)
 
     # Assert that the set course context matches the course of the assignment
-    assert_course_context(assignment.course_id == course.id)
+    assert_course_context(assignment)
 
     # Delete all the question assignments
     AssignedStudentQuestion.query.filter(
@@ -250,9 +231,6 @@ def admin_questions_update(assignment_question_id: str, question: dict):
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Get the assignment question
     db_assignment_question: AssignmentQuestion = AssignmentQuestion.query.filter(
         AssignmentQuestion.id == assignment_question_id
@@ -262,11 +240,8 @@ def admin_questions_update(assignment_question_id: str, question: dict):
     if db_assignment_question is None:
         return error_response('question not found')
 
-    # Assert the current user is an admin for the course the assignment belongs to
-    assert_course_admin(db_assignment_question.assignment.course_id)
-
     # Assert that the set course context matches the course of the assignment
-    assert_course_context(db_assignment_question.assignment.course_id == course.id)
+    assert_course_context(db_assignment_question)
 
     # Update the fields of the question
     db_assignment_question.question = question['question']
@@ -300,11 +275,15 @@ def private_questions_get_assignments_unique_code(unique_code: str):
     assignment: Assignment = Assignment.query.filter(
         Assignment.unique_code == unique_code
     ).first()
+
+    # If the assignment does not exist, then stop
     if assignment is None:
         return error_response("Unable to find assignment")
 
-    assert_course_admin(assignment.course_id)
+    # Assert that the assignment is within the course context
+    assert_course_context(assignment)
 
+    # Get all the question assignments
     assignment_questions = AssignmentQuestion.query.filter(
         AssignmentQuestion.assignment_id == assignment.id,
     ).order_by(AssignmentQuestion.sequence, AssignmentQuestion.created.desc()).all()
@@ -333,10 +312,13 @@ def private_questions_get_unique_code(unique_code: str):
     assignment: Assignment = Assignment.query.filter(
         Assignment.unique_code == unique_code
     ).first()
+
+    # Verify that the assignment exists
     if assignment is None:
         return error_response("Unable to find assignment")
 
-    assert_course_admin(assignment.course_id)
+    # Assert that the assignment is within the course context
+    assert_course_context(assignment)
 
     return success_response({
         'questions': get_all_questions(assignment)
@@ -362,10 +344,12 @@ def private_questions_assign_unique_code(unique_code: str):
     assignment: Assignment = Assignment.query.filter(
         Assignment.unique_code == unique_code
     ).first()
+
+    # Verify that we got an assignment
     if assignment is None:
         return error_response("Unable to find assignment")
 
-    assert_course_admin(assignment.course_id)
+    assert_course_context(assignment)
 
     # Assign the questions
     assigned_questions = assign_questions(assignment)

@@ -372,7 +372,7 @@ class AssignedStudentQuestion(db.Model):
     owner = db.relationship(User)
     assignment = db.relationship(Assignment)
     question = db.relationship(AssignmentQuestion)
-    responses = db.relationship('AssignedQuestionResponse', cascade='all,delete')
+    responses = db.relationship('AssignedQuestionResponse', cascade='all,delete', backref='question')
 
     @property
     def data(self):
@@ -710,6 +710,7 @@ class TheiaSession(db.Model):
 
     owner = db.relationship(User)
     assignment = db.relationship(Assignment)
+    course = db.relationship(Course)
 
     @property
     def data(self):
@@ -764,6 +765,8 @@ class StaticFile(db.Model):
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    course = db.relationship(Course)
 
     @property
     def data(self):

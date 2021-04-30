@@ -2,13 +2,27 @@ import base64
 import json
 import traceback
 import urllib.parse
-from typing import Union
+from typing import Union, Tuple, Any
 
 from flask import request
 
-from anubis.models import Course, TAForCourse, ProfessorForCourse
 from anubis.utils.auth import LackCourseContext, current_user, AuthenticationError
 from anubis.utils.services.logger import logger
+from anubis.models import (
+    Course,
+    TAForCourse,
+    ProfessorForCourse,
+    Assignment,
+    AssignmentRepo,
+    AssignedStudentQuestion,
+    AssignmentQuestion,
+    AssignmentTest,
+    Submission,
+    TheiaSession,
+    StaticFile,
+    User,
+    InCourse,
+)
 
 
 def get_course_context(full_stop: bool = True) -> Union[None, Course]:
@@ -165,7 +179,7 @@ def assert_course_admin(course_id: str = None):
     :return:
     """
     if not is_course_admin(course_id):
-        raise AuthenticationError('Requires admin permissions')
+        raise AuthenticationError('Requires course TA permissions')
 
 
 def assert_course_superuser(course_id: str = None):
@@ -182,16 +196,87 @@ def assert_course_superuser(course_id: str = None):
     :return:
     """
     if not is_course_superuser(course_id):
-        raise AuthenticationError('Requires superuser permissions')
+        raise AuthenticationError('Requires course Professor permissions')
 
 
-def assert_course_context(*expressions):
+def assert_course_context(*models: Tuple[Any]):
     """
-    Pass any expressions to this function. If any evaluate to false,
-    then a LackCourseContext will be raised.
+    This function checks that all the sqlalchemy objects that are
+    passed to this function are within the current course context.
+    If they are not, then a LackCourseContext will be raised.
 
-    :param expressions:
+    :param models:
     :return:
     """
-    if not all(expressions):
-        raise LackCourseContext()
+
+    # Get the current course context
+    context = get_course_context()
+
+    # Create a stack of objects to check
+    object_stack = list(models)
+
+    # This next bit of code definitely deserves an explanation. Most
+    # all the sqlalchemy models have some relationship or backref
+    # that leads to a course object. What I am doing here is using a
+    # stack to continuously access the next backref or relationship
+    # until we get to a course object.
+    #
+    # Since the majority of models have either an .assignment or
+    # .course backref, we can simplify things a bit by iterating
+    # over all the model types that have the same name for the next
+    # relationship or backref to access.
+
+    # Iterate until the stack is empty
+    while len(object_stack) != 0:
+        model = object_stack.pop()
+
+        # If the model is a course, then we can actually do the context check
+        if isinstance(model, Course):
+
+            # Check that the current user is an admin for the course object
+            if not is_course_admin(model.id):
+                raise LackCourseContext('You cannot edit resources in this course context')
+
+            # Verify that the course object is the same as the set context
+            if model.id != context.id:
+                raise LackCourseContext('Cannot view or edit resource outside course context')
+
+        # Group together all the models that have an
+        # assignment backref or relationship
+        for model_type in [
+            Submission,
+            AssignmentTest,
+            AssignmentRepo,
+            AssignedStudentQuestion,
+            AssignmentQuestion,
+        ]:
+            if isinstance(model, model_type):
+                object_stack.append(model.assignment)
+                continue
+
+        # Group together all the models that have a course
+        # backref or relationship
+        for model_type in [
+            Assignment,
+            StaticFile,
+            TheiaSession,
+        ]:
+            if isinstance(model, model_type):
+                object_stack.append(model.course)
+                continue
+
+        # ---------------------------------
+        # If the model is a user then we need to handle it a
+        # little differently. We'll just need to verify that
+        # the student is in the course.
+        if isinstance(model, User):
+
+            # Get course student is in
+            in_course = InCourse.query.filter(
+                InCourse.owner_id == model.id,
+                InCourse.course_id == context.id,
+            ).first()
+
+            # Verify that they are in the course
+            if in_course is None:
+                raise LackCourseContext('Student is not within this course context')

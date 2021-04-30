@@ -27,20 +27,13 @@ def admin_static_delete_static_id(static_id: str):
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Get the static file object
     static_file = StaticFile.query.filter(
         StaticFile.id == static_id
     ).first()
 
-    # Assert that the current user is an admin for
-    # the course the static belongs to
-    assert_course_admin(static_file.course_id)
-
     # Assert that the static file is within the current course context
-    assert_course_context(static_file.course_id == course.id)
+    assert_course_context(static_file)
 
     # Delete the object
     db.session.delete(static_file)

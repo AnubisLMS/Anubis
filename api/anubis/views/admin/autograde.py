@@ -37,9 +37,6 @@ def admin_autograde_assignment_assignment_id(assignment_id, netid=None):
     limit = get_number_arg("limit", 10)
     offset = get_number_arg("offset", 0)
 
-    # Get the course context
-    course = get_course_context()
-
     # Pull the assignment object
     assignment = Assignment.query.filter(
         Assignment.id == assignment_id
@@ -49,11 +46,8 @@ def admin_autograde_assignment_assignment_id(assignment_id, netid=None):
     if assignment is None:
         return error_response('assignment does not exist')
 
-    # Verify that the current user is an admin for the course context
-    assert_course_admin(assignment.course_id)
-
     # Verify that the current course context, and the assignment course match
-    assert_course_context(assignment.course_id == course.id)
+    assert_course_context(assignment)
 
     # Get the (possibly cached) autograde calculations
     bests = bulk_autograde(assignment_id, limit=limit, offset=offset)
@@ -86,24 +80,11 @@ def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
     if assignment is None:
         return error_response('assignment does not exist')
 
-    # Verify that the current user is an admin for the course context
-    assert_course_admin(assignment.course_id)
-
-    # Verify that the current course context, and the assignment course match
-    assert_course_context(assignment.course_id == course.id)
-
     # Pull the student user object
     student = User.query.filter(User.id == user_id).first()
 
-    # Check that the student is in the course
-    in_course = InCourse.query.filter(
-        InCourse.course_id == course.id,
-        InCourse.owner_id == student.id,
-    ).first()
-
-    # Make sure that we got a in_course
-    if in_course is None:
-        return error_response('User is not in this course')
+    # Verify that the current course context, and the assignment course match
+    assert_course_context(assignment, student)
 
     # Calculate the best submission for this student and assignment
     submission_id = autograde(user_id, assignment_id)
@@ -139,9 +120,6 @@ def private_submission_stats_id(assignment_id: str, netid: str):
     if student is None:
         return error_response('User does not exist')
 
-    # Get the course context
-    course = get_course_context()
-
     # Pull the assignment object
     assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
@@ -149,21 +127,8 @@ def private_submission_stats_id(assignment_id: str, netid: str):
     if assignment is None:
         return error_response('assignment does not exist')
 
-    # Verify that the current user is an admin for the course context
-    assert_course_admin(assignment.course_id)
-
     # Verify that the current course context, and the assignment course match
-    assert_course_context(assignment.course_id == course.id)
-
-    # Check that the student is in the course
-    in_course = InCourse.query.filter(
-        InCourse.course_id == course.id,
-        InCourse.owner_id == student.id,
-    ).first()
-
-    # Make sure that we got a in_course
-    if in_course is None:
-        return error_response('User is not in this course')
+    assert_course_context(assignment, student)
 
     # Calculate the best submission
     submission_id = autograde(student.id, assignment.id)

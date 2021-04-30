@@ -24,9 +24,6 @@ def public_visuals_assignment_id(assignment_id: str):
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Get the assignment object
     assignment = Assignment.query.filter(
         Assignment.id == assignment_id
@@ -36,11 +33,8 @@ def public_visuals_assignment_id(assignment_id: str):
     if assignment is None:
         return error_response('Assignment does not exist')
 
-    # Assert that the current user is and admin for the assignment
-    assert_course_admin(assignment.course_id)
-
     # Assert that the assignment is within the course context
-    assert_course_context(assignment.course_id == course.id)
+    assert_course_context(assignment)
 
     # Generate and pass back the visual data
     return success_response({

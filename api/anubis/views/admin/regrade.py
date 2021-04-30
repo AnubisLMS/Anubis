@@ -32,14 +32,8 @@ def admin_regrade_status(assignment: Assignment):
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
-    # Assert that the current user is an admin for the course
-    assert_course_admin(assignment.course_id)
-
     # Assert that the assignment is within the current course context
-    assert_course_context(assignment.course_id == course.id)
+    assert_course_context(assignment)
 
     # Get the number of submissions that are being processed
     processing = Submission.query.filter(
@@ -76,9 +70,6 @@ def admin_regrade_submission_commit(commit):
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Find the submission
     submission: Submission = Submission.query.filter(
         Submission.commit == commit,
@@ -89,11 +80,8 @@ def admin_regrade_submission_commit(commit):
     if submission is None:
         return error_response("Submission does not exist")
 
-    # Assert that the current user is an admin for the assignment course
-    assert_course_admin(submission.assignment.course.id)
-
     # Assert that the submission is within the current course context
-    assert_course_context(submission.assignment.course.id == course.id)
+    assert_course_context(submission)
 
     # Reset submission in database
     submission.init_submission_models()
@@ -130,9 +118,6 @@ def private_regrade_assignment(assignment_id):
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Get the options for the regrade
     hours = get_number_arg('hours', default_value=-1)
     not_processed = get_number_arg('not_processed', default_value=-1)
@@ -167,11 +152,8 @@ def private_regrade_assignment(assignment_id):
     if assignment is None:
         return error_response("cant find assignment")
 
-    # Assert that the current user is an admin for the course
-    assert_course_admin(assignment.course_id)
-
     # Assert that the assignment is within the current course context
-    assert_course_context(assignment.course_id == course.id)
+    assert_course_context(assignment)
 
     # Get all submissions matching the filters
     submissions = Submission.query.filter(
