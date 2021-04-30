@@ -7,7 +7,7 @@ def register_admin_views(app):
     from anubis.views.admin.regrade import regrade
     from anubis.views.admin.autograde import autograde_
     from anubis.views.admin.static import static
-    from anubis.views.admin.students import students
+    from anubis.views.admin.students import students_
     from anubis.views.admin.courses import courses_
     from anubis.views.admin.config import config_
     from anubis.views.admin.visuals import visuals_
@@ -22,7 +22,7 @@ def register_admin_views(app):
         regrade,
         autograde_,
         static,
-        students,
+        students_,
         courses_,
         config_,
         visuals_,

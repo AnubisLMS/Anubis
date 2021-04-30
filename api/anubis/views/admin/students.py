@@ -2,134 +2,195 @@ from flask import Blueprint
 
 from anubis.models import db, User, Course, InCourse, Submission, Assignment
 from anubis.utils.auth import require_admin, current_user, require_superuser
-from anubis.utils.data import is_debug
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response, get_number_arg
-from anubis.utils.lms.course import assert_course_superuser
-from anubis.utils.lms.course import get_course_context
+from anubis.utils.lms.course import assert_course_superuser, get_course_context, assert_course_context
 from anubis.utils.lms.students import get_students
-from anubis.utils.services.cache import cache
 
-students = Blueprint("admin-students", __name__, url_prefix="/admin/students")
+students_ = Blueprint("admin-students", __name__, url_prefix="/admin/students")
 
 
-@students.route('/list/basic')
+@students_.route('/list/basic')
 @require_admin()
 @json_response
-@cache.memoize(timeout=60, unless=is_debug)
 def admin_student_list_basic():
-    """TODO"""
-    users = User.query.all()
+    """
+    List the most basic information about all the students
+    within the Anubis system.
 
+    :return:
+    """
+
+    # Get all users
+    students = get_students()
+
+    # Return their id and netid
     return success_response({
         'users': [
-            {'id': user.id, 'netid': user.netid}
-            for user in users
+            {'id': user['id'], 'netid': user['netid']}
+            for user in students
         ]
     })
 
 
-@students.route("/list")
+@students_.route("/list")
 @require_admin()
 @json_response
-@cache.memoize(timeout=60, unless=is_debug)
 def admin_students_list():
-    """TODO"""
+    """
+    List all users within the current course context
+
+    :return:
+    """
+
+    # Get the current course context
     course = get_course_context()
 
+    # Get all students within the current course context
+    students = get_students(course_id=course.id)
+
+    # Pass back the students
     return success_response({
-        "students": get_students(course_id=course.id)
+        "students": students
     })
 
 
-@students.route("/info/<string:id>")
+@students_.route("/info/<string:id>")
 @require_admin()
 @json_response
 def admin_students_info_id(id: str):
-    """TODO"""
+    """
+    Get basic information about a specific student by id.
+
+    :param id:
+    :return:
+    """
+
+    # Get the student object
     student = User.query.filter(
         User.id == id,
     ).first()
 
+    # Get the current course context
     course = get_course_context()
 
     # Check if student exists
     if student is None:
-        return error_response("Student does not exist"), 400
+        return error_response("Student does not exist")
 
     # Get courses student is in
-    courses = Course.query.join(InCourse).filter(
+    in_courses = InCourse.query.filter(
         InCourse.owner_id == student.id,
         InCourse.course_id == course.id,
     ).all()
 
+    # Get a list of all the course ids
+    course_ids = list(map(lambda x: x.course_id, in_courses))
+
+    # Assert that the student is in the current course context
+    assert_course_context(course.id in course_ids)
+
+    # Get the course objects
+    courses = Course.query.filter(
+        Course.id.in_(course_ids)
+    ).all()
+
+    # Pass back the student and course information
     return success_response({
         "student": student.data,
         "courses": [course.data for course in courses],
     })
 
 
-@students.route("/submissions/<string:id>")
+@students_.route("/submissions/<string:id>")
 @require_admin()
 @json_response
 def admin_students_submissions_id(id: str):
-    """TODO"""
-    student = User.query.filter(
-        User.id == id,
-    ).first()
+    """
+    Get some number of submissions for a specific user within
+    the course context.
 
+    use limit and offset parameters to view submission window
+
+    :param id:
+    :return:
+    """
+
+    # Get an optional limit and offset for query
+    limit = get_number_arg("limit", 50)
+    offset = get_number_arg("offset", 0)
+
+    # Get the current course context
     course = get_course_context()
+
+    # Get the user object
+    student = User.query.filter(User.id == id).first()
 
     # Check if student exists
     if student is None:
-        return error_response("Student does not exist"), 400
-
-    # Get an optional limit from the request query
-    limit = get_number_arg("limit", 50)
+        return error_response("Student does not exist")
 
     # Get n most recent submissions from the user
     submissions = (
         Submission.query.join(Assignment).filter(
             Submission.owner_id == student.id,
             Assignment.course_id == course.id,
-        ).order_by(Submission.created.desc()).limit(limit).all()
+        ).order_by(Submission.created.desc()).limit(limit).offset(offset).all()
     )
 
+    # Pass back the student and submission information
     return success_response({
         "student": student.data,
         "submissions": [submission.data for submission in submissions],
     })
 
 
-@students.route("/update/<string:id>", methods=["POST"])
+@students_.route("/update/<string:id>", methods=["POST"])
 @require_admin()
-@json_endpoint(
-    required_fields=[("name", str), ("github_username", str)], only_required=True
-)
+@json_endpoint([("name", str), ("github_username", str)], only_required=True)
 def admin_students_update_id(id: str, name: str = None, github_username: str = None):
-    """TODO"""
+    """
+    Update either the name of github username of a student.
+
+    The student must be within the current course context, and the
+    user making the change must be a professor or superuser.
+
+    :param id:
+    :param name:
+    :param github_username:
+    :return:
+    """
+
+    # Get the course context
+    course = get_course_context()
+
+    # Assert that the current user is a professor
+    # or superuser in the course context
+    assert_course_superuser(course.id)
+
+    # Get the current user
     user = current_user()
-    student = User.query.filter(
-        User.id == id,
-    ).first()
+
+    # Get the student object
+    student = User.query.filter(User.id == id).first()
 
     # Check if student exists
     if student is None:
-        return error_response("Student does not exist"), 400
+        return error_response("Student does not exist")
 
+    # If the student is a superuser, then stop
     if student.is_superuser and not user.is_superuser:
-        return error_response('You cannot edit a superuser'), 400
+        return error_response('You cannot edit a superuser')
 
-    course = get_course_context()
-    assert_course_superuser(course.id)
-
-    incourse = InCourse.query.filter(
+    # Make sure that the student is within the course context
+    in_course = InCourse.query.filter(
         InCourse.owner_id == student.id,
         InCourse.course_id == course.id,
     ).first()
 
-    if incourse is None:
-        return error_response('You cannot edit someone not in your course'), 400
+    # Verify that the student is in the context
+    if in_course is None:
+        return error_response('You cannot edit someone not in your course')
 
     # Update fields
     student.name = name
@@ -139,12 +200,11 @@ def admin_students_update_id(id: str, name: str = None, github_username: str = N
     db.session.add(student)
     db.session.commit()
 
-    return success_response({
-        "status": "saved",
-    })
+    # Pass back the status
+    return success_response({"status": "saved"})
 
 
-@students.route("/toggle-superuser/<string:id>")
+@students_.route("/toggle-superuser/<string:id>")
 @require_superuser()
 @json_response
 def admin_students_toggle_superuser(id: str):
@@ -155,27 +215,39 @@ def admin_students_toggle_superuser(id: str):
     :param id:
     :return:
     """
-    user: User = current_user()
+
+    # Get the current user
+    user = current_user()
+
+    # Get the other user
     other = User.query.filter(User.id == id).first()
 
+    # Double check that the current user is a superuser
     if not user.is_superuser:
         return error_response("Only superusers can create other superusers.")
 
+    # If the other user was not found, then stop
     if other is None:
         return error_response("User could not be found")
 
+    # Make sure that the other user is not also the current user
     if user.id == other.id:
         return error_response("You can not toggle your own permission.")
 
+    # Toggle the superuser field
     other.is_superuser = not other.is_superuser
+
+    # Commit the change
     db.session.commit()
 
+    # Pass back the status based on if the other is now a superuser
     if other.is_superuser:
-        return success_response(
-            {"status": f"{other.name} is now a superuser", "variant": "warning"}
-        )
+        return success_response({
+            "status": f"{other.name} is now a superuser", "variant": "warning"
+        })
 
+    # Pass back the status based on if the other user is now no longer a superuser
     else:
-        return success_response(
-            {"status": f"{other.name} is no longer a superuser", "variant": "success"}
-        )
+        return success_response({
+            "status": f"{other.name} is no longer a superuser", "variant": "success"
+        })

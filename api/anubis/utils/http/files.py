@@ -5,12 +5,30 @@ from anubis.models import StaticFile
 
 
 def get_mime_type(blob: bytes) -> str:
-    """TODO"""
+    """
+    Get an approximate content type for a given blob. This
+    is very useful for getting the content-type of an
+    uploaded file.
+
+    * This function uses libmagic, which requires some
+    extra .so files outside of the python install *
+
+    :param blob:
+    :return:
+    """
     m = magic.Magic(mime=True)
+
     return m.from_buffer(blob)
 
 
 def make_blob_response(file: StaticFile) -> Response:
+    """
+    Take a static file object, and form a flask response,
+    having the correct bytes content and content-type header.
+
+    :param file:
+    :return:
+    """
     # Make a flask response from file data blob
     response = make_response(file.blob)
 

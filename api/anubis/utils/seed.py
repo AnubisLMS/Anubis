@@ -28,20 +28,38 @@ names = ["Joette", "Anabelle", "Fred", "Woodrow", "Neoma", "Dorian", "Treasure",
 
 
 def create_name() -> str:
-    """TODO"""
+    """
+    Get a randomly generated first and last
+    name from the list of names.
+
+    :return:
+    """
     return f"{random.choice(names)} {random.choice(names)}"
 
 
 def create_netid(name: str) -> str:
-    """TODO"""
+    """
+    Generate a netid from a provided name. This will
+    pull the initials from the name and append some
+    numbers.
+
+    :param name:
+    :return:
+    """
     initials = "".join(word[0].lower() for word in name.split())
     numbers = "".join(random.choice(string.digits) for _ in range(3))
 
     return f"{initials}{numbers}"
 
 
-def rand_commit(n=10) -> str:
-    """TODO"""
+def rand_commit(n=40) -> str:
+    """
+    Generate a random commit hash. The commit length will
+    be 40 characters.
+
+    :param n:
+    :return:
+    """
     from anubis.utils.data import rand
 
     return rand(n)

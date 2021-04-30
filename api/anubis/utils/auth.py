@@ -16,13 +16,28 @@ from anubis.utils.services.logger import logger
 
 
 class AuthenticationError(Exception):
-    """TODO"""
-    pass
+    """
+    This exception should be raised if a request
+    lacks the proper authentication fow whatever
+    action they are requesting.
+
+    If the view function is wrapped in any of the
+    require auth decorators, then this exception
+    will be caught and return a 401.
+    """
 
 
 class LackCourseContext(Exception):
-    """TODO"""
-    pass
+    """
+    Most of the admin actions require there to
+    be a course context to be set. This exception
+    should be raised if there is not a course
+    context set.
+
+    If there is some other permission issue involving
+    the course context, then a AuthenticationError
+    may be more appropriate.
+    """
 
 
 def get_user(netid: Union[str, None]) -> Union[User, None]:
@@ -104,14 +119,54 @@ def create_token(netid: str, **extras) -> Union[str, None]:
         return None
 
     # Create new token
-    return jwt.encode(
-        {
-            "netid": user.netid,
-            "exp": datetime.utcnow() + timedelta(hours=6),
-            **extras,
-        },
-        config.SECRET_KEY,
-    )
+    return jwt.encode({
+        "netid": user.netid,
+        "exp": datetime.utcnow() + timedelta(hours=6),
+        **extras,
+    }, config.SECRET_KEY)
+
+
+def _course_context_wrapper(function):
+    """
+    Wrap a view function or view decorator with a
+    LackCourseContext handler. This should be applied
+    to the admin require decorators.
+
+    :param function:
+    :return:
+    """
+
+    @functools.wraps(function)
+    def wrapper(*args, **kwargs):
+        try:
+            return function(*args, **kwargs)
+        except LackCourseContext:
+            logger.error(traceback.format_exc())
+            return error_response('Missing course context')
+
+    return wrapper
+
+
+def _auth_context_wrapper(function):
+    """
+    Wrap a view function or decorator with an
+    AuthenticationError handler. It will handle
+    the exception with a 401. This should be
+    applied to all the require decorators.
+
+    :param function:
+    :return:
+    """
+
+    @functools.wraps(function)
+    def wrapper(*args, **kwargs):
+        try:
+            return function(*args, **kwargs)
+        except AuthenticationError:
+            logger.error(traceback.format_exc())
+            return error_response('Unauthenticated'), 401
+
+    return wrapper
 
 
 def require_user(unless_debug=False):
@@ -126,6 +181,8 @@ def require_user(unless_debug=False):
 
     def decorator(func):
         @wraps(func)
+        @_auth_context_wrapper
+        @_course_context_wrapper
         def wrapper(*args, **kwargs):
             # Get the user in the current
             # request context.
@@ -149,34 +206,6 @@ def require_user(unless_debug=False):
         return wrapper
 
     return decorator
-
-
-def _course_context_wrapper(function):
-    """TODO"""
-
-    @functools.wraps(function)
-    def wrapper(*args, **kwargs):
-        try:
-            return function(*args, **kwargs)
-        except LackCourseContext:
-            logger.error(traceback.format_exc())
-            return error_response('Missing course context'), 400
-
-    return wrapper
-
-
-def _auth_context_wrapper(function):
-    """TODO"""
-
-    @functools.wraps(function)
-    def wrapper(*args, **kwargs):
-        try:
-            return function(*args, **kwargs)
-        except AuthenticationError:
-            logger.error(traceback.format_exc())
-            return error_response('Unauthenticated'), 401
-
-    return wrapper
 
 
 def require_admin(unless_debug=False, unless_vpn=False):
@@ -247,6 +276,8 @@ def require_superuser(unless_debug=False, unless_vpn=False):
 
     def decorator(func):
         @wraps(func)
+        @_auth_context_wrapper
+        @_course_context_wrapper
         def wrapper(*args, **kwargs):
             # Get the user in the current
             # request context.
@@ -270,7 +301,7 @@ def require_superuser(unless_debug=False, unless_vpn=False):
             # If the user is not a superuser, then return a 400 error
             # so it will be displayed in a snackbar.
             if user.is_superuser is False:
-                return error_response("Requires superuser"), 400
+                return error_response("Requires superuser")
 
             # Pass the parameters to the
             # decorated function.

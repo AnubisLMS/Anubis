@@ -80,7 +80,15 @@ def esindex(index: str = "error", **kwargs):
 
 
 def add_global_error_handler(app):
-    """TODO"""
+    """
+    This function adds a global error handler to the flask
+    app. There are a few reasons why this may not always be the
+    best idea. Some exceptions raised should be handled by flask (for
+    example: 404 not found exceptions).
+
+    :param app:
+    :return:
+    """
 
     @app.errorhandler(Exception)
     def global_err_handler(error):

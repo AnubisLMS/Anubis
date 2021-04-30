@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Union
 
 from flask import Blueprint, request
 
@@ -22,13 +23,24 @@ from anubis.utils.services.rpc import enqueue_autograde_pipeline
 webhook = Blueprint("public-webhook", __name__, url_prefix="/public/webhook")
 
 
-def webhook_log_msg():
-    """TODO"""
-    if (
-            request.headers.get("Content-Type", None) == "application/json"
-            and request.headers.get("X-GitHub-Event", None) == "push"
-    ):
-        return request.json["pusher"]["name"]
+def webhook_log_msg() -> Union[str, None]:
+    """
+    Log message for the webhook. We log the
+
+    :return:
+    """
+
+    # Get the content type from the headers
+    content_type = request.headers.get("Content-Type", None)
+
+    # Get the github event header
+    x_github_event = request.headers.get("X-GitHub-Event", None)
+
+    # If the content type is json, and the github event was a push,
+    # then log the repository name
+    if content_type == "application/json" and x_github_event == "push":
+        return request.json["repository"]["name"]
+
     return None
 
 

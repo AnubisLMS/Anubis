@@ -11,9 +11,18 @@ from anubis.utils.services.cache import cache
 
 
 def get_submissions() -> pd.DataFrame:
-    """TODO"""
+    """
+    Get all submissions from visible assignments, and put them in a dataframe
+
+    :return:
+    """
+    # Get the submission sqlalchemy objects
     raw_submissions = Submission.query.join(Assignment).filter(Assignment.hidden == False).all()
+
+    # Specify which columns we want
     columns = ['id', 'owner_id', 'assignment_id', 'processed', 'created']
+
+    # Build a dataframe of from the columns we pull out of each submission object
     submissions = pd.DataFrame(
         data=list(map(lambda x: ({
             column: getattr(x, column)
@@ -21,14 +30,27 @@ def get_submissions() -> pd.DataFrame:
         }), raw_submissions)),
         columns=columns
     )
+
+    # Round the submission timestamps to the nearest hour
     submissions['created'] = submissions['created'].apply(lambda date: pd.to_datetime(date).round('H'))
+
     return submissions
 
 
 def get_theia_sessions() -> pd.DataFrame:
-    """TODO"""
+    """
+    Get all theia session objects, and throw them into a dataframe
+
+    :return:
+    """
+
+    # Get all the theia session sqlalchemy objects
     raw_theia_sessions = TheiaSession.query.all()
+
+    # Specify which columns we want
     columns = ['id', 'owner_id', 'assignment_id', 'created', 'ended']
+
+    # Build a dataframe of from the columns we pull out of each theia session object
     theia_sessions = pd.DataFrame(
         data=list(map(lambda x: ({
             column: getattr(x, column)
@@ -36,22 +58,31 @@ def get_theia_sessions() -> pd.DataFrame:
         }), raw_theia_sessions)),
         columns=columns
     )
+
+    # Round the timestamps to the nearest hour
     theia_sessions['created'] = theia_sessions['created'].apply(lambda date: pd.to_datetime(date).round('H'))
     theia_sessions['ended'] = theia_sessions['ended'].apply(lambda date: pd.to_datetime(date).round('H'))
+
+    # Add a duration column
     if len(theia_sessions) > 0:
+        # Get the duration from subtracting the end from the start time, and converting to minutes
         theia_sessions['duration'] = theia_sessions[['ended', 'created']].apply(
             lambda row: (row[0] - row[1]).seconds / 60, axis=1)
+
+    # The apply breaks if there are no rows, so make it empty in that case
     else:
         theia_sessions['duration'] = []
+
+    # Drop outliers based on duration
     theia_sessions = theia_sessions[
         np.abs(theia_sessions.duration - theia_sessions.duration.mean()) <= (3 * theia_sessions.duration.std())
-        ]  # Drop outliers based on duration
+    ]
+
     return theia_sessions
 
 
 @cache.memoize(timeout=10)
 def get_raw_submissions() -> List[Dict[str, Any]]:
-    """TODO"""
     submissions_df = get_submissions()
     data = submissions_df.groupby(['assignment_id', 'created'])['id'].count() \
         .reset_index().rename(columns={'id': 'count'}).to_dict()
@@ -103,7 +134,6 @@ def get_raw_submissions() -> List[Dict[str, Any]]:
 
 @cache.memoize(timeout=420, unless=is_debug)
 def get_usage_plot():
-    """TODO"""
     import matplotlib.pyplot as plt
     import matplotlib.colors as mcolors
 

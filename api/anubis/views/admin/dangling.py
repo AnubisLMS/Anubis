@@ -22,13 +22,17 @@ def private_dangling():
 
     :return:
     """
-    # TODO
+
+    # Pull all the dandling submissions
     dangling_ = Submission.query.filter(
         Submission.owner_id == None,
     ).all()
+
+    # Get the data response for the dangling submissions
     dangling_ = [a.data for a in dangling_]
 
-    return success_response({"dangling": dangling_, "count": len(dangling_)})
+    # Pass back all the dangling submissions
+    return success_response({"count": len(dangling_), "dangling": dangling_})
 
 
 @dangling.route("/reset")
@@ -36,11 +40,24 @@ def private_dangling():
 @log_endpoint("reset-dangling", lambda: "reset-dangling")
 @json_response
 def private_reset_dangling():
-    """TODO"""
+    """
+    Reset all the submission that are dangling
+
+    :return:
+    """
+
+    # Build a list of all the reset submissions
     resets = []
+
+    # Iterate over all the dangling submissions
     for s in Submission.query.filter_by(owner_id=None).all():
+        # Reset the submission models
         s.init_submission_models()
+
+        # Append the new dangling submission data for the response
         resets.append(s.data)
+
+    # Return all the reset submissions
     return success_response({"reset": resets})
 
 

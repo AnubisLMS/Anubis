@@ -5,13 +5,18 @@ from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQue
 from anubis.utils.auth import require_admin
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import error_response, success_response
-from anubis.utils.lms.course import assert_course_admin, assert_course_superuser
+from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.lms.course import (
+    assert_course_admin,
+    assert_course_superuser,
+    assert_course_context,
+    get_course_context,
+)
 from anubis.utils.lms.questions import (
     hard_reset_questions,
     get_all_questions,
     assign_questions,
 )
-from anubis.utils.services.elastic import log_endpoint
 
 questions = Blueprint("admin-questions", __name__, url_prefix="/admin/questions")
 
@@ -20,17 +25,34 @@ questions = Blueprint("admin-questions", __name__, url_prefix="/admin/questions"
 @require_admin()
 @log_endpoint("admin", lambda: "add new question")
 @json_response
-def private_questions_add_unique_code(unique_code: str):
-    """TODO"""
+def admin_questions_add_unique_code(unique_code: str):
+    """
+    Add a new blank question to the assignment.
+
+    :param unique_code:
+    :return:
+    """
+
+    # Get the current course context
+    course = get_course_context()
+
     # Try to find assignment
     assignment: Assignment = Assignment.query.filter(
         Assignment.unique_code == unique_code
     ).first()
-    if assignment is None:
-        return error_response("Unable to find assignment"), 400
 
+    # If the assignment does not exist, then stop
+    if assignment is None:
+        return error_response("Unable to find assignment")
+
+    # Verify that the current user is an admin for the course
+    # that the assignment is apart of
     assert_course_admin(assignment.course_id)
 
+    # Assert that the set course context matches the course of the assignment
+    assert_course_context(assignment.course_id == course.id)
+
+    # Create a new, blank question
     aq = AssignmentQuestion(
         assignment_id=assignment.id,
         sequence=0,
@@ -40,9 +62,12 @@ def private_questions_add_unique_code(unique_code: str):
         code_language='',
         placeholder='',
     )
+
+    # Add and commit the question
     db.session.add(aq)
     db.session.commit()
 
+    # Return the status
     return success_response({
         "status": "Question added",
     })
@@ -52,23 +77,49 @@ def private_questions_add_unique_code(unique_code: str):
 @require_admin()
 @log_endpoint("admin", lambda: "delete question")
 @json_response
-def private_questions_del(assignment_question_id: str):
+def admin_questions_delete_question_id(assignment_question_id: str):
+    """
+    Delete an assignment question
+
+    :param assignment_question_id:
+    :return:
+    """
+
+    # Get the current course context
+    course = get_course_context()
+
+    # Get the assignment question
     assignment_question: AssignmentQuestion = AssignmentQuestion.query.filter(
         AssignmentQuestion.id == assignment_question_id,
     ).first()
-    if assignment_question is None:
-        return error_response('Could not find question'), 400
 
+    # Verify that the question exists
+    if assignment_question is None:
+        return error_response('Could not find question')
+
+    # Assert that the course
     assert_course_admin(assignment_question.assignment.course_id)
 
+    # Assert that the set course context matches the course of the assignment
+    assert_course_context(assignment_question.assignment.course_id == course.id)
+
     try:
+        # Try to delete the question
         AssignmentQuestion.query.filter(
             AssignmentQuestion.id == assignment_question_id,
         ).delete()
+
+        # Try to commit the delete
         db.session.commit()
+
     except sqlalchemy.exc.IntegrityError:
+        # Rollback the commit
+        db.session.rollback()
+
+        # If this commit fails, then it is assigned to students
         return error_response('Question is already assigned to students. Reset assignments to delete.')
 
+    # Return the status
     return success_response({
         "status": "Question deleted",
         'variant': 'warning',
@@ -99,18 +150,29 @@ def private_questions_hard_reset_unique_code(unique_code: str):
     :param unique_code:
     :return:
     """
+
+    # Get the current course context
+    course = get_course_context()
+
     # Try to find assignment
     assignment: Assignment = Assignment.query.filter(
         Assignment.unique_code == unique_code
     ).first()
+
+    # If the assignment does not exist, then stop
     if assignment is None:
         return error_response("Unable to find assignment")
 
+    # Assert that the current user is a professor or superuser
     assert_course_superuser(assignment.course_id)
+
+    # Assert that the set course context matches the course of the assignment
+    assert_course_context(assignment.course_id == course.id)
 
     # Hard reset questions
     hard_reset_questions(assignment)
 
+    # Pass back the status
     return success_response({
         "status": "Questions hard reset",
         'variant': 'warning',
@@ -141,20 +203,34 @@ def private_questions_reset_assignments_unique_code(unique_code: str):
     :param unique_code:
     :return:
     """
+
+    # Get the current course context
+    course = get_course_context()
+
     # Try to find assignment
     assignment: Assignment = Assignment.query.filter(
         Assignment.unique_code == unique_code
     ).first()
+
+    # Verify that the assignment exists
     if assignment is None:
         return error_response("Unable to find assignment")
 
+    # Assert that the current user is a professor or superuser
     assert_course_superuser(assignment.course_id)
 
+    # Assert that the set course context matches the course of the assignment
+    assert_course_context(assignment.course_id == course.id)
+
+    # Delete all the question assignments
     AssignedStudentQuestion.query.filter(
         AssignedStudentQuestion.assignment_id == assignment.id
     ).delete()
+
+    # Commit the delete
     db.session.commit()
 
+    # Pass back the status
     return success_response({
         "status": "Questions assignments reset",
         'variant': 'warning',
@@ -174,24 +250,35 @@ def admin_questions_update(assignment_question_id: str, question: dict):
     :return:
     """
 
+    # Get the current course context
+    course = get_course_context()
+
+    # Get the assignment question
     db_assignment_question: AssignmentQuestion = AssignmentQuestion.query.filter(
         AssignmentQuestion.id == assignment_question_id
     ).first()
-    db_assignment_question: AssignmentQuestion
 
-    assert_course_admin(db_assignment_question.assignment.course_id)
-
+    # Verify that the assignment question exists
     if db_assignment_question is None:
         return error_response('question not found')
 
+    # Assert the current user is an admin for the course the assignment belongs to
+    assert_course_admin(db_assignment_question.assignment.course_id)
+
+    # Assert that the set course context matches the course of the assignment
+    assert_course_context(db_assignment_question.assignment.course_id == course.id)
+
+    # Update the fields of the question
     db_assignment_question.question = question['question']
     db_assignment_question.solution = question['solution']
     db_assignment_question.code_language = question['code_language']
     db_assignment_question.code_question = question['code_question']
     db_assignment_question.sequence = question['sequence']
 
+    # Commit any changes
     db.session.commit()
 
+    # Pass back status
     return success_response({
         'status': 'Question updated'
     })

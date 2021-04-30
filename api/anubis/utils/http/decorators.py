@@ -5,20 +5,48 @@ from typing import Union, List, Tuple
 from flask import request
 
 from anubis.models import Submission
-from anubis.utils.auth import current_user
+from anubis.utils.auth import current_user, AuthenticationError
 from anubis.utils.data import jsonify, _verify_data_shape
 from anubis.utils.http.https import error_response
 
 
-def load_from_id(model, verify_owner=True):
-    """TODO"""
+def load_from_id(model, verify_owner=False):
+    """
+    This flask decorator loads the id kwarg passed in by flask
+    and uses it to pull the sqlalchemy object corresponding to that id
+
+    >>> @app.route('/assignment/<string:id>')
+    >>> @require_user
+    >>> @load_from_id(Assignment)
+    >>> def view_function(assignment: Assignment):
+    >>>     pass
+
+    If the verify_owner is true, then the sqlachemy object's owner
+    relationship (assuming it has one) will be checked against the
+    current logged in user.
+
+    :param model:
+    :param verify_owner:
+    :return:
+    """
+
     def wrapper(func):
         @wraps(func)
         def decorator(id, *args, **kwargs):
+            # Use the id from the view functions params to query for
+            # the object.
             r = model.query.filter_by(id=id).first()
-            if r is None or (verify_owner and current_user().id != r.owner.id):
-                logging.info("Unauthenticated GET {}".format(request.path))
+
+            # If the sqlalchemy object was not found, then return a 400
+            if r is None:
                 return error_response("Unable to find"), 400
+
+            # If the verify_owner option is on, then
+            # check the object's owner against the currently
+            # logged in user.
+            if verify_owner and current_user().id != r.owner.id:
+                raise AuthenticationError()
+
             return func(r, *args, **kwargs)
 
         return decorator
@@ -55,59 +83,100 @@ def json_endpoint(
         only_required: bool = False,
 ):
     """
-    Wrap a route so that it always converts data
-    response to proper json.
+    Wrap a route so that it always converts data response to proper
+    json. This decorator will save a whole lot of time verifying
+    json body data.
 
-    @app.route('/')
-    @json
-    def test():
-        return {
-            'success': True
-        }
+    The required fields should be a list of either strings or tuples.
+
+    If the required fields is a list of strings, then each of the
+    strings will be verified in the json body, and passed to the
+    view function as a kwarg.
+
+    >>> @app.route('/')
+    >>> @json_endpoint(['name')])
+    >>> def test(name, **_):
+    >>>    return {
+    >>>        'success': True
+    >>>    }
+
+    If the required fields are a list of tuples, then the first item
+    should be the string name of the field, then its type. When you
+    specify the type in a tuple, then that fields type will also
+    be verified in the json body.
+
+    >>> @app.route('/')
+    >>> @json_endpoint([('name', str)])
+    >>> def test(name: str, **_):
+    >>>    return {
+    >>>        'success': True
+    >>>    }
     """
 
     def wrapper(func):
         @wraps(func)
         def json_wrap(*args, **kwargs):
-            if not request.headers.get("Content-Type", default=None).startswith(
-                    "application/json"
-            ):
-                return {
-                           "success": False,
-                           "error": "Content-Type header is not application/json",
-                           "data": None,
-                       }, 406  # Not Acceptable
-            json_data: dict = request.json
 
+            # Get the content type header
+            content_type = request.headers.get("Content-Type", default="")
+
+            # Verify that the content type header was application json.
+            # If the content type header is not application/json, then
+            # flask will not parse the body of the request.
+            if not content_type.startswith("application/json"):
+
+                # If the content-type was not set properly, then we
+                # should hand back a 406 not acceptable error code.
+                return error_response("Content-Type header is not application/json"), 406
+
+            # After verifying that the content type header was set,
+            # then we can access the request json body
+            json_body: dict = request.json
+
+            # Build a list of the required field string values
+            _required_fields: List[str] = []
+
+            # If the required fields was set, then we
+            # need to verify that they exist in the json
+            # body, along with type checks if they were
+            # specified.
             if required_fields is not None:
                 # Check required fields
                 for index, field in enumerate(required_fields):
-                    # If field was a tuple, extract field name and required
-                    # type
+                    # If field was a tuple, extract field name and required type.
                     required_type = None
                     if isinstance(field, tuple):
-                        field, required_type = field
-                        required_fields[index] = field
 
-                    # Make sure
-                    if field not in json_data:
+                        # If the tuple was more than two items, then
+                        # we dont know how to handle.
+                        if len(field) != 2:
+                            pass
+
+                        # Pull the field apart into the field and required type
+                        field, required_type = field
+
+                    # At this point, the tuple will have been parsed if it had one,
+                    # so the field will always be a string. Add it to the running
+                    # (fresh) list of required field string objects.
+                    _required_fields.append(field)
+
+                    # Make sure that the field is in the json body.
+                    # If this condition is not met, then we will return
+                    # a 406 not acceptable.
+                    if field not in json_body:
+
                         # field missing, return error
-                        return (
-                            error_response(
-                                "Malformed requests. Missing field {}.".format(field)
-                            ),
-                            406,
-                        )  # Not Acceptable
+                        # Not Acceptable
+                        return error_response(f"Malformed requests. Missing field {field}."), 406
 
                     # If a type was specified, verify it
                     if required_type is not None:
-                        if not isinstance(json_data[field], required_type):
-                            return (
-                                error_response(
-                                    "Malformed requests. Invalid field type."
-                                ),
-                                406,
-                            )  # Not Acceptable
+
+                        # Do a type check on the json body field
+                        if not isinstance(json_body[field], required_type):
+
+                            # Not Acceptable
+                            return error_response("Malformed requests. Invalid field type."), 406
 
             # Give the positional args first,
             # then the json data (in the order of
@@ -122,18 +191,21 @@ def json_endpoint(
                 # as it will overwrite any keys already in the
                 # kwargs with the values in the json.
                 if not only_required:
-                    for key, value in json_data.items():
-                        if key not in required_fields:
+                    for key, value in json_body.items():
+                        if key not in _required_fields:
                             kwargs[key] = value
 
                 # Call the function while trying to maintain a
                 # logical order to the arguments
                 return func(
                     *args,
-                    **{field: json_data[field] for field in required_fields},
+                    **{field: json_body[field] for field in _required_fields},
                     **kwargs,
                 )
-            return func(json_data, *args, **kwargs)
+
+            # If there was no required fields specified, then we can just call the
+            # view function with the first argument being the json body.
+            return func(json_body, *args, **kwargs)
 
         return json_wrap
 
@@ -157,11 +229,15 @@ def check_submission_token(func):
 
     @wraps(func)
     def wrapper(submission_id: str):
+        # Try to get the submission
         submission = Submission.query.filter(Submission.id == submission_id).first()
+
+        # Try to get a token from the request query
         token = request.args.get("token", default=None)
 
         # Verify submission exists
         if submission is None:
+            # Log that there was an issue with finding the submission
             logging.error(
                 "Invalid submission from submission pipeline",
                 extra={
@@ -171,10 +247,13 @@ def check_submission_token(func):
                     "ip": request.remote_addr,
                 },
             )
+
+            # Give back a 406 rejected error
             return error_response("Invalid"), 406
 
         # Verify we got a token
         if token is None:
+            # Log that there was an issue with finding a token
             logging.error(
                 "Attempted report post with no token",
                 extra={
@@ -184,10 +263,13 @@ def check_submission_token(func):
                     "ip": request.remote_addr,
                 },
             )
+
+            # Give back a 406 rejected error
             return error_response("Invalid"), 406
 
         # Verify token matches
         if token != submission.token:
+            # Log that there was an issue verifying tokens
             logging.error(
                 "Invalid token reported from pipeline",
                 extra={
@@ -197,9 +279,15 @@ def check_submission_token(func):
                     "ip": request.remote_addr,
                 },
             )
+
+            # Give back a 406 rejected error
             return error_response("Invalid"), 406
 
+        # Log that the request was validated
         logging.info("Pipeline request validated {}".format(request.path))
+
+        # Call the view function, and pass the
+        # submission sqlalchemy object.
         return func(submission)
 
     return wrapper

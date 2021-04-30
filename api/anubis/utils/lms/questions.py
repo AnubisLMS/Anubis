@@ -222,9 +222,20 @@ def get_all_questions(assignment: Assignment) -> Dict[int, List[Dict[str, str]]]
     }
 
 
-@cache.memoize(timeout=1, unless=is_debug)
-def get_assigned_questions(assignment_id: str, user_id: str, full=False):
-    """TODO"""
+@cache.memoize(timeout=5, unless=is_debug)
+def get_assigned_questions(assignment_id: str, user_id: str, full: bool = False):
+    """
+    Get the assigned question objects for a user_id and assignment.
+
+    If the full option is on, then a full view (including solutions) will be returned
+
+    * The results are lightly cached *
+
+    :param assignment_id:
+    :param user_id:
+    :param full:
+    :return:
+    """
 
     # Get assigned questions
     assigned_questions = AssignedStudentQuestion.query.filter(

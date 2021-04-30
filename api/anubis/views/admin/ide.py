@@ -23,36 +23,44 @@ ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 @json_endpoint([('settings', dict)])
 def admin_ide_initialize_custom(settings: dict, **_):
     """
-    TODO
-
+    Initialize a new management ide with options.
 
     :param settings:
     :param _:
     :return:
     """
+
+    # Get the current user
     user = current_user()
 
+    # Get the current course context
     course = get_course_context()
 
+    # Check to see if there is already a management session
+    # allocated for the current user
     session = TheiaSession.query.filter(
         TheiaSession.active,
         TheiaSession.owner_id == user.id,
+        TheiaSession.course_id == course.id,
         TheiaSession.assignment_id == None,
     ).first()
 
+    # If there is already a session, then stop
     if session is not None:
         return success_response({"session": session.data})
 
+    # Read the options out of the posted data
     network_locked = settings.get('network_locked', False)
     privileged = settings.get('privileged', True)
     image = settings.get('image', 'registry.osiris.services/anubis/theia-admin')
     repo_url = settings.get('repo_url', 'https://github.com/os3224/anubis-assignment-tests')
     options_str = settings.get('options', '{"limits": {"cpu": "4", "memory": "4Gi"}}')
 
+    # Attempt to load the options_str into a dict object
     try:
         options = json.loads(options_str)
     except json.JSONDecodeError:
-        return error_response('Can not parse JSON options'), 400
+        return error_response('Can not parse JSON options')
 
     # Create a new session
     session = TheiaSession(
@@ -79,18 +87,32 @@ def admin_ide_initialize_custom(settings: dict, **_):
 @log_endpoint("admin-ide-active")
 @json_response
 def admin_ide_active():
-    """TODO"""
+    """
+    Get the list of all active Theia ides within
+    the current course context.
+
+    :return:
+    """
+
+    # Get the current user
     user = current_user()
 
+    # Get the course context
+    course = get_course_context()
+
+    # Query for an active theia session within this course context
     session = TheiaSession.query.filter(
         TheiaSession.active,
         TheiaSession.owner_id == user.id,
+        TheiaSession.course_id == course.id,
         TheiaSession.assignment_id == None,
     ).first()
 
+    # If there was no session, then stop
     if session is None:
         return success_response({"session": None})
 
+    # Return the active session informatino
     return success_response({
         "session": session.data,
         "settings": session.settings,

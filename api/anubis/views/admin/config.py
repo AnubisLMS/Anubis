@@ -12,9 +12,16 @@ config_ = Blueprint('config', __name__, url_prefix='/admin/config')
 @require_admin(unless_vpn=True)
 @json_response
 def config_list():
-    """TODO"""
+    """
+    List all config items.
+
+    :return:
+    """
+
+    # Pull all the config items
     items = Config.query.all()
 
+    # Return the broken down objects
     return success_response({
         'config': [item.data for item in items]
     })

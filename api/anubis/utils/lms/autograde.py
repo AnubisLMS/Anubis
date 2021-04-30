@@ -57,7 +57,7 @@ def autograde(student_id, assignment_id):
     return best.id if best is not None else None
 
 
-def stats_wrapper(assignment: Assignment, user_id: str, netid: str, name: str, submission_id: str) -> dict:
+def autograde_submission_result_wrapper(assignment: Assignment, user_id: str, netid: str, name: str, submission_id: str) -> dict:
     """
     The autograde results require quite of bit more information than
     just the id of the best submission. This function takes some high level
@@ -158,7 +158,7 @@ def bulk_autograde(assignment_id, netids=None, offset=0, limit=20):
         bests.append(
             # Use the stats_wrapper function to add all the necessary
             # metadata for the submission.
-            stats_wrapper(
+            autograde_submission_result_wrapper(
                 assignment,
                 student["id"],
                 student["netid"],

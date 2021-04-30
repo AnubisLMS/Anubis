@@ -5,13 +5,13 @@ from anubis.utils.auth import require_admin
 from anubis.utils.data import rand
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.files import get_mime_type
+from anubis.utils.lms.course import get_course_context, assert_course_admin, assert_course_context
 from anubis.utils.http.https import (
     get_number_arg,
     get_request_file_stream,
     success_response,
     error_response,
 )
-from anubis.utils.lms.course import get_course_context, assert_course_admin
 
 static = Blueprint("admin-static", __name__, url_prefix="/admin/static")
 
@@ -19,17 +19,36 @@ static = Blueprint("admin-static", __name__, url_prefix="/admin/static")
 @static.route('/delete/<string:static_id>')
 @require_admin()
 @json_response
-def static_delete_static_id(static_id: str):
-    """TODO"""
+def admin_static_delete_static_id(static_id: str):
+    """
+    Delete a static file item.
+
+    :param static_id:
+    :return:
+    """
+
+    # Get the current course context
+    course = get_course_context()
+
+    # Get the static file object
     static_file = StaticFile.query.filter(
         StaticFile.id == static_id
     ).first()
 
+    # Assert that the current user is an admin for
+    # the course the static belongs to
     assert_course_admin(static_file.course_id)
 
+    # Assert that the static file is within the current course context
+    assert_course_context(static_file.course_id == course.id)
+
+    # Delete the object
     db.session.delete(static_file)
+
+    # Commit the delete
     db.session.commit()
 
+    # Pass back the status
     return success_response({
         'status': 'File deleted',
         'variant': 'warning',
@@ -49,11 +68,14 @@ def admin_static_list():
     :return:
     """
 
+    # Get the current course context
     course = get_course_context()
 
+    # Get options for the query
     limit = get_number_arg("limit", default_value=20)
     offset = get_number_arg("offset", default_value=0)
 
+    # Get all public static files within this course
     public_files = StaticFile.query \
         .filter(StaticFile.course_id == course.id) \
         .order_by(StaticFile.created.desc()) \
@@ -61,9 +83,10 @@ def admin_static_list():
         .offset(offset) \
         .all()
 
-    return success_response(
-        {"files": [public_file.data for public_file in public_files]}
-    )
+    # Pass back the list of files
+    return success_response({
+        "files": [public_file.data for public_file in public_files]
+    })
 
 
 @static.route("/upload", methods=["POST"])
@@ -80,19 +103,18 @@ def admin_static_upload():
     :return:
     """
 
+    # Get the current course context
     course = get_course_context()
-    path = request.args.get("path", default=None)
 
-    # If the path was not specified, then create some hash for it
-    if path is None:
-        path = "/" + rand(16)
+    # Create a path hash
+    path = "/" + rand(16)
 
     # Pull file from request
     stream, filename = get_request_file_stream(with_filename=True)
 
     # Make sure we got a file
     if stream is None:
-        return error_response("No file uploaded"), 406
+        return error_response("No file uploaded")
 
     # Figure out content type
     mime_type = get_mime_type(stream)
@@ -105,10 +127,7 @@ def admin_static_upload():
 
     # If the blob doesn't already exist, create one
     if blob is None:
-        blob = StaticFile(
-            path=path,
-            course_id=course.id,
-        )
+        blob = StaticFile(path=path, course_id=course.id)
 
     # Update the fields
     blob.filename = filename
@@ -119,6 +138,7 @@ def admin_static_upload():
     db.session.add(blob)
     db.session.commit()
 
+    # Pass back the status
     return success_response({
         "status": f"{filename} uploaded",
         "blob": blob.data,

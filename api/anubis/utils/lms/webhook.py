@@ -2,7 +2,13 @@ from anubis.models import db, User, AssignmentRepo
 
 
 def parse_webhook(webhook):
-    """TODO"""
+    """
+    Parse out some of the important basics of any webhook.
+
+    :param webhook:
+    :return:
+    """
+
     # Load the basics from the webhook
     repo_url = webhook["repository"]["url"]
     repo_name = webhook["repository"]["name"]

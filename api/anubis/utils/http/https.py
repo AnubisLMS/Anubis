@@ -64,12 +64,40 @@ def success_response(data: Union[dict, str, None]) -> dict:
     }
 
 
-def get_number_arg(arg_name: str = "number", default_value: int = 10) -> int:
-    """TODO"""
-    n = request.args.get(arg_name, default=default_value)
+def get_number_arg(arg_name: str = "number", default_value: int = 10, reject_negative: bool = True) -> int:
+    """
+    Quick function for getting a number http query argument. If the
+    argument is not found, or cannot be converted to an int
+    then use a fallback default value.
+
+    Optionally if reject_negative is True, then it will fallback
+    to the default value if the user specified is negative.
+
+    :param arg_name:
+    :param default_value:
+    :param reject_negative:
+    :return:
+    """
+
+    # Get the query argument in string form
+    n_str: str = request.args.get(arg_name, default=default_value)
+
     try:
-        return int(n)
+        # Attempt to convert to a python int
+        n: int = int(n_str)
+
+        # If reject_negative, then check if
+        # the parsed value is negative.
+        if reject_negative and n < 0:
+            # If it was negative, then fallback to default
+            return default_value
+
+        # Return integer value
+        return n
     except ValueError:
+        # ValueError is raised if the string to int
+        # conversion was unsuccessful. In that case,
+        # then we fallback to default
         return default_value
 
 

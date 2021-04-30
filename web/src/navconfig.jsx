@@ -14,28 +14,28 @@ import AttachFileIcon from '@material-ui/icons/AttachFile';
 import BookIcon from '@material-ui/icons/Book';
 import TimelineIcon from '@material-ui/icons/Timeline';
 
-import About from '../Pages/Public/About';
-import Courses from '../Pages/Public/Courses';
-import Assignments from '../Pages/Public/Assignments';
-import Profile from '../Pages/Public/Profile';
-import Repos from '../Pages/Public/Repos';
-import Submissions from '../Pages/Public/Submissions';
-import Submission from '../Pages/Public/Submission';
-import Blog from '../Pages/Public/Blog';
-import Visuals from '../Pages/Public/Visuals';
+import About from './Pages/Public/About';
+import Courses from './Pages/Public/Courses';
+import Assignments from './Pages/Public/Assignments';
+import Profile from './Pages/Public/Profile';
+import Repos from './Pages/Public/Repos';
+import Submissions from './Pages/Public/Submissions';
+import Submission from './Pages/Public/Submission';
+import Blog from './Pages/Public/Blog';
+import Visuals from './Pages/Public/Visuals';
 
-import AdminUsers from '../Pages/Admin/Users';
-import AdminUser from '../Pages/Admin/User';
-import AdminAssignments from '../Pages/Admin/Assignment/Assignments';
-import AdminStats from '../Pages/Admin/Autograde/AutogradeResults';
-import AdminAssignmentStats from '../Pages/Admin/Autograde/AutogradeAssignments';
-import AdminSubmissionStats from '../Pages/Admin/Autograde/AutogradeSubmission';
-import AdminCourses from '../Pages/Admin/Courses';
-import AdminTheia from '../Pages/Admin/Theia';
-import AdminStatic from '../Pages/Admin/Static';
-import AdminConfig from '../Pages/Admin/Config';
-import AdminAssignmentQuestions from '../Pages/Admin/Assignment/AssignmentQuestions';
-import AdminAssignmentTests from '../Pages/Admin/Assignment/AssignmentTests';
+import AdminUsers from './Pages/Admin/Users';
+import AdminUser from './Pages/Admin/User';
+import AdminAssignments from './Pages/Admin/Assignment/Assignments';
+import AdminStats from './Pages/Admin/Autograde/AutogradeResults';
+import AdminAssignmentStats from './Pages/Admin/Autograde/AutogradeAssignments';
+import AdminSubmissionStats from './Pages/Admin/Autograde/AutogradeSubmission';
+import AdminCourses from './Pages/Admin/Courses';
+import AdminTheia from './Pages/Admin/Theia';
+import AdminStatic from './Pages/Admin/Static';
+import AdminConfig from './Pages/Admin/Config';
+import AdminAssignmentQuestions from './Pages/Admin/Assignment/AssignmentQuestions';
+import AdminAssignmentTests from './Pages/Admin/Assignment/AssignmentTests';
 
 export const footer_nav = [
   {

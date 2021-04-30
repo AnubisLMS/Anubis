@@ -40,7 +40,7 @@ def get_courses(netid: str):
     return [c.data for c in classes]
 
 
-@cache.memoize(timeout=5, unless=is_debug)
+@cache.memoize(timeout=10, unless=is_debug)
 def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], None]:
     """
     Get all the current assignments for a netid. Optionally specify a class_name
@@ -57,51 +57,69 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
     if user is None:
         return None
 
-    # TODO
-    course_ids = []
+    # Get all the courses the user is in
     in_courses = InCourse.query.join(Course).filter(
         InCourse.owner_id == user.id,
     ).all()
 
-    if course_id is not None:
-        course_ids = [course_id]
-    else:
-        course_ids = [in_course.course.id for in_course in in_courses]
+    # Build a list of course ids. If the user
+    # specified a specific course, make a list
+    # of only that course id.
+    course_ids = [course_id] \
+        if course_id is not None \
+        else [in_course.course.id for in_course in in_courses]
 
-    assignments = []
+    # Build a list of all the assignments visible
+    # to this user for each of the specified courses.
+    assignments: List[Assignment] = []
     for course in course_ids:
+        # Query filters
         filters = []
+
+        # If the current user is not a course admin or a superuser, then
+        # we should filter out assignments that have not been released,
+        # and those marked as hidden.
         if not (user.is_superuser or is_course_admin(course_id)):
             filters.append(Assignment.release_date <= datetime.now())
             filters.append(Assignment.hidden == False)
 
+        # Get the assignment objects that should be visible to this user.
         course_assignments = Assignment.query.join(Course).filter(
             Course.id == course,
             *filters,
-        ).order_by(Assignment.due_date.desc()).all()
+        ).all()
+
+        # Add all the assignment objects to the running list
         assignments.extend(course_assignments)
 
-    a = [a.data for a in assignments]
-    for assignment_data in a:
+    # Take all the sqlalchemy assignment objects,
+    # and break them into data dictionaries.
+    # Sort them by due_date.
+    response = [_a.data for _a in sorted(
+        assignments,
+        reverse=True,
+        key=lambda assignment: assignment.due_date,
+    )]
+
+    # Add submission and repo information to the assignments
+    for assignment_data in response:
+        # If the current user has a submission for this assignment, then mark it
         assignment_data["has_submission"] = (
-                Submission.query.join(User)
-                .join(Assignment)
-                .filter(
-                    Assignment.id == assignment_data["id"],
-                    User.netid == netid,
-                )
-                .first()
-                is not None
-        )
-        assignment_data["has_repo"] = (
-                AssignmentRepo.query.filter(
-                    AssignmentRepo.owner_id == user.id,
-                    AssignmentRepo.assignment_id == assignment_data['id'],
-                ).first()
-                is not None
+            Submission.query.join(User).join(Assignment).filter(
+                Assignment.id == assignment_data["id"],
+                User.netid == netid,
+            ).first() is not None
         )
 
-    return a
+        # If the current user has a repo for this assignment, then mark it
+        assignment_data["has_repo"] = (
+            AssignmentRepo.query.filter(
+                AssignmentRepo.owner_id == user.id,
+                AssignmentRepo.assignment_id == assignment_data['id'],
+            ).first() is not None
+        )
+
+    return response
 
 
 @cache.memoize(timeout=3, unless=is_debug)

@@ -53,10 +53,25 @@ def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str
 @load_from_id(Assignment, verify_owner=False)
 @json_response
 def admin_assignments_get_id(assignment: Assignment):
-    """TODO"""
+    """
+    Get the full data for an assignment id. The course context
+    must be set, and will be checked.
+
+    :param assignment:
+    :return:
+    """
+    # Get the course context
     course = get_course_context()
+
+    # Verify that the current user is an admin for the course
+    # that the assignment is apart of
     assert_course_admin(assignment.course_id)
+
+    # Confirm that the assignment they are asking for is part
+    # of this course
     assert_course_context(course.id == assignment.course_id)
+
+    # Pass back the full data
     return success_response({"assignment": assignment.full_data})
 
 
@@ -64,12 +79,24 @@ def admin_assignments_get_id(assignment: Assignment):
 @require_admin()
 @json_response
 def admin_assignments_list():
-    """TODO"""
+    """
+    List all assignments within the course context.
+
+    * The response will be the row2dict of the assignment, not a data prop *
+
+    :return:
+    """
+
+    # Get the course context
     course = get_course_context()
+
+    # Get all the assignment objects within the course context,
+    # sorted by the due date.
     all_assignments = Assignment.query.filter(
         Assignment.course_id == course.id
     ).order_by(Assignment.due_date.desc()).all()
 
+    # Pass back the row2dict of each assignment object
     return success_response({
         "assignments": [row2dict(assignment) for assignment in all_assignments]
     })
@@ -79,18 +106,37 @@ def admin_assignments_list():
 @require_admin()
 @json_response
 def admin_assignment_tests_toggle_hide_assignment_test_id(assignment_test_id: str):
-    """TODO"""
+    """
+    Toggle an assignment test being hidden.
+
+    :param assignment_test_id:
+    :return:
+    """
+
+    # Get the course context
     course = get_course_context()
+
+    # Pull the assignment test
     assignment_test: AssignmentTest = AssignmentTest.query.filter(
         AssignmentTest.id == assignment_test_id,
     ).first()
-    if assignment_test is None:
-        return error_response('test not found'), 406
 
+    # Make sure the assignment test exists
+    if assignment_test is None:
+        return error_response('test not found')
+
+    # Verify that the current user is an admin for the course the
+    # assignment test is apart of
     assert_course_admin(assignment_test.assignment.course_id)
+
+    # Verify that course the assignment test is apart of and
+    # the course context match
     assert_course_context(course.id == assignment_test.assignment.course_id)
 
+    # Toggle the hidden field
     assignment_test.hidden = not assignment_test.hidden
+
+    # Commit the change
     db.session.commit()
 
     return success_response({
@@ -103,29 +149,51 @@ def admin_assignment_tests_toggle_hide_assignment_test_id(assignment_test_id: st
 @require_admin()
 @json_response
 def admin_assignment_tests_delete_assignment_test_id(assignment_test_id: str):
-    """TODO"""
+    """
+    Delete an assignment test.
+
+    :param assignment_test_id:
+    :return:
+    """
+
+    # Get the course context
     course = get_course_context()
 
+    # Pull the assignment test
     assignment_test = AssignmentTest.query.filter(
         AssignmentTest.id == assignment_test_id,
     ).first()
-    if assignment_test is None:
-        return error_response('test not found'), 406
 
+    # Make sure the assignment test exists
+    if assignment_test is None:
+        return error_response('test not found')
+
+    # Verify that the current user is an admin for the course the
+    # assignment test is apart of
     assert_course_admin(assignment_test.assignment.course_id)
+
+    # Verify that course the assignment test is apart of and
+    # the course context match
     assert_course_context(course.id == assignment_test.assignment.course_id)
 
+    # Save the test name so we can use it in the response
     test_name = assignment_test.name
 
+    # Delete all the submission test results that are pointing to
+    # this test
     SubmissionTestResult.query.filter(
         SubmissionTestResult.assignment_test_id == assignment_test.id,
     ).delete()
 
+    # Delete the test itself
     AssignmentTest.query.filter(
         AssignmentTest.id == assignment_test_id,
     ).delete()
+
+    # Commit the changes
     db.session.commit()
 
+    # Pass back the status
     return success_response({
         'status': f'{test_name} deleted',
         'variant': 'warning',

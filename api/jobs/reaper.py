@@ -4,13 +4,14 @@ import traceback
 from datetime import datetime, timedelta
 
 import requests
-from anubis.utils.lms.autograde import bulk_autograde
-from anubis.utils.lms.webhook import check_repo, guess_github_username
 from sqlalchemy import func, and_
 
 from anubis.app import create_app
 from anubis.models import db, Submission, Assignment, AssignmentRepo, TheiaSession
+from anubis.utils.lms.autograde import bulk_autograde
+from anubis.utils.lms.webhook import check_repo, guess_github_username
 from anubis.utils.services.rpc import enqueue_ide_stop, enqueue_ide_reap_stale, enqueue_autograde_pipeline
+from anubis.utils.data import with_context
 
 
 def reap_stale_submissions():
@@ -40,24 +41,14 @@ def reap_stale_submissions():
     db.session.commit()
 
 
-def reap_theia_sessions():
-    # Get theia sessions that are older than n hours
-    theia_sessions = TheiaSession.query.filter(
-        TheiaSession.active == True,
-        TheiaSession.last_proxy <= datetime.now() - timedelta(hours=3),
-    ).all()
-
-    for theia_session in theia_sessions:
-        enqueue_ide_stop(theia_session.id)
-
-
-def reap_stats():
-    from anubis.config import config
+def reap_broken_submissions():
     """
     Calculate stats for recent submissions
 
     :return:
     """
+    from anubis.config import config
+
     recent_assignments = Assignment.query.group_by(
         Assignment.course_id
     ).having(
@@ -84,7 +75,7 @@ def reap_stats():
         bulk_autograde(assignment.id)
 
 
-def reap_repos():
+def reap_broken_repos():
     """
     For reasons not clear to me yet, the webhooks are sometimes missing
     on the first commit. The result is that repos will be created on
@@ -223,18 +214,19 @@ def reap_repos():
             print(f'checked repo: {repo_name} {github_username} {user} {repo.id}')
 
 
+@with_context
 def reap():
-    app = create_app()
+    # Enqueue a job to reap stale ide k8s resources
+    enqueue_ide_reap_stale()
 
-    with app.app_context():
-        # Reap the stale submissions
-        reap_stale_submissions()
-        enqueue_ide_reap_stale()
-        reap_repos()
+    # Reap the stale submissions
+    reap_stale_submissions()
 
-        with app.test_request_context():
-            # Calculate bulk stats (pre-process stats calls)
-            reap_stats()
+    # Reap broken repos
+    reap_broken_repos()
+
+    # Reap broken submissions in recent assignments
+    reap_broken_submissions()
 
 
 if __name__ == "__main__":
