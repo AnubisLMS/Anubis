@@ -325,6 +325,11 @@ repo is cloned instead of a student assignment repo. It has less networking rest
 and even has docker running right in the pod. With this, TA's and professors can create, modify, and deploy
 assignments.
 
+Using some very clever authentication mechanics, the management IDEs will be initialized with a personal token
+that will be used by the CLI within the container. The result of this is that you will be able to just use the
+anubis CLI. It will be routed to the in cluster API instances. All the requests you make to the API will be 
+authenticated using that personal token that gets dropped into the pod.
+
 ![Management IDE](./img/theia4.png)
 
 ### 2.6 Datastores
@@ -600,7 +605,8 @@ Creating assignment directory...
 Initializing the assignment with sample data...
 
 You now have an Anubis assignment initialized at new-assignment
-cd into that directory and run the sync command to upload it to Anubis.
+cd into that directory and run the sync command to upload it to
+Anubis.
 
 cd new-assignment
 anubis assignment build --push
@@ -638,8 +644,10 @@ functions. Here is a minimal example of an assignment.py that will build and run
 
 ```python
 from utils import register_test, register_build, exec_as_student
-from utils import TestResult, BuildResult, Panic, DEBUG, xv6_run, did_xv6_crash, verify_expected
-
+from utils import (
+    TestResult, BuildResult, Panic, DEBUG, 
+    xv6_run, did_xv6_crash, verify_expected
+)
 
 @register_build
 def build(build_result: BuildResult):
@@ -681,6 +689,10 @@ Now you have your tests. That's great. The next thing you need to do is push the
 upload the assignment data to anubis. This is as simple as running two commands:
 
 ```shell
-anubis assignment sync          # sends assignment metadata to anubis
-anubis assignment build --push  # builds then pushes the assignment pipeline image to the registry
+# sends assignment metadata to anubis
+anubis assignment sync          
+
+# builds then pushes the assignment 
+# pipeline image to the registry
+anubis assignment build --push 
 ```
