@@ -179,7 +179,7 @@ def assert_course_admin(course_id: str = None):
     :return:
     """
     if not is_course_admin(course_id):
-        raise AuthenticationError('Requires course TA permissions')
+        raise LackCourseContext('Requires course TA permissions')
 
 
 def assert_course_superuser(course_id: str = None):
@@ -196,7 +196,7 @@ def assert_course_superuser(course_id: str = None):
     :return:
     """
     if not is_course_superuser(course_id):
-        raise AuthenticationError('Requires course Professor permissions')
+        raise LackCourseContext('Requires course Professor permissions')
 
 
 def assert_course_context(*models: Tuple[Any]):
