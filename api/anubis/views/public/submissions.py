@@ -74,7 +74,7 @@ def public_submission(commit: str):
     # Get current user
     user: User = current_user()
 
-    if not (user.is_admin or user.is_superuser):
+    if not user.is_superuser:
         # Try to find commit (verifying ownership)
         s = Submission.query.filter(
             Submission.owner_id == user.id,
