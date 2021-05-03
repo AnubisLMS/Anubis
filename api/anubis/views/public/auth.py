@@ -69,7 +69,7 @@ def public_oauth():
 
     # Create the user if they do not already exist
     if u is None:
-        u = User(netid=netid, name=name, is_admin=False)
+        u = User(netid=netid, name=name)
         db.session.add(u)
         db.session.commit()
 

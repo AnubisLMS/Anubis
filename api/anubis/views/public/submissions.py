@@ -39,7 +39,7 @@ def public_submissions():
     # Load current user
     user: User = current_user()
 
-    if perspective_of_id is not None and not (user.is_admin or user.is_superuser):
+    if perspective_of_id is not None and not (user.is_superuser):
         return error_response("Bad Request"), 400
 
     logger.debug("id: " + str(perspective_of_id))
