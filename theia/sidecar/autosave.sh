@@ -9,5 +9,5 @@ echo "Autosaving @ $(date)"
 
 git push
 git add .
-git commit -m "Anubis Cloud IDE Autosave"
+git commit --no-verify -m "Anubis Cloud IDE Autosave"
 git push
