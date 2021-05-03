@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Union
 
 from flask import Blueprint, request
 
@@ -12,22 +13,34 @@ from anubis.models import (
     Submission,
 )
 from anubis.utils.data import is_debug
-from anubis.utils.decorators import json_response
-from anubis.utils.services.elastic import log_endpoint, esindex
+from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import error_response, success_response
+from anubis.utils.lms.webhook import parse_webhook, guess_github_username, check_repo
+from anubis.utils.services.elastic import log_endpoint, esindex
 from anubis.utils.services.logger import logger
 from anubis.utils.services.rpc import enqueue_autograde_pipeline
-from anubis.utils.assignment.webhook import parse_webhook, guess_github_username, check_repo
 
 webhook = Blueprint("public-webhook", __name__, url_prefix="/public/webhook")
 
 
-def webhook_log_msg():
-    if (
-            request.headers.get("Content-Type", None) == "application/json"
-            and request.headers.get("X-GitHub-Event", None) == "push"
-    ):
-        return request.json["pusher"]["name"]
+def webhook_log_msg() -> Union[str, None]:
+    """
+    Log message for the webhook. We log the
+
+    :return:
+    """
+
+    # Get the content type from the headers
+    content_type = request.headers.get("Content-Type", None)
+
+    # Get the github event header
+    x_github_event = request.headers.get("X-GitHub-Event", None)
+
+    # If the content type is json, and the github event was a push,
+    # then log the repository name
+    if content_type == "application/json" and x_github_event == "push":
+        return request.json["repository"]["name"]
+
     return None
 
 
@@ -39,6 +52,8 @@ def public_webhook():
     """
     This route should be hit by the github when a push happens.
     We should take the the github repo url and enqueue it as a job.
+
+    :return:
     """
 
     content_type = request.headers.get("Content-Type", None)
@@ -93,10 +108,8 @@ def public_webhook():
         return success_response("initial commit")
 
     repo = (
-        AssignmentRepo.query.join(Assignment)
-            .join(Course)
-            .join(InCourse)
-            .join(User)
+        AssignmentRepo.query
+            .join(Assignment).join(Course).join(InCourse).join(User)
             .filter(
             User.github_username == github_username_guess,
             Assignment.unique_code == assignment.unique_code,
@@ -192,6 +205,11 @@ def public_webhook():
     )
 
     # if the github username is not found, create a dangling submission
-    enqueue_autograde_pipeline(submission.id)
+    if assignment.autograde_enabled:
+        enqueue_autograde_pipeline(submission.id)
+    else:
+        submission.processed = 1
+        submission.state = 'autograde disabled for this assignment'
+        db.session.commit()
 
     return success_response("submission accepted")

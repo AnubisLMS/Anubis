@@ -1,16 +1,18 @@
 import React, {useState} from 'react';
+import {useSnackbar} from 'notistack';
+import axios from 'axios';
+
+import {DataGrid} from '@material-ui/data-grid';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
-import {useSnackbar} from 'notistack';
 import Typography from '@material-ui/core/Typography';
-import {DataGrid} from '@material-ui/data-grid';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
-import axios from 'axios';
+
+import FileUploadDialog from '../../Components/Admin/Static/FileUploadDialog';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
-import FileUploadDialog from '../../Components/Admin/Static/FileUploadDialog';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -39,7 +41,7 @@ const useColumns = (state, enqueueSnackbar) => ([
   {field: 'id', headerName: 'ID'},
   {field: 'content_type', headerName: 'Content Type', width: 150},
   {
-    field: 'path', headerName: 'URL', width: 200, renderCell: ({row}) => (
+    field: 'path', headerName: 'URL', width: 300, renderCell: ({row}) => (
       <div>
         <Typography
           variant={'body1'}

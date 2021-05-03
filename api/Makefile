@@ -10,7 +10,8 @@ all: venv
 
 venv:
 	virtualenv -p `which python3` venv
-	./venv/bin/pip install -r ./requirements.txt -r ./requirements-dev.txt
+	./venv/bin/pip install -r ./requirements.txt
+	./venv/bin/pip install -U black pytest
 
 debug:
 	make -C .. debug
@@ -25,10 +26,8 @@ cleanyeetdb:
 migrations: venv
 	./venv/bin/alembic upgrade head
 
-.PHONY: lint             # Run autopep8 then black on lint directories
+.PHONY: lint             # Run black on lint directories
 lint: venv
-	@echo 'autopep to check and fix un-python things'
-	./venv/bin/autopep8 --in-place --aggressive --aggressive $(LINT_FILES)
 	@echo 'black to stylize'
 	./venv/bin/black $(LINT_FILES)
 

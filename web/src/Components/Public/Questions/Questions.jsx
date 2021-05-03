@@ -9,7 +9,7 @@ import QuestionGrid from './QuestionGrid';
 import useGet from '../../../hooks/useGet';
 
 export default function Questions({assignment_id}) {
-  const [{loading, error, data}] = useGet(`/api/public/assignments/questions/get/${assignment_id}`);
+  const [{loading, error, data}] = useGet(`/api/public/questions/get/${assignment_id}`);
 
   if (assignment_id === null) return <React.Fragment/>;
   if (loading) return <CircularProgress/>;

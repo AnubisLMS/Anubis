@@ -19,7 +19,7 @@ export default function Description(props) {
         />
         <CardContent>
           <Typography gutterBottom variant="h5" component="h2">
-            Anubis v2.2.8
+            Anubis v3.0.0
           </Typography>
           <Typography variant="body1" color="textSecondary" component="p">
             Anubis is a custom built, distributed autograder created by John Cunniff, and Somto Ejinkonye.

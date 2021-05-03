@@ -41,10 +41,12 @@ const editableFields = [
   {field: 'name', label: 'Assignment Name'},
   {field: 'github_classroom_url', label: 'Github Classroom URL'},
   {field: 'theia_image', label: 'Theia Image'},
+  {field: 'theia_options', label: 'Theia Options', type: 'json'},
   {field: 'pipeline_image', label: 'Pipeline Image', disabled: true},
   {field: 'unique_code', label: 'Unique Code', disabled: true},
   {field: 'hidden', label: 'Hidden', type: 'boolean'},
   {field: 'ide_enabled', label: 'Theia Enabled', type: 'boolean'},
+  {field: 'autograde_enabled', label: 'Autograde Enabled', type: 'boolean'},
   {field: 'release_date', label: 'Release Date', type: 'datetime'},
   {field: 'due_date', label: 'Due Date', type: 'datetime'},
   {field: 'grace_date', label: 'Grace Date', type: 'datetime'},
@@ -75,7 +77,7 @@ export default function Assignments() {
     }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
   }, [reset]);
 
-  const updateField = (id, field, toggle = false, datetime = false) => (e) => {
+  const updateField = (id, field, toggle = false, datetime = false, json = false) => (e) => {
     if (!e) {
       return;
     }
@@ -90,6 +92,10 @@ export default function Assignments() {
         if (datetime) {
           assignment[field] = e;
           break;
+        }
+
+        if (json) {
+          assignment[field] = e;
         }
 
         assignment[field] = e.target.value.toString();

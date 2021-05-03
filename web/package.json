@@ -29,6 +29,7 @@
     "react-syntax-highlighter": "^15.3.0",
     "react-vis": "^1.11.7",
     "remark-gfm": "^1.0.0",
+    "universal-cookie": "^4.0.4",
     "web-vitals": "^1.1.0"
   },
   "scripts": {

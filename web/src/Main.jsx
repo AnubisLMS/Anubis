@@ -1,6 +1,6 @@
 import React from 'react';
 import {Redirect, Route, Switch} from 'react-router-dom';
-import {admin_nav, footer_nav, not_shown_nav, public_nav} from './Navigation/navconfig';
+import {admin_nav, footer_nav, not_shown_nav, public_nav} from './navconfig';
 
 export default function Main({user}) {
   return (

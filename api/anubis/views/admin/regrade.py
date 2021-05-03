@@ -1,38 +1,55 @@
-from datetime import datetime, timedelta
 import math
+from datetime import datetime, timedelta
 
 from flask import Blueprint
 from sqlalchemy import or_
 
 from anubis.models import Submission, Assignment
 from anubis.rpc.batch import rpc_bulk_regrade
-from anubis.utils.users.auth import require_admin
+from anubis.utils.auth import require_admin
 from anubis.utils.data import split_chunks
-from anubis.utils.decorators import json_response
-from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.http.decorators import json_response
+from anubis.utils.http.decorators import load_from_id
 from anubis.utils.http.https import error_response, success_response, get_number_arg
+from anubis.utils.lms.course import assert_course_admin, get_course_context, assert_course_context
+from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.rpc import enqueue_autograde_pipeline, rpc_enqueue
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 
 
-@regrade.route("/status/<string:assignment_id>")
+@regrade.route("/status/<string:id>")
 @require_admin()
+@load_from_id(Assignment, verify_owner=False)
 @json_response
-def admin_regrade_status(assignment_id: str):
+def admin_regrade_status(assignment: Assignment):
+    """
+    Get the autograde status for an assignment. The status
+    is some high level stats the proportion of submissions
+    within the assignment that have been processed
+
+    :param assignment:
+    :return:
+    """
+
+    # Assert that the assignment is within the current course context
+    assert_course_context(assignment)
+
+    # Get the number of submissions that are being processed
     processing = Submission.query.filter(
-        Submission.assignment_id == assignment_id,
+        Submission.assignment_id == assignment.id,
         Submission.processed == False,
     ).count()
 
+    # Get the total number of submissions
     total = Submission.query.filter(
-        Submission.assignment_id == assignment_id,
+        Submission.assignment_id == assignment.id,
     ).count()
 
-    percent = 0
-    if total > 0:
-        percent = math.ceil(((total - processing) / total) * 100)
+    # Calculate the percent of submissions that have been processed
+    percent = math.ceil(((total - processing) / total) * 100) if total > 0 else 0
 
+    # Return the status
     return success_response({
         'percent': f'{percent}% of submissions processed',
         'processing': processing,
@@ -45,7 +62,7 @@ def admin_regrade_status(assignment_id: str):
 @require_admin()
 @log_endpoint("cli", lambda: "regrade-commit")
 @json_response
-def private_regrade_submission(commit):
+def admin_regrade_submission_commit(commit):
     """
     Regrade a specific submission via the unique commit hash.
 
@@ -54,21 +71,26 @@ def private_regrade_submission(commit):
     """
 
     # Find the submission
-    s = Submission.query.filter(
+    submission: Submission = Submission.query.filter(
         Submission.commit == commit,
         Submission.owner_id is not None,
     ).first()
-    if s is None:
-        return error_response("not found")
+
+    # Make sure the submission exists
+    if submission is None:
+        return error_response("Submission does not exist")
+
+    # Assert that the submission is within the current course context
+    assert_course_context(submission)
 
     # Reset submission in database
-    s.init_submission_models()
+    submission.init_submission_models()
 
     # Enqueue the submission pipeline
-    enqueue_autograde_pipeline(s.id)
+    enqueue_autograde_pipeline(submission.id)
 
     # Return status
-    return success_response({"submission": s.data, "user": s.owner.data})
+    return success_response({"submission": submission.data, "user": submission.owner.data})
 
 
 @regrade.route("/assignment/<string:assignment_id>")
@@ -96,43 +118,51 @@ def private_regrade_assignment(assignment_id):
     :return:
     """
 
-    extra = []
+    # Get the options for the regrade
     hours = get_number_arg('hours', default_value=-1)
     not_processed = get_number_arg('not_processed', default_value=-1)
     processed = get_number_arg('processed', default_value=-1)
     reaped = get_number_arg('reaped', default_value=-1)
 
-    # Add hours to filter query
+    # Build a list of filters based on the options
+    filters = []
+
+    # Number of hours back to regrade
     if hours > 0:
-        extra.append(
-            Submission.created > datetime.now() - timedelta(hours=hours)
-        )
+        filters.append(Submission.created > datetime.now() - timedelta(hours=hours))
+
+    # Only regrade submissions that have been processed
     if processed == 1:
-        extra.append(
-            Submission.processed == True,
-        )
+        filters.append(Submission.processed == True)
+
+    # Only regrade submissions that have not been processed
     if not_processed == 1:
-        extra.append(
-            Submission.processed == False,
-        )
+        filters.append(Submission.processed == False)
+
+    # Only regrade submissions that have been reaped
     if reaped == 1:
-        extra.append(
-            Submission.state == 'Reaped after timeout',
-        )
+        filters.append(Submission.state == 'Reaped after timeout')
 
     # Find the assignment
     assignment = Assignment.query.filter(
         or_(Assignment.id == assignment_id, Assignment.name == assignment_id)
     ).first()
+
+    # Verify that the assignment exists
     if assignment is None:
         return error_response("cant find assignment")
 
-    # Get all submissions that have an owner (not dangling)
+    # Assert that the assignment is within the current course context
+    assert_course_context(assignment)
+
+    # Get all submissions matching the filters
     submissions = Submission.query.filter(
         Submission.assignment_id == assignment.id,
         Submission.owner_id is not None,
-        *extra
+        *filters
     ).all()
+
+    # Get a count of submissions for the response
     submission_count = len(submissions)
 
     # Split the submissions into bite sized chunks

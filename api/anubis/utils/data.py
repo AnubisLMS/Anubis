@@ -1,6 +1,7 @@
+import functools
 from datetime import datetime
 from email.mime.text import MIMEText
-from hashlib import sha256
+from hashlib import sha512
 from json import dumps
 from os import environ, urandom
 from smtplib import SMTP
@@ -226,7 +227,7 @@ def rand(max_len: int = None):
     :param max_len:
     :return:
     """
-    rand_hash = sha256(urandom(32)).hexdigest()
+    rand_hash = sha512(urandom(32)).hexdigest()
     if max_len is not None:
         return rand_hash[:max_len]
     return rand_hash
@@ -259,19 +260,60 @@ def row2dict(row) -> dict:
     values. This function looks at internal sqlalchemy fields
     to create a raw dictionary from the columns in the table.
 
+    * Something to note is that datetime object fields will be
+    converted to strings in the response *
+
     :param row:
     :return:
     """
 
     raw = {}
 
+    # Read through the sqlalchemy internal
+    # column values.
     for column in row.__table__.columns:
+
+        # Get the value corresponding to the
+        # name of the column.
         value = getattr(row, column.name)
 
+        # If the value is a datetime object, then
+        # we need to convert it to a string to
+        # maintain that the response is a simple
+        # dictionary.
         if isinstance(value, datetime):
-            raw[column.name] = str(value)
-            continue
+            value = str(value)
 
+        # Write the column value into the response
+        # dictionary.
         raw[column.name] = value
 
     return raw
+
+
+def with_context(function):
+    """
+    This decorator is meant to save time and repetitive initialization
+    when using flask-sqlalchemy outside of an app_context.
+
+    :param function:
+    :return:
+    """
+
+    @functools.wraps(function)
+    def wrapper(*args, **kwargs):
+
+        # Do the import here to avoid circular
+        # import issues.
+        from anubis.app import create_app
+
+        # Create a fresh app
+        app = create_app()
+
+        # Push an app context
+        with app.app_context():
+
+            # Call the function within an app context
+            return function(*args, **kwargs)
+
+    return wrapper

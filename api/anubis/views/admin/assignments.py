@@ -5,15 +5,16 @@ from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
 
 from anubis.models import db, Assignment, User, AssignmentTest, SubmissionTestResult
-from anubis.utils.assignment.assignments import assignment_sync
-from anubis.utils.users.auth import require_admin
+from anubis.utils.auth import require_admin
 from anubis.utils.data import rand
 from anubis.utils.data import row2dict
-from anubis.utils.decorators import load_from_id, json_response, json_endpoint
-from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.http.decorators import load_from_id, json_response, json_endpoint
 from anubis.utils.http.https import error_response, success_response
+from anubis.utils.lms.assignments import assignment_sync
+from anubis.utils.lms.course import assert_course_admin, get_course_context, assert_course_context
+from anubis.utils.lms.questions import get_assigned_questions
+from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.logger import logger
-from anubis.utils.assignment.questions import get_assigned_questions
 
 assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
 
@@ -35,6 +36,8 @@ def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str
     if user is None:
         return error_response("user not found")
 
+    assert_course_context(assignment)
+
     return success_response(
         {
             "netid": user.netid,
@@ -45,13 +48,22 @@ def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str
 
 @assignments.route("/get/<string:id>")
 @require_admin()
+@load_from_id(Assignment, verify_owner=False)
 @json_response
-def admin_assignments_get_id(id):
-    assignment = Assignment.query.filter(Assignment.id == id).first()
+def admin_assignments_get_id(assignment: Assignment):
+    """
+    Get the full data for an assignment id. The course context
+    must be set, and will be checked.
 
-    if assignment is None:
-        return error_response("Assignment does not exist")
+    :param assignment:
+    :return:
+    """
 
+    # Confirm that the assignment they are asking for is part
+    # of this course
+    assert_course_context(assignment)
+
+    # Pass back the full data
     return success_response({"assignment": assignment.full_data})
 
 
@@ -59,24 +71,57 @@ def admin_assignments_get_id(id):
 @require_admin()
 @json_response
 def admin_assignments_list():
-    all_assignments = Assignment.query.order_by(Assignment.due_date.desc()).all()
+    """
+    List all assignments within the course context.
 
-    return success_response(
-        {"assignments": [row2dict(assignment) for assignment in all_assignments]}
-    )
+    * The response will be the row2dict of the assignment, not a data prop *
+
+    :return:
+    """
+
+    # Get the course context
+    course = get_course_context()
+
+    # Get all the assignment objects within the course context,
+    # sorted by the due date.
+    all_assignments = Assignment.query.filter(
+        Assignment.course_id == course.id
+    ).order_by(Assignment.due_date.desc()).all()
+
+    # Pass back the row2dict of each assignment object
+    return success_response({
+        "assignments": [row2dict(assignment) for assignment in all_assignments]
+    })
 
 
 @assignments.route('/tests/toggle-hide/<string:assignment_test_id>')
 @require_admin()
 @json_response
 def admin_assignment_tests_toggle_hide_assignment_test_id(assignment_test_id: str):
-    assignment_test = AssignmentTest.query.filter(
+    """
+    Toggle an assignment test being hidden.
+
+    :param assignment_test_id:
+    :return:
+    """
+
+    # Pull the assignment test
+    assignment_test: AssignmentTest = AssignmentTest.query.filter(
         AssignmentTest.id == assignment_test_id,
     ).first()
-    if assignment_test is None:
-        return error_response('test not found'), 406
 
+    # Make sure the assignment test exists
+    if assignment_test is None:
+        return error_response('test not found')
+
+    # Verify that course the assignment test is apart of and
+    # the course context match
+    assert_course_context(assignment_test)
+
+    # Toggle the hidden field
     assignment_test.hidden = not assignment_test.hidden
+
+    # Commit the change
     db.session.commit()
 
     return success_response({
@@ -89,23 +134,44 @@ def admin_assignment_tests_toggle_hide_assignment_test_id(assignment_test_id: st
 @require_admin()
 @json_response
 def admin_assignment_tests_delete_assignment_test_id(assignment_test_id: str):
+    """
+    Delete an assignment test.
+
+    :param assignment_test_id:
+    :return:
+    """
+
+    # Pull the assignment test
     assignment_test = AssignmentTest.query.filter(
         AssignmentTest.id == assignment_test_id,
     ).first()
-    if assignment_test is None:
-        return error_response('test not found'), 406
 
+    # Make sure the assignment test exists
+    if assignment_test is None:
+        return error_response('test not found')
+
+    # Verify that course the assignment test is apart of and
+    # the course context match
+    assert_course_context(assignment_test)
+
+    # Save the test name so we can use it in the response
     test_name = assignment_test.name
 
+    # Delete all the submission test results that are pointing to
+    # this test
     SubmissionTestResult.query.filter(
         SubmissionTestResult.assignment_test_id == assignment_test.id,
     ).delete()
 
+    # Delete the test itself
     AssignmentTest.query.filter(
         AssignmentTest.id == assignment_test_id,
     ).delete()
+
+    # Commit the changes
     db.session.commit()
 
+    # Pass back the status
     return success_response({
         'status': f'{test_name} deleted',
         'variant': 'warning',
@@ -122,7 +188,6 @@ def private_assignment_save(assignment: dict):
     :param assignment:
     :return:
     """
-
     logger.info(json.dumps(assignment, indent=2))
 
     # Get assignment
@@ -135,6 +200,8 @@ def private_assignment_save(assignment: dict):
         db_assignment = Assignment()
         assignment["id"] = rand()
         db.session.add(db_assignment)
+
+    assert_course_context(db_assignment)
 
     # Update all it's fields
     for key, value in assignment.items():
@@ -168,7 +235,7 @@ def private_assignment_sync(assignment: dict):
     body = {
       "assignment": {
         "name": "{name}",
-        "class": "CS-UY 3224",
+        "course": "CS-UY 3224",
         "hidden": true,
         "github_classroom_url": "",
         "unique_code": "{code}",
@@ -220,6 +287,8 @@ def private_assignment_sync(assignment: dict):
     :param question_data:
     :return:
     """
+
+    # The course context assertion happens in the sync function
 
     # Create or update assignment
     message, success = assignment_sync(assignment)

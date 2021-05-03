@@ -67,6 +67,11 @@ export default function AssignmentCard({assignment, editableFields, updateField,
   const [progress, setProgress] = useState('');
   const [reset, setReset] = useState(0);
   const [warningOpen, setWarningOpen] = useState(false);
+  const [jsonValues, setJsonValues] = useState(
+    ...editableFields.filter(({type}) => type === 'json').map(({field}) => ({
+      [field]: JSON.stringify(assignment[field]),
+    })),
+  );
 
   React.useEffect(() => {
     axios.get(`/api/admin/regrade/status/${assignment.id}`).then((response) => {
@@ -100,6 +105,29 @@ export default function AssignmentCard({assignment, editableFields, updateField,
                       label={label}
                       value={assignment[field]}
                       onChange={updateField(assignment.id, field)}
+                    />
+                  </Grid>
+                );
+              case 'json':
+                return (
+                  <Grid item xs={12} lg={6} key={field}>
+                    <TextField
+                      fullWidth
+                      disabled={disabled}
+                      variant={'outlined'}
+                      label={label}
+                      value={jsonValues[field]}
+                      onChange={(e) => {
+                        setJsonValues((prev) => {
+                          prev[field] = e.target.value;
+                          return {...prev};
+                        });
+                        try {
+                          const value = JSON.parse(e.target.value);
+                          updateField(assignment.id, field, false, false, true)(value);
+                        } catch (e) {
+                        }
+                      }}
                     />
                   </Grid>
                 );

@@ -1,13 +1,13 @@
 from flask import Blueprint, request
 
 from anubis.models import User, Submission
-from anubis.utils.assignment.assignments import get_submissions
-from anubis.utils.users.auth import current_user, require_user
-from anubis.utils.decorators import json_response
-from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.auth import current_user, require_user
+from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import error_response, success_response
+from anubis.utils.lms.assignments import get_submissions
+from anubis.utils.lms.submissions import regrade_submission
+from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.logger import logger
-from anubis.utils.assignment.submissions import regrade_submission
 
 submissions = Blueprint(
     "public-submissions", __name__, url_prefix="/public/submissions"
@@ -39,7 +39,7 @@ def public_submissions():
     # Load current user
     user: User = current_user()
 
-    if perspective_of_id is not None and not (user.is_admin or user.is_superuser):
+    if perspective_of_id is not None and not (user.is_superuser):
         return error_response("Bad Request"), 400
 
     logger.debug("id: " + str(perspective_of_id))
@@ -74,7 +74,7 @@ def public_submission(commit: str):
     # Get current user
     user: User = current_user()
 
-    if not (user.is_admin or user.is_superuser):
+    if not user.is_superuser:
         # Try to find commit (verifying ownership)
         s = Submission.query.filter(
             Submission.owner_id == user.id,
@@ -121,6 +121,10 @@ def public_regrade_commit(commit=None):
     # Verify Ownership
     if submission is None:
         return error_response("invalid commit hash or netid"), 406
+
+    # Check that autograde is enabled for the assignment
+    if not submission.assignment.autograde_enabled:
+        return error_response('Autograde is disabled for this assignment'), 400
 
     # Regrade
     return regrade_submission(submission)

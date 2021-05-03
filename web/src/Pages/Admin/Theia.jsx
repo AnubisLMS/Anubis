@@ -59,7 +59,7 @@ const useColumns = (state, enqueueSnackbar) => ([
   {field: 'netid', headerName: 'Netid'},
   {field: 'state', headerName: 'State'},
   {field: 'course_code', headerName: 'Course', width: 120},
-  {field: 'assignment_name', headerName: 'Assignment', width: 110},
+  {field: 'assignment_name', headerName: 'Assignment', width: 200},
   {field: 'created', headerName: 'Created', type: 'dateTime', width: 170},
   {field: 'autosave', headerName: 'Autosave', width: 100, renderCell: ({row}) => (
     <IconButton color={row.autosave ? 'primary' : 'secondary'}>

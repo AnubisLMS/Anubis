@@ -1,3 +1,0 @@
-black
-autopep8
-pytest

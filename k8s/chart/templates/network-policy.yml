@@ -142,8 +142,8 @@ spec:
   - from:
     - podSelector:
         matchLabels:
-          app: theia
-          role: proxy
+          app.kubernetes.io/name: theia
+          component: proxy
     ports:
     - protocol: TCP
       port: 5000
@@ -160,8 +160,8 @@ spec:
   - to:
     - podSelector:
         matchLabels:
-          app: api
-          role: api
+          app.kubernetes.io/name: anubis
+          component: api
     ports:
       - port: 5000
   - to:
@@ -195,7 +195,7 @@ spec:
 #    - from:
 #        - podSelector:
 #            matchLabels:
-#              app: theia
+#              app.kubernetes.io/name: theia
 #              network-policy: admin
 #              role: theia-session
 #      ports:

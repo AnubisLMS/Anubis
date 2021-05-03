@@ -1,3 +1,4 @@
+import base64
 import os
 import time
 from datetime import datetime
@@ -5,10 +6,9 @@ from datetime import datetime
 from kubernetes import config, client
 
 from anubis.models import db, Config, TheiaSession
+from anubis.utils.auth import create_token
 from anubis.utils.services.elastic import esindex
 from anubis.utils.services.logger import logger
-from anubis.utils.users.auth import create_token
-import base64
 
 
 def get_theia_pod_name(theia_session: TheiaSession) -> str:
@@ -409,7 +409,7 @@ def reap_theia_session(theia_session_id: str):
         db.session.commit()
 
 
-def reap_all_theia_sessions(*_):
+def reap_all_theia_sessions(course_id: str):
     from anubis.app import create_app
 
     app = create_app()
@@ -419,7 +419,8 @@ def reap_all_theia_sessions(*_):
 
     with app.app_context():
         theia_sessions = TheiaSession.query.filter(
-            TheiaSession.active,
+            TheiaSession.active == True,
+            TheiaSession.course_id == course_id,
         ).all()
 
         for n, theia_session in enumerate(theia_sessions):

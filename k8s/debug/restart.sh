@@ -41,27 +41,7 @@ pushd ..
 docker-compose build --parallel --pull api web logstash theia-proxy theia-init theia-sidecar
 popd
 
-# Upgrade or install minimal anubis cluster in debug mode
-helm upgrade \
-     --install anubis ./chart \
-     --namespace anubis \
-     --set "imagePullPolicy=IfNotPresent" \
-     --set "elasticsearch.storageClassName=standard" \
-     --set "debug=true" \
-     --set "api.replicas=1" \
-     --set "web.replicas=1" \
-     --set "pipeline_api.replicas=1" \
-     --set "rpc.default.replicas=1" \
-     --set "rpc.theia.replicas=1" \
-     --set "rpc.regrade.replicas=1" \
-     --set "theia.proxy.replicas=1" \
-     --set "api.datacenter=false" \
-     --set "reaper.suspend=true" \
-     --set "visuals.suspend=true" \
-     --set "theia.proxy.domain=ide.localhost" \
-     --set "rollingUpdates=false" \
-     --set "domain=localhost" \
-     $@
+./debug/upgrade.sh
 
 # Restart the most common deployments
 kubectl rollout restart deployments.apps/api -n anubis

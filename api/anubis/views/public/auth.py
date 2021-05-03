@@ -1,14 +1,14 @@
 from flask import Blueprint, make_response, redirect, request
 
 from anubis.models import User, db
-from anubis.utils.assignment.assignments import get_courses, get_assignments
-from anubis.utils.users.auth import create_token, current_user, require_user
+from anubis.utils.auth import create_token, current_user, require_user
 from anubis.utils.data import is_debug
-from anubis.utils.decorators import json_endpoint
-from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.http.decorators import json_endpoint
 from anubis.utils.http.https import success_response, error_response
+from anubis.utils.lms.course import get_course_context
+from anubis.utils.lms.submissions import fix_dangling
+from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.oauth import OAUTH_REMOTE_APP as provider
-from anubis.utils.assignment.submissions import fix_dangling
 
 auth = Blueprint("public-auth", __name__, url_prefix="/public/auth")
 oauth = Blueprint("public-oauth", __name__, url_prefix="/public")
@@ -69,7 +69,7 @@ def public_oauth():
 
     # Create the user if they do not already exist
     if u is None:
-        u = User(netid=netid, name=name, is_admin=False)
+        u = User(netid=netid, name=name)
         db.session.add(u)
         db.session.commit()
 
@@ -105,15 +105,20 @@ def public_whoami():
     if u.github_username is None:
         status = "Please set your github username in your profile so we can identify your repos!"
 
-    return success_response(
-        {
-            "user": u.data,
-            "classes": get_courses(u.netid),
-            "assignments": get_assignments(u.netid),
-            "status": status,
-            "variant": "warning",
+    course_context = None
+    context = get_course_context(False)
+    if context is not None:
+        course_context = {
+            "id": context.id,
+            "name": context.name,
         }
-    )
+
+    return success_response({
+        "user": u.data,
+        "context": course_context,
+        "status": status,
+        "variant": "warning",
+    })
 
 
 @auth.route("/set-github-username", methods=["POST"])

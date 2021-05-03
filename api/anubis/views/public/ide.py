@@ -1,13 +1,15 @@
+import copy
 from datetime import datetime, timedelta
 from typing import Dict
 
 from flask import Blueprint, request
 
 from anubis.models import User, TheiaSession, db, Assignment, AssignmentRepo
-from anubis.utils.users.auth import current_user, require_user
-from anubis.utils.decorators import json_response, load_from_id
-from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.auth import current_user, require_user
+from anubis.utils.http.decorators import json_response, load_from_id
 from anubis.utils.http.https import error_response, success_response
+from anubis.utils.lms.course import is_course_admin
+from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.logger import logger
 from anubis.utils.services.rpc import enqueue_ide_stop, enqueue_ide_initialize
 from anubis.utils.services.theia import (
@@ -58,6 +60,7 @@ def public_ide_active(assignment_id):
         return success_response({"active": None})
 
     return success_response({
+        "active": True,
         "session": session.data,
     })
 
@@ -173,7 +176,7 @@ def public_ide_initialize(assignment: Assignment):
             {"active": active_session.active, "session": active_session.data}
         )
 
-    if not (user.is_admin or user.is_superuser):
+    if user.is_superuser or is_course_admin(assignment.course_id):
         if datetime.now() <= assignment.release_date:
             return error_response("Assignment has not been released.")
 
@@ -193,16 +196,20 @@ def public_ide_initialize(assignment: Assignment):
     autosave = request.args.get('autosave', 'true') == 'true'
     logger.info(f'autosave {autosave}')
 
+    options = copy.deepcopy(assignment.theia_options)
+    options['autosave'] = autosave
+
     # Create a new session
     session = TheiaSession(
         owner_id=user.id,
         assignment_id=assignment.id,
+        course_id=assignment.course.id,
         repo_url=repo.repo_url,
         network_locked=True,
         privileged=False,
         active=True,
         state="Initializing",
-        options={'autosave': autosave}
+        options=options,
     )
     db.session.add(session)
     db.session.commit()
@@ -211,10 +218,8 @@ def public_ide_initialize(assignment: Assignment):
     enqueue_ide_initialize(session.id)
 
     # Redirect to proxy
-    return success_response(
-        {
-            "active": session.active,
-            "session": session.data,
-            "status": "Session created",
-        }
-    )
+    return success_response({
+        "active": session.active,
+        "session": session.data,
+        "status": "Session created",
+    })

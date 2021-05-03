@@ -24,8 +24,9 @@ def log_endpoint(log_type, message_func=None):
     def some_function(arg1, arg2):
         ....
 
-    :log_type str: log type to noted in event
-    :message_func callable: function to return message to be logged
+    :param log_type: log type to noted in event
+    :param message_func: callable function to return message to be logged
+    :return:
     """
 
     def decorator(function):
@@ -66,11 +67,12 @@ def log_endpoint(log_type, message_func=None):
     return decorator
 
 
-def esindex(index="error", **kwargs):
+def esindex(index: str = "error", **kwargs):
     """
     Index anything with elasticsearch
 
-    :kwargs dict:
+    :param index:
+    :param kwargs: dict
     """
     if config.DISABLE_ELK:
         return
@@ -78,23 +80,39 @@ def esindex(index="error", **kwargs):
 
 
 def add_global_error_handler(app):
+    """
+    This function adds a global error handler to the flask
+    app. There are a few reasons why this may not always be the
+    best idea. Some exceptions raised should be handled by flask (for
+    example: 404 not found exceptions).
+
+    :param app:
+    :return:
+    """
+
     @app.errorhandler(Exception)
     def global_err_handler(error):
-        tb = traceback.format_exc()  # get traceback string
-        logger.error(
-            tb,
-            extra={
-                "from": "global-error-handler",
-                "traceback": tb,
-                "ip": get_request_ip(),
-                "method": request.method,
-                "path": request.path,
-                "query": json.dumps(dict(list(request.args.items()))),
-                "headers": json.dumps(dict(list(request.headers.items()))),
-            },
-        )
+        # get traceback string
+        tb = traceback.format_exc()
+
+        # Log the traceback string through logstash, with extra information
+        logger.error(tb, extra={
+            "from": "global-error-handler",
+            "traceback": tb,
+            "ip": get_request_ip(),
+            "method": request.method,
+            "path": request.path,
+            "query": json.dumps(dict(list(request.args.items()))),
+            "headers": json.dumps(dict(list(request.headers.items()))),
+        })
+
+        # Handle the error if it is a 404
         if isinstance(error, exceptions.NotFound):
             return "", 404
+
+        # If it is a method not allowed, return a 405
         if isinstance(error, exceptions.MethodNotAllowed):
             return "MethodNotAllowed", 405
+
+        # Else return a vague 500
         return "err", 500

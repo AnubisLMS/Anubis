@@ -1,17 +1,17 @@
 from flask import Blueprint
 
 from anubis.models import Submission
-from anubis.utils.users.auth import require_admin
-from anubis.utils.decorators import json_response
-from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.auth import require_superuser
+from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response
-from anubis.utils.assignment.submissions import fix_dangling
+from anubis.utils.lms.submissions import fix_dangling
+from anubis.utils.services.elastic import log_endpoint
 
 dangling = Blueprint("admin-dangling", __name__, url_prefix="/admin/dangling")
 
 
-@dangling.route("/")
-@require_admin()
+@dangling.route("/list")
+@require_superuser()
 @log_endpoint("cli", lambda: "dangling")
 @json_response
 def private_dangling():
@@ -19,30 +19,50 @@ def private_dangling():
     This route should hand back a json list of all submissions that are dangling.
     Dangling being that we have no netid to match to the github username that
     submitted the assignment.
+
+    :return:
     """
 
+    # Pull all the dandling submissions
     dangling_ = Submission.query.filter(
         Submission.owner_id == None,
     ).all()
+
+    # Get the data response for the dangling submissions
     dangling_ = [a.data for a in dangling_]
 
-    return success_response({"dangling": dangling_, "count": len(dangling_)})
+    # Pass back all the dangling submissions
+    return success_response({"count": len(dangling_), "dangling": dangling_})
 
 
 @dangling.route("/reset")
-@require_admin()
+@require_superuser()
 @log_endpoint("reset-dangling", lambda: "reset-dangling")
 @json_response
 def private_reset_dangling():
+    """
+    Reset all the submission that are dangling
+
+    :return:
+    """
+
+    # Build a list of all the reset submissions
     resets = []
+
+    # Iterate over all the dangling submissions
     for s in Submission.query.filter_by(owner_id=None).all():
+        # Reset the submission models
         s.init_submission_models()
+
+        # Append the new dangling submission data for the response
         resets.append(s.data)
+
+    # Return all the reset submissions
     return success_response({"reset": resets})
 
 
 @dangling.route("/fix")
-@require_admin()
+@require_superuser()
 @log_endpoint("cli", lambda: "fix-dangling")
 @json_response
 def private_fix_dangling():
@@ -61,4 +81,4 @@ def private_fix_dangling():
 
     :return:
     """
-    return fix_dangling()
+    return success_response({'fixed': fix_dangling()})
