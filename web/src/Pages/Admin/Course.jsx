@@ -37,10 +37,12 @@ const editableFields = [
   {field: 'course_code', label: 'Course Code'},
   {field: 'section', label: 'Section'},
   {field: 'professor', label: 'Professor'},
+  {field: 'theia_default_image', label: 'Theia Default Image'},
+  {field: 'theia_default_options', label: 'Theia Default Options'},
   {field: 'join_code', label: 'Join Code', disabled: true},
 ];
 
-export default function Courses() {
+export default function Course() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [course, setCourse] = useState([]);
@@ -51,12 +53,13 @@ export default function Courses() {
     axios.get('/api/admin/courses/list').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data?.course) {
+        data.course.theia_default_options = JSON.stringify(data.course.theia_default_options);
         setCourse(data.course);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [reset]);
 
-  const updateField = (id, field, toggle = false, datetime = false) => (e) => {
+  const updateField = (id, field, toggle = false, datetime = false, json = false) => (e) => {
     if (!e) {
       return;
     }
@@ -75,6 +78,12 @@ export default function Courses() {
   };
 
   const saveCourse = () => () => {
+    try {
+      course.theia_default_options = JSON.parse(course.theia_default_options);
+    } catch (e) {
+      enqueueSnackbar(e.toString(), {variant: 'error'});
+      return;
+    }
     axios.post(`/api/admin/courses/save`, {course}).then((response) => {
       standardStatusHandler(response, enqueueSnackbar);
     }).catch(standardErrorHandler(enqueueSnackbar));
@@ -112,7 +121,7 @@ export default function Courses() {
                       color={'primary'}
                       onClick={createCourse}
                     >
-                  Create Course
+                      Create Course
                     </Button>
                   </Grid>
                 ) : null}
@@ -125,7 +134,7 @@ export default function Courses() {
       <Grid item xs={12} md={10}>
         <Grid container spacing={4}>
           <Switch>
-            <Route path={'/admin/courses'} exact={true}>
+            <Route path={'/admin/course'} exact={true}>
               <React.Fragment>
                 <Grid item xs={12} md={6} key={course.id}>
                   <CourseCard
@@ -138,10 +147,10 @@ export default function Courses() {
                 </Grid>
               </React.Fragment>
             </Route>
-            <Route path={'/admin/courses/tas'} exact={false}>
+            <Route path={'/admin/course/tas'} exact={false}>
               <CourseTasProfessors base={'ta'}/>
             </Route>
-            <Route path={'/admin/courses/professors'}>
+            <Route path={'/admin/course/professors'}>
               <CourseTasProfessors base={'professor'}/>
             </Route>
           </Switch>

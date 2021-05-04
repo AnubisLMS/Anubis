@@ -29,7 +29,7 @@ def upgrade():
     conn = op.get_bind()
     with conn.begin():
         conn.execute("update assignment set theia_options = '{}';")
-        conn.execute("update course set theia_default_image = '{}';")
+        conn.execute("update course set theia_default_image = 'registry.osiris.services/anubis/theia-xv6';")
         conn.execute("update course set theia_default_options = '{}';")
     # ### end Alembic commands ###
 

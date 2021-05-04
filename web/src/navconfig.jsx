@@ -30,7 +30,7 @@ import AdminAssignments from './Pages/Admin/Assignment/Assignments';
 import AdminStats from './Pages/Admin/Autograde/AutogradeResults';
 import AdminAssignmentStats from './Pages/Admin/Autograde/AutogradeAssignments';
 import AdminSubmissionStats from './Pages/Admin/Autograde/AutogradeSubmission';
-import AdminCourses from './Pages/Admin/Courses';
+import AdminCourse from './Pages/Admin/Course';
 import AdminTheia from './Pages/Admin/Theia';
 import AdminStatic from './Pages/Admin/Static';
 import AdminConfig from './Pages/Admin/Config';
@@ -110,8 +110,8 @@ export const admin_nav = [
   {
     id: 'Course',
     icon: <SchoolIcon/>,
-    path: '/admin/courses',
-    Page: AdminCourses,
+    path: '/admin/course',
+    Page: AdminCourse,
     exact: false,
   },
   {

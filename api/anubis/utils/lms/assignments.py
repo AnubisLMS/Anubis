@@ -181,24 +181,24 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
 
     # Attempt to find the class
     course_name = assignment_data.get('class', None) or assignment_data.get('course', None)
-    c: Course = Course.query.filter(
+    course: Course = Course.query.filter(
         or_(
             Course.name == course_name,
             Course.course_code == course_name,
         )
     ).first()
-    if c is None:
+    if course is None:
         return "Unable to find class", False
 
-    assert_course_admin(c.id)
+    assert_course_admin(course.id)
 
     # Check if it exists
     if assignment is None:
         assignment = Assignment(
-            theia_image=c.theia_default_image,
-            theia_options=c.theia_default_options,
+            theia_image=course.theia_default_image,
+            theia_options=course.theia_default_options,
             unique_code=assignment_data["unique_code"],
-            course=c,
+            course=course,
         )
 
     # Update fields
@@ -257,7 +257,7 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
 
     # Sync the questions in the assignment data
     question_message = None
-    if 'questions' in assignment_data:
+    if 'questions' in assignment_data and isinstance(assignment_data['questions'], list):
         accepted, ignored, rejected = ingest_questions(
             assignment_data["questions"], assignment
         )
