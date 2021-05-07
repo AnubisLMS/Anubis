@@ -279,6 +279,8 @@ def run_main(func):
 
 @with_context
 def create_repo(s: Session, assignment_id: str = None):
+    from anubis.utils.services.cache import cache
+    from anubis.utils.lms.repos import get_repos
     if assignment_id is None:
         assignments = s.get('/public/assignments/list')['assignments']
         assignment_id = assignments[0]['id']
@@ -290,6 +292,7 @@ def create_repo(s: Session, assignment_id: str = None):
         repo_url='https://github.com/wabscale/xv6-public',
     ))
     db.session.commit()
+    cache.delete_memoized(get_repos)
 
 
 @with_context

@@ -16,9 +16,12 @@ from anubis.utils.data import is_debug
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import error_response, success_response
 from anubis.utils.lms.webhook import parse_webhook, guess_github_username, check_repo
+from anubis.utils.lms.submissions import get_submissions
+from anubis.utils.lms.repos import get_repos
 from anubis.utils.services.elastic import log_endpoint, esindex
 from anubis.utils.services.logger import logger
 from anubis.utils.services.rpc import enqueue_autograde_pipeline
+from anubis.utils.services.cache import cache
 
 webhook = Blueprint("public-webhook", __name__, url_prefix="/public/webhook")
 
@@ -211,5 +214,10 @@ def public_webhook():
         submission.processed = 1
         submission.state = 'autograde disabled for this assignment'
         db.session.commit()
+
+    # Delete cached submissions
+    cache.delete_memoized(get_submissions, user.netid)
+    cache.delete_memoized(get_submissions, user.netid, assignment.course_id)
+    cache.delete_memoized(get_submissions, user.netid, assignment.course_id, assignment.id)
 
     return success_response("submission accepted")

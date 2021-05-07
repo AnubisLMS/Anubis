@@ -6,12 +6,11 @@ from datetime import datetime, timedelta
 import requests
 from sqlalchemy import func, and_
 
-from anubis.app import create_app
-from anubis.models import db, Submission, Assignment, AssignmentRepo, TheiaSession
+from anubis.models import db, Submission, Assignment, AssignmentRepo
+from anubis.utils.data import with_context
 from anubis.utils.lms.autograde import bulk_autograde
 from anubis.utils.lms.webhook import check_repo, guess_github_username
-from anubis.utils.services.rpc import enqueue_ide_stop, enqueue_ide_reap_stale, enqueue_autograde_pipeline
-from anubis.utils.data import with_context
+from anubis.utils.services.rpc import enqueue_ide_reap_stale, enqueue_autograde_pipeline
 
 
 def reap_stale_submissions():
@@ -29,12 +28,12 @@ def reap_stale_submissions():
 
     # Find and update stale submissions
     Submission.query.filter(
-        Submission.last_updated < datetime.now() - timedelta(minutes=30),
+        Submission.last_updated < datetime.now() - timedelta(minutes=60),
         Submission.processed == False,
         Submission.state != 'regrading',
     ).update({
-        Submission.processed: True,
-        Submission.state: "Reaped after timeout",
+        'processed': True,
+        'state': "Reaped after timeout",
     }, False)
 
     # Commit any changes

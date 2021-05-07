@@ -1,4 +1,6 @@
 from anubis.models import db, User, AssignmentRepo
+from anubis.utils.services.cache import cache
+from anubis.utils.lms.repos import get_repos
 
 
 def parse_webhook(webhook):
@@ -98,6 +100,9 @@ def check_repo(assignment, repo_url, github_username, user=None) -> AssignmentRe
         )
         db.session.add(repo)
         db.session.commit()
+
+        if user is not None:
+            cache.delete_memoized(get_repos, user.id)
 
     # Return the repo object
     return repo

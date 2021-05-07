@@ -1,8 +1,10 @@
 from datetime import datetime
-from typing import List, Union
+from typing import List, Union, Dict
 
-from anubis.models import Submission, AssignmentRepo, User, db
+from anubis.models import Submission, AssignmentRepo, User, db, Course, Assignment, InCourse
+from anubis.utils.data import is_debug
 from anubis.utils.http.https import error_response, success_response
+from anubis.utils.services.cache import cache
 from anubis.utils.services.rpc import enqueue_autograde_pipeline
 
 
@@ -146,3 +148,45 @@ def fix_dangling():
             enqueue_autograde_pipeline(s.id)
 
     return fixed
+
+
+@cache.memoize(timeout=3600, unless=is_debug)
+def get_submissions(
+        user_id=None, course_id=None, assignment_id=None
+) -> Union[List[Dict[str, str]], None]:
+    """
+    Get all submissions for a given netid. Cache the results. Optionally specify
+    a class_name and / or assignment_name for additional filtering.
+
+    :param user_id:
+    :param course_id:
+    :param assignment_id: id of assignment
+    :return:
+    """
+
+    # Load user
+    owner = User.query.filter(User.id == user_id).first()
+
+    # Verify user exists
+    if owner is None:
+        return None
+
+    # Build filters
+    filters = []
+    if course_id is not None and course_id != "":
+        filters.append(Course.id == course_id)
+    if user_id is not None and user_id != "":
+        filters.append(User.id == user_id)
+    if assignment_id is not None:
+        filters.append(Assignment.id == assignment_id)
+
+    submissions = (
+        Submission.query.join(Assignment)
+            .join(Course)
+            .join(InCourse)
+            .join(User)
+            .filter(Submission.owner_id == owner.id, *filters)
+            .all()
+    )
+
+    return [s.full_data for s in submissions]
