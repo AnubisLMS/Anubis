@@ -11,7 +11,7 @@ from anubis.utils.data import split_chunks
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.decorators import load_from_id
 from anubis.utils.http.https import error_response, success_response, get_number_arg
-from anubis.utils.lms.course import assert_course_admin, get_course_context, assert_course_context
+from anubis.utils.lms.course import assert_course_context
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.rpc import enqueue_autograde_pipeline, rpc_enqueue
 
@@ -62,7 +62,7 @@ def admin_regrade_status(assignment: Assignment):
 @require_admin()
 @log_endpoint("cli", lambda: "regrade-commit")
 @json_response
-def admin_regrade_submission_commit(commit):
+def admin_regrade_submission_commit(commit: str):
     """
     Regrade a specific submission via the unique commit hash.
 

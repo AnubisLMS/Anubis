@@ -109,7 +109,7 @@ export default function CourseCard({course, _disabled, editableFields, updateFie
                 variant={'contained'}
                 className={classes.button}
                 component={Link}
-                to={`/admin/courses/tas`}
+                to={`/admin/course/tas`}
               >
                 Edit TAs
               </Button>
@@ -121,7 +121,7 @@ export default function CourseCard({course, _disabled, editableFields, updateFie
                   variant={'contained'}
                   className={classes.button}
                   component={Link}
-                  to={`/admin/courses/professors`}
+                  to={`/admin/course/professors`}
                 >
                   Edit Professors
                 </Button>

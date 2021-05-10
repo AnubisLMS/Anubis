@@ -8,6 +8,7 @@ from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response, error_response
 from anubis.utils.lms.assignments import get_courses
 from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.services.cache import cache
 
 courses = Blueprint("public-courses", __name__, url_prefix="/public/courses")
 
@@ -82,5 +83,7 @@ def public_courses_join(join_code):
 
     db.session.add(in_course)
     db.session.commit()
+
+    cache.delete_memoized(get_courses, user.netid)
 
     return success_response({"status": "Joined"})

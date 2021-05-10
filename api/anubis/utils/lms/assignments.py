@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Union, List, Dict, Tuple
 
 from dateutil.parser import parse as date_parse, ParserError
-from sqlalchemy import or_, and_
+from sqlalchemy import or_
 
 from anubis.models import (
     db,
@@ -25,7 +25,7 @@ from anubis.utils.services.cache import cache
 from anubis.utils.services.logger import logger
 
 
-@cache.memoize(timeout=5, unless=is_debug)
+@cache.memoize(timeout=60, unless=is_debug)
 def get_courses(netid: str):
     """
     Get all classes a given netid is in
@@ -122,48 +122,6 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
     return response
 
 
-@cache.memoize(timeout=3, unless=is_debug)
-def get_submissions(
-        user_id=None, course_id=None, assignment_id=None
-) -> Union[List[Dict[str, str]], None]:
-    """
-    Get all submissions for a given netid. Cache the results. Optionally specify
-    a class_name and / or assignment_name for additional filtering.
-
-    :param user_id:
-    :param course_id:
-    :param assignment_id: id of assignment
-    :return:
-    """
-
-    # Load user
-    owner = User.query.filter(User.id == user_id).first()
-
-    # Verify user exists
-    if owner is None:
-        return None
-
-    # Build filters
-    filters = []
-    if course_id is not None and course_id != "":
-        filters.append(Course.id == course_id)
-    if user_id is not None and user_id != "":
-        filters.append(User.id == user_id)
-    if assignment_id is not None:
-        filters.append(Assignment.id == assignment_id)
-
-    submissions = (
-        Submission.query.join(Assignment)
-            .join(Course)
-            .join(InCourse)
-            .join(User)
-            .filter(Submission.owner_id == owner.id, *filters)
-            .all()
-    )
-
-    return [s.full_data for s in submissions]
-
-
 def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     """
     Take an assignment_data dictionary from a assignment meta.yaml
@@ -181,24 +139,24 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
 
     # Attempt to find the class
     course_name = assignment_data.get('class', None) or assignment_data.get('course', None)
-    c: Course = Course.query.filter(
+    course: Course = Course.query.filter(
         or_(
             Course.name == course_name,
             Course.course_code == course_name,
         )
     ).first()
-    if c is None:
+    if course is None:
         return "Unable to find class", False
 
-    assert_course_admin(c.id)
+    assert_course_admin(course.id)
 
     # Check if it exists
     if assignment is None:
         assignment = Assignment(
-            theia_image=c.theia_default_image,
-            theia_options=c.theia_default_options,
+            theia_image=course.theia_default_image,
+            theia_options=course.theia_default_options,
             unique_code=assignment_data["unique_code"],
-            course=c,
+            course=course,
         )
 
     # Update fields
@@ -220,10 +178,8 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     # Go through assignment tests, and delete those that are now
     # not in the assignment data.
     for assignment_test in AssignmentTest.query.filter(
-            and_(
-                AssignmentTest.assignment_id == assignment.id,
-                AssignmentTest.name.notin_(assignment_data["tests"]),
-            )
+            AssignmentTest.assignment_id == assignment.id,
+            AssignmentTest.name.notin_(assignment_data["tests"]),
     ).all():
         # Delete any and all submission test results that are still outstanding
         # for an assignment test that will be deleted.
@@ -257,7 +213,7 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
 
     # Sync the questions in the assignment data
     question_message = None
-    if 'questions' in assignment_data:
+    if 'questions' in assignment_data and isinstance(assignment_data['questions'], list):
         accepted, ignored, rejected = ingest_questions(
             assignment_data["questions"], assignment
         )
@@ -266,3 +222,5 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     db.session.commit()
 
     return {"assignment": assignment.data, "questions": question_message}, True
+
+

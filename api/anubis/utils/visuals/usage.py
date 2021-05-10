@@ -81,7 +81,7 @@ def get_theia_sessions() -> pd.DataFrame:
     return theia_sessions
 
 
-@cache.memoize(timeout=10)
+@cache.memoize(timeout=360)
 def get_raw_submissions() -> List[Dict[str, Any]]:
     submissions_df = get_submissions()
     data = submissions_df.groupby(['assignment_id', 'created'])['id'].count() \

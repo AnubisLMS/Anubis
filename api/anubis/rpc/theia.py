@@ -19,6 +19,12 @@ def create_theia_pod_obj(theia_session: TheiaSession):
     name = get_theia_pod_name(theia_session)
     containers = []
 
+    # Get the theia session options
+    limits = theia_session.options.get('limits', {"cpu": "2", "memory": "500Mi"})
+    requests = theia_session.options.get('requests', {"cpu": "250m", "memory": "100Mi"})
+    autosave = theia_session.options.get('autosave', True)
+    credentials = theia_session.options.get('credentials', False)
+
     # PVC
     volume_name = name + "-volume"
     pvc = client.V1PersistentVolumeClaim(
@@ -66,12 +72,8 @@ def create_theia_pod_obj(theia_session: TheiaSession):
         ],
     )
 
-    limits = theia_session.options.get('limits', {"cpu": "2", "memory": "500Mi"})
-    requests = theia_session.options.get('requests', {"cpu": "250m", "memory": "100Mi"})
-    autosave = theia_session.options.get('autosave', True)
-
     extra_env = []
-    if theia_session.options.get('credentials', False):
+    if credentials:
         extra_env.append(client.V1EnvVar(
             name='INCLUSTER',
             value=base64.b64encode(create_token(theia_session.owner.netid).encode()).decode(),

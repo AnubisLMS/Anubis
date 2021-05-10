@@ -56,11 +56,12 @@ class User(db.Model):
     def data(self):
         professor_for = [pf.data for pf in self.professor_for]
         ta_for = [taf.data for taf in self.ta_for]
-        extra_for = []
+        super_for = None
         if self.is_superuser:
+            super_for = []
             courses = Course.query.all()
             for course in courses:
-                extra_for.append({'id': course.id, 'name': course.name})
+                super_for.append({'id': course.id, 'name': course.name})
         return {
             "id": self.id,
             "netid": self.netid,
@@ -70,7 +71,7 @@ class User(db.Model):
             "is_admin": len(professor_for) > 0 or len(ta_for) > 0 or self.is_superuser,
             "professor_for": professor_for,
             "ta_for": ta_for,
-            "admin_for": professor_for + ta_for + extra_for,
+            "admin_for": super_for or (professor_for + ta_for),
         }
 
     def __repr__(self):
@@ -93,7 +94,7 @@ class Course(db.Model):
     section = db.Column(db.TEXT, nullable=True)
     professor = db.Column(db.TEXT, nullable=False)
     theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.osiris.services/anubis/xv6')
-    theia_default_options = db.Column(MutableJson, default=lambda: {"limits": {"cpu": "4", "memory": "4Gi"}})
+    theia_default_options = db.Column(MutableJson, default=lambda: {"limits": {"cpu": "2", "memory": "500Mi"}})
 
     @property
     def total_assignments(self):

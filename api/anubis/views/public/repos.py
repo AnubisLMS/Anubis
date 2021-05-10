@@ -7,6 +7,7 @@ from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response
 from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.lms.repos import get_repos
 
 repos = Blueprint("public-repos", __name__, url_prefix="/public/repos")
 
@@ -24,12 +25,6 @@ def public_repos():
     """
     user: User = current_user()
 
-    repos: List[AssignmentRepo] = (
-        AssignmentRepo.query.join(Assignment)
-            .filter(AssignmentRepo.owner_id == user.id)
-            .distinct(AssignmentRepo.repo_url)
-            .order_by(Assignment.release_date.desc())
-            .all()
-    )
+    _repos = get_repos(user.id)
 
-    return success_response({"repos": [repo.data for repo in repos]})
+    return success_response({"repos": _repos})

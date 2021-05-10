@@ -8,14 +8,16 @@ from anubis.utils.lms.autograde import bulk_autograde, autograde, autograde_subm
 from anubis.utils.lms.course import assert_course_admin, assert_course_context, get_course_context
 from anubis.utils.lms.questions import get_assigned_questions
 from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.services.cache import cache
 
 autograde_ = Blueprint("admin-autograde", __name__, url_prefix="/admin/autograde")
 
 
 @autograde_.route("/assignment/<assignment_id>")
 @require_admin()
+@cache.memoize(timeout=60)
 @json_response
-def admin_autograde_assignment_assignment_id(assignment_id, netid=None):
+def admin_autograde_assignment_assignment_id(assignment_id):
     """
     Calculate result statistics for an assignment. This endpoint is
     potentially very IO and computationally expensive. We basically
@@ -29,7 +31,6 @@ def admin_autograde_assignment_assignment_id(assignment_id, netid=None):
     timeout. *
 
     :param assignment_id:
-    :param netid:
     :return:
     """
 
@@ -58,6 +59,7 @@ def admin_autograde_assignment_assignment_id(assignment_id, netid=None):
 
 @autograde_.route("/for/<assignment_id>/<user_id>")
 @require_admin()
+@cache.memoize(timeout=60)
 @json_response
 def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
     """
@@ -67,9 +69,6 @@ def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
     :param user_id:
     :return:
     """
-
-    # Get the course context
-    course = get_course_context()
 
     # Pull the assignment object
     assignment = Assignment.query.filter(
@@ -101,6 +100,7 @@ def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
 @autograde_.route("/submission/<string:assignment_id>/<string:netid>")
 @require_admin()
 @log_endpoint("cli", lambda: "submission-stats")
+@cache.memoize(timeout=60)
 @json_response
 def private_submission_stats_id(assignment_id: str, netid: str):
     """
