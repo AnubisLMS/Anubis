@@ -11,5 +11,4 @@ def create_visuals(*_, **__):
     app = create_app()
 
     with app.app_context():
-        with app.test_request_context():
-            get_usage_plot()
+        get_usage_plot()

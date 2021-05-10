@@ -45,7 +45,6 @@ fi
 minikube start \
          --feature-gates=TTLAfterFinished=true \
          --ports=80:80,443:443 \
-         --network-plugin=cni \
          --cpus=${CPUS} \
          --memory=${MEM} \
          --cni=calico
