@@ -7,7 +7,7 @@ from os import environ, urandom
 from smtplib import SMTP
 from typing import Union, Tuple
 
-from flask import Response
+from flask import Response, has_app_context, has_request_context
 
 from anubis.config import config
 
@@ -302,10 +302,14 @@ def with_context(function):
 
     @functools.wraps(function)
     def wrapper(*args, **kwargs):
-
         # Do the import here to avoid circular
         # import issues.
         from anubis.app import create_app
+
+        # Only create an app context if
+        # there is not already one
+        if has_app_context() or has_request_context():
+            return function(*args, **kwargs)
 
         # Create a fresh app
         app = create_app()
