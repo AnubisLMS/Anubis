@@ -6,6 +6,8 @@ import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 
 import AssignmentTestsPaper from './AssignmentTestsPaper';
+import AssignmentSundialPaper from './AssignmentSundialPaper';
+import Grid from '@material-ui/core/Grid';
 
 
 export default function AutogradeVisuals({assignmentId}) {
@@ -22,15 +24,24 @@ export default function AutogradeVisuals({assignmentId}) {
   }, []);
 
   return (
-    <div style={{display: 'flex', justifyContent: 'center'}}>
-      {assignmentData.map(({title, pass_time_scatter, pass_count_radial}) => (
-        <AssignmentTestsPaper
-          key={title}
-          title={title}
-          pass_time_scatter={pass_time_scatter}
-          pass_count_radial={pass_count_radial}
-        />
-      ))}
-    </div>
+    <Grid container spacing={1} justify={'center'} alignItems={'center'}>
+      <Grid item xs>
+        <AssignmentSundialPaper/>
+      </Grid>
+      <Grid item xs>
+        <Grid container spacing={1} justify={'center'} alignItems={'center'}>
+          {assignmentData.map(({title, pass_time_scatter, pass_count_radial}) => (
+            <Grid item xs key={title}>
+              <AssignmentTestsPaper
+                title={title}
+                pass_time_scatter={pass_time_scatter}
+                pass_count_radial={pass_count_radial}
+              />
+            </Grid>
+          ))}
+        </Grid>
+      </Grid>
+
+    </Grid>
   );
 }
