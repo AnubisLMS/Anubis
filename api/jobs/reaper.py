@@ -11,6 +11,7 @@ from anubis.utils.data import with_context
 from anubis.utils.lms.autograde import bulk_autograde
 from anubis.utils.lms.webhook import check_repo, guess_github_username
 from anubis.utils.services.rpc import enqueue_ide_reap_stale, enqueue_autograde_pipeline
+from anubis.utils.visuals.assignments import get_assignment_sundial
 
 
 def reap_stale_submissions():
@@ -40,7 +41,7 @@ def reap_stale_submissions():
     db.session.commit()
 
 
-def reap_broken_submissions():
+def reap_recent_assignments():
     """
     Calculate stats for recent submissions
 
@@ -72,6 +73,7 @@ def reap_broken_submissions():
 
     for assignment in recent_assignments:
         bulk_autograde(assignment.id)
+        get_assignment_sundial(assignment.id)
 
 
 def reap_broken_repos():
@@ -94,24 +96,24 @@ def reap_broken_repos():
     # Do graphql nonsense
     query = '''
     query{
-  organization(login:"os3224"){
-    repositories(first:100,orderBy:{field:CREATED_AT,direction:DESC}){
-      nodes{
-        ref(qualifiedName:"master") {
-      target {
-        ... on Commit {
-          history(first: 20) {
-            edges { node { oid } }
+      organization(login:"os3224"){
+        repositories(first:100,orderBy:{field:CREATED_AT,direction:DESC}){
+          nodes{
+            ref(qualifiedName:"master") {
+          target {
+            ... on Commit {
+              history(first: 20) {
+                edges { node { oid } }
+              }
+            }
+          }
+            }
+            name 
+            url
           }
         }
       }
-        }
-        name 
-        url
-      }
     }
-  }
-}
     '''
     url = 'https://api.github.com/graphql'
     json = {'query': query}
@@ -225,7 +227,7 @@ def reap():
     reap_broken_repos()
 
     # Reap broken submissions in recent assignments
-    reap_broken_submissions()
+    reap_recent_assignments()
 
 
 if __name__ == "__main__":

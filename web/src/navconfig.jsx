@@ -36,6 +36,7 @@ import AdminStatic from './Pages/Admin/Static';
 import AdminConfig from './Pages/Admin/Config';
 import AdminAssignmentQuestions from './Pages/Admin/Assignment/AssignmentQuestions';
 import AdminAssignmentTests from './Pages/Admin/Assignment/AssignmentTests';
+import AdminAssignmentRepos from './Pages/Admin/Assignment/AssignmentRepos';
 
 export const footer_nav = [
   {
@@ -176,6 +177,11 @@ export const not_shown_nav = [
     id: '',
     path: '/admin/assignment/tests/:assignmentId',
     Page: AdminAssignmentTests,
+  },
+  {
+    id: '',
+    path: '/admin/assignment/repos/:assignmentId',
+    Page: AdminAssignmentRepos,
   },
 ];
 

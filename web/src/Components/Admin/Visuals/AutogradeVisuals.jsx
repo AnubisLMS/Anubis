@@ -25,23 +25,24 @@ export default function AutogradeVisuals({assignmentId}) {
 
   return (
     <Grid container spacing={1} justify={'center'} alignItems={'center'}>
-      <Grid item xs>
+      <Grid item>
         <AssignmentSundialPaper/>
       </Grid>
-      <Grid item xs>
-        <Grid container spacing={1} justify={'center'} alignItems={'center'}>
-          {assignmentData.map(({title, pass_time_scatter, pass_count_radial}) => (
-            <Grid item xs key={title}>
-              <AssignmentTestsPaper
-                title={title}
-                pass_time_scatter={pass_time_scatter}
-                pass_count_radial={pass_count_radial}
-              />
-            </Grid>
-          ))}
+      {assignmentData.length !== 0 ? (
+        <Grid item>
+          <Grid container spacing={1} justify={'center'} alignItems={'center'}>
+            {assignmentData.map(({title, pass_time_scatter, pass_count_radial}) => (
+              <Grid item xs key={title}>
+                <AssignmentTestsPaper
+                  title={title}
+                  pass_time_scatter={pass_time_scatter}
+                  pass_count_radial={pass_count_radial}
+                />
+              </Grid>
+            ))}
+          </Grid>
         </Grid>
-      </Grid>
-
+      ) : null}
     </Grid>
   );
 }

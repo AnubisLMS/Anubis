@@ -1,10 +1,18 @@
 import json
+import parse
 
 from dateutil.parser import parse as dateparse
 from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
 
-from anubis.models import db, Assignment, User, AssignmentTest, SubmissionTestResult
+from anubis.models import (
+    db,
+    Assignment,
+    AssignmentRepo,
+    User,
+    AssignmentTest,
+    SubmissionTestResult,
+)
 from anubis.utils.auth import require_admin
 from anubis.utils.data import rand
 from anubis.utils.data import row2dict
@@ -17,6 +25,42 @@ from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.logger import logger
 
 assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
+
+
+@assignments.route('/repos/<string:id>')
+@require_admin()
+@load_from_id(Assignment, verify_owner=False)
+@json_response
+def admin_assignments_repos_id(assignment: Assignment):
+    """
+
+    :param assignment:
+    :return:
+    """
+
+    assert_course_context(assignment)
+
+    repos = AssignmentRepo.query.filter(
+        AssignmentRepo.assignment_id == assignment.id,
+    ).all()
+
+    def get_ssh_url(url):
+        r = parse.parse('https://github.com/{}', url)
+        path = r[0]
+        path = path.removesuffix('.git')
+        return f'git@github.com:{path}.git'
+
+    return success_response({'assignment': assignment.full_data, 'repos': [
+        {
+            'id': repo.id,
+            'url': repo.repo_url,
+            'ssh': get_ssh_url(repo.repo_url),
+            'github_username': repo.github_username,
+            'name': repo.owner.name if repo.owner_id is not None else 'N/A',
+            'netid': repo.owner.netid if repo.owner_id is not None else 'N/A',
+        }
+        for repo in repos
+    ]})
 
 
 @assignments.route("/assignment/<string:id>/questions/get/<string:netid>")

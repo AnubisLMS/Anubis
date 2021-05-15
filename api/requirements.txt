@@ -25,3 +25,4 @@ sqlalchemy-json
 pandas
 matplotlib
 numpy
+click==7.1.2

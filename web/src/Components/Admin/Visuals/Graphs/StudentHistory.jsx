@@ -7,13 +7,12 @@ import Grid from '@material-ui/core/Grid';
 
 import {
   DiscreteColorLegend,
+  FlexibleWidthXYPlot,
   Hint,
   HorizontalGridLines,
   LineMarkSeries,
   VerticalGridLines,
   XAxis,
-  XYPlot,
-  FlexibleWidthXYPlot,
   YAxis,
 } from 'react-vis';
 
@@ -24,6 +23,13 @@ const useStyles = makeStyles((theme) => ({
   typography: {
     paddingLeft: theme.spacing(1),
   },
+  slider: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+  },
+  button: {
+    margin: theme.spacing(1),
+  },
 }));
 
 export default function StudentHistory({testResults: rawTestResults, buildResults: rawBuildResults}) {
@@ -32,6 +38,7 @@ export default function StudentHistory({testResults: rawTestResults, buildResult
   const [width, setWidth] = useState(0);
   const [testResults, setTestResult] = useState([]);
   const [buildResults, setBuildResult] = useState([]);
+  // const [lastDrawLocation, setLastDrawLocation] = useState(null);
 
   useEffect(() => {
     setTestResult(rawTestResults.map(({x, ...y}) => ({x: new Date(x), ...y})));
@@ -40,18 +47,14 @@ export default function StudentHistory({testResults: rawTestResults, buildResult
   }, [rawBuildResults, rawTestResults]);
 
   const updateValues = (width) => {
-    const tsize = rawTestResults.length;
-    setTestResult(rawTestResults.slice(tsize-width, tsize-1).map(({x, ...y}) => ({x: new Date(x), ...y})));
-
-    const bsize = rawBuildResults.length;
-    setBuildResult(rawBuildResults.slice(bsize-width, bsize-1).map(({x, ...y}) => ({x: new Date(x), ...y})));
-
+    setTestResult(rawTestResults.slice(0, width).map(({x, ...y}) => ({x: new Date(x), ...y})));
+    setBuildResult(rawBuildResults.slice(0, width).map(({x, ...y}) => ({x: new Date(x), ...y})));
     setWidth(width);
   };
 
   return (
     <Paper style={{display: 'flex'}}>
-      <Grid container spacing={2} direction={'column'} justify={'space-between'} style={{width: 150}}>
+      <Grid container spacing={2} direction={'column'} justify={'space-between'} style={{width: 200}}>
         <Grid item>
           <style>
             {`.rv-discrete-color-legend-item {color: #fff;}`}
@@ -77,12 +80,34 @@ export default function StudentHistory({testResults: rawTestResults, buildResult
             max={rawTestResults.length}
             valueLabelDisplay="auto"
           />
+          {/* <Button*/}
+          {/*  variant={'contained'}*/}
+          {/*  color={'primary'}*/}
+          {/*  className={classes.button}*/}
+          {/*  onClick={() => setLastDrawLocation(null)}*/}
+          {/* >*/}
+          {/*  Reset Zoom*/}
+          {/* </Button>*/}
         </Grid>
       </Grid>
       <FlexibleWidthXYPlot
         animation
-        xType="time" height={300}
+        xType="time"
+        height={300}
+        // xDomain={
+        //   lastDrawLocation && [
+        //     lastDrawLocation.left,
+        //     lastDrawLocation.right,
+        //   ]
+        // }
+        // yDomain={
+        //   lastDrawLocation && [
+        //     lastDrawLocation.bottom,
+        //     lastDrawLocation.top,
+        //   ]
+        // }
       >
+
         <VerticalGridLines/>
         <HorizontalGridLines/>
         <XAxis title={'time'}/>
@@ -111,6 +136,22 @@ export default function StudentHistory({testResults: rawTestResults, buildResult
           markStyle={{stroke: 'green'}}
           data={buildResults}
         />
+
+        {/* <VerticalBarSeries*/}
+        {/*  data={dates?.release_date}*/}
+        {/* />*/}
+
+        {/* <Highlight*/}
+        {/*  onBrushEnd={(area) => setLastDrawLocation(area)}*/}
+        {/*  onDrag={(area) => {*/}
+        {/*    setLastDrawLocation({*/}
+        {/*      bottom: lastDrawLocation.bottom + (area.top - area.bottom),*/}
+        {/*      left: lastDrawLocation.left - (area.right - area.left),*/}
+        {/*      right: lastDrawLocation.right - (area.right - area.left),*/}
+        {/*      top: lastDrawLocation.top + (area.top - area.bottom),*/}
+        {/*    });*/}
+        {/*  }}*/}
+        {/* />*/}
 
         {hint ? <Hint value={hint}/> : null}
       </FlexibleWidthXYPlot>
