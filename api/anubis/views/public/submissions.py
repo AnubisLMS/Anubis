@@ -4,6 +4,7 @@ from anubis.models import User, Submission
 from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import error_response, success_response
+from anubis.utils.lms.course import is_course_admin
 from anubis.utils.lms.submissions import regrade_submission, get_submissions
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.logger import logger
@@ -37,12 +38,12 @@ def public_submissions():
 
     # Load current user
     user: User = current_user()
+    perspective_of = user
+    if perspective_of_id is not None:
+        perspective_of = User.query.filter(User.id == perspective_of_id).first()
 
-    if perspective_of_id is not None and not (user.is_superuser):
+    if perspective_of_id is not None and not is_course_admin(course_id):
         return error_response("Bad Request"), 400
-
-    logger.debug("id: " + str(perspective_of_id))
-    logger.debug("id: " + str(perspective_of_id or user.id))
 
     submissions_ = get_submissions(
         user_id=perspective_of_id or user.id,
@@ -54,7 +55,7 @@ def public_submissions():
         return error_response("Bad Request"), 400
 
     # Get submissions through cached function
-    return success_response({"submissions": submissions_})
+    return success_response({"submissions": submissions_, 'user': perspective_of.data})
 
 
 @submissions.route("/get/<string:commit>")
