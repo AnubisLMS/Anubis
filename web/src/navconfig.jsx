@@ -27,9 +27,9 @@ import Visuals from './Pages/Public/Visuals';
 import AdminUsers from './Pages/Admin/Users';
 import AdminUser from './Pages/Admin/User';
 import AdminAssignments from './Pages/Admin/Assignment/Assignments';
-import AdminStats from './Pages/Admin/Autograde/AutogradeResults';
-import AdminAssignmentStats from './Pages/Admin/Autograde/AutogradeAssignments';
-import AdminSubmissionStats from './Pages/Admin/Autograde/AutogradeSubmission';
+import AdminAutogradeAssignments from './Pages/Admin/Autograde/AutogradeAssignments';
+import AdminAutogradeResults from './Pages/Admin/Autograde/AutogradeResults';
+import AdminAutogradeSubmission from './Pages/Admin/Autograde/AutogradeSubmission';
 import AdminCourse from './Pages/Admin/Course';
 import AdminTheia from './Pages/Admin/Theia';
 import AdminStatic from './Pages/Admin/Static';
@@ -125,7 +125,7 @@ export const admin_nav = [
     id: 'Autograde Results',
     icon: <PieChartIcon/>,
     path: '/admin/autograde',
-    Page: AdminStats,
+    Page: AdminAutogradeAssignments,
   },
   {
     id: 'Anubis Cloud IDE',
@@ -161,12 +161,12 @@ export const not_shown_nav = [
   {
     id: 'AdminAssignmentStats',
     path: '/admin/autograde/assignment',
-    Page: AdminAssignmentStats,
+    Page: AdminAutogradeResults,
   },
   {
     id: 'AdminSubmissionStats',
     path: '/admin/autograde/submission',
-    Page: AdminSubmissionStats,
+    Page: AdminAutogradeSubmission,
   },
   {
     id: '',

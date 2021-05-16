@@ -9,11 +9,49 @@ from anubis.utils.lms.course import assert_course_admin, assert_course_context, 
 from anubis.utils.lms.questions import get_assigned_questions
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.cache import cache
+from anubis.utils.visuals.assignments import (
+    get_admin_assignment_visual_data,
+    get_assignment_history,
+    get_assignment_sundial,
+)
 
 autograde_ = Blueprint("admin-autograde", __name__, url_prefix="/admin/autograde")
 
 
-@autograde_.route("/assignment/<assignment_id>")
+@autograde_.route('/cache-reset/<string:assignment_id>')
+@require_admin()
+@json_response
+def admin_autograde_cache_reset(assignment_id: str):
+    """
+    Clear the autograde cache for a specific assignment.
+
+    :param assignment_id:
+    :return:
+    """
+    # Pull the assignment object
+    assignment = Assignment.query.filter(
+        Assignment.id == assignment_id
+    ).first()
+
+    # Verify that we got an assignment
+    if assignment is None:
+        return error_response('assignment does not exist')
+
+    # Verify that the current course context, and the assignment course match
+    assert_course_context(assignment)
+
+    cache.delete_memoized(bulk_autograde)
+    cache.delete_memoized(autograde)
+    cache.delete_memoized(get_assignment_history)
+    cache.delete_memoized(get_admin_assignment_visual_data)
+    cache.delete_memoized(get_assignment_sundial)
+
+    return success_response({
+        'message': 'success'
+    })
+
+
+@autograde_.route("/assignment/<string:assignment_id>")
 @require_admin()
 @cache.memoize(timeout=60)
 @json_response
