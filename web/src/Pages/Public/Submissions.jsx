@@ -43,24 +43,27 @@ export default function Submissions() {
   const query = useQuery();
   const {enqueueSnackbar} = useSnackbar();
   const [submissions, setSubmissions] = useState([]);
+  const [user, setUser] = useState(null);
 
   const assignment_id = query.get('assignmentId');
 
   React.useEffect(() => {
-    axios.get(
-      `/api/public/submissions/`,
-      {
-        params: {
-          assignmentId: query.get('assignmentId'),
-          courseId: query.get('courseId'),
-          userId: query.get('userId'),
-        },
+    axios.get(`/api/public/submissions/`, {
+      params: {
+        assignmentId: query.get('assignmentId'),
+        courseId: query.get('courseId'),
+        userId: query.get('userId'),
       },
-    ).then((response) => {
+    }).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      setSubmissions(data.submissions
-        .map(translateSubmission)
-        .sort((a, b) => (a.timeStamp > b.timeStamp ? -1 : 1)));
+      if (data?.submissions) {
+        setSubmissions(data.submissions
+          .map(translateSubmission)
+          .sort((a, b) => (a.timeStamp > b.timeStamp ? -1 : 1)));
+      }
+      if (data?.user) {
+        setUser(data.user);
+      }
     }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
   }, []);
 
@@ -71,13 +74,9 @@ export default function Submissions() {
           <Typography variant="h6">
             Anubis
           </Typography>
-          <AuthContext.Consumer>
-            {(user) => (
-              <Typography variant={'subtitle1'} color={'textSecondary'}>
-                {user?.name}&apos;s Submissions
-              </Typography>
-            )}
-          </AuthContext.Consumer>
+          <Typography variant={'subtitle1'} color={'textSecondary'}>
+            {user?.name}&apos;s Submissions
+          </Typography>
         </Grid>
 
         <Grid item/>

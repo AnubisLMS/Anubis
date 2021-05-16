@@ -97,32 +97,6 @@ export default function UserCard({user, setUser}) {
               />
             </Grid>
 
-            {/* Is Admin */}
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={user.student.is_admin}
-                    color={'primary'}
-                    onChange={() => {
-                      axios.get(`/api/admin/students/toggle-admin/${user.student.id}`).then((response) => {
-                        const data = standardStatusHandler(response, enqueueSnackbar);
-                        if (data) {
-                          setUser((state) => {
-                            state.student.is_admin = !state.student.is_admin;
-                            return state;
-                          });
-                          incEdits();
-                        }
-                      }).catch(standardErrorHandler(enqueueSnackbar));
-                    }}
-                  />
-                }
-                label="Is Admin"
-                labelPlacement="end"
-              />
-            </Grid>
-
             {/* Is Superuser */}
             <Grid item xs={12}>
               <FormControlLabel

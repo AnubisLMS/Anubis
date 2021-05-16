@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Cookies from 'universal-cookie';
 import {useSnackbar} from 'notistack';
 import clsx from 'clsx';
@@ -25,6 +25,17 @@ export default function Header({classes, open, onDrawerToggle, user}) {
     }
     return null;
   })());
+
+  useEffect(() => {
+    if ((user?.admin_for?.length ?? 0) > 0) {
+      try {
+        JSON.parse(atob(cookie.get('course')));
+      } catch (_) {
+        cookie.set('course', btoa(JSON.stringify(user.admin_for[0])), {path: '/'});
+        setCourse(user.admin_for[0]);
+      }
+    }
+  }, [user]);
 
   return (
     <React.Fragment>
