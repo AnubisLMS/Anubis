@@ -7,4 +7,7 @@ def test_visuals_admin():
 
     student = Session('student')
     student.get(f'/admin/visuals/assignment/{assignment_id}', should_fail=True)
+
     permission_test(f'/admin/visuals/assignment/{assignment_id}')
+    permission_test(f'/admin/visuals/sundial/{assignment_id}')
+    permission_test(f'/admin/visuals/history/{assignment_id}/superuser')
