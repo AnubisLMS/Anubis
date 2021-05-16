@@ -70,7 +70,7 @@ export default function AssignmentRepos() {
           )}
           className={classes.button}
         >
-          Download Repos
+          Download Repo Metadata
         </Button>
         <RepoCommandDialog
           repos={repos}

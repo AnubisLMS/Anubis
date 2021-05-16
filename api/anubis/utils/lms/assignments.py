@@ -105,18 +105,24 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
     for assignment_data in response:
         # If the current user has a submission for this assignment, then mark it
         assignment_data["has_submission"] = (
-            Submission.query.join(User).join(Assignment).filter(
-                Assignment.id == assignment_data["id"],
-                User.netid == netid,
-            ).first() is not None
+                Submission.query.join(User).join(Assignment).filter(
+                    Assignment.id == assignment_data["id"],
+                    User.netid == netid,
+                ).first() is not None
         )
+
+        repo = AssignmentRepo.query.filter(
+            AssignmentRepo.owner_id == user.id,
+            AssignmentRepo.assignment_id == assignment_data['id'],
+        ).first()
 
         # If the current user has a repo for this assignment, then mark it
         assignment_data["has_repo"] = (
-            AssignmentRepo.query.filter(
-                AssignmentRepo.owner_id == user.id,
-                AssignmentRepo.assignment_id == assignment_data['id'],
-            ).first() is not None
+                repo is not None
+        )
+        # If the current user has a repo for this assignment, then mark it
+        assignment_data["repo_url"] = (
+            repo.repo_url if repo is not None else None
         )
 
     return response
@@ -222,5 +228,3 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     db.session.commit()
 
     return {"assignment": assignment.data, "questions": question_message}, True
-
-
