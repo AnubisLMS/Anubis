@@ -40,7 +40,7 @@ def get_courses(netid: str):
     return [c.data for c in classes]
 
 
-@cache.memoize(timeout=10, unless=is_debug)
+@cache.memoize(timeout=10, unless=is_debug, source_check=True)
 def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], None]:
     """
     Get all the current assignments for a netid. Optionally specify a class_name
@@ -72,20 +72,20 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
     # Build a list of all the assignments visible
     # to this user for each of the specified courses.
     assignments: List[Assignment] = []
-    for course in course_ids:
+    for _course_id in course_ids:
         # Query filters
         filters = []
 
         # If the current user is not a course admin or a superuser, then
         # we should filter out assignments that have not been released,
         # and those marked as hidden.
-        if not (user.is_superuser or is_course_admin(course_id)):
+        if not is_course_admin(_course_id, user_id=user.id):
             filters.append(Assignment.release_date <= datetime.now())
             filters.append(Assignment.hidden == False)
 
         # Get the assignment objects that should be visible to this user.
         course_assignments = Assignment.query.join(Course).filter(
-            Course.id == course,
+            Course.id == _course_id,
             *filters,
         ).all()
 

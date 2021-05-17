@@ -216,8 +216,8 @@ def public_webhook():
         db.session.commit()
 
     # Delete cached submissions
-    cache.delete_memoized(get_submissions, user.netid)
-    cache.delete_memoized(get_submissions, user.netid, assignment.course_id)
-    cache.delete_memoized(get_submissions, user.netid, assignment.course_id, assignment.id)
+    cache.delete_memoized(get_submissions, user.id, None, None)
+    cache.delete_memoized(get_submissions, user.id, assignment.course_id, None)
+    cache.delete_memoized(get_submissions, user.id, assignment.course_id, assignment.id)
 
     return success_response("submission accepted")

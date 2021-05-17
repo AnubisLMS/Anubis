@@ -189,19 +189,18 @@ def ingest_questions(questions: dict, assignment: Assignment):
     return accepted, ignored, rejected
 
 
-def get_all_questions(assignment: Assignment) -> Dict[int, List[Dict[str, str]]]:
+def get_all_questions(assignment: Assignment) -> List[Dict[str, str]]:
     """
     Get all questions for a given assignment.
 
-    response = {
-      1 : [
-        {
-          question: "what is 2*2?",
-          solution: "4"
-        },
+    response = [
+      {
+        question: "what is 2*2?",
+        solution: "4",
         ...
-      ]
-    }
+      },
+      ...
+    ]
 
     :param assignment:
     :return:
@@ -215,11 +214,17 @@ def get_all_questions(assignment: Assignment) -> Dict[int, List[Dict[str, str]]]
     # Get sequence to question mapping
     sequence_to_questions = get_question_sequence_mapping(questions)
 
-    # Convert ORM object to a dictionary
-    return {
-        _sequence: [_question.full_data for _question in _questions]
-        for _sequence, _questions in sequence_to_questions.items()
-    }
+    # Get the raw questions in a generator of lists
+    question_sequences = sequence_to_questions.values()
+
+    # Pull questions out of sequences and add
+    # them to question_list
+    questions_list: List[Dict[str, str]] = []
+    for sequence in question_sequences:
+        for q in sequence:
+            questions_list.append(q.full_data)
+
+    return questions_list
 
 
 @cache.memoize(timeout=5, unless=is_debug)

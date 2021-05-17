@@ -184,6 +184,9 @@ def whoami():
 
 @questions.command()
 def assign():
+    if not os.path.exists('meta.yml'):
+        click.echo('no meta.yml found!')
+        return 1
     assignment_meta = yaml.safe_load(open('meta.yml').read())
     unique_code = assignment_meta['assignment']['unique_code']
     get_json('/private/questions/assign/{}'.format(unique_code))
@@ -191,6 +194,9 @@ def assign():
 
 @assignment.command()
 def sync():
+    if not os.path.exists('meta.yml'):
+        click.echo('no meta.yml found!')
+        return 1
     assignment_meta = yaml.safe_load(open('meta.yml').read())
     # click.echo(json.dumps(assignment_meta, indent=2))
     import assignment
@@ -265,6 +271,9 @@ def stats(assignment, netids):
 @click.argument('path', type=click.Path(exists=True), default='.')
 @click.option('--push/-p', default=False)
 def build(path, push):
+    if not os.path.exists('meta.yml'):
+        click.echo('no meta.yml found!')
+        return 1
     assignment_meta = yaml.safe_load(open(os.path.join(path, 'meta.yml')).read())
 
     # Build assignment image

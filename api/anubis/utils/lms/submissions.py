@@ -150,7 +150,7 @@ def fix_dangling():
     return fixed
 
 
-@cache.memoize(timeout=3600, unless=is_debug)
+@cache.memoize(timeout=5, unless=is_debug)
 def get_submissions(
         user_id=None, course_id=None, assignment_id=None
 ) -> Union[List[Dict[str, str]], None]:

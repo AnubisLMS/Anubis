@@ -25,14 +25,14 @@ assignment:
   # need to manually edit the database. This is by design to prevent
   # a question assigned to a student from being changed to prevent
   # confusion.
-  questions:
-    - sequence: 1
-      questions:
-        - q: "What is 3*4?"
-          a: "12"
-        - q: "What is 3*2"
-          a: "6"
-    - sequence: 2
-      questions:
-        - q: "What is sqrt(144)?"
-          a: "12"
+  questions: []
+  #  - sequence: 1
+  #    questions:
+  #      - q: "What is 3*4?"
+  #        a: "12"
+  #      - q: "What is 3*2"
+  #        a: "6"
+  #  - sequence: 2
+  #    questions:
+  #      - q: "What is sqrt(144)?"
+  #        a: "12"

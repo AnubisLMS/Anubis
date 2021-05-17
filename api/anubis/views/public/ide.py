@@ -176,7 +176,7 @@ def public_ide_initialize(assignment: Assignment):
             {"active": active_session.active, "session": active_session.data}
         )
 
-    if user.is_superuser or is_course_admin(assignment.course_id):
+    if not is_course_admin(assignment.course_id):
         if datetime.now() <= assignment.release_date:
             return error_response("Assignment has not been released.")
 

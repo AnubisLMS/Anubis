@@ -156,6 +156,33 @@ def trim(stdout: str) -> typing.List[str]:
     return stdout_lines
 
 
+def search_lines(stdout_lines: typing.List[str], expected_lines: typing.List[str], case_sensitive: bool = True):
+    if not case_sensitive:
+        stdout_lines = list(map(lambda x: x.lower(), stdout_lines))
+    found = []
+    for line in expected_lines:
+        l = line.strip()
+        if not case_sensitive:
+            l = l.lower()
+        for _aindex, _aline in enumerate(stdout_lines):
+            if l in _aline:
+                found.append(_aindex)
+                break
+        else:
+            found.append(-1)
+    if -1 in found:
+        return False
+    return list(sorted(found)) == found
+
+
+def test_lines(stdout_lines: typing.List[str], expected_lines: typing.List[str], case_sensitive: bool = True):
+    if case_sensitive:
+        return len(stdout_lines) == len(expected_lines) \
+               and all(_a.strip() == _b.strip() for _a, _b in zip(stdout_lines, expected_lines))
+    return len(stdout_lines) == len(expected_lines) \
+           and all(_a.lower().strip() == _b.lower().strip() for _a, _b in zip(stdout_lines, expected_lines))
+
+
 def verify_expected(
     stdout_lines: typing.List[str],
     expected_lines: typing.List[str],
@@ -174,34 +201,8 @@ def verify_expected(
     :return:
     """
 
-    def search_lines(a: typing.List[str], b: typing.List[str]):
-        if not case_sensitive:
-            a = list(map(lambda x: x.lower(), a))
-        found = []
-        for line in b:
-            l = line.strip()
-            if not case_sensitive:
-                l = l.lower()
-            for _aindex, _aline in enumerate(a):
-                if l in _aline:
-                    found.append(_aindex)
-                    break
-            else:
-                found.append(-1)
-        if -1 in found:
-            return False
-
-        return list(sorted(found)) == found
-
-    def test_lines(a: typing.List[str], b: typing.List[str]):
-        if case_sensitive:
-            return len(a) == len(b) \
-               and all(_a.strip() == _b.strip() for _a, _b in zip(a, b))
-        return len(a) == len(b) \
-               and all(_a.lower().strip() == _b.lower().strip() for _a, _b in zip(a, b))
-
     compare_func = search_lines if search else test_lines
-    if not compare_func(stdout_lines, expected_lines):
+    if not compare_func(stdout_lines, expected_lines, case_sensitive=case_sensitive):
         test_result.stdout += 'your lines:\n' + '\n'.join(stdout_lines) + '\n\n' \
                               + 'we expected:\n' + '\n'.join(expected_lines)
         test_result.message = 'Did not receive expected output'

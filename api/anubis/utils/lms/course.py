@@ -107,17 +107,22 @@ def get_course_context(full_stop: bool = True) -> Union[None, Course]:
     return context
 
 
-def is_course_superuser(course_id: str) -> bool:
+def is_course_superuser(course_id: str, user_id: str = None) -> bool:
     """
     Use this function to verify if the current user is a superuser for
     the specified course_id. A user is a superuser for a course if they are
     a professor, or if they are a superuser.
 
     :param course_id:
+    :param user_id:
     :return:
     """
+
     # Get the current user
-    user = current_user()
+    if user_id is None:
+        user = current_user()
+    else:
+        user = User.query.filter(User.id == user_id).first()
 
     # If they are a superuser, then we can just return True
     if user.is_superuser:
@@ -133,17 +138,22 @@ def is_course_superuser(course_id: str) -> bool:
     return prof is not None
 
 
-def is_course_admin(course_id: str) -> bool:
+def is_course_admin(course_id: str, user_id: str = None) -> bool:
     """
     Use this function to verify if the current user is an admin for
     the specified course_id. A user is an admin for a course if they are
     a ta, professor, or if they are a superuser.
 
     :param course_id:
+    :param user_id:
     :return:
     """
+
     # Get the current user
-    user = current_user()
+    if user_id is None:
+        user = current_user()
+    else:
+        user = User.query.filter(User.id == user_id).first()
 
     # If they are a superuser, then just return True
     if user.is_superuser:
