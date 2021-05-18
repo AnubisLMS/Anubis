@@ -3,7 +3,7 @@ from flask import Blueprint, request
 from anubis.models import User, Submission
 from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response
-from anubis.utils.http.https import error_response, success_response
+from anubis.utils.http.https import error_response, success_response, get_number_arg
 from anubis.utils.lms.course import is_course_admin
 from anubis.utils.lms.submissions import regrade_submission, get_submissions
 from anubis.utils.services.elastic import log_endpoint
@@ -36,6 +36,9 @@ def public_submissions():
     perspective_of_id = request.args.get("userId", default=None)
     assignment_id = request.args.get("assignmentId", default=None)
 
+    limit: int = get_number_arg('limit', default_value=10)
+    offset: int = get_number_arg('offset', default_value=0)
+
     # Load current user
     user: User = current_user()
     perspective_of = user
@@ -45,17 +48,23 @@ def public_submissions():
     if perspective_of_id is not None and not is_course_admin(course_id):
         return error_response("Bad Request"), 400
 
-    submissions_ = get_submissions(
+    _submissions, _total = get_submissions(
         user_id=perspective_of_id or user.id,
         course_id=course_id,
         assignment_id=assignment_id,
+        limit=limit,
+        offset=offset,
     )
 
-    if submissions_ is None:
+    if _submissions is None:
         return error_response("Bad Request"), 400
 
     # Get submissions through cached function
-    return success_response({"submissions": submissions_, 'user': perspective_of.data})
+    return success_response({
+        "submissions": _submissions,
+        "total": _total,
+        "user": perspective_of.data
+    })
 
 
 @submissions.route("/get/<string:commit>")

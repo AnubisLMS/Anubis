@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Optional, Tuple
 
 from anubis.models import Submission, AssignmentRepo, User, db, Course, Assignment, InCourse
 from anubis.utils.data import is_debug
@@ -150,14 +150,16 @@ def fix_dangling():
     return fixed
 
 
-@cache.memoize(timeout=5, unless=is_debug)
+@cache.memoize(timeout=5, unless=is_debug, source_check=True)
 def get_submissions(
-        user_id=None, course_id=None, assignment_id=None
-) -> Union[List[Dict[str, str]], None]:
+        user_id=None, course_id=None, assignment_id=None, limit=None, offset=None,
+) -> Optional[Tuple[List[Dict[str, str]], int]]:
     """
     Get all submissions for a given netid. Cache the results. Optionally specify
     a class_name and / or assignment_name for additional filtering.
 
+    :param offset:
+    :param limit:
     :param user_id:
     :param course_id:
     :param assignment_id: id of assignment
@@ -180,13 +182,22 @@ def get_submissions(
     if assignment_id is not None:
         filters.append(Assignment.id == assignment_id)
 
-    submissions = (
+    query = (
         Submission.query.join(Assignment)
             .join(Course)
             .join(InCourse)
             .join(User)
             .filter(Submission.owner_id == owner.id, *filters)
-            .all()
+            .order_by(Submission.created.desc())
     )
 
-    return [s.full_data for s in submissions]
+    all_total = query.count()
+
+    if limit is not None:
+        query = query.limit(limit)
+    if offset is not None:
+        query = query.offset(offset)
+
+    submissions = query.all()
+
+    return [s.full_data for s in submissions], all_total
