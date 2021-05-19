@@ -6,6 +6,9 @@ from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response, get_number_arg
 from anubis.utils.lms.course import assert_course_superuser, get_course_context, assert_course_context
 from anubis.utils.lms.students import get_students
+from anubis.utils.lms.repos import get_repos
+from anubis.utils.lms.theia import get_recent_sessions
+
 
 students_ = Blueprint("admin-students", __name__, url_prefix="/admin/students")
 
@@ -90,10 +93,15 @@ def admin_students_info_id(id: str):
         Course.id.in_(course_ids)
     ).all()
 
+    repos = get_repos(student.id)
+    recent_theia = get_recent_sessions(student.id)
+
     # Pass back the student and course information
     return success_response({
-        "student": student.data,
+        "user": student.data,
         "courses": [course.data for course in courses],
+        "repos": repos,
+        "theia": recent_theia,
     })
 
 

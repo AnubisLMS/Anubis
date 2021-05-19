@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function CourseCard({student, course}) {
+export default function CourseCard({user, course}) {
   const classes = useStyles();
 
   return (
@@ -59,7 +59,7 @@ export default function CourseCard({student, course}) {
           color="primary"
           size="small"
           component={Link}
-          to={`/courses/assignments/submissions?courseId=${course.id}&userId=${student.id}`}
+          to={`/courses/assignments/submissions?courseId=${course.id}&userId=${user.id}`}
         >
           View Submissions
         </Button>

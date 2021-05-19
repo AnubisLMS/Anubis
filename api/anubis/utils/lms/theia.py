@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict
 
 from werkzeug.utils import redirect
 
@@ -7,6 +7,22 @@ from anubis.models import TheiaSession, User, Config
 from anubis.utils.auth import create_token
 from anubis.utils.data import is_debug
 from anubis.utils.services.cache import cache
+
+
+@cache.memoize(timeout=5, source_check=True)
+def get_recent_sessions(user_id: str, limit: int = 10, offset: int = 10) -> List[Dict]:
+    student = User.query.filter(
+        User.id == user_id,
+    ).first()
+
+    sessions: List[TheiaSession] = TheiaSession.query.filter(
+        TheiaSession.owner_id == student.id,
+    ).order_by(TheiaSession.created.desc()).limit(limit).offset(offset).all()
+
+    return [
+        session.data
+        for session in sessions
+    ]
 
 
 @cache.memoize(timeout=5, unless=is_debug)

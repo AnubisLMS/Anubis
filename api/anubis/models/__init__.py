@@ -270,6 +270,7 @@ class AssignmentRepo(db.Model):
     @property
     def data(self):
         return {
+            "id": self.id,
             "github_username": self.github_username,
             "assignment_name": self.assignment.name,
             "course_code": self.assignment.course.course_code,
@@ -715,7 +716,7 @@ class TheiaSession(db.Model):
 
     @property
     def data(self):
-        from anubis.utils.services.theia import theia_redirect_url
+        from anubis.utils.lms.theia import theia_redirect_url
 
         return {
             "id": self.id,

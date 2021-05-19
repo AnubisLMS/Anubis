@@ -1,5 +1,10 @@
-# https://www.robotstxt.org/robotstxt.html
+# Did you think you would find something here?
+
 User-agent: *
 Allow: /about
+Allow: /blog
+Allow: /visuals
 Allow: /favicon.ico
-Disallow: *
+Allow: /api/public/static/
+Allow: /api/public/visuals/
+Disallow: /api
