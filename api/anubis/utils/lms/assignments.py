@@ -240,7 +240,7 @@ def get_assignment_due_date(user: Optional[User], assignment: Assignment) -> dat
     """
 
     if user is None:
-        return assignment.due_date
+        return assignment.grace_date
 
     # Check for a late exception for this student
     late_exception: Optional[LateException] = LateException.query.filter(
@@ -253,4 +253,4 @@ def get_assignment_due_date(user: Optional[User], assignment: Assignment) -> dat
         return late_exception.due_date
 
     # If no late exception, return the assignment default
-    return assignment.due_date
+    return assignment.grace_date

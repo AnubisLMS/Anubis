@@ -108,7 +108,7 @@ export default function Assignment() {
       <Grid item xs={12}>
         <ManagementIDEDialog/>
       </Grid>
-      <Grid item xs={8} key={assignment.id}>
+      <Grid item xs={12} sm={10} md={8} key={assignment.id}>
         <AssignmentCard
           assignment={assignment}
           saveAssignment={saveAssignment}
