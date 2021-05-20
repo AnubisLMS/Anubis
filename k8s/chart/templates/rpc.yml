@@ -49,6 +49,8 @@ spec:
         env:
         - name: "DEBUG"
           value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+        - name: "JOB"
+          value: "1"
         - name: "IMAGE_PULL_POLICY"
           value: {{ .Values.imagePullPolicy }}
         # sqlalchemy uri
@@ -108,6 +110,8 @@ spec:
         env:
         - name: "DEBUG"
           value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+        - name: "JOB"
+          value: "1"
         - name: "IMAGE_PULL_POLICY"
           value: {{ .Values.imagePullPolicy }}
         # sqlalchemy uri
@@ -166,6 +170,8 @@ spec:
         env:
         - name: "DEBUG"
           value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+        - name: "JOB"
+          value: "1"
         - name: "IMAGE_PULL_POLICY"
           value: {{ .Values.imagePullPolicy }}
         # sqlalchemy uri

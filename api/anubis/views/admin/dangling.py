@@ -4,7 +4,7 @@ from anubis.models import Submission
 from anubis.utils.auth import require_superuser
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response
-from anubis.utils.lms.submissions import fix_dangling
+from anubis.utils.lms.submissions import fix_dangling, init_submission
 from anubis.utils.services.elastic import log_endpoint
 
 dangling = Blueprint("admin-dangling", __name__, url_prefix="/admin/dangling")
@@ -50,12 +50,12 @@ def private_reset_dangling():
     resets = []
 
     # Iterate over all the dangling submissions
-    for s in Submission.query.filter_by(owner_id=None).all():
+    for submission in Submission.query.filter_by(owner_id=None).all():
         # Reset the submission models
-        s.init_submission_models()
+        init_submission(submission)
 
         # Append the new dangling submission data for the response
-        resets.append(s.data)
+        resets.append(submission.data)
 
     # Return all the reset submissions
     return success_response({"reset": resets})

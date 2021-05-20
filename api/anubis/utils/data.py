@@ -21,6 +21,16 @@ def is_debug() -> bool:
     return config.DEBUG
 
 
+def is_job() -> bool:
+    """
+    Returns true if the app context is used in a job.
+
+    :return:
+    """
+
+    return config.JOB
+
+
 def jsonify(data, status_code=200):
     """
     Wrap a data response to set proper headers for json

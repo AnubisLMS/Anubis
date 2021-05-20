@@ -33,6 +33,7 @@ def public_visuals_usage():
 
 
 @visuals.route('/raw-usage')
+@cache.cached(timeout=360, unless=is_debug)
 def public_visuals_raw_usage():
     """
     Get the raw usage data for generating a react-vis

@@ -49,9 +49,6 @@ class User(db.Model):
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    ta_for = db.relationship('TAForCourse', cascade='all,delete')
-    professor_for = db.relationship('ProfessorForCourse', cascade='all,delete')
-
     @property
     def data(self):
         professor_for = [pf.data for pf in self.professor_for]
@@ -130,7 +127,7 @@ class TAForCourse(db.Model):
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), primary_key=True)
 
-    owner = db.relationship(User)
+    owner = db.relationship(User, backref='ta_for')
     course = db.relationship(Course)
 
     @property
@@ -148,7 +145,7 @@ class ProfessorForCourse(db.Model):
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), primary_key=True)
 
-    owner = db.relationship(User)
+    owner = db.relationship(User, backref='professor_for')
     course = db.relationship(Course)
 
     @property
@@ -180,17 +177,18 @@ class Assignment(db.Model):
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), index=True)
 
     # Fields
-    name = db.Column(db.TEXT, nullable=False, unique=True)
+    name = db.Column(db.TEXT, nullable=False)
     hidden = db.Column(db.Boolean, default=False)
     description = db.Column(db.TEXT, nullable=True)
     github_classroom_url = db.Column(db.TEXT, nullable=True, default=None)
-    pipeline_image = db.Column(db.TEXT, unique=True, nullable=True)
+    pipeline_image = db.Column(db.TEXT, nullable=True)
     unique_code = db.Column(
         db.String(8),
         unique=True,
         default=lambda: base64.b16encode(os.urandom(4)).decode(),
     )
     ide_enabled = db.Column(db.Boolean, default=True)
+    accept_late = db.Column(db.Boolean, default=True)
     autograde_enabled = db.Column(db.Boolean, default=True)
     theia_image = db.Column(
         db.TEXT, default="registry.osiris.services/anubis/theia-xv6"
@@ -203,16 +201,23 @@ class Assignment(db.Model):
     grace_date = db.Column(db.DateTime, nullable=True)
 
     course = db.relationship(Course, backref="assignments")
-    tests = db.relationship("AssignmentTest", cascade="all,delete")
-    repos = db.relationship("AssignmentRepo", cascade="all,delete")
+    tests = db.relationship("AssignmentTest", cascade="all,delete", backref='assignment')
+    repos = db.relationship("AssignmentRepo", cascade="all,delete", backref='assignment')
 
     @property
     def data(self):
+        from anubis.utils.lms.assignments import get_assignment_due_date
+        from anubis.utils.auth import current_user
+
+        due_date = get_assignment_due_date(current_user(), self)
+
         return {
             "id": self.id,
             "name": self.name,
-            "due_date": str(self.due_date),
+            "due_date": str(due_date),
+            "past_due": due_date < datetime.now(),
             "hidden": self.hidden,
+            "accept_late": self.accept_late,
             "course": self.course.data,
             "description": self.description,
             "ide_enabled": self.ide_enabled,
@@ -264,12 +269,11 @@ class AssignmentRepo(db.Model):
 
     # Relationships
     owner = db.relationship(User)
-    assignment = db.relationship(Assignment)
-    submissions = db.relationship("Submission", cascade="all,delete")
 
     @property
     def data(self):
         return {
+            "id": self.id,
             "github_username": self.github_username,
             "assignment_name": self.assignment.name,
             "course_code": self.assignment.course.course_code,
@@ -289,9 +293,6 @@ class AssignmentTest(db.Model):
     # Fields
     name = db.Column(db.TEXT, index=True)
     hidden = db.Column(db.Boolean, default=False)
-
-    # Relationships
-    assignment = db.relationship(Assignment)
 
     @property
     def data(self):
@@ -314,7 +315,7 @@ class AssignmentQuestion(db.Model):
     # Fields
     question = db.Column(db.Text, nullable=False)
     solution = db.Column(db.Text, nullable=True)
-    sequence = db.Column(db.Integer, index=True, nullable=False)
+    pool = db.Column(db.Integer, index=True, nullable=False)
     code_question = db.Column(db.Boolean, default=False)
     code_language = db.Column(db.TEXT, nullable=True, default='')
     placeholder = db.Column(db.Text, nullable=True, default="")
@@ -326,7 +327,7 @@ class AssignmentQuestion(db.Model):
     # Relationships
     assignment = db.relationship(Assignment, backref="questions")
 
-    shape = {"question": str, "solution": str, "sequence": int}
+    shape = {"question": str, "solution": str, "pool": int}
 
     @property
     def full_data(self):
@@ -336,7 +337,7 @@ class AssignmentQuestion(db.Model):
             "code_question": self.code_question,
             "code_language": self.code_language,
             "solution": self.solution,
-            "sequence": self.sequence,
+            "pool": self.pool,
         }
 
     @property
@@ -346,7 +347,7 @@ class AssignmentQuestion(db.Model):
             "question": self.question,
             "code_question": self.code_question,
             "code_language": self.code_language,
-            "sequence": self.sequence,
+            "pool": self.pool,
         }
 
 
@@ -461,49 +462,14 @@ class Submission(db.Model):
     token = db.Column(
         db.String(64), default=lambda: base64.b16encode(os.urandom(32)).decode()
     )
+    accepted = db.Column(db.Boolean, default=True)
 
     # Relationships
     owner = db.relationship(User)
     assignment = db.relationship(Assignment)
-    build = db.relationship("SubmissionBuild", cascade="all,delete", uselist=False)
-    test_results = db.relationship("SubmissionTestResult", cascade="all,delete")
-    repo = db.relationship(AssignmentRepo)
-
-    def init_submission_models(self):
-        """
-        Create adjacent submission models.
-
-        :return:
-        """
-
-        logger.debug("initializing submission {}".format(self.id))
-
-        # If the models already exist, yeet
-        if len(self.test_results) != 0:
-            SubmissionTestResult.query.filter_by(submission_id=self.id).delete()
-        if self.build is not None:
-            SubmissionBuild.query.filter_by(submission_id=self.id).delete()
-
-        # Commit deletions (if necessary)
-        db.session.commit()
-
-        # Find tests for the current assignment
-        tests = AssignmentTest.query.filter_by(assignment_id=self.assignment_id).all()
-
-        logger.debug("found tests: {}".format(list(map(lambda x: x.data, tests))))
-
-        for test in tests:
-            tr = SubmissionTestResult(submission_id=self.id, assignment_test_id=test.id)
-            db.session.add(tr)
-        sb = SubmissionBuild(submission_id=self.id)
-        db.session.add(sb)
-
-        self.processed = False
-        self.state = "Waiting for resources..."
-        db.session.add(self)
-
-        # Commit new models
-        db.session.commit()
+    build = db.relationship("SubmissionBuild", cascade="all,delete", backref='submission')
+    test_results = db.relationship("SubmissionTestResult", cascade="all,delete", backref='submission')
+    repo = db.relationship(AssignmentRepo, backref='submissions')
 
     @property
     def netid(self):
@@ -614,7 +580,6 @@ class SubmissionTestResult(db.Model):
     passed = db.Column(db.Boolean)
 
     # Relationships
-    submission = db.relationship(Submission)
     assignment_test = db.relationship(AssignmentTest)
 
     @property
@@ -659,9 +624,6 @@ class SubmissionBuild(db.Model):
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
-
-    # Relationships
-    submission = db.relationship(Submission)
 
     @property
     def data(self):
@@ -715,7 +677,7 @@ class TheiaSession(db.Model):
 
     @property
     def data(self):
-        from anubis.utils.services.theia import theia_redirect_url
+        from anubis.utils.lms.theia import theia_redirect_url
 
         return {
             "id": self.id,
@@ -779,3 +741,31 @@ class StaticFile(db.Model):
             "hidden": self.hidden,
             "uploaded": str(self.created)
         }
+
+
+class LateException(db.Model):
+    user_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
+    assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), primary_key=True)
+
+    # New Due Date
+    due_date = db.Column(db.DateTime, nullable=False)
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    assignment = db.relationship(Assignment)
+    user = db.relationship(User)
+
+    @property
+    def data(self):
+        return {
+            'user_id': self.user_id,
+            'user_name': self.user.name,
+            'user_netid': self.user.netid,
+            'assignment_id': self.assignment_id,
+            'due_date': str(self.due_date)
+        }
+
+
+

@@ -48,7 +48,7 @@ def admin_questions_add_unique_code(unique_code: str):
     # Create a new, blank question
     aq = AssignmentQuestion(
         assignment_id=assignment.id,
-        sequence=0,
+        pool=0,
         question='',
         solution='',
         code_question=False,
@@ -286,7 +286,7 @@ def private_questions_get_assignments_unique_code(unique_code: str):
     # Get all the question assignments
     assignment_questions = AssignmentQuestion.query.filter(
         AssignmentQuestion.assignment_id == assignment.id,
-    ).order_by(AssignmentQuestion.sequence, AssignmentQuestion.created.desc()).all()
+    ).order_by(AssignmentQuestion.pool, AssignmentQuestion.created.desc()).all()
 
     return success_response({
         'questions': [

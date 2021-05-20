@@ -8,17 +8,15 @@ RUN set -ex; apt update \
   && apt autoremove -y \
   && find / -name .cache -exec 'rm' '-rf' '{}' ';' \
   && rm -rf /var/cache/apt/* \
-  && rm -rf /var/lib/apt/lists/*
-RUN useradd --no-create-home -u 1001 student \
+  && rm -rf /var/lib/apt/lists/* \
+  && useradd --no-create-home -u 1001 student \
   && mkdir -p /root/anubis/student \
   && chmod 700 -R /root \
   && chown student:student /root/anubis/student
 WORKDIR /root/anubis
 
-COPY pipeline.py pipeline.py
-COPY utils.py utils.py
+COPY pipeline.py utils.py meta.yml /root/anubis/
 COPY assignment.py assignment.py
-COPY meta.yml meta.yml
 # COPY student /student
 
 CMD python3 pipeline.py

@@ -4,13 +4,14 @@ import traceback
 from datetime import datetime, timedelta
 
 import requests
-from sqlalchemy import func, and_
 
 from anubis.models import db, Submission, Assignment, AssignmentRepo
 from anubis.utils.data import with_context
 from anubis.utils.lms.autograde import bulk_autograde
+from anubis.utils.lms.submissions import init_submission
 from anubis.utils.lms.webhook import check_repo, guess_github_username
 from anubis.utils.services.rpc import enqueue_ide_reap_stale, enqueue_autograde_pipeline
+rom anubis.utils.visuals.assignments import get_assignment_sundial
 
 
 def reap_stale_submissions():
@@ -40,7 +41,7 @@ def reap_stale_submissions():
     db.session.commit()
 
 
-def reap_broken_submissions():
+def reap_recent_assignments():
     """
     Calculate stats for recent submissions
 
@@ -48,13 +49,9 @@ def reap_broken_submissions():
     """
     from anubis.config import config
 
-    recent_assignments = Assignment.query.group_by(
-        Assignment.course_id
-    ).having(
-        and_(
-            Assignment.release_date == func.max(Assignment.release_date),
-            Assignment.due_date + config.STATS_REAP_DURATION > datetime.now(),
-        )
+    recent_assignments = Assignment.query.filter(
+        Assignment.release_date > datetime.now(),
+        Assignment.due_date > datetime.now() - config.STATS_REAP_DURATION,
     ).all()
 
     print(json.dumps({
@@ -67,7 +64,7 @@ def reap_broken_submissions():
                 Submission.build == None,
         ).all():
             if submission.build is None:
-                submission.init_submission_models()
+                init_submission(submission)
                 enqueue_autograde_pipeline(submission.id)
 
     for assignment in recent_assignments:
@@ -94,24 +91,24 @@ def reap_broken_repos():
     # Do graphql nonsense
     query = '''
     query{
-  organization(login:"os3224"){
-    repositories(first:100,orderBy:{field:CREATED_AT,direction:DESC}){
-      nodes{
-        ref(qualifiedName:"master") {
-      target {
-        ... on Commit {
-          history(first: 20) {
-            edges { node { oid } }
+      organization(login:"os3224"){
+        repositories(first:100,orderBy:{field:CREATED_AT,direction:DESC}){
+          nodes{
+            ref(qualifiedName:"master") {
+          target {
+            ... on Commit {
+              history(first: 20) {
+                edges { node { oid } }
+              }
+            }
+          }
+            }
+            name 
+            url
           }
         }
       }
-        }
-        name 
-        url
-      }
     }
-  }
-}
     '''
     url = 'https://api.github.com/graphql'
     json = {'query': query}
@@ -190,7 +187,7 @@ def reap_broken_repos():
                 )
                 db.session.add(submission)
                 db.session.commit()
-                submission.init_submission_models()
+                init_submission(submission)
                 enqueue_autograde_pipeline(submission.id)
 
         r = AssignmentRepo.query.filter(AssignmentRepo.repo_url == repo_url).first()
@@ -225,7 +222,7 @@ def reap():
     reap_broken_repos()
 
     # Reap broken submissions in recent assignments
-    reap_broken_submissions()
+    reap_recent_assignments()
 
 
 if __name__ == "__main__":

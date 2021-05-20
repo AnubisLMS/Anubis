@@ -8,6 +8,7 @@ class Config:
     def __init__(self):
         # General flask config
         self.DEBUG = os.environ.get("DEBUG", default="0") == "1"
+        self.JOB = os.environ.get('JOB', default='0') == '1'
         self.SECRET_KEY = os.environ.get("SECRET_KEY", default="DEBUG")
 
         # sqlalchemy

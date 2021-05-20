@@ -6,7 +6,7 @@ import kubernetes
 from kubernetes import config, client
 
 from anubis.models import Config, Submission
-from anubis.utils.data import is_debug
+from anubis.utils.data import is_debug, with_context
 from anubis.utils.services.logger import logger
 
 
@@ -100,6 +100,7 @@ def cleanup_jobs(batch_v1) -> int:
     return active_count
 
 
+@with_context
 def create_submission_pipeline(submission_id: str):
     """
     This function should launch the appropriate testing container
@@ -107,10 +108,9 @@ def create_submission_pipeline(submission_id: str):
 
     :param submission_id: submission.id of to test
     """
-    from anubis.app import create_app
     from anubis.utils.services.rpc import enqueue_autograde_pipeline
+    from anubis.utils.lms.submissions import init_submission
 
-    app = create_app()
 
     logger.info(
         "Starting submission {}".format(submission_id),
@@ -119,48 +119,47 @@ def create_submission_pipeline(submission_id: str):
         },
     )
 
-    with app.app_context():
-        max_jobs = Config.query.filter(Config.key == "MAX_JOBS").first()
-        max_jobs = int(max_jobs.value) if max_jobs is not None else 10
-        submission = Submission.query.filter(Submission.id == submission_id).first()
+    max_jobs = Config.query.filter(Config.key == "MAX_JOBS").first()
+    max_jobs = int(max_jobs.value) if max_jobs is not None else 10
+    submission = Submission.query.filter(Submission.id == submission_id).first()
 
-        if submission is None:
-            logger.error(
-                "Unable to find submission rpc.test_repo",
-                extra={
-                    "submission_id": submission_id,
-                },
-            )
-            return
-
-        if submission.build is None:
-            submission.init_submission_models()
-
-        logger.debug(
-            "Found submission {}".format(submission_id),
-            extra={"submission": submission.data},
+    if submission is None:
+        logger.error(
+            "Unable to find submission rpc.test_repo",
+            extra={
+                "submission_id": submission_id,
+            },
         )
+        return
 
-        # Initialize kube client
-        config.load_incluster_config()
-        batch_v1 = client.BatchV1Api()
+    if submission.build is None:
+        init_submission(submission)
 
-        # Cleanup finished jobs
-        active_jobs = cleanup_jobs(batch_v1)
+    logger.debug(
+        "Found submission {}".format(submission_id),
+        extra={"submission": submission.data},
+    )
 
-        if active_jobs > max_jobs:
-            logger.info(
-                "TOO many jobs - re-enqueue {}".format(submission_id),
-                extra={"submission_id": submission_id},
-            )
-            enqueue_autograde_pipeline(submission_id)
-            exit(0)
+    # Initialize kube client
+    config.load_incluster_config()
+    batch_v1 = client.BatchV1Api()
 
-        # Create job object
-        job = create_pipeline_job_obj(client, submission)
+    # Cleanup finished jobs
+    active_jobs = cleanup_jobs(batch_v1)
 
-        # Log
-        logger.debug("creating pipeline job: " + job.to_str())
+    if active_jobs > max_jobs:
+        logger.info(
+            "TOO many jobs - re-enqueue {}".format(submission_id),
+            extra={"submission_id": submission_id},
+        )
+        enqueue_autograde_pipeline(submission_id)
+        exit(0)
 
-        # Send to kube api
-        batch_v1.create_namespaced_job(body=job, namespace="anubis")
+    # Create job object
+    job = create_pipeline_job_obj(client, submission)
+
+    # Log
+    logger.debug("creating pipeline job: " + job.to_str())
+
+    # Send to kube api
+    batch_v1.create_namespaced_job(body=job, namespace="anubis")

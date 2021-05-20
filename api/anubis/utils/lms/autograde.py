@@ -36,7 +36,8 @@ def autograde(student_id, assignment_id):
             Submission.query.filter(
                 Submission.assignment_id == assignment_id,
                 Submission.owner_id == student_id,
-                Submission.processed,
+                Submission.processed == True,
+                Submission.accepted == True,
             )
                     .order_by(Submission.created.desc())
                     .all()
@@ -81,8 +82,10 @@ def autograde_submission_result_wrapper(assignment: Assignment, user_id: str, ne
             "netid": netid,
             "name": name,
             "submission": None,
+            "build_passed": False,
             "tests_passed": 0,
             "total_tests": 0,
+            "tests_passed_names": [],
             "full_stats": None,
             "master": None,
             "commits": None,
@@ -105,6 +108,7 @@ def autograde_submission_result_wrapper(assignment: Assignment, user_id: str, ne
             "build_passed": submission.build.passed if submission.build is not None else False,
             "tests_passed": best_count,
             "total_tests": len(submission.test_results),
+            "tests_passed_names": [test.assignment_test.name for test in submission.test_results if test.passed],
             "full_stats": "https://anubis.osiris.services/api/private/submission/{}".format(
                 submission.id
             ),

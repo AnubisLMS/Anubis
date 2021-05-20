@@ -12,6 +12,7 @@ def register_admin_views(app):
     from anubis.views.admin.config import config_
     from anubis.views.admin.visuals import visuals_
     from anubis.views.admin.dangling import dangling
+    from anubis.views.admin.late_exceptions import late_exceptions_
 
     views = [
         ide,
@@ -27,6 +28,7 @@ def register_admin_views(app):
         config_,
         visuals_,
         dangling,
+        late_exceptions_,
     ]
 
     for view in views:

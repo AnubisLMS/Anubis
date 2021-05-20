@@ -15,13 +15,14 @@ from anubis.models import (
 from anubis.utils.data import is_debug
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import error_response, success_response
+from anubis.utils.lms.assignments import get_assignment_due_date
 from anubis.utils.lms.webhook import parse_webhook, guess_github_username, check_repo
 from anubis.utils.lms.submissions import get_submissions
 from anubis.utils.lms.repos import get_repos
 from anubis.utils.services.elastic import log_endpoint, esindex
 from anubis.utils.services.logger import logger
 from anubis.utils.services.rpc import enqueue_autograde_pipeline
-from anubis.utils.services.cache import cache
+from anubis.utils.lms.submissions import reject_late_submission, init_submission
 
 webhook = Blueprint("public-webhook", __name__, url_prefix="/public/webhook")
 
@@ -176,7 +177,7 @@ def public_webhook():
         return success_response({'status': 'already created'})
 
     # Create the related submission models
-    submission.init_submission_models()
+    init_submission(submission)
 
     # If a user has not given us their github username
     # the submission will stay in a "dangling" state
@@ -209,11 +210,21 @@ def public_webhook():
 
     # if the github username is not found, create a dangling submission
     if assignment.autograde_enabled:
-        enqueue_autograde_pipeline(submission.id)
+
+        # Check that the current assignment is still accepting submissions
+        if not assignment.accept_late and datetime.now() < get_assignment_due_date(user, assignment):
+            reject_late_submission(submission)
+
     else:
-        submission.processed = 1
+        submission.processed = True
+        submission.accepted = False
         submission.state = 'autograde disabled for this assignment'
-        db.session.commit()
+
+    db.session.commit()
+
+    # If the submission was accepted, then enqueue the job
+    if submission.accepted and user is not None:
+        enqueue_autograde_pipeline(submission.id)
 
     # Delete cached submissions
     cache.delete_memoized(get_submissions, user.netid)

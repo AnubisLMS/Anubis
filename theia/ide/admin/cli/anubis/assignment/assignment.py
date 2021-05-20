@@ -1,10 +1,12 @@
-from utils import register_test, register_build, exec_as_student
-from utils import TestResult, BuildResult, Panic, DEBUG, xv6_run, did_xv6_crash, verify_expected
 import os
 
+from utils import (
+    TestResult, BuildResult, Panic, DEBUG, xv6_run, did_xv6_crash, verify_expected,
+    register_test, register_build, exec_as_student, search_lines, test_lines
+)
 
 if DEBUG:
-    os.environ['GIT_REPO'] = 'https://github.com/juan-punchman/xv6-public.git'
+    os.environ['GIT_REPO'] = '/student'
     os.environ['TOKEN'] = 'null'
     os.environ['COMMIT'] = 'null'
     os.environ['SUBMISSION_ID'] = 'null'
@@ -57,5 +59,3 @@ def test_2(test_result: TestResult):
 
     # Test to see if the expected result was found
     verify_expected(stdout_lines, expected, test_result)
-
-

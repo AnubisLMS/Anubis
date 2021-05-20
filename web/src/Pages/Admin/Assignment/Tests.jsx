@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function AssignmentTests() {
+export default function Tests() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const match = useParams();

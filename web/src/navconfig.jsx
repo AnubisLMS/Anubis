@@ -26,16 +26,19 @@ import Visuals from './Pages/Public/Visuals';
 
 import AdminUsers from './Pages/Admin/Users';
 import AdminUser from './Pages/Admin/User';
-import AdminAssignments from './Pages/Admin/Assignment/Assignments';
-import AdminStats from './Pages/Admin/Autograde/AutogradeResults';
-import AdminAssignmentStats from './Pages/Admin/Autograde/AutogradeAssignments';
-import AdminSubmissionStats from './Pages/Admin/Autograde/AutogradeSubmission';
 import AdminCourse from './Pages/Admin/Course';
 import AdminTheia from './Pages/Admin/Theia';
 import AdminStatic from './Pages/Admin/Static';
 import AdminConfig from './Pages/Admin/Config';
-import AdminAssignmentQuestions from './Pages/Admin/Assignment/AssignmentQuestions';
-import AdminAssignmentTests from './Pages/Admin/Assignment/AssignmentTests';
+import AdminAutogradeAssignments from './Pages/Admin/Autograde/Assignments';
+import AdminAutogradeSubmission from './Pages/Admin/Autograde/Submission';
+import AdminAutogradeResults from './Pages/Admin/Autograde/Results';
+import AdminAssignmentLateExceptions from './Pages/Admin/Assignment/LateExceptions';
+import AdminAssignmentAssignments from './Pages/Admin/Assignment/Assignments';
+import AdminAssignmentAssignment from './Pages/Admin/Assignment/Assignment';
+import AdminAssignmentQuestions from './Pages/Admin/Assignment/Questions';
+import AdminAssignmentTests from './Pages/Admin/Assignment/Tests';
+import AdminAssignmentRepos from './Pages/Admin/Assignment/Repos';
 
 export const footer_nav = [
   {
@@ -118,13 +121,13 @@ export const admin_nav = [
     id: 'Assignments',
     icon: <AssignmentOutlinedIcon/>,
     path: '/admin/assignments',
-    Page: AdminAssignments,
+    Page: AdminAssignmentAssignments,
   },
   {
     id: 'Autograde Results',
     icon: <PieChartIcon/>,
     path: '/admin/autograde',
-    Page: AdminStats,
+    Page: AdminAutogradeAssignments,
   },
   {
     id: 'Anubis Cloud IDE',
@@ -160,12 +163,12 @@ export const not_shown_nav = [
   {
     id: 'AdminAssignmentStats',
     path: '/admin/autograde/assignment',
-    Page: AdminAssignmentStats,
+    Page: AdminAutogradeResults,
   },
   {
     id: 'AdminSubmissionStats',
     path: '/admin/autograde/submission',
-    Page: AdminSubmissionStats,
+    Page: AdminAutogradeSubmission,
   },
   {
     id: '',
@@ -176,6 +179,21 @@ export const not_shown_nav = [
     id: '',
     path: '/admin/assignment/tests/:assignmentId',
     Page: AdminAssignmentTests,
+  },
+  {
+    id: '',
+    path: '/admin/assignment/repos/:assignmentId',
+    Page: AdminAssignmentRepos,
+  },
+  {
+    id: '',
+    path: '/admin/assignment/edit/:assignmentId',
+    Page: AdminAssignmentAssignment,
+  },
+  {
+    id: '',
+    path: '/admin/assignment/late-exceptions/:assignmentId',
+    Page: AdminAssignmentLateExceptions,
   },
 ];
 

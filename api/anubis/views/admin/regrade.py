@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint
 from sqlalchemy import or_
 
-from anubis.models import Submission, Assignment
+from anubis.models import Submission, Assignment, User
 from anubis.rpc.batch import rpc_bulk_regrade
 from anubis.utils.auth import require_admin
 from anubis.utils.data import split_chunks
@@ -13,7 +13,10 @@ from anubis.utils.http.decorators import load_from_id
 from anubis.utils.http.https import error_response, success_response, get_number_arg
 from anubis.utils.lms.course import assert_course_context
 from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.services.cache import cache
 from anubis.utils.services.rpc import enqueue_autograde_pipeline, rpc_enqueue
+from anubis.utils.lms.autograde import bulk_autograde, autograde
+from anubis.utils.lms.submissions import init_submission
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 
@@ -84,13 +87,72 @@ def admin_regrade_submission_commit(commit: str):
     assert_course_context(submission)
 
     # Reset submission in database
-    submission.init_submission_models()
+    init_submission(submission)
 
     # Enqueue the submission pipeline
     enqueue_autograde_pipeline(submission.id)
 
     # Return status
     return success_response({"submission": submission.data, "user": submission.owner.data})
+
+
+@regrade.route("/student/<string:assignment_id>/<string:netid>")
+@require_admin()
+@log_endpoint("cli", lambda: "regrade")
+@json_response
+def private_regrade_student_assignment_netid(assignment_id: str, netid: str):
+    """
+
+    :param assignment_id:
+    :param netid:
+    :return:
+    """
+
+    # Find the assignment
+    assignment: Assignment = Assignment.query.filter(
+        or_(Assignment.id == assignment_id, Assignment.name == assignment_id)
+    ).first()
+
+    # Verify that the assignment exists
+    if assignment is None:
+        return error_response("cant find assignment")
+
+    # Get the student
+    student: User = User.query.filter(
+        User.netid == netid
+    ).first()
+
+    # Verify the student exists
+    if student is None:
+        return error_response('Student does not exist')
+
+    # Assert that the course exists
+    assert_course_context(student, assignment)
+
+    submissions = Submission.query.filter(
+        Submission.assignment_id == assignment.id,
+        Submission.owner_id == student.id,
+    ).all()
+
+    # Get a count of submissions for the response
+    submission_count = len(submissions)
+
+    # Split the submissions into bite sized chunks
+    submission_ids = [s.id for s in submissions]
+    submission_chunks = split_chunks(submission_ids, 100)
+
+    # Enqueue each chunk as a job for the rpc workers
+    for chunk in submission_chunks:
+        rpc_enqueue(rpc_bulk_regrade, 'regrade', args=[chunk])
+
+    # Clear cache of autograde results
+    cache.delete_memoized(bulk_autograde, assignment.id)
+    cache.delete_memoized(autograde, student.id, assignment.id)
+
+    return success_response({
+        "status": f"{submission_count} submissions enqueued. This may take a while.",
+        "submissions": submission_ids,
+    })
 
 
 @regrade.route("/assignment/<string:assignment_id>")

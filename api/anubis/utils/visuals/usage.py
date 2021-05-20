@@ -6,8 +6,9 @@ import numpy as np
 import pandas as pd
 
 from anubis.models import Assignment, Submission, TheiaSession
-from anubis.utils.data import is_debug
+from anubis.utils.data import is_job
 from anubis.utils.services.cache import cache
+from anubis.utils.services.logger import logger
 
 
 def get_submissions() -> pd.DataFrame:
@@ -76,7 +77,7 @@ def get_theia_sessions() -> pd.DataFrame:
     # Drop outliers based on duration
     theia_sessions = theia_sessions[
         np.abs(theia_sessions.duration - theia_sessions.duration.mean()) <= (3 * theia_sessions.duration.std())
-    ]
+        ]
 
     return theia_sessions
 
@@ -132,10 +133,12 @@ def get_raw_submissions() -> List[Dict[str, Any]]:
 #     return df
 
 
-@cache.memoize(timeout=420, unless=is_debug)
+@cache.memoize(timeout=-1, forced_update=is_job)
 def get_usage_plot():
     import matplotlib.pyplot as plt
     import matplotlib.colors as mcolors
+
+    logger.info('GENERATING USAGE PLOT PNG')
 
     assignments = Assignment.query.filter(
         Assignment.hidden == False,

@@ -12,7 +12,7 @@ from anubis.utils.lms.course import is_course_admin
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.logger import logger
 from anubis.utils.services.rpc import enqueue_ide_stop, enqueue_ide_initialize
-from anubis.utils.services.theia import (
+from anubis.utils.lms.theia import (
     theia_redirect_url,
     get_n_available_sessions,
     theia_poll_ide,
@@ -176,7 +176,7 @@ def public_ide_initialize(assignment: Assignment):
             {"active": active_session.active, "session": active_session.data}
         )
 
-    if user.is_superuser or is_course_admin(assignment.course_id):
+    if not is_course_admin(assignment.course_id):
         if datetime.now() <= assignment.release_date:
             return error_response("Assignment has not been released.")
 

@@ -1,103 +1,177 @@
 import React, {useState} from 'react';
-import {makeStyles} from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import {SubmissionsTable} from '../../Components/Public/Submissions/SubmissionsTable';
-import useQuery from '../../hooks/useQuery';
-import Questions from '../../Components/Public/Questions/Questions';
-import axios from 'axios';
-import standardStatusHandler from '../../Utils/standardStatusHandler';
 import {useSnackbar} from 'notistack';
-import AuthContext from '../../Contexts/AuthContext';
+import {Redirect} from 'react-router-dom';
+import axios from 'axios';
 
-const useStyles = makeStyles({
-  root: {
-    flexGrow: 1,
-  },
-  table: {
-    minWidth: 500,
-  },
-  headerText: {
-    fontWeight: 600,
-  },
-  commitHashContainer: {
-    width: 200,
-    overflow: 'hidden',
-  },
-});
+import {DataGrid} from '@material-ui/data-grid';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import Typography from '@material-ui/core/Typography';
+import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
 
-function translateSubmission({assignment_name, assignment_due, commit, processed, state, created, tests}) {
-  const testsPassed = tests.filter((test) => test.result.passed).length;
-  const totalTests = tests.length;
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import CancelIcon from '@material-ui/icons/Cancel';
+import green from '@material-ui/core/colors/green';
+import red from '@material-ui/core/colors/red';
 
+import useQuery from '../../hooks/useQuery';
+import standardStatusHandler from '../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../Utils/standardErrorHandler';
+import Questions from '../../Components/Public/Questions/Questions';
+
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    height: 700,
+    padding: theme.spacing(1),
+  },
+}));
+
+function translateSubmission({id, assignment_name, assignment_due, commit, processed, state, created, tests}) {
   return {
-    assignmentName: assignment_name, assignmentDue: new Date(assignment_due), state: state,
-    commitHash: commit, processed: processed, timeSubmitted: created.split(' ')[0],
-    dateSubmitted: created.split(' ')[1], timeStamp: new Date(created), testsPassed, totalTests,
+    assignment_name, assignment_due, commit, created, tests,
+    id, assignmentDue: new Date(assignment_due), state: state,
+    processed: processed, timeStamp: new Date(created),
   };
 }
+
+
+const useColumns = () => ([
+  {field: 'id', hide: true},
+  {field: 'assignment_name', headerName: 'Assignment Name', width: 200},
+  {
+    field: 'commit', headerName: 'Commit Hash', width: 150, renderCell: ({row}) => (
+      row?.commit && row.commit.substring(0, 10)
+    ),
+  },
+  {
+    field: 'tests_passed', headerName: 'Tests Passed', width: 150, renderCell: ({row}) => (
+      row?.tests && `${row.tests.filter((test) => test.result.passed).length}/${row.tests.length}`
+    ),
+  },
+  {
+    field: 'processed', headerName: 'Processed', width: 150, renderCell: ({row}) => (
+      row.processed && (row.processed ?
+        <CheckCircleIcon style={{color: green[500]}}/> :
+        <CancelIcon style={{color: red[500]}}/>)
+    ),
+  },
+  {
+    field: 'on_time', headerName: 'On Time', width: 150, renderCell: ({row}) => (
+      row?.timeStamp && (row.timeStamp <= row.assignmentDue ?
+        <CheckCircleIcon style={{color: green[500]}}/> :
+        <CancelIcon style={{color: red[500]}}/>)
+    ),
+  },
+  {
+    field: 'timeStamp', headerName: 'Timestamp', width: 250, renderCell: ({row}) => (
+      row.created
+    ),
+  },
+]);
 
 
 export default function Submissions() {
   const classes = useStyles();
   const query = useQuery();
+  const columns = useColumns();
   const {enqueueSnackbar} = useSnackbar();
-  const [submissions, setSubmissions] = useState([]);
+  const [rows, setRows] = useState([]);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [rowCount, setRowCount] = useState(0);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [redirect, setRedirect] = useState(null);
 
-  const assignment_id = query.get('assignmentId');
+  const assignmentId = query.get('assignmentId');
+  const courseId = query.get('courseId');
+  const userId = query.get('userId');
 
   React.useEffect(() => {
-    axios.get(
-      `/api/public/submissions/`,
-      {
-        params: {
-          assignmentId: query.get('assignmentId'),
-          courseId: query.get('courseId'),
-          userId: query.get('userId'),
-        },
+    setLoading(true);
+    axios.get(`/api/public/submissions/`, {
+      params: {
+        assignmentId, courseId, userId,
+        limit: pageSize,
+        offset: page * pageSize,
       },
-    ).then((response) => {
+    }).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      setSubmissions(data.submissions
-        .map(translateSubmission)
-        .sort((a, b) => (a.timeStamp > b.timeStamp ? -1 : 1)));
-    }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
-  }, []);
+      if (data?.total) {
+        setRowCount(data?.total);
+      }
+      if (data?.submissions) {
+        let prev;
+        if (rows.length === 0) {
+          prev = new Array(data?.total);
+          for (let i = 0; i < prev.length; ++i) {
+            prev[i] = {id: i};
+          }
+        } else {
+          prev = rows;
+        }
+
+        const translation = data.submissions.map(translateSubmission);
+        for (let i = page * pageSize; i < (page * pageSize) + translation.length; ++i) {
+          prev[i] = translation[i - (page * pageSize)];
+        }
+
+        setRows([...prev]);
+      }
+      if (data?.user) {
+        setUser(data.user);
+      }
+      setLoading(false);
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  }, [pageSize, page]);
+
+  if (redirect !== null) {
+    return <Redirect to={redirect}/>;
+  }
 
   return (
-    <div className={classes.root}>
-      <Grid container justify="center" spacing={4}>
-        <Grid item xs={12}>
-          <Typography variant="h6">
-            Anubis
-          </Typography>
-          <AuthContext.Consumer>
-            {(user) => (
-              <Typography variant={'subtitle1'} color={'textSecondary'}>
-                {user?.name}&apos;s Submissions
-              </Typography>
-            )}
-          </AuthContext.Consumer>
-        </Grid>
+    <Grid container justify="center" spacing={4}>
+      <Grid item xs={12}>
+        <Typography variant="h6">
+          Anubis
+        </Typography>
+        <Typography variant={'subtitle1'} color={'textSecondary'}>
+          {user && `${user?.name}'s Submissions`}
+        </Typography>
+      </Grid>
 
-        <Grid item/>
+      <Grid item/>
 
-        <Grid item xs={12} md={10}>
-          <Grid container spacing={4}>
-            {/* Questions */}
-            {!!assignment_id ? (
-              <Grid item xs={12}>
-                <Questions assignment_id={assignment_id}/>
-              </Grid>
-            ) : null}
-
-            {/* Table */}
-            <Grid item xs>
-              <SubmissionsTable rows={submissions}/>
+      <Grid item xs={12} md={10}>
+        <Grid container spacing={4}>
+          {/* Questions */}
+          {!!assignmentId ? (
+            <Grid item xs={12}>
+              <Questions assignment_id={assignmentId}/>
             </Grid>
+          ) : null}
+
+          {/* Table */}
+          <Grid item xs>
+            <Paper className={classes.paper}>
+              <DataGrid
+                pagination
+                rowsPerPageOptions={[10, 20, 30]}
+                page={page}
+                pageSize={pageSize}
+                onPageChange={({page}) => setPage(page)}
+                onPageSizeChange={({pageSize}) => setPageSize(pageSize)}
+                onRowClick={({row}) => setRedirect(`/submission?commit=${row.commit}`)}
+                columns={columns}
+                rows={rows}
+                rowCount={rowCount}
+                loading={loading}
+              />
+            </Paper>
           </Grid>
+
         </Grid>
       </Grid>
-    </div>
+    </Grid>
   );
 }

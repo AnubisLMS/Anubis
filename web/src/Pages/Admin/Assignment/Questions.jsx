@@ -44,6 +44,7 @@ export default function AssignmentQuestions() {
   };
 
   const saveQuestion = (index) => () => {
+    console.log(questions[index]);
     const question = questions[index];
     axios.post(`/api/admin/questions/update/${question.id}`, {question}).then((response) => {
       standardStatusHandler(response, enqueueSnackbar);

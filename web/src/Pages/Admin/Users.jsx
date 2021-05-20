@@ -10,12 +10,13 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
-import PersonIcon from '@material-ui/icons/Person';
 import Fab from '@material-ui/core/Fab';
 import Tooltip from '@material-ui/core/Tooltip';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Typography from '@material-ui/core/Typography';
+
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
@@ -60,7 +61,7 @@ const toggleSuperuser = (id, {setStudents, setEdits}, enqueueSnackbar) => () => 
 const useColumns = (pageState, enqueueSnackbar) => (user) => ([
   {
     field: 'id',
-    headerName: 'ID',
+    headerName: 'View',
     renderCell: (params) => (
       <Tooltip title={`View ${params.row.netid}`}>
         <Fab
@@ -69,15 +70,19 @@ const useColumns = (pageState, enqueueSnackbar) => (user) => ([
           component={Link}
           to={`/admin/user?userId=${params.row.id}`}
         >
-          <PersonIcon/>
+          <VisibilityIcon/>
         </Fab>
       </Tooltip>
     ),
   },
+  {field: 'netid', headerName: 'netid'},
+  {field: 'name', headerName: 'Name', width: 150},
+  {field: 'github_username', headerName: 'Github Username', width: 200},
   {
     field: 'log_in_as',
     headerName: 'Log in as',
     width: 130,
+    hide: !user.is_superuser,
     renderCell: (params) => (
       <Tooltip title={`Log in as ${params.row.netid}`}>
         <Fab
@@ -97,9 +102,6 @@ const useColumns = (pageState, enqueueSnackbar) => (user) => ([
       </Tooltip>
     ),
   },
-  {field: 'netid', headerName: 'netid'},
-  {field: 'name', headerName: 'Name', width: 150},
-  {field: 'github_username', headerName: 'Github Username', width: 200},
   {
     field: 'is_superuser',
     headerName: 'Superuser',

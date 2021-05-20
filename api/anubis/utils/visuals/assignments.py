@@ -2,9 +2,19 @@ import numpy as np
 import pandas as pd
 from typing import List, Any, Union, Dict
 
-from anubis.models import db, AssignmentTest
-from anubis.utils.data import is_debug
+from anubis.models import (
+    db,
+    AssignmentTest,
+    Assignment,
+    User,
+    TheiaSession,
+    Submission,
+    SubmissionBuild,
+    SubmissionTestResult
+)
+from anubis.utils.data import is_debug, is_job
 from anubis.utils.services.cache import cache
+from anubis.utils.lms.autograde import bulk_autograde
 from anubis.utils.visuals.queries import (
     time_to_pass_test_sql,
     assignment_test_fail_nosub_sql,
@@ -119,3 +129,196 @@ def get_assignment_tests_pass_counts(assignment_test: AssignmentTest):
         {'label': 'test failed', 'theta': fail_count, 'color': 'red'},
         {'label': 'test passed', 'theta': pass_count, 'color': 'green'},
     ]
+
+
+@cache.memoize(timeout=60, unless=is_debug, source_check=True)
+def get_assignment_history(assignment_id, netid):
+    """
+
+    :param assignment_id:
+    :param netid:
+    :return:
+    """
+
+    assignment = Assignment.query.filter(
+        Assignment.id == assignment_id
+    ).first()
+    other = User.query.filter(User.netid == netid).first()
+
+    db_theia_sessions = TheiaSession.query.filter(
+        TheiaSession.owner_id == other.id,
+        TheiaSession.assignment_id == assignment.id
+    ).all()
+
+    db_submissions = Submission.query.filter(
+        Submission.assignment_id == assignment.id,
+        Submission.owner_id == other.id,
+    ).order_by(Submission.created.desc()).all()
+
+    test_count = len(assignment.full_data['tests'])
+
+    test_results = []
+    build_results = []
+    for db_submission in db_submissions:
+        created = db_submission.created.replace(microsecond=0, second=0)
+        build_passed = 1 if db_submission.build.passed else 0
+        tests_passed = sum(map(lambda test: (1 if test['result']['passed'] else 0), db_submission.all_tests))
+
+        test_results.append({
+            'x': str(created),
+            'y': tests_passed,
+            'total': test_count,
+            'label': f'{tests_passed}/{test_count} tests passed'
+        })
+
+        build_results.append({
+            'x': str(created),
+            'y': build_passed,
+            'label': 'build passed' if build_passed == 1 else 'build failed'
+        })
+
+    return {
+        'submissions': {
+            'test_results': test_results,
+            'build_results': build_results,
+        },
+        'dates': {
+            'release_date': [{'x': str(assignment.release_date), 'y': test_count}],
+            'due_date': [{'x': str(assignment.due_date), 'y': test_count}],
+            'grace_date': [{'x': str(assignment.grace_date), 'y': test_count}],
+        }
+    }
+
+
+@cache.memoize(timeout=-1, source_check=True, forced_update=is_job)
+def get_assignment_sundial(assignment_id):
+    """
+    Get the sundial data for a specific assignment. The basic breakdown of
+    this data is:
+
+    submission -> test -> {passed, failed}
+
+    :param assignment_id:
+    :return:
+    """
+
+    # Get the assignment
+    assignment = Assignment.query.filter(
+        Assignment.id == assignment_id
+    ).first()
+
+    # Create base sundial
+    sundial = {
+        'children': [
+
+            # Build Passed
+            {
+                'name': 'build passed',
+                'hex': '#8b0eea',
+                'children': [
+                    {'name': test.name, 'hex': '#004080', 'children': [
+                        # Test Passed
+                        {'name': 'passed', 'hex': '#008000', 'value': 0},
+
+                        # Test Failed
+                        {'name': 'failed', 'hex': '#800000', 'value': 0},
+                    ]}
+                    for test in assignment.tests
+                ],
+            },
+
+            # Build Failed
+            {
+                'name': 'build failed',
+                'hex': '#f00',
+                'value': 0,
+            },
+
+            # No Submission
+            {
+                'name': 'no submission',
+                'hex': '#808080',
+                'value': 0,
+            },
+        ]
+    }
+
+    # Get the autograde results for the entire assignment. This
+    # function call is cached.
+    autograde_results = bulk_autograde(assignment_id, offset=0, limit=300)
+
+    # Count the number of build and no submissions to
+    # insert into the name label.
+    build_passed = 0
+    build_failed = 0
+    no_submission = 0
+
+    # Go through all the autograde results
+    for result in autograde_results:
+
+        # If there was no submission, then increment no submission
+        if result['submission'] is None:
+            no_submission += 1
+            sundial['children'][2]['value'] += 1
+            continue
+
+        # If the build passed, go through the tests
+        if result['build_passed']:
+            build_passed += 1
+
+            # Set of tests passed names
+            tests_passed = set(result['tests_passed_names'])
+
+            for index in range(len(sundial['children'][0]['children'])):
+                # Get the test name
+                test_name = sundial['children'][0]['children'][index]['name']
+
+                # If this student passed this test, then increment the tests passed value
+                if test_name in tests_passed:
+                    sundial['children'][0]['children'][index]['children'][0]['value'] += 1
+
+                # If this student failed this test, then increment the tests failed value
+                else:
+                    sundial['children'][0]['children'][index]['children'][1]['value'] += 1
+
+            continue
+
+        # If the build failed, then skip the tests
+        if not result['build_passed']:
+
+            # If the student failed the build, then we increment the failed build value
+            build_failed += 1
+            sundial['children'][1]['value'] += 1
+
+            continue
+
+    # Update the title for the high level names
+    sundial['children'][0]['name'] = f'{build_passed} builds passed'
+    sundial['children'][1]['name'] = f'{build_failed} builds failed'
+    sundial['children'][2]['name'] = f'{no_submission} no submissions'
+
+    # Update the title for the individual tests
+    for test in sundial['children'][0]['children']:
+        passed = test['children'][0]
+        failed = test['children'][1]
+        passed_value = passed['value']
+        failed_value = failed['value']
+
+        passed['name'] = f'{passed_value} passed'
+        failed['name'] = f'{failed_value} failed'
+
+    return sundial
+
+
+
+
+
+
+
+
+
+
+
+
+
+

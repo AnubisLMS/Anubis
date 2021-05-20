@@ -56,6 +56,21 @@ export default function Visuals() {
         </Typography>
       </Grid>
       <Grid item/>
+      <Grid item xs={12} sm={12} md={10} lg={8} xl={6}>
+        <Card className={classes.card}>
+          <CardHeader
+            avatar={<Avatar src={'/logo512.png'}/>}
+            title={'Anubis Usage Over Time'}
+            titleTypographyProps={{variant: 'h6'}}
+            subheader={'re-generated every 5 minutes'}
+          />
+          <CardMedia
+            className={classes.usage}
+            image={'/api/public/visuals/usage'}
+            title={'Anubis Usage'}
+          />
+        </Card>
+      </Grid>
       <Grid item xs={12}>
         <div style={{display: 'flex', justifyContent: 'center'}}>
           <Paper style={{width: 620}}>
@@ -76,21 +91,6 @@ export default function Visuals() {
             </XYPlot>
           </Paper>
         </div>
-      </Grid>
-      <Grid item xs={12} sm={12} md={10} lg={8} xl={6}>
-        <Card className={classes.card}>
-          <CardHeader
-            avatar={<Avatar src={'/logo512.png'}/>}
-            title={'Anubis Usage Over Time'}
-            titleTypographyProps={{variant: 'h6'}}
-            subheader={'re-generated every 5 minutes'}
-          />
-          <CardMedia
-            className={classes.usage}
-            image={'/api/public/visuals/usage'}
-            title={'Anubis Usage'}
-          />
-        </Card>
       </Grid>
     </Grid>
   );

@@ -2,128 +2,48 @@ import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
-import Grid from '@material-ui/core/Grid';
+import {DataGrid} from '@material-ui/data-grid';
+import Paper from '@material-ui/core/Paper';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
+
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import green from '@material-ui/core/colors/green';
+import grey from '@material-ui/core/colors/grey';
 
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import ManagementIDEDialog from '../../../Components/Admin/IDE/ManagementIDEDialog';
-import AssignmentCard from '../../../Components/Admin/Assignment/AssignmentCard';
+import {Tooltip} from '@material-ui/core';
+import {Redirect} from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    minWidth: 275,
-  },
-  bullet: {
-    display: 'inline-block',
-    margin: '0 2px',
-    transform: 'scale(0.8)',
-  },
-  title: {
-    fontSize: 14,
-  },
-  pos: {
-    marginBottom: 12,
-  },
-  button: {
-    margin: theme.spacing(1),
+  paper: {
+    height: 700,
+    padding: theme.spacing(1),
   },
 }));
-
-const nonStupidDatetimeFormat = (date) => (
-  `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ` +
-  `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-);
-
-const editableFields = [
-  {field: 'name', label: 'Assignment Name'},
-  {field: 'github_classroom_url', label: 'Github Classroom URL'},
-  {field: 'theia_image', label: 'Theia Image'},
-  {field: 'theia_options', label: 'Theia Options', type: 'json'},
-  {field: 'pipeline_image', label: 'Pipeline Image', disabled: true},
-  {field: 'unique_code', label: 'Unique Code', disabled: true},
-  {field: 'hidden', label: 'Hidden', type: 'boolean'},
-  {field: 'ide_enabled', label: 'Theia Enabled', type: 'boolean'},
-  {field: 'autograde_enabled', label: 'Autograde Enabled', type: 'boolean'},
-  {field: 'release_date', label: 'Release Date', type: 'datetime'},
-  {field: 'due_date', label: 'Due Date', type: 'datetime'},
-  {field: 'grace_date', label: 'Grace Date', type: 'datetime'},
-];
-
 
 export default function Assignments() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [assignments, setAssignments] = useState([]);
-  const [edits, setEdits] = useState(0);
-  const [reset, setReset] = useState(0);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [redirect, setRedirect] = useState(null);
 
   React.useEffect(() => {
     axios.get('/api/admin/assignments/list').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data?.assignments) {
-        for (const assignment of data.assignments) {
-          for (const field of editableFields) {
-            if (field.type === 'datetime') {
-              assignment[field.field] = new Date(assignment[field.field].replace(/-/g, '/'));
-            }
-          }
-        }
         setAssignments(data.assignments);
       }
     }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
-  }, [reset]);
+  }, []);
 
-  const updateField = (id, field, toggle = false, datetime = false, json = false) => (e) => {
-    if (!e) {
-      return;
-    }
+  if (redirect !== null) {
+    return <Redirect to={redirect}/>;
+  }
 
-    for (const assignment of assignments) {
-      if (assignment.id === id) {
-        if (toggle) {
-          assignment[field] = !assignment[field];
-          break;
-        }
-
-        if (datetime) {
-          assignment[field] = e;
-          break;
-        }
-
-        if (json) {
-          assignment[field] = e;
-        }
-
-        assignment[field] = e.target.value.toString();
-        break;
-      }
-    }
-    setAssignments(assignments);
-    setEdits((state) => ++state);
-  };
-
-  const saveAssignment = (id) => () => {
-    for (const assignment of assignments) {
-      if (assignment.id === id) {
-        const conv_assignment = {
-          ...assignment,
-          release_date: nonStupidDatetimeFormat(assignment.release_date),
-          due_date: nonStupidDatetimeFormat(assignment.due_date),
-          grace_date: nonStupidDatetimeFormat(assignment.grace_date),
-        };
-        axios.post(`/api/admin/assignments/save`, {assignment: conv_assignment}).then((response) => {
-          standardStatusHandler(response, enqueueSnackbar);
-        }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
-        return;
-      }
-    }
-
-    enqueueSnackbar('An error occurred', {variant: 'error'});
-  };
 
   return (
     <Grid container spacing={2} justify={'center'} alignItems={'center'}>
@@ -138,16 +58,24 @@ export default function Assignments() {
       <Grid item xs={12}>
         <ManagementIDEDialog/>
       </Grid>
-      {assignments.map((assignment) => (
-        <Grid item xs={8} key={assignment.id}>
-          <AssignmentCard
-            assignment={assignment}
-            saveAssignment={saveAssignment}
-            editableFields={editableFields}
-            updateField={updateField}
-          />
-        </Grid>
-      ))}
+      <Grid item xs={8}>
+        <Paper className={classes.paper}>
+          <DataGrid columns={[
+            {field: 'name', headerName: 'Assignment Name', width: 200},
+            {field: 'hidden', headerName: 'Visibility', width: 110, renderCell: ({row}) => (
+              <Tooltip title={row.hidden ? 'Hidden' : 'Visible'}>
+                {
+                  row.hidden ?
+                    <VisibilityOffIcon style={{color: grey[500]}}/> :
+                    <VisibilityIcon style={{color: green[500]}}/>
+                }
+              </Tooltip>
+            )},
+            {field: 'release_date', headerName: 'Release Date', width: 170},
+            {field: 'due_date', headerName: 'Due Date', width: 170},
+          ]} rows={assignments} onRowClick={({row}) => setRedirect(`/admin/assignment/edit/${row.id}`)}/>
+        </Paper>
+      </Grid>
     </Grid>
   );
 }

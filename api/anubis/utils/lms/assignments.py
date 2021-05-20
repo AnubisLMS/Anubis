@@ -1,6 +1,6 @@
 import traceback
 from datetime import datetime
-from typing import Union, List, Dict, Tuple
+from typing import Union, List, Dict, Tuple, Optional
 
 from dateutil.parser import parse as date_parse, ParserError
 from sqlalchemy import or_
@@ -15,6 +15,7 @@ from anubis.models import (
     AssignmentTest,
     AssignmentRepo,
     SubmissionTestResult,
+    LateException,
 )
 from anubis.utils.auth import get_user
 from anubis.utils.data import is_debug
@@ -40,7 +41,7 @@ def get_courses(netid: str):
     return [c.data for c in classes]
 
 
-@cache.memoize(timeout=10, unless=is_debug)
+@cache.memoize(timeout=10, unless=is_debug, source_check=True)
 def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], None]:
     """
     Get all the current assignments for a netid. Optionally specify a class_name
@@ -72,20 +73,20 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
     # Build a list of all the assignments visible
     # to this user for each of the specified courses.
     assignments: List[Assignment] = []
-    for course in course_ids:
+    for _course_id in course_ids:
         # Query filters
         filters = []
 
         # If the current user is not a course admin or a superuser, then
         # we should filter out assignments that have not been released,
         # and those marked as hidden.
-        if not (user.is_superuser or is_course_admin(course_id)):
+        if not is_course_admin(_course_id, user_id=user.id):
             filters.append(Assignment.release_date <= datetime.now())
             filters.append(Assignment.hidden == False)
 
         # Get the assignment objects that should be visible to this user.
         course_assignments = Assignment.query.join(Course).filter(
-            Course.id == course,
+            Course.id == _course_id,
             *filters,
         ).all()
 
@@ -105,18 +106,24 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
     for assignment_data in response:
         # If the current user has a submission for this assignment, then mark it
         assignment_data["has_submission"] = (
-            Submission.query.join(User).join(Assignment).filter(
-                Assignment.id == assignment_data["id"],
-                User.netid == netid,
-            ).first() is not None
+                Submission.query.join(User).join(Assignment).filter(
+                    Assignment.id == assignment_data["id"],
+                    User.netid == netid,
+                ).first() is not None
         )
+
+        repo = AssignmentRepo.query.filter(
+            AssignmentRepo.owner_id == user.id,
+            AssignmentRepo.assignment_id == assignment_data['id'],
+        ).first()
 
         # If the current user has a repo for this assignment, then mark it
         assignment_data["has_repo"] = (
-            AssignmentRepo.query.filter(
-                AssignmentRepo.owner_id == user.id,
-                AssignmentRepo.assignment_id == assignment_data['id'],
-            ).first() is not None
+                repo is not None
+        )
+        # If the current user has a repo for this assignment, then mark it
+        assignment_data["repo_url"] = (
+            repo.repo_url if repo is not None else None
         )
 
     return response
@@ -197,14 +204,10 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     for test_name in assignment_data["tests"]:
 
         # Find if the assignment test exists
-        assignment_test = (
-            AssignmentTest.query.filter(
-                Assignment.id == assignment.id,
-                AssignmentTest.name == test_name,
-            )
-                .join(Assignment)
-                .first()
-        )
+        assignment_test = AssignmentTest.query.join(Assignment).filter(
+            Assignment.id == assignment.id,
+            AssignmentTest.name == test_name,
+        ).first()
 
         # Create the assignment test if it did not already exist
         if assignment_test is None:
@@ -224,3 +227,30 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     return {"assignment": assignment.data, "questions": question_message}, True
 
 
+def get_assignment_due_date(user: Optional[User], assignment: Assignment) -> datetime:
+    """
+    Get the due date for an assignment for a specific user. We check to
+    see if there is a late exception for this user, and return that if
+    available. Otherwise, the default due date for the assignment is
+    returned.
+
+    :param user:
+    :param assignment:
+    :return:
+    """
+
+    if user is None:
+        return assignment.grace_date
+
+    # Check for a late exception for this student
+    late_exception: Optional[LateException] = LateException.query.filter(
+        LateException.user_id == user.id,
+        LateException.assignment_id == assignment.id,
+    ).first()
+
+    # If there was a late exception, return that due_date
+    if late_exception is not None:
+        return late_exception.due_date
+
+    # If no late exception, return the assignment default
+    return assignment.grace_date

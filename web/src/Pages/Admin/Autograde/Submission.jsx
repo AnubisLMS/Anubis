@@ -18,6 +18,7 @@ import SubmissionBuild from '../../../Components/Public/Submission/SubmissionBui
 import SubmissionTests from '../../../Components/Public/Submission/SubmissionTests';
 import QuestionsCard from '../../../Components/Public/Questions/QuestionsCard';
 import StudentGitCard from '../../../Components/Admin/Stats/Submissions/StudentGitCard';
+import StudentAssignmentHistory from '../../../Components/Admin/Visuals/StudentAssignmentHistory';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -26,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function AutogradeSubmission() {
+export default function Submission() {
   const classes = useStyles();
   const query = useQuery();
   const {enqueueSnackbar} = useSnackbar();
@@ -68,6 +69,9 @@ export default function AutogradeSubmission() {
         </Grid>
         <Grid item xs={12} md={10}>
           <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <StudentAssignmentHistory/>
+            </Grid>
             <Grid item xs>
               <StudentCard student={student}/>
             </Grid>

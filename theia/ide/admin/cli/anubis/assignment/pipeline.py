@@ -13,32 +13,6 @@ root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)
 root_logger.addHandler(logging.StreamHandler())
 
-try:
-    import assignment
-except ImportError:
-    report_panic('Unable to import assignment', traceback.format_exc())
-    exit(0)
-
-from utils import registered_tests, build_function
-from utils import fix_permissions, Panic, DEBUG
-
-git_creds = os.environ.get('GIT_CRED', default=None)
-if git_creds is not None:
-    del os.environ['GIT_CRED']
-    with open(os.environ.get('HOME') + '/.git-credentials', 'w') as f:
-        f.write(git_creds)
-        f.close()
-    with open(os.environ.get('HOME') + '/.gitconfig', 'w') as f:
-        f.write('[credential]\n')
-        f.write('\thelper = store\n')
-        f.close()
-
-TOKEN = os.environ.get('TOKEN')
-COMMIT = os.environ.get('COMMIT')
-GIT_REPO = os.environ.get('GIT_REPO')
-SUBMISSION_ID = os.environ.get('SUBMISSION_ID')
-del os.environ['TOKEN']
-
 
 def post(path: str, data: dict, params=None):
     if params is None:
@@ -88,6 +62,33 @@ def report_panic(message: str, traceback: str, ):
     print(traceback)
     logging.info('report_error {}'.format(json.dumps(data, indent=2)))
     post('/pipeline/report/panic/{}'.format(SUBMISSION_ID), data)
+
+
+try:
+    import assignment
+except ImportError:
+    report_panic('Unable to import assignment', traceback.format_exc())
+    exit(0)
+
+from utils import registered_tests, build_function
+from utils import fix_permissions, Panic, DEBUG
+
+git_creds = os.environ.get('GIT_CRED', default=None)
+if git_creds is not None:
+    del os.environ['GIT_CRED']
+    with open(os.environ.get('HOME') + '/.git-credentials', 'w') as f:
+        f.write(git_creds)
+        f.close()
+    with open(os.environ.get('HOME') + '/.gitconfig', 'w') as f:
+        f.write('[credential]\n')
+        f.write('\thelper = store\n')
+        f.close()
+
+TOKEN = os.environ.get('TOKEN')
+COMMIT = os.environ.get('COMMIT')
+GIT_REPO = os.environ.get('GIT_REPO')
+SUBMISSION_ID = os.environ.get('SUBMISSION_ID')
+del os.environ['TOKEN']
 
 
 def report_state(state: str, params=None):

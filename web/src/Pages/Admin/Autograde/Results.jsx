@@ -21,6 +21,8 @@ import useQuery from '../../../hooks/useQuery';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import AutogradeVisuals from '../../../Components/Admin/Visuals/AutogradeVisuals';
+import Button from '@material-ui/core/Button';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -84,7 +86,7 @@ const useColumns = () => ([
 ]);
 
 
-export default function AutogradeAssignments() {
+export default function Results() {
   const query = useQuery();
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
@@ -167,6 +169,29 @@ export default function AutogradeAssignments() {
     return <Redirect to={`/admin/autograde/submission?assignmentId=${assignment.id}&netid=${selected.id}`}/>;
   }
 
+  const clearCache = () => {
+    axios.get(`/api/admin/autograde/cache-reset/${assignmentId}`).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data) {
+        enqueueSnackbar(
+          'Cache is reset. You will likely need to reload', {
+            variant: 'warning',
+            action: (
+              <Button
+                size="small"
+                startIcon={<RefreshIcon/>}
+                color={'primary'}
+                variant={'contained'}
+                onClick={() => window.location.reload(true)}
+              >
+                Reload
+              </Button>
+            ),
+          });
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  };
+
   return (
     <Grid container spacing={2} justify={'center'} alignItems={'center'}>
       <Grid item xs={12}>
@@ -179,6 +204,13 @@ export default function AutogradeAssignments() {
         <Typography variant={'subtitle1'} color={'textSecondary'}>
           Results for {assignment?.name}
         </Typography>
+        <Button
+          variant={'contained'}
+          color={'primary'}
+          onClick={clearCache}
+        >
+          Clear Cache
+        </Button>
       </Grid>
       <Grid item xs={12}>
         <AutogradeVisuals assignmentId={assignmentId}/>
