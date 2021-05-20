@@ -36,7 +36,7 @@ def get_question_pool_mapping(
     # Build up sequence to question mapping
     sequence_to_questions = {pool: [] for pool in pools}
     for question in questions:
-        sequence_to_questions[question.sequence].append(question)
+        sequence_to_questions[question.pool].append(question)
 
     return sequence_to_questions
 

@@ -8,6 +8,7 @@ from anubis.utils.auth import require_admin
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response
 from anubis.utils.lms.course import assert_course_context
+from anubis.utils.lms.submissions import recalculate_late_submissions
 
 
 late_exceptions_ = Blueprint('admin-late-exceptions', __name__, url_prefix='/admin/late-exceptions')
@@ -101,6 +102,9 @@ def admin_late_exception_update(assignment_id: str = None, user_id: str = None, 
 
     db.session.commit()
 
+    # Recalculate the late submissions
+    recalculate_late_submissions(student, assignment)
+
     # Break down for response
     return success_response({
         'status': 'Late exceptions updated'
@@ -138,6 +142,9 @@ def admin_late_exception_remove(assignment_id: str = None, user_id: str = None):
         LateException.assignment_id == assignment.id,
         LateException.user_id == student.id,
     ).delete()
+
+    # Recalculate the late submissions
+    recalculate_late_submissions(student, assignment)
 
     db.session.commit()
 

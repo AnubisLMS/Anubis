@@ -49,9 +49,6 @@ class User(db.Model):
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    ta_for = db.relationship('TAForCourse', cascade='all,delete')
-    professor_for = db.relationship('ProfessorForCourse', cascade='all,delete')
-
     @property
     def data(self):
         professor_for = [pf.data for pf in self.professor_for]
@@ -130,7 +127,7 @@ class TAForCourse(db.Model):
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), primary_key=True)
 
-    owner = db.relationship(User)
+    owner = db.relationship(User, backref='ta_for')
     course = db.relationship(Course)
 
     @property
@@ -148,7 +145,7 @@ class ProfessorForCourse(db.Model):
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), primary_key=True)
 
-    owner = db.relationship(User)
+    owner = db.relationship(User, backref='professor_for')
     course = db.relationship(Course)
 
     @property
@@ -204,8 +201,8 @@ class Assignment(db.Model):
     grace_date = db.Column(db.DateTime, nullable=True)
 
     course = db.relationship(Course, backref="assignments")
-    tests = db.relationship("AssignmentTest", cascade="all,delete")
-    repos = db.relationship("AssignmentRepo", cascade="all,delete")
+    tests = db.relationship("AssignmentTest", cascade="all,delete", backref='assignment')
+    repos = db.relationship("AssignmentRepo", cascade="all,delete", backref='assignment')
 
     @property
     def data(self):
@@ -272,8 +269,6 @@ class AssignmentRepo(db.Model):
 
     # Relationships
     owner = db.relationship(User)
-    assignment = db.relationship(Assignment)
-    submissions = db.relationship("Submission", cascade="all,delete")
 
     @property
     def data(self):
@@ -298,9 +293,6 @@ class AssignmentTest(db.Model):
     # Fields
     name = db.Column(db.TEXT, index=True)
     hidden = db.Column(db.Boolean, default=False)
-
-    # Relationships
-    assignment = db.relationship(Assignment)
 
     @property
     def data(self):
@@ -475,46 +467,9 @@ class Submission(db.Model):
     # Relationships
     owner = db.relationship(User)
     assignment = db.relationship(Assignment)
-    build = db.relationship("SubmissionBuild", cascade="all,delete", uselist=False)
-    test_results = db.relationship("SubmissionTestResult", cascade="all,delete")
-    repo = db.relationship(AssignmentRepo)
-
-    def init_submission_models(self):
-        """
-        Create adjacent submission models.
-
-        :return:
-        """
-
-        logger.debug("initializing submission {}".format(self.id))
-
-        # If the models already exist, yeet
-        if len(self.test_results) != 0:
-            SubmissionTestResult.query.filter_by(submission_id=self.id).delete()
-        if self.build is not None:
-            SubmissionBuild.query.filter_by(submission_id=self.id).delete()
-
-        # Commit deletions (if necessary)
-        db.session.commit()
-
-        # Find tests for the current assignment
-        tests = AssignmentTest.query.filter_by(assignment_id=self.assignment_id).all()
-
-        logger.debug("found tests: {}".format(list(map(lambda x: x.data, tests))))
-
-        for test in tests:
-            tr = SubmissionTestResult(submission_id=self.id, assignment_test_id=test.id)
-            db.session.add(tr)
-        sb = SubmissionBuild(submission_id=self.id)
-        db.session.add(sb)
-
-        self.accepted = True
-        self.processed = False
-        self.state = "Waiting for resources..."
-        db.session.add(self)
-
-        # Commit new models
-        db.session.commit()
+    build = db.relationship("SubmissionBuild", cascade="all,delete", backref='submission')
+    test_results = db.relationship("SubmissionTestResult", cascade="all,delete", backref='submission')
+    repo = db.relationship(AssignmentRepo, backref='submissions')
 
     @property
     def netid(self):
@@ -625,7 +580,6 @@ class SubmissionTestResult(db.Model):
     passed = db.Column(db.Boolean)
 
     # Relationships
-    submission = db.relationship(Submission)
     assignment_test = db.relationship(AssignmentTest)
 
     @property
@@ -670,9 +624,6 @@ class SubmissionBuild(db.Model):
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
-
-    # Relationships
-    submission = db.relationship(Submission)
 
     @property
     def data(self):

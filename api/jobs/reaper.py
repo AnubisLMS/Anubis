@@ -4,11 +4,11 @@ import traceback
 from datetime import datetime, timedelta
 
 import requests
-from sqlalchemy import and_
 
 from anubis.models import db, Submission, Assignment, AssignmentRepo
 from anubis.utils.data import with_context
 from anubis.utils.lms.autograde import bulk_autograde
+from anubis.utils.lms.submissions import init_submission
 from anubis.utils.lms.webhook import check_repo, guess_github_username
 from anubis.utils.services.rpc import enqueue_ide_reap_stale, enqueue_autograde_pipeline
 from anubis.utils.visuals.assignments import get_assignment_sundial
@@ -60,16 +60,15 @@ def reap_recent_assignments():
 
     for assignment in recent_assignments:
         for submission in Submission.query.filter(
-            Submission.assignment_id == assignment.id,
-            Submission.build == None,
+                Submission.assignment_id == assignment.id,
+                Submission.build == None,
         ).all():
             if submission.build is None:
-                submission.init_submission_models()
+                init_submission(submission)
                 enqueue_autograde_pipeline(submission.id)
 
     for assignment in recent_assignments:
         bulk_autograde(assignment.id)
-        get_assignment_sundial(assignment.id)
 
 
 def reap_broken_repos():
@@ -188,7 +187,7 @@ def reap_broken_repos():
                 )
                 db.session.add(submission)
                 db.session.commit()
-                submission.init_submission_models()
+                init_submission(submission)
                 enqueue_autograde_pipeline(submission.id)
 
         r = AssignmentRepo.query.filter(AssignmentRepo.repo_url == repo_url).first()

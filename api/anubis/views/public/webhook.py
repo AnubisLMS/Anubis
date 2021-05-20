@@ -20,6 +20,7 @@ from anubis.utils.lms.webhook import parse_webhook, guess_github_username, check
 from anubis.utils.services.elastic import log_endpoint, esindex
 from anubis.utils.services.logger import logger
 from anubis.utils.services.rpc import enqueue_autograde_pipeline
+from anubis.utils.lms.submissions import reject_late_submission, init_submission
 
 webhook = Blueprint("public-webhook", __name__, url_prefix="/public/webhook")
 
@@ -174,7 +175,7 @@ def public_webhook():
         return success_response({'status': 'already created'})
 
     # Create the related submission models
-    submission.init_submission_models()
+    init_submission(submission)
 
     # If a user has not given us their github username
     # the submission will stay in a "dangling" state
@@ -210,9 +211,7 @@ def public_webhook():
 
         # Check that the current assignment is still accepting submissions
         if not assignment.accept_late and datetime.now() < get_assignment_due_date(user, assignment):
-            submission.accepted = False
-            submission.processed = True
-            submission.state = 'late submissions are not accepted for this assignment'
+            reject_late_submission(submission)
 
     else:
         submission.processed = True

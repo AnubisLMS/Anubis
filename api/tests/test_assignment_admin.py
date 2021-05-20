@@ -16,8 +16,8 @@ sample_sync = {
     },
     "description": "This is a very long description that encompasses the entire assignment\n",
     "questions": [
-        {"sequence": 1, "questions": [{"q": "What is 3*4?", "a": "12"}, {"q": "What is 3*2", "a": "6"}]},
-        {"sequence": 2, "questions": [{"q": "What is sqrt(144)?", "a": "12"}]}
+        {"pool": 1, "questions": [{"q": "What is 3*4?", "a": "12"}, {"q": "What is 3*2", "a": "6"}]},
+        {"pool": 2, "questions": [{"q": "What is sqrt(144)?", "a": "12"}]}
     ],
     "tests": ["abc123"],
 }
@@ -30,8 +30,8 @@ def test_assignment_admin():
 
     assignment = superuser.get('/admin/assignments/list')['assignments'][0]
     assignment_id = assignment['id']
-    _assignment = superuser.get(f'/admin/assignments/get/{assignment_id}')['assignment']
-    assignment_test_id = _assignment['tests'][0]['id']
+    _tests = superuser.get(f'/admin/assignments/get/{assignment_id}')['tests']
+    assignment_test_id = _tests[0]['id']
 
     permission_test(f'/admin/assignments/get/{assignment_id}')
     permission_test(f'/admin/assignments/assignment/{assignment_id}/questions/get/student')

@@ -1,11 +1,10 @@
 from anubis.utils.services.logger import logger
+from anubis.utils.data import with_context
 
 
+@with_context
 def rpc_bulk_regrade(submissions):
-    from anubis.app import create_app
-    from anubis.utils.lms.submissions import bulk_regrade_submission
-
-    app = create_app()
+    from anubis.utils.lms.submissions import bulk_regrade_submissions
 
     logger.info(
         "bulk regrading {}".format(submissions),
@@ -14,5 +13,4 @@ def rpc_bulk_regrade(submissions):
         },
     )
 
-    with app.app_context():
-        bulk_regrade_submission(submissions)
+    bulk_regrade_submissions(submissions)

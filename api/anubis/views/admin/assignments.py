@@ -108,7 +108,10 @@ def admin_assignments_get_id(assignment: Assignment):
     assert_course_context(assignment)
 
     # Pass back the full data
-    return success_response({"assignment": row2dict(assignment)})
+    return success_response({
+        "assignment": row2dict(assignment),
+        "tests": [test.data for test in assignment.tests],
+    })
 
 
 @assignments.route("/list")

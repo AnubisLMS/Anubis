@@ -16,6 +16,7 @@ from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.cache import cache
 from anubis.utils.services.rpc import enqueue_autograde_pipeline, rpc_enqueue
 from anubis.utils.lms.autograde import bulk_autograde, autograde
+from anubis.utils.lms.submissions import init_submission
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 
@@ -86,7 +87,7 @@ def admin_regrade_submission_commit(commit: str):
     assert_course_context(submission)
 
     # Reset submission in database
-    submission.init_submission_models()
+    init_submission(submission)
 
     # Enqueue the submission pipeline
     enqueue_autograde_pipeline(submission.id)
