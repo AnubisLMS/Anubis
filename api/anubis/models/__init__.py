@@ -180,17 +180,18 @@ class Assignment(db.Model):
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), index=True)
 
     # Fields
-    name = db.Column(db.TEXT, nullable=False, unique=True)
+    name = db.Column(db.TEXT, nullable=False)
     hidden = db.Column(db.Boolean, default=False)
     description = db.Column(db.TEXT, nullable=True)
     github_classroom_url = db.Column(db.TEXT, nullable=True, default=None)
-    pipeline_image = db.Column(db.TEXT, unique=True, nullable=True)
+    pipeline_image = db.Column(db.TEXT, nullable=True)
     unique_code = db.Column(
         db.String(8),
         unique=True,
         default=lambda: base64.b16encode(os.urandom(4)).decode(),
     )
     ide_enabled = db.Column(db.Boolean, default=True)
+    accept_late = db.Column(db.Boolean, default=True)
     autograde_enabled = db.Column(db.Boolean, default=True)
     theia_image = db.Column(
         db.TEXT, default="registry.osiris.services/anubis/theia-xv6"
@@ -213,6 +214,7 @@ class Assignment(db.Model):
             "name": self.name,
             "due_date": str(self.due_date),
             "hidden": self.hidden,
+            "accept_late": self.accept_late,
             "course": self.course.data,
             "description": self.description,
             "ide_enabled": self.ide_enabled,
@@ -315,7 +317,7 @@ class AssignmentQuestion(db.Model):
     # Fields
     question = db.Column(db.Text, nullable=False)
     solution = db.Column(db.Text, nullable=True)
-    sequence = db.Column(db.Integer, index=True, nullable=False)
+    pool = db.Column(db.Integer, index=True, nullable=False)
     code_question = db.Column(db.Boolean, default=False)
     code_language = db.Column(db.TEXT, nullable=True, default='')
     placeholder = db.Column(db.Text, nullable=True, default="")
@@ -327,7 +329,7 @@ class AssignmentQuestion(db.Model):
     # Relationships
     assignment = db.relationship(Assignment, backref="questions")
 
-    shape = {"question": str, "solution": str, "sequence": int}
+    shape = {"question": str, "solution": str, "pool": int}
 
     @property
     def full_data(self):
@@ -337,7 +339,7 @@ class AssignmentQuestion(db.Model):
             "code_question": self.code_question,
             "code_language": self.code_language,
             "solution": self.solution,
-            "sequence": self.sequence,
+            "pool": self.pool,
         }
 
     @property
@@ -347,7 +349,7 @@ class AssignmentQuestion(db.Model):
             "question": self.question,
             "code_question": self.code_question,
             "code_language": self.code_language,
-            "sequence": self.sequence,
+            "pool": self.pool,
         }
 
 

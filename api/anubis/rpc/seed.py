@@ -43,7 +43,7 @@ def create_assignment(course, users):
             id=rand(),
             question=f"What is {c} + {b}?",
             solution=f"{c + b}",
-            sequence=i,
+            pool=i,
             code_question=False,
             assignment_id=assignment.id,
         )

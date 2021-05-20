@@ -13,7 +13,7 @@ from anubis.utils.data import _verify_data_shape, is_debug
 from anubis.utils.services.cache import cache
 
 
-def get_question_sequence_mapping(
+def get_question_pool_mapping(
         questions: List[AssignmentQuestion],
 ) -> Dict[int, List[AssignmentQuestion]]:
     """
@@ -31,10 +31,10 @@ def get_question_sequence_mapping(
     """
 
     # Get unique sequences
-    sequences = set(question.sequence for question in questions)
+    pools = set(question.pool for question in questions)
 
     # Build up sequence to question mapping
-    sequence_to_questions = {sequence: [] for sequence in sequences}
+    sequence_to_questions = {pool: [] for pool in pools}
     for question in questions:
         sequence_to_questions[question.sequence].append(question)
 
@@ -85,7 +85,7 @@ def assign_questions(assignment: Assignment):
         AssignmentQuestion.assignment_id == assignment.id,
     ).all()
 
-    questions = get_question_sequence_mapping(raw_questions)
+    questions = get_question_pool_mapping(raw_questions)
 
     # Go through students in the class and assign them questions
     assigned_questions = []
@@ -159,7 +159,7 @@ def ingest_questions(questions: dict, assignment: Assignment):
             )
             continue
 
-        sequence = question_sequence["sequence"]
+        pool = question_sequence["pool"]
         for question in question_sequence["questions"]:
 
             # Check to see if question already exists for the current
@@ -178,7 +178,7 @@ def ingest_questions(questions: dict, assignment: Assignment):
                 assignment_id=assignment.id,
                 question=question["q"],
                 solution=question["a"],
-                sequence=sequence,
+                pool=pool,
             )
             db.session.add(assignment_question)
             accepted.append({"question": question})
@@ -212,16 +212,16 @@ def get_all_questions(assignment: Assignment) -> List[Dict[str, str]]:
     ).all()
 
     # Get sequence to question mapping
-    sequence_to_questions = get_question_sequence_mapping(questions)
+    pools_to_questions = get_question_pool_mapping(questions)
 
     # Get the raw questions in a generator of lists
-    question_sequences = sequence_to_questions.values()
+    question_pools = pools_to_questions.values()
 
     # Pull questions out of sequences and add
     # them to question_list
     questions_list: List[Dict[str, str]] = []
-    for sequence in question_sequences:
-        for q in sequence:
+    for pool in question_pools:
+        for q in pool:
             questions_list.append(q.full_data)
 
     return questions_list
