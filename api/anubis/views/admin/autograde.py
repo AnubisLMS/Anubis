@@ -20,6 +20,7 @@ autograde_ = Blueprint("admin-autograde", __name__, url_prefix="/admin/autograde
 
 @autograde_.route('/cache-reset/<string:assignment_id>')
 @require_admin()
+@cache.memoize(timeout=60)
 @json_response
 def admin_autograde_cache_reset(assignment_id: str):
     """

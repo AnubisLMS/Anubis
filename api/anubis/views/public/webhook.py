@@ -17,6 +17,8 @@ from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import error_response, success_response
 from anubis.utils.lms.assignments import get_assignment_due_date
 from anubis.utils.lms.webhook import parse_webhook, guess_github_username, check_repo
+from anubis.utils.lms.submissions import get_submissions
+from anubis.utils.lms.repos import get_repos
 from anubis.utils.services.elastic import log_endpoint, esindex
 from anubis.utils.services.logger import logger
 from anubis.utils.services.rpc import enqueue_autograde_pipeline
@@ -223,5 +225,10 @@ def public_webhook():
     # If the submission was accepted, then enqueue the job
     if submission.accepted and user is not None:
         enqueue_autograde_pipeline(submission.id)
+
+    # Delete cached submissions
+    cache.delete_memoized(get_submissions, user.netid)
+    cache.delete_memoized(get_submissions, user.netid, assignment.course_id)
+    cache.delete_memoized(get_submissions, user.netid, assignment.course_id, assignment.id)
 
     return success_response("submission accepted")

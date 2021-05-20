@@ -11,7 +11,7 @@ from anubis.utils.lms.autograde import bulk_autograde
 from anubis.utils.lms.submissions import init_submission
 from anubis.utils.lms.webhook import check_repo, guess_github_username
 from anubis.utils.services.rpc import enqueue_ide_reap_stale, enqueue_autograde_pipeline
-from anubis.utils.visuals.assignments import get_assignment_sundial
+rom anubis.utils.visuals.assignments import get_assignment_sundial
 
 
 def reap_stale_submissions():

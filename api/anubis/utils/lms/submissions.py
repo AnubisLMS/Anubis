@@ -215,12 +215,14 @@ def get_submissions(
     if assignment_id is not None:
         filters.append(Assignment.id == assignment_id)
 
+
     query = (
         Submission.query.join(Assignment)
             .join(Course)
             .join(InCourse)
             .join(User)
             .filter(Submission.owner_id == owner.id, *filters)
+
             .order_by(Submission.created.desc())
     )
 
