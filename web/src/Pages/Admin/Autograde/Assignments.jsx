@@ -44,7 +44,7 @@ const sortModel = [
   },
 ];
 
-export default function AutogradeAssignments() {
+export default function Assignments() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [assignments, setAssignments] = useState([]);

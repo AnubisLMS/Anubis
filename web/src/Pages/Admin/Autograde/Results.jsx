@@ -86,7 +86,7 @@ const useColumns = () => ([
 ]);
 
 
-export default function AutogradeResults() {
+export default function Results() {
   const query = useQuery();
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();

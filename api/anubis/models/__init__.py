@@ -209,10 +209,16 @@ class Assignment(db.Model):
 
     @property
     def data(self):
+        from anubis.utils.lms.assignments import get_assignment_due_date
+        from anubis.utils.auth import current_user
+
+        due_date = get_assignment_due_date(current_user(), self)
+
         return {
             "id": self.id,
             "name": self.name,
-            "due_date": str(self.due_date),
+            "due_date": str(due_date),
+            "past_due": due_date < datetime.now(),
             "hidden": self.hidden,
             "accept_late": self.accept_late,
             "course": self.course.data,
@@ -464,6 +470,7 @@ class Submission(db.Model):
     token = db.Column(
         db.String(64), default=lambda: base64.b16encode(os.urandom(32)).decode()
     )
+    accepted = db.Column(db.Boolean, default=True)
 
     # Relationships
     owner = db.relationship(User)
@@ -501,6 +508,7 @@ class Submission(db.Model):
         sb = SubmissionBuild(submission_id=self.id)
         db.session.add(sb)
 
+        self.accepted = True
         self.processed = False
         self.state = "Waiting for resources..."
         db.session.add(self)
@@ -782,3 +790,31 @@ class StaticFile(db.Model):
             "hidden": self.hidden,
             "uploaded": str(self.created)
         }
+
+
+class LateException(db.Model):
+    user_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
+    assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), primary_key=True)
+
+    # New Due Date
+    due_date = db.Column(db.DateTime, nullable=False)
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    assignment = db.relationship(Assignment)
+    user = db.relationship(User)
+
+    @property
+    def data(self):
+        return {
+            'user_id': self.user_id,
+            'user_name': self.user.name,
+            'user_netid': self.user.netid,
+            'assignment_id': self.assignment_id,
+            'due_date': str(self.due_date)
+        }
+
+
+

@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function AssignmentRepos() {
+export default function Repos() {
   const classes = useStyles();
   const match = useParams();
   const {enqueueSnackbar} = useSnackbar();

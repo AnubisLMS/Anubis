@@ -1,6 +1,6 @@
 import traceback
 from datetime import datetime
-from typing import Union, List, Dict, Tuple
+from typing import Union, List, Dict, Tuple, Optional
 
 from dateutil.parser import parse as date_parse, ParserError
 from sqlalchemy import or_
@@ -15,6 +15,7 @@ from anubis.models import (
     AssignmentTest,
     AssignmentRepo,
     SubmissionTestResult,
+    LateException,
 )
 from anubis.utils.auth import get_user
 from anubis.utils.data import is_debug
@@ -203,14 +204,10 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     for test_name in assignment_data["tests"]:
 
         # Find if the assignment test exists
-        assignment_test = (
-            AssignmentTest.query.filter(
-                Assignment.id == assignment.id,
-                AssignmentTest.name == test_name,
-            )
-                .join(Assignment)
-                .first()
-        )
+        assignment_test = AssignmentTest.query.join(Assignment).filter(
+            Assignment.id == assignment.id,
+            AssignmentTest.name == test_name,
+        ).first()
 
         # Create the assignment test if it did not already exist
         if assignment_test is None:
@@ -228,3 +225,32 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     db.session.commit()
 
     return {"assignment": assignment.data, "questions": question_message}, True
+
+
+def get_assignment_due_date(user: Optional[User], assignment: Assignment) -> datetime:
+    """
+    Get the due date for an assignment for a specific user. We check to
+    see if there is a late exception for this user, and return that if
+    available. Otherwise, the default due date for the assignment is
+    returned.
+
+    :param user:
+    :param assignment:
+    :return:
+    """
+
+    if user is None:
+        return assignment.due_date
+
+    # Check for a late exception for this student
+    late_exception: Optional[LateException] = LateException.query.filter(
+        LateException.user_id == user.id,
+        LateException.assignment_id == assignment.id,
+    ).first()
+
+    # If there was a late exception, return that due_date
+    if late_exception is not None:
+        return late_exception.due_date
+
+    # If no late exception, return the assignment default
+    return assignment.due_date

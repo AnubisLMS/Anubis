@@ -6,7 +6,8 @@ from typing import Union, Tuple, Any
 
 from flask import request
 
-from anubis.utils.auth import LackCourseContext, current_user, AuthenticationError
+from anubis.utils.auth import current_user
+from anubis.utils.exceptions import AuthenticationError, LackCourseContext
 from anubis.utils.services.logger import logger
 from anubis.models import (
     Course,
@@ -22,6 +23,7 @@ from anubis.models import (
     StaticFile,
     User,
     InCourse,
+    LateException,
 )
 
 
@@ -259,6 +261,7 @@ def assert_course_context(*models: Tuple[Any]):
             AssignmentRepo,
             AssignedStudentQuestion,
             AssignmentQuestion,
+            LateException,
         ]:
             if isinstance(model, model_type):
                 object_stack.append(model.assignment)

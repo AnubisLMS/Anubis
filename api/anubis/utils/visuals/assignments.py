@@ -190,7 +190,7 @@ def get_assignment_history(assignment_id, netid):
     }
 
 
-@cache.memoize(timeout=3600, source_check=True, forced_update=is_job)
+@cache.memoize(timeout=-1, source_check=True, forced_update=is_job)
 def get_assignment_sundial(assignment_id):
     """
     Get the sundial data for a specific assignment. The basic breakdown of

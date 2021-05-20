@@ -4,7 +4,7 @@ import traceback
 from datetime import datetime, timedelta
 
 import requests
-from sqlalchemy import func, and_
+from sqlalchemy import and_
 
 from anubis.models import db, Submission, Assignment, AssignmentRepo
 from anubis.utils.data import with_context
@@ -49,13 +49,9 @@ def reap_recent_assignments():
     """
     from anubis.config import config
 
-    recent_assignments = Assignment.query.group_by(
-        Assignment.course_id
-    ).having(
-        and_(
-            Assignment.release_date == func.max(Assignment.release_date),
-            Assignment.due_date + config.STATS_REAP_DURATION > datetime.now(),
-        )
+    recent_assignments = Assignment.query.filter(
+        Assignment.release_date > datetime.now(),
+        Assignment.due_date > datetime.now() - config.STATS_REAP_DURATION,
     ).all()
 
     print(json.dumps({
@@ -64,8 +60,8 @@ def reap_recent_assignments():
 
     for assignment in recent_assignments:
         for submission in Submission.query.filter(
-                Submission.assignment_id == assignment.id,
-                Submission.build == None,
+            Submission.assignment_id == assignment.id,
+            Submission.build == None,
         ).all():
             if submission.build is None:
                 submission.init_submission_models()

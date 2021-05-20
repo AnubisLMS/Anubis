@@ -15,6 +15,7 @@ import red from '@material-ui/core/colors/red';
 import green from '@material-ui/core/colors/green';
 import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import {nonStupidDatetimeFormat} from '../../../Utils/datetime';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -81,9 +82,11 @@ export default function AssignmentCard({assignment, setSelectedTheia}) {
     course: {course_code},
     has_submission,
     github_classroom_link,
-    ide_active,
+    ide_enabled,
     has_repo,
     repo_url,
+    past_due,
+    accept_late,
   } = assignment;
 
   const [timeLeft] = useState(remainingTime(due_date));
@@ -118,7 +121,7 @@ export default function AssignmentCard({assignment, setSelectedTheia}) {
 
           <div className={classes.datePos}>
             <EventNoteIcon style={{marginRight: 7}}/>
-            <p className={classes.dateText}> {` Due: ${(new Date(due_date)).toLocaleDateString()}`} </p>
+            <p className={classes.dateText}>Due: {nonStupidDatetimeFormat(new Date(due_date))}</p>
           </div>
 
           <div className={classes.statusPos} style={has_submission ? {} : {color: red[500]}}>
@@ -144,7 +147,7 @@ export default function AssignmentCard({assignment, setSelectedTheia}) {
           color={'primary'}
           className={classes.button}
           startIcon={<CodeOutlinedIcon/>}
-          disabled={!ide_active || !has_repo}
+          disabled={!ide_enabled || !has_repo || past_due}
           onClick={() => setSelectedTheia(assignment)}
         >
           Anubis Cloud IDE

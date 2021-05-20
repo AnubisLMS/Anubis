@@ -24,6 +24,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import EditIcon from '@material-ui/icons/Edit';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
 
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
@@ -226,6 +227,17 @@ export default function AssignmentCard({assignment, editableFields, updateField,
             startIcon={<EditIcon/>}
           >
             Edit Tests
+          </Button>
+          <Button
+            size={'small'}
+            color={'primary'}
+            variant={'contained'}
+            className={classes.button}
+            component={Link}
+            to={`/admin/assignment/late-exceptions/${assignment.id}`}
+            startIcon={<AccessTimeIcon/>}
+          >
+            Late Exceptions
           </Button>
           <Button
             size={'small'}

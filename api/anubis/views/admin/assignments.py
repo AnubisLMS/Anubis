@@ -1,6 +1,6 @@
 import json
-import parse
 
+import parse
 from dateutil.parser import parse as dateparse
 from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
@@ -19,7 +19,7 @@ from anubis.utils.data import row2dict
 from anubis.utils.http.decorators import load_from_id, json_response, json_endpoint
 from anubis.utils.http.https import error_response, success_response
 from anubis.utils.lms.assignments import assignment_sync
-from anubis.utils.lms.course import assert_course_admin, get_course_context, assert_course_context
+from anubis.utils.lms.course import get_course_context, assert_course_context
 from anubis.utils.lms.questions import get_assigned_questions
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.logger import logger

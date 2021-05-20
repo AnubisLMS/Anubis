@@ -62,7 +62,7 @@ export default function Assignments() {
         <Paper className={classes.paper}>
           <DataGrid columns={[
             {field: 'name', headerName: 'Assignment Name', width: 200},
-            {field: 'hidden', headerName: 'Hidden', width: 100, renderCell: ({row}) => (
+            {field: 'hidden', headerName: 'Visibility', width: 110, renderCell: ({row}) => (
               <Tooltip title={row.hidden ? 'Hidden' : 'Visible'}>
                 {
                   row.hidden ?

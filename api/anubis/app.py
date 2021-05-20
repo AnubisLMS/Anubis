@@ -13,11 +13,13 @@ def init_services(app):
     from anubis.utils.services.cache import cache, cache_health
     from anubis.utils.services.migrate import migrate
     from anubis.utils.services.elastic import add_global_error_handler
+    from anubis.utils.exceptions import add_app_exception_handlers
 
     # Init services
     db.init_app(app)
     cache.init_app(app)
     migrate.init_app(app, db)
+    add_app_exception_handlers(app)
 
     @app.route("/")
     def index():

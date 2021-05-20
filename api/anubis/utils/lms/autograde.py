@@ -36,7 +36,8 @@ def autograde(student_id, assignment_id):
             Submission.query.filter(
                 Submission.assignment_id == assignment_id,
                 Submission.owner_id == student_id,
-                Submission.processed,
+                Submission.processed == True,
+                Submission.accepted == True,
             )
                     .order_by(Submission.created.desc())
                     .all()

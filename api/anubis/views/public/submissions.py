@@ -1,10 +1,12 @@
+from datetime import datetime
+
 from flask import Blueprint, request
 
-from anubis.models import User, Submission
+from anubis.models import User, Submission, Assignment
 from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import error_response, success_response, get_number_arg
-from anubis.utils.lms.course import is_course_admin
+from anubis.utils.lms.course import is_course_admin, assert_course_context
 from anubis.utils.lms.submissions import regrade_submission, get_submissions
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.logger import logger
@@ -31,11 +33,13 @@ def public_submissions():
 
     :return:
     """
+
     # Get optional filters
     course_id = request.args.get("courseId", default=None)
     perspective_of_id = request.args.get("userId", default=None)
     assignment_id = request.args.get("assignmentId", default=None)
 
+    # Get the limit and offset for submissions query
     limit: int = get_number_arg('limit', default_value=10)
     offset: int = get_number_arg('offset', default_value=0)
 
@@ -45,9 +49,13 @@ def public_submissions():
     if perspective_of_id is not None:
         perspective_of = User.query.filter(User.id == perspective_of_id).first()
 
+    # If the request is from the perspective of a different user,
+    # we need to make sure the requester is an admin in the current
+    # course context.
     if perspective_of_id is not None and not is_course_admin(course_id):
         return error_response("Bad Request"), 400
 
+    # Get a possibly cached list of submission data
     _submissions, _total = get_submissions(
         user_id=perspective_of_id or user.id,
         course_id=course_id,
@@ -56,6 +64,7 @@ def public_submissions():
         offset=offset,
     )
 
+    # If the submissions query returned None, something went wrong
     if _submissions is None:
         return error_response("Bad Request"), 400
 
@@ -104,36 +113,42 @@ def public_submission(commit: str):
     return success_response({"submission": s.full_data})
 
 
-@submissions.route("/regrade/<commit>")
+@submissions.route("/regrade/<string:commit>")
 @require_user()
 @log_endpoint("regrade-request", lambda: "submission regrade request " + request.path)
 @json_response
-def public_regrade_commit(commit=None):
+def public_regrade_commit(commit: str):
     """
     This route will get hit whenever someone clicks the regrade button on a
     processed assignment. It should do some validity checks on the commit and
     netid, then reset the submission and re-enqueue the submission job.
     """
-    if commit is None:
-        return error_response("incomplete_request"), 406
 
     # Load current user
     user: User = current_user()
 
     # Find the submission
-    submission: Submission = (
-        Submission.query.join(User)
-            .filter(Submission.commit == commit, User.netid == user.netid)
-            .first()
-    )
+    submission: Submission = Submission.query.filter(
+        Submission.commit == commit
+    ).first()
 
     # Verify Ownership
     if submission is None:
-        return error_response("invalid commit hash or netid"), 406
+        return error_response("invalid commit hash")
+
+    # Check that the owner matches the user
+    if submission.owner_id != user.id:
+
+        # If the user is not the owner, then full stop if
+        assert_course_context(submission)
 
     # Check that autograde is enabled for the assignment
     if not submission.assignment.autograde_enabled:
-        return error_response('Autograde is disabled for this assignment'), 400
+        return error_response('Autograde is disabled for this assignment')
+
+    # Check that the submission is allowed to be accepted
+    if not submission.accepted:
+        return error_response('Submission was rejected for being late')
 
     # Regrade
     return regrade_submission(submission)

@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function AutogradeSubmission() {
+export default function Submission() {
   const classes = useStyles();
   const query = useQuery();
   const {enqueueSnackbar} = useSnackbar();
