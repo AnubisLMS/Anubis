@@ -27,6 +27,7 @@ import Visuals from './Pages/Public/Visuals';
 import AdminUsers from './Pages/Admin/Users';
 import AdminUser from './Pages/Admin/User';
 import AdminAssignments from './Pages/Admin/Assignment/Assignments';
+import AdminAssignment from './Pages/Admin/Assignment/Assignment';
 import AdminAutogradeAssignments from './Pages/Admin/Autograde/AutogradeAssignments';
 import AdminAutogradeResults from './Pages/Admin/Autograde/AutogradeResults';
 import AdminAutogradeSubmission from './Pages/Admin/Autograde/AutogradeSubmission';
@@ -182,6 +183,11 @@ export const not_shown_nav = [
     id: '',
     path: '/admin/assignment/repos/:assignmentId',
     Page: AdminAssignmentRepos,
+  },
+  {
+    id: '',
+    path: '/admin/assignment/edit/:assignmentId',
+    Page: AdminAssignment,
   },
 ];
 
