@@ -28,10 +28,6 @@ spec:
         component: api
     spec:
       # dnsPolicy: Default
-      {{- if .Values.api.datacenter }}
-      nodeSelector:
-        datacenter: {{ .Values.api.datacenter }}
-      {{- end }}
       containers:
       - name: api
         image: {{ .Values.api.image }}:{{ .Values.api.tag }}
