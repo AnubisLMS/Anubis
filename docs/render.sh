@@ -11,4 +11,4 @@ fi
 ./render.sh
 
 cd ../../
-exec pandoc design.md -s -o docs/design.pdf -f markdown-implicit_figures
+exec pandoc README.md -s -o docs/design.pdf -f markdown-implicit_figures
