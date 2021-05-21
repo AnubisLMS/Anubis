@@ -125,19 +125,22 @@ export default function ManagementIDEDialog() {
   const [sessionsAvailable, setSessionsAvailable] = useState(null);
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState(false);
-  const [settings, setSettings] = useState({
-    image: 'registry.osiris.services/anubis/theia-admin',
-    repo_url: 'https://github.com/os3224/anubis-assignment-tests',
-    options: '{"limits": {"cpu": "4", "memory": "4Gi"}, "autosave": true, "credentials": true}',
-    privileged: true,
-    network_locked: false,
-  });
+  const [settings, setSettings] = useState({});
 
   React.useEffect(() => {
     axios.get('/api/public/ide/available').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
         setSessionsAvailable(data.session_available);
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  }, []);
+
+  React.useEffect(() => {
+    axios.get('/api/admin/ide/settings').then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data?.settings) {
+        setSettings(data.settings);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, []);
@@ -153,7 +156,9 @@ export default function ManagementIDEDialog() {
         setSettings(data.settings);
       }
       if (data.session) {
-        setSession(data.session);
+        setTimeout(() => {
+          setSession(data.session);
+        }, 1000);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [open]);

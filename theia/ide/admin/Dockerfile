@@ -105,6 +105,7 @@ RUN pip3 install --no-cache-dir /cli \
   \( -type d -a \( -name test -o -name tests -o -name idle_test -o -name __pycache__ \) \) \
   -o \( -type f -a \( -name '*.pyc' -o -name '*.pyo' -o -name '*.a' \) \) \
   \) -exec rm -rf '{}' +
-COPY supervisord.conf initialize-incluster.py /
+COPY supervisord.conf initialize-incluster.py autosave-dump.sh /
+COPY autosave /usr/local/bin/autosave
 
 ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]

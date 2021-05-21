@@ -8,7 +8,7 @@ sample_sync = {
     "hidden": True,
     "github_classroom_url": "",
     "unique_code": "aa11bb22",
-    "pipeline_image": "registry.osiris.services/anubis/assignment/aa11bb2233",
+    "pipeline_image": "registry.digitalocean.com/anubis/assignment/aa11bb2233",
     "date": {
         "release": str(datetime.now() - timedelta(hours=2)),
         "due": str(datetime.now() + timedelta(hours=12)),

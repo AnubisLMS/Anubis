@@ -11,6 +11,7 @@ helm repo add longhorn https://charts.longhorn.io
 helm repo update
 
 kubectl create ns traefik
+kubectl create ns longhorn-system
 kubectl create ns elastic
 kubectl create ns anubis
 

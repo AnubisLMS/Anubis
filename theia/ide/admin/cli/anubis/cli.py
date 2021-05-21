@@ -16,6 +16,8 @@ import yaml
 
 INCLUSTER = False
 API_URL = 'https://anubis.osiris.services/api'
+COURSE_ID = os.environ.get('COURSE_ID', None)
+COURSE_CODE = os.environ.get('COURSE_CODE', 'CS-UY 3224')
 conf_dir = os.path.join(os.environ.get("HOME"), ".anubis")
 conf_file = os.path.join(os.environ.get("HOME"), ".anubis/config.json")
 assignment_base = None
@@ -232,7 +234,8 @@ def init(assignment_name):
         name=os.path.basename(safe_assignment_name),
         code=unique_code,
         now=now.strftime('%F %T'),
-        week_from_now=week_from_now.strftime('%F %T')
+        week_from_now=week_from_now.strftime('%F %T'),
+        course_code=COURSE_CODE,
     )
     with open(meta_path, 'w') as f:
         f.write(meta)

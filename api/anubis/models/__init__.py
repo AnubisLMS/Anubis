@@ -7,7 +7,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_json import MutableJson
 
 from anubis.utils.data import rand
-from anubis.utils.services.logger import logger
 
 db = SQLAlchemy()
 
@@ -90,7 +89,9 @@ class Course(db.Model):
     semester = db.Column(db.TEXT, nullable=True)
     section = db.Column(db.TEXT, nullable=True)
     professor = db.Column(db.TEXT, nullable=False)
-    theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.osiris.services/anubis/xv6')
+    autograde_tests_repo = db.Column(db.TEXT, nullable=False,
+                                     default='https://github.com/os3224/anubis-assignment-tests')
+    theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.digitalocean.com/anubis/xv6')
     theia_default_options = db.Column(MutableJson, default=lambda: {"limits": {"cpu": "2", "memory": "500Mi"}})
 
     @property
@@ -191,7 +192,7 @@ class Assignment(db.Model):
     accept_late = db.Column(db.Boolean, default=True)
     autograde_enabled = db.Column(db.Boolean, default=True)
     theia_image = db.Column(
-        db.TEXT, default="registry.osiris.services/anubis/theia-xv6"
+        db.TEXT, default="registry.digitalocean.com/anubis/theia-xv6"
     )
     theia_options = db.Column(MutableJson, default=lambda: {})
 
@@ -467,7 +468,7 @@ class Submission(db.Model):
     # Relationships
     owner = db.relationship(User)
     assignment = db.relationship(Assignment)
-    build = db.relationship("SubmissionBuild", cascade="all,delete", backref='submission')
+    build = db.relationship("SubmissionBuild", cascade="all,delete", uselist=False, backref='submission')
     test_results = db.relationship("SubmissionTestResult", cascade="all,delete", backref='submission')
     repo = db.relationship(AssignmentRepo, backref='submissions')
 
@@ -658,7 +659,7 @@ class TheiaSession(db.Model):
     state = db.Column(db.TEXT)
     cluster_address = db.Column(db.TEXT, nullable=True, default=None)
     image = db.Column(
-        db.TEXT, default="registry.osiris.services/anubis/theia-xv6"
+        db.TEXT, default="registry.digitalocean.com/anubis/theia-xv6"
     )
     options = db.Column(MutableJson, nullable=False, default=lambda: dict())
     network_locked = db.Column(db.Boolean, default=True)
@@ -766,6 +767,3 @@ class LateException(db.Model):
             'assignment_id': self.assignment_id,
             'due_date': str(self.due_date)
         }
-
-
-

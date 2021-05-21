@@ -286,7 +286,7 @@ def private_assignment_sync(assignment: dict):
         "hidden": true,
         "github_classroom_url": "",
         "unique_code": "{code}",
-        "pipeline_image": "registry.osiris.services/anubis/assignment/{code}",
+        "pipeline_image": "registry.digitalocean.com/anubis/assignment/{code}",
         "date": {
           "release": "{now}",
           "due": "{week_from_now}",

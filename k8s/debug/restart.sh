@@ -51,3 +51,6 @@ kubectl rollout restart deployments.apps/rpc-theia -n anubis
 kubectl rollout restart deployments.apps/rpc-regrade -n anubis
 kubectl rollout restart deployments.apps/pipeline-api -n anubis
 kubectl rollout restart deployments.apps/theia-proxy -n anubis
+
+cd ..
+make startup-links

@@ -45,6 +45,7 @@ fi
 minikube start \
          --feature-gates=TTLAfterFinished=true \
          --ports=80:80,443:443 \
+         --network-plugin=cni \
          --cpus=${CPUS} \
          --memory=${MEM} \
          --cni=calico
@@ -87,23 +88,22 @@ helm upgrade --install mariadb bitnami/mariadb \
     --set 'replication.enabled=false' \
     --namespace mariadb
 
+
 # Install a minimal elasticsearch and kibana deployments
-echo 'Adding elasticsearch + kibana'
-kubectl create namespace anubis
-helm upgrade --install elasticsearch bitnami/elasticsearch \
-    --set name=elasticsearch \
-    --set master.persistence.size=1Gi \
-    --set data.persistence.size=1Gi \
-    --set master.replicas=1 \
-    --set coordinating.replicas=1 \
-    --set data.replicas=1 \
-    --set global.kibanaEnabled=true \
-    --set fullnameOverride=elasticsearch \
-    --set global.coordinating.name=coordinating \
-    --namespace anubis
+echo 'Adding elasticsearch'
+kubectl create namespace elastic
+helm upgrade \
+		 --install elasticsearch elastic/elasticsearch \
+		 --create-namespace \
+		 --set replicas=1 \
+		 --set resources=null \
+		 --set volumeClaimTemplate.resources.requests.storage=1Gi \
+		 --set imageTag=7.12.0 \
+		 --namespace elastic
 
 # Install a minimal redis deployment
 echo 'Adding redis'
+kubectl create namespace anubis
 helm upgrade --install redis bitnami/redis \
     --set fullnameOverride=redis \
     --set global.redis.password=anubis \

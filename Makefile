@@ -1,6 +1,6 @@
 PERSISTENT_SERVICES := db traefik kibana elasticsearch-coordinating redis-master logstash
 RESTART_ALWAYS_SERVICES := api web-dev rpc-default rpc-theia rpc-regrade
-PUSH_SERVICES := api web logstash theia-init theia-proxy theia-admin theia-xv6
+PUSH_SERVICES := api web theia-init theia-proxy theia-admin theia-xv6
 
 
 
@@ -35,7 +35,7 @@ deploy:
 build:
 	docker-compose build --parallel --pull
 
-.PHONY: push         # Push images to registry.osiris.services (requires vpn)
+.PHONY: push         # Push images to registry.digitalocean.com (requires vpn)
 push:
 	docker-compose build --parallel --pull $(PUSH_SERVICES)
 	docker-compose push $(PUSH_SERVICES)

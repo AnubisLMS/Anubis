@@ -37,6 +37,7 @@ const editableFields = [
   {field: 'course_code', label: 'Course Code'},
   {field: 'section', label: 'Section'},
   {field: 'professor', label: 'Professor'},
+  {field: 'autograde_tests_repo', label: 'Autograde Tests Repo'},
   {field: 'theia_default_image', label: 'Theia Default Image'},
   {field: 'theia_default_options', label: 'Theia Default Options'},
   {field: 'join_code', label: 'Join Code', disabled: true},
@@ -78,13 +79,14 @@ export default function Course() {
   };
 
   const saveCourse = () => () => {
+    const post_course = {...course};
     try {
-      course.theia_default_options = JSON.parse(course.theia_default_options);
+      post_course.theia_default_options = JSON.parse(course.theia_default_options);
     } catch (e) {
       enqueueSnackbar(e.toString(), {variant: 'error'});
       return;
     }
-    axios.post(`/api/admin/courses/save`, {course}).then((response) => {
+    axios.post(`/api/admin/courses/save`, {course: post_course}).then((response) => {
       standardStatusHandler(response, enqueueSnackbar);
     }).catch(standardErrorHandler(enqueueSnackbar));
   };
@@ -136,7 +138,7 @@ export default function Course() {
           <Switch>
             <Route path={'/admin/course'} exact={true}>
               <React.Fragment>
-                <Grid item xs={12} md={6} key={course.id}>
+                <Grid item xs={12} sm={10} md={8} lg={6} key={course.id}>
                   <CourseCard
                     course={course}
                     editableFields={editableFields}

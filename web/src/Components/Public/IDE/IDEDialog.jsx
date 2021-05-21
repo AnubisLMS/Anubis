@@ -90,7 +90,9 @@ const startSession = (state, enqueueSnackbar) => () => {
         pollSession(data.session.id, state, enqueueSnackbar)();
       } else {
         setSession(data.session);
-        setLoading(false);
+        setTimeout(() => {
+          setLoading(false);
+        }, 1000);
       }
     }
   }).catch(standardErrorHandler(enqueueSnackbar));

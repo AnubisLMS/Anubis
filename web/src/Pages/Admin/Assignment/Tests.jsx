@@ -49,8 +49,8 @@ export default function Tests() {
   React.useEffect(() => {
     axios.get(`/api/admin/assignments/get/${match?.assignmentId}`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      if (data?.assignment?.tests) {
-        setTests(data?.assignment?.tests ?? []);
+      if (data?.tests) {
+        setTests(data?.tests ?? []);
       }
       if (data?.assignment?.name) {
         setAssignmentName(data?.assignment?.name ?? '');

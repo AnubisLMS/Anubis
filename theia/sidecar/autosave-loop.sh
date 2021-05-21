@@ -12,6 +12,8 @@ fi
 
 set +e
 while true; do
-    /autosave.sh
+    if [ "${AUTOSAVE}" = "ON" ]; then
+        /autosave.sh
+    fi
     sleep "5m"
 done

@@ -1,6 +1,6 @@
 assignment:
   name: "{name}"
-  class: "CS-UY 3224"
+  class: "{course_code}"
   hidden: true
   # Optionally specify the github classroom link
   # for students to get their repo.
@@ -8,7 +8,7 @@ assignment:
 
   # Don't change these!
   unique_code: "{code}"
-  pipeline_image: "registry.osiris.services/anubis/assignment/{code}"
+  pipeline_image: "registry.digitalocean.com/anubis/assignment/{code}"
 
   # Specify the importaint dates here
   date:
