@@ -315,8 +315,7 @@ completely hidden from the user.
 
 With these lightweight containerized theia servers, we are able to support significantly more concurrent users than
 if we had elected to implement a cloud vm solution. Because with containers, we do not need to virtualize hardware,
-the resources on the system for each user is significantly less. Given the resources that we have in the
-Space Cluster,
+the resources on the system for each user is significantly less. Given the resources that we have on Digital Ocean,
 we would be able to have maybe 20-30 concurrent users using cloud virtual machines. With our containerized theia,
 we can handle all ~130 students at the same time with room to breath.
 
@@ -350,8 +349,7 @@ authenticated using that personal token that gets dropped into the pod.
 
 #### 2.6.1 Mariadb
 
-Anubis will use the OSIRIS Space Clusters existing MariaDB cluster. That cluster is made from
-[bitnami's MariaDB chart](https://hub.kubeapps.com/charts/bitnami/mariadb). It runs with 3 read-only
+Anubis uses the [bitnami MariaDB chart](https://hub.kubeapps.com/charts/bitnami/mariadb). It runs with 3 read-only
 replication nodes, along with a main node that does read-write. The underlying MariaDB files are also
 backed up with a [Longhorn](https://longhorn.io/) persistent volume that has 3x replication in the cluster.
 That volume has daily snapshots. Redundancy is the name of the game here.
@@ -519,10 +517,10 @@ versions, with little to no degradation in service.
 
 #### 3.1.3 Longhorn
 
-The Kubernetes [StorageClass](https://kubernetes.io/docs/concepts/storage/storage-classes/) that the Space Cluster
-supports is Longhorn. It allows us to have replicated data volumes with scheduled snapshots and backups.
+The Kubernetes [StorageClass](https://kubernetes.io/docs/concepts/storage/storage-classes/) that Anubis uses is Longhorn. It allows us to have ReadWriteMany volumes
+for things like the Cloud IDEs.
 
-All persistent data is stored on 3x replicated Longhorn StorageVolumes. Those volumes all have at least daily
+All important data is stored on 3x replicated Longhorn StorageVolumes. Those volumes all have at least daily
 snapshots taken of them. At any given time, we can reset any stateful service to a previous snapshot from the
 last seven days.
 
