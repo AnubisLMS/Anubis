@@ -296,21 +296,21 @@ def private_questions_get_assignments_unique_code(unique_code: str):
     })
 
 
-@questions.route("/get/<string:unique_code>")
+@questions.route("/get/<string:assignment_id>")
 @require_admin()
 @log_endpoint("admin", lambda: "get question assignments")
 @json_response
-def private_questions_get_unique_code(unique_code: str):
+def private_questions_get_unique_code(assignment_id: str):
     """
     Get all questions for the given assignment.
 
-    :param unique_code:
+    :param assignment_id:
     :return:
     """
 
     # Try to find assignment
     assignment: Assignment = Assignment.query.filter(
-        Assignment.unique_code == unique_code
+        Assignment.id == assignment_id
     ).first()
 
     # Verify that the assignment exists

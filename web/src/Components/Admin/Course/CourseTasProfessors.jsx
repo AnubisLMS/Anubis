@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(1),
   },
   dataGridPaper: {
-    width: '100%',
+    padding: theme.spacing(1),
     height: 700,
   },
   inline: {
@@ -125,7 +125,7 @@ export default function CourseTasProfessors({base}) {
             className={classes.autocomplete}
             renderInput={(params) => <TextField {...params} variant={'outlined'}/>}
             value={selected}
-            getOptionLabel={(item) => item.netid}
+            getOptionLabel={(option) => `${option.netid} ${option.name}`}
             onChange={(_, e) => setSelected(e)}
             options={users}
           />

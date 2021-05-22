@@ -212,7 +212,7 @@ export default function AssignmentCard({assignment, editableFields, updateField,
             variant={'contained'}
             className={clsx(classes.buttonRight, classes.button)}
             component={Link}
-            to={`/admin/assignment/questions/${assignment.unique_code}`}
+            to={`/admin/assignment/questions/${assignment.id}`}
             startIcon={<EditIcon/>}
           >
             Edit Questions

@@ -122,12 +122,11 @@ export default function CourseView() {
       <Grid item xs={12} md={10}>
         <Grid container spacing={4}>
           {courses.map((course, pos) => (
-            <Grid item xs key={course.courseCode}>
+            <Grid item key={course.courseCode}>
               <Grow
-                key={course.courseCode}
                 in={true}
                 style={{transformOrigin: '0 0 0'}}
-                {...({timeout: 300 * (pos + 1)})}
+                timeout={300 * (pos + 1)}
               >
                 <CourseCard course={course}/>
               </Grow>

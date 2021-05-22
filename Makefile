@@ -65,7 +65,7 @@ mindebug:
 	docker-compose up -d traefik db redis-master logstash
 	docker-compose up \
 		-d --force-recreate \
-		api web rpc-default rpc-theia
+		api web-dev rpc-default rpc-theia
 	@echo 'Waiting a moment before running migrations'
 	sleep 3
 	@echo 'running migrations'

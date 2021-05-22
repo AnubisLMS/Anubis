@@ -161,8 +161,8 @@ export const not_shown_nav = [
     Page: AdminUser,
   },
   {
-    id: 'AdminAssignmentStats',
-    path: '/admin/autograde/assignment',
+    id: 'AdminAssignmentResults',
+    path: '/admin/autograde/assignment/:assignmentId',
     Page: AdminAutogradeResults,
   },
   {
@@ -172,7 +172,7 @@ export const not_shown_nav = [
   },
   {
     id: '',
-    path: '/admin/assignment/questions/:code',
+    path: '/admin/assignment/questions/:assignmentId',
     Page: AdminAssignmentQuestions,
   },
   {

@@ -51,17 +51,12 @@ export default function CourseCard({course}) {
 
         <CardActionArea
           component={Link}
-          to={`/courses/assignments?course=${id}`}>
+          to={`/courses/assignments?courseId=${id}`}>
 
           <CardContent>
-            <Typography
-              className={classes.sem}
-              color="textSecondary"
-              gutterBottom
-            >
+            <Typography className={classes.sem} color="textSecondary" gutterBottom>
               {semester}
             </Typography>
-
             <Typography className={classes.title} variant="h6" component="h2">
               {name}
             </Typography>
@@ -72,6 +67,7 @@ export default function CourseCard({course}) {
               {professor}
             </Typography>
           </CardContent>
+
           <CardActions>
             <Button size="small" color="primary">
               {`${total_assignments} Assigments`}

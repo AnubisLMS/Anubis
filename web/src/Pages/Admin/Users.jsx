@@ -193,7 +193,7 @@ export default function Users() {
               blurOnSelect
               fullWidth={false}
               options={students}
-              getOptionLabel={(option) => option.name}
+              getOptionLabel={(option) => `${option.netid} ${option.name}`}
               onChange={(_, value) => setSearched(value)}
               renderInput={(params) => (
                 <TextField

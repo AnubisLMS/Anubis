@@ -9,8 +9,16 @@ import makeStyles from '@material-ui/core/styles/makeStyles';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Grid from '@material-ui/core/Grid';
+import Tooltip from '@material-ui/core/Tooltip';
+import green from '@material-ui/core/colors/green';
+import red from '@material-ui/core/colors/red';
+import grey from '@material-ui/core/colors/grey';
+
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import CheckIcon from '@material-ui/icons/Check';
+import CancelIcon from '@material-ui/icons/Cancel';
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 
 import QuestionEditor from './QuestionEditor';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
@@ -39,10 +47,13 @@ const useStyles = makeStyles((theme) => ({
   markdown: {
     margin: theme.spacing(1),
   },
+  icon: {
+    marginRight: theme.spacing(1),
+  },
 }));
 
 const saveResponse = (id, response, enqueueSnackbar) => () => {
-  axios.post(`/api/public/questions/save/${id}`, {response}).then((resp) => {
+  axios.post(`/api/public/questions/save/${id}`, {response: response.text}).then((resp) => {
     standardStatusHandler(resp, enqueueSnackbar);
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
@@ -50,37 +61,55 @@ const saveResponse = (id, response, enqueueSnackbar) => () => {
 export default function QuestionsCard({questions}) {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
-  const [edits, setEdits] = useState(0);
-  const [responses, setResponses] = useState([]);
-
-  const incEdits = () => setEdits((state) => ++state);
+  const [responses, setResponses] = useState(null);
 
   React.useEffect(() => {
     setResponses(questions.map((question) => question.response));
-    incEdits();
   }, [questions]);
 
-  if (!questions || questions.length === 0) {
+  if (!questions || questions.length === 0 || !responses || responses.length === 0) {
     return null;
   }
 
   const updateResponse = (index) => (value) => {
     setResponses((state) => {
-      state[index] = value;
-      return state;
+      state[index].text = value;
+      return [...state];
     });
-    incEdits();
   };
+
+  console.log(responses);
 
   return (
     <div className={classes.root}>
       <Grid container justify={'center'} spacing={1}>
 
-        {questions.sort(({question: q1}, {question: q2}) => q1.pool - q2.pool).map(({id, question}, index) => (
+        {questions.sort(({question: q1}, {question: q2}) => q1.pool - q2.pool).map(({
+          id, question,
+        }, index) => (
           <Grid item xs={12} key={`question-${question.pool}`} className={classes.question}>
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                <Typography className={classes.heading}>Question {question.pool}</Typography>
+                <div className={classes.icon}>
+                  {responses[index].submitted === null ? (
+                    <Tooltip title={'No Submission'}>
+                      <RemoveCircleOutlineIcon style={{color: grey[500]}}/>
+                    </Tooltip>
+                  ) : (
+                    responses[index].late ? (
+                      <Tooltip title={`Submitted late. Last modified ${responses[index].submitted}`}>
+                        <CancelIcon style={{color: red[500]}}/>
+                      </Tooltip>
+                    ) : (
+                      <Tooltip title={`Submitted on time. Last modified ${responses[index].submitted}`}>
+                        <CheckIcon style={{color: green[500]}}/>
+                      </Tooltip>
+                    )
+                  )}
+                </div>
+                <Typography className={classes.heading}>
+                  Question {question.pool}
+                </Typography>
               </AccordionSummary>
 
               <AccordionDetails>
@@ -96,7 +125,7 @@ export default function QuestionsCard({questions}) {
 
                   <QuestionEditor
                     question={question}
-                    response={responses[index]}
+                    response={responses[index].text}
                     updateResponse={updateResponse(index)}
                     saveResponse={saveResponse(id, responses[index], enqueueSnackbar)}
                   />

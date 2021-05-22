@@ -24,7 +24,7 @@ export default function AssignmentQuestions() {
   const [reset, setReset] = useState(0);
 
   React.useEffect(() => {
-    axios.get(`/api/admin/questions/get/${match.code}`).then((response) => {
+    axios.get(`/api/admin/questions/get/${match.assignmentId}`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data.questions) {
         setQuestions(data.questions);
@@ -44,7 +44,6 @@ export default function AssignmentQuestions() {
   };
 
   const saveQuestion = (index) => () => {
-    console.log(questions[index]);
     const question = questions[index];
     axios.post(`/api/admin/questions/update/${question.id}`, {question}).then((response) => {
       standardStatusHandler(response, enqueueSnackbar);

@@ -384,35 +384,37 @@ class AssignedStudentQuestion(db.Model):
 
         :return:
         """
-        response = AssignedQuestionResponse.query.filter(
+        from anubis.utils.lms.assignments import get_assignment_due_date
+
+        response: AssignedQuestionResponse = AssignedQuestionResponse.query.filter(
             AssignedQuestionResponse.assigned_question_id == self.id,
         ).order_by(AssignedQuestionResponse.created.desc()).first()
 
+        submitted = None
+        late = True
         raw_response = self.question.placeholder
         if response is not None:
+            due_date = get_assignment_due_date(self.owner, self.assignment)
+
             raw_response = response.response
+            submitted = str(response.created)
+            late = due_date < response.created
 
         return {
             "id": self.id,
-            "response": raw_response,
+            "response": {
+                'submitted': submitted,
+                'late': late,
+                'text': raw_response,
+            },
             "question": self.question.data,
         }
 
     @property
     def full_data(self):
-        response = AssignedQuestionResponse.query.filter(
-            AssignedQuestionResponse.assigned_question_id == self.id,
-        ).order_by(AssignedQuestionResponse.created.desc()).first()
-
-        raw_response = self.question.placeholder
-        if response is not None:
-            raw_response = response.response
-
-        return {
-            "id": self.id,
-            "question": self.question.full_data,
-            "response": raw_response,
-        }
+        data = self.data
+        data['question'] = self.question.full_data
+        return data
 
 
 class AssignedQuestionResponse(db.Model):

@@ -71,7 +71,7 @@ services:
     volumes:
       - "./api:/opt/app"
     labels:
-      - "traefik.enable=false"
+      - "traefik.false=enable"
 
   rpc-theia:
     build: ./api
