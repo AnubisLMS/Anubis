@@ -90,7 +90,7 @@ export default function QuestionsCard({questions}) {
     <div className={classes.root}>
       <Grid container justify={'center'} spacing={1}>
 
-        {questions.sort(({question: q1}, {question: q2}) => q1.pool - q2.pool).map(({
+        {questions.map(({
           id, question,
         }, index) => (
           <Grid item xs={12} key={`question-${question.pool}`} className={classes.question}>

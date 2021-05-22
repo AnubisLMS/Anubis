@@ -25,7 +25,7 @@ export default function Questions({assignment_id}) {
         <Typography variant="body1">
           Questions
         </Typography>
-        <QuestionGrid questions={data.questions}/>
+        <QuestionGrid questions={data.questions.sort(({question: q1}, {question: q2}) => q1.pool - q2.pool)}/>
       </React.Fragment>
     </Zoom>
   );
