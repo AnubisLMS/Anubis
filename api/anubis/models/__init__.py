@@ -390,23 +390,13 @@ class AssignedStudentQuestion(db.Model):
             AssignedQuestionResponse.assigned_question_id == self.id,
         ).order_by(AssignedQuestionResponse.created.desc()).first()
 
-        submitted = None
-        late = True
-        raw_response = self.question.placeholder
+        response_data = {'submitted': None,'late': True, 'text': self.question.placeholder}
         if response is not None:
-            due_date = get_assignment_due_date(self.owner, self.assignment)
-
-            raw_response = response.response
-            submitted = str(response.created)
-            late = due_date < response.created
+            response_data = response.data
 
         return {
             "id": self.id,
-            "response": {
-                'submitted': submitted,
-                'late': late,
-                'text': raw_response,
-            },
+            "response": response_data,
             "question": self.question.data,
         }
 
@@ -434,6 +424,16 @@ class AssignedQuestionResponse(db.Model):
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    @property
+    def data(self):
+        from anubis.utils.lms.assignments import get_assignment_due_date
+
+        return {
+            'submitted': str(self.created),
+            'late': get_assignment_due_date(self.question.owner, self.question.assignment) < self.created,
+            'text': self.response,
+        }
 
 
 class Submission(db.Model):

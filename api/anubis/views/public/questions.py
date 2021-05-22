@@ -114,4 +114,5 @@ def public_questions_save(id: str, response: str):
 
     return success_response({
         "status": "Response Saved",
+        "response": res.data,
     })

@@ -16,9 +16,9 @@ import red from '@material-ui/core/colors/red';
 import grey from '@material-ui/core/colors/grey';
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import CheckIcon from '@material-ui/icons/Check';
-import CancelIcon from '@material-ui/icons/Cancel';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
+import AssignmentLateIcon from '@material-ui/icons/AssignmentLate';
 
 import QuestionEditor from './QuestionEditor';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
@@ -52,9 +52,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const saveResponse = (id, response, enqueueSnackbar) => () => {
-  axios.post(`/api/public/questions/save/${id}`, {response: response.text}).then((resp) => {
-    standardStatusHandler(resp, enqueueSnackbar);
+const saveResponse = (id, responses, index, setResponses, enqueueSnackbar) => () => {
+  axios.post(`/api/public/questions/save/${id}`, {response: responses[index].text}).then((resp) => {
+    const data = standardStatusHandler(resp, enqueueSnackbar);
+    if (data?.response) {
+      setResponses((prev) => {
+        prev[index] = data.response;
+        return [...prev];
+      });
+    }
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
@@ -98,11 +104,11 @@ export default function QuestionsCard({questions}) {
                   ) : (
                     responses[index].late ? (
                       <Tooltip title={`Submitted late. Last modified ${responses[index].submitted}`}>
-                        <CancelIcon style={{color: red[500]}}/>
+                        <AssignmentLateIcon style={{color: red[500]}}/>
                       </Tooltip>
                     ) : (
                       <Tooltip title={`Submitted on time. Last modified ${responses[index].submitted}`}>
-                        <CheckIcon style={{color: green[500]}}/>
+                        <AssignmentTurnedInIcon style={{color: grey[500]}}/>
                       </Tooltip>
                     )
                   )}
@@ -127,7 +133,7 @@ export default function QuestionsCard({questions}) {
                     question={question}
                     response={responses[index].text}
                     updateResponse={updateResponse(index)}
-                    saveResponse={saveResponse(id, responses[index], enqueueSnackbar)}
+                    saveResponse={saveResponse(id, responses, index, setResponses, enqueueSnackbar)}
                   />
                 </Grid>
               </AccordionDetails>
