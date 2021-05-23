@@ -6,16 +6,18 @@ assignment:
   # Optionally specify the github classroom link
   # for students to get their repo.
   #
-  # ** Remember to set the Custom repository
-  # prefix to {name}-{unique_code} in github classroom
-  # when creating the assignment. **
+  #  !! Remember to set the Custom repository
+  #  !! prefix to {name}-{unique_code}
+  #  !! when creating the assignment on
+  #  !! Github Classroom
   github_classroom_url: ""
 
   # Don't change these!
-  unique_code: "{code}"
-  pipeline_image: "registry.digitalocean.com/anubis/assignment/{code}"
+  unique_code: "{unique_code}"
+  pipeline_image: "registry.digitalocean.com/anubis/assignment/{unique_code}"
 
-  # Specify the importaint dates here
+  # Specify the important dates here
+  # * Remember! These are interpreted as America/New_York *
   date:
     release: "{now}"
     due: "{week_from_now}"
@@ -24,20 +26,3 @@ assignment:
   # This description will be shown to the user on the Anubis website.
   description: |
     This is a very long description that encompases the entire assignment
-
-  # Uncomment this section if you want to have question pools
-  # These questions are purely additive. To delete a question, you will
-  # need to manually edit the database. This is by design to prevent
-  # a question assigned to a student from being changed to prevent
-  # confusion.
-  questions: []
-  #  - pool: 1
-  #    questions:
-  #      - q: "What is 3*4?"
-  #        a: "12"
-  #      - q: "What is 3*2"
-  #        a: "6"
-  #  - pool: 2
-  #    questions:
-  #      - q: "What is sqrt(144)?"
-  #        a: "12"

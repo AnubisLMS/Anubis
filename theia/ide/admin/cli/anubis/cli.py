@@ -184,16 +184,6 @@ def whoami():
     click.echo(json.dumps(r.json(), indent=2))
 
 
-@questions.command()
-def assign():
-    if not os.path.exists('meta.yml'):
-        click.echo('no meta.yml found!')
-        return 1
-    assignment_meta = yaml.safe_load(open('meta.yml').read())
-    unique_code = assignment_meta['assignment']['unique_code']
-    get_json('/private/questions/assign/{}'.format(unique_code))
-
-
 @assignment.command()
 def sync():
     if not os.path.exists('meta.yml'):
@@ -232,7 +222,7 @@ def init(assignment_name):
     meta_path = os.path.join(safe_assignment_name, 'meta.yml')
     meta = open(meta_path).read().format(
         name=os.path.basename(safe_assignment_name),
-        code=unique_code,
+        unique_code=unique_code,
         now=now.strftime('%F %T'),
         week_from_now=week_from_now.strftime('%F %T'),
         course_code=COURSE_CODE,

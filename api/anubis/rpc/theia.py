@@ -249,6 +249,8 @@ def initialize_theia_session(theia_session_id: str):
     name = get_theia_pod_name(theia_session)
     n = 10
     while True:
+
+        # Get the pod information from the kubernetes api
         pod: client.V1Pod = v1.read_namespaced_pod(
             name=name,
             namespace="anubis",
@@ -256,6 +258,8 @@ def initialize_theia_session(theia_session_id: str):
 
         if pod.status.phase == "Pending":
             n += 1
+
+            # Wait at 60 iterations while it is pending before giving up
             if n > 60:
                 logger.error(
                     "Theia session took too long to initialize. Freeing worker."
@@ -265,8 +269,17 @@ def initialize_theia_session(theia_session_id: str):
             time.sleep(1)
 
         if pod.status.phase == "Running":
+            # Set the cluster address and state
             theia_session.cluster_address = pod.status.pod_ip
             theia_session.state = "Running"
+
+            # We need to introduce a small amount of time here
+            # to give the theia server a moment to actually run
+            # before the button on the web frontend to go to
+            # the session is available to the user
+            time.sleep(1)
+
+            # Index the event
             esindex(
                 "theia",
                 body={
@@ -275,6 +288,8 @@ def initialize_theia_session(theia_session_id: str):
                     "netid": theia_session.owner.netid,
                 },
             )
+
+            # Log the event
             logger.info("Theia session started {}".format(name))
             break
 
