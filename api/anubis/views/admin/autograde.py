@@ -142,7 +142,7 @@ def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
 @autograde_.route("/submission/<string:assignment_id>/<string:netid>")
 @require_admin()
 @log_endpoint("cli", lambda: "submission-stats")
-@cache.memoize(timeout=60)
+@cache.memoize(timeout=60, source_check=True)
 @json_response
 def private_submission_stats_id(assignment_id: str, netid: str):
     """

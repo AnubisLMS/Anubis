@@ -19,47 +19,62 @@ import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import downloadTextFile from '../../../Utils/downloadTextFile';
 import AddIcon from '@material-ui/icons/Add';
+import CardHeader from '@material-ui/core/CardHeader';
 
-const resetWarning = 'This will delete all question assignments. ' +
-  'This action cannot be undone. ' +
-  'After assigning new questions, students may have a different set of assigned questions. ' +
-  'Do not use this if you are not sure what you are doing.';
+const resetWarning = (
+  <div>
+    <p>
+      This will delete all question assignments. This action cannot be easily undone.
+      After assigning new questions, students may have a different set of assigned questions.
+      Consider downloading the question assignments before running this action.
+    </p>
+    <p style={{color: 'red'}}> Do not use this if you are not sure what you are doing. </p>
+  </div>
+);
 
-const hardResetWarning = 'This will delete all assignments and questions for the assignments. ' +
-  'This action cannot be undone. ' +
-  'You will need to re-sync the assignment to get the questions back. ' +
-  'Do not use this fi you are not sure what you are doing.';
+const hardResetWarning = (
+  <div>
+    <p>
+      This will delete all assignments and questions for the assignments. This action cannot be easily undone.
+      You will need to re-sync the assignment to get the questions back.
+      Consider downloading the question assignments before running this action.
+    </p>
+    <p style={{color: 'red'}}> Do not use this if you are not sure what you are doing. </p>
+  </div>
+);
 
-export default function QuestionControls({uniqueCode, reload}) {
+export default function QuestionControls({assignmentId, reload, questionsAssigned, assignmentName}) {
   const {enqueueSnackbar} = useSnackbar();
   const [verify, setVerify] = useState(null);
 
-
   const assignQuestions = () => {
-    axios.get(`/api/admin/questions/assign/${uniqueCode}`).then((response) => {
+    axios.get(`/api/admin/questions/assign/${assignmentId}`).then((response) => {
       standardStatusHandler(response, enqueueSnackbar);
+      reload();
     }).catch(standardErrorHandler(enqueueSnackbar));
   };
 
   const hardResetQuestions = () => {
-    axios.get(`/api/admin/questions/hard-reset/${uniqueCode}`).then((response) => {
+    axios.get(`/api/admin/questions/hard-reset/${assignmentId}`).then((response) => {
       standardStatusHandler(response, enqueueSnackbar);
+      reload();
     }).catch(standardErrorHandler(enqueueSnackbar));
   };
 
   const resetQuestionAssignments = () => {
-    axios.get(`/api/admin/questions/reset-assignments/${uniqueCode}`).then((response) => {
+    axios.get(`/api/admin/questions/reset-assignments/${assignmentId}`).then((response) => {
       standardStatusHandler(response, enqueueSnackbar);
+      reload();
     }).catch(standardErrorHandler(enqueueSnackbar));
   };
 
   const downloadQuestionAssignments = () => {
-    axios.get(`/api/admin/questions/get-assignments/${uniqueCode}`).then((response) => {
+    axios.get(`/api/admin/questions/get-assignments/${assignmentId}`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      if (data.questions) {
+      if (data.assignments) {
         downloadTextFile(
-          `assignment-${uniqueCode}-question-assignments.json`,
-          JSON.stringify(data.questions),
+          `assignment-${assignmentName}-question-assignments.json`,
+          JSON.stringify(data.assignments),
           'application/json',
         );
       }
@@ -67,7 +82,7 @@ export default function QuestionControls({uniqueCode, reload}) {
   };
 
   const addQuestion = () => {
-    axios.get(`/api/admin/questions/add/${uniqueCode}`).then((response) => {
+    axios.get(`/api/admin/questions/add/${assignmentId}`).then((response) => {
       standardStatusHandler(response, enqueueSnackbar);
       reload();
     }).catch(standardErrorHandler(enqueueSnackbar));
@@ -88,7 +103,9 @@ export default function QuestionControls({uniqueCode, reload}) {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setVerify(null)} color="primary" variant={'contained'} autoFocus>
+          <Button onClick={() => (
+            setVerify(null)
+          )} color="primary" variant={'contained'} autoFocus>
             Cancel
           </Button>
           <Button onClick={() => {
@@ -100,6 +117,13 @@ export default function QuestionControls({uniqueCode, reload}) {
         </DialogActions>
       </Dialog>
       <Card>
+        <CardHeader
+          title={`Questions for ${assignmentName}`}
+          subheader={questionsAssigned ?
+            'Questions are assigned' :
+            'Questions are not assigned'
+          }
+        />
         <CardContent>
           <Grid container spacing={2}>
 
