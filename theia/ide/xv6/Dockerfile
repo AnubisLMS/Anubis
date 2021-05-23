@@ -1,100 +1,12 @@
 # https://github.com/theia-ide/theia-apps/tree/master/theia-cpp-docker
 
-FROM ubuntu:20.04 as common
-
 ARG NODE_VERSION=12.18.3
+
+FROM node:${NODE_VERSION}-buster as theia
+
 ENV NODE_VERSION=$NODE_VERSION
+ENV TERM=xterm-256color
 ENV DEBIAN_FRONTEND=noninteractive
-
-# User account
-RUN adduser --disabled-password --gecos '' --uid 1001 theia
-
-# Common deps
-RUN apt-get update && \
-    apt-get -y install build-essential \
-                       curl \
-                       git \
-                       gpg \
-                       python \
-                       wget \
-                       xz-utils && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install Node.js
-# From: https://github.com/nodejs/docker-node/blob/6b8d86d6ad59e0d1e7a94cec2e909cad137a028f/8/Dockerfile
-
-# gpg keys listed at https://github.com/nodejs/node#release-keys
-RUN set -ex \
-    && for key in \
-    4ED778F539E3634C779C87C6D7062848A1AB005C \
-    B9E2F5981AA6E0CD28160D9FF13993A75599653C \
-    94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
-    B9AE9905FFD7803F25714661B63B535A4C206CA9 \
-    77984A986EBC2AA786BC0F66B01FBB92821C587A \
-    71DCFD284A79C3B38668286BC97EC7A07EDE3FC1 \
-    FD3A5288F042B6850C66B31F09FE44734EB7990E \
-    8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600 \
-    C4F0DFFF4E8C1A8236409D08E73BC641CC11F4C8 \
-    DD8F2338BAE7501E3DD5AC78C273792F7D83545D \
-    A48C2BEE680E841632CD4E44F07496B3EB3C1762 \
-    ; do \
-    gpg --batch --keyserver ipv4.pool.sks-keyservers.net --recv-keys "$key" || \
-    gpg --batch --keyserver pool.sks-keyservers.net --recv-keys "$key" || \
-    gpg --batch --keyserver pgp.mit.edu --recv-keys "$key" || \
-    gpg --batch --keyserver keyserver.pgp.com --recv-keys "$key" || \
-    gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" ; \
-    done
-
-RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
-    && case "${dpkgArch##*-}" in \
-    amd64) ARCH='x64';; \
-    ppc64el) ARCH='ppc64le';; \
-    s390x) ARCH='s390x';; \
-    arm64) ARCH='arm64';; \
-    armhf) ARCH='armv7l';; \
-    i386) ARCH='x86';; \
-    *) echo "unsupported architecture"; exit 1 ;; \
-    esac \
-    && curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-$ARCH.tar.xz" \
-    && curl -SLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
-    && gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc \
-    && grep " node-v$NODE_VERSION-linux-$ARCH.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
-    && tar -xJf "node-v$NODE_VERSION-linux-$ARCH.tar.xz" -C /usr/local --strip-components=1 --no-same-owner \
-    && rm "node-v$NODE_VERSION-linux-$ARCH.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt \
-    && ln -s /usr/local/bin/node /usr/local/bin/nodejs
-
-FROM common as theia
-
-# Use "latest" or "next" version for Theia packages
-# Optionally build a striped Theia application with no map file or .ts sources.
-# Makes image ~150MB smaller when enabled
-ARG strip=true
-
-ENV DEBIAN_FRONTEND=noninteractive \
-    YARN_VERSION=1.22.5 \
-    strip=trye
-
-# Install Yarn
-# From: https://github.com/nodejs/docker-node/blob/6b8d86d6ad59e0d1e7a94cec2e909cad137a028f/8/Dockerfile
-
-RUN set -ex \
-    && for key in \
-    6A010C5166006599AA17F08146C2130DFD2497F5 \
-    ; do \
-    gpg --batch --keyserver ipv4.pool.sks-keyservers.net --recv-keys "$key" || \
-    gpg --batch --keyserver pool.sks-keyservers.net --recv-keys "$key" || \
-    gpg --batch --keyserver pgp.mit.edu --recv-keys "$key" || \
-    gpg --batch --keyserver keyserver.pgp.com --recv-keys "$key" || \
-    gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" ; \
-    done \
-    && curl -fSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz" \
-    && curl -fSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz.asc" \
-    && gpg --batch --verify yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz \
-    && mkdir -p /opt/yarn \
-    && tar -xzf yarn-v$YARN_VERSION.tar.gz -C /opt/yarn --strip-components=1 \
-    && ln -s /opt/yarn/bin/yarn /usr/local/bin/yarn \
-    && ln -s /opt/yarn/bin/yarn /usr/local/bin/yarnpkg \
-    && rm yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz
 
 # Theia application
 
@@ -102,61 +14,65 @@ WORKDIR /home/theia
 
 COPY latest.package.json package.json
 
-RUN yarn --pure-lockfile && \
-  NODE_OPTIONS="--max_old_space_size=4096" yarn theia build && \
-  yarn theia download:plugins && \
-  yarn --production && \
-  yarn autoclean --init && \
-  echo *.ts >> .yarnclean && \
-  echo *.ts.map >> .yarnclean && \
-  echo *.spec.* >> .yarnclean && \
-  yarn autoclean --force && \
-  yarn cache clean
-
-FROM common
-
-ARG LLVM=10
-ARG CMAKE_VERSION=3.18.1
-# C/C++ Developer tools
-
-# Install clangd and clang-tidy from the public LLVM PPA (nightly build / development version)
-# And also the GDB debugger from the Ubuntu repos
-RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - && \
-  echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal main" > /etc/apt/sources.list.d/llvm.list && \
-  apt-get update && \
-  apt-get install -y \
-  gcc-multilib \
-  g++-multilib \
-  python3 python3-pip \
-  clangd-$LLVM \
-  gdb \
-  qemu-system-i386 && \
-  pip3 install supervisor && \
-  rm -rf /var/lib/apt/lists/* && \
-  ln -s /usr/bin/clangd-$LLVM /usr/bin/clangd
-
-# Install latest stable CMake
-RUN wget "https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION-Linux-x86_64.sh" && \
-    chmod a+x cmake-$CMAKE_VERSION-Linux-x86_64.sh && \
-    ./cmake-$CMAKE_VERSION-Linux-x86_64.sh --prefix=/usr/ --skip-license && \
-    rm cmake-$CMAKE_VERSION-Linux-x86_64.sh
-
-RUN echo 'set auto-load safe-path /' > /home/theia/.gdbinit \
+RUN set -ex; \
+  chown -R 1001:1001 /home/theia; \
+  cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/theia/; \
+  adduser --disabled-password --gecos '' --uid 1001 theia; \
+  yarn --pure-lockfile; \
+  NODE_OPTIONS="--max_old_space_size=4096" yarn theia build; \
+  yarn theia download:plugins; \
+  yarn --production; \
+  yarn autoclean --init; \
+  echo *.ts >> .yarnclean; \
+  echo *.ts.map >> .yarnclean; \
+  echo *.spec.* >> .yarnclean; \
+  yarn autoclean --force; \
+  yarn cache clean; \
+  apt update; \
+  apt-get install -y --no-install-recommends \
+    wget gpg apt-transport-https ca-certificates apt-utils; \
+  wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -; \
+  echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-12 main" \
+    > /etc/apt/sources.list.d/llvm.list; \
+  apt-get update; \
+    apt-get install -y --no-install-recommends \
+    zsh gdb git build-essential cmake \
+    gcc-multilib g++-multilib \
+    python3 python3-pip \
+    clangd-12 \
+    qemu-system-i386; \
+  pip3 install --no-cache-dir supervisor; \
+  ln -s /usr/bin/clangd-12 /usr/bin/clangd; \
+  echo 'set auto-load safe-path /' > /home/theia/.gdbinit \
   && echo 'source /opt/pwndbg/gdbinit.py' >> /home/theia/.gdbinit \
   && git clone https://github.com/pwndbg/pwndbg.git /opt/pwndbg \
   && cd /opt/pwndbg \
-  && ./setup.sh
+  && ./setup.sh; \
+  cd /home/theia; \
+  git clone https://github.com/ohmyzsh/ohmyzsh.git .oh-my-zsh; \
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
+    .oh-my-zsh/custom/plugins/zsh-syntax-highlighting; \
+  cp .oh-my-zsh/templates/zshrc.zsh-template .zshrc; \
+  sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="gnzh"/' .zshrc; \
+  sed -i 's/plugins=(git)/plugins=(git zsh-syntax-highlighting)/' .zshrc; \
+  mkdir -p /home/theia/.theia; \
+  echo '{"terminal.integrated.shell.linux": "/usr/bin/zsh"}' \
+    > /home/theia/.theia/settings.json; \
+  chmod g+rw /home \
+  && mkdir -p /home/project \
+  && chown -R theia:theia /home/theia \
+  && chown -R theia:theia /home/project; \
+  apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+  rm -rf /tmp/*; \
+  rm -rf /usr/share/doc; \
+  rm -rf /var/cache/apt/*; \
+  rm -rf /var/lib/apt/lists/*; \
+  find / -depth \
+    \( -name .cache -o -name __pycache__ -o -name '*.pyc' -o -name '*.a' -o -name .git -o -name .github \) \
+    -exec 'rm' '-rf' '{}' '+';
 
-RUN chmod g+rw /home && \
-    mkdir -p /home/project && \
-    chown -R theia:theia /home/theia && \
-    chown -R theia:theia /home/project;
-
-COPY --from=theia /home/theia /home/theia
-WORKDIR /home/theia
-COPY supervisord.conf /supervisord.conf
+COPY supervisord.conf autosave-dump.sh /
 COPY autosave /usr/local/bin/autosave
-COPY autosave-dump.sh /autosave-dump.sh
 
 USER theia
 ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]

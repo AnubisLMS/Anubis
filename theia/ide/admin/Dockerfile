@@ -33,7 +33,7 @@ RUN set -eux; apt-get update \
     | tee /etc/apt/sources.list.d/docker.list > /dev/null \
   && apt-get update \
   && apt-get install -y --no-install-recommends \
-    make build-essential libssl-dev wget curl llvm htop \
+    make build-essential libssl-dev wget curl llvm htop zsh \
     docker-ce docker-ce-cli containerd.io; \
   rm -rf /var/lib/apt/lists/* \
   && savedAptMark="$(apt-mark showmanual)" \
@@ -68,11 +68,21 @@ RUN set -eux; apt-get update \
   && rm get-pip.py; \
   pip3 install --upgrade --no-cache-dir pip \
   && pip3 install --upgrade --no-cache-dir python-language-server flake8 autopep8 pylint supervisor \
-  && rm -rf /tmp/* \
+  && adduser --disabled-password --gecos '' --uid 1001 theia; \
+  cd /home/theia; \
+  git clone https://github.com/ohmyzsh/ohmyzsh.git .oh-my-zsh; \
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
+    .oh-my-zsh/custom/plugins/zsh-syntax-highlighting; \
+  cp .oh-my-zsh/templates/zshrc.zsh-template .zshrc; \
+  sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="gnzh"/' .zshrc; \
+  sed -i 's/plugins=(git)/plugins=(git zsh-syntax-highlighting)/' .zshrc; \
+  mkdir -p /home/theia/.theia; \
+  echo '{"terminal.integrated.shell.linux": "/usr/bin/zsh"}' \
+    > /home/theia/.theia/settings.json; \
+  rm -rf /tmp/* \
   && rm -rf /usr/share/doc \
   && rm -rf /root/.cache \
   && rm -rf /home/theia/node_modules/.cache \
-  && adduser --disabled-password --gecos '' --uid 1001 theia \
   && mkdir -p /home/project \
   && chmod g+rw /home \
   && mkdir -p /home/project \
@@ -94,7 +104,10 @@ RUN set -eux; apt-get update \
   | xargs -r apt-mark manual \
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/cache/apt/* \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/*; \
+  find / -depth \
+    \( -name .cache -o -name __pycache__ -o -name *.pyc -o -name *.a -o -name .git -o -name .github \) \
+    -exec rm -rf {} +
 COPY --from=0 /home/theia /home/theia
 
 COPY cli /cli

@@ -2,8 +2,13 @@ assignment:
   name: "{name}"
   class: "{course_code}"
   hidden: true
+
   # Optionally specify the github classroom link
   # for students to get their repo.
+  #
+  # ** Remember to set the Custom repository
+  # prefix to {name}-{unique_code} in github classroom
+  # when creating the assignment. **
   github_classroom_url: ""
 
   # Don't change these!
