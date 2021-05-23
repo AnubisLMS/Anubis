@@ -9,6 +9,6 @@ if ! [ -d node_modules ]; then
     yarn
 fi
 ./render.sh
-cd ..
 
-exec pandoc design.md -s -o design.pdf -f markdown-implicit_figures
+cd ../../
+exec pandoc README.md -s -o docs/design.pdf -f markdown-implicit_figures

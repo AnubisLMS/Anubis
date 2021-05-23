@@ -16,6 +16,22 @@ from anubis.utils.services.rpc import rpc_enqueue, enqueue_ide_stop
 ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 
 
+@ide.route("/settings")
+@require_admin()
+@json_response
+def admin_ide_admin_settings():
+    # Get the current course context
+    course = get_course_context()
+
+    return success_response({'settings': {
+        "privileged": True,
+        "network_locked": False,
+        "image": "registry.digitalocean.com/anubis/theia-admin",
+        "repo_url": course.autograde_tests_repo,
+        "options": '{"limits": {"cpu": "2", "memory": "2Gi"}, "autosave": true, "credentials": true}',
+    }})
+
+
 @ide.route("/initialize", methods=["POST"])
 @ide.route("/initialize-custom", methods=["POST"])
 @require_admin()
@@ -52,7 +68,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
     # Read the options out of the posted data
     network_locked = settings.get('network_locked', False)
     privileged = settings.get('privileged', True)
-    image = settings.get('image', 'registry.osiris.services/anubis/theia-admin')
+    image = settings.get('image', 'registry.digitalocean.com/anubis/theia-admin')
     repo_url = settings.get('repo_url', 'https://github.com/os3224/anubis-assignment-tests')
     options_str = settings.get('options', '{"limits": {"cpu": "4", "memory": "4Gi"}}')
 

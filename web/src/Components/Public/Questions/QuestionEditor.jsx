@@ -57,6 +57,11 @@ export default function QuestionEditor({question, response, updateResponse, save
             width={'100%'}
             value={response}
             onChange={updateResponse}
+            commands={[{ // commands is array of key bindings.
+              name: 'save', // name for the key binding.
+              bindKey: {win: 'Ctrl-s', mac: 'Command-s'}, // key combination used for the command.
+              exec: saveResponse, // function to execute when keys are pressed.
+            }]}
           />
         </CardContent>
         <CardActionArea>

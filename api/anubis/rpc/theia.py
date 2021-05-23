@@ -52,7 +52,7 @@ def create_theia_pod_obj(theia_session: TheiaSession):
     # Init container
     init_container = client.V1Container(
         name="theia-init-{}-{}".format(theia_session.owner.netid, theia_session.id),
-        image="registry.osiris.services/anubis/theia-init:latest",
+        image="registry.digitalocean.com/anubis/theia-init:latest",
         image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
         env=[
             client.V1EnvVar(name="GIT_REPO", value=theia_session.repo_url),
@@ -91,6 +91,14 @@ def create_theia_pod_obj(theia_session: TheiaSession):
                 name='AUTOSAVE',
                 value='ON' if autosave else 'OFF',
             ),
+            client.V1EnvVar(
+                name='COURSE_ID',
+                value=theia_session.course_id,
+            ),
+            client.V1EnvVar(
+                name='COURSE_CODE',
+                value=theia_session.course.course_code,
+            ),
             *extra_env,
         ],
         resources=client.V1ResourceRequirements(
@@ -111,29 +119,32 @@ def create_theia_pod_obj(theia_session: TheiaSession):
     containers.append(theia_container)
 
     # Sidecar container
-    if autosave:
-        sidecar_container = client.V1Container(
-            name="sidecar",
-            image="registry.osiris.services/anubis/theia-sidecar:latest",
-            image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
-            env=[
-                client.V1EnvVar(
-                    name="GIT_CRED",
-                    value_from=client.V1EnvVarSource(
-                        secret_key_ref=client.V1SecretKeySelector(
-                            name="git", key="credentials"
-                        )
-                    ),
+    sidecar_container = client.V1Container(
+        name="sidecar",
+        image="registry.digitalocean.com/anubis/theia-sidecar:latest",
+        image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
+        env=[
+            client.V1EnvVar(
+                name="GIT_CRED",
+                value_from=client.V1EnvVarSource(
+                    secret_key_ref=client.V1SecretKeySelector(
+                        name="git", key="credentials"
+                    )
                 ),
-            ],
-            volume_mounts=[
-                client.V1VolumeMount(
-                    mount_path="/home/project",
-                    name=volume_name,
-                )
-            ],
-        )
-        containers.append(sidecar_container)
+            ),
+            client.V1EnvVar(
+                name='AUTOSAVE',
+                value='ON' if autosave else 'OFF',
+            ),
+        ],
+        volume_mounts=[
+            client.V1VolumeMount(
+                mount_path="/home/project",
+                name=volume_name,
+            )
+        ],
+    )
+    containers.append(sidecar_container)
 
     extra_labels = {}
     spec_extra = {}
@@ -238,6 +249,8 @@ def initialize_theia_session(theia_session_id: str):
     name = get_theia_pod_name(theia_session)
     n = 10
     while True:
+
+        # Get the pod information from the kubernetes api
         pod: client.V1Pod = v1.read_namespaced_pod(
             name=name,
             namespace="anubis",
@@ -245,6 +258,8 @@ def initialize_theia_session(theia_session_id: str):
 
         if pod.status.phase == "Pending":
             n += 1
+
+            # Wait at 60 iterations while it is pending before giving up
             if n > 60:
                 logger.error(
                     "Theia session took too long to initialize. Freeing worker."
@@ -254,8 +269,17 @@ def initialize_theia_session(theia_session_id: str):
             time.sleep(1)
 
         if pod.status.phase == "Running":
+            # Set the cluster address and state
             theia_session.cluster_address = pod.status.pod_ip
             theia_session.state = "Running"
+
+            # We need to introduce a small amount of time here
+            # to give the theia server a moment to actually run
+            # before the button on the web frontend to go to
+            # the session is available to the user
+            time.sleep(1)
+
+            # Index the event
             esindex(
                 "theia",
                 body={
@@ -264,6 +288,8 @@ def initialize_theia_session(theia_session_id: str):
                     "netid": theia_session.owner.netid,
                 },
             )
+
+            # Log the event
             logger.info("Theia session started {}".format(name))
             break
 

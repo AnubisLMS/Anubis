@@ -4,18 +4,13 @@
 
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
-    readme = readme_file.read()
+requirements = ['Click>=7.0', 'requests', 'pyyaml']
 
-requirements = ['Click>=7.0', 'requests','pyyaml','docker']
-
-setup_requirements = [ ]
-
-test_requirements = [ ]
+setup_requirements = []
+test_requirements = []
 
 setup(
     author="John McCann Cunniff Jr.",
-    author_email='johncunniff1248@gmail.com',
     python_requires='>=3.5',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
@@ -34,7 +29,6 @@ setup(
         ],
     },
     install_requires=requirements,
-    long_description=readme + '\n',
     include_package_data=True,
     keywords='anubis',
     name='anubis',

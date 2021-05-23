@@ -6,11 +6,13 @@ from anubis.models import (
     Assignment,
     AssignmentQuestion,
     AssignedStudentQuestion,
+    AssignedQuestionResponse,
     User,
     InCourse,
 )
 from anubis.utils.data import _verify_data_shape, is_debug
 from anubis.utils.services.cache import cache
+from anubis.utils.lms.students import get_students
 
 
 def get_question_pool_mapping(
@@ -41,28 +43,64 @@ def get_question_pool_mapping(
     return sequence_to_questions
 
 
-def hard_reset_questions(assignment: Assignment):
+def reset_question_assignments(assignment: Assignment, commit: bool = True):
+    """
+    Reset the question assignments for an assignment. This will
+    first delete all the existing question responses, then
+    the question assignments. The questions themselves will stay
+
+    :param assignment:
+    :param commit:
+    :return:
+    """
+
+    # Get all the question assignments for this assignment
+    assigned_student_questions = AssignedStudentQuestion.query.filter(
+        AssignedStudentQuestion.assignment_id == assignment.id
+    ).all()
+
+    # Break them down into ids
+    assigned_student_question_ids = list(map(lambda x: x.id, assigned_student_questions))
+
+    # Delete all responses for the assignment
+    AssignedQuestionResponse.query.filter(
+        AssignedQuestionResponse.assigned_question_id.in_(
+            assigned_student_question_ids
+        ),
+    ).delete()
+
+    # Delete the question assignments
+    AssignedStudentQuestion.query.filter(
+        AssignedStudentQuestion.assignment_id == assignment.id
+    ).delete()
+
+    # Commit the delete
+    if commit:
+        db.session.commit()
+
+
+def hard_reset_questions(assignment: Assignment, commit: bool = True):
     """
     Hard reset all questions for a given assignment. This
     will delete question assignments and the questions
     themselves.
 
     :param assignment:
+    :param commit:
     :return:
     """
 
-    # Delete the student question assignments
-    AssignedStudentQuestion.query.filter(
-        AssignedStudentQuestion.assignment_id == assignment.id
-    ).delete()
+    # Delete the student responses, and question assignments
+    reset_question_assignments(assignment, commit=False)
 
     # Delete the questions themselves
     AssignmentQuestion.query.filter(
         AssignmentQuestion.assignment_id == assignment.id
     ).delete()
 
-    # commit the delete
-    db.session.commit()
+    # Commit the delete
+    if commit:
+        db.session.commit()
 
 
 def assign_questions(assignment: Assignment):
@@ -243,11 +281,36 @@ def get_assigned_questions(assignment_id: str, user_id: str, full: bool = False)
     """
 
     # Get assigned questions
-    assigned_questions = AssignedStudentQuestion.query.filter(
+    assigned_questions = AssignedStudentQuestion.query.join(AssignmentQuestion).filter(
         AssignedStudentQuestion.assignment_id == assignment_id,
         AssignedStudentQuestion.owner_id == user_id,
-    ).all()
+    ).order_by(AssignmentQuestion.pool).all()
 
     if not full:
         return [assigned_question.data for assigned_question in assigned_questions]
     return [assigned_question.full_data for assigned_question in assigned_questions]
+
+
+def get_question_assignments(assignment: Assignment):
+    """
+
+    :param assignment:
+    :return:
+    """
+
+    # Create a dictionary of question assignments
+    # netid -> get_assigned_questions(assignment, student, full=True)
+    assignments = {}
+
+    # Get all the students in the course
+    students = get_students(assignment.course_id)
+
+    for student in students:
+        assignments[student['netid']] = {
+            'name': student['name'],
+            'netid': student['netid'],
+            'questions': get_assigned_questions(assignment.id, student['id'], full=True),
+        }
+
+    return assignments
+

@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import axios from 'axios';
 import {useSnackbar} from 'notistack';
-import {Redirect} from 'react-router-dom';
+import {Redirect, useParams} from 'react-router-dom';
 
 import {DataGrid} from '@material-ui/data-grid';
 import Grid from '@material-ui/core/Grid';
@@ -60,12 +60,12 @@ const useColumns = () => ([
   },
   {
     field: 'build_passed', headerName: 'Build Passed', width: 150,
-    renderCell: (params) => (
+    renderCell: ({row}) => (
       <React.Fragment>
-        {params.row.submission !== null ? (
-          <Tooltip title={params.value ? 'Build Succeeded' : 'Build Failed'}>
-            <IconButton style={{color: params.value ? 'green' : 'yellow'}}>
-              {params.value ? <CheckOutlinedIcon/> : <CancelIcon/>}
+        {row?.submission !== null ? (
+          <Tooltip title={row?.build_passed ? 'Build Succeeded' : 'Build Failed'}>
+            <IconButton style={{color: row?.build_passed ? 'green' : 'yellow'}}>
+              {row?.build_passed ? <CheckOutlinedIcon/> : <CancelIcon/>}
             </IconButton>
           </Tooltip>
         ) : (
@@ -81,13 +81,13 @@ const useColumns = () => ([
   },
   {
     field: 'tests_passed', headerName: 'Tests Passed', width: 150,
-    renderCell: (params) => `${params.row.tests_passed}/${params.row.total_tests}`,
+    renderCell: ({row}) => `${row?.tests_passed}/${row?.total_tests}`,
   },
 ]);
 
 
 export default function Results() {
-  const query = useQuery();
+  const {assignmentId} = useParams();
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [assignment, setAssignment] = useState(null);
@@ -100,8 +100,6 @@ export default function Results() {
   const [selected, setSelected] = useState(null);
   const [searched, setSearched] = useState(null);
   const columns = useColumns();
-  const assignmentId = query.get('assignmentId');
-
 
   React.useEffect(() => {
     axios.get('/api/admin/students/list').then((response) => {
@@ -124,11 +122,11 @@ export default function Results() {
 
       setStats((state) => {
         let j = 0;
-        while (state.length < offset + limit) {
+        while (state.length < data.total) {
           state.push({id: j++});
         }
         let i = 0;
-        for (let k = offset; k < offset + limit; ++k) {
+        for (let k = offset; k < Math.min(offset + limit, data.total); ++k) {
           state[k] = data.stats[i++];
         }
         return [...state];
@@ -222,7 +220,7 @@ export default function Results() {
               blurOnSelect
               fullWidth={false}
               options={students}
-              getOptionLabel={(option) => option.name}
+              getOptionLabel={(option) => (`${option.netid} ${option.name}`)}
               onChange={(_, value) => setSearched(value)}
               renderInput={(params) => (
                 <TextField
@@ -246,8 +244,12 @@ export default function Results() {
             page={page}
             pageSize={pageSize}
             rowsPerPageOptions={[10, 15]}
-            onPageChange={(params) => setPage(params.page)}
-            onPageSizeChange={(params) => setPageSize(params.pageSize)}
+            onPageChange={(params) => {
+              setLoading(true); setPage(params.page);
+            }}
+            onPageSizeChange={(params) => {
+              setLoading(true); setPageSize(params.pageSize);
+            }}
             onRowClick={({row}) => setSelected(row)}
           />
         </Paper>

@@ -23,7 +23,7 @@ const editableFields = [
   {field: 'github_classroom_url', label: 'Github Classroom URL'},
   {field: 'theia_image', label: 'Theia Image'},
   {field: 'theia_options', label: 'Theia Options', type: 'json'},
-  {field: 'pipeline_image', label: 'Pipeline Image', disabled: true},
+  {field: 'pipeline_image', label: 'Pipeline Image'},
   {field: 'unique_code', label: 'Unique Code', disabled: true},
   {field: 'hidden', label: 'Hidden', type: 'boolean'},
   {field: 'accept_late', label: 'Accept Late Submissions', type: 'boolean'},

@@ -74,7 +74,7 @@ def create_assignment(course, users):
     # Assignment 1 uniq
     assignment = Assignment(
         id=rand(), name=f"assignment {course.name}", unique_code=rand(8), hidden=False,
-        pipeline_image=f"registry.osiris.services/anubis/assignment/{rand(8)}",
+        pipeline_image=f"registry.digitalocean.com/anubis/assignment/{rand(8)}",
         github_classroom_url='http://localhost',
         release_date=datetime.now() - timedelta(hours=2),
         due_date=datetime.now() + timedelta(hours=12),

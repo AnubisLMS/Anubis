@@ -28,10 +28,6 @@ spec:
         component: api
     spec:
       # dnsPolicy: Default
-      {{- if .Values.api.datacenter }}
-      nodeSelector:
-        datacenter: {{ .Values.api.datacenter }}
-      {{- end }}
       containers:
       - name: api
         image: {{ .Values.api.image }}:{{ .Values.api.tag }}
@@ -92,40 +88,6 @@ spec:
           periodSeconds: 3
         {{- end }}
 
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: db-migrate
-  namespace: {{ .Release.Namespace }}
-  labels:
-    job: db-migrate
-    component: db-migrate
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
-spec:
-  backoffLimit: 4
-  ttlSecondsAfterFinished: 30
-  template:
-    spec:
-      restartPolicy: Never
-      containers:
-      - name: db-migrate
-        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
-        imagePullPolicy: {{ .Values.imagePullPolicy }}
-        command: ["alembic", "upgrade", "head"]
-        env:
-        # sqlalchemy uri
-        - name: "DATABASE_URI"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: database-uri
-        - name: "REDIS_PASS"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: redis-password
 ---
 apiVersion: v1
 kind: Service

@@ -37,15 +37,17 @@ const editableFields = [
   {field: 'course_code', label: 'Course Code'},
   {field: 'section', label: 'Section'},
   {field: 'professor', label: 'Professor'},
+  {field: 'autograde_tests_repo', label: 'Autograde Tests Repo'},
   {field: 'theia_default_image', label: 'Theia Default Image'},
   {field: 'theia_default_options', label: 'Theia Default Options'},
+  {field: 'github_org_url', label: 'Github Org URL'},
   {field: 'join_code', label: 'Join Code', disabled: true},
 ];
 
 export default function Course() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
-  const [course, setCourse] = useState([]);
+  const [course, setCourse] = useState(null);
   const [edits, setEdits] = useState(0);
   const [reset, setReset] = useState(0);
 
@@ -78,13 +80,14 @@ export default function Course() {
   };
 
   const saveCourse = () => () => {
+    const post_course = {...course};
     try {
-      course.theia_default_options = JSON.parse(course.theia_default_options);
+      post_course.theia_default_options = JSON.parse(course.theia_default_options);
     } catch (e) {
       enqueueSnackbar(e.toString(), {variant: 'error'});
       return;
     }
-    axios.post(`/api/admin/courses/save`, {course}).then((response) => {
+    axios.post(`/api/admin/courses/save`, {course: post_course}).then((response) => {
       standardStatusHandler(response, enqueueSnackbar);
     }).catch(standardErrorHandler(enqueueSnackbar));
   };
@@ -98,6 +101,9 @@ export default function Course() {
     }).catch(standardErrorHandler(enqueueSnackbar));
   };
 
+  if (!course) {
+    return null;
+  }
 
   return (
     <Grid container spacing={4} justify={'center'} alignItems={'center'}>
@@ -131,31 +137,31 @@ export default function Course() {
         </Route>
       </Switch>
       <Grid item/>
-      <Grid item xs={12} md={10}>
-        <Grid container spacing={4}>
-          <Switch>
-            <Route path={'/admin/course'} exact={true}>
-              <React.Fragment>
-                <Grid item xs={12} md={6} key={course.id}>
-                  <CourseCard
-                    course={course}
-                    editableFields={editableFields}
-                    updateField={updateField}
-                    saveCourse={saveCourse}
-                    _disabled={false}
-                  />
-                </Grid>
-              </React.Fragment>
-            </Route>
-            <Route path={'/admin/course/tas'} exact={false}>
-              <CourseTasProfessors base={'ta'}/>
-            </Route>
-            <Route path={'/admin/course/professors'}>
-              <CourseTasProfessors base={'professor'}/>
-            </Route>
-          </Switch>
-        </Grid>
-      </Grid>
+
+      <Switch>
+        <Route path={'/admin/course'} exact={true}>
+          <Grid item xs={12} sm={10} md={8}>
+            <CourseCard
+              course={course}
+              editableFields={editableFields}
+              updateField={updateField}
+              saveCourse={saveCourse}
+              _disabled={false}
+            />
+          </Grid>
+        </Route>
+        <Route path={'/admin/course/tas'} exact={false}>
+          <Grid item xs={12} sm={10} md={8}>
+            <CourseTasProfessors base={'ta'}/>
+          </Grid>
+        </Route>
+        <Route path={'/admin/course/professors'}>
+          <Grid item xs={12} sm={10} md={8}>
+            <CourseTasProfessors base={'professor'}/>
+          </Grid>
+        </Route>
+      </Switch>
+
     </Grid>
   );
 }

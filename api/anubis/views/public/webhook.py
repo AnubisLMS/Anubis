@@ -18,8 +18,8 @@ from anubis.utils.http.https import error_response, success_response
 from anubis.utils.lms.assignments import get_assignment_due_date
 from anubis.utils.lms.webhook import parse_webhook, guess_github_username, check_repo
 from anubis.utils.lms.submissions import get_submissions
-from anubis.utils.lms.repos import get_repos
 from anubis.utils.services.elastic import log_endpoint, esindex
+from anubis.utils.services.cache import cache
 from anubis.utils.services.logger import logger
 from anubis.utils.services.rpc import enqueue_autograde_pipeline
 from anubis.utils.lms.submissions import reject_late_submission, init_submission
@@ -134,8 +134,8 @@ def public_webhook():
 
     if not is_debug():
         # Make sure that the repo we're about to process actually belongs to
-        # our organization
-        if not request.json["repository"]["full_name"].startswith("os3224/"):
+        # a github organization that matches a course.
+        if not repo_url.startswith(assignment.course.github_org_url):
             logger.error(
                 "Invalid github organization in webhook.",
                 extra={

@@ -4,20 +4,15 @@ healthChecks: true
 domain: "anubis.osiris.services"
 vpnOnly: false
 imagePullPolicy: "Always"
+imagePullSecret: "anubis"
 
 api:
-  replicas: 3
-  workers: 4
+  replicas: 2
+  workers: 2
   datacenter: "mtc"
   gunicorn_options: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
-  image: "registry.osiris.services/anubis/api"
+  image: "registry.digitalocean.com/anubis/api"
   tag: "latest"
-
-static:
-  replicas: 3
-  image: "registry.osiris.services/anubis/static"
-  tag: "latest"
-  healthCheck: true
 
 reaper:
   enable: true
@@ -30,30 +25,33 @@ visuals:
   suspend: false
 
 pipeline_api:
-  replicas: 3
-  workers: 2
+  replicas: 1
+  workers: 1
 
 web:
   replicas: 2
-  image: "registry.osiris.services/anubis/web"
+  image: "registry.digitalocean.com/anubis/web"
   tag: "latest"
 
 logstash:
-  image: "registry.osiris.services/anubis/logstash"
+  image: "registry.digitalocean.com/anubis/logstash"
   tag: "latest"
 
 rpc:
   default:
-    replicas: 5    
+    replicas: 3
   theia:
-    replicas: 5    
+    replicas: 3    
   regrade:
-    replicas: 5
+    replicas: 3
 
 theia:
   enable: true
   proxy:
-    replicas: 10
+    replicas: 2
     domain: "ide.anubis.osiris.services"
-    image: "registry.osiris.services/anubis/theia-proxy"
+    image: "registry.digitalocean.com/anubis/theia-proxy"
     tag: "latest"
+
+elasticsearch:
+  service: elasticsearch-master.elastic.svc.cluster.local

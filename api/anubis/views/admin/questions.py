@@ -5,37 +5,37 @@ from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQue
 from anubis.utils.auth import require_admin
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import error_response, success_response
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.lms.course import (
-    assert_course_admin,
     assert_course_superuser,
     assert_course_context,
-    get_course_context,
 )
 from anubis.utils.lms.questions import (
     hard_reset_questions,
     get_all_questions,
     assign_questions,
+    reset_question_assignments,
+get_question_assignments,
 )
+from anubis.utils.services.elastic import log_endpoint
 
 questions = Blueprint("admin-questions", __name__, url_prefix="/admin/questions")
 
 
-@questions.route("/add/<string:unique_code>")
+@questions.route("/add/<string:assignment_id>")
 @require_admin()
 @log_endpoint("admin", lambda: "add new question")
 @json_response
-def admin_questions_add_unique_code(unique_code: str):
+def admin_questions_add_unique_code(assignment_id: str):
     """
     Add a new blank question to the assignment.
 
-    :param unique_code:
+    :param assignment_id:
     :return:
     """
 
     # Try to find assignment
     assignment: Assignment = Assignment.query.filter(
-        Assignment.unique_code == unique_code
+        Assignment.id == assignment_id
     ).first()
 
     # If the assignment does not exist, then stop
@@ -113,11 +113,11 @@ def admin_questions_delete_question_id(assignment_question_id: str):
     })
 
 
-@questions.route("/hard-reset/<string:unique_code>")
+@questions.route("/hard-reset/<string:assignment_id>")
 @require_admin()
 @log_endpoint("admin", lambda: "question hard reset")
 @json_response
-def private_questions_hard_reset_unique_code(unique_code: str):
+def private_questions_hard_reset_unique_code(assignment_id: str):
     """
     This endpoint should be used very sparingly. When this is hit,
     assuming the assignment exists, it will delete all questions
@@ -134,13 +134,13 @@ def private_questions_hard_reset_unique_code(unique_code: str):
 
     ** Be careful with this one **
 
-    :param unique_code:
+    :param assignment_id:
     :return:
     """
 
     # Try to find assignment
     assignment: Assignment = Assignment.query.filter(
-        Assignment.unique_code == unique_code
+        Assignment.id == assignment_id
     ).first()
 
     # If the assignment does not exist, then stop
@@ -163,11 +163,11 @@ def private_questions_hard_reset_unique_code(unique_code: str):
     })
 
 
-@questions.route("/reset-assignments/<string:unique_code>")
+@questions.route("/reset-assignments/<string:assignment_id>")
 @require_admin()
 @log_endpoint("admin", lambda: "reset question assignments")
 @json_response
-def private_questions_reset_assignments_unique_code(unique_code: str):
+def private_questions_reset_assignments_assignment_id(assignment_id: str):
     """
     This endpoint should be used very sparingly. When this is hit,
     assuming the assignment exists, it will delete all questions
@@ -184,13 +184,13 @@ def private_questions_reset_assignments_unique_code(unique_code: str):
 
     ** Be careful with this one **
 
-    :param unique_code:
+    :param assignment_id:
     :return:
     """
 
     # Try to find assignment
     assignment: Assignment = Assignment.query.filter(
-        Assignment.unique_code == unique_code
+        Assignment.id == assignment_id
     ).first()
 
     # Verify that the assignment exists
@@ -203,13 +203,8 @@ def private_questions_reset_assignments_unique_code(unique_code: str):
     # Assert that the set course context matches the course of the assignment
     assert_course_context(assignment)
 
-    # Delete all the question assignments
-    AssignedStudentQuestion.query.filter(
-        AssignedStudentQuestion.assignment_id == assignment.id
-    ).delete()
-
-    # Commit the delete
-    db.session.commit()
+    # Reset the question assignments
+    reset_question_assignments(assignment, commit=True)
 
     # Pass back the status
     return success_response({
@@ -248,7 +243,7 @@ def admin_questions_update(assignment_question_id: str, question: dict):
     db_assignment_question.solution = question['solution']
     db_assignment_question.code_language = question['code_language']
     db_assignment_question.code_question = question['code_question']
-    db_assignment_question.sequence = question['sequence']
+    db_assignment_question.pool = question['pool']
 
     # Commit any changes
     db.session.commit()
@@ -259,21 +254,21 @@ def admin_questions_update(assignment_question_id: str, question: dict):
     })
 
 
-@questions.route("/get-assignments/<string:unique_code>")
+@questions.route("/get-assignments/<string:assignment_id>")
 @require_admin()
 @log_endpoint("admin", lambda: "questions get")
 @json_response
-def private_questions_get_assignments_unique_code(unique_code: str):
+def private_questions_get_assignments_unique_code(assignment_id: str):
     """
     Get all questions for the given assignment.
 
-    :param unique_code:
+    :param assignment_id:
     :return:
     """
 
     # Try to find assignment
     assignment: Assignment = Assignment.query.filter(
-        Assignment.unique_code == unique_code
+        Assignment.id == assignment_id
     ).first()
 
     # If the assignment does not exist, then stop
@@ -284,33 +279,28 @@ def private_questions_get_assignments_unique_code(unique_code: str):
     assert_course_context(assignment)
 
     # Get all the question assignments
-    assignment_questions = AssignmentQuestion.query.filter(
-        AssignmentQuestion.assignment_id == assignment.id,
-    ).order_by(AssignmentQuestion.pool, AssignmentQuestion.created.desc()).all()
+    question_assignments = get_question_assignments(assignment)
 
     return success_response({
-        'questions': [
-            assignment_question.full_data
-            for assignment_question in assignment_questions
-        ]
+        'assignments': question_assignments,
     })
 
 
-@questions.route("/get/<string:unique_code>")
+@questions.route("/get/<string:assignment_id>")
 @require_admin()
 @log_endpoint("admin", lambda: "get question assignments")
 @json_response
-def private_questions_get_unique_code(unique_code: str):
+def private_questions_get_unique_code(assignment_id: str):
     """
     Get all questions for the given assignment.
 
-    :param unique_code:
+    :param assignment_id:
     :return:
     """
 
     # Try to find assignment
     assignment: Assignment = Assignment.query.filter(
-        Assignment.unique_code == unique_code
+        Assignment.id == assignment_id
     ).first()
 
     # Verify that the assignment exists
@@ -320,16 +310,23 @@ def private_questions_get_unique_code(unique_code: str):
     # Assert that the assignment is within the course context
     assert_course_context(assignment)
 
+    assigned_question_count = AssignedStudentQuestion.query.filter(
+        AssignedStudentQuestion.assignment_id == assignment.id
+    ).count()
+
     return success_response({
-        'questions': get_all_questions(assignment)
+        'assignment_name': assignment.name,
+        'questions': get_all_questions(assignment),
+        'questions_assigned': assigned_question_count > 0,
+        'assigned_question_count': assigned_question_count,
     })
 
 
-@questions.route("/assign/<string:unique_code>")
+@questions.route("/assign/<string:assignment_id>")
 @require_admin()
 @log_endpoint("admin", lambda: "question assign")
 @json_response
-def private_questions_assign_unique_code(unique_code: str):
+def private_questions_assign_unique_code(assignment_id: str):
     """
     Assign questions that have been created. This action will only run once.
     Once a question is assigned to a student, the only way to change it is
@@ -342,7 +339,7 @@ def private_questions_assign_unique_code(unique_code: str):
 
     # Try to find assignment
     assignment: Assignment = Assignment.query.filter(
-        Assignment.unique_code == unique_code
+        Assignment.id == assignment_id
     ).first()
 
     # Verify that we got an assignment

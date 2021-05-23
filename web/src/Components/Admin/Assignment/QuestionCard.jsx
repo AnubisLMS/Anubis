@@ -18,6 +18,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import clsx from 'clsx';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -42,12 +43,16 @@ const useStyles = makeStyles((theme) => ({
     width: 42,
     marginLeft: theme.spacing(2),
   },
+  code_lang: {
+    marginLeft: theme.spacing(1),
+    minWidth: 300,
+  },
 }));
 
 export default function QuestionCard({assignmentQuestion, updateQuestion, saveQuestion, deleteQuestion, reload}) {
   const classes = useStyles();
   const {
-    sequence = 0,
+    pool = 0,
     question = '',
     solution = '',
     code_language = '',
@@ -60,19 +65,15 @@ export default function QuestionCard({assignmentQuestion, updateQuestion, saveQu
         <Grid container spacing={2}>
 
           <Grid item xs={12}>
-            <Typography className={classes.title} color="textSecondary" gutterBottom>
-              Question {sequence}
-            </Typography>
-          </Grid>
-
-          <Grid item xs={12}>
             <Typography style={{display: 'inline'}}>
-              Sequence
+              Question Pool
             </Typography>
             <Input
               className={classes.input}
-              value={sequence}
-              onChange={(e) => updateQuestion({...assignmentQuestion, sequence: e.target.value})}
+              value={pool}
+              onChange={(e) => (
+                updateQuestion({...assignmentQuestion, pool: e.target.value})
+              )}
               margin="dense"
               inputProps={{
                 'step': 1,
@@ -83,33 +84,36 @@ export default function QuestionCard({assignmentQuestion, updateQuestion, saveQu
           </Grid>
 
           <Grid item xs={12}>
-            <FormControlLabel
-              className={classes.padding2}
-              value={code_question}
-              control={
-                <Switch
-                  checked={code_question}
-                  color={'primary'}
-                  onClick={() => updateQuestion({...assignmentQuestion, code_question: !code_question})}
-                />
-              }
-              label={'Code Question'}
-              labelPlacement="start"
-            />
+            <div style={{display: 'flex'}}>
+              <FormControlLabel
+                value={code_question}
+                control={
+                  <Switch
+                    checked={code_question}
+                    color={'primary'}
+                    onClick={() => updateQuestion({...assignmentQuestion, code_question: !code_question})}
+                  />
+                }
+                label={'Code Question'}
+                labelPlacement="start"
+              />
 
-            <TextField
-              variant={'outlined'}
-              label={'Question Code Language'}
-              value={code_language}
-              className={classes.margin1}
-              onChange={(e) => updateQuestion({...assignmentQuestion, code_language: e.target.value})}
-            />
+              <TextField
+                variant={'outlined'}
+                label={'Code Language (markdown, cpp)'}
+                value={code_language}
+                className={classes.code_lang}
+                onChange={(e) => (
+                  updateQuestion({...assignmentQuestion, code_language: e.target.value})
+                )}
+              />
+            </div>
           </Grid>
         </Grid>
 
         <Grid container spacing={2} direction={'row'} justify={'center'} className={classes.padding1}>
-          <Grid item xs={6} md={6}>
-            <Typography>
+          <Grid item sm={12} md={6}>
+            <Typography variant={'body1'}>
               Question Editor
             </Typography>
             <AceEditor
@@ -122,9 +126,9 @@ export default function QuestionCard({assignmentQuestion, updateQuestion, saveQu
               editorProps={{$blockScrolling: true}}
             />
           </Grid>
-          <Grid item xs={6} md={6}>
-            <Typography>
-              Question Preview
+          <Grid item sm={12} md={6}>
+            <Typography variant={'body1'}>
+              Markdown Preview
             </Typography>
             <ReactMarkdownWithHtml
               className={classes.markdown}
@@ -137,9 +141,12 @@ export default function QuestionCard({assignmentQuestion, updateQuestion, saveQu
         </Grid>
 
         <Grid container spacing={2} direction={'row'} justify={'center'} className={classes.padding1}>
-          <Grid item xs={6} md={6}>
-            <Typography>
+          <Grid item sm={12} md={6}>
+            <Typography variant={'body1'}>
               Solution Editor
+            </Typography>
+            <Typography variant={'body2'} color={'textSecondary'} style={{fontSize: 12}}>
+              Solutions only visible to TAs
             </Typography>
             <AceEditor
               mode={'markdown'}
@@ -151,9 +158,9 @@ export default function QuestionCard({assignmentQuestion, updateQuestion, saveQu
               editorProps={{$blockScrolling: true}}
             />
           </Grid>
-          <Grid item xs={6} md={6}>
-            <Typography>
-              Solution Preview
+          <Grid item sm={12} md={6}>
+            <Typography variant={'body1'}>
+              Markdown Preview
             </Typography>
             <ReactMarkdownWithHtml
               className={classes.markdown}

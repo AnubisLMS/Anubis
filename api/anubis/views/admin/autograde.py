@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from anubis.models import Submission, Assignment, User
+from anubis.models import Submission, Assignment, User, InCourse
 from anubis.utils.auth import require_admin
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response, error_response, get_number_arg
@@ -91,9 +91,12 @@ def admin_autograde_assignment_assignment_id(assignment_id):
 
     # Get the (possibly cached) autograde calculations
     bests = bulk_autograde(assignment_id, limit=limit, offset=offset)
+    total = User.query.join(InCourse).filter(
+        InCourse.course_id == assignment.course_id,
+    ).count()
 
     # Pass back the results
-    return success_response({"stats": bests})
+    return success_response({"stats": bests, "total": total})
 
 
 @autograde_.route("/for/<assignment_id>/<user_id>")
@@ -139,7 +142,7 @@ def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
 @autograde_.route("/submission/<string:assignment_id>/<string:netid>")
 @require_admin()
 @log_endpoint("cli", lambda: "submission-stats")
-@cache.memoize(timeout=60)
+@cache.memoize(timeout=60, source_check=True)
 @json_response
 def private_submission_stats_id(assignment_id: str, netid: str):
     """

@@ -1,12 +1,15 @@
 import React, {useState} from 'react';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Grid from '@material-ui/core/Grid';
+import axios from 'axios';
 import {useSnackbar} from 'notistack';
 import {useParams} from 'react-router-dom';
-import axios from 'axios';
+
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
-import Typography from '@material-ui/core/Typography';
+
 import QuestionCard from '../../../Components/Admin/Assignment/QuestionCard';
 import QuestionControls from '../../../Components/Admin/Assignment/QuestionControls';
 
@@ -19,15 +22,21 @@ const useStyles = makeStyles((theme) => ({
 export default function AssignmentQuestions() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
-  const match = useParams();
+  const {assignmentId} = useParams();
+  const [assignmentName, setAssignmentName] = useState('');
+  const [questionsAssigned, setQuestionsAssigned] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [reset, setReset] = useState(0);
 
   React.useEffect(() => {
-    axios.get(`/api/admin/questions/get/${match.code}`).then((response) => {
+    axios.get(`/api/admin/questions/get/${assignmentId}`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      if (data.questions) {
+      setQuestionsAssigned(data.questions_assigned);
+      if (data?.questions) {
         setQuestions(data.questions);
+      }
+      if (data?.assignment_name) {
+        setAssignmentName(data.assignment_name);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [reset]);
@@ -44,7 +53,6 @@ export default function AssignmentQuestions() {
   };
 
   const saveQuestion = (index) => () => {
-    console.log(questions[index]);
     const question = questions[index];
     axios.post(`/api/admin/questions/update/${question.id}`, {question}).then((response) => {
       standardStatusHandler(response, enqueueSnackbar);
@@ -72,8 +80,9 @@ export default function AssignmentQuestions() {
         </Grid>
         <Grid item xs={12}>
           <QuestionControls
-            questions={questions}
-            uniqueCode={match.code}
+            assignmentName={assignmentName}
+            questionsAssigned={questionsAssigned}
+            assignmentId={assignmentId}
             reload={reload}
           />
         </Grid>

@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import clsx from 'clsx';
 import axios from 'axios';
-import Redirect from 'react-router-dom/Redirect';
+import {Redirect} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
 
 import {DataGrid} from '@material-ui/data-grid';
@@ -61,7 +61,7 @@ export default function Assignments() {
   }, []);
 
   if (selected) {
-    return <Redirect to={`/admin/autograde/assignment?assignmentId=${selected.id}`}/>;
+    return <Redirect to={`/admin/autograde/assignment/${selected.id}`}/>;
   }
 
   return (
@@ -74,7 +74,7 @@ export default function Assignments() {
           Autograded Assignments
         </Typography>
       </Grid>
-      <Grid item xs={12} md={8}>
+      <Grid item xs={12} sm={10} md={8}>
         <Paper className={clsx(classes.dataGridPaper, classes.paper)}>
           <DataGrid
             className={classes.dataGrid}

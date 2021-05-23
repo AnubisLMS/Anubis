@@ -24,7 +24,7 @@ services:
       - "traefik.enable=false"
 
   api:
-    image: registry.osiris.services/anubis/api:latest
+    image: registry.digitalocean.com/anubis/api:latest
     build: ./api
     command: sh -c "while true; do python3 dev.py; sleep 1; done"
     ports:
@@ -49,7 +49,7 @@ services:
 
   pipeline-api:
     build: ./api
-    image: registry.osiris.services/anubis/api:latest
+    image: registry.digitalocean.com/anubis/api:latest
     environment:
       - "DEBUG=1"
       - "DB_HOST=db"
@@ -71,7 +71,7 @@ services:
     volumes:
       - "./api:/opt/app"
     labels:
-      - "traefik.enable=false"
+      - "traefik.false=enable"
 
   rpc-theia:
     build: ./api
@@ -96,7 +96,7 @@ services:
       - "traefik.enable=false"
 
   web:
-    image: registry.osiris.services/anubis/web:latest
+    image: registry.digitalocean.com/anubis/web:latest
     build: ./web
 
   web-dev:
@@ -162,7 +162,7 @@ services:
       - "traefik.enable=false"
 
   logstash:
-    image: registry.osiris.services/anubis/logstash:latest
+    image: registry.digitalocean.com/anubis/logstash:latest
     build: ./logstash
     labels:
       - "traefik.enable=false"
@@ -175,23 +175,23 @@ services:
       - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
 
   theia-xv6:
-    image: registry.osiris.services/anubis/theia-xv6:latest
+    image: registry.digitalocean.com/anubis/theia-xv6:latest
     build: ./theia/ide/xv6
 
   theia-admin:
-    image: registry.osiris.services/anubis/theia-admin:latest
+    image: registry.digitalocean.com/anubis/theia-admin:latest
     build: ./theia/ide/admin
 
   theia-proxy:
-    image: registry.osiris.services/anubis/theia-proxy:latest
+    image: registry.digitalocean.com/anubis/theia-proxy:latest
     build: ./theia/proxy
 
   theia-init:
-    image: registry.osiris.services/anubis/theia-init:latest
+    image: registry.digitalocean.com/anubis/theia-init:latest
     build: ./theia/init
 
   theia-sidecar:
-    image: registry.osiris.services/anubis/theia-sidecar:latest
+    image: registry.digitalocean.com/anubis/theia-sidecar:latest
     build: ./theia/sidecar
 
 volumes:

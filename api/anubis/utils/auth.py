@@ -5,8 +5,7 @@ from functools import wraps
 from typing import Union
 
 import jwt
-from flask import g
-from flask import request
+from flask import g, request, has_request_context
 
 from anubis.config import config
 from anubis.models import User, TAForCourse, ProfessorForCourse
@@ -73,6 +72,9 @@ def get_token() -> Union[str, None]:
 
     :return:
     """
+
+    if not has_request_context():
+        return None
 
     return request.headers.get("token", default=None) or request.cookies.get(
         "token", default=None

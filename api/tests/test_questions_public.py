@@ -23,4 +23,4 @@ def test_questions_public():
             json={'response': None}, should_fail=True,
         )
         _questions = s.get(f'/public/questions/get/{assignment_id}')['questions']
-        assert _questions[index]['response'] == 'test123'
+        assert _questions[index]['response']['text'] == 'test123'

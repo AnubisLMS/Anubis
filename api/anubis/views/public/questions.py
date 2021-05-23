@@ -1,4 +1,5 @@
 from flask import Blueprint
+from datetime import datetime
 from sqlalchemy.exc import IntegrityError, DataError
 
 from anubis.models import db, Assignment, AssignedStudentQuestion, AssignedQuestionResponse, User
@@ -8,6 +9,7 @@ from anubis.utils.http.https import success_response, error_response
 from anubis.utils.lms.course import is_course_admin
 from anubis.utils.lms.questions import get_assigned_questions
 from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.lms.assignments import get_assignment_due_date
 
 questions = Blueprint("public-questions", __name__, url_prefix="/public/questions")
 
@@ -70,6 +72,27 @@ def public_questions_save(id: str, response: str):
     if not isinstance(response, str):
         return error_response('response must be a string')
 
+    # Get the assignment that this question exists for
+    assignment = assigned_question.assignment
+
+    # If the assignment is set to not accept late submissions,
+    # then we need to do a quick check to make sure they are submitting
+    # on time.
+    if not assignment.accept_late:
+        # Calculate now
+        now = datetime.now()
+
+        # Calculate the assignment due date for this student
+        due_date = get_assignment_due_date(user, assignment)
+
+        # Make sure that the deadline has not passed. If it has, then
+        # we should give them an error saying that they can request a
+        # regrade from the Professor.
+        if due_date < now:
+            return error_response(
+                'This assignment does not accept late submissions. You can request an extension from your Professor.'
+            )
+
     # Create a new response
     res = AssignedQuestionResponse(
         assigned_question_id=assigned_question.id,
@@ -91,4 +114,5 @@ def public_questions_save(id: str, response: str):
 
     return success_response({
         "status": "Response Saved",
+        "response": res.data,
     })

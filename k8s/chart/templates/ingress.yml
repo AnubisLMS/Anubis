@@ -16,33 +16,27 @@ spec:
       - "/api"
 
 ---
-# Public Ingress Route /api/public/*
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: ingress.route.anubis.api.public
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: anubis
-    component: api
+    app: api
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
-  {{- if .Values.debug }}
+  {{- if not .Values.debug }}
   entryPoints:
-    - web
+  - websecure
   {{- else }}
   entryPoints:
-    - websecure
+  - web
   {{- end }}
   routes:
   - kind: Rule
     match: Host(`{{ .Values.domain }}`) && PathPrefix(`/api`)
     middlewares:
-    {{- if .Values.vpnOnly }}
-    - name: whitelist-vpn
-      namespace: traefik
-    {{- end }}
     - name: strip-api
       namespace: {{ .Release.Namespace }}
     services:
@@ -50,7 +44,7 @@ spec:
       port: 5000
   {{- if not .Values.debug }}
   tls:
-    certResolver: tls
+    certResolver: le
   {{- end }}
 
 ---
@@ -86,7 +80,7 @@ spec:
       port: 3000
   {{- if not .Values.debug }}
   tls:
-    certResolver: tls
+    certResolver: le
   {{- end }}
 
 ---
@@ -118,7 +112,5 @@ spec:
       port: 5000
   {{- if not .Values.debug }}
   tls:
-    certResolver: tls
+    certResolver: le
   {{- end }}
-
-

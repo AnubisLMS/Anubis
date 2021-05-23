@@ -326,8 +326,8 @@ def with_context(function):
 
         # Push an app context
         with app.app_context():
-
-            # Call the function within an app context
-            return function(*args, **kwargs)
+            with app.test_request_context():
+                # Call the function within an app context
+                return function(*args, **kwargs)
 
     return wrapper

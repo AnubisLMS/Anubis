@@ -153,7 +153,7 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
         )
     ).first()
     if course is None:
-        return "Unable to find class", False
+        return "Unable to find course", False
 
     assert_course_admin(course.id)
 

@@ -7,7 +7,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_json import MutableJson
 
 from anubis.utils.data import rand
-from anubis.utils.services.logger import logger
 
 db = SQLAlchemy()
 
@@ -90,8 +89,11 @@ class Course(db.Model):
     semester = db.Column(db.TEXT, nullable=True)
     section = db.Column(db.TEXT, nullable=True)
     professor = db.Column(db.TEXT, nullable=False)
-    theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.osiris.services/anubis/xv6')
+    autograde_tests_repo = db.Column(db.TEXT, nullable=False,
+                                     default='https://github.com/os3224/anubis-assignment-tests')
+    theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.digitalocean.com/anubis/xv6')
     theia_default_options = db.Column(MutableJson, default=lambda: {"limits": {"cpu": "2", "memory": "500Mi"}})
+    github_org_url = db.Column(db.TEXT, default='')
 
     @property
     def total_assignments(self):
@@ -177,11 +179,11 @@ class Assignment(db.Model):
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), index=True)
 
     # Fields
-    name = db.Column(db.TEXT, nullable=False)
+    name = db.Column(db.TEXT, nullable=False, index=True)
     hidden = db.Column(db.Boolean, default=False)
     description = db.Column(db.TEXT, nullable=True)
     github_classroom_url = db.Column(db.TEXT, nullable=True, default=None)
-    pipeline_image = db.Column(db.TEXT, nullable=True)
+    pipeline_image = db.Column(db.TEXT, nullable=True, index=True)
     unique_code = db.Column(
         db.String(8),
         unique=True,
@@ -191,7 +193,7 @@ class Assignment(db.Model):
     accept_late = db.Column(db.Boolean, default=True)
     autograde_enabled = db.Column(db.Boolean, default=True)
     theia_image = db.Column(
-        db.TEXT, default="registry.osiris.services/anubis/theia-xv6"
+        db.TEXT, default="registry.digitalocean.com/anubis/theia-xv6"
     )
     theia_options = db.Column(MutableJson, default=lambda: {})
 
@@ -383,35 +385,27 @@ class AssignedStudentQuestion(db.Model):
 
         :return:
         """
-        response = AssignedQuestionResponse.query.filter(
+        from anubis.utils.lms.assignments import get_assignment_due_date
+
+        response: AssignedQuestionResponse = AssignedQuestionResponse.query.filter(
             AssignedQuestionResponse.assigned_question_id == self.id,
         ).order_by(AssignedQuestionResponse.created.desc()).first()
 
-        raw_response = self.question.placeholder
+        response_data = {'submitted': None,'late': True, 'text': self.question.placeholder}
         if response is not None:
-            raw_response = response.response
+            response_data = response.data
 
         return {
             "id": self.id,
-            "response": raw_response,
+            "response": response_data,
             "question": self.question.data,
         }
 
     @property
     def full_data(self):
-        response = AssignedQuestionResponse.query.filter(
-            AssignedQuestionResponse.assigned_question_id == self.id,
-        ).order_by(AssignedQuestionResponse.created.desc()).first()
-
-        raw_response = self.question.placeholder
-        if response is not None:
-            raw_response = response.response
-
-        return {
-            "id": self.id,
-            "question": self.question.full_data,
-            "response": raw_response,
-        }
+        data = self.data
+        data['question'] = self.question.full_data
+        return data
 
 
 class AssignedQuestionResponse(db.Model):
@@ -431,6 +425,16 @@ class AssignedQuestionResponse(db.Model):
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    @property
+    def data(self):
+        from anubis.utils.lms.assignments import get_assignment_due_date
+
+        return {
+            'submitted': str(self.created),
+            'late': get_assignment_due_date(self.question.owner, self.question.assignment) < self.created,
+            'text': self.response,
+        }
 
 
 class Submission(db.Model):
@@ -467,7 +471,7 @@ class Submission(db.Model):
     # Relationships
     owner = db.relationship(User)
     assignment = db.relationship(Assignment)
-    build = db.relationship("SubmissionBuild", cascade="all,delete", backref='submission')
+    build = db.relationship("SubmissionBuild", cascade="all,delete", uselist=False, backref='submission')
     test_results = db.relationship("SubmissionTestResult", cascade="all,delete", backref='submission')
     repo = db.relationship(AssignmentRepo, backref='submissions')
 
@@ -658,7 +662,7 @@ class TheiaSession(db.Model):
     state = db.Column(db.TEXT)
     cluster_address = db.Column(db.TEXT, nullable=True, default=None)
     image = db.Column(
-        db.TEXT, default="registry.osiris.services/anubis/theia-xv6"
+        db.TEXT, default="registry.digitalocean.com/anubis/theia-xv6"
     )
     options = db.Column(MutableJson, nullable=False, default=lambda: dict())
     network_locked = db.Column(db.Boolean, default=True)
@@ -766,6 +770,3 @@ class LateException(db.Model):
             'assignment_id': self.assignment_id,
             'due_date': str(self.due_date)
         }
-
-
-
