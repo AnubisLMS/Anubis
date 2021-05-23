@@ -93,6 +93,7 @@ class Course(db.Model):
                                      default='https://github.com/os3224/anubis-assignment-tests')
     theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.digitalocean.com/anubis/xv6')
     theia_default_options = db.Column(MutableJson, default=lambda: {"limits": {"cpu": "2", "memory": "500Mi"}})
+    github_org_url = db.Column(db.TEXT, default='')
 
     @property
     def total_assignments(self):
@@ -178,11 +179,11 @@ class Assignment(db.Model):
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), index=True)
 
     # Fields
-    name = db.Column(db.TEXT, nullable=False)
+    name = db.Column(db.TEXT, nullable=False, index=True)
     hidden = db.Column(db.Boolean, default=False)
     description = db.Column(db.TEXT, nullable=True)
     github_classroom_url = db.Column(db.TEXT, nullable=True, default=None)
-    pipeline_image = db.Column(db.TEXT, nullable=True)
+    pipeline_image = db.Column(db.TEXT, nullable=True, index=True)
     unique_code = db.Column(
         db.String(8),
         unique=True,

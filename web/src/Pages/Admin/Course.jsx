@@ -40,6 +40,7 @@ const editableFields = [
   {field: 'autograde_tests_repo', label: 'Autograde Tests Repo'},
   {field: 'theia_default_image', label: 'Theia Default Image'},
   {field: 'theia_default_options', label: 'Theia Default Options'},
+  {field: 'github_org_url', label: 'Github Org URL'},
   {field: 'join_code', label: 'Join Code', disabled: true},
 ];
 
