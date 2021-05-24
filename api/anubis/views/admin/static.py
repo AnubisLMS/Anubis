@@ -1,17 +1,17 @@
-from flask import Blueprint, request
+from flask import Blueprint
 
 from anubis.models import db, StaticFile
 from anubis.utils.auth import require_admin
 from anubis.utils.data import rand
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.files import get_mime_type
-from anubis.utils.lms.course import get_course_context, assert_course_admin, assert_course_context
 from anubis.utils.http.https import (
     get_number_arg,
     get_request_file_stream,
     success_response,
     error_response,
 )
+from anubis.utils.lms.course import get_course_context, assert_course_context
 
 static = Blueprint("admin-static", __name__, url_prefix="/admin/static")
 

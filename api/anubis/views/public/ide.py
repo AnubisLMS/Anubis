@@ -9,14 +9,14 @@ from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response, load_from_id
 from anubis.utils.http.https import error_response, success_response
 from anubis.utils.lms.course import is_course_admin
-from anubis.utils.services.elastic import log_endpoint
-from anubis.utils.services.logger import logger
-from anubis.utils.services.rpc import enqueue_ide_stop, enqueue_ide_initialize
 from anubis.utils.lms.theia import (
     theia_redirect_url,
     get_n_available_sessions,
     theia_poll_ide,
 )
+from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.services.logger import logger
+from anubis.utils.services.rpc import enqueue_ide_stop, enqueue_ide_initialize
 
 ide = Blueprint("public-ide", __name__, url_prefix="/public/ide")
 

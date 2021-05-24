@@ -6,9 +6,6 @@ from typing import Union, Tuple, Any
 
 from flask import request
 
-from anubis.utils.auth import current_user
-from anubis.utils.exceptions import AuthenticationError, LackCourseContext
-from anubis.utils.services.logger import logger
 from anubis.models import (
     Course,
     TAForCourse,
@@ -25,6 +22,9 @@ from anubis.models import (
     InCourse,
     LateException,
 )
+from anubis.utils.auth import current_user
+from anubis.utils.exceptions import AuthenticationError, LackCourseContext
+from anubis.utils.services.logger import logger
 
 
 def get_course_context(full_stop: bool = True) -> Union[None, Course]:

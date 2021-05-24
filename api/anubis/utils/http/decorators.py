@@ -6,8 +6,8 @@ from flask import request
 
 from anubis.models import Submission
 from anubis.utils.auth import current_user
-from anubis.utils.exceptions import AuthenticationError
 from anubis.utils.data import jsonify, _verify_data_shape
+from anubis.utils.exceptions import AuthenticationError
 from anubis.utils.http.https import error_response
 
 
@@ -125,7 +125,6 @@ def json_endpoint(
             # If the content type header is not application/json, then
             # flask will not parse the body of the request.
             if not content_type.startswith("application/json"):
-
                 # If the content-type was not set properly, then we
                 # should hand back a 406 not acceptable error code.
                 return error_response("Content-Type header is not application/json"), 406
@@ -165,7 +164,6 @@ def json_endpoint(
                     # If this condition is not met, then we will return
                     # a 406 not acceptable.
                     if field not in json_body:
-
                         # field missing, return error
                         # Not Acceptable
                         return error_response(f"Malformed requests. Missing field {field}."), 406
@@ -175,7 +173,6 @@ def json_endpoint(
 
                         # Do a type check on the json body field
                         if not isinstance(json_body[field], required_type):
-
                             # Not Acceptable
                             return error_response("Malformed requests. Invalid field type."), 406
 

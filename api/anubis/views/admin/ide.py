@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import Blueprint
 
 from anubis.models import db, TheiaSession
-from anubis.rpc.theia import reap_all_theia_sessions
+from anubis.rpc.theia import reap_theia_sessions_in_course
 from anubis.utils.auth import require_admin, current_user
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response
@@ -206,7 +206,7 @@ def private_ide_reap_all():
     course = get_course_context()
 
     # Send reap job to rpc cluster
-    rpc_enqueue(reap_all_theia_sessions, 'theia', args=(course.id,))
+    rpc_enqueue(reap_theia_sessions_in_course, 'theia', args=(course.id,))
 
     # Hand back status
     return success_response(

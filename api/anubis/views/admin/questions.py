@@ -14,7 +14,7 @@ from anubis.utils.lms.questions import (
     get_all_questions,
     assign_questions,
     reset_question_assignments,
-get_question_assignments,
+    get_question_assignments,
 )
 from anubis.utils.services.elastic import log_endpoint
 

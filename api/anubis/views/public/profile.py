@@ -1,5 +1,4 @@
 import string
-from datetime import timedelta, datetime
 
 from flask import Blueprint, request
 
@@ -8,7 +7,6 @@ from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import error_response, success_response
 from anubis.utils.services.elastic import log_endpoint
-from anubis.utils.services.logger import logger
 
 profile = Blueprint("public-profile", __name__, url_prefix="/public/profile")
 
@@ -57,7 +55,6 @@ def public_set_github_username():
             and not github_username.startswith("-")
             and not github_username.endswith("-")
     ):
-
         # Give them back an error saying they have illegal characters
         return error_response(
             "Github usernames may only contain alphanumeric characters "

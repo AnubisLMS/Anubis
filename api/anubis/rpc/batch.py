@@ -1,5 +1,5 @@
-from anubis.utils.services.logger import logger
 from anubis.utils.data import with_context
+from anubis.utils.services.logger import logger
 
 
 @with_context

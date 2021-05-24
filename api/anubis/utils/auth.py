@@ -1,4 +1,3 @@
-import functools
 import traceback
 from datetime import datetime, timedelta
 from functools import wraps
@@ -10,8 +9,8 @@ from flask import g, request, has_request_context
 from anubis.config import config
 from anubis.models import User, TAForCourse, ProfessorForCourse
 from anubis.utils.data import is_debug
-from anubis.utils.exceptions import AuthenticationError, LackCourseContext
-from anubis.utils.http.https import error_response, get_request_ip
+from anubis.utils.exceptions import AuthenticationError
+from anubis.utils.http.https import get_request_ip
 from anubis.utils.services.logger import logger
 
 

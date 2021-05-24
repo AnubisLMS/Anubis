@@ -385,13 +385,12 @@ class AssignedStudentQuestion(db.Model):
 
         :return:
         """
-        from anubis.utils.lms.assignments import get_assignment_due_date
 
         response: AssignedQuestionResponse = AssignedQuestionResponse.query.filter(
             AssignedQuestionResponse.assigned_question_id == self.id,
         ).order_by(AssignedQuestionResponse.created.desc()).first()
 
-        response_data = {'submitted': None,'late': True, 'text': self.question.placeholder}
+        response_data = {'submitted': None, 'late': True, 'text': self.question.placeholder}
         if response is not None:
             response_data = response.data
 

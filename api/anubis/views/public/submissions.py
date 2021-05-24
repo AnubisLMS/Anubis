@@ -1,15 +1,12 @@
-from datetime import datetime
-
 from flask import Blueprint, request
 
-from anubis.models import User, Submission, Assignment
+from anubis.models import User, Submission
 from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import error_response, success_response, get_number_arg
 from anubis.utils.lms.course import is_course_admin, assert_course_context
 from anubis.utils.lms.submissions import regrade_submission, get_submissions
 from anubis.utils.services.elastic import log_endpoint
-from anubis.utils.services.logger import logger
 
 submissions = Blueprint(
     "public-submissions", __name__, url_prefix="/public/submissions"
@@ -138,7 +135,6 @@ def public_regrade_commit(commit: str):
 
     # Check that the owner matches the user
     if submission.owner_id != user.id:
-
         # If the user is not the owner, then full stop if
         assert_course_context(submission)
 

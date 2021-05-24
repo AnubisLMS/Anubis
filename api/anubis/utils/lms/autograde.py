@@ -58,7 +58,8 @@ def autograde(student_id, assignment_id):
     return best.id if best is not None else None
 
 
-def autograde_submission_result_wrapper(assignment: Assignment, user_id: str, netid: str, name: str, submission_id: str) -> dict:
+def autograde_submission_result_wrapper(assignment: Assignment, user_id: str, netid: str, name: str,
+                                        submission_id: str) -> dict:
     """
     The autograde results require quite of bit more information than
     just the id of the best submission. This function takes some high level

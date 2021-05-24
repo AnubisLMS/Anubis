@@ -1,13 +1,11 @@
-from typing import List
-
 from flask import Blueprint
 
-from anubis.models import User, AssignmentRepo, Assignment
+from anubis.models import User
 from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.lms.repos import get_repos
+from anubis.utils.services.elastic import log_endpoint
 
 repos = Blueprint("public-repos", __name__, url_prefix="/public/repos")
 

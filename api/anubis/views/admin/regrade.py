@@ -11,12 +11,12 @@ from anubis.utils.data import split_chunks
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.decorators import load_from_id
 from anubis.utils.http.https import error_response, success_response, get_number_arg
-from anubis.utils.lms.course import assert_course_context
-from anubis.utils.services.elastic import log_endpoint
-from anubis.utils.services.cache import cache
-from anubis.utils.services.rpc import enqueue_autograde_pipeline, rpc_enqueue
 from anubis.utils.lms.autograde import bulk_autograde, autograde
+from anubis.utils.lms.course import assert_course_context
 from anubis.utils.lms.submissions import init_submission
+from anubis.utils.services.cache import cache
+from anubis.utils.services.elastic import log_endpoint
+from anubis.utils.services.rpc import enqueue_autograde_pipeline, rpc_enqueue
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 
