@@ -55,3 +55,13 @@ theia:
 
 elasticsearch:
   service: elasticsearch-master.elastic.svc.cluster.local
+
+backup:
+  enable: true
+  suspend: false
+  schedule: "0 0 * * *"
+
+  remote:
+    enable: true
+    secretName: anubis-backup-creds
+

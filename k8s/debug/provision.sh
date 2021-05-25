@@ -70,8 +70,9 @@ echo 'Adding traefik resources...'
 kubectl create ns traefik
 kubectl apply -f ./debug/traefik.yaml
 
-# Add the bitnami helm charts
+# Add the external chart repositories
 helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add elastic https://helm.elastic.co
 helm repo update
 
 # Create a minimal mariadb deployment in a mariadb namespace. On

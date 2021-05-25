@@ -50,12 +50,13 @@ helm upgrade --install mariadb bitnami/mariadb \
 echo 'Adding elasticsearch'
 kubectl create namespace anubis
 helm upgrade \
+     --version 7.12 \
 		 --install elasticsearch elastic/elasticsearch \
 		 --create-namespace \
 		 --set replicas=1 \
 		 --set resources=null \
-		 --set volumeClaimTemplate.resources.requests.storage=1Gi \
-		 --set imageTag=7.12.0 \
+		 --set volumeClaimTemplate.resources.requests.storage=8Gi \
+     --set volumeClaimTemplate.storageClassName=do-block-storage \
 		 --namespace elastic
 
 # Install a minimal redis deployment

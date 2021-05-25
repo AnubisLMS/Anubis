@@ -1,0 +1,91 @@
+{{- if .Values.backup.enable }}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: backup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Replace
+  suspend: {{ .Values.reaper.suspend }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+
+          initContainers:
+          - name: volume-permissions
+            image: busybox:1.31.1
+            command: ["sh", "-c", "chmod -Rv 666 /data/*; chmod 777 /data"]
+            volumeMounts:
+            - name: anubis-backups
+              mountPath: /data
+
+          containers:
+          - name: backup
+            image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+            imagePullPolicy: {{ .Values.imagePullPolicy }}
+            command:
+            - ./jobs/backup.sh
+            env:
+            - name: "PYTHONPATH"
+              value: "/opt/app"
+            - name: DB_HOST
+              value: mariadb.mariadb.svc.cluster.local
+            # sqlalchemy uri
+            - name: "DATABASE_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-password
+            - name: "REDIS_PASS"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: redis-password
+            {{- if .Values.backup.remote.enable }}
+            - name: "BACKUP_SSH_DOMAIN"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backup.remote.secretName }}
+                  key: ssh-domain
+            {{- end }}
+            volumeMounts:
+            - name: anubis-backups
+              mountPath: "/mnt/backups"
+            {{- if .Values.backup.remote.enable }}
+            - name: {{ .Values.backup.remote.secretName }}
+              mountPath: "/home/anubis/.ssh"
+            {{- end }}
+          volumes:
+          - name: anubis-backups
+            persistentVolumeClaim:
+              claimName: anubis-backups
+          {{- if .Values.backup.remote.enable }}
+          - name: anubis-backup-creds
+            secret:
+              secretName: {{ .Values.backup.remote.secretName }}
+              defaultMode: 0644
+          {{- end }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: anubis-backups
+  namespace: {{ .Release.Namespace }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 8Gi
+
+{{- end }}
