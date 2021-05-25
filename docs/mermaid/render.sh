@@ -11,7 +11,11 @@ if [ ! -d ../img ]; then
 fi
 
 for mmdf in $(find -name '*.mmd'); do
-    echo "rendering ${mmdf}"
-    node_modules/.bin/mmdc -i ${mmdf} -o ../img/${mmdf}.png -b transparent -t forest
-    node_modules/.bin/mmdc -i ${mmdf} -o ../img/${mmdf}.svg -b transparent -t forest
+    if [ ! -f ../img/${mmdf}.png ] && [ ! -f ../img/${mmdf}.svg ]; then
+        echo "mermaid rendering ${mmdf}"
+        node_modules/.bin/mmdc -i ${mmdf} -o ../img/${mmdf}.png -b transparent -t forest
+        node_modules/.bin/mmdc -i ${mmdf} -o ../img/${mmdf}.svg -b transparent -t forest
+    else
+        echo "mermaid skipping ${mmdf}"
+    fi
 done
