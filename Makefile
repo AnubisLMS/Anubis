@@ -72,13 +72,13 @@ mindebug:
 	make -C api migrations
 	make startup-links
 
-.PHONY: mkdebug      # Start minikube debug
-mkdebug:
+.PHONY: debug-mk     # Start minikube debug
+debug-mk:
 	./k8s/debug/provision.sh
 	make startup-links
 
-.PHONY: mkrestart    # Restart minikube debug
-mkrestart:
+.PHONY: restart-mk   # Restart minikube debug
+restart-mk:
 	./k8s/debug/restart.sh
 	make startup-links
 
