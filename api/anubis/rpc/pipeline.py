@@ -1,6 +1,6 @@
 from kubernetes import config, client
 
-from anubis.models import Config, Submission
+from anubis.models import db, Config, Submission
 from anubis.utils.data import with_context
 from anubis.utils.k8s.pipeline import create_pipeline_job_obj, reap_pipeline_jobs
 from anubis.utils.services.logger import logger
@@ -62,6 +62,10 @@ def create_submission_pipeline(submission_id: str):
     # we need to initialize the submission.
     if submission.build is None:
         init_submission(submission, commit=True)
+
+    submission.processed = False
+    submission.state = 'Initializing Pipeline'
+    db.session.commit()
 
     # Create k8s job object
     job = create_pipeline_job_obj(submission)

@@ -29,7 +29,7 @@ def rpc_enqueue(func, queue=None, args=None):
         conn.close()
 
 
-def enqueue_autograde_pipeline(*args, queue: str = 'default'):
+def enqueue_autograde_pipeline(*args, queue: str = 'regrade'):
     """Enqueues a test job"""
     rpc_enqueue(create_submission_pipeline, queue=queue, args=args)
 
