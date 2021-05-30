@@ -83,6 +83,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
+  storageClassName: {{ .Values.backup.storageClassName | default "do-block-storage" | quote }}
   volumeMode: Filesystem
   resources:
     requests:

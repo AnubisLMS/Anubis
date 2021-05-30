@@ -59,11 +59,10 @@ backup:
   enable: true
   suspend: false
   schedule: "0 0 * * *"
-
+  storageClassName: do-block-storage
   remote:
     enable: true
     secretName: anubis-backup-creds
-
 
 hpa:
   enable: true

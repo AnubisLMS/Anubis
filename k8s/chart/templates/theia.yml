@@ -33,6 +33,13 @@ spec:
       - name: proxy
         image: {{ .Values.theia.proxy.image }}:{{ .Values.theia.proxy.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 50Mi
+          limits:
+            cpu: 2000m
+            memory: 500Mi
         ports:
         - name: http
           containerPort: 5000

@@ -32,6 +32,13 @@ spec:
       - name: api
         image: {{ .Values.api.image }}:{{ .Values.api.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: {{ .Values.api.workers }}
+            memory: 300Mi
         ports:
         - name: web
           containerPort: 5000

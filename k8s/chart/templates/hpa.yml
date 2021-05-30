@@ -1,4 +1,4 @@
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
   name: anubis-api
@@ -16,7 +16,7 @@ spec:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 60
+        averageUtilization: 100
 
 ---
 apiVersion: autoscaling/v2beta2
@@ -30,14 +30,14 @@ spec:
     kind: Deployment
     name: web
   minReplicas: 1
-  maxReplicas: 3
+  maxReplicas: 5
   metrics:
   - type: Resource
     resource:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 60
+        averageUtilization: 100
 
 ---
 apiVersion: autoscaling/v2beta2
@@ -58,7 +58,7 @@ spec:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 60
+        averageUtilization: 100
 
 ---
 {{- range .Values.hpa.rpc }}
@@ -80,7 +80,7 @@ spec:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 60
+        averageUtilization: 100
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 0
