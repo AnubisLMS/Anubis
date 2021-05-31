@@ -1,20 +1,25 @@
+import os
+import json
+import base64
+
+
 from flask import Blueprint, make_response, redirect, request
 
 from anubis.models import User, db
-from anubis.utils.auth import create_token, current_user, require_user
+from anubis.utils.auth import create_token, current_user, require_user, require_admin
 from anubis.utils.data import is_debug
-from anubis.utils.http.decorators import json_endpoint
+from anubis.utils.http.decorators import json_endpoint, json_response
 from anubis.utils.http.https import success_response, error_response
 from anubis.utils.lms.course import get_course_context
 from anubis.utils.lms.submissions import fix_dangling
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.oauth import OAUTH_REMOTE_APP as provider
 
-auth = Blueprint("public-auth", __name__, url_prefix="/public/auth")
-oauth = Blueprint("public-oauth", __name__, url_prefix="/public")
+auth_ = Blueprint("public-auth", __name__, url_prefix="/public/auth")
+oauth_ = Blueprint("public-oauth", __name__, url_prefix="/public")
 
 
-@auth.route("/login")
+@auth_.route("/login")
 @log_endpoint("public-login", lambda: "login")
 def public_login():
     if is_debug():
@@ -24,7 +29,7 @@ def public_login():
     )
 
 
-@auth.route("/logout")
+@auth_.route("/logout")
 @log_endpoint("public-logout", lambda: "logout")
 def public_logout():
     r = make_response(redirect("/"))
@@ -32,7 +37,7 @@ def public_logout():
     return r
 
 
-@oauth.route("/oauth")
+@oauth_.route("/oauth")
 @log_endpoint("public-oauth", lambda: "oauth")
 def public_oauth():
     """
@@ -87,7 +92,7 @@ def public_oauth():
     return r
 
 
-@auth.route("/whoami")
+@auth_.route("/whoami")
 def public_whoami():
     """
     Figure out who you are
@@ -121,7 +126,7 @@ def public_whoami():
     })
 
 
-@auth.route("/set-github-username", methods=["POST"])
+@auth_.route("/set-github-username", methods=["POST"])
 @require_user()
 @json_endpoint(required_fields=[("github_username", str)])
 def public_auth_set_github_username(github_username):
@@ -155,3 +160,52 @@ def public_auth_set_github_username(github_username):
 
     # Notify them with status
     return success_response({"status": "github username updated"})
+
+
+@auth_.route('/cli')
+@require_admin()
+def public_cli_auth():
+    """
+    When the cli authenticates it will open a browser window that will authenticate then
+    ?next them to here. This should redirect the user back to the local server that
+    is running with whatever authentication token it needs.
+
+    :return:
+    """
+
+    user: User = current_user()
+
+    # Create a token with 30 days to expire
+    token = create_token(user.netid, exp_kwargs={'days': 30})
+
+    # Grab the docker config out of the environ if it is there
+    docker_token = os.environ.get('DOCKER_TOKEN', None)
+    docker_registry = os.environ.get('DOCKER_REGISTRY', None)
+    docker_config = {
+        'registry': docker_registry,
+        'token': docker_token,
+    }
+    if docker_token is None or docker_registry is None:
+        docker_config = None
+
+    # Construct the data response
+    data = json.dumps({
+        'token': token,
+        'docker_config': docker_config,
+    })
+
+    # Base64 encode the response
+    b64_encoded_data = base64.b64encode(data.encode()).decode()
+
+    # Construct message to be splayed on the browser
+    message = f'Please copy this into the cli console:\n{b64_encoded_data}'
+
+    # Create the response
+    response = make_response(message)
+
+    # Set the content type to text/plain so that there is no additional
+    # formatting added to the browser display
+    response.headers['Content-Type'] = 'text/plain'
+
+    return response
+

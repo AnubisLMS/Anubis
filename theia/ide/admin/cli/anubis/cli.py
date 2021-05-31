@@ -8,6 +8,7 @@ import os
 import shutil
 import string
 import sys
+import typing
 from datetime import datetime, timedelta
 
 import click
@@ -23,10 +24,29 @@ conf_file = os.path.join(os.environ.get("HOME"), ".anubis/config.json")
 assignment_base = None
 
 
-def prompt_auth():
-    username = input('Anubis Username: ')
-    password = getpass.getpass('Anubis Password: ')
-    return username, password
+def prompt_auth_data() -> typing.Dict[str, dict]:
+    b64_auth_data = getpass.getpass('Token from anubis: ')
+
+    try:
+        decoded_auth_data = base64.b64decode(b64_auth_data.encode()).decode()
+    except Exception as e:
+        print(e)
+        print('Unable to base64 decode token')
+        exit(1)
+
+    try:
+        auth_data = json.loads(decoded_auth_data)
+    except Exception as e:
+        print(e)
+        print('Unable to json decode token')
+        exit(1)
+
+    return auth_data
+
+
+def get_conf(key, default=None):
+    conf = load_conf()
+    return conf.get(key, default)
 
 
 def load_conf():
@@ -42,53 +62,19 @@ def init_conf():
         os.makedirs(conf_dir, exist_ok=True)
 
     if not os.path.isfile(conf_file):
-        set_conf({"auth": {"username": None, "password": None}, "incluster": False})
+        set_conf({
+            "url": "https://anubis.osiris.services/",
+            "token": None,
+        })
 
 
-def load_auth():
-    if not os.path.isfile(conf_file):
-        init_conf()
+def _make_request(path, request_func, **kwargs):
+    if 'params' in kwargs and kwargs['params'] is None:
+        kwargs['params'] = {}
 
-        username, password = prompt_auth()
-        set_auth(username, password)
-
-    conf = load_conf()
-    return conf['auth']['username'], conf['auth']['password']
-
-
-def set_auth(username, password):
-    conf = load_conf()
-    conf['auth']['username'] = username
-    conf['auth']['password'] = password
-    set_conf(conf)
-
-
-def post_json(path: str, data: dict, params=None):
-    """
-    Do a POST request to the API with a json object.
-
-    :return: requests.Response
-    """
-    if params is None:
-        params = {}
-
-    kwargs = {}
-    auth = load_auth()
-
-    if INCLUSTER:
-        params['token'] = INCLUSTER
-    else:
-        if auth == (None, None):
-            click.echo(click.style('You need to sign in', fg='red'))
-            click.echo(click.style('anubis -u username -p password ...', fg='red'))
-            exit(0)
-        kwargs['auth'] = auth
-
-    r = requests.post(
+    r = request_func(
         API_URL + path,
         headers={'Content-Type': 'application/json'},
-        params=params,
-        json=data,
         **kwargs
     )
 
@@ -101,39 +87,26 @@ def post_json(path: str, data: dict, params=None):
     return r
 
 
-def get_json(path: str, params=None):
+def post_json(path: str, data: dict, params=None):
     """
-
+    Do a POST request to the API with a json object.
 
     :return: requests.Response
     """
-    if params is None:
-        params = {}
 
-    kwargs = {}
-    auth = load_auth()
-
-    if INCLUSTER:
-        params['token'] = INCLUSTER
-    else:
-        if auth == (None, None):
-            click.echo(click.style('You need to sign in', fg='red'))
-            click.echo(click.style('anubis -u username -p password ...', fg='red'))
-            exit(0)
-        kwargs['auth'] = auth
-
-    r = requests.get(
-        API_URL + path,
-        params=params,
-        **kwargs
-    )
-
-    assert r.status_code == 200
-
-    return r
+    return _make_request(path, requests.post, json=data, params=params)
 
 
-def safe_filename(filename: str) -> str:
+def get_json(path: str, params=None):
+    """
+    GET something from the api, expecting a json response.
+
+    :return: requests.Response
+    """
+    return _make_request(path, requests.get, params=params)
+
+
+def relatively_safe_filename(filename: str) -> str:
     filename = filename.lower().replace(' ', '-')
     allowed = set(string.ascii_letters + string.digits + '_-')
     filename = ''.join(i for i in filename if i in allowed)
@@ -142,28 +115,14 @@ def safe_filename(filename: str) -> str:
 
 @click.group()
 @click.option('--debug/-d', default=False)
-@click.option('--username/-u', default=None)
-@click.option('--password/-p', default=None)
-def main(debug, username, password):
+def main(debug):
     global assignment_base
-    global API_URL
-    global INCLUSTER
     assignment_base = os.path.abspath(os.path.join(os.path.dirname(__file__), 'assignment'))
 
-    conf = load_conf()
-
-    if conf.get('incluster', False):
-        click.echo('detecting incluster mode')
-        API_URL = 'http://anubis:5000'
-        INCLUSTER = conf['incluster']
+    init_conf()
 
     if debug:
         click.echo('Debug mode is %s' % ('on' if debug else 'off'))
-        API_URL = 'http://localhost/api'
-
-    if username is not None or password is not None:
-        c_username, c_password = load_auth()
-        set_auth(username or c_username, password or c_password)
 
     sys.path.append(os.getcwd())
 
@@ -173,9 +132,40 @@ def assignment():
     pass
 
 
+@main.command()
+def auth():
+    click.echo('open this in browser:')
+    click.echo('https://anubis.osiris.services/api/public/auth/login?next=/api/public/auth/cli')
+
+    conf = load_conf()
+
+    auth_data = prompt_auth_data()
+    if 'token' in auth_data:
+        conf['token'] = auth_data['token']
+    if 'docker_config' in auth_data and auth_data['docker_config'] is not None:
+        pass
+
+
 @main.group()
-def questions():
+def config():
     pass
+
+
+@config.command()
+@click.argument('key')
+@click.argument('value')
+def set(key, value):
+    conf = load_conf()
+    conf[key] = value
+    set_conf(conf)
+
+    click.echo(json.dumps(conf, indent=2))
+
+
+@config.command()
+def show():
+    conf = load_conf()
+    click.echo(json.dumps(conf, indent=2))
 
 
 @main.command()
@@ -201,7 +191,7 @@ def sync():
 @assignment.command()
 @click.argument('assignment-name')
 def init(assignment_name):
-    safe_assignment_name = safe_filename(assignment_name)
+    safe_assignment_name = relatively_safe_filename(assignment_name)
 
     assignment_base: str = os.path.abspath(os.path.join(os.path.dirname(__file__), 'assignment'))
 
