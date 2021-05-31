@@ -18,7 +18,7 @@ mysqldump \
 
 if [ -n "${BACKUP_SSH_DOMAIN}" ]; then
     echo 'scping file to remote'
-    scp /tmp/${BACKUP_FILE} ${BACKUP_SSH_DOMAIN}/${BACKUP_FILE}
+    echo "put /tmp/${BACKUP_FILE} ${SFTP_LOCATION}" | sftp ${SFTP_USER}@${SFTP_HOST}
 fi
 
 echo 'copying to DO volume'

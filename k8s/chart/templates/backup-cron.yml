@@ -48,11 +48,21 @@ spec:
                   name: api
                   key: redis-password
             {{- if .Values.backup.remote.enable }}
-            - name: "BACKUP_SSH_DOMAIN"
+            - name: "SFTP_HOST"
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.backup.remote.secretName }}
-                  key: ssh-domain
+                  key: sftp-host
+            - name: "SFTP_USER"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backup.remote.secretName }}
+                  key: sftp-user
+            - name: "SFTP_LOCATION"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backup.remote.secretName }}
+                  key: sftp-location
             {{- end }}
             volumeMounts:
             - name: anubis-backups
