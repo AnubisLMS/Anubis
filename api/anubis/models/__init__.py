@@ -94,6 +94,7 @@ class Course(db.Model):
     theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.digitalocean.com/anubis/xv6')
     theia_default_options = db.Column(MutableJson, default=lambda: {"limits": {"cpu": "2", "memory": "500Mi"}})
     github_org_url = db.Column(db.TEXT, default='')
+    join_code = db.Column(db.String(256), unique=True)
 
     @property
     def total_assignments(self):

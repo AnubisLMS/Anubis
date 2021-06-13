@@ -1,5 +1,6 @@
 import base64
 import json
+import string
 import traceback
 import urllib.parse
 from typing import Union, Tuple, Any
@@ -23,7 +24,9 @@ from anubis.models import (
     LateException,
 )
 from anubis.utils.auth import current_user
+from anubis.utils.data import is_debug
 from anubis.utils.exceptions import AuthenticationError, LackCourseContext
+from anubis.utils.services.cache import cache
 from anubis.utils.services.logger import logger
 
 
@@ -293,3 +296,34 @@ def assert_course_context(*models: Tuple[Any]):
             # Verify that they are in the course
             if in_course is None:
                 raise LackCourseContext('Student is not within this course context')
+
+
+def valid_join_code(join_code: str) -> bool:
+    """
+    Validate code to make sure that all the characters are ok.
+
+    :param join_code:
+    :return:
+    """
+
+    # Create a valid charset from all ascii letters and numbers
+    valid_chars = set(string.ascii_letters + string.digits)
+
+    # Make sure the join code is 6 chars long, and
+    # all the chars exist in the valid_chars set.
+    return all(c in valid_chars for c in join_code)
+
+
+@cache.memoize(timeout=60, unless=is_debug)
+def get_courses(netid: str):
+    """
+    Get all classes a given netid is in
+
+    :param netid:
+    :return:
+    """
+    # Query for classes
+    classes = Course.query.join(InCourse).join(User).filter(User.netid == netid).all()
+
+    # Convert to list of data representation
+    return [c.data for c in classes]

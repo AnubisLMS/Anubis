@@ -172,7 +172,8 @@ def create_students(n=10):
 
 
 def create_course(users, **kwargs):
-    course = Course(id=rand(), **kwargs)
+    course_id = rand()
+    course = Course(id=course_id, join_code=id[:6], **kwargs)
     db.session.add(course)
 
     for user in users:

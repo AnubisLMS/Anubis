@@ -4,7 +4,7 @@ from anubis.models import db, User, Course, InCourse, Submission, Assignment
 from anubis.utils.auth import require_admin, current_user, require_superuser
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response, get_number_arg
-from anubis.utils.lms.course import assert_course_superuser, get_course_context, assert_course_context
+from anubis.utils.lms.courses import assert_course_superuser, get_course_context, assert_course_context
 from anubis.utils.lms.repos import get_repos
 from anubis.utils.lms.students import get_students
 from anubis.utils.lms.theia import get_recent_sessions

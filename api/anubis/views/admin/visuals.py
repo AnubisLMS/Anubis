@@ -4,7 +4,7 @@ from anubis.models import Assignment, User
 from anubis.utils.auth import require_admin
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response, error_response
-from anubis.utils.lms.course import assert_course_context
+from anubis.utils.lms.courses import assert_course_context
 from anubis.utils.visuals.assignments import (
     get_admin_assignment_visual_data,
     get_assignment_history,

@@ -8,7 +8,7 @@ from anubis.rpc.theia import reap_theia_sessions_in_course
 from anubis.utils.auth import require_admin, current_user
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response
-from anubis.utils.lms.course import get_course_context
+from anubis.utils.lms.courses import get_course_context
 from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.rpc import enqueue_ide_initialize
 from anubis.utils.services.rpc import rpc_enqueue, enqueue_ide_stop

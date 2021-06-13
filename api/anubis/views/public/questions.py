@@ -8,7 +8,7 @@ from anubis.utils.auth import require_user, current_user
 from anubis.utils.http.decorators import json_endpoint, load_from_id, json_response
 from anubis.utils.http.https import success_response, error_response
 from anubis.utils.lms.assignments import get_assignment_due_date
-from anubis.utils.lms.course import is_course_admin
+from anubis.utils.lms.courses import is_course_admin
 from anubis.utils.lms.questions import get_assigned_questions
 from anubis.utils.services.elastic import log_endpoint
 

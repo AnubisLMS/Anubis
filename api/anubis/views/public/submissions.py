@@ -4,7 +4,7 @@ from anubis.models import User, Submission
 from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import error_response, success_response, get_number_arg
-from anubis.utils.lms.course import is_course_admin, assert_course_context
+from anubis.utils.lms.courses import is_course_admin, assert_course_context
 from anubis.utils.lms.submissions import regrade_submission, get_submissions
 from anubis.utils.services.elastic import log_endpoint
 

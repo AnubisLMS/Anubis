@@ -6,7 +6,8 @@ from anubis.utils.auth import require_admin, require_superuser, current_user
 from anubis.utils.data import row2dict
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response
-from anubis.utils.lms.course import assert_course_superuser, get_course_context
+from anubis.utils.lms.courses import assert_course_superuser, get_course_context
+from anubis.utils.lms.courses import valid_join_code
 
 courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
 
@@ -27,7 +28,7 @@ def admin_courses_list():
 
     # Return the course context broken down
     return success_response({
-        "course": {"join_code": course.id[:6], **row2dict(course)},
+        "course": row2dict(course),
     })
 
 
@@ -89,6 +90,10 @@ def admin_courses_save_id(course: dict):
 
     # Assert that the current user is a professor or a superuser
     assert_course_superuser(course_id)
+
+    # Check that the join code is valid
+    if not valid_join_code(course['join_code']):
+        return error_response('Invalid join code. Lowercase letters and numbers only.')
 
     # Update all the items in the course with the posted data
     for column in Course.__table__.columns:

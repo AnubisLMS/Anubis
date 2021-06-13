@@ -11,7 +11,7 @@ from anubis.utils.http.https import (
     success_response,
     error_response,
 )
-from anubis.utils.lms.course import get_course_context, assert_course_context
+from anubis.utils.lms.courses import get_course_context, assert_course_context
 
 static = Blueprint("admin-static", __name__, url_prefix="/admin/static")
 

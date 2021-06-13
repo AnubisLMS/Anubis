@@ -5,7 +5,7 @@ from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQue
 from anubis.utils.auth import require_admin
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import error_response, success_response
-from anubis.utils.lms.course import (
+from anubis.utils.lms.courses import (
     assert_course_superuser,
     assert_course_context,
 )
