@@ -5,21 +5,18 @@ import axios from 'axios';
 import {KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider} from '@material-ui/pickers';
 
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import Grid from '@material-ui/core/Grid';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import DateFnsUtils from '@date-io/date-fns';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
+import CardActions from '@material-ui/core/CardActions';
+import Button from '@material-ui/core/Button';
+import SaveIcon from '@material-ui/icons/Save';
 
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
-import CardActionArea from '@material-ui/core/CardActionArea';
-import {CardActions} from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import SaveIcon from '@material-ui/icons/Save';
 import {nonStupidDatetimeFormat} from '../../../Utils/datetime';
-import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
   datePicker: {
@@ -67,7 +64,7 @@ export default function LateExceptionAddCard({assignment, setReset}) {
       <CardContent>
         <Autocomplete
           getOptionLabel={(option) => option.netid}
-          renderInput={(params) => <TextField {...params} label="Student" variant="outlined" />}
+          renderInput={(params) => <TextField {...params} label="Student" variant="outlined"/>}
           options={students}
           onChange={(_, v) => setSelected(v)}
         />
@@ -98,7 +95,7 @@ export default function LateExceptionAddCard({assignment, setReset}) {
           startIcon={<SaveIcon/>}
           onClick={save}
         >
-          Add or Update
+                    Add or Update
         </Button>
       </CardActions>
     </Card>

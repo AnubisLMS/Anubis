@@ -18,7 +18,6 @@ import SaveIcon from '@material-ui/icons/Save';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
-import clsx from 'clsx';
 
 
 const useStyles = makeStyles((theme) => ({

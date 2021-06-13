@@ -1,16 +1,27 @@
 import React, {useState} from 'react';
-
-import {BrowserRouter as Router} from 'react-router-dom';
-import {SnackbarProvider} from 'notistack';
 import clsx from 'clsx';
 
-import {makeStyles, ThemeProvider} from '@material-ui/core/styles';
+// React router
+import {BrowserRouter as Router} from 'react-router-dom';
+
+// Snackbar
+import {SnackbarProvider} from 'notistack';
+
+// React vis stylesheet
+import 'react-vis/dist/style.css';
+
+import {ThemeProvider} from '@material-ui/core/styles';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
-import {drawerWidth} from './navconfig';
-import theme from './Theme/Dark';
-
+// Auth Context
 import AuthContext from './Contexts/AuthContext';
+
+// Navconfig
+import {drawerWidth} from './navconfig';
+
+// Dark theme
+import theme from './Theme/Dark';
 
 import AuthWrapper from './Components/AuthWrapper';
 import Main from './Main';
@@ -130,7 +141,7 @@ export default function App() {
                     />
                     <div className={classes.app} id={'app'}>
                       <Header
-                        onDrawerToggle={() => setOpen((prev) => !prev)}
+                        onDrawerToggle={handleDrawerOpen}
                         user={user}
                         classes={classes}
                         open={open}

@@ -1,14 +1,17 @@
 import React, {useState} from 'react';
-import makeStyles from '@material-ui/core/styles/makeStyles';
 import {useSnackbar} from 'notistack';
+import axios from 'axios';
+
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import List from '@material-ui/core/List';
-import {ListItem, ListItemText} from '@material-ui/core';
-import axios from 'axios';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 

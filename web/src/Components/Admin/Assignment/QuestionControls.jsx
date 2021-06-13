@@ -14,12 +14,12 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import CardHeader from '@material-ui/core/CardHeader';
+import AddIcon from '@material-ui/icons/Add';
 
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import downloadTextFile from '../../../Utils/downloadTextFile';
-import AddIcon from '@material-ui/icons/Add';
-import CardHeader from '@material-ui/core/CardHeader';
 
 const resetWarning = (
   <div>

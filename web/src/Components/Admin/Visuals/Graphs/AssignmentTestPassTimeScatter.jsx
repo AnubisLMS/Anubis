@@ -1,7 +1,5 @@
 import React, {useState} from 'react';
-
 import {XYPlot, XAxis, YAxis, VerticalGridLines, HorizontalGridLines, MarkSeries, Hint} from 'react-vis';
-import 'react-vis/dist/style.css';
 
 
 export default function AssignmentTestTimes({title, data}) {

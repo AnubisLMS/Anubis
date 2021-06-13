@@ -1,6 +1,7 @@
 import React from 'react';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+
 import {DataGrid} from '@material-ui/data-grid';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 

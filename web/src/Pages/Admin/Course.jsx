@@ -41,7 +41,7 @@ const editableFields = [
   {field: 'theia_default_image', label: 'Theia Default Image'},
   {field: 'theia_default_options', label: 'Theia Default Options'},
   {field: 'github_org_url', label: 'Github Org URL'},
-  {field: 'join_code', label: 'Join Code', disabled: true},
+  {field: 'join_code', label: 'Join Code'},
 ];
 
 export default function Course() {

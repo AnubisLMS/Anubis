@@ -15,12 +15,12 @@ import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
-
-import standardStatusHandler from '../../../Utils/standardStatusHandler';
-import standardErrorHandler from '../../../Utils/standardErrorHandler';
-import IDEHeader from '../../Public/IDE/IDEHeader';
 import Typography from '@material-ui/core/Typography';
 import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
+
+import IDEHeader from '../../Public/IDE/IDEHeader';
+import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../../Utils/standardErrorHandler';
 
 const useStyles = makeStyles((theme) => ({
   root: {

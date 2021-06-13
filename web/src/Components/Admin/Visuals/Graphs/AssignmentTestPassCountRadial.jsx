@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
-import Typography from '@material-ui/core/Typography';
-
 import {RadialChart, Hint} from 'react-vis';
+
+import Typography from '@material-ui/core/Typography';
 
 export default function AssignmentTestCountRadial({data}) {
   const [hoverNode, setHoverNode] = useState(null);
