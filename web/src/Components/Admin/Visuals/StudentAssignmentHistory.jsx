@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
+
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import useQuery from '../../../hooks/useQuery';
-
 import StudentHistory from './Graphs/StudentHistory';
 
 
