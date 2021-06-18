@@ -1,4 +1,5 @@
 from flask import Blueprint
+from sqlalchemy.orm import defer
 
 from anubis.models import db, StaticFile
 from anubis.utils.auth import require_admin
@@ -64,17 +65,15 @@ def admin_static_list():
     # Get the current course context
     course = get_course_context()
 
-    # Get options for the query
-    limit = get_number_arg("limit", default_value=20)
-    offset = get_number_arg("offset", default_value=0)
-
-    # Get all public static files within this course
-    public_files = StaticFile.query \
+    # Build Query. Defer the blob field so
+    # it is not loaded.
+    query = StaticFile.query \
         .filter(StaticFile.course_id == course.id) \
         .order_by(StaticFile.created.desc()) \
-        .limit(limit) \
-        .offset(offset) \
-        .all()
+        .options(defer(StaticFile.blob))
+
+    # Get all public static files within this course
+    public_files = query.all()
 
     # Pass back the list of files
     return success_response({

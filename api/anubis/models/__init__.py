@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_json import MutableJson
+from sqlalchemy.orm import deferred
 
 from anubis.utils.data import rand
 
@@ -579,8 +580,8 @@ class SubmissionTestResult(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Fields
-    stdout = db.Column(db.Text)
-    message = db.Column(db.Text)
+    stdout = deferred(db.Column(db.Text))
+    message = deferred(db.Column(db.Text))
     passed = db.Column(db.Boolean)
 
     # Relationships
@@ -622,7 +623,7 @@ class SubmissionBuild(db.Model):
     submission_id = db.Column(db.String(128), db.ForeignKey(Submission.id), index=True)
 
     # Fields
-    stdout = db.Column(db.Text)
+    stdout = deferred(db.Column(db.Text))
     passed = db.Column(db.Boolean, default=None)
 
     # Timestamps
@@ -726,7 +727,7 @@ class StaticFile(db.Model):
     filename = db.Column(db.TEXT)
     path = db.Column(db.TEXT)
     content_type = db.Column(db.TEXT)
-    blob = db.Column(db.LargeBinary(length=(2 ** 32) - 1))
+    blob = deferred(db.Column(db.LargeBinary(length=(2 ** 32) - 1)))
     hidden = db.Column(db.Boolean)
 
     # Timestamps

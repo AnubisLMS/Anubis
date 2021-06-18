@@ -1,7 +1,9 @@
-from flask import Blueprint
+from flask import Blueprint, request
+from sqlalchemy.sql import or_
 
 from anubis.models import Submission, Assignment, User, InCourse
 from anubis.utils.auth import require_admin
+from anubis.utils.data import is_debug
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response, error_response, get_number_arg
 from anubis.utils.lms.autograde import bulk_autograde, autograde, autograde_submission_result_wrapper
@@ -101,7 +103,7 @@ def admin_autograde_assignment_assignment_id(assignment_id):
 
 @autograde_.route("/for/<assignment_id>/<user_id>")
 @require_admin()
-@cache.memoize(timeout=60)
+# @cache.memoize(timeout=60, unless=is_debug)
 @json_response
 def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
     """
@@ -112,9 +114,11 @@ def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
     :return:
     """
 
+    force = request.args.get('force', default='no') != 'no'
+
     # Pull the assignment object
     assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
+        or_(Assignment.id == assignment_id, Assignment.name == assignment_id)
     ).first()
 
     # Verify that we got an assignment
@@ -122,13 +126,23 @@ def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
         return error_response('assignment does not exist')
 
     # Pull the student user object
-    student = User.query.filter(User.id == user_id).first()
+    student = User.query.filter(
+        or_(User.id == user_id, User.netid == user_id)
+    ).first()
 
     # Verify that the current course context, and the assignment course match
     assert_course_context(assignment, student)
 
+    # Assert that the student does not exist
+    if student is None:
+        return error_response('student does not exist')
+
+    # If force load, then skip any caching
+    if force:
+        cache.delete_memoized(autograde, student.id, assignment.id)
+
     # Calculate the best submission for this student and assignment
-    submission_id = autograde(user_id, assignment_id)
+    submission_id = autograde(student.id, assignment.id)
 
     # Pass back the
     return success_response({
