@@ -12,7 +12,12 @@ import HomeLayout from '../../Layouts/HomeLayout';
 const useStyles = makeStyles((theme) => ({
   title: {
     position: 'absolute',
-    top: 100,
+    [theme.breakpoints.down('md')]: {
+      top: 20,
+    },
+    [theme.breakpoints.up('md')]: {
+      top: 70,
+    },
   },
   button: {
     minWidth: 200,
@@ -25,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   logo: {
-    margin: theme.spacing(5),
+    margin: theme.spacing(5, 0),
     height: 256,
     width: 256,
   },
