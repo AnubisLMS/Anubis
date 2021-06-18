@@ -1,18 +1,26 @@
 import React from 'react';
 import {makeStyles} from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
-
-import John from '../../Components/Public/About/John';
-import Somto from '../../Components/Public/About/Somto';
-import Description from '../../Components/Public/About/Description';
+import Home from '../../Components/Public/About/Home';
+import Values from '../../Components/Public/About/Values';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    maxWidth: 512,
+  background: {
+    // backgroundImage: `url(${backgroundImage})`,
+    backgroundColor: '#7fc7d9', // Average color of the background image.
+    backgroundPosition: 'center',
   },
-  authors: {
-    paddingTop: theme.spacing(5),
+  button: {
+    minWidth: 200,
+  },
+  h5: {
+    marginBottom: theme.spacing(4),
+    marginTop: theme.spacing(4),
+    [theme.breakpoints.up('sm')]: {
+      marginTop: theme.spacing(10),
+    },
+  },
+  more: {
+    marginTop: theme.spacing(2),
   },
 }));
 
@@ -21,43 +29,9 @@ export default function About() {
   const classes = useStyles();
 
   return (
-    <Grid
-      container
-      direction="column"
-      justify="center"
-      alignItems="center"
-      spacing={4}
-    >
-      {/* description */}
-      <Grid item xs={12}>
-        <Description className={classes.root}/>
-      </Grid>
-      {/* END Jumbotron */}
-
-      {/* Author description */}
-      <Grid
-        container
-        direction={'row'}
-        spacing={3}
-        alignItems={'center'}
-        justify={'center'}
-        className={classes.authors}
-      >
-        <Grid item xs={12}>
-          <Typography variant="h5" style={{textAlign: 'center'}}>
-            About the Authors
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <John/>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Somto/>
-        </Grid>
-      </Grid>
-      {/* END Author section */}
-
-    </Grid>
+    <div>
+      <Home/>
+      <Values/>
+    </div>
   );
 }

@@ -1,98 +1,56 @@
 import React from 'react';
-import {makeStyles} from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
+
+import {DataGrid} from '@material-ui/data-grid';
 import Paper from '@material-ui/core/Paper';
-import TablePagination from '@material-ui/core/TablePagination';
-import TablePaginationActions from '@material-ui/core/TablePagination/TablePaginationActions';
-import TableFooter from '@material-ui/core/TableFooter';
+import Typography from '@material-ui/core/Typography';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+
 import IconButton from '@material-ui/core/IconButton';
 import GitHubIcon from '@material-ui/icons/GitHub';
 
+import AuthContext from '../../../Contexts/AuthContext';
 
-const useStyles = makeStyles({
-  table: {
-    minWidth: 650,
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    height: 700,
+    padding: theme.spacing(1),
   },
-});
+}));
+
+const columns = [
+  {field: 'course_code', headerName: 'Course', width: 150},
+  {field: 'assignment_name', headerName: 'Assignment Name', width: 200},
+  {field: 'github_username', headerName: 'Github Username', width: 200},
+  {
+    field: 'repo_url', headerName: 'Repo', width: 170, renderCell: ({row}) => (
+      <IconButton
+        color={'primary'}
+        component={'a'}
+        target={'_blank'}
+        rel={'noreferrer'}
+        href={row.repo_url}
+      >
+        <GitHubIcon/>
+      </IconButton>
+    ),
+  },
+];
 
 export default function ReposTable({rows}) {
   const classes = useStyles();
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
   return (
-    <TableContainer component={Paper}>
-      <Table className={classes.table} aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Course</TableCell>
-            <TableCell>Assignment</TableCell>
-            <TableCell>Github Username</TableCell>
-            <TableCell>Repo URL</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.assignment_name}>
-              <TableCell component="th" scope="row">
-                {row.course_code}
-              </TableCell>
-              <TableCell>{row.assignment_name}</TableCell>
-              <TableCell>{row.github_username}</TableCell>
-              <TableCell>
-                <IconButton
-                  component={'a'}
-                  href={row.repo_url}
-                  target={'_blank'}
-                  color={'primary'}
-                >
-                  <GitHubIcon/>
-                </IconButton>
-              </TableCell>
-            </TableRow>
-          ))}
-          {emptyRows > 0 && (
-            <TableRow style={{height: 53 * emptyRows}}>
-              <TableCell colSpan={6}/>
-            </TableRow>
-          )}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TablePagination
-              rowsPerPageOptions={[10, 20, 30, {label: 'All', value: -1}]}
-              colSpan={4}
-              count={rows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              SelectProps={{
-                inputProps: {'aria-label': 'rows per page'},
-                native: true,
-              }}
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
-              ActionsComponent={TablePaginationActions}
-              labelRowsPerPage="Submissions per page"
-            />
-          </TableRow>
-        </TableFooter>
-      </Table>
-    </TableContainer>
+    <div>
+      <AuthContext.Consumer>
+        {(user) => (
+          <Typography variant={'subtitle1'} color={'textSecondary'}>
+            {user?.name}&apos;s Repos
+          </Typography>
+        )}
+      </AuthContext.Consumer>
+      <Paper className={classes.paper}>
+        <DataGrid columns={columns} rows={rows}/>
+      </Paper>
+    </div>
   );
 }

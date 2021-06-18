@@ -158,6 +158,7 @@ export default function AssignmentCard({assignment, setSelectedTheia}) {
           size={'small'}
           variant={'contained'}
           color={'primary'}
+          disabled={!githubLinkEnabled}
           startIcon={has_repo ? <ExitToAppIcon/> : <GitHubIcon/>}
           className={classes.button}
           component={'a'}

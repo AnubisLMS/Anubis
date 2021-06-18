@@ -31,21 +31,16 @@ import Error from './Components/Error';
 import Footer from './Components/Footer';
 import Header from './Components/Header';
 import DeviceWarning from './Components/DeviceWarning';
+import Container from '@material-ui/core/Container';
 
 const useStyles = makeStyles(() => ({
   root: {
     display: 'flex',
     height: '100%',
     minHeight: '100vh',
-    width: '100%',
+    // width: '100%',
     backgroundImage: `url(/curvylines.png)`,
     backgroundRepeat: 'repeat',
-  },
-  main: {
-    width: '100%',
-    flexDirection: 'column',
-    padding: theme.spacing(6, 4),
-    marginBottom: theme.spacing(5),
   },
   app: {
     flex: 1,
@@ -69,7 +64,7 @@ const useStyles = makeStyles(() => ({
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing(3),
+    // padding: theme.spacing(3),
     marginBottom: '20px',
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.sharp,
@@ -108,6 +103,11 @@ const useStyles = makeStyles(() => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
   },
+  main: {
+    [theme.breakpoints.up('sm')]: {
+      padding: theme.spacing(2),
+    },
+  },
 }));
 
 export default function App() {
@@ -115,14 +115,6 @@ export default function App() {
   const query = useQuery();
   const [open, setOpen] = useState(window.innerWidth >= 960); // 960px is md
   const [showError, setShowError] = useState(!!query.get('error'));
-
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -137,11 +129,11 @@ export default function App() {
                     <Nav
                       classes={classes}
                       open={open}
-                      handleDrawerClose={handleDrawerClose}
+                      handleDrawerClose={() => setOpen(!open)}
                     />
                     <div className={classes.app} id={'app'}>
                       <Header
-                        onDrawerToggle={handleDrawerOpen}
+                        onDrawerToggle={() => setOpen(!open)}
                         user={user}
                         classes={classes}
                         open={open}
@@ -153,7 +145,9 @@ export default function App() {
                       >
                         <div className={classes.drawerHeader} />
                         <Error show={showError} onDelete={() => setShowError(false)}/>
-                        <Main user={user}/>
+                        <div className={classes.main}>
+                          <Main user={user}/>
+                        </div>
                         <Footer/>
                       </main>
                     </div>

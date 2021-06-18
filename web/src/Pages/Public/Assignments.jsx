@@ -11,6 +11,7 @@ import standardErrorHandler from '../../Utils/standardErrorHandler';
 import {useSnackbar} from 'notistack';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import IDEDialog from '../../Components/Public/IDE/IDEDialog';
+import StandardLayout from '../../Components/Layouts/StandardLayout';
 
 
 export default function AssignmentView() {
@@ -29,32 +30,24 @@ export default function AssignmentView() {
   }, []);
 
   return (
-    <Grid container spacing={4} justify={'center'}>
-      <Grid item xs={12}>
-        <Typography variant="h6">
-          Anubis
-        </Typography>
-        <Typography variant={'subtitle1'} color={'textSecondary'}>
-          Assignments
-        </Typography>
-      </Grid>
+    <StandardLayout
+      title={'Anubis'}
+      description={'Assignments'}
+    >
       <IDEDialog selectedTheia={selectedTheia} setSelectedTheia={setSelectedTheia}/>
-      <Grid item/>
-      <Grid item xs={12} md={10}>
-        <Grid container spacing={4}>
-          {assignments.map((assignment, pos) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={assignment.id}>
-              <Grow
-                in={true}
-                style={{transformOrigin: '0 0 0'}}
-                {...({timeout: 300 * (pos + 1)})}
-              >
-                <AssignmentCard assignment={assignment} setSelectedTheia={setSelectedTheia}/>
-              </Grow>
-            </Grid>
-          ))}
-        </Grid>
+      <Grid container spacing={4}>
+        {assignments.map((assignment, pos) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={assignment.id}>
+            <Grow
+              in={true}
+              style={{transformOrigin: '0 0 0'}}
+              {...({timeout: 300 * (pos + 1)})}
+            >
+              <AssignmentCard assignment={assignment} setSelectedTheia={setSelectedTheia}/>
+            </Grow>
+          </Grid>
+        ))}
       </Grid>
-    </Grid>
+    </StandardLayout>
   );
 }

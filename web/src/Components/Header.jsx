@@ -13,6 +13,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
 import RefreshIcon from '@material-ui/icons/Refresh';
+import {Hidden} from '@material-ui/core';
 
 
 export default function Header({classes, open, onDrawerToggle, user}) {
@@ -59,7 +60,9 @@ export default function Header({classes, open, onDrawerToggle, user}) {
                 <MenuIcon/>
               </IconButton>
             </Grid>
-            <Grid item xs/>
+            <Hidden smDown>
+              <Grid item xs/>
+            </Hidden>
             <Grid item>
               <div style={{display: 'flex', flexDirection: 'row'}}>
                 {user?.is_admin ? (

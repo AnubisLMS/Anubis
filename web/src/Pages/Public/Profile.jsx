@@ -6,9 +6,8 @@ import Grid from '@material-ui/core/Grid';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import useGet from '../../hooks/useGet';
-
 import ProfileCard from '../../Components/Public/Profile/ProfileCard';
-import Typography from '@material-ui/core/Typography';
+import StandardLayout from '../../Components/Layouts/StandardLayout';
 
 
 export default function Profile() {
@@ -23,28 +22,17 @@ export default function Profile() {
   const github_username = _github_username || user.github_username;
 
   return (
-    <Grid container spacing={4} alignItems="center">
-      <Grid item>
-        <Typography variant="h6">
-          Anubis
-        </Typography>
-        <Typography variant={'subtitle1'} color={'textSecondary'}>
-          Profile
-        </Typography>
-      </Grid>
-
-      <Grid item xs={12}>
-        <Grid container spacing={4} justify={'center'}>
-          <Grid item xs={12} sm={10} md={8} lg={4}>
-            <ProfileCard
-              user={user}
-              github_username={github_username}
-              set_github_username={set_github_username}
-            />
-          </Grid>
+    <StandardLayout description={'Profile'}>
+      <Grid container spacing={4} justify={'center'}>
+        <Grid item xs={12} sm={10} md={8} lg={4}>
+          <ProfileCard
+            user={user}
+            github_username={github_username}
+            set_github_username={set_github_username}
+          />
         </Grid>
       </Grid>
-    </Grid>
+    </StandardLayout>
   );
 }
 

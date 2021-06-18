@@ -19,7 +19,9 @@ function Preview({classes}) {
       <Typography gutterBottom className={classes.typography}>
         There are 4 main benefits to using Anubis.
         <ul>
-          <li>Students can edit and run their code right in their browser</li>
+          <li>
+            Students can edit and run their code right in their browser. No class VMs, nothing to install.
+          </li>
           <li>Students get live feedback on their answers <i>before</i> the deadline</li>
           <li>The feedback given to students is then used to help speed up TAs grading</li>
           <li>
@@ -87,9 +89,9 @@ function Post({classes}) {
         and networking. From the IDEs, students are only able to connect to Github to
         submit their work.
       </Typography>
-      <CardMedia
-        className={classes.media16x9}
-        image="/api/public/static/c99e89d478b73ad6"
+      <BlogImg
+        alt={'theia-fullscreen.png'}
+        src="/api/public/static/c99e89d478b73ad6"
       />
 
       <Typography gutterBottom color={'textSecondary'} className={classes.subtitle}>
@@ -117,9 +119,9 @@ function Post({classes}) {
         the students logs from their tests, and builds along with which
         tests passed and which failed.
       </Typography>
-      <CardMedia
-        className={classes.media16x9}
-        image="/api/public/static/82255026ec8ec6d2"
+      <BlogImg
+        alt={'theia-fullscreen.png'}
+        src="/api/public/static/82255026ec8ec6d2"
       />
 
       <Typography gutterBottom className={classes.subtitle}>
