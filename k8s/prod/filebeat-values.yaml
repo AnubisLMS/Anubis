@@ -59,7 +59,7 @@ daemonset:
   securityContext:
     runAsUser: 0
     privileged: false
-  resources: {}
+  resources: null
   tolerations: []
 
 deployment:
@@ -139,8 +139,7 @@ hostAliases: []
 image: "docker.elastic.co/beats/filebeat"
 imageTag: "7.12.0"
 imagePullPolicy: "IfNotPresent"
-imagePullSecrets:
-- anubis
+imagePullSecrets: null
 
 livenessProbe:
   exec:
@@ -187,7 +186,7 @@ podAnnotations: {}
   # iam.amazonaws.com/role: es-cluster
 
 # Custom service account override that the pod will use
-serviceAccount: ""
+serviceAccount: "anubis"
 
 # Annotations to add to the ServiceAccount that is created if the serviceAccount value isn't set.
 serviceAccountAnnotations: {}

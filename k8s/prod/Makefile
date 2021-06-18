@@ -108,8 +108,7 @@ filebeat:
 	helm upgrade \
 		--install filebeat elastic/filebeat \
 		--values filebeat-values.yaml \
-		--set daemonset.resources=null \
-		--set imageTag=$(ELASTIC_VERSION) \
+		--version $(ELASTIC_VERSION) \
 		--namespace kube-system
 
 mariadb: ns-mariadb
