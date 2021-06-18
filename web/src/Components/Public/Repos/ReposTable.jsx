@@ -41,13 +41,6 @@ export default function ReposTable({rows}) {
 
   return (
     <div>
-      <AuthContext.Consumer>
-        {(user) => (
-          <Typography variant={'subtitle1'} color={'textSecondary'}>
-            {user?.name}&apos;s Repos
-          </Typography>
-        )}
-      </AuthContext.Consumer>
       <Paper className={classes.paper}>
         <DataGrid columns={columns} rows={rows}/>
       </Paper>

@@ -9,19 +9,24 @@ import IconButton from '@material-ui/core/IconButton';
 import CodeIcon from '@material-ui/icons/Code';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 import GrainIcon from '@material-ui/icons/Grain';
-import PieChartIcon from '@material-ui/icons/PieChart';
+import Divider from '@material-ui/core/Divider';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
+    justifyContent: 'center',
     overflow: 'hidden',
-    // backgroundColor: theme.palette.secondary.light,
   },
   container: {
-    marginTop: theme.spacing(15),
-    marginBottom: theme.spacing(15),
     display: 'flex',
     position: 'relative',
+    [theme.breakpoints.down('md')]: {
+      marginTop: theme.spacing(5),
+      marginBottom: theme.spacing(5),
+    },
+    [theme.breakpoints.up('md')]: {
+      margin: theme.spacing(15),
+    },
   },
   item: {
     display: 'flex',
@@ -33,16 +38,17 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 64,
   },
   title: {
-    marginTop: theme.spacing(5),
-    marginBottom: theme.spacing(5),
+    marginTop: theme.spacing(3),
+    marginBottom: theme.spacing(0),
   },
   description: {
     fontSize: '24px',
   },
-  curvyLines: {
-    pointerEvents: 'none',
-    position: 'absolute',
-    top: -180,
+  divider: {
+    width: 120,
+    height: 3,
+    backgroundColor: 'white',
+    margin: theme.spacing(3, 0),
   },
 }));
 
@@ -77,26 +83,29 @@ export default function Values() {
   const classes = useStyles();
 
   return (
-    <Paper className={classes.root} id={'values'}>
-      <Container className={classes.container}>
-        <Grid container spacing={5}>
-          {values.map(({Icon, title, description}) => (
-            <Grid item xs={12} md={4} key={title}>
-              <div className={classes.item}>
-                <IconButton>
-                  <Icon color={'primary'} className={classes.icon}/>
-                </IconButton>
-                <Typography variant="h6" className={classes.title}>
-                  {title}
-                </Typography>
-                <Typography color={'textSecondary'} className={classes.description}>
-                  {description}
-                </Typography>
-              </div>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
-    </Paper>
+    <div className={classes.root} id={'values'}>
+      <Paper>
+        <Container className={classes.container}>
+          <Grid container spacing={4}>
+            {values.map(({Icon, title, description}) => (
+              <Grid item xs={12} md={4} key={title}>
+                <div className={classes.item}>
+                  <IconButton>
+                    <Icon color={'primary'} className={classes.icon}/>
+                  </IconButton>
+                  <Typography variant="h6" className={classes.title}>
+                    {title}
+                  </Typography>
+                  <Divider variant={'middle'} className={classes.divider} />
+                  <Typography color={'textSecondary'} className={classes.description}>
+                    {description}
+                  </Typography>
+                </div>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Paper>
+    </div>
   );
 }

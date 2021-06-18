@@ -1,20 +1,18 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {makeStyles} from '@material-ui/core/styles';
+import {Link} from 'react-router-dom';
+
+
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Scrambler from 'scrambling-text';
 
 import HomeLayout from '../../Layouts/HomeLayout';
-import {Link} from 'react-router-dom';
-
-const backgroundImage = '/logo512.png';
 
 const useStyles = makeStyles((theme) => ({
-  background: {
-    backgroundImage: `url(${backgroundImage})`,
-    // backgroundColor: '#7fc7d9', // Average color of the background image.
-    backgroundPosition: 'center',
-
+  title: {
+    position: 'absolute',
+    top: 100,
   },
   button: {
     minWidth: 200,
@@ -26,8 +24,10 @@ const useStyles = makeStyles((theme) => ({
       marginTop: theme.spacing(10),
     },
   },
-  more: {
-    marginTop: theme.spacing(2),
+  logo: {
+    margin: theme.spacing(5),
+    height: 256,
+    width: 256,
   },
 }));
 
@@ -51,17 +51,10 @@ export default function Home() {
   const scramblerRef = useRef(new Scrambler());
 
   useEffect(() => {
-    if (window.innerWidth <= 960) {
-      setText(titles[0]);
-      return;
-    }
     scramblerRef.current.scramble(titles[0], setText);
   }, []);
 
   useEffect(() => {
-    if (window.innerWidth <= 960) {
-      return;
-    }
     setTimeout(() => {
       const nextIndex = (index + 1) % titles.length;
       scramblerRef.current.scramble(titles[nextIndex], setText);
@@ -70,10 +63,19 @@ export default function Home() {
   }, [index]);
 
   return (
-    <HomeLayout backgroundClassName={classes.background}>
-      <Typography color="inherit" align="center" variant="h2" marked="center" display={'inline'}>
-        {text}
-      </Typography>
+    <HomeLayout>
+      <div className={classes.title}>
+        <Typography color="inherit" align="center" variant="h2">
+          {text}
+        </Typography>
+      </div>
+
+      <img
+        alt={'anubis-logo'}
+        src={'/logo512.png'}
+        className={classes.logo}
+      />
+
       <Typography color="inherit" align="center" variant="h5" className={classes.h5}>
         Simplify your CS Course with Anubis
       </Typography>

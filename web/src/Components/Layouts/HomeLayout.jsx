@@ -1,10 +1,8 @@
 import React from 'react';
-import clsx from 'clsx';
+import {Link as SmoothLink, animateScroll as scroll} from 'react-scroll';
 
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Container from '@material-ui/core/Container';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import IconButton from '@material-ui/core/IconButton';
 
@@ -32,10 +30,8 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     bottom: theme.spacing(4),
   },
-  logo: {
-    margin: theme.spacing(5),
-    height: 256,
-    width: 256,
+  icon: {
+    fontSize: 128,
   },
 }));
 
@@ -46,19 +42,18 @@ export default function HomeLayout({children = null}) {
   return (
     <section className={classes.root}>
       <Container className={classes.container}>
-        <img
-          alt={'anubis-logo'}
-          src={'/logo512.png'}
-          className={classes.logo}
-        />
         {children}
-
         <IconButton
           color={'primary'}
           className={classes.arrowDown}
-          href={'#values'}
+          component={SmoothLink}
+          to={'values'}
+          activeClass="active"
+          smooth={true}
+          offset={-70}
+          duration={500}
         >
-          <ArrowDownwardIcon/>
+          <ArrowDownwardIcon fontSize={'large'}/>
         </IconButton>
 
       </Container>

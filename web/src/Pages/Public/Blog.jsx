@@ -9,6 +9,7 @@ import AssignmentPackagingPost from '../../Components/Public/Blog/AssignmentPack
 import MidtermRetroPost from '../../Components/Public/Blog/MidtermRetroPost';
 import TheiaIDEPost from '../../Components/Public/Blog/TheiaIDEPost';
 import Divider from '@material-ui/core/Divider';
+import HomeLayout from '../../Components/Layouts/HomeLayout';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -59,6 +60,9 @@ const useStyles = makeStyles((theme) => ({
     height: 3,
     marginTop: theme.spacing(3),
   },
+  root: {
+    margin: theme.spacing(5, 0),
+  },
 }));
 
 const posts = [
@@ -90,31 +94,32 @@ export default function Blog() {
   const classes = useStyles();
 
   return (
-    <Grid
-      container
-      direction="column"
-      justify="center"
-      alignItems="center"
-      spacing={4}
-    >
-      <Switch>
-        <Route exact path="/blog">
-          {posts.map(({Component, path, divider = false}, index) => (
-            <Grid item xs={12} key={`post-preview-${index}`}>
-              <Component classes={classes} preview={path}/>
-              {divider ? (
-                <Divider className={classes.divider} variant={'middle'}/>
-              ) : null}
-            </Grid>
-          ))}
-        </Route>
-        {posts.map(({Component, path}, index) => (
-          <Route exact path={path} key={`post-${index}`}>
-            <Component classes={classes} preview={false}/>
+    <div className={classes.root}>
+      <Grid
+        container
+        direction="column"
+        justify="center"
+        alignItems="center"
+        spacing={4}
+      >
+        <Switch>
+          <Route exact path="/blog">
+            {posts.map(({Component, path, divider = false}, index) => (
+              <Grid item xs={12} key={`post-preview-${index}`}>
+                <Component classes={classes} preview={path}/>
+                {divider ? (
+                  <Divider className={classes.divider} variant={'middle'}/>
+                ) : null}
+              </Grid>
+            ))}
           </Route>
-        ))}
-      </Switch>
-
-    </Grid>
+          {posts.map(({Component, path}, index) => (
+            <Route exact path={path} key={`post-${index}`}>
+              <Component classes={classes} preview={false}/>
+            </Route>
+          ))}
+        </Switch>
+      </Grid>
+    </div>
   );
 }

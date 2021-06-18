@@ -8,6 +8,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import ReposTable from '../../Components/Public/Repos/ReposTable';
 import useGet from '../../hooks/useGet';
 import StandardLayout from '../../Components/Layouts/StandardLayout';
+import AuthContext from '../../Contexts/AuthContext';
 
 
 export default function Repos() {
@@ -17,12 +18,16 @@ export default function Repos() {
   if (error) return <Redirect to={`/error`}/>;
 
   return (
-    <StandardLayout description={'Assignment Repos'}>
-      <Grid container spacing={1} justify={'center'}>
-        <Grid item xs={12}>
-          <ReposTable rows={data.repos}/>
-        </Grid>
-      </Grid>
-    </StandardLayout>
+    <AuthContext.Consumer>
+      {(user) => (
+        <StandardLayout description={`${user?.name}'s Repos`}>
+          <Grid container spacing={1} justify={'center'}>
+            <Grid item xs={12}>
+              <ReposTable rows={data.repos}/>
+            </Grid>
+          </Grid>
+        </StandardLayout>
+      )}
+    </AuthContext.Consumer>
   );
 }
