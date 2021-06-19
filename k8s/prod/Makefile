@@ -47,7 +47,7 @@ REDIS_PASS := "$(shell head -c10 /dev/random | openssl sha1 -hex | awk '{print $
 ELASTIC_VERSION := 7.12
 
 
-all: \
+provision: \
 	helm-init \
 	traefik \
 	elasticsearch \
