@@ -39,8 +39,9 @@
         - [2.6.2 Elasticsearch](#262-elasticsearch)
         - [2.6.3 Kibana](#263-kibana)
         - [2.6.4 Redis + RQWorker](#264-redis--rqworker)
+        - [2.6.4 Redis + flask-caching](#265-redis--flask-caching)  
     - [2.7 Logging](#27-logging)
-        - [2.7.1 logstash](#271-logstash)
+        - [2.7.1 filebeat](#271-filebeat)
 - [3. Deployment](#3-deployment)
     - [3.1 Kubernetes](#31-kubernetes)
         - [3.1.1 Helm Chart](#311-helm-chart)
@@ -72,33 +73,30 @@
 
 ### 1.1 Elevator Pitch
 
-At its core, Anubis is a tool to give students live feedback from their homework assignments
-while they are working on them and before the deadline. Instead of having students
-submit a patch file, through github classrooms
-each student will have their own private repo for every assignment.
-The way students then submit their work
-is simply by submitting before the deadline. Students can then
-push, and therefore submit as many times as
-they would like before the deadline.
+At its core, the Anubis LMS is a tool to give students live feedback from their homework 
+assignments while they are working on them and before the deadline. Instead of having students 
+submit a patch file or individual files, each student will have their own private repo for 
+every assignment. The way students then submit their work is simply by pushing to their repo before 
+the deadline. Students submit as many times as they would like before the deadline.
 
 When a student pushes to their assignment repo, a job is launched in the
-Anubis cluster. That job will build
-their repo, run tests on the results, and store the results in the [datastore](#26-datastores).
+Anubis cluster. That job will build their code, and run tests on the results.
+Students can then use the live feedback to see which areas they need to improve on
+before they get their final grades.
 
-Students can then navigate to the anubis website, where they will sign in through [NYU SSO](#223-sso-authentication).
-From there,
-they will be able to see all the current and past assignments, and submissions for their classes. They are able
-to view all relevant data from their build and tests for a given submission. There they can request a regrade,
-there by launching a new submission pipeline. While the submission still being processed, the frontend will poll
-the [API](#22-api) for updates. In this, the frontend will be constantly updating while the submission is being
-processed, giving a live and interactive feel to the frontend. Once a submission is processed Anubis will show
-the students logs from their tests, and builds along with which tests passed and which failed.
+> live feedback, before final grades
+
+![alt autograde-results.png](./docs/img/autograde-results.png)
 
 New in version v2.2.0, there is now the Anubis Cloud IDE. Using some kubernetes magic, we are able to
 host [theia](https://theia-ide.org/) servers for individual students. These are essentially VSCode instances
 that students can access in the browser. What makes these so powerful is that students can access a terminal
 and type commands right into a bash shell which will be run in the remote container. With this setup students
-have access to a fully insolated and prebuilt linux environment at a click of a button.
+have access to a fully insulated and prebuilt linux environment at a click of a button.
+
+> fully insulated and prebuilt linux environment at a click of a button
+
+![alt theia-fullscreen.png](./docs/img/theia-fullscreen.png)
 
 ### 1.2 Motivations
 
@@ -107,13 +105,15 @@ The purpose of this paper is to both explain the design, and the features of the
 One of the main goals for Anubis from the beginning
 was to simplify the experience for students. There should not need to
 be a learning curve with a learning management system like Anubis just
-for students to turn in their homework. Everywhere possible, Anubis
-will fill in the blanks. All they need to do is click a button to get an
+for students to turn in their homework. _Everywhere possible, Anubis
+will fill in the blanks._ All they need to do is click a button to get an
 ide, do their work and check their test feedback if they would like. The
 feedback the system gives to students is entirely up to the Professor and TAs.
 You could use the Anubis system just for autograding, or just
 for the cloud IDEs or both! It is up to you which features of Anubis you
-would like to integrate into your curriculum.  
+would like to integrate into your curriculum.
+
+> Everywhere possible, Anubis will fill in the blanks
 
 \pagebreak
 
@@ -139,7 +139,7 @@ being accessed externally. Namely, the basic authentication for certain paths (a
 ### 2.2 API
 
 The API is the backbone of anubis. It is where all the heavy lifting is done. The service relies on both
-the [elasticsearch](#262-elasticsearch) and [mariadb](#261-mariadb) data stores to maintain state.
+the [cache]() and [mariadb](#261-mariadb) data stores to maintain state.
 
 #### 2.2.1 Zones
 
@@ -232,7 +232,7 @@ the pipeline. It is at that point that the API marks the submission as processed
 
 ### 2.4 Web Frontend
 
-The frontend is designed to be a simple reflection of the backend data. Once authenticated, users will
+The frontend ``is designed to be a simple reflection of the backend data. Once authenticated, users will
 be able to see the classes they are a part of, current and past assignments, and all their submissions.
 With few exceptions, the frontend is a near one to one translation of the API's data models. Most pages
 will have a corresponding API endpoint. The data shown on that page will be in exactly the form of the
@@ -377,16 +377,18 @@ want to change the password from anubis to something stronger.
 # prod, the mariadb is in a separate namespace, so we do the same
 # here.
 echo 'Adding mariadb'
-kubectl create namespace mariadb
-helm install mariadb \
-     --set 'auth.rootPassword=anubis' \
-     --set 'volumePermissions.enabled=true' \
-     --set 'auth.username=anubis' \
-     --set 'auth.database=anubis' \
-     --set 'auth.password=anubis' \
-     --set 'replication.enabled=false' \
-     --namespace mariadb \
-     bitnami/mariadb
+
+# mariadb: ns-mariadb
+#	helm upgrade --install mariadb bitnami/mariadb \
+#		--set 'volumePermissions.enabled=true' \
+#		--set 'auth.username=anubis' \
+#		--set 'auth.database=anubis' \
+#		--set "auth.password=$(DB_PASS)" \
+#		--set 'replication.enabled=false' \
+#		--namespace mariadb
+
+make -C k8s/prod mariadb
+
 ```
 
 #### 2.6.2 Elasticsearch
@@ -401,21 +403,17 @@ The Elasticsearch stack is pretty annoying to manage on its own. Installing thro
 much easier.
 
 ```shell
-# Install a minimal elasticsearch and kibana deployments
+# Install a minimal elasticsearch deployments
 echo 'Adding elasticsearch + kibana'
-kubectl create namespace anubis
-helm install elasticsearch \
-     --set name=elasticsearch \
-     --set master.persistence.size=1Gi \
-     --set data.persistence.size=1Gi \
-     --set master.replicas=1 \
-     --set coordinating.replicas=1 \
-     --set data.replicas=1 \
-     --set global.kibanaEnabled=true \
-     --set fullnameOverride=elasticsearch \
-     --set global.coordinating.name=coordinating \
-     --namespace anubis \
-     bitnami/elasticsearch
+
+# elasticsearch: ns-elastic
+#	helm upgrade \
+#		--install elasticsearch elastic/elasticsearch \
+#		--values elastic-values.yaml \
+#		--version $(ELASTIC_VERSION) \
+#		--namespace elastic
+
+make -C k8s/prod elasticsearch
 ```
 
 #### 2.6.3 Kibana
@@ -454,28 +452,69 @@ here in prod.
 ```shell
 # Install a minimal redis deployment
 echo 'Adding redis'
-helm install redis \
-     --set fullnameOverride=redis \
-     --set password=anubis \
-     --set cluster.enabled=false \
-     --namespace anubis \
-     bitnami/redis
+
+# redis: ns-anubis
+#	helm upgrade \
+#		--install redis bitnami/redis \
+#		--set fullnameOverride=redis \
+#		--set global.redis.password=$(REDIS_PASS) \
+#		--set architecture=standalone \
+#		--set master.persistence.enabled=false \
+#		--namespace anubis
+
+make -C k8s/prod redis
 ```
+
+#### 2.6.5 Redis + flask-caching
+
+The redis instance is also used for caching function results. Some of the functionalities of Anubis require
+a pretty large and time-consuming calculations that would be foolish to not cache. In particular calculating
+autograde results and generating visuals are quite computationally intensive (not to mention the strain on the
+database). By caching the results (and sometimes preprocessing then caching) the system is significantly
+more responsive.
+
+```python
+@cache.memoize(timeout=5 * 60, unless=is_debug)
+def autograde(student_id, assignment_id):
+    """
+    Get the stats for a specific student on a specific assignment.
+
+    Pulls all submissions, then finds the most recent one that
+    has the most tests that passed.
+
+    * This function is heavily cached as it is IO intensive on the DB *
+
+    :param student_id:
+    :param assignment_id:
+    :return:
+    """
+```
+
+The library we use for this is [flask-caching](https://flask-caching.readthedocs.io/en/latest/index.html).
 
 ### 2.7 Logging
 
 > _When it doubt, just log it_
 
-#### 2.7.1 Logstash
+#### 2.7.1 filebeat
 
-Logstash itself is a service that your applications can ship their logs to before being indexed into elasticsearch.
-Its purpose is to act as a natural buffer of log data. It is able to interface with elasticsearch, adjusting the
-speed of log ingestion as needed. In addition to acting as a buffer, it also enriches the data that it sees. For
-example, the logstash python client will not only ship the log message, but also the file that the log is coming
-from, along with which node the log is coming from.
+Filebeat handles persistent logging. Filebeat is configured to capture all container logs from the 
+`anubis` k8s namespace and index them into elasticsearch. The indexes are then set to maximum limits 
+that will recycle space when full.
 
-This centralized, and persistent logging is indexed into elasticsearch, and accessed via kibana. Anubis uses logstash
-on its API and submission pipeline.
+```shell
+# Install filebeat deployments
+echo 'Adding filebeat'
+
+# filebeat:
+#	helm upgrade \
+#		--install filebeat elastic/filebeat \
+#		--values filebeat-values.yaml \
+#		--version $(ELASTIC_VERSION) \
+#		--namespace kube-system
+
+make -C k8s/prod filebeat
+```
 
 \pagebreak
 
