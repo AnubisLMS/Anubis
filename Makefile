@@ -44,10 +44,10 @@ debug:
 
 .PHONY: mindebug     # Start the minimal cluster in debug mode
 mindebug:
-	docker-compose up -d traefik db redis-master logstash
+	docker-compose up -d traefik db redis-master
 	docker-compose up \
 		-d --force-recreate \
-		api web-dev rpc-default rpc-theia
+		api web-dev rpc-default
 	@echo 'Waiting a moment before running migrations'
 	sleep 3
 	@echo 'running migrations'
