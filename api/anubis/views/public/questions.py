@@ -4,8 +4,8 @@ from flask import Blueprint
 from sqlalchemy.exc import IntegrityError, DataError
 
 from anubis.models import db, Assignment, AssignedStudentQuestion, AssignedQuestionResponse, User
-from anubis.utils.data import req_assert
 from anubis.utils.auth import require_user, current_user
+from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_endpoint, load_from_id, json_response
 from anubis.utils.http.https import success_response, error_response
 from anubis.utils.lms.assignments import get_assignment_due_date

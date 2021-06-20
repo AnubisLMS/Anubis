@@ -1,6 +1,6 @@
 from flask import Blueprint
-from sqlalchemy.sql import or_
 from sqlalchemy.orm import undefer
+from sqlalchemy.sql import or_
 
 from anubis.models import StaticFile
 from anubis.utils.http.files import make_blob_response

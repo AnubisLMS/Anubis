@@ -55,8 +55,8 @@ def initialize_theia_session(theia_session_id: str):
     # Check to ses how many theia sessions are marked as active in the database. If that
     # count exceeds the artificial limit of IDEs, then we need to re-enqueue this job.
     if TheiaSession.query.filter(
-        TheiaSession.active == True,
-        TheiaSession.state != 'Initializing',
+            TheiaSession.active == True,
+            TheiaSession.state != 'Initializing',
     ).count() >= max_ides:
         from anubis.utils.services.rpc import enqueue_ide_initialize
 

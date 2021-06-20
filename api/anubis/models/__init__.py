@@ -4,8 +4,8 @@ import os
 from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy_json import MutableJson
 from sqlalchemy.orm import deferred
+from sqlalchemy_json import MutableJson
 
 from anubis.utils.data import rand
 

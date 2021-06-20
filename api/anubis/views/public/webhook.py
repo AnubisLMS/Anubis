@@ -105,10 +105,10 @@ def public_webhook():
         AssignmentRepo.query
             .join(Assignment).join(Course).join(InCourse).join(User)
             .filter(
-                User.github_username == github_username_guess,
-                Assignment.unique_code == assignment.unique_code,
-                AssignmentRepo.repo_url == repo_url,
-            )
+            User.github_username == github_username_guess,
+            Assignment.unique_code == assignment.unique_code,
+            AssignmentRepo.repo_url == repo_url,
+        )
             .first()
     )
 
