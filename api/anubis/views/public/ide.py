@@ -14,7 +14,6 @@ from anubis.utils.lms.theia import (
     get_n_available_sessions,
     theia_poll_ide,
 )
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.logger import logger
 from anubis.utils.services.rpc import enqueue_ide_stop, enqueue_ide_initialize
 
@@ -22,7 +21,6 @@ ide = Blueprint("public-ide", __name__, url_prefix="/public/ide")
 
 
 @ide.route("/available")
-@log_endpoint("ide-available")
 @require_user()
 @json_response
 def public_ide_available():
@@ -39,7 +37,6 @@ def public_ide_available():
 
 
 @ide.route("/active/<string:assignment_id>")
-@log_endpoint("ide-active")
 @require_user()
 @json_response
 def public_ide_active(assignment_id):
@@ -66,7 +63,6 @@ def public_ide_active(assignment_id):
 
 
 @ide.route("/stop/<string:theia_session_id>")
-@log_endpoint("stop-theia-session")
 @require_user()
 def public_ide_stop(theia_session_id: str) -> Dict[str, str]:
     user: User = current_user()
@@ -94,7 +90,6 @@ def public_ide_stop(theia_session_id: str) -> Dict[str, str]:
 
 
 @ide.route("/poll/<string:theia_session_id>")
-@log_endpoint("ide-poll-id", lambda: "ide-poll")
 @require_user()
 @json_response
 def public_ide_poll(theia_session_id: str) -> Dict[str, str]:
@@ -121,7 +116,6 @@ def public_ide_poll(theia_session_id: str) -> Dict[str, str]:
 
 
 @ide.route("/redirect-url/<string:theia_session_id>")
-@log_endpoint("ide-redirect-url", lambda: "ide-redirect-url")
 @require_user()
 @json_response
 def public_ide_redirect_url(theia_session_id: str) -> Dict[str, str]:
@@ -146,7 +140,6 @@ def public_ide_redirect_url(theia_session_id: str) -> Dict[str, str]:
 
 
 @ide.route("/initialize/<string:id>")
-@log_endpoint("ide-initialize", lambda: "ide-initialize")
 @require_user()
 @load_from_id(Assignment, verify_owner=False)
 def public_ide_initialize(assignment: Assignment):

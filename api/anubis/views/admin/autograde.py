@@ -10,7 +10,6 @@ from anubis.utils.lms.autograde import bulk_autograde, autograde, autograde_subm
 from anubis.utils.lms.courses import assert_course_context
 from anubis.utils.lms.questions import get_assigned_questions
 from anubis.utils.services.cache import cache
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.visuals.assignments import (
     get_admin_assignment_visual_data,
     get_assignment_history,
@@ -155,7 +154,6 @@ def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
 
 @autograde_.route("/submission/<string:assignment_id>/<string:netid>")
 @require_admin()
-@log_endpoint("cli", lambda: "submission-stats")
 @cache.memoize(timeout=60, source_check=True)
 @json_response
 def private_submission_stats_id(assignment_id: str, netid: str):

@@ -5,7 +5,6 @@ from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response
 from anubis.utils.lms.repos import get_repos
-from anubis.utils.services.elastic import log_endpoint
 
 repos = Blueprint("public-repos", __name__, url_prefix="/public/repos")
 
@@ -13,7 +12,6 @@ repos = Blueprint("public-repos", __name__, url_prefix="/public/repos")
 @repos.route("/")
 @repos.route("/list")
 @require_user()
-@log_endpoint("repos", lambda: "repos")
 @json_response
 def public_repos():
     """

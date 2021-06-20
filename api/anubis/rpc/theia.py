@@ -13,7 +13,6 @@ from anubis.utils.k8s.theia import (
     list_theia_pods,
 )
 from anubis.utils.lms.theia import get_theia_pod_name
-from anubis.utils.services.elastic import esindex
 from anubis.utils.services.logger import logger
 
 
@@ -153,9 +152,9 @@ def initialize_theia_session(theia_session_id: str):
             time.sleep(1)
 
             # Index the event
-            esindex(
+            logger.info(
                 "theia",
-                body={
+                extra={
                     "event": "session-init",
                     "session_id": theia_session.id,
                     "netid": theia_session.owner.netid,

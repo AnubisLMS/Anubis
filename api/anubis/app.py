@@ -12,7 +12,6 @@ def init_services(app):
     from anubis.models import db, Config
     from anubis.utils.services.cache import cache, cache_health
     from anubis.utils.services.migrate import migrate
-    from anubis.utils.services.elastic import add_global_error_handler
     from anubis.utils.exceptions import add_app_exception_handlers
 
     # Init services
@@ -26,11 +25,6 @@ def init_services(app):
         Config.query.all()
         cache_health()
         return "Healthy"
-
-    # Add ELK stuff
-    if not config.DISABLE_ELK:
-        # Add elastic global error handler
-        add_global_error_handler(app)
 
 
 def create_app():

@@ -6,7 +6,6 @@ from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import error_response, success_response, get_number_arg
 from anubis.utils.lms.courses import is_course_admin, assert_course_context
 from anubis.utils.lms.submissions import regrade_submission, get_submissions
-from anubis.utils.services.elastic import log_endpoint
 
 submissions = Blueprint(
     "public-submissions", __name__, url_prefix="/public/submissions"
@@ -15,7 +14,6 @@ submissions = Blueprint(
 
 @submissions.route("/")
 @require_user()
-@log_endpoint("public-submissions")
 @json_response
 def public_submissions():
     """
@@ -75,9 +73,6 @@ def public_submissions():
 
 @submissions.route("/get/<string:commit>")
 @require_user()
-@log_endpoint(
-    "public-submission-commit", lambda: "get submission {}".format(request.path)
-)
 @json_response
 def public_submission(commit: str):
     """
@@ -112,7 +107,6 @@ def public_submission(commit: str):
 
 @submissions.route("/regrade/<string:commit>")
 @require_user()
-@log_endpoint("regrade-request", lambda: "submission regrade request " + request.path)
 @json_response
 def public_regrade_commit(commit: str):
     """

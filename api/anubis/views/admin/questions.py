@@ -16,14 +16,12 @@ from anubis.utils.lms.questions import (
     reset_question_assignments,
     get_question_assignments,
 )
-from anubis.utils.services.elastic import log_endpoint
 
 questions = Blueprint("admin-questions", __name__, url_prefix="/admin/questions")
 
 
 @questions.route("/add/<string:assignment_id>")
 @require_admin()
-@log_endpoint("admin", lambda: "add new question")
 @json_response
 def admin_questions_add_unique_code(assignment_id: str):
     """
@@ -68,7 +66,6 @@ def admin_questions_add_unique_code(assignment_id: str):
 
 @questions.route("/delete/<string:assignment_question_id>")
 @require_admin()
-@log_endpoint("admin", lambda: "delete question")
 @json_response
 def admin_questions_delete_question_id(assignment_question_id: str):
     """
@@ -115,7 +112,6 @@ def admin_questions_delete_question_id(assignment_question_id: str):
 
 @questions.route("/hard-reset/<string:assignment_id>")
 @require_admin()
-@log_endpoint("admin", lambda: "question hard reset")
 @json_response
 def private_questions_hard_reset_unique_code(assignment_id: str):
     """
@@ -165,7 +161,6 @@ def private_questions_hard_reset_unique_code(assignment_id: str):
 
 @questions.route("/reset-assignments/<string:assignment_id>")
 @require_admin()
-@log_endpoint("admin", lambda: "reset question assignments")
 @json_response
 def private_questions_reset_assignments_assignment_id(assignment_id: str):
     """
@@ -215,7 +210,6 @@ def private_questions_reset_assignments_assignment_id(assignment_id: str):
 
 @questions.route("/update/<string:assignment_question_id>", methods=["POST"])
 @require_admin()
-@log_endpoint("admin", lambda: "question update")
 @json_endpoint(required_fields=[('question', dict)])
 def admin_questions_update(assignment_question_id: str, question: dict):
     """
@@ -256,7 +250,6 @@ def admin_questions_update(assignment_question_id: str, question: dict):
 
 @questions.route("/get-assignments/<string:assignment_id>")
 @require_admin()
-@log_endpoint("admin", lambda: "questions get")
 @json_response
 def private_questions_get_assignments_unique_code(assignment_id: str):
     """
@@ -288,7 +281,6 @@ def private_questions_get_assignments_unique_code(assignment_id: str):
 
 @questions.route("/get/<string:assignment_id>")
 @require_admin()
-@log_endpoint("admin", lambda: "get question assignments")
 @json_response
 def private_questions_get_unique_code(assignment_id: str):
     """
@@ -324,7 +316,6 @@ def private_questions_get_unique_code(assignment_id: str):
 
 @questions.route("/assign/<string:assignment_id>")
 @require_admin()
-@log_endpoint("admin", lambda: "question assign")
 @json_response
 def private_questions_assign_unique_code(assignment_id: str):
     """

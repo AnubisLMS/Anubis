@@ -10,14 +10,12 @@ from anubis.utils.http.https import success_response, error_response
 from anubis.utils.lms.assignments import get_assignment_due_date
 from anubis.utils.lms.courses import is_course_admin
 from anubis.utils.lms.questions import get_assigned_questions
-from anubis.utils.services.elastic import log_endpoint
 
 questions = Blueprint("public-questions", __name__, url_prefix="/public/questions")
 
 
 @questions.route("/get/<string:id>")
 @require_user()
-@log_endpoint("public-questions-get", lambda: "get questions")
 @load_from_id(Assignment, verify_owner=False)
 @json_response
 def public_assignment_questions_id(assignment: Assignment):

@@ -21,7 +21,6 @@ from anubis.utils.http.https import error_response, success_response
 from anubis.utils.lms.assignments import assignment_sync
 from anubis.utils.lms.courses import get_course_context, assert_course_context
 from anubis.utils.lms.questions import get_assigned_questions
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.logger import logger
 
 assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
@@ -65,7 +64,6 @@ def admin_assignments_repos_id(assignment: Assignment):
 
 @assignments.route("/assignment/<string:id>/questions/get/<string:netid>")
 @require_admin()
-@log_endpoint("cli", lambda: "question get")
 @load_from_id(Assignment, verify_owner=False)
 @json_response
 def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str):
@@ -273,7 +271,6 @@ def private_assignment_save(assignment: dict):
 
 @assignments.route("/sync", methods=["POST"])
 @require_admin(unless_debug=True)
-@log_endpoint("cli", lambda: "assignment-sync")
 @json_endpoint(required_fields=[("assignment", dict)])
 def private_assignment_sync(assignment: dict):
     """

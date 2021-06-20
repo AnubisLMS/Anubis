@@ -9,7 +9,6 @@ from anubis.utils.auth import require_admin, current_user
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response
 from anubis.utils.lms.courses import get_course_context
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.rpc import enqueue_ide_initialize
 from anubis.utils.services.rpc import rpc_enqueue, enqueue_ide_stop
 
@@ -35,7 +34,6 @@ def admin_ide_admin_settings():
 @ide.route("/initialize", methods=["POST"])
 @ide.route("/initialize-custom", methods=["POST"])
 @require_admin()
-@log_endpoint("admin-ide-initialize")
 @json_endpoint([('settings', dict)])
 def admin_ide_initialize_custom(settings: dict, **_):
     """
@@ -100,7 +98,6 @@ def admin_ide_initialize_custom(settings: dict, **_):
 
 @ide.route("/active")
 @require_admin()
-@log_endpoint("admin-ide-active")
 @json_response
 def admin_ide_active():
     """
@@ -137,7 +134,6 @@ def admin_ide_active():
 
 @ide.route("/list")
 @require_admin()
-@log_endpoint("ide-list")
 @json_response
 def admin_ide_list():
     """
@@ -160,7 +156,6 @@ def admin_ide_list():
 
 @ide.route("/stop/<string:id>")
 @require_admin()
-@log_endpoint("ide-end")
 @json_response
 def admin_ide_stop_id(id: str):
     """
@@ -192,7 +187,6 @@ def admin_ide_stop_id(id: str):
 
 @ide.route("/reap-all")
 @require_admin()
-@log_endpoint("ide-reap-all")
 @json_response
 def private_ide_reap_all():
     """

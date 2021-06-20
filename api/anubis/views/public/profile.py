@@ -6,14 +6,12 @@ from anubis.models import User, db
 from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import error_response, success_response
-from anubis.utils.services.elastic import log_endpoint
 
 profile = Blueprint("public-profile", __name__, url_prefix="/public/profile")
 
 
 @profile.route("/set-github-username")
 @require_user()
-@log_endpoint("public-set-github-username", lambda: "github username set")
 @json_response
 def public_set_github_username():
     """

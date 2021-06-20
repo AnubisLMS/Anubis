@@ -7,7 +7,6 @@ from anubis.utils.http.https import success_response, error_response
 from anubis.utils.lms.assignments import get_assignments
 from anubis.utils.lms.courses import valid_join_code, get_courses
 from anubis.utils.services.cache import cache
-from anubis.utils.services.elastic import log_endpoint
 
 courses_ = Blueprint("public-courses", __name__, url_prefix="/public/courses")
 
@@ -15,7 +14,6 @@ courses_ = Blueprint("public-courses", __name__, url_prefix="/public/courses")
 @courses_.route("/")
 @courses_.route("/list")
 @require_user()
-@log_endpoint("public-classes")
 @json_response
 def public_classes():
     """
@@ -41,7 +39,6 @@ def public_classes():
 
 @courses_.route("/join/<string:join_code>")
 @require_user()
-@log_endpoint("join-course")
 @json_response
 def public_courses_join(join_code):
     """

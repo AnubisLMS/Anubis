@@ -12,7 +12,6 @@ from anubis.utils.http.decorators import json_endpoint, json_response
 from anubis.utils.http.https import success_response, error_response
 from anubis.utils.lms.courses import get_course_context
 from anubis.utils.lms.submissions import fix_dangling
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.oauth import OAUTH_REMOTE_APP as provider
 
 auth_ = Blueprint("public-auth", __name__, url_prefix="/public/auth")
@@ -20,7 +19,6 @@ oauth_ = Blueprint("public-oauth", __name__, url_prefix="/public")
 
 
 @auth_.route("/login")
-@log_endpoint("public-login", lambda: "login")
 def public_login():
     if is_debug():
         return "AUTH"
@@ -30,7 +28,6 @@ def public_login():
 
 
 @auth_.route("/logout")
-@log_endpoint("public-logout", lambda: "logout")
 def public_logout():
     r = make_response(redirect("/"))
     r.set_cookie("token", "")
@@ -38,7 +35,6 @@ def public_logout():
 
 
 @oauth_.route("/oauth")
-@log_endpoint("public-oauth", lambda: "oauth")
 def public_oauth():
     """
     This is the endpoint NYU oauth sends the user to after

@@ -15,7 +15,6 @@ from anubis.utils.lms.autograde import bulk_autograde, autograde
 from anubis.utils.lms.courses import assert_course_context
 from anubis.utils.lms.submissions import init_submission
 from anubis.utils.services.cache import cache
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.rpc import enqueue_autograde_pipeline, rpc_enqueue
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
@@ -63,7 +62,6 @@ def admin_regrade_status(assignment: Assignment):
 
 @regrade.route("/submission/<string:commit>")
 @require_admin()
-@log_endpoint("cli", lambda: "regrade-commit")
 @json_response
 def admin_regrade_submission_commit(commit: str):
     """
@@ -98,7 +96,6 @@ def admin_regrade_submission_commit(commit: str):
 
 @regrade.route("/student/<string:assignment_id>/<string:netid>")
 @require_admin()
-@log_endpoint("cli", lambda: "regrade")
 @json_response
 def private_regrade_student_assignment_netid(assignment_id: str, netid: str):
     """
@@ -157,7 +154,6 @@ def private_regrade_student_assignment_netid(assignment_id: str, netid: str):
 
 @regrade.route("/assignment/<string:assignment_id>")
 @require_admin()
-@log_endpoint("cli", lambda: "regrade")
 @json_response
 def private_regrade_assignment(assignment_id):
     """

@@ -20,7 +20,6 @@ from anubis.utils.lms.submissions import get_submissions
 from anubis.utils.lms.submissions import reject_late_submission, init_submission
 from anubis.utils.lms.webhook import parse_webhook, guess_github_username, check_repo
 from anubis.utils.services.cache import cache
-from anubis.utils.services.elastic import log_endpoint, esindex
 from anubis.utils.services.logger import logger
 from anubis.utils.services.rpc import enqueue_autograde_pipeline
 
@@ -50,7 +49,6 @@ def webhook_log_msg() -> Union[str, None]:
 
 @webhook.route("/", methods=["POST"])
 @webhook.route("/backup", methods=["POST"])
-@log_endpoint("webhook", webhook_log_msg)
 @json_response
 def public_webhook():
     """
@@ -108,7 +106,6 @@ def public_webhook():
 
         check_repo(assignment, repo_url, github_username_guess, user)
 
-        esindex("new-repo", repo_url=repo_url, assignment=str(assignment))
         return success_response("initial commit")
 
     repo = (
@@ -190,23 +187,7 @@ def public_webhook():
                 "commit": commit,
             },
         )
-        esindex(
-            type="error",
-            logs="dangling submission by: " + github_username_guess,
-            submission=submission.data,
-            neitd=None,
-        )
         return error_response("dangling submission")
-
-    # Log the submission
-    esindex(
-        index="submission",
-        processed=0,
-        error=-1,
-        passed=-1,
-        netid=submission.netid,
-        commit=submission.commit,
-    )
 
     # if the github username is not found, create a dangling submission
     if assignment.autograde_enabled:
