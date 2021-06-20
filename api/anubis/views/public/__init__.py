@@ -2,10 +2,10 @@ def register_public_views(app):
     from anubis.views.public.auth import auth_
     from anubis.views.public.auth import oauth_
     from anubis.views.public.ide import ide
-    from anubis.views.public.repos import repos
+    from anubis.views.public.repos import repos_
     from anubis.views.public.webhook import webhook
     from anubis.views.public.profile import profile
-    from anubis.views.public.submissions import submissions
+    from anubis.views.public.submissions import submissions_
     from anubis.views.public.assignments import assignments
     from anubis.views.public.static import static
     from anubis.views.public.courses import courses_
@@ -17,10 +17,10 @@ def register_public_views(app):
         auth_,
         oauth_,
         ide,
-        repos,
+        repos_,
         webhook,
         profile,
-        submissions,
+        submissions_,
         assignments,
         static,
         courses_,

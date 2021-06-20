@@ -1,14 +1,13 @@
-import os
-import json
 import base64
-
+import json
+import os
 
 from flask import Blueprint, make_response, redirect, request
 
 from anubis.models import User, db
 from anubis.utils.auth import create_token, current_user, require_user, require_admin
-from anubis.utils.data import is_debug
-from anubis.utils.http.decorators import json_endpoint, json_response
+from anubis.utils.data import is_debug, req_assert
+from anubis.utils.http.decorators import json_endpoint
 from anubis.utils.http.https import success_response, error_response
 from anubis.utils.lms.courses import get_course_context
 from anubis.utils.lms.submissions import fix_dangling
@@ -66,24 +65,24 @@ def public_oauth():
     name = f'{firstname} {lastname}'.strip()
 
     # Check to see if user already exists
-    u = User.query.filter(User.netid == netid).first()
+    user = User.query.filter(User.netid == netid).first()
 
     # Create the user if they do not already exist
-    if u is None:
-        u = User(netid=netid, name=name)
-        db.session.add(u)
+    if user is None:
+        user = User(netid=netid, name=name)
+        db.session.add(user)
         db.session.commit()
 
     # If their github username is not set, send them to
     # the profile page
-    if u.github_username is None:
+    if user.github_username is None:
         next_url = "/profile"
 
     # Make the response depending on if a next_url was specified
     r = make_response(redirect(next_url))
 
     # Set the token cookie
-    r.set_cookie("token", create_token(u.netid))
+    r.set_cookie("token", create_token(user.netid))
 
     return r
 
@@ -142,8 +141,9 @@ def public_auth_set_github_username(github_username):
     other: User = User.query.filter(
         User.github_username == github_username, User.id != user.id
     ).first()
-    if other is not None:
-        return error_response("github username is already taken")
+
+    # Assert that there is not a duplicate github username
+    req_assert(other is None, message='github username is already taken')
 
     # Set github username and commit
     user.github_username = github_username
@@ -204,4 +204,3 @@ def public_cli_auth():
     response.headers['Content-Type'] = 'text/plain'
 
     return response
-

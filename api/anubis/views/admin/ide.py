@@ -6,6 +6,7 @@ from flask import Blueprint
 from anubis.models import db, TheiaSession
 from anubis.rpc.theia import reap_theia_sessions_in_course
 from anubis.utils.auth import require_admin, current_user
+from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response
 from anubis.utils.lms.courses import get_course_context
@@ -125,7 +126,7 @@ def admin_ide_active():
     if session is None:
         return success_response({"session": None})
 
-    # Return the active session informatino
+    # Return the active session information
     return success_response({
         "session": session.data,
         "settings": session.settings,
@@ -159,26 +160,32 @@ def admin_ide_list():
 @json_response
 def admin_ide_stop_id(id: str):
     """
-    List all active ide sessions
+    Stop a specific IDE
 
     :return:
     """
 
+    # Get the course context
     course = get_course_context()
 
+    # Search for the theia session
     session = TheiaSession.query.filter(
         TheiaSession.id == id,
         TheiaSession.course_id == course.id,
     ).first()
 
-    if session is None:
-        return error_response("Session does not exist.")
+    # Verify it exists
+    req_assert(session is not None, message='session does not exist')
 
+    # Set all the things as stopped
     session.active = False
     session.ended = datetime.now()
     session.state = "Ending"
+
+    # Commit the stop
     db.session.commit()
 
+    # Enqueue the theia stop cleanup
     enqueue_ide_stop(session.id)
 
     # Hand back response
@@ -197,12 +204,13 @@ def private_ide_reap_all():
     :return:
     """
 
+    # Get the course context
     course = get_course_context()
 
     # Send reap job to rpc cluster
     rpc_enqueue(reap_theia_sessions_in_course, 'theia', args=(course.id,))
 
     # Hand back status
-    return success_response(
-        {"status": "Reap job enqueued. Session cleanup will take a minute."}
-    )
+    return success_response({
+        "status": "Reap job enqueued. Session cleanup will take a minute."
+    })

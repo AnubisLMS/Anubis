@@ -2,8 +2,9 @@ from flask import Blueprint
 
 from anubis.models import db, User, Course, InCourse, Submission, Assignment
 from anubis.utils.auth import require_admin, current_user, require_superuser
+from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
-from anubis.utils.http.https import success_response, error_response, get_number_arg
+from anubis.utils.http.https import success_response, get_number_arg
 from anubis.utils.lms.courses import assert_course_superuser, get_course_context, assert_course_context
 from anubis.utils.lms.repos import get_repos
 from anubis.utils.lms.students import get_students
@@ -74,9 +75,9 @@ def admin_students_info_id(id: str):
     ).first()
 
     # Check if student exists
-    if student is None:
-        return error_response("Student does not exist")
+    req_assert(student is not None, message='student does not exist')
 
+    # Assert that the student is within the current course context
     assert_course_context(student)
 
     # Get courses student is in
@@ -129,8 +130,7 @@ def admin_students_submissions_id(id: str):
     student = User.query.filter(User.id == id).first()
 
     # Check if student exists
-    if student is None:
-        return error_response("Student does not exist")
+    req_assert(student is not None, message='student does not exist')
 
     # Get n most recent submissions from the user
     submissions = (
@@ -177,12 +177,10 @@ def admin_students_update_id(id: str, name: str = None, github_username: str = N
     student = User.query.filter(User.id == id).first()
 
     # Check if student exists
-    if student is None:
-        return error_response("Student does not exist")
+    req_assert(student is not None, message='student does not exist')
 
     # If the student is a superuser, then stop
-    if student.is_superuser and not user.is_superuser:
-        return error_response('You cannot edit a superuser')
+    req_assert(not (student.is_superuser and not user.is_superuser), message='cannot edit a superuser')
 
     # Make sure that the student is within the course context
     in_course = InCourse.query.filter(
@@ -191,8 +189,7 @@ def admin_students_update_id(id: str, name: str = None, github_username: str = N
     ).first()
 
     # Verify that the student is in the context
-    if in_course is None:
-        return error_response('You cannot edit someone not in your course')
+    req_assert(in_course is not None, message='cannot edit outside your course context')
 
     # Update fields
     student.name = name
@@ -225,16 +222,13 @@ def admin_students_toggle_superuser(id: str):
     other = User.query.filter(User.id == id).first()
 
     # Double check that the current user is a superuser
-    if not user.is_superuser:
-        return error_response("Only superusers can create other superusers.")
+    req_assert(user.is_superuser, message='only superusers can create superusers')
 
     # If the other user was not found, then stop
-    if other is None:
-        return error_response("User could not be found")
+    req_assert(other is not None, message='user does not exist')
 
     # Make sure that the other user is not also the current user
-    if user.id == other.id:
-        return error_response("You can not toggle your own permission.")
+    req_assert(user.id != other.id, message='cannot toggle your own superuser')
 
     # Toggle the superuser field
     other.is_superuser = not other.is_superuser

@@ -4,6 +4,7 @@ from flask import Blueprint
 from sqlalchemy.exc import IntegrityError, DataError
 
 from anubis.models import db, Assignment, AssignedStudentQuestion, AssignedQuestionResponse, User
+from anubis.utils.data import req_assert
 from anubis.utils.auth import require_user, current_user
 from anubis.utils.http.decorators import json_endpoint, load_from_id, json_response
 from anubis.utils.http.https import success_response, error_response
@@ -58,18 +59,18 @@ def public_questions_save(id: str, response: str):
 
     # Verify that the assigned question they are attempting to update
     # actually exists
-    if assigned_question is None:
-        return error_response("Assigned question does not exist")
+    req_assert(assigned_question is not None, message='assigned question does not exist')
 
     # Check that the person that the assigned question belongs to the
     # user. If the current user is a course admin (TA, Professor or superuser)
     # then we can skip this check.
-    if not is_course_admin(user.id) and assigned_question.owner_id != user.id:
-        return error_response("Assigned question does not exist")
+    req_assert(
+        is_course_admin(user.id) or assigned_question.owner_id != user.id,
+        message='assigned question does not exist'
+    )
 
     # Verify that the response is a string object
-    if not isinstance(response, str):
-        return error_response('response must be a string')
+    req_assert(isinstance(response, str), message='response must be a string')
 
     # Get the assignment that this question exists for
     assignment = assigned_question.assignment
@@ -87,10 +88,10 @@ def public_questions_save(id: str, response: str):
         # Make sure that the deadline has not passed. If it has, then
         # we should give them an error saying that they can request a
         # regrade from the Professor.
-        if due_date < now:
-            return error_response(
-                'This assignment does not accept late submissions. You can request an extension from your Professor.'
-            )
+        req_assert(
+            now < due_date,
+            message='This assignment does not accept late submissions. You can request an extension from your Professor.'
+        )
 
     # Create a new response
     res = AssignedQuestionResponse(

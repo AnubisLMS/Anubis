@@ -7,10 +7,10 @@ from sqlalchemy import or_
 from anubis.models import Submission, Assignment, User
 from anubis.rpc.batch import rpc_bulk_regrade
 from anubis.utils.auth import require_admin
-from anubis.utils.data import split_chunks
+from anubis.utils.data import split_chunks, req_assert
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.decorators import load_from_id
-from anubis.utils.http.https import error_response, success_response, get_number_arg
+from anubis.utils.http.https import success_response, get_number_arg
 from anubis.utils.lms.autograde import bulk_autograde, autograde
 from anubis.utils.lms.courses import assert_course_context
 from anubis.utils.lms.submissions import init_submission
@@ -78,8 +78,7 @@ def admin_regrade_submission_commit(commit: str):
     ).first()
 
     # Make sure the submission exists
-    if submission is None:
-        return error_response("Submission does not exist")
+    req_assert(submission is not None, message='submission does not exist')
 
     # Assert that the submission is within the current course context
     assert_course_context(submission)
@@ -111,8 +110,7 @@ def private_regrade_student_assignment_netid(assignment_id: str, netid: str):
     ).first()
 
     # Verify that the assignment exists
-    if assignment is None:
-        return error_response("cant find assignment")
+    req_assert(assignment is not None, message='assignment does not exist')
 
     # Get the student
     student: User = User.query.filter(
@@ -120,8 +118,7 @@ def private_regrade_student_assignment_netid(assignment_id: str, netid: str):
     ).first()
 
     # Verify the student exists
-    if student is None:
-        return error_response('Student does not exist')
+    req_assert(student is not None, message='student does not exist')
 
     # Assert that the course exists
     assert_course_context(student, assignment)
@@ -207,8 +204,7 @@ def private_regrade_assignment(assignment_id):
     ).first()
 
     # Verify that the assignment exists
-    if assignment is None:
-        return error_response("cant find assignment")
+    req_assert(assignment is not None, message='assignment does not exist')
 
     # Assert that the assignment is within the current course context
     assert_course_context(assignment)

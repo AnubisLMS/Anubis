@@ -3,11 +3,10 @@ from sqlalchemy.orm import defer
 
 from anubis.models import db, StaticFile
 from anubis.utils.auth import require_admin
-from anubis.utils.data import rand
+from anubis.utils.data import rand, req_assert
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.files import get_mime_type
 from anubis.utils.http.https import (
-    get_number_arg,
     get_request_file_stream,
     success_response,
     error_response,
@@ -32,6 +31,9 @@ def admin_static_delete_static_id(static_id: str):
     static_file = StaticFile.query.filter(
         StaticFile.id == static_id
     ).first()
+
+    # Verify that static file exists
+    req_assert(static_file is not None, message='static file does not exist')
 
     # Assert that the static file is within the current course context
     assert_course_context(static_file)

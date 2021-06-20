@@ -2,8 +2,9 @@ from flask import Blueprint
 
 from anubis.models import Assignment, User
 from anubis.utils.auth import require_admin
+from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
-from anubis.utils.http.https import success_response, error_response
+from anubis.utils.http.https import success_response
 from anubis.utils.lms.courses import assert_course_context
 from anubis.utils.visuals.assignments import (
     get_admin_assignment_visual_data,
@@ -34,8 +35,7 @@ def public_visuals_assignment_id(assignment_id: str):
     ).first()
 
     # If the assignment does not exist, then stop
-    if assignment is None:
-        return error_response('Assignment does not exist')
+    req_assert(assignment is not None, message='assignment does not exist')
 
     # Assert that the assignment is within the course context
     assert_course_context(assignment)
@@ -68,15 +68,13 @@ def visual_history_assignment_netid(assignment_id: str, netid: str):
     ).first()
 
     # If the assignment does not exist, then stop
-    if assignment is None:
-        return error_response('Assignment does not exist')
+    req_assert(assignment is not None, message='assignment does not exist')
 
     # Get the student
     student = User.query.filter(User.netid == netid).first()
 
     # Make sure that the student exists
-    if student is None:
-        return error_response('netid does not exist')
+    req_assert(student is not None, message='user does not exist')
 
     # Assert that both the course and the assignment are
     # within the view of the current admin.
@@ -105,8 +103,7 @@ def visual_sundial_assignment(assignment_id: str):
     ).first()
 
     # If the assignment does not exist, then stop
-    if assignment is None:
-        return error_response('Assignment does not exist')
+    req_assert(assignment is not None, message='assignment does not exist')
 
     # Assert that the assignment is within the view of
     # the current admin.

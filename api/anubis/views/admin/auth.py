@@ -4,8 +4,8 @@ from flask import Blueprint, Response
 
 from anubis.models import User
 from anubis.utils.auth import create_token, require_superuser
-from anubis.utils.data import is_debug
-from anubis.utils.http.https import error_response, success_response
+from anubis.utils.data import is_debug, req_assert
+from anubis.utils.http.https import success_response
 
 auth = Blueprint("admin-auth", __name__, url_prefix="/admin/auth")
 
@@ -19,12 +19,15 @@ def private_token_netid(netid):
     :param netid:
     :return:
     """
-    other = User.query.filter_by(netid=netid).first()
-    if other is None:
-        return error_response("User does not exist")
 
-    if not is_debug() and other.is_superuser:
-        return error_response("You cannot log in as a superuser.")
+    # Get other user
+    other = User.query.filter_by(netid=netid).first()
+
+    # Verify that the other user exists
+    req_assert(other is not None, message='user does not exist')
+
+    # Verify that the other user is not a superuser
+    req_assert(is_debug() or other.is_superuser, message='You cannot log in as a superuser')
 
     token = create_token(other.netid)
     res = Response(

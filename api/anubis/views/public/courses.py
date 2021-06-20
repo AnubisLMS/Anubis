@@ -1,6 +1,7 @@
 from flask import Blueprint
 
 from anubis.models import db, User, InCourse, Course
+from anubis.utils.data import req_assert
 from anubis.utils.auth import require_user, current_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response, error_response
@@ -58,8 +59,7 @@ def public_courses_join(join_code):
     ).first()
 
     # If course not found, then we can hand back an error
-    if course is None:
-        return error_response("Join code is not valid :(")
+    req_assert(course is not None, message='join code is not valid :(')
 
     # Check to see if student is already in course
     in_course = InCourse.query.filter(

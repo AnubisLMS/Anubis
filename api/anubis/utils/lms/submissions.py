@@ -118,7 +118,7 @@ def fix_dangling():
 
             # Find all the submissions that belong to that
             # repo, fix then grade them.
-            for submission in dangling_repo.submissions:
+            for submission in dangling_repo.submissions_:
                 # Give the submission an owner
                 submission.owner_id = owner.id
                 db.session.add(submission)
