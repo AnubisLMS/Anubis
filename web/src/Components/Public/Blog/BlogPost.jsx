@@ -1,17 +1,21 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 
 import CardActionArea from '@material-ui/core/CardActionArea';
 import CardHeader from '@material-ui/core/CardHeader';
 import Avatar from '@material-ui/core/Avatar';
+import Button from '@material-ui/core/Button';
 import CardContent from '@material-ui/core/CardContent';
-import Typography from '@material-ui/core/Typography';
+import Tooltip from '@material-ui/core/Tooltip';
 import Card from '@material-ui/core/Card';
-import {Link as RouterLink} from 'react-router-dom';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import {useHistory} from 'react-router-dom';
+import BlogContent from './BlogContent';
 
 const useStyles = makeStyles((theme) => ({
   card: {
-    maxWidth: 1028,
+    maxWidth: 1024,
+    position: 'relative',
   },
   media: {
     height: 0,
@@ -59,39 +63,94 @@ const useStyles = makeStyles((theme) => ({
     height: 3,
     marginTop: theme.spacing(3),
   },
+  backButton: {
+    position: 'absolute',
+    top: theme.spacing(4),
+    right: theme.spacing(4),
+  },
+  indentText: {
+    marginLeft: theme.spacing(4),
+    opacity: .6,
+    marginTop: theme.spacing(4),
+    fontSize: '1.2rem',
+  },
 }));
 
-export default function BlogPost({Preview, Post, title='', date='', author='', preview = false}) {
+
+const parseContentForPreview = (content) => {
+  return content.substring(content.lastIndexOf('<preview>') + '<preview>'.length, content.lastIndexOf('</preview>'));
+};
+
+const parseContentForFullView = (content) => {
+  return content.replace('<preview>', '').replace('</preview>', ' ');
+};
+
+export default function BlogPost({get, slug, authorImage, isHighlight, title='', date='', author='', preview = false}) {
   const classes = useStyles();
+  const history = useHistory();
+  const [postContent, setPostContent] = useState(undefined);
+
+  useEffect(() => {
+    get()
+      .then((file) => {
+        fetch(file.default)
+          .then((file) => file.text())
+          .then((file) => {
+            setPostContent(preview ? parseContentForPreview(file) : parseContentForFullView(file));
+            console.log(parseContentForPreview(file));
+          })
+          .catch(((error) => console.log('FETCH/ERROR', error)));
+      })
+      .catch((error) => console.log('IMPORT/ERROR', error));
+  }, []);
 
   return (
     <Card className={classes.card}>
-      <CardActionArea {...(!!preview ? {component: RouterLink, to: preview} : {})}>
-        <CardHeader
-          avatar={<Avatar src={'https://avatars.githubusercontent.com/u/36013983'}/>}
-          title={title}
-          titleTypographyProps={{variant: 'h6'}}
-          subheader={date}
-        />
-        <CardContent>
-
-          {/* Post Preview */}
-          <Preview classes={classes} />
-
-          {!preview ? (
-            <React.Fragment>
-
-              {/* Main Post Content */}
-              <Post classes={classes}/>
-
-              {/* Author */}
-              <Typography variant={'body2'} className={classes.author}>
-                - {author}
-              </Typography>
-            </React.Fragment>
-          ) : null}
-        </CardContent>
-      </CardActionArea>
+      {preview &&
+        <CardActionArea
+          onClick = {() => history.push(`/blog/${slug}`)}
+          style = {{focusHighlight: 'background-color: none'}}
+        >
+          <CardHeader
+            avatar={<Avatar src={'https://avatars.githubusercontent.com/u/36013983'}/>}
+            title={title}
+            titleTypographyProps={{variant: 'h6'}}
+            subheader={date}
+          />
+          <CardContent>
+            {postContent &&
+              <BlogContent content = {postContent} />
+            }
+          </CardContent>
+        </CardActionArea>
+      }
+      {!preview &&
+        <>
+          <CardHeader
+            avatar={<Avatar src={'https://avatars.githubusercontent.com/u/36013983'}/>}
+            title={title}
+            titleTypographyProps={{variant: 'h6'}}
+            subheader={date}
+          />
+          <Tooltip
+            className = {classes.backButton}
+            disableFocusListener
+            onClick = {() => history.push('/blog')}
+            title='Back to /Blog'
+          >
+            <Button>
+              <ArrowBackIcon/>
+            </Button>
+          </Tooltip>
+          <CardContent>
+            {postContent &&
+              <BlogContent content = {postContent} />
+            }
+            <p className = {classes.indentText}> -  {author}</p>
+          </CardContent>
+        </>
+      }
     </Card>
   );
 }
+
