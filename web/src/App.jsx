@@ -1,6 +1,10 @@
 import React, {useState} from 'react';
 import clsx from 'clsx';
 
+// useSWR
+import {SWRConfig} from 'swr';
+import axios from 'axios';
+
 // React router
 import {BrowserRouter as Router} from 'react-router-dom';
 
@@ -119,44 +123,57 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <div className={classes.root}>
-        <SnackbarProvider maxSnack={5}>
-          <DeviceWarning/>
-          <Router>
-            <AuthWrapper>
-              <AuthContext.Consumer>
-                {(user) => (
-                  <CssBaseline>
-                    <Nav
-                      classes={classes}
-                      open={open}
-                      handleDrawerClose={() => setOpen(!open)}
-                    />
-                    <div className={classes.app} id={'app'}>
-                      <Header
-                        onDrawerToggle={() => setOpen(!open)}
-                        user={user}
+        <SWRConfig
+          value={{
+            shouldRetryOnError: false,
+            fetcher: (...args) => fetch(...args).then((res) => res.json()).catch((error) => {
+              if (error?.response?.status === 401) {
+                window.location = '/api/public/auth/login';
+              } else {
+                throw error;
+              }
+            }),
+          }}
+        >
+          <SnackbarProvider maxSnack={5}>
+            <DeviceWarning/>
+            <Router>
+              <AuthWrapper>
+                <AuthContext.Consumer>
+                  {(user) => (
+                    <CssBaseline>
+                      <Nav
                         classes={classes}
                         open={open}
+                        handleDrawerClose={() => setOpen(!open)}
                       />
-                      <main
-                        className={clsx(classes.content, {
-                          [classes.contentShift]: open,
-                        })}
-                      >
-                        <div className={classes.drawerHeader} />
-                        <Error show={showError} onDelete={() => setShowError(false)}/>
-                        <div className={classes.main}>
-                          <Main user={user}/>
-                        </div>
-                        <Footer/>
-                      </main>
-                    </div>
-                  </CssBaseline>
-                )}
-              </AuthContext.Consumer>
-            </AuthWrapper>
-          </Router>
-        </SnackbarProvider>
+                      <div className={classes.app} id={'app'}>
+                        <Header
+                          onDrawerToggle={() => setOpen(!open)}
+                          user={user}
+                          classes={classes}
+                          open={open}
+                        />
+                        <main
+                          className={clsx(classes.content, {
+                            [classes.contentShift]: open,
+                          })}
+                        >
+                          <div className={classes.drawerHeader} />
+                          <Error show={showError} onDelete={() => setShowError(false)}/>
+                          <div className={classes.main}>
+                            <Main user={user}/>
+                          </div>
+                          <Footer/>
+                        </main>
+                      </div>
+                    </CssBaseline>
+                  )}
+                </AuthContext.Consumer>
+              </AuthWrapper>
+            </Router>
+          </SnackbarProvider>
+        </SWRConfig>
       </div>
     </ThemeProvider>
   );

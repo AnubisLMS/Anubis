@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import useSWR from 'swr';
-import {Redirect} from 'react-router-dom';
 
 import Grid from '@material-ui/core/Grid';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -13,12 +12,20 @@ export default function Profile() {
   const [_github_username, set_github_username] = useState(null);
   const {isValidating: loading, error, data} = useSWR('/api/public/auth/whoami');
 
+
   if (loading) return <CircularProgress/>;
-  if (error) return <Redirect to={`/error`}/>;
+  if (error) {
+    window.location = '/api/public/auth/login';
+    return null;
+  }
 
-  const user = data?.data?.user;
-
+  const user = data?.data?.user ?? null;
   const github_username = _github_username || user?.github_username;
+
+  if (!user) {
+    window.location = '/api/public/auth/login';
+    return null;
+  }
 
   return (
     <StandardLayout description={'Profile'}>
