@@ -89,7 +89,7 @@ it takes them to pass specific tests. In the autograde results panel, a &quot;vi
 history&quot; is generated for each student. It shows when students started their
 assignment, then for each submission if their build passed or failed and how many
 tests passed. If they used the Anubis Cloud IDEs as most students do choose to, then
-the graph generated shows a <i>near minute by minute</i> representation of which challenges
+the graph generated shows a *near minute by minute* representation of which challenges
 they faced and how long it took for them to overcome them.
 
 ![student assignment visual history](/api/public/static/000e6a27e2f9a14d)

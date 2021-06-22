@@ -11,13 +11,13 @@ export default [
     },
   },
   {
-    slug: 'assignment-packaging',
-    title: 'Assignment Packaging',
+    slug: 'anubis-cloud-ide',
+    title: 'Anubis cloud IDEs',
     author: 'John Cunniff',
     authorImage: 'https://avatars.githubusercontent.com/u/36013983',
-    date: '2021-03-31',
+    date: '2021-04-13',
     get: () => {
-      return import('./AssignmentPackaging.md');
+      return import('./TheialDE.md');
     },
   },
   {
@@ -31,6 +31,16 @@ export default [
     },
   },
   {
+    slug: 'assignment-packaging',
+    title: 'Assignment Packaging',
+    author: 'John Cunniff',
+    authorImage: 'https://avatars.githubusercontent.com/u/36013983',
+    date: '2021-03-31',
+    get: () => {
+      return import('./AssignmentPackaging.md');
+    },
+  },
+  {
     slug: 'packaging',
     title: 'How Assignments Work In Anubis',
     author: 'John Cunniff',
@@ -40,14 +50,5 @@ export default [
       return import('./Assignment.md');
     },
   },
-  {
-    slug: 'anubis-cloud-ide',
-    title: 'Anubis cloud IDEs',
-    author: 'John Cunniff',
-    authorImage: 'https://avatars.githubusercontent.com/u/36013983',
-    date: '2021-04-13',
-    get: () => {
-      return import('./TheialDE.md');
-    },
-  },
+
 ];

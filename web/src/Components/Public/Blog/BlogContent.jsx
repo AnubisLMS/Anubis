@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
   },
   markdown: {
     '& p': {
-      fontSize: '1rem',
+      fontSize: '1.1rem',
       marginBottom: '1.3rem',
     },
     '& body': {
@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
       color: '#4fc3f7',
     },
     '& li': {
-      fontSize: '.9rem',
+      fontSize: '1rem',
       marginBottom: '.3rem',
     },
     '& code': {
