@@ -1,4 +1,5 @@
 import React from 'react';
+import useSWR from 'swr';
 import {Redirect} from 'react-router-dom';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -6,10 +7,9 @@ import Zoom from '@material-ui/core/Zoom';
 import Typography from '@material-ui/core/Typography';
 
 import QuestionGrid from './QuestionGrid';
-import useGet from '../../../hooks/useGet';
 
 export default function Questions({assignment_id}) {
-  const [{loading, error, data}] = useGet(`/api/public/questions/get/${assignment_id}`);
+  const {isValidating: loading, error, data} = useSWR(`/api/public/questions/get/${assignment_id}`);
 
   if (assignment_id === null) return <React.Fragment/>;
   if (loading) return <CircularProgress/>;

@@ -31,6 +31,7 @@
     "react-vis": "^1.11.7",
     "remark-gfm": "^1.0.0",
     "scrambling-text": "^1.0.4",
+    "swr": "^0.5.6",
     "universal-cookie": "^4.0.4",
     "web-vitals": "^1.1.0"
   },
