@@ -16,9 +16,9 @@ export default function Profile() {
   if (loading) return <CircularProgress/>;
   if (error) return <Redirect to={`/error`}/>;
 
-  const {user} = data;
+  const user = data?.data?.user;
 
-  const github_username = _github_username || user.github_username;
+  const github_username = _github_username || user?.github_username;
 
   return (
     <StandardLayout description={'Profile'}>

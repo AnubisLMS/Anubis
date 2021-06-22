@@ -17,13 +17,15 @@ export default function Repos() {
   if (loading) return <CircularProgress/>;
   if (error) return <Redirect to={`/error`}/>;
 
+  const repos = data?.data?.repos ?? [];
+
   return (
     <AuthContext.Consumer>
       {(user) => (
         <StandardLayout description={`${user?.name}'s Repos`}>
           <Grid container spacing={1} justify={'center'}>
             <Grid item xs={12}>
-              <ReposTable rows={data.repos}/>
+              <ReposTable rows={repos}/>
             </Grid>
           </Grid>
         </StandardLayout>

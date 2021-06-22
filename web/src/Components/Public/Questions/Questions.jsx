@@ -15,7 +15,9 @@ export default function Questions({assignment_id}) {
   if (loading) return <CircularProgress/>;
   if (error) return <Redirect to={`/error`}/>;
 
-  if (data.questions.length === 0) {
+  const questions = data?.data?.questions ?? [];
+
+  if (questions.length === 0) {
     return <React.Fragment/>;
   }
 
@@ -25,7 +27,7 @@ export default function Questions({assignment_id}) {
         <Typography variant="body1">
           Questions
         </Typography>
-        <QuestionGrid questions={data.questions}/>
+        <QuestionGrid questions={questions}/>
       </React.Fragment>
     </Zoom>
   );
