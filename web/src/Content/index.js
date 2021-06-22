@@ -3,7 +3,7 @@ export default [
     slug: 'elavator-pitch',
     title: 'Anubis LMS',
     author: 'John Cunniff',
-    authorImage: '',
+    authorImage: 'https://avatars.githubusercontent.com/u/36013983',
     date: '2021-03-17',
     isHighlight: true,
     get: () => {
@@ -14,7 +14,7 @@ export default [
     slug: 'assignment-packaging',
     title: 'Assignment Packaging',
     author: 'John Cunniff',
-    authorImage: '',
+    authorImage: 'https://avatars.githubusercontent.com/u/36013983',
     date: '2021-03-31',
     get: () => {
       return import('./AssignmentPackaging.md');
@@ -24,7 +24,7 @@ export default [
     slug: 'midterm-retro',
     title: 'Reorganizing RPC While Under Load - The Midterm Retro',
     author: 'John Cunniff',
-    authorImage: '',
+    authorImage: 'https://avatars.githubusercontent.com/u/36013983',
     date: '2021-04-06',
     get: () => {
       return import('./MidtermRetro.md');
@@ -34,7 +34,7 @@ export default [
     slug: 'packaging',
     title: 'How Assignments Work In Anubis',
     author: 'John Cunniff',
-    authorImage: '',
+    authorImage: 'https://avatars.githubusercontent.com/u/36013983',
     date: '2021-03-24',
     get: () => {
       return import('./Assignment.md');
@@ -44,7 +44,7 @@ export default [
     slug: 'anubis-cloud-ide',
     title: 'Anubis cloud IDEs',
     author: 'John Cunniff',
-    authorImage: '',
+    authorImage: 'https://avatars.githubusercontent.com/u/36013983',
     date: '2021-04-13',
     get: () => {
       return import('./TheialDE.md');

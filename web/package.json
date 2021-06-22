@@ -17,7 +17,6 @@
     "axios": "^0.21.1",
     "clsx": "^1.1.0",
     "date-fns": "^2.0.0",
-    "github-markdown-css": "^4.0.0",
     "markdown-to-jsx": "^7.1.2",
     "notistack": "^1.0.3",
     "react": "^17.0.1",

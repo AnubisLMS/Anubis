@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import './markdown.css';
 
 const useStyles = makeStyles((theme) => ({
   imgbox: {
@@ -11,6 +10,41 @@ const useStyles = makeStyles((theme) => ({
   img: {
     width: '100%',
     height: '100%',
+  },
+  markdown: {
+    '& p': {
+      fontSize: '1rem',
+      marginBottom: '1.3rem',
+    },
+    '& body': {
+      lineHeight: '1.85',
+      fontSize: '18px',
+    },
+    '& h4': {
+      fontSize: '1.1rem',
+      opacity: .7,
+    },
+    '& blockquote': {
+      borderLeft: '3px solid #4fc3f7',
+      paddingLeft: '1rem',
+    },
+    '& a': {
+      textDecoration: 'none',
+      color: '#4fc3f7',
+    },
+    '& li': {
+      fontSize: '.9rem',
+      marginBottom: '.3rem',
+    },
+    '& code': {
+      paddingRight: '6px',
+      paddingLeft: '6px',
+      paddingBottom: '2px',
+      paddingTop: '3px',
+      backgroundColor: '#4F4F4F',
+      borderRadius: '3px',
+      borderBottom: '1px solid #4fc3f7',
+    },
   },
 }));
 const customRender = {
@@ -33,8 +67,10 @@ const customRender = {
 };
 
 const BlogContent = ({content}) => {
+  const classes = useStyles();
   return (
     <ReactMarkdown
+      className = {classes.markdown}
       escapeHtml={true}
       renderers={customRender}
     >
@@ -44,3 +80,4 @@ const BlogContent = ({content}) => {
 };
 
 export default BlogContent;
+

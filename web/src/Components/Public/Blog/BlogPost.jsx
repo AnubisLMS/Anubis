@@ -12,6 +12,8 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import {useHistory} from 'react-router-dom';
 import BlogContent from './BlogContent';
 
+import axios from 'axios';
+
 const useStyles = makeStyles((theme) => ({
   card: {
     maxWidth: 1024,
@@ -93,11 +95,9 @@ export default function BlogPost({get, slug, authorImage, isHighlight, title='',
   useEffect(() => {
     get()
       .then((file) => {
-        fetch(file.default)
-          .then((file) => file.text())
+        axios.get(file.default)
           .then((file) => {
-            setPostContent(preview ? parseContentForPreview(file) : parseContentForFullView(file));
-            console.log(parseContentForPreview(file));
+            setPostContent(preview ? parseContentForPreview(file.data) : parseContentForFullView(file.data));
           })
           .catch(((error) => console.log('FETCH/ERROR', error)));
       })
@@ -112,7 +112,7 @@ export default function BlogPost({get, slug, authorImage, isHighlight, title='',
           style = {{focusHighlight: 'background-color: none'}}
         >
           <CardHeader
-            avatar={<Avatar src={'https://avatars.githubusercontent.com/u/36013983'}/>}
+            avatar={<Avatar src={authorImage}/>}
             title={title}
             titleTypographyProps={{variant: 'h6'}}
             subheader={date}
@@ -127,7 +127,7 @@ export default function BlogPost({get, slug, authorImage, isHighlight, title='',
       {!preview &&
         <>
           <CardHeader
-            avatar={<Avatar src={'https://avatars.githubusercontent.com/u/36013983'}/>}
+            avatar={<Avatar src={authorImage}/>}
             title={title}
             titleTypographyProps={{variant: 'h6'}}
             subheader={date}

@@ -94,7 +94,7 @@ they faced and how long it took for them to overcome them.
 
 ![student assignment visual history](/api/public/static/000e6a27e2f9a14d)
 
-This example shows the build as the green line, and the assignment tests as the blue line.
+ > This example shows the build as the green line, and the assignment tests as the blue line.
 We can see that this student spent a good deal of time on the first day just getting their
 tests to pass, only to revisit their work the next day probably to clean up their submission.
 
