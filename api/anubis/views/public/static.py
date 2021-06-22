@@ -25,7 +25,7 @@ def public_static(path: str, filename: str = None):
 
     query = (
         StaticFile.query
-            .option(undefer(StaticFile.blob))  # undefer blob attr to avoid followup query
+            .options(undefer(StaticFile.blob))  # undefer blob attr to avoid followup query
             .filter(or_(StaticFile.path == path, StaticFile.path == "/" + path))
     )
 

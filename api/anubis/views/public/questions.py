@@ -34,10 +34,10 @@ def public_assignment_questions_id(assignment: Assignment):
     })
 
 
-@questions.route("/save/<string:id>", methods=["POST"])
+@questions.route("/save/<assignment_question_id>", methods=["POST"])
 @require_user()
 @json_endpoint(required_fields=[("response", str)])
-def public_questions_save(id: str, response: str):
+def public_questions_save(assignment_question_id: str, response: str):
     """
     Save the response for an assigned question.
 
@@ -45,7 +45,8 @@ def public_questions_save(id: str, response: str):
       response: str
     }
 
-    :param id:
+    :param assignment_question_id:
+    :param response:
     :return:
     """
 
@@ -54,7 +55,7 @@ def public_questions_save(id: str, response: str):
 
     # Try to find the assigned question
     assigned_question = AssignedStudentQuestion.query.filter(
-        AssignedStudentQuestion.id == id,
+        AssignedStudentQuestion.id == assignment_question_id,
     ).first()
 
     # Verify that the assigned question they are attempting to update
@@ -64,10 +65,11 @@ def public_questions_save(id: str, response: str):
     # Check that the person that the assigned question belongs to the
     # user. If the current user is a course admin (TA, Professor or superuser)
     # then we can skip this check.
-    req_assert(
-        is_course_admin(user.id) or assigned_question.owner_id != user.id,
-        message='assigned question does not exist'
-    )
+    if not is_course_admin(assigned_question.assignment.course_id, user.id):
+        req_assert(
+            assigned_question.owner_id == user.id,
+            message='assigned question does not exist'
+        )
 
     # Verify that the response is a string object
     req_assert(isinstance(response, str), message='response must be a string')

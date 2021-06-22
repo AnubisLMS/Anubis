@@ -105,7 +105,7 @@ def do_webhook_tests_user(github_username):
     assert r['error'] == 'assignment not found'
 
     r = post_webhook(gen_webhook(assignment.name, assignment.unique_code, user.github_username, ref="abc123")).json()
-    assert r['error'] == 'not push to master'
+    assert r['error'] == 'not a push to master or main'
 
     r = post_webhook(gen_webhook(assignment.name, assignment.unique_code, gen_rand(6))).json()
     assert r['error'] == 'dangling submission'

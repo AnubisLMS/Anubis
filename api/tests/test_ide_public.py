@@ -9,7 +9,7 @@ def test_ide_public():
 
     s.get(f'/public/ide/active/{assignment_id}')
     active = s.get(f'/public/ide/active/{assignment_id}')['active']
-    assert active is None
+    assert active is False
 
     s.get(f'/public/ide/initialize/{assignment_id}', should_fail=True)
 
@@ -21,7 +21,7 @@ def test_ide_public():
     session_id = resp['session']['id']
 
     active = s.get(f'/public/ide/active/{assignment_id}')['active']
-    assert active is not None
+    assert active is not False
 
     s.get(f'/public/ide/poll/{session_id}')
     s.get(f'/public/ide/poll/{session_id}')

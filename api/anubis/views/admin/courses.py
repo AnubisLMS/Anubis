@@ -239,7 +239,8 @@ def admin_course_remove_ta_id(user_id: str):
     req_assert(other is not None, message='user does not exist')
 
     # If the other user is the current user, then stop
-    req_assert(user.is_superuser or other.id == user.id, message='cannot remove yourself')
+    if not user.is_superuser:
+        req_assert(other.id != user.id, message='cannot remove yourself')
 
     # Delete the TA
     TAForCourse.query.filter(
