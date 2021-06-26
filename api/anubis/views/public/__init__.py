@@ -1,29 +1,29 @@
 def register_public_views(app):
-    from anubis.views.public.auth import auth
-    from anubis.views.public.auth import oauth
+    from anubis.views.public.auth import auth_
+    from anubis.views.public.auth import oauth_
     from anubis.views.public.ide import ide
-    from anubis.views.public.repos import repos
+    from anubis.views.public.repos import repos_
     from anubis.views.public.webhook import webhook
     from anubis.views.public.profile import profile
-    from anubis.views.public.submissions import submissions
+    from anubis.views.public.submissions import submissions_
     from anubis.views.public.assignments import assignments
     from anubis.views.public.static import static
-    from anubis.views.public.courses import courses
+    from anubis.views.public.courses import courses_
     from anubis.views.public.questions import questions
     from anubis.views.public.memes import memes
     from anubis.views.public.visuals import visuals
 
     views = [
-        auth,
-        oauth,
+        auth_,
+        oauth_,
         ide,
-        repos,
+        repos_,
         webhook,
         profile,
-        submissions,
+        submissions_,
         assignments,
         static,
-        courses,
+        courses_,
         questions,
         memes, visuals,
     ]

@@ -8,6 +8,10 @@
 
 \pagebreak
 
+![alt anubis-cluster](./docs/img/cluster.mmd.png)
+
+\pagebreak
+
 # Contents
 - [1. Overview](#1-overview)
     - [1.1 Elevator Pitch](#11-elevator-pitch)
@@ -35,8 +39,9 @@
         - [2.6.2 Elasticsearch](#262-elasticsearch)
         - [2.6.3 Kibana](#263-kibana)
         - [2.6.4 Redis + RQWorker](#264-redis--rqworker)
+        - [2.6.4 Redis + flask-caching](#265-redis--flask-caching)  
     - [2.7 Logging](#27-logging)
-        - [2.7.1 logstash](#271-logstash)
+        - [2.7.1 filebeat](#271-filebeat)
 - [3. Deployment](#3-deployment)
     - [3.1 Kubernetes](#31-kubernetes)
         - [3.1.1 Helm Chart](#311-helm-chart)
@@ -52,9 +57,15 @@
     - [4.1 CLI in Management IDE](#41-cli-in-management-ide)
     - [4.2 CLI Usage](#42-cli-usage)
 - [5. Assignments](#5-assignments)
-    - [5.1 Creating a new Assignment](#51-creating-a-new-assignment)
-    - [5.2 Writing Tests](#52-writing-tests)
-    - [5.3 Uploading Tests](#53-uploading-tests)
+    - [5.1 Creating an Assignment Template Repository](#51-creating-an-assignment-template-repository)
+    - [5.2 Creating Assignment Tests](#52-creating-assignment-tests)
+    - [5.3 Writing Tests](#53-writing-tests)
+    - [5.4 Uploading Tests](#54-uploading-tests)
+    - [5.5 Creating Github Classroom Assignment](#55-creating-github-classroom-assignment)
+- [6. Usage Statistics](#6-usage-statistics)    
+    - [6.1 Student Progress](#61-student-progress)
+    - [6.2 Class Progress](#62-class-progress)
+    - [6.3 Public Usage Visuals](#63-public-usage-visuals)
 
 \pagebreak
 
@@ -62,33 +73,30 @@
 
 ### 1.1 Elevator Pitch
 
-At its core, Anubis is a tool to give students live feedback from their homework assignments
-while they are working on them and before the deadline. Instead of having students
-submit a patch file, through github classrooms
-each student will have their own private repo for every assignment.
-The way students then submit their work
-is simply by submitting before the deadline. Students can then
-push, and therefore submit as many times as
-they would like before the deadline.
+At its core, the Anubis LMS is a tool to give students live feedback from their homework 
+assignments while they are working on them and before the deadline. Instead of having students 
+submit a patch file or individual files, each student will have their own private repo for 
+every assignment. The way students then submit their work is simply by pushing to their repo before 
+the deadline. Students submit as many times as they would like before the deadline.
 
 When a student pushes to their assignment repo, a job is launched in the
-Anubis cluster. That job will build
-their repo, run tests on the results, and store the results in the [datastore](#26-datastores).
+Anubis cluster. That job will build their code, and run tests on the results.
+Students can then use the live feedback to see which areas they need to improve on
+before they get their final grades.
 
-Students can then navigate to the anubis website, where they will sign in through [NYU SSO](#223-sso-authentication).
-From there,
-they will be able to see all the current and past assignments, and submissions for their classes. They are able
-to view all relevant data from their build and tests for a given submission. There they can request a regrade,
-there by launching a new submission pipeline. While the submission still being processed, the frontend will poll
-the [API](#22-api) for updates. In this, the frontend will be constantly updating while the submission is being
-processed, giving a live and interactive feel to the frontend. Once a submission is processed Anubis will show
-the students logs from their tests, and builds along with which tests passed and which failed.
+> live feedback, before final grades
+
+![alt autograde-results.png](./docs/img/autograde-results.png)
 
 New in version v2.2.0, there is now the Anubis Cloud IDE. Using some kubernetes magic, we are able to
 host [theia](https://theia-ide.org/) servers for individual students. These are essentially VSCode instances
 that students can access in the browser. What makes these so powerful is that students can access a terminal
 and type commands right into a bash shell which will be run in the remote container. With this setup students
-have access to a fully insolated and prebuilt linux environment at a click of a button.
+have access to a fully insulated and prebuilt linux environment at a click of a button.
+
+> fully insulated and prebuilt linux environment at a click of a button
+
+![alt theia-fullscreen.png](./docs/img/theia-fullscreen.png)
 
 ### 1.2 Motivations
 
@@ -97,13 +105,15 @@ The purpose of this paper is to both explain the design, and the features of the
 One of the main goals for Anubis from the beginning
 was to simplify the experience for students. There should not need to
 be a learning curve with a learning management system like Anubis just
-for students to turn in their homework. Everywhere possible, Anubis
-will fill in the blanks. All they need to do is click a button to get an
+for students to turn in their homework. _Everywhere possible, Anubis
+will fill in the blanks._ All they need to do is click a button to get an
 ide, do their work and check their test feedback if they would like. The
 feedback the system gives to students is entirely up to the Professor and TAs.
 You could use the Anubis system just for autograding, or just
 for the cloud IDEs or both! It is up to you which features of Anubis you
-would like to integrate into your curriculum.  
+would like to integrate into your curriculum.
+
+> Everywhere possible, Anubis will fill in the blanks
 
 \pagebreak
 
@@ -129,7 +139,7 @@ being accessed externally. Namely, the basic authentication for certain paths (a
 ### 2.2 API
 
 The API is the backbone of anubis. It is where all the heavy lifting is done. The service relies on both
-the [elasticsearch](#262-elasticsearch) and [mariadb](#261-mariadb) data stores to maintain state.
+the [cache]() and [mariadb](#261-mariadb) data stores to maintain state.
 
 #### 2.2.1 Zones
 
@@ -222,7 +232,7 @@ the pipeline. It is at that point that the API marks the submission as processed
 
 ### 2.4 Web Frontend
 
-The frontend is designed to be a simple reflection of the backend data. Once authenticated, users will
+The frontend ``is designed to be a simple reflection of the backend data. Once authenticated, users will
 be able to see the classes they are a part of, current and past assignments, and all their submissions.
 With few exceptions, the frontend is a near one to one translation of the API's data models. Most pages
 will have a corresponding API endpoint. The data shown on that page will be in exactly the form of the
@@ -250,14 +260,16 @@ Getting the autograde results is as easy as searching a name in the autograde re
 be taken to a page like this where the calculated best submission is shown. The best submission is the
 most recent submission that passed the most tests.
 
-The students see a reduced version of the panel showed to the TAs and professors. In the admin view, more
+![alt autograde-results-2](./docs/img/autograde-results-2.png)
+
+The students see a reduced version of the panel shown to the TAs and professors. In the admin view, more
 data is displayed about the student. The students can see the status of the submission, and the build and
 test results.
 
 > *Calculating the best submissions requires heavy IO with the database. For this, the autograde results are
 heavily cached. Results are updated hourly.*
 
-![Autograde Results](./docs/img/autograde-results.png)
+![alt autograde-results-1](./docs/img/autograde-results-1.png)
 
 
 ### 2.5 Anubis Cloud IDE
@@ -365,16 +377,18 @@ want to change the password from anubis to something stronger.
 # prod, the mariadb is in a separate namespace, so we do the same
 # here.
 echo 'Adding mariadb'
-kubectl create namespace mariadb
-helm install mariadb \
-     --set 'auth.rootPassword=anubis' \
-     --set 'volumePermissions.enabled=true' \
-     --set 'auth.username=anubis' \
-     --set 'auth.database=anubis' \
-     --set 'auth.password=anubis' \
-     --set 'replication.enabled=false' \
-     --namespace mariadb \
-     bitnami/mariadb
+
+# mariadb: ns-mariadb
+#	helm upgrade --install mariadb bitnami/mariadb \
+#		--set 'volumePermissions.enabled=true' \
+#		--set 'auth.username=anubis' \
+#		--set 'auth.database=anubis' \
+#		--set "auth.password=$(DB_PASS)" \
+#		--set 'replication.enabled=false' \
+#		--namespace mariadb
+
+make -C k8s/prod mariadb
+
 ```
 
 #### 2.6.2 Elasticsearch
@@ -389,21 +403,17 @@ The Elasticsearch stack is pretty annoying to manage on its own. Installing thro
 much easier.
 
 ```shell
-# Install a minimal elasticsearch and kibana deployments
+# Install a minimal elasticsearch deployments
 echo 'Adding elasticsearch + kibana'
-kubectl create namespace anubis
-helm install elasticsearch \
-     --set name=elasticsearch \
-     --set master.persistence.size=1Gi \
-     --set data.persistence.size=1Gi \
-     --set master.replicas=1 \
-     --set coordinating.replicas=1 \
-     --set data.replicas=1 \
-     --set global.kibanaEnabled=true \
-     --set fullnameOverride=elasticsearch \
-     --set global.coordinating.name=coordinating \
-     --namespace anubis \
-     bitnami/elasticsearch
+
+# elasticsearch: ns-elastic
+#	helm upgrade \
+#		--install elasticsearch elastic/elasticsearch \
+#		--values elastic-values.yaml \
+#		--version $(ELASTIC_VERSION) \
+#		--namespace elastic
+
+make -C k8s/prod elasticsearch
 ```
 
 #### 2.6.3 Kibana
@@ -442,28 +452,69 @@ here in prod.
 ```shell
 # Install a minimal redis deployment
 echo 'Adding redis'
-helm install redis \
-     --set fullnameOverride=redis \
-     --set password=anubis \
-     --set cluster.enabled=false \
-     --namespace anubis \
-     bitnami/redis
+
+# redis: ns-anubis
+#	helm upgrade \
+#		--install redis bitnami/redis \
+#		--set fullnameOverride=redis \
+#		--set global.redis.password=$(REDIS_PASS) \
+#		--set architecture=standalone \
+#		--set master.persistence.enabled=false \
+#		--namespace anubis
+
+make -C k8s/prod redis
 ```
+
+#### 2.6.5 Redis + flask-caching
+
+The redis instance is also used for caching function results. Some of the functionalities of Anubis require
+a pretty large and time-consuming calculations that would be foolish to not cache. In particular calculating
+autograde results and generating visuals are quite computationally intensive (not to mention the strain on the
+database). By caching the results (and sometimes preprocessing then caching) the system is significantly
+more responsive.
+
+```python
+@cache.memoize(timeout=5 * 60, unless=is_debug)
+def autograde(student_id, assignment_id):
+    """
+    Get the stats for a specific student on a specific assignment.
+
+    Pulls all submissions, then finds the most recent one that
+    has the most tests that passed.
+
+    * This function is heavily cached as it is IO intensive on the DB *
+
+    :param student_id:
+    :param assignment_id:
+    :return:
+    """
+```
+
+The library we use for this is [flask-caching](https://flask-caching.readthedocs.io/en/latest/index.html).
 
 ### 2.7 Logging
 
 > _When it doubt, just log it_
 
-#### 2.7.1 Logstash
+#### 2.7.1 filebeat
 
-Logstash itself is a service that your applications can ship their logs to before being indexed into elasticsearch.
-Its purpose is to act as a natural buffer of log data. It is able to interface with elasticsearch, adjusting the
-speed of log ingestion as needed. In addition to acting as a buffer, it also enriches the data that it sees. For
-example, the logstash python client will not only ship the log message, but also the file that the log is coming
-from, along with which node the log is coming from.
+Filebeat handles persistent logging. Filebeat is configured to capture all container logs from the 
+`anubis` k8s namespace and index them into elasticsearch. The indexes are then set to maximum limits 
+that will recycle space when full.
 
-This centralized, and persistent logging is indexed into elasticsearch, and accessed via kiaban. Anubis uses logstash
-on its API and submission pipeline.
+```shell
+# Install filebeat deployments
+echo 'Adding filebeat'
+
+# filebeat:
+#	helm upgrade \
+#		--install filebeat elastic/filebeat \
+#		--values filebeat-values.yaml \
+#		--version $(ELASTIC_VERSION) \
+#		--namespace kube-system
+
+make -C k8s/prod filebeat
+```
 
 \pagebreak
 
@@ -479,7 +530,6 @@ In moving to Kube, we are also now able to make guarantees about availability. I
 physical servers on the cluster go offline Anubis will still remain available.
 [More on that later...](#314-digital-ocean)
 
-
 #### 3.1.1 Helm Chart
 
 Anubis itself is packaged as a helm chart. Both mariadb and elasticsearch need to be setup separately. There
@@ -489,7 +539,7 @@ to the deploy script will be then passed to helm.
 
 
 ```shell
-# Deploy with anubis only being accessable from the OSIRIS vpn
+# Deploy with anubis only being accessible from the OSIRIS vpn
 ./kube/deploy.sh --set vpnOnly=true
 
 # Deploy in debug mode
@@ -618,11 +668,63 @@ Some use cases would be:
 
 ## 5 Assignments
 
-### 5.1 Creating a new Assignment
+### 5.1 Creating an Assignment Template Repository
+
+The first thing we need to do to create a new assignment is to create a template repo
+that each student will start with. It is up to you what you would like students to start 
+out with. Here is the template from the final exam for OS this semester. This template repo
+only contains a hello world c program in the pmerge.c file, and some basic things necessary
+to compile the pmerge program in the Makefile. 
+
+![alt assignment-template-1](./docs/img/assignment-github-template-1.png)
+
+We can then go into the settings of the repo, and mark it as a template. This is something
+necessary for github classroom.
+
+![alt assignment-template-2](./docs/img/assignment-github-template-2.png)
+
+Simply by constraining students to have a specific file name for the program, and a
+Makefile to match the submissions are much more uniform. What this means is that
+we can have the assignment set up in such a way that everyone's code can be compiled
+with the same command. This makes automating the tests much easier. It also can reduce
+manual work that the TAs would need to do.
+
+### 5.2 Creating Assignment Tests
 
 Using the anubis cli, you can initialize a new assignment using `anubis assignment init <name of assignment>`
 
-### 5.2 Writing Tests
+The first file you will want to edit is the `meta.yml` that gets created. This is where things
+like the assignment name, and due dates should be defined. There is also a generated `unique_code`
+that anubis uses to identify this assignment. Hold on to this, as we will use it in the next
+step.
+
+Here is an example generated `meta.yml` from the OS final exam this semester. The only fields that
+will you will need to fill in are the `github_classroom_url`. This is the URL that is given
+to you when you create a github classroom assignment. That link will then be provided as a button
+for students to click in the frontend.
+
+```yaml
+assignment:
+  name: "final"
+  class: "CS-UY 3224"
+  hidden: true
+  
+  # Optionally specify the github classroom link
+  # for students to get their repo.
+  github_classroom_url: ""
+
+  # Don't change these!
+  unique_code: "839f70b2"
+  pipeline_image: "registry.digitalocean.com/anubis/assignment/839f70b2"
+
+  # Specify the important dates here (remember these are America/New_York)
+  date:
+    release: "2021-05-17 06:00:00"
+    due: "2021-05-19 06:00:00"
+    grace: "2021-05-19 06:30:00"
+```
+
+### 5.3 Writing Tests
 
 All the files to build and run a complete anubis pipeline image will be dropped into the new directory.
 
@@ -643,8 +745,9 @@ functions. Here is a minimal example of an assignment.py that will build and run
 ```python
 from utils import register_test, register_build, exec_as_student
 from utils import (
-    TestResult, BuildResult, Panic, DEBUG,
-    xv6_run, did_xv6_crash, verify_expected
+    TestResult, BuildResult, Panic, DEBUG, 
+    xv6_run, did_xv6_crash, 
+    verify_expected, search_lines, test_lines
 )
 
 @register_build
@@ -675,22 +778,211 @@ def test_1(test_result: TestResult):
 
 ```
 
-There are a couple functions to point out here. The `register_build` and `register_test` decorators are how you
-tell anubis about your build and test. The `exec_as_student` is how you should call any and all student code. It
-lowers the privileges way down so that even if the student pushes something malicious, they are still low privileged
-enough where they can not do much. It also adds timeouts to their commands. Boxing student code in like this
-is absolutely essential. Do not underestimate the creative and surprising ways students will find to break things.
+There are a couple functions to point out here. The `register_build` and `register_test` 
+decorators are how you tell anubis about your build and test. The `exec_as_student` is how 
+you should call any and all student code. It lowers the privileges way down so that even 
+if the student pushes something malicious, they are still low privileged enough where they 
+can not do much. It also adds timeouts to their commands. Boxing student code in like this
+is absolutely essential. Do not underestimate the creative and surprising ways students will
+find to break things.
 
-### 5.3 Uploading Tests
+Each test is passed a `test_result` object. This object has 3 fields. All you need to do
+is set the fields on the `test_result` object. The results will then be reported to the
+anubis api, and then to the student.
+
+```python
+class TestResult(object):
+    def __init__(self):
+        # The standard out for the students tests. You can 
+        # add extra text in this field as needed.
+        self.stdout: str = None
+        
+        # The message is an optional parameter that will 
+        # insert a short message in bold above the standard 
+        # out on the website frontend.  
+        self.message: str = None
+        
+        # Passed should be a boolean value. True if the test
+        # passed, and False if it did not.
+        self.passed: bool = None
+```
+
+The functions `run_xv6` and `did_xv6_crash` are very specific to the Intro to OS needs.
+There are also some general functions that are just as helpful.
+
+```python
+def exec_as_student(cmd, timeout=60) -> typing.Tuple[bytes, int]:
+    """
+    Run a command as the student. Any and all times that student
+    code is run, it should be done through this function. Any other
+    way would be incredibly insecure.
+
+    :param cmd: Command to run
+    :param timeout: Timeout for command
+    :return: bytes output, int return code
+    """
+
+
+def verify_expected(
+    stdout_lines: typing.List[str],
+    expected_lines: typing.List[str],
+    test_result: TestResult,
+    case_sensitive: bool = True,
+    search: bool = False
+):
+    """
+    Check to lists of strings for quality. Will strip off whitespace from each line
+    before checking for equality. The stdout_lines should be from the student code.
+    The expected_lines should then be whichever lines are expected for this test.
+
+    * The fields on the test_result object will be set automatically based on if the
+    expected output was found. *
+
+    :param stdout_lines: students lines as a list of strings
+    :param expected_lines: expected lines as a list of strings
+    :param test_result: TestResult object for this test
+    :param case_sensitive: boolean to indicate if the comparison should be case sensitive
+    :param search: boolean to indicate if the stdout should be searched instead of
+                   directly compared for equality
+    :return:
+    """
+
+    
+def test_lines(
+        stdout_lines: typing.List[str],
+        expected_lines: typing.List[str],
+        case_sensitive: bool = True
+) -> bool:
+    """
+    Test lines for exact equality. Whitespace will be stripped off each line automatically.
+
+    * Optionally specify if the equality comparison should be case sensitive *
+
+    >>> test_lines(['a', 'b', 'c'], ['a', 'b', 'c']) -> True
+    >>> test_lines(['a', 'debugging', 'b', 'c'], ['a', 'b', 'c']) -> False
+    >>> test_lines(['a', 'b'],      ['a', 'b', 'c']) -> False
+
+    :param stdout_lines: students standard out lines as a list of strings
+    :param expected_lines: expected lines as a list of strings
+    :param case_sensitive: optional boolean to indicate if comparison should be case sensitive
+    :return: True if exact match was found, False otherwise
+    """
+    
+    
+def search_lines(
+        stdout_lines: typing.List[str],
+        expected_lines: typing.List[str],
+        case_sensitive: bool = True
+) -> bool:
+    """
+    Search lines for expected lines. This will return true if all expected lines are in the
+    student standard out lines in order. There can be interruptions in the student standard out.
+    This function has the advantage of allowing students to still print out debugging lines
+    while their output is still accurately checked for  the expected result.
+
+    >>> search_lines(['a', 'b', 'c'], ['a', 'b', 'c']) -> True
+    >>> search_lines(['a', 'debugging', 'b', 'c'], ['a', 'b', 'c']) -> True
+    >>> search_lines(['a', 'b'],      ['a', 'b', 'c']) -> False
+
+    * Optionally specify if the equality comparison should be case sensitive *
+
+    :param stdout_lines:
+    :param expected_lines:
+    :param case_sensitive:
+    :return:
+    """
+
+```
+
+### 5.4 Uploading Tests
 
 Now you have your tests. That's great. The next thing you need to do is push the image to the docker registry and
 upload the assignment data to anubis. This is as simple as running two commands:
 
 ```shell
-# sends assignment metadata to anubis
+# sends assignment metadata to anubis api
 anubis assignment sync          
 
 # builds then pushes the assignment
 # pipeline image to the registry
 anubis assignment build --push
 ```
+
+### 5.5 Creating Github Classroom Assignment
+
+Go to github classroom, and select the button to create a new assignment. You can name 
+the assignment anything you would like. The most important
+part of the process when creating a github classroom assignment is making sure to fill
+in the `Custom repository Prefix` in the first step. The custom repo prefix needs
+to end with a `-` followed by the `unique_code` we we given in the 
+[generated meta.yml](#52-creating-assignment-tests). Your custom prefix should look something
+like this:
+
+![alt github-classroom-1](./docs/img/github-classroom-1.png)
+
+> *The purpose of this custom prefix is to make sure that the `unique_code` will be in the
+> repo title for each student. Anubis needs this unique code to be available in order to 
+> figure out which assignment each repo belongs to.* 
+
+At the end of this process github classroom will provide an assignment invitation link.
+You should take this link and put it in your `meta.yml` under the `github_classroom_url`
+field. 
+
+## 6 Usage Statistics
+
+Simply by placing timestamps on thing that are already tracked like submissions
+and the test results for submissions, we can start to both ask and
+answer some interesting questions about how well students are understanding
+certain topics.
+
+### 6.1 Student Progress
+
+Given the structure of Anubis assignments, coupled with the Anubis Cloud IDEs
+we can track and measure each student's progress through an assignment. We can 
+track and measure when students start and finish their assignments, and how long 
+it takes them to pass specific tests. In the autograde results panel, a "visual 
+history" is generated for each student. It shows when students started their 
+assignment, then for each submission if their build passed or failed and how many
+tests passed. If they used the Anubis Cloud IDEs as most students do choose to, then
+the graph generated shows a near minute by minute representation of which challenges
+they faced and how long it took for them to overcome them.
+
+![alt student-history](./docs/img/student-assignment-visual-history-1.png)
+
+> This example shows the build as the green line, and the assignment tests as the blue line.
+> We can see that this student spent a good deal of time on the first day just getting their
+> tests to pass, only to revisit their work the next day probably to clean up their submission.
+
+### 6.2 Class Progress
+
+Then more generally Anubis can represent how the class as a whole did on the assignment. One 
+of the core visuals generated is what we call the "summary sundial". In this sundial, we can
+show a quick view of how well the class did on the assignment.
+
+![alt sundial-1](./docs/img/sundial-1.png)
+
+The sundial shows how many students submitted work, and which test had the most cases pass.
+This assignment had 5 autograde tests. The inner purple radial represents all the students that
+submitted work for this assignment. Then each of the outer 5 blue radials represents an assignment
+test. Then the most outside layer shows in green and red how many students passed, and failed 
+that test. We can hover over an element to get a more detailed look.
+
+![alt sundial-2](./docs/img/sundial-2.png)
+
+From the detail tree at the bottom, we can see that of the 123 students whose builds passed,
+90 passed the `cat input.txt | pmerge` test.
+
+![alt sundial-3](./docs/img/sundial-3.png)
+
+Taking a look at another test, we can see that more students failed this test than passed.
+This test is the same as the previous one except it gives the student program a much larger 
+file. From this we can see that we need to review how to buffer long input files.
+
+### 6.3 Public Usage Visuals
+
+We provide public usage visuals that are generated every few minutes. These visuals 
+show a near live view of how many submissions, and IDEs are active for each assignment 
+on the platform.
+
+![alt public-usage-1](./docs/img/public-usage-1.png)
+

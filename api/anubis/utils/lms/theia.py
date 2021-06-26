@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Tuple, Union, Dict
 
 from werkzeug.utils import redirect
@@ -119,3 +120,20 @@ def theia_poll_ide(theia_session_id: str, user_id: str) -> Union[None, dict]:
 
     # Else return the session data
     return theia_session.data
+
+
+def mark_session_ended(theia_session: TheiaSession):
+    """
+    Mark the database entries for the
+    theia session as ended.
+
+    :param theia_session:
+    :return:
+    """
+    theia_session.active = False
+    theia_session.state = "Ended"
+    theia_session.ended = datetime.now()
+
+
+def get_theia_pod_name(theia_session: TheiaSession) -> str:
+    return f"theia-{theia_session.owner.netid}-{theia_session.id}"

@@ -161,12 +161,6 @@ services:
     labels:
       - "traefik.enable=false"
 
-  logstash:
-    image: registry.digitalocean.com/anubis/logstash:latest
-    build: ./logstash
-    labels:
-      - "traefik.enable=false"
-
   kibana:
     image: kibana:7.10.1
     ports:

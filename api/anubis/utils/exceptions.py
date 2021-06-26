@@ -3,6 +3,21 @@ import traceback
 from flask import Flask, jsonify
 
 
+class AssertError(Exception):
+    """
+    This exception should be raised when an assertion
+    fails in the request.
+    """
+
+    def __init__(self, message: str, status_code: int = 400):
+        super(AssertError, self).__init__(message)
+        self._message = message
+        self._status_code = status_code
+
+    def response(self):
+        return self._message, self._status_code
+
+
 class AuthenticationError(Exception):
     """
     This exception should be raised if a request
@@ -49,4 +64,10 @@ def add_app_exception_handlers(app: Flask):
     @app.errorhandler(LackCourseContext)
     def handle_lack_course_context(e: LackCourseContext):
         logger.error(traceback.format_exc())
-        return error_response(str(e) or 'Please set your course context')
+        return jsonify(error_response(str(e) or 'Please set your course context'))
+
+    @app.errorhandler(AssertError)
+    def handle_assertion_error(e: AssertError):
+        logger.error(traceback.format_exc())
+        message, status_code = e.response()
+        return jsonify(error_response(message)), status_code

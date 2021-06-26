@@ -1,16 +1,19 @@
 import React, {useState} from 'react';
-import {makeStyles} from '@material-ui/core/styles';
+import {useSnackbar} from 'notistack';
+import axios from 'axios';
+
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import green from '@material-ui/core/colors/green';
-import {useSnackbar} from 'notistack';
-import axios from 'axios';
+
 import useQuery from '../../hooks/useQuery';
+import {translateSubmission} from '../../Utils/submission';
+import StandardLayout from '../../Components/Layouts/StandardLayout';
 import SubmissionSummary from '../../Components/Public/Submission/SubmissionSummary';
 import SubmissionBuild from '../../Components/Public/Submission/SubmissionBuild';
 import SubmissionTests from '../../Components/Public/Submission/SubmissionTests';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
-import {translateSubmission} from '../../Utils/submission';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -145,57 +148,35 @@ export default function Submission() {
   };
 
   return (
-    <Grid
-      container
-      justify="center"
-      alignItems="flex-start"
-      direction={'row'}
-      spacing={2}
-    >
+    <StandardLayout title={'Anubis Submission'} description={[
+      `Assignment: ${submission.assignment_name}`,
+      submission.commit,
+    ]}>
+      <Grid container spacing={4}>
+        {/* Summary */}
+        <Grid item xs={12} md={4} key={'summary'}>
+          <SubmissionSummary
+            submission={submission}
+            regrade={regrade(pageState, enqueueSnackbar)}
+            stop={errorStop}
+          />
+        </Grid>
 
-      {/* Upper description */}
-      <Grid item xs={12} key={'description'}>
-        <Typography variant="h6">
-          Submission
-        </Typography>
-        <Typography variant="body1" className={classes.subtitle}>
-          {submission.course_code}
-        </Typography>
-        <Typography variant="body1" className={classes.subtitle}>
-          {submission.commit}
-        </Typography>
-      </Grid>
+        <Grid item xs={12} md={8} key={'build-test'}>
+          <Grid container spacing={1}>
+            {/* Build */}
+            <Grid item xs={12} key={'build'}>
+              <SubmissionBuild build={build} stop={errorStop}/>
+            </Grid>
 
-      <Grid item/>
-
-      <Grid item xs={12} md={10}>
-        <Grid container spacing={4}>
-          {/* Summary */}
-          <Grid item xs={12} md={4} key={'summary'}>
-            <SubmissionSummary
-              submission={submission}
-              regrade={regrade(pageState, enqueueSnackbar)}
-              stop={errorStop}
-            />
-          </Grid>
-
-          <Grid item xs={12} md={8} key={'build-test'}>
-            <Grid container spacing={1}>
-              {/* Build */}
-              <Grid item xs={12} key={'build'}>
-                <SubmissionBuild build={build} stop={errorStop}/>
-              </Grid>
-
-              {/* Tests */}
-              <Grid item xs={12} key={'tests'}>
-                <SubmissionTests tests={tests} stop={errorStop}/>
-              </Grid>
+            {/* Tests */}
+            <Grid item xs={12} key={'tests'}>
+              <SubmissionTests tests={tests} stop={errorStop}/>
             </Grid>
           </Grid>
         </Grid>
       </Grid>
-
-    </Grid>
+    </StandardLayout>
   );
 }
 

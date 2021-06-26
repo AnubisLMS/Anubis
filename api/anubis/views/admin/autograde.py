@@ -1,14 +1,15 @@
-from flask import Blueprint
+from flask import Blueprint, request
+from sqlalchemy.sql import or_
 
 from anubis.models import Submission, Assignment, User, InCourse
 from anubis.utils.auth import require_admin
+from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
-from anubis.utils.http.https import success_response, error_response, get_number_arg
+from anubis.utils.http.https import success_response, get_number_arg
 from anubis.utils.lms.autograde import bulk_autograde, autograde, autograde_submission_result_wrapper
-from anubis.utils.lms.course import assert_course_context
+from anubis.utils.lms.courses import assert_course_context
 from anubis.utils.lms.questions import get_assigned_questions
 from anubis.utils.services.cache import cache
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.visuals.assignments import (
     get_admin_assignment_visual_data,
     get_assignment_history,
@@ -35,8 +36,7 @@ def admin_autograde_cache_reset(assignment_id: str):
     ).first()
 
     # Verify that we got an assignment
-    if assignment is None:
-        return error_response('assignment does not exist')
+    req_assert(assignment is not None, message='assignment does not exist')
 
     # Verify that the current course context, and the assignment course match
     assert_course_context(assignment)
@@ -83,8 +83,7 @@ def admin_autograde_assignment_assignment_id(assignment_id):
     ).first()
 
     # Verify that we got an assignment
-    if assignment is None:
-        return error_response('assignment does not exist')
+    req_assert(assignment is not None, message='assignment does not exist')
 
     # Verify that the current course context, and the assignment course match
     assert_course_context(assignment)
@@ -101,7 +100,7 @@ def admin_autograde_assignment_assignment_id(assignment_id):
 
 @autograde_.route("/for/<assignment_id>/<user_id>")
 @require_admin()
-@cache.memoize(timeout=60)
+# @cache.memoize(timeout=60, unless=is_debug)
 @json_response
 def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
     """
@@ -112,23 +111,33 @@ def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
     :return:
     """
 
+    force = request.args.get('force', default='no') != 'no'
+
     # Pull the assignment object
     assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
+        or_(Assignment.id == assignment_id, Assignment.name == assignment_id)
     ).first()
 
     # Verify that we got an assignment
-    if assignment is None:
-        return error_response('assignment does not exist')
+    req_assert(assignment is not None, 'assignment does not exist')
 
     # Pull the student user object
-    student = User.query.filter(User.id == user_id).first()
+    student = User.query.filter(
+        or_(User.id == user_id, User.netid == user_id)
+    ).first()
 
     # Verify that the current course context, and the assignment course match
     assert_course_context(assignment, student)
 
+    # Assert that the student does not exist
+    req_assert(student is not None, message='student does not exist')
+
+    # If force load, then skip any caching
+    if force:
+        cache.delete_memoized(autograde, student.id, assignment.id)
+
     # Calculate the best submission for this student and assignment
-    submission_id = autograde(user_id, assignment_id)
+    submission_id = autograde(student.id, assignment.id)
 
     # Pass back the
     return success_response({
@@ -141,7 +150,6 @@ def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
 
 @autograde_.route("/submission/<string:assignment_id>/<string:netid>")
 @require_admin()
-@log_endpoint("cli", lambda: "submission-stats")
 @cache.memoize(timeout=60, source_check=True)
 @json_response
 def private_submission_stats_id(assignment_id: str, netid: str):
@@ -159,15 +167,13 @@ def private_submission_stats_id(assignment_id: str, netid: str):
     student = User.query.filter(User.netid == netid).first()
 
     # Make sure the user exists
-    if student is None:
-        return error_response('User does not exist')
+    req_assert(student is not None, message='user does not exist')
 
     # Pull the assignment object
     assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     # Verify that we got an assignment
-    if assignment is None:
-        return error_response('assignment does not exist')
+    req_assert(assignment is not None, message='assignment does not exist')
 
     # Verify that the current course context, and the assignment course match
     assert_course_context(assignment, student)

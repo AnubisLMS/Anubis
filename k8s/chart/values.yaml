@@ -7,21 +7,20 @@ imagePullPolicy: "Always"
 imagePullSecret: "anubis"
 
 api:
-  replicas: 2
+  replicas: 1
   workers: 2
-  datacenter: "mtc"
   gunicorn_options: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
   image: "registry.digitalocean.com/anubis/api"
   tag: "latest"
 
 reaper:
   enable: true
-  schedule: "*/5 * * * *"
+  schedule: "0 * * * *"
   suspend: false
 
 visuals:
   enable: true
-  schedule: "*/5 * * * *"
+  schedule: "0 0 * * *"
   suspend: false
 
 pipeline_api:
@@ -29,7 +28,7 @@ pipeline_api:
   workers: 1
 
 web:
-  replicas: 2
+  replicas: 1
   image: "registry.digitalocean.com/anubis/web"
   tag: "latest"
 
@@ -39,19 +38,35 @@ logstash:
 
 rpc:
   default:
-    replicas: 3
+    replicas: 1
   theia:
-    replicas: 3    
+    replicas: 1    
   regrade:
-    replicas: 3
+    replicas: 1
 
 theia:
   enable: true
   proxy:
-    replicas: 2
+    replicas: 1
     domain: "ide.anubis.osiris.services"
     image: "registry.digitalocean.com/anubis/theia-proxy"
     tag: "latest"
 
 elasticsearch:
   service: elasticsearch-master.elastic.svc.cluster.local
+
+backup:
+  enable: true
+  suspend: false
+  schedule: "0 0 * * *"
+  storageClassName: do-block-storage
+  remote:
+    enable: true
+    secretName: anubis-backup-creds
+
+hpa:
+  enable: true
+  rpc:
+  - name: rpc-default
+  - name: rpc-theia
+  - name: rpc-regrade

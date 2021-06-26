@@ -1,4 +1,3 @@
-import functools
 import traceback
 from datetime import datetime, timedelta
 from functools import wraps
@@ -10,8 +9,7 @@ from flask import g, request, has_request_context
 from anubis.config import config
 from anubis.models import User, TAForCourse, ProfessorForCourse
 from anubis.utils.data import is_debug
-from anubis.utils.exceptions import AuthenticationError, LackCourseContext
-from anubis.utils.http.https import error_response, get_request_ip
+from anubis.utils.exceptions import AuthenticationError
 from anubis.utils.services.logger import logger
 
 
@@ -81,16 +79,22 @@ def get_token() -> Union[str, None]:
     ) or request.args.get('token', default=None)
 
 
-def create_token(netid: str, **extras) -> Union[str, None]:
+def create_token(netid: str, exp_kwargs=None, **extras) -> Union[str, None]:
     """
-    Get token for user by netid
+    Get token for user by netid. You can provide a dictionary
+    to the exp_kwargs to set a different expire time for this token.
+    By default it is 6 hours. If you wanted to do 6 days exp_kwargs={'days': 6}
 
+    :param exp_kwargs:
     :param netid:
     :return: token string or None (if user not found)
     """
 
     # Get user
     user: User = get_user(netid)
+
+    if exp_kwargs is None:
+        exp_kwargs = {'hours': 6}
 
     # Verify user exists
     if user is None:
@@ -99,7 +103,7 @@ def create_token(netid: str, **extras) -> Union[str, None]:
     # Create new token
     return jwt.encode({
         "netid": user.netid,
-        "exp": datetime.utcnow() + timedelta(hours=6),
+        "exp": datetime.utcnow() + timedelta(**exp_kwargs),
         **extras,
     }, config.SECRET_KEY)
 
@@ -141,14 +145,13 @@ def require_user(unless_debug=False):
     return decorator
 
 
-def require_admin(unless_debug=False, unless_vpn=False):
+def require_admin(unless_debug=False):
     """
     Wrap a function to require an admin to be logged in.
     If they are not logged in, they will get an Unathed
     error response with status code 401.
 
     :param unless_debug:
-    :param unless_vpn:
     :return:
     """
 
@@ -158,10 +161,6 @@ def require_admin(unless_debug=False, unless_vpn=False):
             # Get the user in the current
             # request context.
             user = current_user()
-
-            # Bypass auth if vpn
-            if unless_vpn and get_request_ip() == '128.238.66.211':
-                return func(*args, **kwargs)
 
             # Bypass auth if the api is in debug
             # mode and unless_debug is true.
@@ -194,14 +193,13 @@ def require_admin(unless_debug=False, unless_vpn=False):
     return decorator
 
 
-def require_superuser(unless_debug=False, unless_vpn=False):
+def require_superuser(unless_debug=False):
     """
     Wrap a function to require an superuser to be logged in.
     If they are not logged in, they will get an Unathed
     error response with status code 401.
 
     :param unless_debug:
-    :param unless_vpn:
     :return:
     """
 
@@ -211,10 +209,6 @@ def require_superuser(unless_debug=False, unless_vpn=False):
             # Get the user in the current
             # request context.
             user = current_user()
-
-            # Bypass auth if vpn
-            if unless_vpn and get_request_ip() == '128.238.66.211':
-                return func(*args, **kwargs)
 
             # Bypass auth if the api is in debug
             # mode and unless_debug is true.

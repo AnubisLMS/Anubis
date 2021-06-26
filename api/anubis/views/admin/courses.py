@@ -3,10 +3,11 @@ from sqlalchemy.exc import IntegrityError, DataError
 
 from anubis.models import db, Course, TAForCourse, ProfessorForCourse, User
 from anubis.utils.auth import require_admin, require_superuser, current_user
-from anubis.utils.data import row2dict
+from anubis.utils.data import row2dict, req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response
-from anubis.utils.lms.course import assert_course_superuser, get_course_context
+from anubis.utils.lms.courses import assert_course_superuser, get_course_context
+from anubis.utils.lms.courses import valid_join_code
 
 courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
 
@@ -27,7 +28,7 @@ def admin_courses_list():
 
     # Return the course context broken down
     return success_response({
-        "course": {"join_code": course.id[:6], **row2dict(course)},
+        "course": row2dict(course),
     })
 
 
@@ -84,11 +85,16 @@ def admin_courses_save_id(course: dict):
     db_course = Course.query.filter(Course.id == course_id).first()
 
     # Make sure we got a course
-    if db_course is None:
-        return error_response("Course not found.")
+    req_assert(db_course is not None, message='course not found')
 
     # Assert that the current user is a professor or a superuser
     assert_course_superuser(course_id)
+
+    # Check that the join code is valid
+    req_assert(
+        valid_join_code(course['join_code']),
+        message='Invalid join code. Lowercase letters and numbers only.'
+    )
 
     # Update all the items in the course with the posted data
     for column in Course.__table__.columns:
@@ -180,15 +186,15 @@ def admin_course_make_ta_id(user_id: str):
     other = User.query.filter(User.id == user_id).first()
 
     # Check that the user exists
-    if other is None:
-        return error_response('User id does not exist')
+    req_assert(other is not None, message='user does not exist')
 
     # Check to see if the user is already a ta
     ta = TAForCourse.query.filter(
         TAForCourse.owner_id == user_id,
     ).first()
-    if ta is not None:
-        return error_response('They are already a TA')
+
+    # Check that they are not already a TA
+    req_assert(ta is None, message='they are already a TA')
 
     # Make the user a TA if they are not already
     ta = TAForCourse(
@@ -230,12 +236,11 @@ def admin_course_remove_ta_id(user_id: str):
     other = User.query.filter(User.id == user_id).first()
 
     # Make sure that the other user exists
-    if other is None:
-        return error_response('User id does not exist')
+    req_assert(other is not None, message='user does not exist')
 
     # If the other user is the current user, then stop
-    if not user.is_superuser and other.id == user.id:
-        return error_response('cannot remove yourself')
+    if not user.is_superuser:
+        req_assert(other.id != user.id, message='cannot remove yourself')
 
     # Delete the TA
     TAForCourse.query.filter(
@@ -271,8 +276,7 @@ def admin_course_make_professor_id(user_id: str):
     other = User.query.filter(User.id == user_id).first()
 
     # Make sure they exist
-    if other is None:
-        return error_response('User id does not exist')
+    req_assert(other is not None, message='user does not exist')
 
     # Check to see if the other user is already a professor
     # for this course
@@ -281,8 +285,7 @@ def admin_course_make_professor_id(user_id: str):
     ).first()
 
     # If they are already a professor, then stop
-    if prof is not None:
-        return error_response('They are already a professor')
+    req_assert(prof is None, message='they are already a professor')
 
     # Create a new professor
     prof = ProfessorForCourse(
@@ -318,8 +321,7 @@ def admin_course_remove_professor_id(user_id: str):
     other = User.query.filter(User.id == user_id).first()
 
     # Make sure the other user exists
-    if other is None:
-        return error_response('User id does not exist')
+    req_assert(other is not None, message='user does not exist')
 
     # Delete the professor
     ProfessorForCourse.query.filter(

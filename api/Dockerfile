@@ -35,4 +35,5 @@ USER anubis
 
 COPY . .
 
+USER nobody
 CMD ./docker-entrypoint.sh

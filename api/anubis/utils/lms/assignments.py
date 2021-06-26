@@ -19,26 +19,11 @@ from anubis.models import (
 )
 from anubis.utils.auth import get_user
 from anubis.utils.data import is_debug
-from anubis.utils.lms.course import assert_course_admin
-from anubis.utils.lms.course import is_course_admin
+from anubis.utils.lms.courses import assert_course_admin
+from anubis.utils.lms.courses import is_course_admin
 from anubis.utils.lms.questions import ingest_questions
 from anubis.utils.services.cache import cache
 from anubis.utils.services.logger import logger
-
-
-@cache.memoize(timeout=60, unless=is_debug)
-def get_courses(netid: str):
-    """
-    Get all classes a given netid is in
-
-    :param netid:
-    :return:
-    """
-    # Query for classes
-    classes = Course.query.join(InCourse).join(User).filter(User.netid == netid).all()
-
-    # Convert to list of data representation
-    return [c.data for c in classes]
 
 
 @cache.memoize(timeout=10, unless=is_debug, source_check=True)
@@ -222,6 +207,7 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
         )
         question_message = {"accepted": accepted, "ignored": ignored, "rejected": rejected}
 
+    # Commit changes
     db.session.commit()
 
     return {"assignment": assignment.data, "questions": question_message}, True

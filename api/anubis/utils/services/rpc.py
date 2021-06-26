@@ -6,7 +6,7 @@ from anubis.rpc.pipeline import create_submission_pipeline
 from anubis.rpc.seed import seed
 from anubis.rpc.theia import (
     initialize_theia_session,
-    reap_theia_session,
+    reap_theia_session_by_id,
     reap_stale_theia_sessions,
 )
 from anubis.rpc.visualizations import create_visuals as create_visuals_
@@ -29,7 +29,7 @@ def rpc_enqueue(func, queue=None, args=None):
         conn.close()
 
 
-def enqueue_autograde_pipeline(*args, queue: str = 'default'):
+def enqueue_autograde_pipeline(*args, queue: str = 'regrade'):
     """Enqueues a test job"""
     rpc_enqueue(create_submission_pipeline, queue=queue, args=args)
 
@@ -41,7 +41,7 @@ def enqueue_ide_initialize(*args):
 
 def enqueue_ide_stop(*args):
     """Reap theia session kube resources"""
-    rpc_enqueue(reap_theia_session, queue='theia', args=args)
+    rpc_enqueue(reap_theia_session_by_id, queue='theia', args=args)
 
 
 def enqueue_ide_reap_stale(*args):

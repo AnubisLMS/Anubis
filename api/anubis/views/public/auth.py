@@ -1,21 +1,23 @@
+import base64
+import json
+import os
+
 from flask import Blueprint, make_response, redirect, request
 
 from anubis.models import User, db
-from anubis.utils.auth import create_token, current_user, require_user
-from anubis.utils.data import is_debug
+from anubis.utils.auth import create_token, current_user, require_user, require_admin
+from anubis.utils.data import is_debug, req_assert
 from anubis.utils.http.decorators import json_endpoint
 from anubis.utils.http.https import success_response, error_response
-from anubis.utils.lms.course import get_course_context
+from anubis.utils.lms.courses import get_course_context
 from anubis.utils.lms.submissions import fix_dangling
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.oauth import OAUTH_REMOTE_APP as provider
 
-auth = Blueprint("public-auth", __name__, url_prefix="/public/auth")
-oauth = Blueprint("public-oauth", __name__, url_prefix="/public")
+auth_ = Blueprint("public-auth", __name__, url_prefix="/public/auth")
+oauth_ = Blueprint("public-oauth", __name__, url_prefix="/public")
 
 
-@auth.route("/login")
-@log_endpoint("public-login", lambda: "login")
+@auth_.route("/login")
 def public_login():
     if is_debug():
         return "AUTH"
@@ -24,16 +26,14 @@ def public_login():
     )
 
 
-@auth.route("/logout")
-@log_endpoint("public-logout", lambda: "logout")
+@auth_.route("/logout")
 def public_logout():
     r = make_response(redirect("/"))
     r.set_cookie("token", "")
     return r
 
 
-@oauth.route("/oauth")
-@log_endpoint("public-oauth", lambda: "oauth")
+@oauth_.route("/oauth")
 def public_oauth():
     """
     This is the endpoint NYU oauth sends the user to after
@@ -65,29 +65,29 @@ def public_oauth():
     name = f'{firstname} {lastname}'.strip()
 
     # Check to see if user already exists
-    u = User.query.filter(User.netid == netid).first()
+    user = User.query.filter(User.netid == netid).first()
 
     # Create the user if they do not already exist
-    if u is None:
-        u = User(netid=netid, name=name)
-        db.session.add(u)
+    if user is None:
+        user = User(netid=netid, name=name)
+        db.session.add(user)
         db.session.commit()
 
     # If their github username is not set, send them to
     # the profile page
-    if u.github_username is None:
+    if user.github_username is None:
         next_url = "/profile"
 
     # Make the response depending on if a next_url was specified
     r = make_response(redirect(next_url))
 
     # Set the token cookie
-    r.set_cookie("token", create_token(u.netid))
+    r.set_cookie("token", create_token(user.netid))
 
     return r
 
 
-@auth.route("/whoami")
+@auth_.route("/whoami")
 def public_whoami():
     """
     Figure out who you are
@@ -121,7 +121,7 @@ def public_whoami():
     })
 
 
-@auth.route("/set-github-username", methods=["POST"])
+@auth_.route("/set-github-username", methods=["POST"])
 @require_user()
 @json_endpoint(required_fields=[("github_username", str)])
 def public_auth_set_github_username(github_username):
@@ -141,8 +141,9 @@ def public_auth_set_github_username(github_username):
     other: User = User.query.filter(
         User.github_username == github_username, User.id != user.id
     ).first()
-    if other is not None:
-        return error_response("github username is already taken")
+
+    # Assert that there is not a duplicate github username
+    req_assert(other is None, message='github username is already taken')
 
     # Set github username and commit
     user.github_username = github_username
@@ -155,3 +156,51 @@ def public_auth_set_github_username(github_username):
 
     # Notify them with status
     return success_response({"status": "github username updated"})
+
+
+@auth_.route('/cli')
+@require_admin()
+def public_cli_auth():
+    """
+    When the cli authenticates it will open a browser window that will authenticate then
+    ?next them to here. This should redirect the user back to the local server that
+    is running with whatever authentication token it needs.
+
+    :return:
+    """
+
+    user: User = current_user()
+
+    # Create a token with 30 days to expire
+    token = create_token(user.netid, exp_kwargs={'days': 30})
+
+    # Grab the docker config out of the environ if it is there
+    docker_token = os.environ.get('DOCKER_TOKEN', None)
+    docker_registry = os.environ.get('DOCKER_REGISTRY', None)
+    docker_config = {
+        'registry': docker_registry,
+        'token': docker_token,
+    }
+    if docker_token is None or docker_registry is None:
+        docker_config = None
+
+    # Construct the data response
+    data = json.dumps({
+        'token': token,
+        'docker_config': docker_config,
+    })
+
+    # Base64 encode the response
+    b64_encoded_data = base64.b64encode(data.encode()).decode()
+
+    # Construct message to be splayed on the browser
+    message = f'Please copy this into the cli console:\n{b64_encoded_data}'
+
+    # Create the response
+    response = make_response(message)
+
+    # Set the content type to text/plain so that there is no additional
+    # formatting added to the browser display
+    response.headers['Content-Type'] = 'text/plain'
+
+    return response

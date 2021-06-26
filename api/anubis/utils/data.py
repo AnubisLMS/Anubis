@@ -10,6 +10,7 @@ from typing import Union, Tuple
 from flask import Response, has_app_context, has_request_context
 
 from anubis.config import config
+from anubis.utils.exceptions import AssertError
 
 
 def is_debug() -> bool:
@@ -331,3 +332,23 @@ def with_context(function):
                 return function(*args, **kwargs)
 
     return wrapper
+
+
+def req_assert(*expressions, message: str = 'invalid', status_code: int = 200):
+    """
+    Call this at any point to check if an expression is True. If any
+    of the expressions provided are False, then an anubis.utils.exceptions.AssertError
+    will be raised. The global handler will then use the message and status
+    code in a error_response.
+
+    >>> thing = None
+    >>> req_assert(thing is not None, message='thing was None')
+    >>> # raise AssertError('thing was None', 200)
+
+    :param expressions:
+    :param message:
+    :param status_code:
+    :return:
+    """
+    if not all(expressions):
+        raise AssertError(message, status_code)

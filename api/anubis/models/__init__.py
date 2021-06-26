@@ -4,6 +4,7 @@ import os
 from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import deferred
 from sqlalchemy_json import MutableJson
 
 from anubis.utils.data import rand
@@ -94,6 +95,7 @@ class Course(db.Model):
     theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.digitalocean.com/anubis/xv6')
     theia_default_options = db.Column(MutableJson, default=lambda: {"limits": {"cpu": "2", "memory": "500Mi"}})
     github_org_url = db.Column(db.TEXT, default='')
+    join_code = db.Column(db.String(256), unique=True)
 
     @property
     def total_assignments(self):
@@ -385,13 +387,12 @@ class AssignedStudentQuestion(db.Model):
 
         :return:
         """
-        from anubis.utils.lms.assignments import get_assignment_due_date
 
         response: AssignedQuestionResponse = AssignedQuestionResponse.query.filter(
             AssignedQuestionResponse.assigned_question_id == self.id,
         ).order_by(AssignedQuestionResponse.created.desc()).first()
 
-        response_data = {'submitted': None,'late': True, 'text': self.question.placeholder}
+        response_data = {'submitted': None, 'late': True, 'text': self.question.placeholder}
         if response is not None:
             response_data = response.data
 
@@ -579,8 +580,8 @@ class SubmissionTestResult(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Fields
-    stdout = db.Column(db.Text)
-    message = db.Column(db.Text)
+    stdout = deferred(db.Column(db.Text))
+    message = deferred(db.Column(db.Text))
     passed = db.Column(db.Boolean)
 
     # Relationships
@@ -622,7 +623,7 @@ class SubmissionBuild(db.Model):
     submission_id = db.Column(db.String(128), db.ForeignKey(Submission.id), index=True)
 
     # Fields
-    stdout = db.Column(db.Text)
+    stdout = deferred(db.Column(db.Text))
     passed = db.Column(db.Boolean, default=None)
 
     # Timestamps
@@ -726,7 +727,7 @@ class StaticFile(db.Model):
     filename = db.Column(db.TEXT)
     path = db.Column(db.TEXT)
     content_type = db.Column(db.TEXT)
-    blob = db.Column(db.LargeBinary(length=(2 ** 32) - 1))
+    blob = deferred(db.Column(db.LargeBinary(length=(2 ** 32) - 1)))
     hidden = db.Column(db.Boolean)
 
     # Timestamps

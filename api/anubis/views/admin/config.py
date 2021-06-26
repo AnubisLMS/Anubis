@@ -9,7 +9,7 @@ config_ = Blueprint('config', __name__, url_prefix='/admin/config')
 
 
 @config_.route('/list')
-@require_admin(unless_vpn=True)
+@require_admin()
 @json_response
 def config_list():
     """

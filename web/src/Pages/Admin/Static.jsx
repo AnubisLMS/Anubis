@@ -38,10 +38,10 @@ const deleteFile = (id, state, enqueueSnackbar) => () => {
 
 
 const useColumns = (state, enqueueSnackbar) => ([
-  {field: 'id', headerName: 'ID'},
+  {field: 'path', headerName: 'Path', width: 170},
   {field: 'content_type', headerName: 'Content Type', width: 150},
   {
-    field: 'path', headerName: 'URL', width: 300, renderCell: ({row}) => (
+    field: 'a', headerName: 'URL', width: 300, renderCell: ({row}) => (
       <div>
         <Typography
           variant={'body1'}

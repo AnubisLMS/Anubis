@@ -6,9 +6,10 @@ from parse import parse
 
 from anubis.models import Submission, SubmissionTestResult, AssignmentTest
 from anubis.models import db
-from anubis.utils.http.decorators import json_response, check_submission_token, json_endpoint
+from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response
 from anubis.utils.services.logger import logger
+from anubis.utils.services.pipeline import check_submission_token
 
 pipeline = Blueprint("pipeline", __name__, url_prefix="/pipeline")
 

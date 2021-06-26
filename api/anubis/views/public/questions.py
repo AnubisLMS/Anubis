@@ -1,22 +1,22 @@
-from flask import Blueprint
 from datetime import datetime
+
+from flask import Blueprint
 from sqlalchemy.exc import IntegrityError, DataError
 
 from anubis.models import db, Assignment, AssignedStudentQuestion, AssignedQuestionResponse, User
 from anubis.utils.auth import require_user, current_user
+from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_endpoint, load_from_id, json_response
 from anubis.utils.http.https import success_response, error_response
-from anubis.utils.lms.course import is_course_admin
-from anubis.utils.lms.questions import get_assigned_questions
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.lms.assignments import get_assignment_due_date
+from anubis.utils.lms.courses import is_course_admin
+from anubis.utils.lms.questions import get_assigned_questions
 
 questions = Blueprint("public-questions", __name__, url_prefix="/public/questions")
 
 
 @questions.route("/get/<string:id>")
 @require_user()
-@log_endpoint("public-questions-get", lambda: "get questions")
 @load_from_id(Assignment, verify_owner=False)
 @json_response
 def public_assignment_questions_id(assignment: Assignment):
@@ -34,10 +34,10 @@ def public_assignment_questions_id(assignment: Assignment):
     })
 
 
-@questions.route("/save/<string:id>", methods=["POST"])
+@questions.route("/save/<assignment_question_id>", methods=["POST"])
 @require_user()
 @json_endpoint(required_fields=[("response", str)])
-def public_questions_save(id: str, response: str):
+def public_questions_save(assignment_question_id: str, response: str):
     """
     Save the response for an assigned question.
 
@@ -45,7 +45,8 @@ def public_questions_save(id: str, response: str):
       response: str
     }
 
-    :param id:
+    :param assignment_question_id:
+    :param response:
     :return:
     """
 
@@ -54,23 +55,24 @@ def public_questions_save(id: str, response: str):
 
     # Try to find the assigned question
     assigned_question = AssignedStudentQuestion.query.filter(
-        AssignedStudentQuestion.id == id,
+        AssignedStudentQuestion.id == assignment_question_id,
     ).first()
 
     # Verify that the assigned question they are attempting to update
     # actually exists
-    if assigned_question is None:
-        return error_response("Assigned question does not exist")
+    req_assert(assigned_question is not None, message='assigned question does not exist')
 
     # Check that the person that the assigned question belongs to the
     # user. If the current user is a course admin (TA, Professor or superuser)
     # then we can skip this check.
-    if not is_course_admin(user.id) and assigned_question.owner_id != user.id:
-        return error_response("Assigned question does not exist")
+    if not is_course_admin(assigned_question.assignment.course_id, user.id):
+        req_assert(
+            assigned_question.owner_id == user.id,
+            message='assigned question does not exist'
+        )
 
     # Verify that the response is a string object
-    if not isinstance(response, str):
-        return error_response('response must be a string')
+    req_assert(isinstance(response, str), message='response must be a string')
 
     # Get the assignment that this question exists for
     assignment = assigned_question.assignment
@@ -88,10 +90,10 @@ def public_questions_save(id: str, response: str):
         # Make sure that the deadline has not passed. If it has, then
         # we should give them an error saying that they can request a
         # regrade from the Professor.
-        if due_date < now:
-            return error_response(
-                'This assignment does not accept late submissions. You can request an extension from your Professor.'
-            )
+        req_assert(
+            now < due_date,
+            message='This assignment does not accept late submissions. You can request an extension from your Professor.'
+        )
 
     # Create a new response
     res = AssignedQuestionResponse(

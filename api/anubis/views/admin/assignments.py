@@ -15,13 +15,12 @@ from anubis.models import (
 )
 from anubis.utils.auth import require_admin
 from anubis.utils.data import rand
-from anubis.utils.data import row2dict
+from anubis.utils.data import row2dict, req_assert
 from anubis.utils.http.decorators import load_from_id, json_response, json_endpoint
 from anubis.utils.http.https import error_response, success_response
 from anubis.utils.lms.assignments import assignment_sync
-from anubis.utils.lms.course import get_course_context, assert_course_context
+from anubis.utils.lms.courses import get_course_context, assert_course_context
 from anubis.utils.lms.questions import get_assigned_questions
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.services.logger import logger
 
 assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
@@ -65,7 +64,6 @@ def admin_assignments_repos_id(assignment: Assignment):
 
 @assignments.route("/assignment/<string:id>/questions/get/<string:netid>")
 @require_admin()
-@log_endpoint("cli", lambda: "question get")
 @load_from_id(Assignment, verify_owner=False)
 @json_response
 def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str):
@@ -77,9 +75,10 @@ def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str
     :return:
     """
     user = User.query.filter_by(netid=netid).first()
-    if user is None:
-        return error_response("user not found")
 
+    # Verify that the user exists, and that the assignment
+    # is within the course context of the current user.
+    req_assert(user is not None, message='user not found')
     assert_course_context(assignment)
 
     return success_response(
@@ -158,8 +157,7 @@ def admin_assignment_tests_toggle_hide_assignment_test_id(assignment_test_id: st
     ).first()
 
     # Make sure the assignment test exists
-    if assignment_test is None:
-        return error_response('test not found')
+    req_assert(assignment_test is not None, message='test not found')
 
     # Verify that course the assignment test is apart of and
     # the course context match
@@ -194,8 +192,7 @@ def admin_assignment_tests_delete_assignment_test_id(assignment_test_id: str):
     ).first()
 
     # Make sure the assignment test exists
-    if assignment_test is None:
-        return error_response('test not found')
+    req_assert(assignment_test is not None, message='test not found')
 
     # Verify that course the assignment test is apart of and
     # the course context match
@@ -272,8 +269,7 @@ def private_assignment_save(assignment: dict):
 
 
 @assignments.route("/sync", methods=["POST"])
-@require_admin(unless_debug=True, unless_vpn=True)
-@log_endpoint("cli", lambda: "assignment-sync")
+@require_admin(unless_debug=True)
 @json_endpoint(required_fields=[("assignment", dict)])
 def private_assignment_sync(assignment: dict):
     """
@@ -341,8 +337,7 @@ def private_assignment_sync(assignment: dict):
     message, success = assignment_sync(assignment)
 
     # If there was an error, pass it back
-    if not success:
-        return error_response(message), 406
+    req_assert(success, message=message, status_code=406)
 
     # Return
     return success_response(message)

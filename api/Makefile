@@ -38,3 +38,16 @@ clean:
 .PHONY: db-cli
 db-cli:
 	mysql -u anubis -h 127.0.0.1 --password=anubis anubis
+
+.PHONY: pydoc
+pydoc: venv
+	for i in $(find anubis -name '*.py'); do \
+		if [ "$(basename $i)" = "__init__.py" ]; then \
+			dirname $i; \
+		else \
+			echo $i; \
+		fi; \
+	done \
+		| sed 's/\//./g; s/.py$//' \
+		| sort \
+		| xargs ./venv/bin/python -m pydoc -w

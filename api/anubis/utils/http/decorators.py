@@ -1,13 +1,11 @@
-import logging
 from functools import wraps
 from typing import Union, List, Tuple
 
 from flask import request
 
-from anubis.models import Submission
 from anubis.utils.auth import current_user
-from anubis.utils.exceptions import AuthenticationError
 from anubis.utils.data import jsonify, _verify_data_shape
+from anubis.utils.exceptions import AuthenticationError
 from anubis.utils.http.https import error_response
 
 
@@ -125,7 +123,6 @@ def json_endpoint(
             # If the content type header is not application/json, then
             # flask will not parse the body of the request.
             if not content_type.startswith("application/json"):
-
                 # If the content-type was not set properly, then we
                 # should hand back a 406 not acceptable error code.
                 return error_response("Content-Type header is not application/json"), 406
@@ -165,7 +162,6 @@ def json_endpoint(
                     # If this condition is not met, then we will return
                     # a 406 not acceptable.
                     if field not in json_body:
-
                         # field missing, return error
                         # Not Acceptable
                         return error_response(f"Malformed requests. Missing field {field}."), 406
@@ -175,7 +171,6 @@ def json_endpoint(
 
                         # Do a type check on the json body field
                         if not isinstance(json_body[field], required_type):
-
                             # Not Acceptable
                             return error_response("Malformed requests. Invalid field type."), 406
 
@@ -209,87 +204,6 @@ def json_endpoint(
             return func(json_body, *args, **kwargs)
 
         return json_wrap
-
-    return wrapper
-
-
-def check_submission_token(func):
-    """
-    This decorator should be exclusively used on the pipeline manager.
-    For the report endpoints, it will find and verify submission data
-    for endpoints that follow the shape:
-
-    /report/.../<int:submission_id>?token=<token>
-
-    If the submission and the token are not verified, and error response
-    with status code 406 (rejected) will be returned.
-
-    :param func:
-    :return:
-    """
-
-    @wraps(func)
-    def wrapper(submission_id: str):
-        # Try to get the submission
-        submission = Submission.query.filter(Submission.id == submission_id).first()
-
-        # Try to get a token from the request query
-        token = request.args.get("token", default=None)
-
-        # Verify submission exists
-        if submission is None:
-            # Log that there was an issue with finding the submission
-            logging.error(
-                "Invalid submission from submission pipeline",
-                extra={
-                    "submission_id": submission_id,
-                    "path": request.path,
-                    "headers": request.headers,
-                    "ip": request.remote_addr,
-                },
-            )
-
-            # Give back a 406 rejected error
-            return error_response("Invalid"), 406
-
-        # Verify we got a token
-        if token is None:
-            # Log that there was an issue with finding a token
-            logging.error(
-                "Attempted report post with no token",
-                extra={
-                    "submission_id": submission_id,
-                    "path": request.path,
-                    "headers": request.headers,
-                    "ip": request.remote_addr,
-                },
-            )
-
-            # Give back a 406 rejected error
-            return error_response("Invalid"), 406
-
-        # Verify token matches
-        if token != submission.token:
-            # Log that there was an issue verifying tokens
-            logging.error(
-                "Invalid token reported from pipeline",
-                extra={
-                    "submission_id": submission_id,
-                    "path": request.path,
-                    "headers": request.headers,
-                    "ip": request.remote_addr,
-                },
-            )
-
-            # Give back a 406 rejected error
-            return error_response("Invalid"), 406
-
-        # Log that the request was validated
-        logging.info("Pipeline request validated {}".format(request.path))
-
-        # Call the view function, and pass the
-        # submission sqlalchemy object.
-        return func(submission)
 
     return wrapper
 

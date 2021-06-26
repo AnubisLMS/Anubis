@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {Link} from 'react-router-dom';
-import {makeStyles} from '@material-ui/core/styles';
+
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import CardActions from '@material-ui/core/CardActions';
@@ -15,6 +16,7 @@ import red from '@material-ui/core/colors/red';
 import green from '@material-ui/core/colors/green';
 import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+
 import {nonStupidDatetimeFormat} from '../../../Utils/datetime';
 
 const useStyles = makeStyles((theme) => ({
@@ -156,6 +158,7 @@ export default function AssignmentCard({assignment, setSelectedTheia}) {
           size={'small'}
           variant={'contained'}
           color={'primary'}
+          disabled={!githubLinkEnabled}
           startIcon={has_repo ? <ExitToAppIcon/> : <GitHubIcon/>}
           className={classes.button}
           component={'a'}

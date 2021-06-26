@@ -5,7 +5,6 @@ from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response
 from anubis.utils.lms.assignments import get_assignments
-from anubis.utils.services.elastic import log_endpoint
 
 assignments = Blueprint(
     "public-assignments", __name__, url_prefix="/public/assignments"
@@ -15,7 +14,6 @@ assignments = Blueprint(
 @assignments.route("/")
 @assignments.route("/list")
 @require_user()
-@log_endpoint("public-assignments")
 @json_response
 def public_assignments():
     """

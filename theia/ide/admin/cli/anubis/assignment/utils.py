@@ -156,7 +156,29 @@ def trim(stdout: str) -> typing.List[str]:
     return stdout_lines
 
 
-def search_lines(stdout_lines: typing.List[str], expected_lines: typing.List[str], case_sensitive: bool = True):
+def search_lines(
+        stdout_lines: typing.List[str],
+        expected_lines: typing.List[str],
+        case_sensitive: bool = True
+) -> bool:
+    """
+    Search lines for expected lines. This will return true if all expected lines are in the
+    student standard out lines in order. There can be interruptions in the student standard out.
+    This function has the advantage of allowing students to still print out debugging lines
+    while their output is still accurately checked for  the expected result.
+
+    >>> search_lines(['a', 'b', 'c'], ['a', 'b', 'c']) -> True
+    >>> search_lines(['a', 'debugging', 'b', 'c'], ['a', 'b', 'c']) -> True
+    >>> search_lines(['a', 'b'],      ['a', 'b', 'c']) -> False
+
+    * Optionally specify if the equality comparison should be case sensitive *
+
+    :param stdout_lines:
+    :param expected_lines:
+    :param case_sensitive:
+    :return:
+    """
+
     if not case_sensitive:
         stdout_lines = list(map(lambda x: x.lower(), stdout_lines))
     found = []
@@ -175,7 +197,25 @@ def search_lines(stdout_lines: typing.List[str], expected_lines: typing.List[str
     return list(sorted(found)) == found
 
 
-def test_lines(stdout_lines: typing.List[str], expected_lines: typing.List[str], case_sensitive: bool = True):
+def test_lines(
+        stdout_lines: typing.List[str],
+        expected_lines: typing.List[str],
+        case_sensitive: bool = True
+) -> bool:
+    """
+    Test lines for exact equality. Whitespace will be stripped off each line automatically.
+
+    * Optionally specify if the equality comparison should be case sensitive *
+
+    >>> test_lines(['a', 'b', 'c'], ['a', 'b', 'c']) -> True
+    >>> test_lines(['a', 'debugging', 'b', 'c'], ['a', 'b', 'c']) -> False
+    >>> test_lines(['a', 'b'],      ['a', 'b', 'c']) -> False
+
+    :param stdout_lines: students standard out lines as a list of strings
+    :param expected_lines: expected lines as a list of strings
+    :param case_sensitive: optional boolean to indicate if comparison should be case sensitive
+    :return: True if exact match was found, False otherwise
+    """
     if case_sensitive:
         return len(stdout_lines) == len(expected_lines) \
                and all(_a.strip() == _b.strip() for _a, _b in zip(stdout_lines, expected_lines))
@@ -187,17 +227,23 @@ def verify_expected(
     stdout_lines: typing.List[str],
     expected_lines: typing.List[str],
     test_result: TestResult,
-    case_sensitive=True,
-    search=False
+    case_sensitive: bool = True,
+    search: bool = False
 ):
     """
-    Check to lists of strings for quality. Will strip off whitespace
-    from each line before checking for equality.
-    :param stdout_lines:
-    :param expected_lines:
-    :param test_result:
-    :param case_sensitive:
-    :param search:
+    Check to lists of strings for quality. Will strip off whitespace from each line
+    before checking for equality. The stdout_lines should be from the student code.
+    The expected_lines should then be whichever lines are expected for this test.
+
+    * The fields on the test_result object will be set automatically based on if the
+    expected output was found. *
+
+    :param stdout_lines: students lines as a list of strings
+    :param expected_lines: expected lines as a list of strings
+    :param test_result: TestResult object for this test
+    :param case_sensitive: boolean to indicate if the comparison should be case sensitive
+    :param search: boolean to indicate if the stdout should be searched instead of
+                   directly compared for equality
     :return:
     """
 

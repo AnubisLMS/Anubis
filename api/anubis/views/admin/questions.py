@@ -3,9 +3,10 @@ from flask import Blueprint
 
 from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQuestion
 from anubis.utils.auth import require_admin
+from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import error_response, success_response
-from anubis.utils.lms.course import (
+from anubis.utils.lms.courses import (
     assert_course_superuser,
     assert_course_context,
 )
@@ -14,16 +15,14 @@ from anubis.utils.lms.questions import (
     get_all_questions,
     assign_questions,
     reset_question_assignments,
-get_question_assignments,
+    get_question_assignments,
 )
-from anubis.utils.services.elastic import log_endpoint
 
 questions = Blueprint("admin-questions", __name__, url_prefix="/admin/questions")
 
 
 @questions.route("/add/<string:assignment_id>")
 @require_admin()
-@log_endpoint("admin", lambda: "add new question")
 @json_response
 def admin_questions_add_unique_code(assignment_id: str):
     """
@@ -39,8 +38,7 @@ def admin_questions_add_unique_code(assignment_id: str):
     ).first()
 
     # If the assignment does not exist, then stop
-    if assignment is None:
-        return error_response("Unable to find assignment")
+    req_assert(assignment is not None, message='assignment does not exist')
 
     # Assert that the set course context matches the course of the assignment
     assert_course_context(assignment)
@@ -68,7 +66,6 @@ def admin_questions_add_unique_code(assignment_id: str):
 
 @questions.route("/delete/<string:assignment_question_id>")
 @require_admin()
-@log_endpoint("admin", lambda: "delete question")
 @json_response
 def admin_questions_delete_question_id(assignment_question_id: str):
     """
@@ -84,8 +81,7 @@ def admin_questions_delete_question_id(assignment_question_id: str):
     ).first()
 
     # Verify that the question exists
-    if assignment_question is None:
-        return error_response('Could not find question')
+    req_assert(assignment_question is not None, message='question does not exist')
 
     # Assert that the set course context matches the course of the assignment
     assert_course_context(assignment_question)
@@ -115,7 +111,6 @@ def admin_questions_delete_question_id(assignment_question_id: str):
 
 @questions.route("/hard-reset/<string:assignment_id>")
 @require_admin()
-@log_endpoint("admin", lambda: "question hard reset")
 @json_response
 def private_questions_hard_reset_unique_code(assignment_id: str):
     """
@@ -144,8 +139,7 @@ def private_questions_hard_reset_unique_code(assignment_id: str):
     ).first()
 
     # If the assignment does not exist, then stop
-    if assignment is None:
-        return error_response("Unable to find assignment")
+    req_assert(assignment is not None, message='assignment does not exist')
 
     # Assert that the current user is a professor or superuser
     assert_course_superuser(assignment.course_id)
@@ -165,7 +159,6 @@ def private_questions_hard_reset_unique_code(assignment_id: str):
 
 @questions.route("/reset-assignments/<string:assignment_id>")
 @require_admin()
-@log_endpoint("admin", lambda: "reset question assignments")
 @json_response
 def private_questions_reset_assignments_assignment_id(assignment_id: str):
     """
@@ -194,8 +187,7 @@ def private_questions_reset_assignments_assignment_id(assignment_id: str):
     ).first()
 
     # Verify that the assignment exists
-    if assignment is None:
-        return error_response("Unable to find assignment")
+    req_assert(assignment is not None, message='assignment does not exist')
 
     # Assert that the current user is a professor or superuser
     assert_course_superuser(assignment.course_id)
@@ -215,7 +207,6 @@ def private_questions_reset_assignments_assignment_id(assignment_id: str):
 
 @questions.route("/update/<string:assignment_question_id>", methods=["POST"])
 @require_admin()
-@log_endpoint("admin", lambda: "question update")
 @json_endpoint(required_fields=[('question', dict)])
 def admin_questions_update(assignment_question_id: str, question: dict):
     """
@@ -232,8 +223,7 @@ def admin_questions_update(assignment_question_id: str, question: dict):
     ).first()
 
     # Verify that the assignment question exists
-    if db_assignment_question is None:
-        return error_response('question not found')
+    req_assert(db_assignment_question is not None, message='question does not exist')
 
     # Assert that the set course context matches the course of the assignment
     assert_course_context(db_assignment_question)
@@ -256,7 +246,6 @@ def admin_questions_update(assignment_question_id: str, question: dict):
 
 @questions.route("/get-assignments/<string:assignment_id>")
 @require_admin()
-@log_endpoint("admin", lambda: "questions get")
 @json_response
 def private_questions_get_assignments_unique_code(assignment_id: str):
     """
@@ -272,8 +261,7 @@ def private_questions_get_assignments_unique_code(assignment_id: str):
     ).first()
 
     # If the assignment does not exist, then stop
-    if assignment is None:
-        return error_response("Unable to find assignment")
+    req_assert(assignment is not None, message='assignment does not exist')
 
     # Assert that the assignment is within the course context
     assert_course_context(assignment)
@@ -288,7 +276,6 @@ def private_questions_get_assignments_unique_code(assignment_id: str):
 
 @questions.route("/get/<string:assignment_id>")
 @require_admin()
-@log_endpoint("admin", lambda: "get question assignments")
 @json_response
 def private_questions_get_unique_code(assignment_id: str):
     """
@@ -304,8 +291,7 @@ def private_questions_get_unique_code(assignment_id: str):
     ).first()
 
     # Verify that the assignment exists
-    if assignment is None:
-        return error_response("Unable to find assignment")
+    req_assert(assignment is not None, message='assignment does not exist')
 
     # Assert that the assignment is within the course context
     assert_course_context(assignment)
@@ -324,7 +310,6 @@ def private_questions_get_unique_code(assignment_id: str):
 
 @questions.route("/assign/<string:assignment_id>")
 @require_admin()
-@log_endpoint("admin", lambda: "question assign")
 @json_response
 def private_questions_assign_unique_code(assignment_id: str):
     """
@@ -343,9 +328,9 @@ def private_questions_assign_unique_code(assignment_id: str):
     ).first()
 
     # Verify that we got an assignment
-    if assignment is None:
-        return error_response("Unable to find assignment")
+    req_assert(assignment is not None, message='assignment does not exist')
 
+    # Verify that the assignment is accessible to the user in the current course context
     assert_course_context(assignment)
 
     # Assign the questions

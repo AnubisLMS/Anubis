@@ -1,20 +1,17 @@
 import React, {useState} from 'react';
-import clsx from 'clsx';
-import {makeStyles} from '@material-ui/core/styles';
+
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import Divider from '@material-ui/core/Divider';
-import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ExitToAppOutlinedIcon from '@material-ui/icons/ExitToAppOutlined';
 import LaunchOutlinedIcon from '@material-ui/icons/LaunchOutlined';
-import {isWidthDown} from '@material-ui/core/withWidth';
 
-
-import {admin_nav, footer_nav, public_nav} from '../../navconfig';
-import NavItem from './NavItem';
 import AuthContext from '../../Contexts/AuthContext';
+import NavItem from './NavItem';
+import {admin_nav, footer_nav, public_nav} from '../../navconfig';
 
 const useStyles = makeStyles((theme) => ({
   categoryHeader: {

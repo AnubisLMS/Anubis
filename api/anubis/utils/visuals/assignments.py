@@ -1,6 +1,7 @@
+from typing import List, Any, Dict
+
 import numpy as np
 import pandas as pd
-from typing import List, Any, Union, Dict
 
 from anubis.models import (
     db,
@@ -8,13 +9,11 @@ from anubis.models import (
     Assignment,
     User,
     TheiaSession,
-    Submission,
-    SubmissionBuild,
-    SubmissionTestResult
+    Submission
 )
 from anubis.utils.data import is_debug, is_job
-from anubis.utils.services.cache import cache
 from anubis.utils.lms.autograde import bulk_autograde
+from anubis.utils.services.cache import cache
 from anubis.utils.visuals.queries import (
     time_to_pass_test_sql,
     assignment_test_fail_nosub_sql,
@@ -285,7 +284,6 @@ def get_assignment_sundial(assignment_id):
 
         # If the build failed, then skip the tests
         if not result['build_passed']:
-
             # If the student failed the build, then we increment the failed build value
             build_failed += 1
             sundial['children'][1]['value'] += 1
@@ -308,17 +306,3 @@ def get_assignment_sundial(assignment_id):
         failed['name'] = f'{failed_value} failed'
 
     return sundial
-
-
-
-
-
-
-
-
-
-
-
-
-
-

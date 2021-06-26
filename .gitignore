@@ -10,3 +10,5 @@ os-dump-*.sql
 .ipynb_checkpoints
 
 api/seed.ipynb
+
+.DS_Store

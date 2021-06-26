@@ -18,6 +18,7 @@ import useQuery from '../../hooks/useQuery';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
 import Questions from '../../Components/Public/Questions/Questions';
+import StandardLayout from '../../Components/Layouts/StandardLayout';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -130,48 +131,37 @@ export default function Submissions() {
   }
 
   return (
-    <Grid container justify="center" spacing={4}>
-      <Grid item xs={12}>
-        <Typography variant="h6">
-          Anubis
-        </Typography>
-        <Typography variant={'subtitle1'} color={'textSecondary'}>
-          {user && `${user?.name}'s Submissions`}
-        </Typography>
-      </Grid>
+    <StandardLayout description={user && `${user?.name}'s Submissions`}>
+      <Grid container spacing={4}>
 
-      <Grid item/>
-
-      <Grid item xs={12} md={10}>
-        <Grid container spacing={4}>
-          {/* Questions */}
-          {!!assignmentId ? (
-            <Grid item xs={12}>
-              <Questions assignment_id={assignmentId}/>
-            </Grid>
-          ) : null}
-
-          {/* Table */}
-          <Grid item xs>
-            <Paper className={classes.paper}>
-              <DataGrid
-                pagination
-                rowsPerPageOptions={[10, 20, 30]}
-                page={page}
-                pageSize={pageSize}
-                onPageChange={({page}) => setPage(page)}
-                onPageSizeChange={({pageSize}) => setPageSize(pageSize)}
-                onRowClick={({row}) => setRedirect(`/submission?commit=${row.commit}`)}
-                columns={columns}
-                rows={rows}
-                rowCount={rowCount}
-                loading={loading}
-              />
-            </Paper>
+        {/* Questions */}
+        {!!assignmentId ? (
+          <Grid item xs={12}>
+            <Questions assignment_id={assignmentId}/>
           </Grid>
+        ) : null}
+
+        {/* Table */}
+        <Grid item xs>
+          <Paper className={classes.paper}>
+            <DataGrid
+              pagination
+              rowsPerPageOptions={[10, 20, 30]}
+              page={page}
+              pageSize={pageSize}
+              onPageChange={({page}) => setPage(page)}
+              onPageSizeChange={({pageSize}) => setPageSize(pageSize)}
+              onRowClick={({row}) => setRedirect(`/submission?commit=${row.commit}`)}
+              columns={columns}
+              rows={rows}
+              rowCount={rowCount}
+              loading={loading}
+            />
+          </Paper>
 
         </Grid>
       </Grid>
-    </Grid>
+    </StandardLayout>
+
   );
 }

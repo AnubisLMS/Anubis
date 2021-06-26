@@ -1,16 +1,31 @@
 import React, {useState} from 'react';
-
-import {BrowserRouter as Router} from 'react-router-dom';
-import {SnackbarProvider} from 'notistack';
 import clsx from 'clsx';
 
-import {makeStyles, ThemeProvider} from '@material-ui/core/styles';
+// useSWR
+import {SWRConfig} from 'swr';
+import axios from 'axios';
+
+// React router
+import {BrowserRouter as Router} from 'react-router-dom';
+
+// Snackbar
+import {SnackbarProvider} from 'notistack';
+
+// React vis stylesheet
+import 'react-vis/dist/style.css';
+
+import {ThemeProvider} from '@material-ui/core/styles';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
-import {drawerWidth} from './navconfig';
-import theme from './Theme/Dark';
-
+// Auth Context
 import AuthContext from './Contexts/AuthContext';
+
+// Navconfig
+import {drawerWidth} from './navconfig';
+
+// Dark theme
+import theme from './Theme/Dark';
 
 import AuthWrapper from './Components/AuthWrapper';
 import Main from './Main';
@@ -20,21 +35,16 @@ import Error from './Components/Error';
 import Footer from './Components/Footer';
 import Header from './Components/Header';
 import DeviceWarning from './Components/DeviceWarning';
+import Container from '@material-ui/core/Container';
 
 const useStyles = makeStyles(() => ({
   root: {
     display: 'flex',
     height: '100%',
     minHeight: '100vh',
-    width: '100%',
+    // width: '100%',
     backgroundImage: `url(/curvylines.png)`,
     backgroundRepeat: 'repeat',
-  },
-  main: {
-    width: '100%',
-    flexDirection: 'column',
-    padding: theme.spacing(6, 4),
-    marginBottom: theme.spacing(5),
   },
   app: {
     flex: 1,
@@ -58,7 +68,7 @@ const useStyles = makeStyles(() => ({
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing(3),
+    // padding: theme.spacing(3),
     marginBottom: '20px',
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.sharp,
@@ -97,6 +107,11 @@ const useStyles = makeStyles(() => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
   },
+  main: {
+    [theme.breakpoints.up('sm')]: {
+      padding: theme.spacing(2),
+    },
+  },
 }));
 
 export default function App() {
@@ -105,53 +120,60 @@ export default function App() {
   const [open, setOpen] = useState(window.innerWidth >= 960); // 960px is md
   const [showError, setShowError] = useState(!!query.get('error'));
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
-
   return (
     <ThemeProvider theme={theme}>
       <div className={classes.root}>
-        <SnackbarProvider maxSnack={5}>
-          <DeviceWarning/>
-          <Router>
-            <AuthWrapper>
-              <AuthContext.Consumer>
-                {(user) => (
-                  <CssBaseline>
-                    <Nav
-                      classes={classes}
-                      open={open}
-                      handleDrawerClose={handleDrawerClose}
-                    />
-                    <div className={classes.app} id={'app'}>
-                      <Header
-                        onDrawerToggle={() => setOpen((prev) => !prev)}
-                        user={user}
+        <SWRConfig
+          value={{
+            shouldRetryOnError: false,
+            fetcher: (...args) => fetch(...args).then((res) => res.json()).catch((error) => {
+              if (error?.response?.status === 401) {
+                window.location = '/api/public/auth/login';
+              } else {
+                throw error;
+              }
+            }),
+          }}
+        >
+          <SnackbarProvider maxSnack={5}>
+            <DeviceWarning/>
+            <Router>
+              <AuthWrapper>
+                <AuthContext.Consumer>
+                  {(user) => (
+                    <CssBaseline>
+                      <Nav
                         classes={classes}
                         open={open}
+                        handleDrawerClose={() => setOpen(!open)}
                       />
-                      <main
-                        className={clsx(classes.content, {
-                          [classes.contentShift]: open,
-                        })}
-                      >
-                        <div className={classes.drawerHeader} />
-                        <Error show={showError} onDelete={() => setShowError(false)}/>
-                        <Main user={user}/>
-                        <Footer/>
-                      </main>
-                    </div>
-                  </CssBaseline>
-                )}
-              </AuthContext.Consumer>
-            </AuthWrapper>
-          </Router>
-        </SnackbarProvider>
+                      <div className={classes.app} id={'app'}>
+                        <Header
+                          onDrawerToggle={() => setOpen(!open)}
+                          user={user}
+                          classes={classes}
+                          open={open}
+                        />
+                        <main
+                          className={clsx(classes.content, {
+                            [classes.contentShift]: open,
+                          })}
+                        >
+                          <div className={classes.drawerHeader} />
+                          <Error show={showError} onDelete={() => setShowError(false)}/>
+                          <div className={classes.main}>
+                            <Main user={user}/>
+                          </div>
+                          <Footer/>
+                        </main>
+                      </div>
+                    </CssBaseline>
+                  )}
+                </AuthContext.Consumer>
+              </AuthWrapper>
+            </Router>
+          </SnackbarProvider>
+        </SWRConfig>
       </div>
     </ThemeProvider>
   );

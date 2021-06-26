@@ -1,21 +1,17 @@
-from typing import List
-
 from flask import Blueprint
 
-from anubis.models import User, AssignmentRepo, Assignment
+from anubis.models import User
 from anubis.utils.auth import current_user, require_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response
-from anubis.utils.services.elastic import log_endpoint
 from anubis.utils.lms.repos import get_repos
 
-repos = Blueprint("public-repos", __name__, url_prefix="/public/repos")
+repos_ = Blueprint("public-repos", __name__, url_prefix="/public/repos")
 
 
-@repos.route("/")
-@repos.route("/list")
+@repos_.route("/")
+@repos_.route("/list")
 @require_user()
-@log_endpoint("repos", lambda: "repos")
 @json_response
 def public_repos():
     """
@@ -23,8 +19,12 @@ def public_repos():
 
     :return:
     """
+
+    # Get current user
     user: User = current_user()
 
-    _repos = get_repos(user.id)
+    # Get all repos for the user
+    repos = get_repos(user.id)
 
-    return success_response({"repos": _repos})
+    # Pass them back
+    return success_response({"repos": repos})

@@ -3,12 +3,11 @@ import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
 import {Route, Switch} from 'react-router-dom';
 
-import AssignmentPost from '../../Components/Public/Blog/AssignmentPost';
-import ElevatorPitchPost from '../../Components/Public/Blog/ElevatorPitchPost';
-import AssignmentPackagingPost from '../../Components/Public/Blog/AssignmentPackagingPost';
-import MidtermRetroPost from '../../Components/Public/Blog/MidtermRetroPost';
-import TheiaIDEPost from '../../Components/Public/Blog/TheiaIDEPost';
 import Divider from '@material-ui/core/Divider';
+
+import BlogPost from '../../Components/Public/Blog/BlogPost';
+
+import posts from '../../Content';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -55,66 +54,59 @@ const useStyles = makeStyles((theme) => ({
     transform: 'scale(0.8)',
   },
   divider: {
-    // width: '100%',
     height: 3,
     marginTop: theme.spacing(3),
   },
+  root: {
+    margin: theme.spacing(5, 0),
+  },
 }));
-
-const posts = [
-  {
-    Component: ElevatorPitchPost,
-    path: '/blog/elevator-pitch',
-    divider: true,
-  },
-  {
-    Component: TheiaIDEPost,
-    path: '/blog/anubis-cloud-ide',
-  },
-  {
-    Component: MidtermRetroPost,
-    path: '/blog/midterm-retro',
-  },
-  {
-    Component: AssignmentPackagingPost,
-    path: '/blog/assignment-packaging',
-  },
-  {
-    Component: AssignmentPost,
-    path: '/blog/packaging',
-  },
-];
-
 
 export default function Blog() {
   const classes = useStyles();
 
   return (
-    <Grid
-      container
-      direction="column"
-      justify="center"
-      alignItems="center"
-      spacing={4}
-    >
-      <Switch>
-        <Route exact path="/blog">
-          {posts.map(({Component, path, divider = false}, index) => (
-            <Grid item xs={12} key={`post-preview-${index}`}>
-              <Component classes={classes} preview={path}/>
-              {divider ? (
-                <Divider className={classes.divider} variant={'middle'}/>
-              ) : null}
-            </Grid>
-          ))}
-        </Route>
-        {posts.map(({Component, path}, index) => (
-          <Route exact path={path} key={`post-${index}`}>
-            <Component classes={classes} preview={false}/>
+    <div className={classes.root}>
+      <Grid
+        container
+        direction="column"
+        justify="center"
+        alignItems="center"
+        spacing={4}
+      >
+        <Switch>
+          <Route exact path="/blog">
+            {posts.map((post, index) => (
+              <Grid item xs = {12} key = {`post-${index}-${post.title}`}>
+                <BlogPost
+                  isHighlight = {post.isHighlight}
+                  get = {post.get}
+                  slug = {post.slug}
+                  title = {post.title}
+                  author = {post.author}
+                  authorImage = {post.authorImage}
+                  date = {post.date}
+                  preview = {true}
+                />
+                {post.isHighlight && <Divider className={classes.divider} variant={'middle'}/>}
+              </Grid>
+            ))}
           </Route>
-        ))}
-      </Switch>
-
-    </Grid>
+          {posts.map((post, index) => (
+            <Route exact path={`/blog/${post.slug}`} key={`post-${index}`}>
+              <BlogPost
+                get = {post.get}
+                slug = {post.slug}
+                title = {post.title}
+                author = {post.author}
+                authorImage = {post.authorImage}
+                date = {post.date}
+                preview = {false}
+              />
+            </Route>
+          ))}
+        </Switch>
+      </Grid>
+    </div>
   );
 }

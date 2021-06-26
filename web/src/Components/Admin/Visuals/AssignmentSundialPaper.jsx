@@ -1,13 +1,14 @@
 import React, {useState} from 'react';
-
-import {useSnackbar} from 'notistack';
 import axios from 'axios';
+import {useSnackbar} from 'notistack';
+import {useParams} from 'react-router-dom';
+
+import Paper from '@material-ui/core/Paper';
+
+import useQuery from '../../../hooks/useQuery';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
-import useQuery from '../../../hooks/useQuery';
-import Paper from '@material-ui/core/Paper';
 import AssignmentSundial from './Graphs/AssignmentSundial';
-import {useParams} from 'react-router-dom';
 
 
 export default function AssignmentSundialPaper() {

@@ -2,19 +2,20 @@ import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
+import {DataGrid} from '@material-ui/data-grid';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
-import {DataGrid} from '@material-ui/data-grid';
 import Paper from '@material-ui/core/Paper';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-
-import standardStatusHandler from '../../../Utils/standardStatusHandler';
-import standardErrorHandler from '../../../Utils/standardErrorHandler';
-import {TextField, Tooltip} from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
+import Tooltip from '@material-ui/core/Tooltip';
+import TextField from '@material-ui/core/TextField';
 import Fab from '@material-ui/core/Fab';
 import Button from '@material-ui/core/Button';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import AddIcon from '@material-ui/icons/Add';
+
+import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../../Utils/standardErrorHandler';
 
 
 const useStyles = makeStyles((theme) => ({

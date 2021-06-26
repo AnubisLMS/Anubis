@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import {useSnackbar} from 'notistack';
-
 import {LabelSeries, Sunburst} from 'react-vis';
 import {EXTENDED_DISCRETE_COLOR_RANGE} from 'react-vis/es/theme';
+import {useSnackbar} from 'notistack';
+
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import Typography from '@material-ui/core/Typography';
 
 const LABEL_STYLE = {

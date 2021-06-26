@@ -1,9 +1,9 @@
 from flask import Blueprint
 
 from anubis.utils.auth import require_superuser
-from anubis.utils.data import is_debug
+from anubis.utils.data import is_debug, req_assert
 from anubis.utils.http.decorators import json_response
-from anubis.utils.http.https import success_response, error_response
+from anubis.utils.http.https import success_response
 from anubis.utils.services.rpc import enqueue_seed
 
 seed = Blueprint("admin-seed", __name__, url_prefix="/admin/seed")
@@ -20,8 +20,7 @@ def admin_seed():
     """
 
     # Only allow seed to run if in debug mode
-    if not is_debug():
-        return error_response('Seed only enabled in debug mode')
+    req_assert(is_debug(), message='seed only enabled in debug mode')
 
     # Enqueue a seed job
     enqueue_seed()
