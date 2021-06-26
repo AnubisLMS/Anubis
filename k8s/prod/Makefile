@@ -1,4 +1,4 @@
-##################################
+###################################################
 #
 # Copyright John Cunniff 2021
 #
@@ -24,11 +24,7 @@
 #      this assumption and have this be a Makefile
 #      variable in this file.
 #
-#
-# TODO remove do-block-storage assumptions from the elk
-#      yaml configurations
-#
-##################################
+###################################################
 
 
 
@@ -44,8 +40,14 @@ SECRET_KEY := "$(shell head -c10 /dev/random | openssl sha1 -hex | awk '{print $
 DB_PASS := "$(shell head -c10 /dev/random | openssl sha1 -hex | awk '{print $$2}')"
 REDIS_PASS := "$(shell head -c10 /dev/random | openssl sha1 -hex | awk '{print $$2}')"
 
-ELASTIC_VERSION := 7.12
+# StorageClass that should be used for elastic and mariadb
+STORAGE_CLASS := do-block-storage
 
+# Chart versions for things
+TRAEFIK_VERSION := 9.19.1
+ELASTIC_VERSION := 7.12
+MARIADB_VERSION := 9.3.16
+REDIS_VERSION := 14.6.2
 
 provision: \
 	helm-init \
@@ -80,11 +82,12 @@ helm-init:
 	helm repo add longhorn 'https://charts.longhorn.io'
 	helm repo update
 
-traefik: ns-traefik
+traefik: ns-anubis
 	helm upgrade \
 		--install traefik traefik/traefik \
 		--values traefik-values.yaml \
-		--namespace traefik
+		--version $(TRAEFIK_VERSION) \
+		--namespace anubis
 
 # We need the default storage class to
 # be longhorn (or really any class that
@@ -97,43 +100,44 @@ longhorn: ns-longhorn-system
 	kubectl patch storageclass longhorn \
 		-p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 
-elasticsearch: ns-elastic
+elasticsearch: ns-anubis
 	helm upgrade \
 		--install elasticsearch elastic/elasticsearch \
 		--values elastic-values.yaml \
+		--set volumeClaimTemplate.storageClassName=$(STORAGE_CLASS) \
 		--version $(ELASTIC_VERSION) \
-		--namespace elastic
+		--namespace anubis
 
 filebeat:
 	helm upgrade \
 		--install filebeat elastic/filebeat \
 		--values filebeat-values.yaml \
+		--set storage_class=$(STORAGE_CLASS) \
 		--version $(ELASTIC_VERSION) \
 		--namespace kube-system
 
-mariadb: ns-mariadb
-	helm upgrade --install mariadb bitnami/mariadb \
-		--set 'volumePermissions.enabled=true' \
-		--set 'auth.username=anubis' \
-		--set 'auth.database=anubis' \
-		--set "auth.password=$(DB_PASS)" \
-		--set 'replication.enabled=false' \
-		--namespace mariadb
+mariadb: ns-anubis
+	helm upgrade \
+		--install mariadb bitnami/mariadb \
+		--values mariadb-values.yaml \
+		--set primary.persistence.storageClass=$(STORAGE_CLASS) \
+		--set auth.password=$(DB_PASS) \
+		--version $(MARIADB_VERSION) \
+		--namespace anubis
 
 redis: ns-anubis
 	helm upgrade \
 		--install redis bitnami/redis \
-		--set fullnameOverride=redis \
+		--values redis-values.yaml \
 		--set global.redis.password=$(REDIS_PASS) \
-		--set architecture=standalone \
-		--set master.persistence.enabled=false \
+		--version $(REDIS_VERSION) \
 		--namespace anubis
 
 api-secret:
 	@if ! kubectl get secret api -n anubis; then;
 		kubectl create secret generic api \
 			--namespace anubis \
-			--from-literal=database-uri=mysql+pymysql://anubis:$(DB_PASS)@mariadb.mariadb.svc.cluster.local/anubis \
+			--from-literal=database-uri=mysql+pymysql://anubis:$(DB_PASS)@mariadb.anubis.svc.cluster.local/anubis \
 			--from-literal=database-password=$(DB_PASS) \
 			--from-literal=redis-password=$(REDIS_PASS) \
 			--from-literal=secret-key=$(SECRET_KEY); \
