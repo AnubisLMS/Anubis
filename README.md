@@ -13,59 +13,62 @@
 \pagebreak
 
 # Contents
-- [1. Overview](#1-overview)
-    - [1.1 Elevator Pitch](#11-elevator-pitch)
-    - [1.2 Motivations](#12-motivations)
-- [2. Services](#2-services)
-    - [2.1 Traefik](#21-traefik)
-    - [2.2 API](#22-api)
-        - [2.2.1 Zones](#221-zones)
-        - [2.2.2 Responsibilities](#222-responsibilities)
-        - [2.2.3 SSO Authentication](#223-sso-authentication)
-    - [2.3 Submission Pipeline](#23-submission-pipeline)
-        - [2.3.1 Kube Job](#231-kube-job)
-        - [2.3.2 Submission State Reporting](#232-submission-state-reporting)
-        - [2.3.3 Stages](#233-stages)
-            - [Clone](#clone)
-            - [Build](#build)
-            - [Test](#test)
-    - [2.4 Web Frontend](#24-web-frontend)
-        - [2.4.1 Autograde Results](#241-autograde-results)
-    - [2.5 Anubis Cloud IDE](#25-anubis-cloud-ide)
-        - [2.5.1 IDE Frontend](#251-ide-frontend)
-        - [2.5.2 Theia Pod Design](#252-theia-pod-design)
-    - [2.6 Datastores](#26-datastores)
-        - [2.6.1 Mariadb](#261-mariadb)
-        - [2.6.2 Elasticsearch](#262-elasticsearch)
-        - [2.6.3 Kibana](#263-kibana)
-        - [2.6.4 Redis + RQWorker](#264-redis--rqworker)
-        - [2.6.4 Redis + flask-caching](#265-redis--flask-caching)  
-    - [2.7 Logging](#27-logging)
-        - [2.7.1 filebeat](#271-filebeat)
-- [3. Deployment](#3-deployment)
-    - [3.1 Kubernetes](#31-kubernetes)
-        - [3.1.1 Helm Chart](#311-helm-chart)
-        - [3.1.2 Rolling Updates](#312-rolling-updates)
-        - [3.1.3 Longhorn](#313-longhorn)
-        - [2.1.4 Digital Ocean](#314-digital-ocean)
-        - [3.1.5 Nodes](#315-nodes)
-        - [3.1.6 Networking](#316-networking)
-    - [3.2 Github](#32-github)
-        - [3.2.1 Organization](#321-organization)
-        - [3.2.2 Classroom](#322-classroom)
-- [4. CLI](#4-cli)
-    - [4.1 CLI in Management IDE](#41-cli-in-management-ide)
-    - [4.2 CLI Usage](#42-cli-usage)
-- [5. Assignments](#5-assignments)
-    - [5.1 Creating an Assignment Template Repository](#51-creating-an-assignment-template-repository)
-    - [5.2 Creating Assignment Tests](#52-creating-assignment-tests)
-    - [5.3 Writing Tests](#53-writing-tests)
-    - [5.4 Uploading Tests](#54-uploading-tests)
-    - [5.5 Creating Github Classroom Assignment](#55-creating-github-classroom-assignment)
-- [6. Usage Statistics](#6-usage-statistics)    
-    - [6.1 Student Progress](#61-student-progress)
-    - [6.2 Class Progress](#62-class-progress)
-    - [6.3 Public Usage Visuals](#63-public-usage-visuals)
+- [Anubis Design Doc](#anubis-design-doc)
+- [1 Overview](#1-overview)
+  - [1.1 Elevator Pitch](#11-elevator-pitch)
+  - [1.2 Motivations](#12-motivations)
+- [2 Services](#2-services)
+  - [2.1 Traefik](#21-traefik)
+  - [2.2 API](#22-api)
+    - [2.2.1 Zones](#221-zones)
+    - [2.2.2 Responsibilities](#222-responsibilities)
+    - [2.2.3 SSO Authentication](#223-sso-authentication)
+  - [2.3 Submission Pipeline](#23-submission-pipeline)
+    - [2.3.1 Kube Job](#231-kube-job)
+    - [2.3.2 Submission State Reporting](#232-submission-state-reporting)
+    - [2.3.3 Stages](#233-stages)
+      - [Clone](#clone)
+      - [Build](#build)
+      - [Test](#test)
+  - [2.4 Web Frontend](#24-web-frontend)
+    - [2.4.1 Autograde Results](#241-autograde-results)
+  - [2.5 Anubis Cloud IDE](#25-anubis-cloud-ide)
+    - [2.5.1 IDE Frontend](#251-ide-frontend)
+    - [2.5.2 Theia Pod Design](#252-theia-pod-design)
+    - [2.5.3 Reclaiming Theia Resources](#253-reclaiming-theia-resources)
+    - [2.5.4 Management IDE](#254-management-ide)
+  - [2.6 Datastores](#26-datastores)
+    - [2.6.1 Mariadb](#261-mariadb)
+    - [2.6.2 Elasticsearch](#262-elasticsearch)
+    - [2.6.3 Kibana](#263-kibana)
+    - [2.6.4 Redis + RQWorker](#264-redis--rqworker)
+    - [2.6.5 Redis + flask-caching](#265-redis--flask-caching)
+  - [2.7 Logging](#27-logging)
+    - [2.7.1 filebeat](#271-filebeat)
+- [3 Deployment](#3-deployment)
+  - [3.1 Kubernetes](#31-kubernetes)
+    - [3.1.1 Helm Chart](#311-helm-chart)
+    - [3.1.2 Rolling Updates](#312-rolling-updates)
+    - [3.1.3 Longhorn](#313-longhorn)
+    - [3.1.4 Digital Ocean](#314-digital-ocean)
+      - [3.1.5 Nodes](#315-nodes)
+      - [3.1.6 Networking](#316-networking)
+  - [3.2 Github](#32-github)
+    - [3.2.1 Organization](#321-organization)
+    - [3.2.2 Classroom](#322-classroom)
+- [4 CLI](#4-cli)
+  - [4.1 CLI in Management IDE](#41-cli-in-management-ide)
+  - [4.2 CLI Usage](#42-cli-usage)
+- [5 Assignments](#5-assignments)
+  - [5.1 Creating an Assignment Template Repository](#51-creating-an-assignment-template-repository)
+  - [5.2 Creating Assignment Tests](#52-creating-assignment-tests)
+  - [5.3 Writing Tests](#53-writing-tests)
+  - [5.4 Uploading Tests](#54-uploading-tests)
+  - [5.5 Creating Github Classroom Assignment](#55-creating-github-classroom-assignment)
+- [6 Usage Statistics](#6-usage-statistics)
+  - [6.1 Student Progress](#61-student-progress)
+  - [6.2 Class Progress](#62-class-progress)
+  - [6.3 Public Usage Visuals](#63-public-usage-visuals)
 
 \pagebreak
 
@@ -232,7 +235,7 @@ the pipeline. It is at that point that the API marks the submission as processed
 
 ### 2.4 Web Frontend
 
-The frontend ``is designed to be a simple reflection of the backend data. Once authenticated, users will
+The frontend is designed to be a simple reflection of the backend data. Once authenticated, users will
 be able to see the classes they are a part of, current and past assignments, and all their submissions.
 With few exceptions, the frontend is a near one to one translation of the API's data models. Most pages
 will have a corresponding API endpoint. The data shown on that page will be in exactly the form of the
@@ -292,7 +295,7 @@ time, we clone exactly what is in github into a theia pod.
 
 ![Theia Launch Session](./docs/img/theia1.png)
 
-Once their session pod has been allocated, then they can click the goto session button. It is at this point
+Once their session pod has been allocated, they can click the goto session button. It is at this point
 that their requests start to go through the theia proxy. Assuming all goes well with initializing the session,
 and starting the websocket connection, then students will have the following theia IDE.
 
@@ -314,7 +317,7 @@ theia server instance. When the pods are allocated, we note the ClusterIP in the
 initialize a client session, we use this saved ClusterIP to forward requests (both http and websockets) to the
 pod.
 
-These pods are temporary. When the student is finished working (or after a timeout) we reclaim the resources by
+These pods are temporary. When the student finishes working (or after a timeout) we reclaim the resources by
 deleting the containers and data. Because of this, we needed some form of autosave. Saving is pushing to github.
 The issue we need to contend with is how do we have automatic commits and pushes to github without exposing a
 password or api token to the users. We handle this by having a second container whose only role is committing and
@@ -494,7 +497,7 @@ The library we use for this is [flask-caching](https://flask-caching.readthedocs
 
 ### 2.7 Logging
 
-> _When it doubt, just log it_
+> _When in doubt, just log it_
 
 #### 2.7.1 filebeat
 
@@ -584,9 +587,9 @@ as simple as checking some boxes. You can see here our mariadb master image with
 
 The official Anubis cluster is hosted on Digital Ocean.
 Using their managed Kubernetes solution, the cluster can
-balloon in resources when their are many students online.
+balloon in resources when there are many students online.
 
-The main benifits of using a managed cluster instead of
+The main benefits of using a managed cluster instead of
 self hosting is ease of mind!
 
 ##### 3.1.5 Nodes
@@ -623,7 +626,7 @@ other student repos (given the assignment was made using a private repo).
 The best place to put the template repo is within the class organization as a private repo.
 
 One very important thing to note here is that in order to be able to create private assignment repo's, the
-classroom you create must be verified by github. This can take a few weeks, ad a professor needs to email
+classroom you create must be verified by github. This can take a few weeks, and a professor needs to email
 github asking for permission from a .edu email providing their title and whatnot.
 
 > Getting your github classroom / org approved will likely cause delays if not done at least a month
@@ -634,7 +637,7 @@ github asking for permission from a .edu email providing their title and whatnot
 
 ### 4.1 CLI in Management IDE
 
-In the Anubis Management IDEs there is a anubis cli installed. When a
+In the Anubis Management IDEs there is an anubis cli installed. When a
 Management IDE is started, it is provisioned with the necessary authentication
 tokens to communicate with the Anubis API.
 
@@ -699,7 +702,7 @@ that anubis uses to identify this assignment. Hold on to this, as we will use it
 step.
 
 Here is an example generated `meta.yml` from the OS final exam this semester. The only fields that
-will you will need to fill in are the `github_classroom_url`. This is the URL that is given
+you will need to fill in are the `github_classroom_url`. This is the URL that is given
 to you when you create a github classroom assignment. That link will then be provided as a button
 for students to click in the frontend.
 
