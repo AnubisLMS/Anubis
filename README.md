@@ -1,10 +1,10 @@
-# Anubis Design Doc
+# Anubis LMS Design Doc
 
 ![](./docs/img/anubis-icon-1.png)
 
-> Author: John Cunniff
+> Author: [John Cunniff](https://github.com/wabscale)
 
-> Version: v3.0.3
+> Version: v3.1.0
 
 \pagebreak
 
@@ -13,7 +13,6 @@
 \pagebreak
 
 # Contents
-- [Anubis Design Doc](#anubis-design-doc)
 - [1 Overview](#1-overview)
   - [1.1 Elevator Pitch](#11-elevator-pitch)
   - [1.2 Motivations](#12-motivations)
@@ -134,7 +133,7 @@ have both the static store and api on the same domain. The rules are set up such
 starts with a path of `/api` goes to the api service.
 
 By leveraging these features of Traefik, we can make it appear that the services work different when
-being accessed externally. Namely, the basic authentication for certain paths (and therefore services).
+being accessed externally.
 
 > One thing to note here is that when being accessed from within the cluster, none of these rules
 > apply as we would be connecting directly to services.
@@ -142,7 +141,7 @@ being accessed externally. Namely, the basic authentication for certain paths (a
 ### 2.2 API
 
 The API is the backbone of anubis. It is where all the heavy lifting is done. The service relies on both
-the [cache]() and [mariadb](#261-mariadb) data stores to maintain state.
+the [cache](#265-redis--flask-caching) and [mariadb](#261-mariadb) data stores to maintain state.
 
 #### 2.2.1 Zones
 
@@ -250,12 +249,6 @@ new data, it will update what is displayed.
 Located on the submission page, the purpose of the regrade button is to be a simple and easy way for
 users to request regrades. When clicked, the frontend will hit a special endpoint for requesting regrades.
 If successful, the submission will be re-enqueued in a submission pipeline.
-
-On the submissions page, the find-missing button will trigger a server side update of the submission data.
-When the find-missing endpoint is hit, the API will use the graphql API for github to pull all the commits
-for all the known repos for that user. If it sees commits that were not previously seen (likely though github
-not delivering a webhook), then it will create and enqueue the new submissions.
-
 
 #### 2.4.1 Autograde Results
 

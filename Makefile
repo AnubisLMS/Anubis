@@ -1,4 +1,4 @@
-PERSISTENT_SERVICES := db traefik kibana elasticsearch-coordinating redis-master
+PERSISTENT_SERVICES := db traefik redis-master
 RESTART_ALWAYS_SERVICES := api web-dev rpc-default rpc-theia rpc-regrade
 PUSH_SERVICES := api web theia-init theia-proxy theia-admin theia-xv6
 
@@ -12,9 +12,11 @@ startup-links:
 	@echo ''
 	@echo 'seed: http://localhost/api/admin/seed/'
 	@echo 'auth: http://localhost/api/admin/auth/token/superuser'
-	@echo 'auth: http://localhost/api/admin/auth/token/ta'
 	@echo 'auth: http://localhost/api/admin/auth/token/professor'
+	@echo 'auth: http://localhost/api/admin/auth/token/ta'
+	@echo 'auth: http://localhost/api/admin/auth/token/student'
 	@echo 'site: http://localhost/'
+
 
 .PHONY: deploy       # Deploy Anubis to cluster
 deploy:
@@ -42,17 +44,20 @@ debug:
 	make -C api migrations
 	make startup-links
 
-.PHONY: mindebug     # Start the minimal cluster in debug mode
+.PHONY: mindebug     # Setup mindebug environment
 mindebug:
-	docker-compose up -d traefik db redis-master
-	docker-compose up \
-		-d --force-recreate \
-		api web-dev rpc-default
-	@echo 'Waiting a moment before running migrations'
-	sleep 3
-	@echo 'running migrations'
-	make -C api migrations
-	make startup-links
+	make -C api venv
+	cd web && yarn
+	@echo ''
+	@echo 'run `make run` from api'
+	@echo 'run `yarn run start` from web'
+	@echo ''
+	@echo 'seed: http://localhost:3000/api/admin/seed/'
+	@echo 'auth: http://localhost:3000/api/admin/auth/token/superuser'
+	@echo 'auth: http://localhost:3000/api/admin/auth/token/professor'
+	@echo 'auth: http://localhost:3000/api/admin/auth/token/ta'
+	@echo 'auth: http://localhost:3000/api/admin/auth/token/student'
+	@echo 'site: http://localhost:3000/'
 
 .PHONY: debug-mk     # Start minikube debug
 debug-mk:

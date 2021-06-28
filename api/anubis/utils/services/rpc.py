@@ -19,10 +19,18 @@ def rpc_enqueue(func, queue=None, args=None):
     :func callable: any callable object
     :args tuple: ordered arguments for function
     """
+
+    # Set defaults
     if queue is None:
         queue = 'default'
     if args is None:
         args = tuple()
+
+    # If we are running in mindebug, there is
+    # no rq cluster to send things off to.
+    if config.MINDEBUG:
+        return func(*args)
+
     with Redis(host=config.CACHE_REDIS_HOST, password=config.CACHE_REDIS_PASSWORD) as conn:
         q = Queue(name=queue, connection=conn)
         q.enqueue(func, *args)

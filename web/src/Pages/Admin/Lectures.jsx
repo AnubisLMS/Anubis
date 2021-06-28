@@ -103,7 +103,7 @@ export default function Static() {
   };
 
   React.useEffect(() => {
-    axios.get('/api/admin/lecture/list').then((response) => {
+    axios.get('/api/admin/lectures/list').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
         setLectures(data.lectures);
