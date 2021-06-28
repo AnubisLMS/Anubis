@@ -50,8 +50,8 @@ mindebug:
 		api web-dev rpc-default
 	@echo 'Waiting a moment before running migrations'
 	sleep 3
-# 	@echo 'running migrations'
-# 	make -C api migrations
+	@echo 'running migrations'
+	make -C api migrations
 	make startup-links
 
 .PHONY: debug-mk     # Start minikube debug
