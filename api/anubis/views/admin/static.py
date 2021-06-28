@@ -3,14 +3,10 @@ from sqlalchemy.orm import defer
 
 from anubis.models import db, StaticFile
 from anubis.utils.auth import require_admin
-from anubis.utils.data import rand, req_assert
+from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
-from anubis.utils.http.files import get_mime_type
-from anubis.utils.http.https import (
-    get_request_file_stream,
-    success_response,
-    error_response,
-)
+from anubis.utils.http.files import process_file_upload
+from anubis.utils.http.https import success_response
 from anubis.utils.lms.courses import get_course_context, assert_course_context
 
 static = Blueprint("admin-static", __name__, url_prefix="/admin/static")
@@ -59,7 +55,7 @@ def admin_static_list():
     List all public blob files. Optionally specify a limit
     and an offset.
 
-    /admin/static/list?limit=20&offset=20
+    /admin/static/list
 
     :return:
     """
@@ -86,7 +82,7 @@ def admin_static_list():
 @static.route("/upload", methods=["POST"])
 @require_admin(unless_debug=True)
 @json_response
-def admin_static_upload():
+def admin_static_file_upload():
     """
     Upload a new public static file. The file will immediately be
     publicly available.
@@ -97,43 +93,10 @@ def admin_static_upload():
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
-    # Create a path hash
-    path = "/" + rand(16)
-
-    # Pull file from request
-    stream, filename = get_request_file_stream(with_filename=True)
-
-    # Make sure we got a file
-    if stream is None:
-        return error_response("No file uploaded")
-
-    # Figure out content type
-    mime_type = get_mime_type(stream)
-
-    if mime_type == 'image/svg':
-        mime_type = 'image/svg+xml'
-
-    # Check to see if blob path already exists
-    blob = StaticFile.query.filter(StaticFile.path == path).first()
-
-    # If the blob doesn't already exist, create one
-    if blob is None:
-        blob = StaticFile(path=path, course_id=course.id)
-
-    # Update the fields
-    blob.filename = filename
-    blob.blob = stream
-    blob.content_type = mime_type
-
-    # Add to db
-    db.session.add(blob)
-    db.session.commit()
+    blob = process_file_upload()
 
     # Pass back the status
     return success_response({
-        "status": f"{filename} uploaded",
+        "status": f"{blob.filename} uploaded",
         "blob": blob.data,
     })
