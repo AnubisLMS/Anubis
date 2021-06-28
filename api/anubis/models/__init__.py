@@ -19,7 +19,7 @@ def default_id(max_len=None) -> db.Column:
 
 
 class Config(db.Model):
-    __tablename__ = "config"
+    __tablename__ = "anubis_config"
 
     # Fields
     key = db.Column(db.String(128), primary_key=True)

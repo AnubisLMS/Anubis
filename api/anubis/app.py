@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, Blueprint
 
 
 def init_services(app):
@@ -35,7 +35,7 @@ def create_app():
 
     :return: Flask app
     """
-    from anubis.config import Config
+    from anubis.config import config
 
     # Import views
     from anubis.views.public import register_public_views
@@ -43,14 +43,25 @@ def create_app():
 
     # Create app
     app = Flask(__name__)
-    app.config.from_object(Config())
+    app.config.from_object(config)
 
     # Initialize app with all the extra services
     init_services(app)
 
     # register views
-    register_public_views(app)
-    register_admin_views(app)
+    if not config.MINDEBUG:
+        register_public_views(app)
+        register_admin_views(app)
+
+    # MINDEBUG
+    else:
+        # If not mindebug, then we need to add a /api base blueprint to add thing onto
+        api_blueprint = Blueprint('anubis-api-app', __name__, url_prefix='/api')
+
+        register_public_views(api_blueprint)
+        register_admin_views(api_blueprint)
+
+        app.register_blueprint(api_blueprint)
 
     return app
 

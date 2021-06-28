@@ -1,9 +1,8 @@
-import magic
 from flask import Response, make_response
 
-from anubis.models import db, StaticFile, Course
-from anubis.utils.http.https import get_request_file_stream, error_response
+from anubis.models import db, StaticFile
 from anubis.utils.data import rand, req_assert
+from anubis.utils.http.https import get_request_file_stream
 from anubis.utils.lms.courses import get_course_context
 
 
@@ -19,8 +18,20 @@ def get_mime_type(blob: bytes) -> str:
     :param blob:
     :return:
     """
+
+    # If this fails to import, you probably need to
+    # install libmagic system wide. It should be:
+    #
+    # OSX     : brew install libmagic
+    # Windows : pip install python-magic-bin
+    # Debian  : apt install libmagic1
+    # Arch    : pacman -S imagemagick
+    import magic
+
+    # Create some magic
     m = magic.Magic(mime=True)
 
+    # Calculate mime from bytes
     return m.from_buffer(blob)
 
 

@@ -8,6 +8,9 @@ LINT_FILES := $(shell find $(LINT_DIRECTORIES) -name '*.py' | xargs)
 .PHONY: all
 all: venv
 
+run: venv
+	env MINDEBUG=1 DEBUG=1 ./venv/bin/python3 dev.py
+
 venv:
 	virtualenv -p `which python3` venv
 	./venv/bin/pip install -r ./requirements.txt
@@ -33,11 +36,7 @@ lint: venv
 
 .PHONY: clean
 clean:
-	rm -rf $$(find -name __pycache__) venv
-
-.PHONY: db-cli
-db-cli:
-	mysql -u anubis -h 127.0.0.1 --password=anubis anubis
+	rm -rf $$(find -name __pycache__) venv .data
 
 .PHONY: pydoc
 pydoc: venv

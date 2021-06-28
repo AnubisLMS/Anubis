@@ -17,6 +17,7 @@
     "axios": "^0.21.1",
     "clsx": "^1.1.0",
     "date-fns": "^2.0.0",
+    "http-proxy-middleware": "^2.0.0",
     "markdown-to-jsx": "^7.1.2",
     "notistack": "^1.0.3",
     "react": "^17.0.1",
@@ -35,6 +36,7 @@
     "universal-cookie": "^4.0.4",
     "web-vitals": "^1.1.0"
   },
+  "proxy": "http://localhost:5000/",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
