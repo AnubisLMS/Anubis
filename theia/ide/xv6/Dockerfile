@@ -13,6 +13,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /home/theia
 
 COPY latest.package.json package.json
+COPY motd.txt /etc/motd
 
 RUN set -ex; \
   chown -R 1001:1001 /home/theia; \
@@ -55,6 +56,7 @@ RUN set -ex; \
   cp .oh-my-zsh/templates/zshrc.zsh-template .zshrc; \
   sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="gnzh"/' .zshrc; \
   sed -i 's/plugins=(git)/plugins=(git zsh-syntax-highlighting)/' .zshrc; \
+  echo 'cat /etc/motd' >> .zshrc; \
   mkdir -p /home/theia/.theia; \
   echo '{"terminal.integrated.shell.linux": "/usr/bin/zsh"}' \
     > /home/theia/.theia/settings.json; \
