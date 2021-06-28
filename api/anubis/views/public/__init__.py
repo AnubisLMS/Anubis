@@ -12,6 +12,7 @@ def register_public_views(app):
     from anubis.views.public.questions import questions
     from anubis.views.public.memes import memes
     from anubis.views.public.visuals import visuals
+    from anubis.views.public.lectures import lectures_
 
     views = [
         auth_,
@@ -25,7 +26,9 @@ def register_public_views(app):
         static,
         courses_,
         questions,
-        memes, visuals,
+        memes,
+        visuals,
+        lectures_,
     ]
 
     for view in views:
