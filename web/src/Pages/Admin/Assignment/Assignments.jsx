@@ -58,7 +58,7 @@ export default function Assignments() {
       <Grid item xs={12}>
         <ManagementIDEDialog/>
       </Grid>
-      <Grid item xs={8}>
+      <Grid item xs={12} md={12} lg={10}>
         <Paper className={classes.paper}>
           <DataGrid columns={[
             {field: 'name', headerName: 'Assignment Name', width: 200},

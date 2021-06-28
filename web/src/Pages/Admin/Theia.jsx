@@ -2,12 +2,10 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import {useSnackbar} from 'notistack';
 
-import {DataGrid} from '@material-ui/data-grid';
 import Grid from '@material-ui/core/Grid';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import Fab from '@material-ui/core/Fab';
 import RefreshIcon from '@material-ui/icons/Refresh';
@@ -17,6 +15,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CheckIcon from '@material-ui/icons/Check';
 import CancelIcon from '@material-ui/icons/Cancel';
 
+import {CustomGrid} from '../../Components/Shared';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
 import ManagementIDEDialog from '../../Components/Admin/IDE/ManagementIDEDialog';
@@ -154,19 +153,15 @@ export default function Theia() {
         </Tooltip>
       </Grid>
       <Grid item/>
-      <Grid item xs={12} md={10}>
-        <Grid container spacing={4}>
-          <Grid item xs={12}>
-            <Paper className={classes.paper}>
-              <DataGrid
-                disableColumnMenu={true}
-                className={classes.dataGrid}
-                columns={columns}
-                rows={rows}
-              />
-            </Paper>
-          </Grid>
-        </Grid>
+      <Grid item xs={12} md={12} lg={10}>
+        <CustomGrid {
+          ... {
+            columns: columns,
+            rows: rows,
+            disableColumnMenu: true,
+          }
+        }
+        />
       </Grid>
     </Grid>
   );

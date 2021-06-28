@@ -11,6 +11,7 @@ import Button from '@material-ui/core/Button';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import EditIcon from '@material-ui/icons/Edit';
 
+import {CustomGrid} from '../../Components/Shared';
 import LectureUploadDialog from '../../Components/Admin/Lecture/LectureUploadDialog';
 import LectureEditDialog from '../../Components/Admin/Lecture/LectureEditDialog';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
@@ -140,25 +141,12 @@ export default function Static() {
         </Grid>
         <Grid item/>
         <Grid item xs={12} md={12} lg={10}>
-          <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <Paper className={classes.paper}>
-                <div style={{height: 700}}>
-                  <DataGrid
-                    pagination
-                    page={page}
-                    pageSize={pageSize}
-                    rowsPerPageOptions={[10, 20, 30]}
-                    onPageChange={(value) => setPage(value.page)}
-                    onPageSizeChange={(value) => setPageSize(value.pageSize)}
-                    className={classes.dataGrid}
-                    columns={columns}
-                    rows={rows}
-                  />
-                </div>
-              </Paper>
-            </Grid>
-          </Grid>
+          <CustomGrid {
+            ... {
+              columns: columns,
+              rows: rows,
+            }
+          }/>
         </Grid>
       </Grid>
     </div>

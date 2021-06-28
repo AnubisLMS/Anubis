@@ -10,6 +10,7 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 
+import {CustomGrid} from '../../../Components/Shared';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 
@@ -74,16 +75,15 @@ export default function Assignments() {
           Autograded Assignments
         </Typography>
       </Grid>
-      <Grid item xs={12} sm={10} md={8}>
-        <Paper className={clsx(classes.dataGridPaper, classes.paper)}>
-          <DataGrid
-            className={classes.dataGrid}
-            sortModel={sortModel}
-            columns={columns}
-            rows={assignments}
-            onRowClick={({row}) => setSelected(row)}
-          />
-        </Paper>
+      <Grid item xs={12} md={12} lg={10}>
+        <CustomGrid {
+          ... {
+            rows: assignments,
+            columns: columns,
+            sortModel: sortModel,
+            onRowClick: (row) => setSelected(row),
+          }
+        } />
       </Grid>
     </Grid>
   );

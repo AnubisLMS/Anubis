@@ -4,7 +4,6 @@ import axios from 'axios';
 import {useSnackbar} from 'notistack';
 import {Link} from 'react-router-dom';
 
-import {DataGrid} from '@material-ui/data-grid/';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -18,6 +17,7 @@ import Typography from '@material-ui/core/Typography';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
+import {CustomGrid} from '../../Components/Shared';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
 import AuthContext from '../../Contexts/AuthContext';
@@ -205,27 +205,18 @@ export default function Users() {
           </div>
         </Paper>
       </Grid>
-      <Grid item xs={12} md={10} key={'user-table'}>
-        <Paper className={clsx(classes.paper, classes.dataGridPaper)}>
-          <div className={classes.dataGrid}>
-            <AuthContext.Consumer>
-              {(user) => (
-                <DataGrid
-                  pagination
-                  pageSize={10}
-                  rowsPerPageOptions={[5, 10, 20]}
-                  rows={rows}
-                  columns={columns(user)}
-                  filterModel={{
-                    items: [
-                      {columnField: 'name', operatorValue: 'contains', value: ''},
-                    ],
-                  }}
-                />
-              )}
-            </AuthContext.Consumer>
-          </div>
-        </Paper>
+      <Grid item xs={12} md={12} lg={10} key={'user-table'}>
+        <AuthContext.Consumer>
+          {(user) => (
+            <CustomGrid {
+              ... {
+                rows: rows,
+                columns: columns(user),
+              }
+            }
+            />
+          )}
+        </AuthContext.Consumer>
       </Grid>
     </Grid>
   );

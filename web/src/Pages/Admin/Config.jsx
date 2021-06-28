@@ -4,8 +4,6 @@ import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
 import Grid from '@material-ui/core/Grid';
-import {DataGrid} from '@material-ui/data-grid/';
-import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
@@ -13,6 +11,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import EditIcon from '@material-ui/icons/Edit';
 import AddIcon from '@material-ui/icons/Add';
 
+import {CustomGrid} from '../../Components/Shared';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
 import Typography from '@material-ui/core/Typography';
@@ -148,13 +147,7 @@ export default function Config() {
           </Button>
         </Grid>
         <Grid item xs={12}>
-          <Paper className={classes.paper}>
-            <DataGrid
-              rows={config}
-              columns={columns}
-              pageSize={5}
-            />
-          </Paper>
+          <CustomGrid {... {rows: config, columns: columns}} />
         </Grid>
       </Grid>
     </div>
