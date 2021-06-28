@@ -1,3 +1,10 @@
+###############################################################
+#                                                             #
+#  This file is meant for debugging ONLY. Do not use in prod  #
+#                                                             #
+###############################################################
+
+
 version: '3.7'
 
 services:
@@ -11,8 +18,6 @@ services:
 
       - "--entrypoints.http.address=:80"
       - "--entrypoints.https.address=:443"
-      # - "--entrypoints.http.http.redirections.entryPoint.to=https"
-      # - "--entrypoints.http.http.redirections.entryPoint.scheme=https"
 
     ports:
       - "80:80"
@@ -30,6 +35,7 @@ services:
     ports:
       - 5000:5000
     environment:
+      - "MINDEBUG=0"
       - "DEBUG=1"
       - "DB_HOST=db"
       - "THEIA_DOMAIN=ide.localhost"
@@ -134,15 +140,6 @@ services:
     labels:
       - "traefik.enable=false"
 
-  adminer:
-    image: adminer:4
-    ports:
-      - 127.0.0.1:5002:8080
-    environment:
-      - "ADMINER_DEFAULT_SERVER=db"
-    labels:
-      - "traefik.enable=false"
-
   redis-master:
     image: redis:latest
     command: redis-server --requirepass anubis
@@ -150,23 +147,6 @@ services:
       - "127.0.0.1:6379:6379"
     labels:
       - "traefik.enable=false"
-
-  elasticsearch-coordinating:
-    image: elasticsearch:7.10.1
-    environment:
-      - "discovery.type=single-node"
-    volumes:
-      - el_data:/usr/share/elasticsearch/data
-      - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
-    labels:
-      - "traefik.enable=false"
-
-  kibana:
-    image: kibana:7.10.1
-    ports:
-      - 127.0.0.1:5001:5601
-    volumes:
-      - "/usr/share/zoneinfo/America/New_York:/etc/localtime:ro"
 
   theia-xv6:
     image: registry.digitalocean.com/anubis/theia-xv6:latest
