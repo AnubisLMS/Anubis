@@ -19,7 +19,7 @@ from anubis.models import (
 )
 from anubis.utils.auth import get_user
 from anubis.utils.data import is_debug
-from anubis.utils.lms.courses import assert_course_admin
+from anubis.utils.lms.courses import assert_course_admin, get_student_course_ids
 from anubis.utils.lms.courses import is_course_admin
 from anubis.utils.lms.questions import ingest_questions
 from anubis.utils.services.cache import cache
@@ -43,17 +43,8 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
     if user is None:
         return None
 
-    # Get all the courses the user is in
-    in_courses = InCourse.query.join(Course).filter(
-        InCourse.owner_id == user.id,
-    ).all()
-
-    # Build a list of course ids. If the user
-    # specified a specific course, make a list
-    # of only that course id.
-    course_ids = [course_id] \
-        if course_id is not None \
-        else [in_course.course.id for in_course in in_courses]
+    # Get the list of course ids
+    course_ids = get_student_course_ids(user, default=course_id)
 
     # Build a list of all the assignments visible
     # to this user for each of the specified courses.
