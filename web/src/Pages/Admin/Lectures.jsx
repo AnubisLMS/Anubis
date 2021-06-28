@@ -9,8 +9,10 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import EditIcon from '@material-ui/icons/Edit';
 
-import FileUploadDialog from '../../Components/Admin/Static/FileUploadDialog';
+import LectureUploadDialog from '../../Components/Admin/Lecture/LectureUploadDialog';
+import LectureEditDialog from '../../Components/Admin/Lecture/LectureEditDialog';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
 
@@ -25,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const deleteFile = (id, state, enqueueSnackbar) => () => {
-  axios.get(`/api/admin/static/delete/${id}`).then((response) => {
+  axios.get(`/api/admin/lecture/delete/${id}`).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
     if (data) {
       state.setReset((prev) => ++prev);
@@ -33,10 +35,11 @@ const deleteFile = (id, state, enqueueSnackbar) => () => {
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
-
 const useColumns = (state, enqueueSnackbar) => ([
+  {field: 'number', headerName: 'Lecture Number', width: 160},
+  {field: 'title', headerName: 'Lecture Title', width: 300},
   {
-    field: 'a', headerName: 'URL', width: 300, renderCell: ({row}) => (
+    field: 'a', headerName: 'Lecture File', width: 300, renderCell: ({row}) => (
       <div>
         <Typography
           variant={'body1'}
@@ -44,14 +47,26 @@ const useColumns = (state, enqueueSnackbar) => ([
           style={{display: 'inline'}}
           component={'a'}
           target={'_blank'}
-          href={`${window.location.origin}/api/public/static${row.path}/${row.filename}`}
+          href={`${window.location.origin}/api/public/static${row.static_file.path}/${row.static_file.filename}`}
         >
-          {row.filename}
+          {row.static_file.filename}
         </Typography>
       </div>
     ),
   },
-  {field: 'content_type', headerName: 'Content Type', width: 150},
+  {
+    field: 'edit', headerName: 'Edit', width: 150, renderCell: ({row}) => (
+      <Button
+        variant={'contained'}
+        color={'primary'}
+        size={'small'}
+        startIcon={<EditIcon/>}
+        onClick={() => state.setOpenEdit(row)}
+      >
+        Edit
+      </Button>
+    ),
+  },
   {
     field: 'kill', headerName: 'Delete', width: 150, renderCell: ({row}) => (
       <Button
@@ -59,9 +74,9 @@ const useColumns = (state, enqueueSnackbar) => ([
         color={'secondary'}
         size={'small'}
         startIcon={<DeleteForeverIcon/>}
-        onClick={deleteFile(row.id, state, enqueueSnackbar)}
+        onClick={deleteFile(row, state, enqueueSnackbar)}
       >
-        Delete File
+        Delete
       </Button>
     ),
   },
@@ -71,32 +86,34 @@ const useColumns = (state, enqueueSnackbar) => ([
 export default function Static() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
+  const [openEdit, setOpenEdit] = useState(null);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [files, setFiles] = useState([]);
+  const [lectures, setLectures] = useState([]);
   const [rows, setRows] = useState([]);
   const [reset, setReset] = useState([]);
 
   const pageState = {
     page, setPage,
     pageSize, setPageSize,
-    files, setFiles,
+    lectures, setLectures,
     rows, setRows,
     reset, setReset,
+    openEdit, setOpenEdit,
   };
 
   React.useEffect(() => {
-    axios.get('/api/admin/static/list').then((response) => {
+    axios.get('/api/admin/lecture/list').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
-        setFiles(data.files);
+        setLectures(data.lectures);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [page, pageSize, reset]);
 
   React.useEffect(() => {
-    setRows(files);
-  }, [files]);
+    setRows(lectures);
+  }, [lectures]);
 
   const columns = useColumns(pageState, enqueueSnackbar);
 
@@ -108,11 +125,18 @@ export default function Static() {
             Anubis
           </Typography>
           <Typography variant={'subtitle1'} color={'textSecondary'}>
-            Static File Management
+            Lecture Management
           </Typography>
         </Grid>
         <Grid item xs={12}>
-          <FileUploadDialog className={classes.button} setReset={setReset}/>
+          <LectureUploadDialog className={classes.button} setReset={setReset}/>
+          <LectureEditDialog
+            lecture={openEdit}
+            open={openEdit !== null}
+            setOpen={setOpenEdit}
+            className={classes.button}
+            setReset={setReset}
+          />
         </Grid>
         <Grid item/>
         <Grid item xs={12} md={12} lg={10}>
