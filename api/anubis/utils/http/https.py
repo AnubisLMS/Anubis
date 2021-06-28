@@ -2,6 +2,9 @@ from datetime import datetime, timedelta
 from typing import Union, Tuple
 
 from flask import request
+from werkzeug.utils import secure_filename
+
+from anubis.utils.data import req_assert
 
 
 def get_request_ip():
@@ -101,7 +104,7 @@ def get_number_arg(arg_name: str = "number", default_value: int = 10, reject_neg
         return default_value
 
 
-def get_request_file_stream(with_filename=False) -> Union[bytes, None, Tuple[bytes, str]]:
+def get_request_file_stream(with_filename=False, fail_ok=False) -> Union[bytes, None, Tuple[bytes, str], Tuple[None, None]]:
     """
     Get first file uploaded in the request. Will return None if
     there is no file uploaded.
@@ -109,16 +112,21 @@ def get_request_file_stream(with_filename=False) -> Union[bytes, None, Tuple[byt
     :return:
     """
 
-    # Check to see if we have a single file
-    if len(request.files) != 1:
-        return None
+    # Check to see if we have a file
+    if len(request.files) == 0:
+        # If failing is not allowed, call assert false to abort request
+        if not fail_ok:
+            req_assert(False, message='No file uploaded')
+
+        # If failing is ok, then we can pass back None
+        return None, None if with_filename else None
 
     # Get file from request
     file = list(request.files.values())[0]
 
     # If they want the filename too
     if with_filename:
-        return file.stream.read(), file.filename
+        return file.stream.read(), secure_filename(file.filename)
 
     # Read its stream
     return file.stream.read()

@@ -13,6 +13,7 @@ import PieChartIcon from '@material-ui/icons/PieChart';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import BookIcon from '@material-ui/icons/Book';
 import TimelineIcon from '@material-ui/icons/Timeline';
+import ImportContactsIcon from '@material-ui/icons/ImportContacts';
 
 import About from './Pages/Public/About';
 import Courses from './Pages/Public/Courses';
@@ -23,6 +24,7 @@ import Submissions from './Pages/Public/Submissions';
 import Submission from './Pages/Public/Submission';
 import Blog from './Pages/Public/Blog';
 import Visuals from './Pages/Public/Visuals';
+import Lectures from './Pages/Public/Lectures';
 
 import AdminUsers from './Pages/Admin/Users';
 import AdminUser from './Pages/Admin/User';
@@ -30,6 +32,7 @@ import AdminCourse from './Pages/Admin/Course';
 import AdminTheia from './Pages/Admin/Theia';
 import AdminStatic from './Pages/Admin/Static';
 import AdminConfig from './Pages/Admin/Config';
+import AdminLectures from './Pages/Admin/Lectures';
 import AdminAutogradeAssignments from './Pages/Admin/Autograde/Assignments';
 import AdminAutogradeSubmission from './Pages/Admin/Autograde/Submission';
 import AdminAutogradeResults from './Pages/Admin/Autograde/Results';
@@ -73,6 +76,12 @@ export const public_nav = [
         icon: <SchoolIcon/>,
         path: '/courses',
         Page: Courses,
+      },
+      {
+        id: 'Lectures',
+        icon: <ImportContactsIcon/>,
+        path: '/lectures',
+        Page: Lectures,
       },
       {
         id: 'Assignments',
@@ -140,6 +149,12 @@ export const admin_nav = [
     icon: <AttachFileIcon/>,
     path: '/admin/static',
     Page: AdminStatic,
+  },
+  {
+    id: 'Lectures',
+    icon: <ImportContactsIcon/>,
+    path: '/admin/lectures',
+    Page: AdminLectures,
   },
   {
     id: 'Config',

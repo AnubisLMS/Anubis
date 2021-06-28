@@ -1,7 +1,10 @@
 import magic
 from flask import Response, make_response
 
-from anubis.models import StaticFile
+from anubis.models import db, StaticFile, Course
+from anubis.utils.http.https import get_request_file_stream, error_response
+from anubis.utils.data import rand, req_assert
+from anubis.utils.lms.courses import get_course_context
 
 
 def get_mime_type(blob: bytes) -> str:
@@ -42,3 +45,41 @@ def make_blob_response(file: StaticFile) -> Response:
 
     # Hand the flask response back
     return response
+
+
+def process_file_upload() -> StaticFile:
+    # Get the current course context
+    course = get_course_context()
+
+    # Create a path hash
+    path = "/" + rand(16)
+
+    # Pull file from request
+    stream, filename = get_request_file_stream(with_filename=True)
+
+    # Make sure we got a file
+    req_assert(stream is not None, message='No file uploaded')
+
+    # Figure out content type
+    mime_type = get_mime_type(stream)
+
+    if mime_type == 'image/svg':
+        mime_type = 'image/svg+xml'
+
+    # Check to see if blob path already exists
+    blob = StaticFile.query.filter(StaticFile.path == path).first()
+
+    # If the blob doesn't already exist, create one
+    if blob is None:
+        blob = StaticFile(path=path, course_id=course.id)
+
+    # Update the fields
+    blob.filename = filename
+    blob.blob = stream
+    blob.content_type = mime_type
+
+    # Add to db
+    db.session.add(blob)
+    db.session.commit()
+
+    return blob

@@ -3,7 +3,7 @@ import json
 import string
 import traceback
 import urllib.parse
-from typing import Union, Tuple, Any
+from typing import Union, Tuple, Any, List
 
 from flask import request
 
@@ -22,6 +22,7 @@ from anubis.models import (
     User,
     InCourse,
     LateException,
+    LectureNotes,
 )
 from anubis.utils.auth import current_user
 from anubis.utils.data import is_debug
@@ -276,6 +277,7 @@ def assert_course_context(*models: Tuple[Any]):
             Assignment,
             StaticFile,
             TheiaSession,
+            LectureNotes,
         ]:
             if isinstance(model, model_type):
                 object_stack.append(model.course)
@@ -327,3 +329,30 @@ def get_courses(netid: str):
 
     # Convert to list of data representation
     return [c.data for c in classes]
+
+
+def get_student_course_ids(user: User, default: str = None) -> List[str]:
+    """
+    Get the course ids for the courses that the user is in.
+
+    :param user:
+    :param default: 
+    :return:
+    """
+
+    # Get all the courses the user is in
+    in_courses = InCourse.query.join(Course).filter(
+        InCourse.owner_id == user.id,
+    ).all()
+
+    # Build a list of course ids. If the user
+    # specified a specific course, make a list
+    # of only that course id.
+    course_ids = [in_course.course.id for in_course in in_courses]
+
+    # If a default was specified, check
+    if default is not None and default in course_ids:
+        course_ids = [default]
+
+    # Pass back list of course ids
+    return course_ids

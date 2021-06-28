@@ -6,12 +6,14 @@ from utils import Session
 
 
 def test_static_public():
+    # Upload image as a professor first so we have a image to test downloading
     logo = requests.get('https://linux.org/images/logo.png').content
     filename = 'logo.png'
     prof = Session('professor')
     logo_file = io.BytesIO(logo)
     blob_id = prof.post('/admin/static/upload', files={filename: logo_file})['blob']['path'].lstrip('/')
 
+    # Now test as a student
     student = Session('student')
     r = student.get(f'/public/static/{blob_id}', return_request=True, skip_verify=True)
     assert r.status_code == 200
