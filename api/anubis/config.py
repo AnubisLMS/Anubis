@@ -12,7 +12,6 @@ class Config:
         self.SECRET_KEY = os.environ.get("SECRET_KEY", default="DEBUG")
 
         # sqlalchemy
-        self.SQLALCHEMY_DATABASE_URI = None
         self.SQLALCHEMY_POOL_PRE_PING = True
         self.SQLALCHEMY_POOL_SIZE = 100
         self.SQLALCHEMY_POOL_RECYCLE = 280
