@@ -20,6 +20,7 @@ const CustomGrid = (
     onRowClick = () => {},
     onColumnClick = () => {},
     disableColumnMenu = false,
+    loading = null,
   },
 ) => {
   const classes = useStyles();
@@ -42,6 +43,8 @@ const CustomGrid = (
               onColumnClick={onColumnClick}
               columns = {columns}
               rows = {rows}
+              loading = {loading}
+
             />
           </div>
         </Paper>

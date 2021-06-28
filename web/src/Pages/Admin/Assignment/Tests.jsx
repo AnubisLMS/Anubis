@@ -21,6 +21,7 @@ import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
 import yellow from '@material-ui/core/colors/yellow';
 
+import {PageTitle} from '../../../Components/Shared';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 
@@ -119,14 +120,7 @@ export default function Tests() {
       </Dialog>
 
       <Grid container spacing={2} justify={'center'} alignItems={'center'}>
-        <Grid item xs={12}>
-          <Typography variant="h6">
-            Anubis
-          </Typography>
-          <Typography variant={'subtitle1'} color={'textSecondary'}>
-            Assignment Tests Management
-          </Typography>
-        </Grid>
+        <PageTitle {... {description: 'Assignment Test Management'}} />
         <Grid item/>
         <Grid item xs={10}>
           <Grid container spacing={2}>

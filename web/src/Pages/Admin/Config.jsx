@@ -11,7 +11,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import EditIcon from '@material-ui/icons/Edit';
 import AddIcon from '@material-ui/icons/Add';
 
-import {CustomGrid} from '../../Components/Shared';
+import {CustomGrid, PageTitle} from '../../Components/Shared';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
 import Typography from '@material-ui/core/Typography';
@@ -128,14 +128,7 @@ export default function Config() {
   return (
     <div className={classes.root}>
       <Grid container spacing={4} justify={'center'} alignItems={'center'}>
-        <Grid item xs={12}>
-          <Typography variant="h6">
-            Anubis
-          </Typography>
-          <Typography variant={'subtitle1'} color={'textSecondary'}>
-            Config
-          </Typography>
-        </Grid>
+        <PageTitle {... {description: 'Config'}}/>
         <Grid item xs>
           <Button
             variant={'contained'}

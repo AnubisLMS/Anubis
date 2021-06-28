@@ -15,7 +15,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CheckIcon from '@material-ui/icons/Check';
 import CancelIcon from '@material-ui/icons/Cancel';
 import GitHubIcon from '@material-ui/icons/GitHub';
-
+import {PageTitle} from '../../Components/Shared';
 
 export default function User() {
   const query = useQuery();
@@ -49,15 +49,7 @@ export default function User() {
 
   return (
     <Grid container spacing={4} justify={'center'} alignItems={'flex-start'}>
-      <Grid item xs={12}>
-        <Typography variant="h6">
-          Anubis
-        </Typography>
-        <Typography variant={'subtitle1'} color={'textSecondary'}>
-          Student Management
-        </Typography>
-      </Grid>
-
+      <PageTitle {...{description: 'Student Management'}} />
       <Grid item xs={10}>
         <Grid container spacing={2}>
 

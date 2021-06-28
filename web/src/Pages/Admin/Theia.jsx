@@ -15,7 +15,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CheckIcon from '@material-ui/icons/Check';
 import CancelIcon from '@material-ui/icons/Cancel';
 
-import {CustomGrid} from '../../Components/Shared';
+import {CustomGrid, PageTitle} from '../../Components/Shared';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
 import ManagementIDEDialog from '../../Components/Admin/IDE/ManagementIDEDialog';
@@ -121,14 +121,7 @@ export default function Theia() {
 
   return (
     <Grid container spacing={4} justify={'center'} alignItems={'center'}>
-      <Grid item xs={12}>
-        <Typography variant="h6">
-          Anubis
-        </Typography>
-        <Typography variant={'subtitle1'} color={'textSecondary'}>
-          Cloud IDE Management
-        </Typography>
-      </Grid>
+      <PageTitle {...{description: 'Cloud IDE Management'}} />
       <Grid item xs={12}>
         <ManagementIDEDialog/>
       </Grid>

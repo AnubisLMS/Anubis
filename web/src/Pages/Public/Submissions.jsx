@@ -14,6 +14,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import green from '@material-ui/core/colors/green';
 import red from '@material-ui/core/colors/red';
 
+import {CustomGrid} from '../../Components/Shared';
 import useQuery from '../../hooks/useQuery';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
@@ -143,22 +144,13 @@ export default function Submissions() {
 
         {/* Table */}
         <Grid item xs>
-          <Paper className={classes.paper}>
-            <DataGrid
-              pagination
-              rowsPerPageOptions={[10, 20, 30]}
-              page={page}
-              pageSize={pageSize}
-              onPageChange={({page}) => setPage(page)}
-              onPageSizeChange={({pageSize}) => setPageSize(pageSize)}
-              onRowClick={({row}) => setRedirect(`/submission?commit=${row.commit}`)}
-              columns={columns}
-              rows={rows}
-              rowCount={rowCount}
-              loading={loading}
-            />
-          </Paper>
-
+          <CustomGrid {
+            ... {
+              rows: rows,
+              columns: columns,
+              loading: loading,
+            }
+          }/>
         </Grid>
       </Grid>
     </StandardLayout>

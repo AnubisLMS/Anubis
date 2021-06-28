@@ -13,6 +13,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
+import {PageTitle} from '../../../Components/Shared';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import AssignmentReposTable from '../../../Components/Admin/Assignment/AssignmentReposTable';
@@ -54,12 +55,7 @@ export default function Repos() {
   return (
     <Grid container spacing={2} justify={'center'} alignItems={'center'}>
       <Grid item xs={12}>
-        <Typography variant="h6">
-          Anubis
-        </Typography>
-        <Typography variant={'subtitle1'} color={'textSecondary'}>
-          Assignment Repos
-        </Typography>
+        <PageTitle {... {description: 'Assignment Repos'}} />
         <Button
           variant={'contained'}
           color={'primary'}

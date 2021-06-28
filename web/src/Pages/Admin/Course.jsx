@@ -10,6 +10,7 @@ import Button from '@material-ui/core/Button';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Typography from '@material-ui/core/Typography';
 
+import {PageTitle} from '../../Components/Shared';
 import CourseCard from '../../Components/Admin/Course/CourseCard';
 import AuthContext from '../../Contexts/AuthContext';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
@@ -107,14 +108,7 @@ export default function Course() {
 
   return (
     <Grid container spacing={4} justify={'center'} alignItems={'center'}>
-      <Grid item xs={12}>
-        <Typography variant="h6">
-          Anubis
-        </Typography>
-        <Typography variant={'subtitle1'} color={'textSecondary'}>
-          Course Management
-        </Typography>
-      </Grid>
+      <PageTitle {... {description: 'Course Management'}} />
       <Switch>
         <Route path={'/admin/courses'} exact>
           <AuthContext.Consumer>

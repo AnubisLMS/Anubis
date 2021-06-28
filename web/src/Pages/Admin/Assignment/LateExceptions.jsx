@@ -14,6 +14,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import IconButton from '@material-ui/core/IconButton';
 
+import {PageTitle} from '../../../Components/Shared';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import LateExceptionAddCard from '../../../Components/Admin/Assignment/LateExceptionAddCard';
@@ -62,14 +63,7 @@ export default function LateExceptions() {
 
   return (
     <Grid container spacing={2} justify={'center'} alignItems={'center'}>
-      <Grid item xs={12}>
-        <Typography variant="h6">
-          Anubis
-        </Typography>
-        <Typography variant={'subtitle1'} color={'textSecondary'}>
-          Late Exceptions for {assignment.name}
-        </Typography>
-      </Grid>
+      <PageTitle {...{description: `Late Exceptions for ${assignment.name}`}} />
       <Grid item xs={6}>
         <LateExceptionAddCard assignment={assignment} setReset={setReset} />
       </Grid>

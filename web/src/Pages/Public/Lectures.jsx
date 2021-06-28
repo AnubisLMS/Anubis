@@ -7,6 +7,7 @@ import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 
+import {CustomGrid} from '../../Components/Shared';
 import StandardLayout from '../../Components/Layouts/StandardLayout';
 import useQuery from '../../hooks/useQuery';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
@@ -21,7 +22,6 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(1),
   },
 }));
-
 
 export default function Repos() {
   const classes = useStyles();
@@ -46,38 +46,38 @@ export default function Repos() {
     `${window.location.origin}/api/public/static${row.static_file.path}/${row.static_file.filename}`
   );
 
+  const columns = [
+    {field: 'course', headerName: 'Course', width: 150},
+    {field: 'number', headerName: 'Lecture Number', width: 160},
+    {field: 'title', headerName: 'Title', width: 300},
+    {
+      field: 'a', headerName: 'Lecture Attachment', width: 300, renderCell: ({row}) => (
+        <div>
+          <Typography
+            variant={'body1'}
+            color={'primary'}
+            style={{display: 'inline'}}
+            component={'a'}
+            target={'_blank'}
+            href={get_href(row)}
+          >
+            {row.static_file.filename}
+          </Typography>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <StandardLayout title={'Lectures'} description={'Lecture notes posted by professors'}>
       <Grid container spacing={1} justify={'center'}>
         <Grid item xs={12}>
-          <Paper className={classes.paper}>
-            <DataGrid
-              columns={[
-                {field: 'course', headerName: 'Course', width: 150},
-                {field: 'number', headerName: 'Lecture Number', width: 160},
-                {field: 'title', headerName: 'Title', width: 300},
-                {
-                  field: 'a', headerName: 'Lecture Attachment', width: 300, renderCell: ({row}) => (
-                    <div>
-                      <Typography
-                        variant={'body1'}
-                        color={'primary'}
-                        style={{display: 'inline'}}
-                        component={'a'}
-                        target={'_blank'}
-                        href={get_href(row)}
-                      >
-                        {row.static_file.filename}
-                      </Typography>
-                    </div>
-                  ),
-                },
-              ]}
-              rows={lectures}
-              rowsPerPageOptions={[10, 20, 30]}
-              pagination
-            />
-          </Paper>
+          <CustomGrid {
+            ... {
+              columns: columns,
+              rows: lectures,
+            }
+          }/>
         </Grid>
       </Grid>
     </StandardLayout>

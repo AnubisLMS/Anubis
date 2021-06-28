@@ -17,7 +17,7 @@ import Typography from '@material-ui/core/Typography';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
-import {CustomGrid} from '../../Components/Shared';
+import {CustomGrid, PageTitle} from '../../Components/Shared';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
 import AuthContext from '../../Contexts/AuthContext';
@@ -178,14 +178,7 @@ export default function Users() {
 
   return (
     <Grid container spacing={2} justify={'center'} alignItems={'center'}>
-      <Grid item xs={12}>
-        <Typography variant="h6">
-          Anubis
-        </Typography>
-        <Typography variant={'subtitle1'} color={'textSecondary'}>
-          Student Management
-        </Typography>
-      </Grid>
+      <PageTitle {...{description: 'Students Management'}} />
       <Grid item xs={12} md={4} key={'search'}>
         <Paper className={classes.paper}>
           <div className={classes.autocomplete}>

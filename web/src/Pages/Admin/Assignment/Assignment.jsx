@@ -11,6 +11,7 @@ import {nonStupidDatetimeFormat} from '../../../Utils/datetime';
 import useQuery from '../../../hooks/useQuery';
 import {useParams} from 'react-router-dom';
 import {CircularProgress} from '@material-ui/core';
+import {PageTitle} from '../../../Components/Shared';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -97,14 +98,7 @@ export default function Assignment() {
 
   return (
     <Grid container spacing={2} justify={'center'} alignItems={'center'}>
-      <Grid item xs={12}>
-        <Typography variant="h6">
-          Anubis
-        </Typography>
-        <Typography variant={'subtitle1'} color={'textSecondary'}>
-          Assignment Management
-        </Typography>
-      </Grid>
+      <PageTitle {...{description: 'Assignment Management'}}/>
       <Grid item xs={12}>
         <ManagementIDEDialog/>
       </Grid>

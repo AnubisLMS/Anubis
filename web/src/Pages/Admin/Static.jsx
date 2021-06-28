@@ -10,7 +10,7 @@ import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 
-import {CustomGrid} from '../../Components/Shared';
+import {CustomGrid, PageTitle} from '../../Components/Shared';
 import FileUploadDialog from '../../Components/Admin/Static/FileUploadDialog';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
@@ -104,14 +104,7 @@ export default function Static() {
   return (
     <div className={classes.root}>
       <Grid container spacing={4} justify={'center'} alignItems={'center'}>
-        <Grid item xs={12}>
-          <Typography variant="h6">
-            Anubis
-          </Typography>
-          <Typography variant={'subtitle1'} color={'textSecondary'}>
-            Static File Management
-          </Typography>
-        </Grid>
+        <PageTitle {... {description: 'Static File Management'}} />
         <Grid item xs={12}>
           <FileUploadDialog className={classes.button} setReset={setReset}/>
         </Grid>

@@ -13,6 +13,7 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import green from '@material-ui/core/colors/green';
 import grey from '@material-ui/core/colors/grey';
 
+import {PageTitle, CustomGrid} from '../../../Components/Shared';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import ManagementIDEDialog from '../../../Components/Admin/IDE/ManagementIDEDialog';
 import {Tooltip} from '@material-ui/core';
@@ -44,37 +45,36 @@ export default function Assignments() {
     return <Redirect to={redirect}/>;
   }
 
+  const columns = [
+    {field: 'name', headerName: 'Assignment Name', width: 200},
+    {field: 'hidden', headerName: 'Visibility', width: 110, renderCell: ({row}) => (
+      <Tooltip title={row.hidden ? 'Hidden' : 'Visible'}>
+        {
+          row.hidden ?
+            <VisibilityOffIcon style={{color: grey[500]}}/> :
+            <VisibilityIcon style={{color: green[500]}}/>
+        }
+      </Tooltip>
+    )},
+    {field: 'release_date', headerName: 'Release Date', width: 170},
+    {field: 'due_date', headerName: 'Due Date', width: 170},
+  ];
+
 
   return (
     <Grid container spacing={2} justify={'center'} alignItems={'center'}>
-      <Grid item xs={12}>
-        <Typography variant="h6">
-          Anubis
-        </Typography>
-        <Typography variant={'subtitle1'} color={'textSecondary'}>
-          Assignment Management
-        </Typography>
-      </Grid>
+      <PageTitle {...{description: 'Assignment Management'}} />
       <Grid item xs={12}>
         <ManagementIDEDialog/>
       </Grid>
       <Grid item xs={12} md={12} lg={10}>
-        <Paper className={classes.paper}>
-          <DataGrid columns={[
-            {field: 'name', headerName: 'Assignment Name', width: 200},
-            {field: 'hidden', headerName: 'Visibility', width: 110, renderCell: ({row}) => (
-              <Tooltip title={row.hidden ? 'Hidden' : 'Visible'}>
-                {
-                  row.hidden ?
-                    <VisibilityOffIcon style={{color: grey[500]}}/> :
-                    <VisibilityIcon style={{color: green[500]}}/>
-                }
-              </Tooltip>
-            )},
-            {field: 'release_date', headerName: 'Release Date', width: 170},
-            {field: 'due_date', headerName: 'Due Date', width: 170},
-          ]} rows={assignments} onRowClick={({row}) => setRedirect(`/admin/assignment/edit/${row.id}`)}/>
-        </Paper>
+        <CustomGrid {
+          ... {
+            columns: columns,
+            rows: assignments,
+            onRowClick: ({row}) => setRedirect(`/admin/assignment/edit/${row.id}`),
+          }
+        }/>
       </Grid>
     </Grid>
   );

@@ -11,6 +11,7 @@ import Button from '@material-ui/core/Button';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import EditIcon from '@material-ui/icons/Edit';
 
+import {PageTitle} from '../../Components/Shared';
 import {CustomGrid} from '../../Components/Shared';
 import LectureUploadDialog from '../../Components/Admin/Lecture/LectureUploadDialog';
 import LectureEditDialog from '../../Components/Admin/Lecture/LectureEditDialog';
@@ -121,14 +122,7 @@ export default function Static() {
   return (
     <div className={classes.root}>
       <Grid container spacing={4} justify={'center'} alignItems={'center'}>
-        <Grid item xs={12}>
-          <Typography variant="h6">
-            Anubis
-          </Typography>
-          <Typography variant={'subtitle1'} color={'textSecondary'}>
-            Lecture Management
-          </Typography>
-        </Grid>
+        <PageTitle {...{description: 'Lecture Management'}} />
         <Grid item xs={12}>
           <LectureUploadDialog className={classes.button} setReset={setReset}/>
           <LectureEditDialog

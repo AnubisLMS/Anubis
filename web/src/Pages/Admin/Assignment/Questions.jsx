@@ -10,6 +10,7 @@ import Typography from '@material-ui/core/Typography';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 
+import {PageTitle} from '../../../Components/Shared';
 import QuestionCard from '../../../Components/Admin/Assignment/QuestionCard';
 import QuestionControls from '../../../Components/Admin/Assignment/QuestionControls';
 
@@ -70,14 +71,7 @@ export default function AssignmentQuestions() {
   return (
     <div className={classes.root}>
       <Grid container spacing={2} justify={'center'} alignItems={'center'}>
-        <Grid item xs={12}>
-          <Typography variant="h6">
-            Anubis
-          </Typography>
-          <Typography variant={'subtitle1'} color={'textSecondary'}>
-            Assignment Question Management
-          </Typography>
-        </Grid>
+        <PageTitle {...{description: 'Assignment Question Management'}} />
         <Grid item xs={12}>
           <QuestionControls
             assignmentName={assignmentName}
