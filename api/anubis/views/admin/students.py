@@ -30,7 +30,7 @@ def admin_student_list_basic():
     # Return their id and netid
     return success_response({
         'users': [
-            {'id': user['id'], 'netid': user['netid']}
+            {'id': user['id'], 'netid': user['netid'], 'name': user['name']}
             for user in students
         ]
     })
