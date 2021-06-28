@@ -191,6 +191,7 @@ def admin_course_make_ta_id(user_id: str):
     # Check to see if the user is already a ta
     ta = TAForCourse.query.filter(
         TAForCourse.owner_id == user_id,
+        TAForCourse.course_id == course.id,
     ).first()
 
     # Check that they are not already a TA
@@ -282,6 +283,7 @@ def admin_course_make_professor_id(user_id: str):
     # for this course
     prof = ProfessorForCourse.query.filter(
         ProfessorForCourse.owner_id == user_id,
+        ProfessorForCourse.course_id == course.id,
     ).first()
 
     # If they are already a professor, then stop
