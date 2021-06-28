@@ -17,6 +17,7 @@ from anubis.models import (
     ProfessorForCourse,
     StaticFile,
     LateException,
+    LectureNotes,
 )
 from anubis.utils.data import with_context
 from anubis.utils.lms.questions import assign_questions
@@ -45,6 +46,7 @@ def seed():
     Assignment.query.delete()
     TAForCourse.query.delete()
     ProfessorForCourse.query.delete()
+    LectureNotes.query.delete()
     StaticFile.query.delete()
     Course.query.delete()
     User.query.delete()
