@@ -41,7 +41,7 @@ debug:
 	@echo 'Waiting a moment before running migrations'
 	sleep 3
 	@echo 'running migrations'
-	make -C api migrations
+	docker-compose exec api alembic upgrade head
 	make startup-links
 
 .PHONY: mindebug     # Setup mindebug environment
@@ -59,8 +59,8 @@ mindebug:
 	@echo 'auth: http://localhost:3000/api/admin/auth/token/student'
 	@echo 'site: http://localhost:3000/'
 
-.PHONY: debug-mk     # Start minikube debug
-debug-mk:
+.PHONY: mkdebug     # Start minikube debug
+mkdebug:
 	./k8s/debug/provision.sh
 	make startup-links
 
