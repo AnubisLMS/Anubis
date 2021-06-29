@@ -72,7 +72,6 @@ kubectl apply -f ./debug/traefik.yaml
 
 # Add the external chart repositories
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add elastic https://helm.elastic.co
 helm repo update
 
 # Create a minimal mariadb deployment in a mariadb namespace. On
@@ -88,19 +87,6 @@ helm upgrade --install mariadb bitnami/mariadb \
     --set 'auth.password=anubis' \
     --set 'replication.enabled=false' \
     --namespace mariadb
-
-
-# Install a minimal elasticsearch and kibana deployments
-echo 'Adding elasticsearch'
-kubectl create namespace elastic
-helm upgrade \
-		 --install elasticsearch elastic/elasticsearch \
-		 --create-namespace \
-		 --set replicas=1 \
-		 --set resources=null \
-		 --set volumeClaimTemplate.resources.requests.storage=1Gi \
-		 --set imageTag=7.12.0 \
-		 --namespace elastic
 
 # Install a minimal redis deployment
 echo 'Adding redis'
