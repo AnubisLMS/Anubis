@@ -1,11 +1,10 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 
 import Grid from '@material-ui/core/Grid';
 import Grow from '@material-ui/core/Grow';
 import useQuery from '../../hooks/useQuery';
 
 import AssignmentCard from '../../Components/Public/Assignments/AssignmentCard';
-import Typography from '@material-ui/core/Typography';
 import axios from 'axios';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
 import {useSnackbar} from 'notistack';
@@ -19,8 +18,9 @@ export default function AssignmentView() {
   const {enqueueSnackbar} = useSnackbar();
   const [assignments, setAssignments] = useState([]);
   const [selectedTheia, setSelectedTheia] = useState(null);
+  const [runAssignmentPolling, setRunAssignmentPolling] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     axios.get('/api/public/assignments/', {params: {courseId: query.get('courseId')}}).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
@@ -28,6 +28,39 @@ export default function AssignmentView() {
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, []);
+
+  useEffect(() => {
+    if (runAssignmentPolling) {
+      const endPollingTimeout = setTimeout(() => {
+        setRunAssignmentPolling(false);
+      }, 60_000);
+
+      const runPollingInterval = setInterval(() => {
+        axios.get('/api/public/assignments/', {params: {courseId: query.get('courseId')}}).then((response) => {
+          const data = standardStatusHandler(response, enqueueSnackbar);
+
+          if (data) {
+            // compare assignments to see if any have a corresponding repo now
+            const assignmentsHasChanged = !assignments.every((assignment) => {
+              const matchingResponseAssignment = data.assignments.find((a) => a.id === assignment.id);
+
+              return assignment.has_repo === matchingResponseAssignment.has_repo;
+            });
+
+            if (assignmentsHasChanged) {
+              setAssignments(data.assignments);
+              setRunAssignmentPolling(false);
+            }
+          }
+        }).catch(standardErrorHandler(enqueueSnackbar));
+      }, 5_000);
+
+      return () => {
+        clearTimeout(endPollingTimeout);
+        clearInterval(runPollingInterval);
+      };
+    }
+  }, [runAssignmentPolling, setRunAssignmentPolling]);
 
   return (
     <StandardLayout
@@ -43,7 +76,11 @@ export default function AssignmentView() {
               style={{transformOrigin: '0 0 0'}}
               {...({timeout: 300 * (pos + 1)})}
             >
-              <AssignmentCard assignment={assignment} setSelectedTheia={setSelectedTheia}/>
+              <AssignmentCard
+                assignment={assignment}
+                setSelectedTheia={setSelectedTheia}
+                runAssignmentPolling={runAssignmentPolling}
+                setRunAssignmentPolling={setRunAssignmentPolling} />
             </Grow>
           </Grid>
         ))}

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
 import {useSnackbar} from 'notistack';
@@ -41,13 +41,12 @@ export default function Assignment() {
   const [reset, setReset] = useState(0);
   const {assignmentId} = useParams();
 
-  React.useEffect(() => {
+  useEffect(() => {
     axios.get(`/api/admin/assignments/get/${assignmentId}`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data?.assignment) {
         for (const field of editableFields) {
           if (field.type === 'datetime') {
-            console.log(field.field);
             data.assignment[field.field] = new Date(data.assignment[field.field].replace(/-/g, '/'));
           }
         }
