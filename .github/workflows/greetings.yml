@@ -1,0 +1,16 @@
+name: Greetings
+
+on: [pull_request, issues]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+    - uses: actions/first-interaction@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        issue-message: 'Thank you for submitting an issue to Anubis! Please make sure that your issue is consistent with our contribution guidelines.'
+        pr-message: 'Thank you for contributing to Anubis! Please make sure that your PR is consistent with our contribution guidelines.'
