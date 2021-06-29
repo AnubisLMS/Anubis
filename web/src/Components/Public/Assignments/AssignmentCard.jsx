@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import {Link} from 'react-router-dom';
 
 import makeStyles from '@material-ui/core/styles/makeStyles';
@@ -6,6 +6,7 @@ import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import AlarmIcon from '@material-ui/icons/Alarm';
@@ -37,16 +38,13 @@ const useStyles = makeStyles((theme) => ({
   dateText: {
     fontSize: 15,
     marginTop: 20,
-
   },
   statusPos: {
     display: 'flex',
-
+    alignItems: 'center',
   },
   statusText: {
     fontSize: 14,
-    marginTop: 5,
-
   },
   datetext: {
     fontSize: 14,
@@ -58,6 +56,16 @@ const useStyles = makeStyles((theme) => ({
   },
   button: {
     margin: theme.spacing(0.5),
+  },
+  ideButtonWrapper: {
+    position: 'relative',
+  },
+  pollingProgress: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -12,
   },
 }));
 
@@ -75,7 +83,7 @@ const remainingTime = (dueDate) => {
   return timeLeft;
 };
 
-export default function AssignmentCard({assignment, setSelectedTheia}) {
+export default function AssignmentCard({assignment, setSelectedTheia, runAssignmentPolling, setRunAssignmentPolling}) {
   const classes = useStyles();
   const {
     id,
@@ -88,7 +96,7 @@ export default function AssignmentCard({assignment, setSelectedTheia}) {
     has_repo,
     repo_url,
     past_due,
-    accept_late,
+    // accept_late,
   } = assignment;
 
   const [timeLeft] = useState(remainingTime(due_date));
@@ -103,6 +111,10 @@ export default function AssignmentCard({assignment, setSelectedTheia}) {
       </span>,
     );
   });
+
+  const handleGithubClassroomLinkClicked = useCallback(() => {
+    setRunAssignmentPolling(true);
+  }, [setRunAssignmentPolling]);
 
   const githubLinkEnabled = typeof github_classroom_link === 'string';
 
@@ -143,17 +155,21 @@ export default function AssignmentCard({assignment, setSelectedTheia}) {
         </CardContent>
       </CardActionArea>
       <CardActions className={classes.actionList}>
-        <Button
-          size={'small'}
-          variant={'contained'}
-          color={'primary'}
-          className={classes.button}
-          startIcon={<CodeOutlinedIcon/>}
-          disabled={!ide_enabled || !has_repo || past_due}
-          onClick={() => setSelectedTheia(assignment)}
-        >
+        <div className={classes.ideButtonWrapper}>
+          <Button
+            size={'small'}
+            variant={'contained'}
+            color={'primary'}
+            className={classes.button}
+            startIcon={<CodeOutlinedIcon/>}
+            disabled={!ide_enabled || !has_repo || past_due || runAssignmentPolling}
+            onClick={() => setSelectedTheia(assignment)}
+          >
           Anubis Cloud IDE
-        </Button>
+          </Button>
+          {runAssignmentPolling && <CircularProgress size={24} className={classes.pollingProgress} />}
+        </div>
+
         <Button
           size={'small'}
           variant={'contained'}
@@ -164,6 +180,7 @@ export default function AssignmentCard({assignment, setSelectedTheia}) {
           component={'a'}
           href={has_repo ? repo_url : github_classroom_link}
           target={'_blank'}
+          onClickCapture={!!has_repo && handleGithubClassroomLinkClicked}
         >
           {has_repo ? 'Go to repo' : 'Create repo'}
         </Button>

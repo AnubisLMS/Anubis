@@ -17,10 +17,10 @@ plugins:
   - react
 rules:
   react/prop-types: off
-  require-jsdoc: off
-  valid-jsdoc: off
-  camelcase: off
-  no-unused-vars: off
+  require-jsdoc: 0
+  valid-jsdoc: 0
+  camelcase: 0
+  no-unused-vars: 1
   react/display-name: off
   indent: ["error", 2]
   max-len: ["error", { "code": 120 }]
