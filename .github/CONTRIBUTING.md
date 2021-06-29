@@ -1,8 +1,9 @@
 # Contributing to Anubis
 
 1. [Descriptive Suffixes](#descriptive-suffixes)
-2. [Issues](#issues)
-3. [Pull Requests](#pull-requests)
+2. [Commit Message Guidelines](#commit-message-guidelines)
+3. [Issues](#issues)
+4. [Pull Requests](#pull-requests)
 
 ## Descriptive Suffixes
 
@@ -19,6 +20,19 @@ Similarly for issues:
 - CHG change to somthing
 - RM removal of something
 - ADD addition of somthing
+
+## Commit Message Guidelines
+
+For all commits please begin them with an all caps descriptive suffix from the above. The rest of the commit message
+should be lowercase.
+
+Examples:
+```
+git commit -m "FIX issue with this thing"
+git commit -m "CHG move function to this file"
+git commit -m "RM unneeded file"
+git commit -m "ADD something new"
+```
 
 ## Issues
 
