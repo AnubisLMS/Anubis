@@ -31,10 +31,34 @@ export default function AssignmentView() {
 
   useEffect(() => {
     if (runAssignmentPolling) {
-      const timeout = setTimeout(() => {
+      const endPollingTimeout = setTimeout(() => {
         setRunAssignmentPolling(false);
       }, 60_000);
-      return () => clearTimeout(timeout);
+
+      const runPollingInterval = setInterval(() => {
+        axios.get('/api/public/assignments/', {params: {courseId: query.get('courseId')}}).then((response) => {
+          const data = standardStatusHandler(response, enqueueSnackbar);
+
+          if (data) {
+            // compare assignments to see if any have a corresponding repo now
+            const assignmentsHasChanged = !assignments.every((assignment) => {
+              const matchingResponseAssignment = data.assignments.find((a) => a.id === assignment.id);
+
+              return assignment.has_repo === matchingResponseAssignment.has_repo;
+            });
+
+            if (assignmentsHasChanged) {
+              setAssignments(data.assignments);
+              setRunAssignmentPolling(false);
+            }
+          }
+        }).catch(standardErrorHandler(enqueueSnackbar));
+      }, 5_000);
+
+      return () => {
+        clearTimeout(endPollingTimeout);
+        clearInterval(runPollingInterval);
+      };
     }
   }, [runAssignmentPolling, setRunAssignmentPolling]);
 

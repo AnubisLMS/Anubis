@@ -13,7 +13,6 @@ run: venv
 
 venv:
 	virtualenv -p `which python3` venv
-	./venv/bin/pip install -r ./requirements.in
 	./venv/bin/pip install -r ./requirements.txt
 	./venv/bin/pip install -U black pytest
 

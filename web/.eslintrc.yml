@@ -20,7 +20,7 @@ rules:
   require-jsdoc: 0
   valid-jsdoc: 0
   camelcase: 0
-  no-unused-vars: 1
+  no-unused-vars: 0
   react/display-name: off
   indent: ["error", 2]
   max-len: ["error", { "code": 120 }]

@@ -180,7 +180,7 @@ export default function AssignmentCard({assignment, setSelectedTheia, runAssignm
           component={'a'}
           href={has_repo ? repo_url : github_classroom_link}
           target={'_blank'}
-          onClickCapture={!!has_repo && handleGithubClassroomLinkClicked}
+          onClickCapture={!has_repo && handleGithubClassroomLinkClicked}
         >
           {has_repo ? 'Go to repo' : 'Create repo'}
         </Button>
