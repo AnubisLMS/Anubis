@@ -26,7 +26,7 @@ Before posting a new issue, please make sure that you explain what the purpose o
 
 If you are reporting a bug or some other issue then please provide steps to reproduce. If you are developing, then providing your environment will be quite helpful (Operating System, debug environment, etc.). Screenshots are very helpful!
 
-Please make sure your issue title starts with a all caps descriptive suffix from above.
+Please make sure your issue title starts with an all caps descriptive suffix from above.
 
 ## Pull Requests
 
@@ -34,7 +34,7 @@ If you are submitting a Pull Request, thank you for contributing! Please check f
 
 Please make sure that your changes are clearly described in the description of the PR. This will help the maintainers understand and speed up the review and merging process.
 
-Please make sure your PR title starts with a all caps descriptive suffix from above.
+Please make sure your PR title starts with an all caps descriptive suffix from above.
 
 
 ## Developer's Certificate of Origin 1.1
