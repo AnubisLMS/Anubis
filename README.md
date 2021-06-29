@@ -13,6 +13,7 @@
 # Table of contents
 
 * [Design and Internals](#design-and-internals)
+* [Blog](#blog)
 * [What is this project?](#what-is-this-project?)
   * [Autograding](#autograding)
   * [Anubis Cloud IDEs](#anubis-cloud-ides)
@@ -26,6 +27,10 @@
 
 Want to know how Anubis works internally? We have a 36 page design doc that thoroughly explains how Anubis works 
 under [our docs](./docs). Don't worry, there are a lot of pictures :)
+
+## Blog
+
+Be sure to check out our [blog](https://anubis.osiris.services/blog)!
 
 ## What is this project?
 
