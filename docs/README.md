@@ -170,11 +170,6 @@ To authenticate with the api, a token is required. The only way to get one of th
 Single Sign On. By doing this, we are outsourcing our authentication. This saves a whole lot of headaches
 while being arguably more secure than if we rolled our own.
 
-In implementation, the frontend loads it will attempt to authenticate with the API. If there is
-a stale or broken token in the current cookies, the frontend will redirect users to the NYU login page.
-Given that they authenticate there, they will be redirected back to the API, where we will provide them
-with a token. From there, they will be logged into Anubis.
-
 All of this is about 20 lines on our end. All that is necessary are some keys from NYU IT.
 
 ### 2.3 Submission Pipeline
@@ -200,7 +195,7 @@ Each unique per-assignment pipeline is packaged in the form of a docker image.
 #### 2.3.3 Stages
 
 It is important to note that at each stage of the submission pipeline, we will be moving execution back and
-forth between two users. There will be the entrypoint program managing the container as user `anubis`. The
+forth between two unix users. There will be the entrypoint program managing the container as user `anubis`. The
 `anubis` user will have much higher privileges than the `student` user. The `student` user will be used whenever
 executing student code. It will not have any level of access to anything from the `anubis` user.
 
@@ -240,15 +235,12 @@ With few exceptions, the frontend is a near one to one translation of the API's 
 will have a corresponding API endpoint. The data shown on that page will be in exactly the form of the
 API response.
 
-The notable exceptions to this simplistic model would be the submission page, the regrade button, and
-the find-missing button.
-
 The submission page will poll for new data if the submission is not marked as processed. As it sees
 new data, it will update what is displayed.
 
 Located on the submission page, the purpose of the regrade button is to be a simple and easy way for
-users to request regrades. When clicked, the frontend will hit a special endpoint for requesting regrades.
-If successful, the submission will be re-enqueued in a submission pipeline.
+users to request regrades. When clicked, the frontend will hit a endpoint for requesting regrades.
+If successful, the submission will be reset and re-enqueued in a submission pipeline.
 
 #### 2.4.1 Autograde Results
 
@@ -258,9 +250,9 @@ most recent submission that passed the most tests.
 
 ![alt autograde-results-2](./img/autograde-results-2.png)
 
-The students see a reduced version of the panel shown to the TAs and professors. In the admin view, more
-data is displayed about the student. The students can see the status of the submission, and the build and
-test results.
+The students see a reduced version of the submission information panel shown to the TAs and professors.
+In the admin view, more data is displayed about the student. The students can see the status of the submission,
+and the build and test results.
 
 > *Calculating the best submissions requires heavy IO with the database. For this, the autograde results are
 heavily cached. Results are updated hourly.*
@@ -270,86 +262,93 @@ heavily cached. Results are updated hourly.*
 
 ### 2.5 Anubis Cloud IDE
 
-One of the more exciting new features is that of the cloud ide. Leveraging some magic that Kubernetes
-and containers give us, we can provide a fully isolated IDE environment for all ~130 concurrently.
+One of the more exciting new features is that of the Cloud IDEs. Leveraging some magic that Kubernetes
+and containers give us, we can provide a fully insulated linux environment for all ~130 students concurrently.
 
-The [Theia IDE](https://theia-ide.org/) is a basically a VSCode webserver. They have docker images for
+The [Theia IDE](https://theia-ide.org/) is a basically a VSCode webserver. They have base docker images for
 specific languages.
 
-Something very special about theia is that we can actually build theia using a package.json. By doing this
-we are able to compile in only the plugins we actually need/use. This is very useful because we can bring
-the default theia-cpp image down from 4GiB to ~1.5GiB. This is still an annoyingly large image, but hey, it's
-not 4GiB.
+Something very special about theia is that we can actually configure custom builds using a package.json. By doing this
+we are able to compile in only the plugins we actually need/use. Then because they are docker images, any other software
+that is needed for the course can be installed alongside the custom build of theia. Then students are one click away
+from having a Cloud IDE that has all the VSCode extensions and other software needed.
+
+With custom builds of theia we can also remove extra things that get installed by default. We can bring the default 
+theia-cpp image down from 4GiB to ~1.5GiB. This is still an annoyingly large image, but hey, it's not 4GiB.
 
 #### 2.5.1 IDE Frontend
 
 Once students have created their repo, they will be able to launch a theia session for a given assignment. At that
-time, we clone exactly what is in github into a theia pod.
+time, Anubis clones exactly what is in their github repo into a theia pod.
 
 ![Theia Launch Session](./img/theia1.png)
 
 Once their session pod has been allocated, they can click the goto session button. It is at this point
-that their requests start to go through the theia proxy. Assuming all goes well with initializing the session,
-and starting the websocket connection, then students will have the following theia IDE.
+that their requests start to go through the theia proxy services. Assuming all goes well with initializing the session,
+and starting the necessary connections, the student will have the access to their very own Cloud IDE.
 
 ![Theia Webview](./img/theia2.png)
 
 Something to point out here is that this looks, feels, and acts exactly as VSCode, but it is accessed over the
-internet. We can even load some VSCode plugins into the builds.
+internet. [Most VSCode extensions will just work on theia.](https://theia-ide.org/docs/composing_applications/#consuming-vs-code-extensions)
 
 #### 2.5.2 Theia Pod Design
 
-The pod design requires some distributed finesse. There are a couple of things about theia that make it so that
+The Cloude IDE pod design requires some finesse. There are a couple of things about theia that make it so that
 we need to do some rather fancy things in Kubernetes to make the setup work.
 
 Distributing and handling multiple theia severs and concurrent connections is the name of the game here. We
 need to be able to have a setup that scales well that is able to handle many users on the system at once.
 
 The main thing that we need to handle is the fact that theia requires a websocket connection between the browser and
-theia server instance. When the pods are allocated, we note the ClusterIP in the database. Then when we need to
-initialize a client session, we use this saved ClusterIP to forward requests (both http and websockets) to the
-pod.
+theia server instance. When the pods are allocated Anubis records the ClusterIP in the database. Then when we need to
+initialize a client connection Anubis uses this saved ClusterIP to forward requests (both http and websockets) to the
+correct pod.
 
-These pods are temporary. When the student finishes working (or after a timeout) we reclaim the resources by
-deleting the containers and data. Because of this, we needed some form of autosave. Saving is pushing to github.
-The issue we need to contend with is how do we have automatic commits and pushes to github without exposing a
+These IDE servers are temporary. When the student finishes working (or after a timeout) we reclaim the resources by
+deleting the pod and shared volume. Because of this, we needed some form of autosave. Saving is pushing to github.
+The issue we need to contend with is automatically committing and pushing to github without exposing a sensitive
 password or api token to the users. We handle this by having a second container whose only role is committing and
 pushing to github. The credentials live in that container, completely separate and inaccessible to the user who
-may be working in the other theia server container. These two containers are connected by a shared longhorn volume.
-This volume is relatively small (~50MiB). With this setup, we have autosave running in the background while being
-completely hidden from the user.
+may be working in the other theia server container. These two containers are connected by a shared volume mounted
+at `/home/project` in both containers. This volume is relatively small (~50MiB).
+
+With this setup, we have autosave running in the background while being completely hidden from the user. When
+explaining autosave to students we usually just say "it is witchcraft, just trust that it works".
 
 ![Theia Pod Spec](./img/theia-pod.mmd.png)
 
 With these lightweight containerized theia servers, we are able to support significantly more concurrent users than
-if we had elected to implement a cloud vm solution. Because with containers, we do not need to virtualize hardware,
+if we had elected to implement a cloud VM solution. Because Anubis Cloud IDEs do not need to virtualize hardware,
 the resources on the system for each user is significantly less. Given the resources that we have on Digital Ocean,
 we would be able to have maybe 20-30 concurrent users using cloud virtual machines. With our containerized theia,
-we can handle all ~130 students at the same time with room to breath.
+we can handle all ~130 students in CS-UY 3224 at the same time with room to breath.
 
 #### 2.5.3 Reclaiming Theia Resources
 
-The theia sessions are often forgotten about. Students often create an IDE server, work on it for a bit, then forget
-about it. Due to this, we have a time to live of 6 hours for each session. A cronjob runs every 5 minutes to look
-for and schedule delete for stale resources. We do provide a button in the anubis panel as a way for students to manually
+The Cloud IDE sessions are often forgotten about. Students often create an IDE server work on it for a bit, then forget
+about it. Due to this, we have a time to live of 6 hours for each session. A CronJob runs every 5 minutes to look
+for and schedule deletes for stale resources. We do provide a button on the Anubis website as a way for students to manually
 schedule their session for deletion. Even when we ask students to click this button when they are done, some still do not.
-In the following graph we can see an interesting experiment in student behavior. It shows a cumulative graph
-showing the duration of a theia session for the final exam. Just about 40% of sessions hit the 6-hour timeout.
+In the following graph we can see an interesting experiment in student behavior. It shows the cumulative duration of
+a theia session for the final exam in the Fall 2020 semester for CS-UY 3224. Just about 40% of sessions are destroyed
+after hitting the 6-hour timeout.
 
 ![Theia Cumulative Duration](./img/theia3.png)
 
 #### 2.5.4 Management IDE
 
 Separate from the student xv6 IDE, there is also an admin build of theia that has some extra things. On the assignments
-page of the admin panel, any TA or professor can launch their own admin IDE. In this IDE, the assignment-tests
+page of the admin panel, any TA or Professor can launch their own Management IDE. In this IDE the assignment-tests
 repo is cloned instead of a student assignment repo. It has less networking restrictions, the anubis cli
-and even has docker running right in the pod. With this, TA's and professors can create, modify, and deploy
-assignments.
+and even docker running right in the pod. With this TA's and professors can create, modify, and deploy
+assignments all from their browser.
 
-Using some very clever authentication mechanics, the management IDEs will be initialized with a personal token
-that will be used by the CLI within the container. The result of this is that you will be able to just use the
-anubis CLI. It will be routed to the in cluster API instances. All the requests you make to the API will be
-authenticated using that personal token that gets dropped into the pod.
+Using some very clever authentication mechanics the management IDEs will be initialized with a personal token
+that will be used by the CLI within the container. The result of this is that you can then just use the packaged
+anubis CLI in the container, and your requests will be authenticated with the API. This authentication model also
+enforces course aware permissions. What this means is that you will be able to create and modify assignments for
+only the courses that you are a TA or Professor for.
 
 ![Management IDE](./img/theia4.png)
 
@@ -360,7 +359,7 @@ authenticated using that personal token that gets dropped into the pod.
 Anubis uses the [bitnami MariaDB chart](https://hub.kubeapps.com/charts/bitnami/mariadb). It runs with 3 read-only
 replication nodes, along with a main node that does read-write. The underlying MariaDB files are also
 backed up with a [Longhorn](https://longhorn.io/) persistent volume that has 3x replication in the cluster.
-That volume has daily snapshots. Redundancy is the name of the game here.
+The main volume has daily snapshots. Redundancy is the name of the game here.
 
 The precise data model that we will be using is a simple relational database. From the API, we will interface
 with Mariadb via [SQLAlchemy](https://www.sqlalchemy.org/).
@@ -384,18 +383,17 @@ echo 'Adding mariadb'
 #		--namespace mariadb
 
 make -C k8s/prod mariadb
-
 ```
 
 #### 2.6.2 Elasticsearch
 
 Anubis uses elasticsearch as a search engine for logging, and event tracking. The
-[elastic ecosystem](https://www.elastic.co/) has other tools like [kibana](#263-kibana) and [logstash](#271-logstash)
-for visualizing data, and logging. Other than the visualization features, elastic allows us to simply start
+[elastic ecosystem](https://www.elastic.co/) has other tools like [kibana](#263-kibana)
+for visualizing data. Other than the visualization features, elastic allows us to simply start
 throwing data at it without defining any meaningful shape. This allows us to just log events and data into
 elastic to be retrieved, and visualized later.
 
-The Elasticsearch stack is pretty annoying to manage on its own. Installing through the bitnami chart is
+The Elasticsearch stack is pretty annoying to manage on its own. Installing through an official chart is
 much easier.
 
 ```shell
@@ -419,10 +417,10 @@ When something happens on the cluster, it will be indexed into elastic. [Kibana]
 is elastic's data visualization tool. It runs as a website that interfaces with the internal elasticsearch. Through
 kibana, we can stream live logs, view event data, and create meaningful visualizations.
 
-The API sees when students start their homeworks (create their github repo), and when they are submitting
+The API sees when students start an assignment (create their github repo), and when they are submitting
 (pushing to their repo). This data is indexed into elasticsearch, and visualized via kibana. In Anubis version
-one we were able to show graphs of when students were starting vs finishing their assignments. To no ones surprise,
-the majority of the class was starting very late, with a large influx of submissions in the few hours before each
+v1.0.0 we were able to show graphs of when students were starting vs finishing their assignments. To no ones surprise,
+the majority of the class was starting very late with a large influx of submissions in the few hours before each
 deadline. Furthermore, we can show how long it takes for a student to start their assignment to when they have
 their tests pass on average. We can also show which tests were causing students the most trouble.
 
@@ -535,31 +533,29 @@ to the deploy script will be then passed to helm.
 
 
 ```shell
-# Deploy with anubis only being accessible from the OSIRIS vpn
-./kube/deploy.sh --set vpnOnly=true
-
 # Deploy in debug mode
-./kube/deploy.sh --set debug=true
+./k8s/deploy.sh --set debug=true
 
-# Set the number of replicas for the api service to a specific value
-./kube/deploy.sh --set api.replicas=5
+# Set the initial number of replicas for the api service to 5
+./k8s/deploy.sh --set api.replicas=5
 
 # Disable rolling updates
-./kube/deploy.sh --set rollingUpdates=false
+./k8s/deploy.sh --set rollingUpdates=false
 ```
 
-A full list of options can be found in the values.yaml file at `kube/values.yaml`.
+A full list of options can be found in the [values.yaml](../k8s/chart/values.yaml) file.
 
 #### 3.1.2 Rolling Updates
 
 In the decisions that were made when considering when expanding Anubis, availability was of the most important.
 Specifically we needed to move to a platform that would allow us to do _zero_ downtime deploys. Kubernetes has
 very powerful rolling update features. We can bring up a new version of the Anubis API, verify that this new
-version is healthy, then bring down the old version. All the while, there will be no degradation in availability.
+version is healthy, then bring down the old version. All the while, there will be little to no degradation of service.
 
 Of all the features of Kubernetes that Anubis leverages, none are quite as important as rolling updates. The
-Anubis API can be updated to a new version with _zero_ downtime. This means we can live patch the API with new
-versions, with little to no degradation in service.
+Anubis API can be updated to a new version with _zero_ downtime. This means we can live patch the Anubis even 
+when under load. To hear about one such tricky deploy from the Spring 2021 CU-UY 3224 semester, check out 
+[this blog post](https://anubis.osiris.services/blog/midterm-retro).
 
 #### 3.1.3 Longhorn
 
