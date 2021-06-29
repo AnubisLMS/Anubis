@@ -12,5 +12,5 @@ if ! [ -d node_modules ]; then
 fi
 ./render.sh
 
-cd ../../
-exec pandoc README.md -s -o docs/anubis.pdf -f markdown-implicit_figures
+cd ../
+exec pandoc README.md -s -o anubis.pdf -f markdown-implicit_figures
