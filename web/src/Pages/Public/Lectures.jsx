@@ -54,7 +54,7 @@ export default function Repos() {
             <DataGrid
               columns={[
                 {field: 'course', headerName: 'Course', width: 150},
-                {field: 'number', headerName: 'Lecture Number', width: 160},
+                {field: 'post_time', headerName: 'Post Time', width: 170},
                 {field: 'title', headerName: 'Title', width: 300},
                 {
                   field: 'a', headerName: 'Lecture Attachment', width: 300, renderCell: ({row}) => (
