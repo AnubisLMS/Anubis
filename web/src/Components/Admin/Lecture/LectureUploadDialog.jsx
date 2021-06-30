@@ -15,6 +15,9 @@ import TextField from '@material-ui/core/TextField';
 
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import DateFnsUtils from '@date-io/date-fns';
+import {KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider} from '@material-ui/pickers';
+import {nonStupidDatetimeFormat} from '../../../Utils/datetime';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,14 +29,17 @@ const useStyles = makeStyles((theme) => ({
   field: {
     margin: theme.spacing(1, 1),
   },
+  datePicker: {
+    marginRight: theme.spacing(2),
+  },
 }));
 
 
 const uploadLecture = (state, enqueueSnackbar) => () => {
   const {
     file, setFile,
-    number, setNumber,
     title, setTitle,
+    postTime,
     setOpen,
     setReset,
   } = state;
@@ -41,20 +47,18 @@ const uploadLecture = (state, enqueueSnackbar) => () => {
   const form = new FormData();
   form.append('image', file);
 
-  axios.post('/api/admin/lecture/upload', form, {
-    params: {number, title, description: ''},
+  axios.post('/api/admin/lectures/upload', form, {
+    params: {post_time: nonStupidDatetimeFormat(postTime), title, description: ''},
     headers: {'Content-Type': 'multipart/form-data'},
   }).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
     if (data) {
       setReset((prev) => ++prev);
+      setOpen(false);
+      setFile(null);
+      setTitle('');
     }
   }).catch(standardErrorHandler(enqueueSnackbar));
-
-  setOpen(false);
-  setFile(null);
-  setTitle('');
-  setNumber(1);
 };
 
 export default function FileUploadDialog({setReset}) {
@@ -62,7 +66,7 @@ export default function FileUploadDialog({setReset}) {
   const {enqueueSnackbar} = useSnackbar();
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState(null);
-  const [number, setNumber] = useState(0);
+  const [postTime, setPostTime] = useState(new Date());
   const [title, setTitle] = useState('');
 
   const handleClose = () => setOpen(false);
@@ -73,7 +77,7 @@ export default function FileUploadDialog({setReset}) {
     open, setOpen,
     file, setFile,
     title, setTitle,
-    number, setNumber,
+    postTime, setPostTime,
   };
 
   return (
@@ -93,18 +97,23 @@ export default function FileUploadDialog({setReset}) {
       >
         <DialogTitle id="alert-dialog-title">Upload file</DialogTitle>
         <DialogContent>
-          <TextField
-            fullWidth
-            label="Lecture Number"
-            className={classes.field}
-            type="number"
-            InputLabelProps={{
-              shrink: true,
-            }}
-            variant="outlined"
-            value={number}
-            onChange={(e) => setNumber(e.target.value)}
-          />
+          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+            <KeyboardDatePicker
+              className={classes.datePicker}
+              margin="normal"
+              label={'Post Time'}
+              format="yyyy-MM-dd"
+              value={postTime}
+              onChange={(v) => setPostTime(v)}
+            />
+            <KeyboardTimePicker
+              className={classes.datePicker}
+              margin="normal"
+              label="Time"
+              value={postTime}
+              onChange={(v) => setPostTime(v)}
+            />
+          </MuiPickersUtilsProvider>
           <TextField
             fullWidth
             className={classes.field}

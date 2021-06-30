@@ -15,6 +15,9 @@ import TextField from '@material-ui/core/TextField';
 
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import DateFnsUtils from '@date-io/date-fns';
+import {KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider} from '@material-ui/pickers';
+import {nonStupidDatetimeFormat} from '../../../Utils/datetime';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,6 +29,9 @@ const useStyles = makeStyles((theme) => ({
   field: {
     margin: theme.spacing(1, 1),
   },
+  datePicker: {
+    marginRight: theme.spacing(2),
+  },
 }));
 
 
@@ -33,54 +39,57 @@ const uploadLecture = (state, enqueueSnackbar) => () => {
   const {
     lecture,
     file, setFile,
-    number, setNumber,
+    postTime, setPostTime,
     title, setTitle,
     setOpen,
     setReset,
   } = state;
 
+  const reset = () => {
+    // reset everything
+    setReset((prev) => ++prev);
+    setOpen(null);
+    setFile(null);
+    setTitle('');
+    setPostTime(null);
+  };
+
   if (file !== null) {
     const form = new FormData();
     form.append('image', file);
 
-    axios.post(`/api/admin/lecture/save/${lecture.id}`, form, {
-      params: {number, title, description: ''},
+    axios.post(`/api/admin/lectures/save/${lecture.id}`, form, {
+      params: {post_time: nonStupidDatetimeFormat(postTime), title, description: ''},
       headers: {'Content-Type': 'multipart/form-data'},
     }).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
-        setReset((prev) => ++prev);
+        reset();
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   } else {
-    axios.post(`/api/admin/lecture/save/${lecture.id}`, {}, {
-      params: {number, title, description: ''},
+    axios.post(`/api/admin/lectures/save/${lecture.id}`, {}, {
+      params: {post_time: nonStupidDatetimeFormat(postTime), title, description: ''},
     }).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
-        setReset((prev) => ++prev);
+        reset();
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }
-
-  // reset everything
-  setOpen(null);
-  setFile(null);
-  setTitle('');
-  setNumber(1);
 };
 
 export default function FileUploadDialog({setReset, open, setOpen, lecture}) {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [file, setFile] = useState(null);
-  const [number, setNumber] = useState(1);
+  const [postTime, setPostTime] = useState(null);
   const [title, setTitle] = useState('');
 
   const handleClose = () => setOpen(null);
 
   useEffect(() => {
-    setNumber(lecture?.number ?? 1);
+    setPostTime(new Date(lecture?.post_time ?? null));
     setTitle(lecture?.title ?? '');
   }, [lecture]);
 
@@ -90,7 +99,7 @@ export default function FileUploadDialog({setReset, open, setOpen, lecture}) {
     open, setOpen,
     file, setFile,
     title, setTitle,
-    number, setNumber,
+    postTime, setPostTime,
   };
 
   return (
@@ -101,18 +110,23 @@ export default function FileUploadDialog({setReset, open, setOpen, lecture}) {
       >
         <DialogTitle id="alert-dialog-title">Upload file</DialogTitle>
         <DialogContent>
-          <TextField
-            fullWidth
-            label="Lecture Number"
-            className={classes.field}
-            type="number"
-            InputLabelProps={{
-              shrink: true,
-            }}
-            variant="outlined"
-            value={number}
-            onChange={(e) => setNumber(e.target.value)}
-          />
+          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+            <KeyboardDatePicker
+              className={classes.datePicker}
+              margin="normal"
+              label={'Post Time'}
+              format="yyyy-MM-dd"
+              value={postTime}
+              onChange={(v) => setPostTime(v)}
+            />
+            <KeyboardTimePicker
+              className={classes.datePicker}
+              margin="normal"
+              label="Time"
+              value={postTime}
+              onChange={(v) => setPostTime(v)}
+            />
+          </MuiPickersUtilsProvider>
           <TextField
             fullWidth
             className={classes.field}
