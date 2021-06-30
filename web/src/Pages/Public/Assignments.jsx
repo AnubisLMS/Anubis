@@ -19,6 +19,7 @@ export default function AssignmentView() {
   const [assignments, setAssignments] = useState([]);
   const [selectedTheia, setSelectedTheia] = useState(null);
   const [runAssignmentPolling, setRunAssignmentPolling] = useState(false);
+  const [pollingAssignmentId, setPollingAssignmentId] = useState(null);
 
   useEffect(() => {
     axios.get('/api/public/assignments/', {params: {courseId: query.get('courseId')}}).then((response) => {
@@ -41,13 +42,9 @@ export default function AssignmentView() {
 
           if (data) {
             // compare assignments to see if any have a corresponding repo now
-            const assignmentsHasChanged = !assignments.every((assignment) => {
-              const matchingResponseAssignment = data.assignments.find((a) => a.id === assignment.id);
+            const currentPollingAssignment = data.assignments.find((a) => a.id === pollingAssignmentId);
 
-              return assignment.has_repo === matchingResponseAssignment.has_repo;
-            });
-
-            if (assignmentsHasChanged) {
+            if (currentPollingAssignment.has_repo) {
               setAssignments(data.assignments);
               setRunAssignmentPolling(false);
             }
@@ -60,7 +57,7 @@ export default function AssignmentView() {
         clearInterval(runPollingInterval);
       };
     }
-  }, [runAssignmentPolling, setRunAssignmentPolling]);
+  }, [runAssignmentPolling, setRunAssignmentPolling, pollingAssignmentId]);
 
   return (
     <StandardLayout
@@ -79,8 +76,10 @@ export default function AssignmentView() {
               <AssignmentCard
                 assignment={assignment}
                 setSelectedTheia={setSelectedTheia}
-                runAssignmentPolling={runAssignmentPolling}
-                setRunAssignmentPolling={setRunAssignmentPolling} />
+                runAssignmentPolling={assignment.id === pollingAssignmentId && runAssignmentPolling}
+                setRunAssignmentPolling={setRunAssignmentPolling}
+                setPollingAssignmentId={setPollingAssignmentId}
+              />
             </Grow>
           </Grid>
         ))}

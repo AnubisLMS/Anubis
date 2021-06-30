@@ -83,7 +83,13 @@ const remainingTime = (dueDate) => {
   return timeLeft;
 };
 
-export default function AssignmentCard({assignment, setSelectedTheia, runAssignmentPolling, setRunAssignmentPolling}) {
+export default function AssignmentCard({
+  assignment,
+  setSelectedTheia,
+  runAssignmentPolling,
+  setRunAssignmentPolling,
+  setPollingAssignmentId,
+}) {
   const classes = useStyles();
   const {
     id,
@@ -114,7 +120,8 @@ export default function AssignmentCard({assignment, setSelectedTheia, runAssignm
 
   const handleGithubClassroomLinkClicked = useCallback(() => {
     setRunAssignmentPolling(true);
-  }, [setRunAssignmentPolling]);
+    setPollingAssignmentId(id);
+  }, [setRunAssignmentPolling, setPollingAssignmentId, id]);
 
   const githubLinkEnabled = typeof github_classroom_link === 'string';
 
