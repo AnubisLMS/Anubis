@@ -126,8 +126,13 @@ services:
       - "traefik.http.routers.web-public.entrypoints=http,https"
 
   db:
-    image: mariadb:10.5.5
+    image: mariadb:10.6
     dns: [8.8.8.8]
+    command:
+      - "mysqld"
+      - "--max-allowed-packet=1073741824"
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_unicode_ci"
     ports:
       - "127.0.0.1:3306:3306"
     environment:

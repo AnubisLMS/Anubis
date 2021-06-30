@@ -1,9 +1,12 @@
+from datetime import datetime
+from dateutil.parser import parse as date_parse
+
 from flask import Blueprint, request
 
 from anubis.models import db, LectureNotes
 from anubis.utils.data import req_assert
 from anubis.utils.auth import require_admin
-from anubis.utils.http.decorators import json_response, json_endpoint
+from anubis.utils.http.decorators import json_response
 from anubis.utils.http.files import process_file_upload, get_mime_type
 from anubis.utils.http.https import success_response, get_number_arg, get_request_file_stream
 from anubis.utils.lms.courses import get_course_context, assert_course_context
@@ -30,7 +33,7 @@ def admin_static_lectures_list():
     # it is not loaded.
     query = LectureNotes.query \
         .filter(LectureNotes.course_id == course.id) \
-        .order_by(LectureNotes.number.desc())
+        .order_by(LectureNotes.post_time.desc())
 
     # Get all public static files within this course
     lectures = query.all()
@@ -100,15 +103,27 @@ def admin_lecture_save(lecture_notes_id: str):
     course = get_course_context()
 
     # Get fields from params
-    number = get_number_arg('number', default_value=1, reject_negative=True)
+    post_time = request.args.get('post_time', default=None)
     title = request.args.get('title', default='')
     description = request.args.get('description', default='')
+
+    # If post time was in the http query, then try to parse it
+    if isinstance(post_time, str):
+        try:
+            post_time = date_parse(post_time)
+        except:
+            post_time = None
 
     # Get lecture notes
     lecture_notes: LectureNotes = LectureNotes.query.filter(
         LectureNotes.id == lecture_notes_id,
         LectureNotes.course_id == course.id,
     ).first()
+
+    # If post time is None for whatever reason, then
+    # default to what it is set as already
+    if post_time is None:
+        post_time = lecture_notes.post_time
 
     # Assert that the static file is within the current course context
     assert_course_context(lecture_notes)
@@ -117,7 +132,7 @@ def admin_lecture_save(lecture_notes_id: str):
     stream, filename = get_request_file_stream(with_filename=True, fail_ok=True)
 
     # Update fields
-    lecture_notes.number = number
+    lecture_notes.post_time = post_time
     lecture_notes.title = title
     lecture_notes.description = description
 
@@ -157,9 +172,21 @@ def admin_lecture_upload():
     course = get_course_context()
 
     # Get fields from params
-    number = get_number_arg('number', default_value=1, reject_negative=True)
+    post_time = request.args.get('post_time', default=None)
     title = request.args.get('title', default='')
     description = request.args.get('description', default='')
+
+    # If post time was in the http query, then try to parse it
+    if isinstance(post_time, str):
+        try:
+            post_time = date_parse(post_time)
+        except:
+            post_time = None
+
+    # If post time is None for whatever reason, then
+    # default to now
+    if post_time is None:
+        post_time = datetime.now()
 
     # Process the file upload
     blob = process_file_upload()
@@ -168,7 +195,7 @@ def admin_lecture_upload():
     lecture_notes = LectureNotes(
         static_file_id=blob.id,
         course_id=course.id,
-        number=number,
+        post_time=post_time,
         title=title,
         description=description,
         hidden=False,

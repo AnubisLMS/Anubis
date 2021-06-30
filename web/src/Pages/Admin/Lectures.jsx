@@ -36,7 +36,7 @@ const deleteFile = (id, state, enqueueSnackbar) => () => {
 };
 
 const useColumns = (state, enqueueSnackbar) => ([
-  {field: 'number', headerName: 'Lecture Number', width: 160},
+  {field: 'post_time', headerName: 'Post Time', width: 160},
   {field: 'title', headerName: 'Lecture Title', width: 300},
   {
     field: 'a', headerName: 'Lecture File', width: 300, renderCell: ({row}) => (

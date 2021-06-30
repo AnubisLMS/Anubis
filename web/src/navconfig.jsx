@@ -127,6 +127,12 @@ export const admin_nav = [
     exact: false,
   },
   {
+    id: 'Lectures',
+    icon: <ImportContactsIcon/>,
+    path: '/admin/lectures',
+    Page: AdminLectures,
+  },
+  {
     id: 'Assignments',
     icon: <AssignmentOutlinedIcon/>,
     path: '/admin/assignments',
@@ -149,12 +155,6 @@ export const admin_nav = [
     icon: <AttachFileIcon/>,
     path: '/admin/static',
     Page: AdminStatic,
-  },
-  {
-    id: 'Lectures',
-    icon: <ImportContactsIcon/>,
-    path: '/admin/lectures',
-    Page: AdminLectures,
   },
   {
     id: 'Config',
