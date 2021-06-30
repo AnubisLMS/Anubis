@@ -780,7 +780,7 @@ class LectureNotes(db.Model):
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), nullable=False, index=True)
 
     # Meta fields
-    number = db.Column(db.Integer, nullable=True)
+    post_time = db.Column(db.DateTime, nullable=True, default=datetime.now)
     title = db.Column(db.TEXT, default='')
     description = db.Column(db.TEXT, default='')
     hidden = db.Column(db.Boolean, default=False)
@@ -795,10 +795,10 @@ class LectureNotes(db.Model):
             'id': self.id,
             'static_file': self.static_file.data,
             'course': self.course.course_code,
-            'number': self.number,
             'title': self.title,
             'description': self.description,
             'hidden': self.hidden,
+            'post_time': str(self.post_time),
             'created': str(self.created),
             'last_updated': str(self.last_updated),
         }
