@@ -103,15 +103,27 @@ def admin_lecture_save(lecture_notes_id: str):
     course = get_course_context()
 
     # Get fields from params
-    number = get_number_arg('number', default_value=1, reject_negative=True)
+    post_time = request.args.get('post_time', default=None)
     title = request.args.get('title', default='')
     description = request.args.get('description', default='')
+
+    # If post time was in the http query, then try to parse it
+    if isinstance(post_time, str):
+        try:
+            post_time = date_parse(post_time)
+        except:
+            post_time = None
 
     # Get lecture notes
     lecture_notes: LectureNotes = LectureNotes.query.filter(
         LectureNotes.id == lecture_notes_id,
         LectureNotes.course_id == course.id,
     ).first()
+
+    # If post time is None for whatever reason, then
+    # default to what it is set as already
+    if post_time is None:
+        post_time = lecture_notes.post_time
 
     # Assert that the static file is within the current course context
     assert_course_context(lecture_notes)
@@ -120,7 +132,7 @@ def admin_lecture_save(lecture_notes_id: str):
     stream, filename = get_request_file_stream(with_filename=True, fail_ok=True)
 
     # Update fields
-    lecture_notes.number = number
+    lecture_notes.post_time = post_time
     lecture_notes.title = title
     lecture_notes.description = description
 
