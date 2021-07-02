@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/core": "^11.0.0",
+    "@emotion/react": "^11.4.0",
+    "@emotion/styled": "^11.3.0",
     "gatsby": "^3.8.1",
     "gatsby-plugin-gatsby-cloud": "^2.8.1",
     "gatsby-plugin-image": "^1.8.0",
@@ -15,7 +18,8 @@
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "react-helmet": "^6.1.0"
+    "react-helmet": "^6.1.0",
+    "twin.macro": "^2.5.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.2.6",
