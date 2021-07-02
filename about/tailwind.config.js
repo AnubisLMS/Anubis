@@ -3,6 +3,9 @@ module.exports = {
   darkMode: false,
   theme: {
     extend: {
+      backgroundImage: (theme)  => ({
+        'swirl': "url('../images/swirl-bg.png')",
+      }),
       colors: {
         white: '#FFFFFF',
         primary: '#FF9900',
