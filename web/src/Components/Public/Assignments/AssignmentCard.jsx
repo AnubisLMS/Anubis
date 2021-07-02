@@ -17,12 +17,15 @@ import red from '@material-ui/core/colors/red';
 import green from '@material-ui/core/colors/green';
 import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import Dialog from '@material-ui/core/Dialog';
+import ReactMarkdown from 'react-markdown';
+import Box from '@material-ui/core/Box';
 
 import {nonStupidDatetimeFormat} from '../../../Utils/datetime';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    minWidth: 210,
+    minWidth: 250,
   },
   pos: {
     marginBottom: 5,
@@ -50,15 +53,8 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 14,
     paddingLeft: theme.spacing(1),
   },
-  actionList: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
   button: {
     margin: theme.spacing(0.5),
-  },
-  ideButtonWrapper: {
-    position: 'relative',
   },
   pollingProgress: {
     position: 'absolute',
@@ -66,6 +62,9 @@ const useStyles = makeStyles((theme) => ({
     left: '50%',
     marginTop: -12,
     marginLeft: -12,
+  },
+  dialog: {
+    padding: '2rem',
   },
 }));
 
@@ -106,6 +105,8 @@ export default function AssignmentCard({
   } = assignment;
 
   const [timeLeft] = useState(remainingTime(due_date));
+  const [isOpen, setIsOpen] = useState(false);
+
   const timerComponents = [];
   Object.keys(timeLeft).forEach((interval) => {
     if (!timeLeft[interval]) {
@@ -161,8 +162,8 @@ export default function AssignmentCard({
           </div>
         </CardContent>
       </CardActionArea>
-      <CardActions className={classes.actionList}>
-        <div className={classes.ideButtonWrapper}>
+      <CardActions>
+        <Box display = 'flex' flexDirection="column" width={'100%'}>
           <Button
             size={'small'}
             variant={'contained'}
@@ -175,22 +176,44 @@ export default function AssignmentCard({
           Anubis Cloud IDE
           </Button>
           {runAssignmentPolling && <CircularProgress size={24} className={classes.pollingProgress} />}
-        </div>
-
-        <Button
-          size={'small'}
-          variant={'contained'}
-          color={'primary'}
-          disabled={!githubLinkEnabled}
-          startIcon={has_repo ? <ExitToAppIcon/> : <GitHubIcon/>}
-          className={classes.button}
-          component={'a'}
-          href={has_repo ? repo_url : github_classroom_link}
-          target={'_blank'}
-          onClickCapture={!has_repo && handleGithubClassroomLinkClicked}
-        >
-          {has_repo ? 'Go to repo' : 'Create repo'}
-        </Button>
+          <Button
+            size={'small'}
+            variant={'contained'}
+            color={'primary'}
+            disabled={!githubLinkEnabled}
+            startIcon={has_repo ? <ExitToAppIcon/> : <GitHubIcon/>}
+            className={classes.button}
+            component={'a'}
+            href={has_repo ? repo_url : github_classroom_link}
+            target={'_blank'}
+            onClickCapture={!has_repo && handleGithubClassroomLinkClicked}
+          >
+            {has_repo ? 'Go to repo' : 'Create repo'}
+          </Button>
+          {!assignment.description &&
+            <Button
+              size='small'
+              variant='contained'
+              color='primary'
+              className={classes.button}
+              component='a'
+              onClick = {() => setIsOpen(true)}
+            >
+              View Description
+            </Button>
+          }
+          <Dialog
+            onClose = {() => setIsOpen(false)}
+            open = {isOpen}
+          >
+            <div className={classes.dialog}>
+              <Typography variant = 'h6'>Assignment - {assignment.name}</Typography>
+              <ReactMarkdown>
+                {assignment.description}
+              </ReactMarkdown>
+            </div>
+          </Dialog>
+        </Box>
       </CardActions>
     </Card>
   );
