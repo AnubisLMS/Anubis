@@ -9,3 +9,6 @@ export {HeaderLink as HeaderLink} from './links';
 export {default as Button} from './buttons';
 export {PrimaryButton} from './buttons';
 export {SecondaryButton} from './buttons';
+
+//Typography
+export {PageTitle} from './typography';

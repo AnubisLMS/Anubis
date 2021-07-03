@@ -6,8 +6,8 @@ import {Link as GatsbyLink} from 'gatsby';
 export const Link = tw(GatsbyLink)`hover:text-primary cursor-pointer`;
 
 //Link component for Header
-export const HeaderLink = ({children}) => (
-  <Link  activeClassName = 'text-tertiary'>{children}</Link>
+export const HeaderLink = ({children, to = '/'}) => (
+  <Link to = {to}  activeClassName = 'text-primary'>{children}</Link>
 );
 
 export default Link;
