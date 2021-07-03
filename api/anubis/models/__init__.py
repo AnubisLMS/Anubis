@@ -1,7 +1,9 @@
 import base64
 import json
 import os
+import copy
 from datetime import datetime, timedelta
+from typing import Any
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import deferred
@@ -60,24 +62,14 @@ class User(db.Model):
 
     @property
     def data(self):
-        professor_for = [pf.data for pf in self.professor_for_course]
-        ta_for = [taf.data for taf in self.ta_for_course]
-        super_for = None
-        if self.is_superuser:
-            super_for = []
-            courses = Course.query.all()
-            for course in courses:
-                super_for.append({'id': course.id, 'name': course.name})
+        from anubis.utils.lms.courses import get_user_permissions
+
         return {
             "id": self.id,
             "netid": self.netid,
             "github_username": self.github_username,
             "name": self.name,
-            "is_superuser": self.is_superuser,
-            "is_admin": len(professor_for) > 0 or len(ta_for) > 0 or self.is_superuser,
-            "professor_for": professor_for,
-            "ta_for": ta_for,
-            "admin_for": super_for or (professor_for + ta_for),
+            **get_user_permissions(self)
         }
 
     def __repr__(self):
