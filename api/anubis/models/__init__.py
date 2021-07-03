@@ -62,52 +62,14 @@ class User(db.Model):
 
     @property
     def data(self):
+        from anubis.utils.lms.courses import get_user_permissions
+
         return {
             "id": self.id,
             "netid": self.netid,
             "github_username": self.github_username,
             "name": self.name,
-        } | self.get_user_permissions
-
-    @property
-    def get_user_permissions(self) -> dict[str, Any]:
-        """
-        Get a user's `professor_for`, `ta_for`, and `admin_for` permissions
-
-        :param user:
-        :return:
-        """
-
-        # If the user is superuser, return all the permissions for every course
-        if self.is_superuser:
-            super_for = [
-                {'id': course.id, 'name': course.name}
-                for course in Course.query.all()
-            ]
-            return {
-                "is_superuser": True,
-                "is_admin": True,
-                "professor_for": super_for,
-                # super_for is deepcopied to avoid introducing exceptions
-                # if further data processing is needed
-                "ta_for": copy.deepcopy(super_for),
-                "admin_for": copy.deepcopy(super_for),
-            }
-
-        professor_for = [pf.data for pf in self.professor_for_course]
-        # A professor has the same permissions as a ta do
-        ta_for = [taf.data for taf in self.ta_for_course] + professor_for
-        # According to John's explanation in issue #115, `admin_for` should
-        # actually be the same as `ta_for`. So `admin_for` now becomes a
-        # redundant value and should be removed in the future
-        admin_for = copy.deepcopy(ta_for)
-
-        return {
-            "is_superuser": False,
-            "is_admin": len(admin_for) > 0,
-            "professor_for": professor_for,
-            "ta_for": ta_for,
-            "admin_for": admin_for,
+            **get_user_permissions(self)
         }
 
     def __repr__(self):
