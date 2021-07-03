@@ -1,0 +1,106 @@
+\documentclass[12pt]{report}
+\usepackage{arxiv}
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc} % use 8-bit T1 fonts
+\usepackage{fancyref} % \fref \Fref
+\usepackage{hyperref} % hyperlinks
+\usepackage{url} % simple URL typesetting
+\usepackage{booktabs} % professional-quality tables
+\usepackage{amsfonts} % blackboard math symbols
+\usepackage{mathtools}
+\usepackage{nicefrac} % compact symbols for 1/2, etc.
+\usepackage{microtype} % microtypography
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{minted}
+\usepackage{amssymb}
+\usepackage{xcolor} % for marking points of confusion
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+\renewcommand{\fancyrefdefaultformat}{plain}
+%\newcommand(\fref)[1]{\cref{#1}} % Because I started with fancyref
+\newcommand{\pref}[1]{(\fref{#1})}
+\newcommand{\sref}[1]{(see
+\fref{#1})}
+
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\bolds}[1]{\boldsymbol{#1}}
+
+%1 Exectation value
+\newcommand{\expect}[1]{\langle{}{#1}\rangle{}}
+
+\title{Anubis LMS}
+
+
+\author{%
+    John McCann Cunniff Jr \\
+    New York University\\
+    Brooklyn, New York \\
+    \texttt{john@osiris.cyber.nyu.edu} \\
+    \AND{}
+    Professor Gustavo Sandoval \\
+    Supervisor \\
+    New York University\\
+    Brooklyn, New York \\
+    \texttt{gustavo.sandoval@nyu.edu} \\
+}
+
+\begin{document}
+
+%  Title
+    \maketitle
+
+%  Abstract
+    \begin{abstract}
+        The Anubis LMS is a tool to give students live feedback from their homework
+        assignments while they are working on them and before the deadline.
+        Instead of having students submit a patch file or individual files, each student
+        will have their own private repo for every assignment.
+        The way students then submit their work is simply by pushing to their repo before
+        the deadline.
+        Students submit as many times as they would like before the deadline.
+
+        When a student pushes to their assignment repo, a job is launched in the Anubis cluster.
+        That job will build their code, and run tests on the results.
+        Students can then use the live feedback to see which areas they need to improve on
+        before they get their final grades.
+    \end{abstract}
+
+%  Keywords
+    \keywords{LMS, Cloud IDEs, Autograding, Distributed Computing, Kubernetes}
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=1\textwidth]{figures/cluster.mmd}
+        \caption{The Anubis Cluster\label{fig:cluster}}
+    \end{figure}
+
+%  Contents
+    \tableofcontents
+
+%    1. overview
+    \include{overview}
+
+%    2. autograding
+    \include{autograding}
+
+%    3. cloud ides
+    \include{cloud_ides}
+
+%    4. insights
+    \include{insights}
+
+%    5. services
+    \include{services}
+
+%    6. deployment
+    \include{deployment}
+
+
+\end{document}
