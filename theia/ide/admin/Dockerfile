@@ -23,6 +23,13 @@ RUN yarn --pure-lockfile \
 
 FROM node:${NODE_VERSION}
 ARG PY_VERSION=3.9.3
+
+COPY --from=0 /home/theia /home/theia
+COPY motd.txt /etc/motd
+COPY cli /cli
+COPY supervisord.conf initialize-incluster.py autosave-dump.sh /
+COPY autosave /usr/local/bin/autosave
+
 RUN set -eux; apt-get update \
   && apt-get upgrade -y --no-install-recommends \
   && apt-get install -y --no-install-recommends \
@@ -76,6 +83,8 @@ RUN set -eux; apt-get update \
   cp .oh-my-zsh/templates/zshrc.zsh-template .zshrc; \
   sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="gnzh"/' .zshrc; \
   sed -i 's/plugins=(git)/plugins=(git zsh-syntax-highlighting)/' .zshrc; \
+  echo 'cat /etc/motd' >> .zshrc; \
+  mkdir -p /home/theia/.theia; \
   mkdir -p /home/theia/.theia; \
   echo '{"terminal.integrated.shell.linux": "/usr/bin/zsh"}' \
     > /home/theia/.theia/settings.json; \
@@ -102,23 +111,20 @@ RUN set -eux; apt-get update \
   | cut -d: -f1 \
   | sort -u \
   | xargs -r apt-mark manual \
+  && apt remove python python3 -y \
+  && apt autoremove -y \
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/cache/apt/* \
   && rm -rf /var/lib/apt/lists/*; \
   find / -depth \
     \( -name .cache -o -name __pycache__ -o -name *.pyc -o -name *.a -o -name .git -o -name .github \) \
-    -exec rm -rf {} +
-COPY --from=0 /home/theia /home/theia
-
-COPY cli /cli
-RUN pip3 install --no-cache-dir /cli \
+    -exec 'rm' '-rf' '{}' '+' \
+  && pip3 install --no-cache-dir /cli \
   && rm -rf /cli \
   && find /usr/local -depth \
   \( \
   \( -type d -a \( -name test -o -name tests -o -name idle_test -o -name __pycache__ \) \) \
   -o \( -type f -a \( -name '*.pyc' -o -name '*.pyo' -o -name '*.a' \) \) \
-  \) -exec rm -rf '{}' +
-COPY supervisord.conf initialize-incluster.py autosave-dump.sh /
-COPY autosave /usr/local/bin/autosave
+  \) -exec 'rm' '-rf' '{}' '+'
 
 ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]
