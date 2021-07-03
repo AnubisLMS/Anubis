@@ -2,6 +2,8 @@
 *.log
 *.pyg
 *.toc
+*.out
+*.pdf
+
 out
 _*
-*.out

@@ -1,4 +1,4 @@
-\documentclass[12pt]{report}
+\documentclass[12pt letterpaper]{report}
 \usepackage{arxiv}
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc} % use 8-bit T1 fonts
@@ -36,44 +36,49 @@
 \newcommand{\expect}[1]{\langle{}{#1}\rangle{}}
 
 \title{Anubis LMS}
-
-
+\date{2021-07-03}
 \author{%
     John McCann Cunniff Jr \\
     New York University\\
     Brooklyn, New York \\
     \texttt{john@osiris.cyber.nyu.edu} \\
-    \AND{}
-    Professor Gustavo Sandoval \\
-    Supervisor \\
-    New York University\\
-    Brooklyn, New York \\
-    \texttt{gustavo.sandoval@nyu.edu} \\
+    \thanks{A special thanks to Professor Gustavo Sandoval who always believed in me} \\
 }
+
 
 \begin{document}
 
 %  Title
-    \maketitle
+    \begin{titlepage}
+
+        \maketitle
+
+        \vspace{0.3cm}
+        \begin{center}
+            \includegraphics[width=0.3\textwidth]{figures/anubis-icon-1.png}
+        \end{center}
+        \vspace{0.3cm}
 
 %  Abstract
-    \begin{abstract}
-        The Anubis LMS is a tool to give students live feedback from their homework
-        assignments while they are working on them and before the deadline.
-        Instead of having students submit a patch file or individual files, each student
-        will have their own private repo for every assignment.
-        The way students then submit their work is simply by pushing to their repo before
-        the deadline.
-        Students submit as many times as they would like before the deadline.
+        \begin{abstract}
+            The Anubis LMS is a tool to give students live feedback from their homework
+            assignments while they are working on them and before the deadline.
+            Instead of having students submit a patch file or individual files, each student
+            will have their own private repo for every assignment.
+            The way students then submit their work is simply by pushing to their repo before
+            the deadline.
+            Students submit as many times as they would like before the deadline.
 
-        When a student pushes to their assignment repo, a job is launched in the Anubis cluster.
-        That job will build their code, and run tests on the results.
-        Students can then use the live feedback to see which areas they need to improve on
-        before they get their final grades.
-    \end{abstract}
+            When a student pushes to their assignment repo, a job is launched in the Anubis cluster.
+            That job will build their code, and run tests on the results.
+            Students can then use the live feedback to see which areas they need to improve on
+            before they get their final grades.
+        \end{abstract}
 
 %  Keywords
-    \keywords{LMS, Cloud IDEs, Autograding, Distributed Computing, Kubernetes}
+        \keywords{LMS, Cloud IDEs, Autograding, Distributed Computing, Kubernetes}
+
+    \end{titlepage}
 
     \begin{figure}[h]
         \centering
