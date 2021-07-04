@@ -4,6 +4,9 @@
 *.toc
 *.out
 *.pdf
+*.fdb_latexmk
+*.synctex*
+*.fls
 
 out
 _*
