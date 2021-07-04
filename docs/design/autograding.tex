@@ -345,6 +345,26 @@ processed.
 \subsection{A Word on Isolation}\label{subsec:a-word-on-isolation}
 
 
+We are executing student code in the submission pipeline containers.
+Due to this reality, the pipelines are designed from the ground
+up to be isolated in whatever way they can be.
 
+There is a special \href{https://kubernetes.io/docs/concepts/services-networking/network-policies/}{kubernetes network} that is applied to 
+all the submission pipeline pods.
+This policy limits the pod to only being able to connect to the \textit{pipeline-api}
+service.
+Using simple resource requests and limits in kubernets enables
+limits on resources like cpu and memory.
+
+In early versions of Anubis, there were not memory limits on submission
+containers. 
+Several students would push code that would blow up in memory. 
+These students were not acting malicious, they just did not understand
+how memory works in C that well.
+When this would happen, the node would be quickly drained of available memory,
+and the OOM killer would start taking other processes and containers down.
+Obviously this lead to sensible resources limits being placed
+on student code. In more modern versions of Anubis there are proper isolation and
+resource limits that are placed on students.
 
 
