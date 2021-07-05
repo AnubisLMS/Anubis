@@ -27,21 +27,17 @@ class Config:
 
             # cache
             self.CACHE_TYPE = 'Redis'
-            self.CACHE_REDIS_HOST = os.environ.get("CACHE_REDIS_HOST", default="redis-master")
+            self.CACHE_REDIS_HOST = os.environ.get("REDIS_HOST", default="redis-master")
             self.CACHE_REDIS_PASSWORD = os.environ.get("REDIS_PASS", default="anubis")
 
         # MINDEBUG
         else:
-            os.makedirs('.data/', exist_ok=True)
-            os.makedirs('.data/cache', exist_ok=True)
-
             # sqlalchemy
             self.SQLALCHEMY_DATABASE_URI = 'sqlite:///../.data/anubis.db'
             self.SQLALCHEMY_TRACK_MODIFICATIONS = False
 
             # cache
-            self.CACHE_TYPE = 'FileSystemCache'
-            self.CACHE_DIR = '.data/cache'
+            self.CACHE_TYPE = 'NullCache'
 
         # OAuth
         self.OAUTH_CONSUMER_KEY = os.environ.get("OAUTH_CONSUMER_KEY", default="DEBUG")
@@ -57,9 +53,11 @@ class Config:
         # autograding specific config
         self.STATS_REAP_DURATION = timedelta(days=60)
 
-        logging.info("Starting with DATABASE_URI: {}".format(self.SQLALCHEMY_DATABASE_URI))
-        logging.info("Starting with SECRET_KEY: {}".format(self.SECRET_KEY))
-        logging.info("Starting with DEBUG: {}".format(self.DEBUG))
+        print("Starting with DATABASE_URI: {}".format(self.SQLALCHEMY_DATABASE_URI))
+        print("Starting with CACHE_TYPE: {}".format(self.CACHE_TYPE))
+        print("Starting with SECRET_KEY: {}".format(self.SECRET_KEY))
+        print("Starting with MINDEBUG: {}".format(self.MINDEBUG))
+        print("Starting with DEBUG: {}".format(self.DEBUG))
 
 
 config = Config()

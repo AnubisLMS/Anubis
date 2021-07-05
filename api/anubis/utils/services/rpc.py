@@ -1,3 +1,5 @@
+import traceback
+
 from redis import Redis
 from rq import Queue
 
@@ -29,7 +31,12 @@ def rpc_enqueue(func, queue=None, args=None):
     # If we are running in mindebug, there is
     # no rq cluster to send things off to.
     if config.MINDEBUG:
-        return func(*args)
+        try:
+            return func(*args)
+        except Exception as e:
+            print(e)
+            print(traceback.format_exc())
+            return
 
     with Redis(host=config.CACHE_REDIS_HOST, password=config.CACHE_REDIS_PASSWORD) as conn:
         q = Queue(name=queue, connection=conn)
