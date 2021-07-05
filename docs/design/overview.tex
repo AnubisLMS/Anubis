@@ -1,5 +1,17 @@
 \chapter{Project Overview}\label{ch:overview}
 
+The Anubis LMS is a tool to give students live feedback from their homework
+assignments while they are working on them and before the deadline.
+Instead of having students submit a patch file or individual files, each student
+will have their own private repo for every assignment.
+The way students then submit their work is simply by pushing to their repo before
+the deadline.
+Students submit as many times as they would like before the deadline.
+
+When a student pushes to their assignment repo, a job is launched in the Anubis cluster.
+That job will build their code, and run tests on the results.
+Students can then use the live feedback to see which areas they need to improve on
+before they get their final grades.
 
 \section{Autograding}\label{sec:autograding}
 
