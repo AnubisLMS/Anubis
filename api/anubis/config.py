@@ -26,7 +26,7 @@ class Config:
             )
 
             # cache
-            self.CACHE_TYPE = 'Redis'
+            self.CACHE_TYPE = 'RedisCache'
             self.CACHE_REDIS_HOST = os.environ.get("REDIS_HOST", default="redis-master")
             self.CACHE_REDIS_PASSWORD = os.environ.get("REDIS_PASS", default="anubis")
 
