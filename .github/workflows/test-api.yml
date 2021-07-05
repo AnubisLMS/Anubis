@@ -34,10 +34,10 @@ jobs:
     - name: Background API
       run: |
         set -x
-        python3 dev.py &
+        ./venv/bin/python3 dev.py &
     - name: Test with pytest
       run: |
-        ./api/tests/mintest.sh
+        ./tests/mintest.sh
     - name: Teardown
       run: |
         killall -9 python3
