@@ -1,10 +1,36 @@
 \chapter{Insights}\label{ch:insights}
 
+\section{High Level Usage Stats}\label{sec:high-level-usage-stats}
+
+There is a unavoidable wave of complains that flow in for every assignment in CS-UY 3224
+in the day or so before a deadline.
+The most common is the classic \textit{you did not give us enough time} excuse.
+Even if the assignment was assigned weeks before the deadline.
+
+Something unique about spring semester of 2021 for CS-UY 3224 was the introduction of the public usage graph on Anubis.
+This graph~\fref{fig:public-usage} is generated every few minutes from live usage data in Anubis.
+It shows the number of Cloud IDEs and submissions per hour for each assignment.
+Although it also has the due date for different assignments marked, you could easily deduce the
+due date for each.
+It is always the day that the usage spikes from basically nothing to hundreds of submissions per hour.
+
+Our response to students asking for extensions was often just showing the usage graphs in lecture.
+These graphs are an interesting experiment in student behavior.
+They can prove that the majority of students wait until the very last minute to do an assignment
+regardless of how long the assignment has been released.
+I think most educators have assumed this to be the case, but generating near live graphs from 
+this behavior is certainly an unique feature of Anubis.  
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/public-usage-1}
+    \caption{Public Usage Graph\label{fig:public-usage}}
+\end{figure}
 
 \section{Class Level Autograde Results}\label{sec:class-level-results}
 
 A special visual is generated specifically for visualizing the success of an assignment at a glance.
-This visual is called the Anubis Sundial~\ref{fig:autograde-sundial-1}.
+This visual is called the Anubis Sundial~\fref{fig:autograde-sundial-1}.
 It is a radial graph that shows the proportion of students that are passing/failing tests
 for a specific assignment.
 
@@ -28,7 +54,7 @@ At any time, even before the due date, they will be available.
 For course administrators, this means that they can see which tests students are struggling with.
 
 
-Take the simple example in~\ref{fig:autograde-sundial-3}.
+Take the simple example in~\fref{fig:autograde-sundial-3}.
 By mousing over the sundial, we can see that the tests with long file lines are failing.
 This information can then lead to long line buffering being covered again in lecture or
 recitation.
@@ -52,9 +78,8 @@ challenges they faced and how long it took for them to overcome them.
     \caption{A Student Visual History\label{fig:student-assignment-visual-history-1}}
 \end{figure}
 
-The example in~\ref{fig:student-assignment-visual-history-1} shows the build as the green
+The example in~\fref{fig:student-assignment-visual-history-1} shows the build as the green
 line, and the assignment tests as the blue line.
 We can see that this student spent a good deal of time on the first day
 just getting their tests to pass, only to revisit their work the next day probably to
 clean up their submission.
-
