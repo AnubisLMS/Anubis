@@ -1,4 +1,4 @@
-\documentclass[12pt letterpaper]{report}
+\documentclass[12pt]{report}
 \usepackage{arxiv}
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc} % use 8-bit T1 fonts
@@ -35,7 +35,69 @@
 %1 Exectation value
 \newcommand{\expect}[1]{\langle{}{#1}\rangle{}}
 
-\title{Anubis LMS}
+
+%1 Exectation value
+\newcommand{\expect}[1]{\langle{}{#1}\rangle{}}
+
+% Collections of samples
+\newcommand{\mcH}{\mathcal{H}}
+\newcommand{\mcE}{\mathcal{E}}
+\newcommand{\mcB}{\mathcal{B}}
+\newcommand{\mcV}{\mathcal{V}}
+\newcommand{\mcX}{\mathcal{X}}
+\newcommand{\mcY}{\mathcal{Y}}
+\newcommand{\mcC}{\mathcal{C}}
+\newcommand{\mcS}{\mathcal{S}}
+\newcommand{\mcL}{\mathcal{L}}
+\newcommand{\mcR}{\mathcal{R}}
+
+
+% Microstates (bold lowercase)
+\newcommand{\bh}{\bolds{h}}
+\newcommand{\be}{\bolds{e}}
+\newcommand{\bb}{\bolds{b}}
+\newcommand{\bv}{\bolds{v}}
+\newcommand{\bx}{\bolds{x}}
+\newcommand{\by}{\bolds{y}}
+\newcommand{\bs}{\bolds{s}}
+\newcommand{\bo}{\bolds{o}}
+\newcommand{\br}{\bolds{r}}
+
+% Microstates (bold lowercase)
+\newcommand{\bH}{\bolds{H}}
+\newcommand{\bE}{\bolds{E}}
+\newcommand{\bB}{\bolds{B}}
+\newcommand{\bV}{\bolds{V}}
+\newcommand{\bX}{\bolds{X}}
+\newcommand{\bY}{\bolds{Y}}
+\newcommand{\bS}{\bolds{S}}
+\newcommand{\bT}{\bolds{T}}
+
+% microstates explicit (bold lowercase)
+\newcommand{\seth}{\{h_j\}}
+\newcommand{\sete}{\{e\}}
+\newcommand{\setb}{\{b\}}
+\newcommand{\setv}{\{v_i\}}
+\newcommand{\setx}{\{x_i\}}
+\newcommand{\sety}{\{y_j\}}
+\newcommand{\sets}{\{s_i\}}
+\newcommand{\setr}{\{r_j\}}
+
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator{\sgn}{sgn}
+
+% Greek letters
+\renewcommand{\l}{\lambda}
+\renewcommand{\b}{\beta}
+\renewcommand{\L}{\Lambda}
+\renewcommand{\k}{\kappa}
+\newcommand{\T}{\Theta}
+\renewcommand{\P}{\Psi}
+\newcommand{\coloneq}{\mathrel{\resizebox{\widthof{$\mathord{=}$}}{\height}{ $\!\!=\!\!\resizebox{1.2\width}{0.8\height}{\raisebox{0.23ex}{$\mathop{:}$}}\!\!$ }}}
+\newcommand{\eqcolon}{\mathrel{\resizebox{\widthof{$\mathord{=}$}}{\height}{ $\!\!\resizebox{1.2\width}{0.8\height}{\raisebox{0.23ex}{$\mathop{:}$}}\!\!=\!\!$ }}}
+
+
+\title{Anubis Learning Management System}
 \date{2021-07-03}
 \author{%
     John McCann Cunniff Jr \\
@@ -55,24 +117,17 @@
 
         \vspace{0.3cm}
         \begin{center}
-            \includegraphics[width=0.3\textwidth]{figures/anubis-icon-1.png}
+            \includegraphics[width=0.3\textwidth]{figures/anubis-icon-1}
         \end{center}
         \vspace{0.3cm}
 
 %  Abstract
         \begin{abstract}
-            The Anubis LMS is a tool to give students live feedback from their homework
-            assignments while they are working on them and before the deadline.
-            Instead of having students submit a patch file or individual files, each student
-            will have their own private repo for every assignment.
-            The way students then submit their work is simply by pushing to their repo before
-            the deadline.
-            Students submit as many times as they would like before the deadline.
-
-            When a student pushes to their assignment repo, a job is launched in the Anubis cluster.
-            That job will build their code, and run tests on the results.
-            Students can then use the live feedback to see which areas they need to improve on
-            before they get their final grades.
+            The Anubis Learning Management System (LMS) is a tool designed specifically to automate Computer Science courses. 
+            Cloud IDEs integrated into Anubis provide students with a one click stable, consistent and inulated linux environment
+            in their browser.
+            While students work on their assignments, the provides live autograded feedback \textit{before the deadline}.
+            Powerful behavioral insights are generated for TAs and Professors from data collected by the platform.
         \end{abstract}
 
 %  Keywords
