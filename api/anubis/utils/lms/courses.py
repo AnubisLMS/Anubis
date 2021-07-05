@@ -4,7 +4,7 @@ import string
 import traceback
 import copy
 import urllib.parse
-from typing import Union, Tuple, Any, List
+from typing import Union, Tuple, Any, List, Dict
 
 from flask import request
 
@@ -358,7 +358,7 @@ def get_student_course_ids(user: User, default: str = None) -> List[str]:
     # Pass back list of course ids
     return course_ids
 
-def get_user_permissions(user: User) -> dict[str, Any]:
+def get_user_permissions(user: User) -> Dict[str, Any]:
     """
     Get a user's `professor_for`, `ta_for`, and `admin_for` permissions
 

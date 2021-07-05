@@ -97,8 +97,11 @@ def public_webhook():
             },
         )
 
-        check_repo(assignment, repo_url, github_username_guess, user)
+        repo = check_repo(assignment, repo_url, github_username_guess, user)
 
+        if repo.owner_id == None:
+            return success_response("initial dangling")
+            
         return success_response("initial commit")
 
     repo = (
