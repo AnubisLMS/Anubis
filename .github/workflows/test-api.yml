@@ -3,6 +3,11 @@
 
 name: Anubis API Test
 
+defaults:
+  run:
+    shell: bash
+    working-directory: api
+
 on:
   push:
     branches: [ master ]
@@ -23,14 +28,12 @@ jobs:
     - name: Install dependencies
       run: |
         set -x
-        cd api
         python -m pip install --upgrade pip virtualenv
         virtualenv -p $(which python3) venv
         if [ -f requirements.txt ]; then ./venv/bin/pip install -r requirements.txt; fi
     - name: Background API
       run: |
         set -x
-        cd api
         python3 dev.py &
     - name: Test with pytest
       run: |
