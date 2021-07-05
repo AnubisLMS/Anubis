@@ -1,6 +1,7 @@
 import base64
 import json
 import os
+import copy
 import sys
 import traceback
 
@@ -129,6 +130,7 @@ def _create_user_session(url: str, netid: str = 'superuser', new: bool = False, 
         assert data["success"] is True
         assert data["data"] is not None
         assert data["error"] is None
+        data = copy.deepcopy(data)
         admin_for = data['data']['user']['admin_for']
         for i in admin_for:
             if i['name'] == 'Intro to OS':
@@ -151,9 +153,9 @@ class Session(object):
 
     def __init__(
             self, permission: str = 'superuser', new: bool = False, add_to_os: bool = True,
-            domain: str = "localhost", port: int = 80,
+            domain: str = "localhost", port: int = 5000,
     ):
-        self.url = f"http://{domain}:{port}/api"
+        self.url = f"http://{domain}:{port}"
         self.timings = []
         self._session, self.netid = _create_user_session(
             self.url, permission, new=new, add_to_os=add_to_os

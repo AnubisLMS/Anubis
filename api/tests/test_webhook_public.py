@@ -4,7 +4,7 @@ import os
 
 import requests
 
-from anubis.models import db, User, Assignment, InCourse, Course
+from anubis.models import db, User, Assignment, InCourse, Course, AssignmentRepo
 from anubis.utils.data import with_context
 
 
@@ -58,69 +58,57 @@ def create_user(github_username: str):
 @with_context
 def do_webhook_tests_user(github_username):
     user = User.query.filter_by(github_username=github_username).first()
-
-    import pymysql
-    connection = pymysql.connect(
-        host='localhost',
-        user='anubis',
-        password='anubis',
-        database='anubis',
-        charset='utf8mb4'
-    )
-
     assignment = Assignment.query.join(Course).filter(Course.name == 'Intro to OS').first()
+    
+    assignment_id = assignment.id
+    assignment_name = assignment.name
+    assignment_unique_code = assignment.unique_code
+    user_id = user.id
+    user_github_username = user.github_username
+
+    print(db.engine)
+    print(assignment_name, assignment_unique_code)
+
+    db.session.expire_all()
     r = post_webhook(
-        gen_webhook(assignment.name, assignment.unique_code, user.github_username, "0" * 40, "0" * 40)).json()
+        gen_webhook(assignment_name, assignment_unique_code, user_github_username, "0" * 40, "0" * 40)).json()
     assert r['data'] == 'initial commit'
-    with connection.cursor() as cursor:
-        cursor.execute(
-            'select * from assignment_repo where assignment_id = %s and owner_id = %s;',
-            (assignment.id, user.id)
+    db.session.expire_all()
+    response = db.engine.execute(
+        'select count(id) from assignment_repo where assignment_id = \'{}\' and owner_id = \'{}\';'.format(
+            assignment_id, user_id
         )
-        assert cursor.fetchone() is not None
-        cursor.execute(
-            'select count(id) from assignment_repo where assignment_id = %s and owner_id = %s;',
-            (assignment.id, user.id)
-        )
-        count = cursor.fetchone()
-        assert count is not None and count[0] == 1
-
-    r = post_webhook(gen_webhook(assignment.name, assignment.unique_code, user.github_username)).json()
+    )
+    assert response.fetchone()[0] == 1
+    
+    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, user_github_username)).json()
+    db.session.expire_all()
     assert r['data'] != 'initial commit'
-    with connection.cursor() as cursor:
-        cursor.execute(
-            'select * from assignment_repo where assignment_id = %s and owner_id = %s;',
-            (assignment.id, user.id)
+    response = db.engine.execute(
+        'select count(id) from assignment_repo where assignment_id = \'{}\' and owner_id = \'{}\';'.format(
+            assignment_id, user_id
         )
-        assert cursor.fetchone() is not None
-        cursor.execute(
-            'select count(id) from assignment_repo where assignment_id = %s and owner_id = %s;',
-            (assignment.id, user.id)
-        )
-        count = cursor.fetchone()
-        assert count is not None and count[0] == 1
+    )
+    assert response.fetchone()[0] == 1
 
-    r = post_webhook(gen_webhook(assignment.name, assignment.unique_code + 'abc', user.github_username)).json()
+    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code + 'abc', user_github_username)).json()
     assert r['data'] is None
     assert r['error'] == 'assignment not found'
 
-    r = post_webhook(gen_webhook(assignment.name, assignment.unique_code, user.github_username, ref="abc123")).json()
+    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, user_github_username, ref="abc123")).json()
     assert r['error'] == 'not a push to master or main'
 
-    r = post_webhook(gen_webhook(assignment.name, assignment.unique_code, gen_rand(6))).json()
+    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, gen_rand(6))).json()
     assert r['error'] == 'dangling submission'
 
-    r = post_webhook(gen_webhook(assignment.name, assignment.unique_code, user.github_username)).json()
+    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, user_github_username)).json()
     assert r['data'] == 'submission accepted'
-
-    connection.close()
 
 
 def test_webhooks():
-    username1 = create_user(f'abc123')
+    username1 = create_user(f'{gen_rand(3)}-{gen_rand(3)}')
     username2 = create_user(f'{gen_rand(3)}-{gen_rand(3)}')
 
-    do_webhook_tests_user('superuser')
     do_webhook_tests_user(username1)
     do_webhook_tests_user(username2)
 

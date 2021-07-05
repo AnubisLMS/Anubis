@@ -48,20 +48,8 @@ def create_app():
     # Initialize app with all the extra services
     init_services(app)
 
-    # register views
-    if not config.MINDEBUG:
-        register_public_views(app)
-        register_admin_views(app)
-
-    # MINDEBUG
-    else:
-        # If not mindebug, then we need to add a /api base blueprint to add thing onto
-        api_blueprint = Blueprint('anubis-api-app', __name__, url_prefix='/api')
-
-        register_public_views(api_blueprint)
-        register_admin_views(api_blueprint)
-
-        app.register_blueprint(api_blueprint)
+    register_public_views(app)
+    register_admin_views(app)
 
     return app
 
