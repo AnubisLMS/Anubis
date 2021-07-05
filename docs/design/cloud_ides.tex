@@ -6,14 +6,14 @@
     \caption{Anubis Cloud IDE\label{fig:theia2}}
 \end{figure}
 
-\section{Cloud IDE Overview}
+\section{Cloud IDE Overview}\label{sec:cloud-ide-overview}
 
 One of the more exciting new features of Anubis is that of the Cloud IDEs.
 Anubis Cloud IDEs are \href{https://theia-ide.org/}{Theia} IDE servers that run in containers.
 Since the containers are themselves linux environments, we can allow students
 to run commands in that environment with the built in terminal in Theia.
 
-\section{Packaging of Course Software}
+\section{Packaging of Course Software}\label{sec:packaing-of-course-software}
 
 Taking these IDE container servers to the next level, we can add whatever 
 other software is necessary for the course.
@@ -33,7 +33,7 @@ The course VMs are then no longer necessary.
 Students have access to all the tools they need through the Cloud IDE
 with one click.
 
-\section{IDE Guarentees}
+\section{IDE Guarentees}\label{sec:ide-guarentees}
 
 Leveraging some magic that Kubernetes and containers give us,
 we can provide a fully insulated linux environment for hundreds of
@@ -46,7 +46,7 @@ Cloud IDEs need to be scalable.
 This requires the system to distribute Cloud IDE instances across multiple nodes. 
 Networking traffic to Cloud IDEs need to also be automatically detected and balanced.
 
-\subsection{Scaling IDEs}
+\subsection{Scaling IDEs}\label{subsec:scaling-ides}
 
 Kubernetes tracks what resources are reserved for specific containers.
 When it runs out of a resource like memory of cpu, it will automatically
@@ -55,7 +55,7 @@ There resource reservations are added to each student Cloud IDE.
 If there are more students asking for Cloud IDEs resources than exist
 in the cluster, it will automatically scale to handle the load.
 
-\subsection{Balancing Network Traffic}
+\subsection{Balancing Network Traffic}\label{subsec:balancing-network-traffic}
 
 There is a service in Anubis whose only purpose is to route
 student requests to IDE instances. 
@@ -92,7 +92,7 @@ The load balancer will then automatically distribute incomming connections
 between \textit{theia-proxy} containers.
 
 
-\section{IDE Pod Design}
+\section{IDE Pod Design}\label{sec:ide-pod-design}
 
 \begin{figure}[ht]
     \centering
