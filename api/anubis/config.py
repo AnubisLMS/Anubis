@@ -32,6 +32,8 @@ class Config:
 
         # MINDEBUG
         else:
+            os.makedirs('.data/', exist_ok=True)
+            
             # sqlalchemy
             self.SQLALCHEMY_DATABASE_URI = 'sqlite:///../.data/anubis.db'
             self.SQLALCHEMY_TRACK_MODIFICATIONS = False
