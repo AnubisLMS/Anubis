@@ -22,16 +22,18 @@ jobs:
         python-version: 3.9
     - name: Install dependencies
       run: |
+        cd api
         python -m pip install --upgrade pip
-        pip install pytest
-        if [ -f api/requirements.txt ]; then pip install -r api/requirements.txt; fi
+        pip install virtualenv
+        virtualenv -p $(python3) venv
+        if [ -f requirements.txt ]; then ./venv/bin/pip install -r requirements.txt; fi
     - name: Background API
       run: |
         cd api;
         python3 dev.py &
     - name: Test with pytest
       run: |
-        ./api/tests/test.sh
+        ./api/tests/mintest.sh
     - name: Teardown
       run: |
         killall -9 python3
