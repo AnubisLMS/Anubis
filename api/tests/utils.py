@@ -151,9 +151,9 @@ class Session(object):
 
     def __init__(
             self, permission: str = 'superuser', new: bool = False, add_to_os: bool = True,
-            domain: str = "localhost", port: int = 80,
+            domain: str = "localhost", port: int = 5000,
     ):
-        self.url = f"http://{domain}:{port}/api"
+        self.url = f"http://{domain}:{port}"
         self.timings = []
         self._session, self.netid = _create_user_session(
             self.url, permission, new=new, add_to_os=add_to_os

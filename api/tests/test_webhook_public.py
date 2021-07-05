@@ -4,7 +4,7 @@ import os
 
 import requests
 
-from anubis.models import db, User, Assignment, InCourse, Course
+from anubis.models import db, User, Assignment, InCourse, Course, AssignmentRepo
 from anubis.utils.data import with_context
 
 
@@ -58,47 +58,22 @@ def create_user(github_username: str):
 @with_context
 def do_webhook_tests_user(github_username):
     user = User.query.filter_by(github_username=github_username).first()
-
-    import pymysql
-    connection = pymysql.connect(
-        host='localhost',
-        user='anubis',
-        password='anubis',
-        database='anubis',
-        charset='utf8mb4'
-    )
-
     assignment = Assignment.query.join(Course).filter(Course.name == 'Intro to OS').first()
+    
+    assignment_id = assignment.id
+    user_id = user.id
+
     r = post_webhook(
         gen_webhook(assignment.name, assignment.unique_code, user.github_username, "0" * 40, "0" * 40)).json()
     assert r['data'] == 'initial commit'
-    with connection.cursor() as cursor:
-        cursor.execute(
-            'select * from assignment_repo where assignment_id = %s and owner_id = %s;',
-            (assignment.id, user.id)
-        )
-        assert cursor.fetchone() is not None
-        cursor.execute(
-            'select count(id) from assignment_repo where assignment_id = %s and owner_id = %s;',
-            (assignment.id, user.id)
-        )
-        count = cursor.fetchone()
-        assert count is not None and count[0] == 1
-
+    db.session.expire_all()
+    assert AssignmentRepo.query.filter_by(assignment_id=assignment_id, owner_id=user_id).count() == 1
+    
     r = post_webhook(gen_webhook(assignment.name, assignment.unique_code, user.github_username)).json()
+    db.session.expire_all()
     assert r['data'] != 'initial commit'
-    with connection.cursor() as cursor:
-        cursor.execute(
-            'select * from assignment_repo where assignment_id = %s and owner_id = %s;',
-            (assignment.id, user.id)
-        )
-        assert cursor.fetchone() is not None
-        cursor.execute(
-            'select count(id) from assignment_repo where assignment_id = %s and owner_id = %s;',
-            (assignment.id, user.id)
-        )
-        count = cursor.fetchone()
-        assert count is not None and count[0] == 1
+    assert AssignmentRepo.query.filter_by(assignment_id=assignment_id, owner_id=user_id).count() == 1
+    
 
     r = post_webhook(gen_webhook(assignment.name, assignment.unique_code + 'abc', user.github_username)).json()
     assert r['data'] is None
@@ -112,8 +87,6 @@ def do_webhook_tests_user(github_username):
 
     r = post_webhook(gen_webhook(assignment.name, assignment.unique_code, user.github_username)).json()
     assert r['data'] == 'submission accepted'
-
-    connection.close()
 
 
 def test_webhooks():
