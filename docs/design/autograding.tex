@@ -19,7 +19,7 @@ everyone's code will compile and run with the same commands.
 This structure makes automating tests possible.
 
 
-\section{Creating Autograde Tests}
+\section{Creating Autograde Tests}\label{sec:creating-autograde-tests}
 
 Using the anubis cli, you can initialize a new assignment using
 \mint{shell}|anubis assignment init <name of assignment>|
@@ -66,7 +66,7 @@ This is the URL that is given to you when you create a github classroom assignme
 That link will then be provided as a button for students to click in the frontend.
 
 
-\section{Writing Autograde Tests}
+\section{Writing Autograde Tests}\label{sec:writing-autograde-tests}
 
 All the files to build and run a complete anubis pipeline image will be dropped into the new directory.
 
@@ -153,8 +153,7 @@ class TestResult(object):
         self.passed: bool = None
 \end{minted}
 
-The functions \textit{run\_xv6} and \textit{did\_xv6\_crash} are very specific to the
-Intro to OS needs.
+The functions \textit{run\_xv6} and \textit{did\_xv6\_crash} are very specific to the Intro to OS needs.
 There are also some general functions that are just as helpful.
 
 \begin{minted}{python}
@@ -241,7 +240,7 @@ def search_lines(
 \end{minted}
 
 
-\section{Deploying Autograde Tests}
+\section{Deploying Autograde Tests}\label{sec:deploying-autograde-tests}
 
 
 Once you have tests written, then it is time to push them to Anubis.
@@ -259,7 +258,7 @@ anubis assignment build --push
 \end{minted}
 
 
-\section{Submission Pipelines}
+\section{Submission Pipelines}\label{sec:submission-pipelines}
 
 \begin{figure}[ht]
     \centering
@@ -267,19 +266,19 @@ anubis assignment build --push
     \caption{Submission Pipelines are a complex multi service data flow. \label{fig:submission-flow} }
 \end{figure}
 
-Submissions Pipelines~\ref{fig:submission-flow} are where the autographing is really happening.
+Submissions Pipelines~\fref{fig:submission-flow} are where the autographing is really happening.
 When students push code to their github repositories, Anubis sees the new
 commits and creates a pipeline job.
 Each commit to student github repository gets a new Submission Pipeline.
 
-\subsection{Kubernetes Job}
+\subsection{Kubernetes Job}\label{subsec:kubernetes-job}
 
 Each Submission Pipeline is a \href{https://kubernetes.io/docs/concepts/workloads/controllers/job/}{Kubernetes Job}.
 There are certain assurances that can be made when using Kubernetes Jobs.
 If there is an issue on one node on the cluster that prevents a submission job from finishing,
 Kubernetes will reschedule and retry the Submission Pipeline elsewhere.
 
-\subsection{Pipeline State Reporting}
+\subsection{Pipeline State Reporting}\label{subsec:pipeline-state-reporting}
 
 Some assignment tests will also take a long time to process each submission.
 Due to this reality, live state updating was added to the Submission Pipelines.
@@ -295,7 +294,7 @@ If a submission is processing the website will poll for updates.
 This complex multi service state reporting model is how results from isolated
 submission pipelines appear on the website for students as they happen.
 
-\subsection{Pipeline Stages}
+\subsection{Pipeline Stages}\label{subsec:pipeline-stages}
 
 It is important to note that at each stage of the submission pipeline,
 we will be moving execution back and forth between two unix users.
