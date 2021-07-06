@@ -2,24 +2,91 @@
 
 \section{Data Stores}\label{sec:data-stores}
 
-\subsection{Mariadb}\label{sec:mariadb}
+State in Anubis is somewhat fluid.
+Data is parked either in the main Mariadb~\ref{subsec:mairadb} database, or
+in the redis cache~\ref{subsec:caching}.
 
-\subsection{Redis}\label{sec:redis}
-\subsection{Caching}\label{sec:caching}
-\subsection{RPC Queues}\label{sec:rpc-queues}
+\subsection{Mariadb}\label{subsec:mariadb}
+
+The main data store for Anubis is a \href{https://mariadb.org/}{MariaDB}
+\href{https://mariadb.com/kb/en/galera-cluster/}{galera} deployment.
+More specifically the
+\href{https://github.com/bitnami/charts/tree/master/bitnami/mariadb-galera}{Bitnami mariadb-galera} chart is used.
+
+The advantage of galera is that MariaDB is multi-leader.
+Any node of the MariaDB cluster can be read or written to at any time.
+In a multi leader database deployment there is a certain tolerance of downed nodes before
+service is degraded.
+Even if nodes begin to fail, the MariaDB pods that are available can still handle
+read and write operations.
+
+All persistent storage in Anubis is parked in MariaDB.
+Things like student, course and assignment information are stored here.
+Temporary values like autograde results are stored in redis~\ref{subsec:redis}.
+
+\subsection{Redis}\label{subsec:redis}
+
+\href{https://redis.io/}{Redis} in Anubis is where temporary values are stored.
+It is assumed that redis is not persistent.
+What this means is that the redis deployment should be able to be reset
+at any time without critical data loss.
+If and when values need to be persisted, MariaDB~\ref{subsec:mariadb} is the better option.
+
+\subsection{Caching}\label{subsec:caching}
+
+Caching in Anubis is handled by the
+\href{https://flask-caching.readthedocs.io/en/latest/index.html}{flask-caching} library.
+The return values for specific functions can be temporarily stored in Redis for some
+period of time.
+
+In the Anubis API there is a great deal of caching.
+Almost all view functions that query for database values will cache the results in redis
+for some period of time.
+
+Many of the computationally intensive calculation results are cached.
+Take the autograde results for example.
+To calculate the best submission for a student, all the
+calculated submission results for that student and assignment must be pulled
+out of the database and examined.
+Depending on the student and assignment, this calculation could involve
+examining hundreds of submissions searching for the best.
+The results for these autograde calculations are then stored in the cache.
+
+For a 3 week window around each assignment deadline the autograde results
+for the assignment are periodically calculated.
+The purpose of this preprocessing is to ensure that the autograde results
+for recent assignments are always available in the cache.
+Without this small optimization, the autograde results page in the admin
+panel would just about always require 15-30 seconds to load data.
+
+Another example of heavy caching in Anubis would be the public usage visuals.
+The visuals themselves are png images that are generated from matplotlib.
+To generate the png we must periodically pull out all the submission
+and cloud ide session information.
+Pulling this data then generating the png can take upwards of 45 seconds to a minute.
+45 seconds is obviously an unacceptable amount of time to wait for an image to load
+in the browser.
+Anubis handles this situation by telling the API to always load the cached png image
+from the cache.
+The image is then periodically re-generated in the Reaper Cronjob.
+
+Without heavy caching on things like the autograde results and visual generation
+the admin panel would be quite slow.
+
+\subsection{RPC Queues}\label{subsec:rpc-queues}
 
 \section{Logging}\label{sec:logging}
-\subsection{Filebeat}\label{sec:filebeat}
-\subsection{Elasticsearch}\label{sec:elasticsearch}
+\subsection{Filebeat}\label{subsec:filebeat}
+\subsection{Elasticsearch}\label{subsec:elasticsearch}
 
 \section{Kubernetes}\label{sec:kubernetes}
-\subsection{Helm Chart}\label{sec:helm-chart}
-\subsection{Longhorn}\label{sec:longhorn}
-\subsection{Digital Ocean}\label{sec:digital-ocean}
-\subsubsection{Nodes}\label{sec:digital-ocean-nodes}
-\subsubsection{Networking}\label{sec:digital-ocean-networking}
+\subsection{Helm Chart}\label{subsec:helm-chart}
+\subsection{Longhorn}\label{subsec:longhorn}
+\subsection{Digital Ocean}\label{subsec:digital-ocean}
+\subsubsection{Nodes}\label{subsubsec:digital-ocean-nodes}
+\subsubsection{Networking}\label{subsubsec:digital-ocean-networking}
 
 \section{Github}\label{sec:github}
-\subsection{Github Classrooms}\label{sec:github-classrooms}
+\subsection{Github Classrooms}\label{subsec:github-classrooms}
 
 
