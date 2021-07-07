@@ -11,13 +11,17 @@ const links = [
     path: '/features'
   },
   {
-    name: 'Demo',
-    path: '/demo'
+    name: 'Blog',
+    path: '/blog'
   },
   {
     name: 'Contribute',
-    path: '/Contribute',
+    path: '/contribute',
   },
+  {
+    name: 'Contact Us',
+    path: '/contact'
+  }
 ];
 
 export const Header = () => {
@@ -31,7 +35,7 @@ export const Header = () => {
           <HeaderLink key = {`${link.name}-${index}`} to={link.path}>{link.name}</HeaderLink>
         ))}
       </div>
-      <div className= 'space-x-5'>
+      <div className= 'space-x-2'>
         <PrimaryButton>Log In</PrimaryButton>
         <Button className= 'hover:text-primary'>Get Started</Button>
       </div>

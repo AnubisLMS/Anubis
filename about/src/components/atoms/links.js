@@ -7,7 +7,7 @@ export const Link = tw(GatsbyLink)`hover:text-primary cursor-pointer`;
 
 //Link component for Header
 export const HeaderLink = ({children, to = '/'}) => (
-  <Link to = {to}  activeClassName = 'text-primary'>{children}</Link>
+  <Link to = {to}  activeClassName = 'pb-2 border-b-2 border-primary'>{children}</Link>
 );
 
 export default Link;

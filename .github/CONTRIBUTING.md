@@ -1,4 +1,4 @@
-# Contributing to Anubis
+# Contribute to Anubis
 
 1. [Descriptive Suffixes](#descriptive-suffixes)
 2. [Commit Message Guidelines](#commit-message-guidelines)

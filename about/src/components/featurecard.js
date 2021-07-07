@@ -1,11 +1,17 @@
-import React from 'react';
+import React, {useState} from 'react';
 
-const FeatureCard = ({name, description}) => {
+import {GradingIcon} from './atoms';
+
+const FeatureCard = ({name, shortDescription, icon}) => {
+  const [secondary, setSecondary] = useState(false);
   return (
-    <div className= 'flex  flex-row justify-center items-center border-2 h-32 border-primary p-6 hover:bg-primary hover:text-black cursor-pointer'>
+    <div onMouseOver = {() => setSecondary(true)}  onMouseLeave = {() => setSecondary(false)} className = 'flex  flex-row justify-center items-center border-2 h-32 border-primary p-6 hover:bg-primary hover:text-black cursor-pointer space-x-2'>
+      <div>
+        {icon(secondary)}
+      </div>
       <div>
         <h1 className= 'text-md font-bold'>{name}</h1>
-        <p className= 'text-sm'>{description}</p>
+        <p className= 'text-sm'>{shortDescription}</p>
       </div>
     </div>
   )

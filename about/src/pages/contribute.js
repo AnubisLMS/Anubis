@@ -1,9 +1,9 @@
 import React from 'react';
 
-export const Contributing = () => {
+export const Contribute = () => {
   return (
     <h1>Contributing</h1>
   )
 };
 
-export default Contributing;
+export default Contribute;

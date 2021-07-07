@@ -1,37 +1,44 @@
 import React from 'react';
 import {Layout, FeatureCard} from '../components';
 import {PageTitle} from '../components/atoms';
+import {GradingIcon, GraderIcon, SubmissionIcon, CustomIcon, VirtualIcon, ManagementIcon} from "../components/atoms";
 
 const features = [
   {
     name: 'Grading Insights',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nec vestibulum velit.'
+    shortDescription: 'Get quantitative data on how topics and assignments are comprehended',
+    icon: (secondary) => (<GradingIcon isSecondary={secondary}/> )
   },
   {
     name: 'Auto Grader',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nec vestibulum velit.',
+    shortDescription: 'Accelerate grading by automating the grunt work out',
+    icon: (secondary) => (<GraderIcon isSecondary={secondary}/> )
   },
   {
     name: 'Submission',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nec vestibulum velit.',
+    shortDescription: 'Submit assignments as many times as needed getting live feedback as students go',
+    icon: (secondary) => (<SubmissionIcon isSecondary={secondary}/> )
   },
   {
-    name: 'Customizibility',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nec vestibulum velit.',
+    name: 'Customizability',
+    shortDescription: 'Integrate only the parts of Anubis that fit in the curriculum',
+    icon: (secondary) => (<CustomIcon isSecondary={secondary}/> )
   },
   {
-    name: 'Virtual IDE',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nec vestibulum velit.',
+    name: 'Cloud IDE',
+    shortDescription: 'Prebuilt linux IDEs in the cloud tailored to each course\'s needs',
+    icon: (secondary) => (<VirtualIcon isSecondary={secondary}/> )
   },
   {
     name: 'Class Management',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nec vestibulum velit.'
+    shortDescription: 'Administrate with Anubis\'s complete admin panel and Management IDEs',
+    icon: (secondary) => (<ManagementIcon isSecondary={secondary}/> )
   }
 ]
 
 export const Features = () => {
   return (
-    <Layout>
+    <Layout isCentered>
       <div className= 'flex items-start w-full max-w-6xl'>
         <PageTitle>Features</PageTitle>
       </div>
