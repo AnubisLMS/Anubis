@@ -53,6 +53,7 @@ const useStyles = makeStyles(() => ({
     height: '100%',
   },
   drawer: {
+    height: '100%',
     width: drawerWidth,
     flexShrink: 0,
   },
@@ -65,6 +66,9 @@ const useStyles = makeStyles(() => ({
     padding: theme.spacing(0, 1),
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
+  },
+  githubButton: {
+    margin: theme.spacing(2, 1),
   },
   content: {
     flexGrow: 1,

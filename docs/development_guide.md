@@ -109,25 +109,8 @@ make mindebug
 ```
 
 This command will initialize the python virtual environment for the api and the node_modules for the web. It
-will then print out the mindebug startup links. Then you need to run the api and website yourself separately. 
-We launch these separately so that the api can be run in your debugger of choice.
-
-To start the api, run this from the top of the repo:
-
-```shell
-# Same as running `make run` or `env MINDEBUG=1 DEBUG=1 ./venv/bin/python3 dev.py` from the api directory
-# This will start the flask server in MINDEBUG mode
-make -C api run
-```
-
-> _Alternatively you can run api/dev.py from your IDE if it has a fancy debugger (like pycharm!)_
-
-Then to start the web, run this from the web directory:
-
-```shell
-# This will start the create-react-app dev server with api proxy
-yarn run start
-```
+will then print out the mindebug startup links.
+The api and web servers will be then (hopefully) start.
 
 Things that will not work with `mindebug` are:
 
