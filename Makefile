@@ -46,11 +46,6 @@ debug:
 
 .PHONY: mindebug     # Setup mindebug environment
 mindebug:
-	make -C api venv
-	cd web && yarn
-	@echo ''
-	@echo 'run `make run` from api'
-	@echo 'run `yarn run start` from web'
 	@echo ''
 	@echo 'seed: http://localhost:3000/api/admin/seed/'
 	@echo 'auth: http://localhost:3000/api/admin/auth/token/superuser'
@@ -58,6 +53,13 @@ mindebug:
 	@echo 'auth: http://localhost:3000/api/admin/auth/token/ta'
 	@echo 'auth: http://localhost:3000/api/admin/auth/token/student'
 	@echo 'site: http://localhost:3000/'
+	make -j2 apirun webrun
+
+apirun:
+	make -C api run
+
+webrun:
+	make -C web run
 
 .PHONY: mkdebug     # Start minikube debug
 mkdebug:
