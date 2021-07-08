@@ -1,16 +1,12 @@
-import json
 import os
 import traceback
-from datetime import datetime, timedelta
 
 import requests
 
-from anubis.models import db, Submission, Assignment, AssignmentRepo, Course
-from anubis.utils.data import with_context
-from anubis.utils.lms.autograde import bulk_autograde
+from anubis.models import db, Submission, Assignment, AssignmentRepo
 from anubis.utils.lms.submissions import init_submission
 from anubis.utils.lms.webhook import check_repo, guess_github_username
-from anubis.utils.services.rpc import enqueue_ide_reap_stale, enqueue_autograde_pipeline
+from anubis.utils.services.rpc import enqueue_autograde_pipeline
 
 
 def fix_github_broken_repos(org_name: str):
