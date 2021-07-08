@@ -1,6 +1,6 @@
 # Anubis LMS Design Doc
 
-![](./figures/anubis-icon-1.png)
+![](design-tex/figures/anubis-icon-1.png)
 
 > Author: [John Cunniff](https://github.com/wabscale)
 
@@ -8,7 +8,7 @@
 
 \pagebreak
 
-![alt anubis-cluster](./figures/cluster.mmd.png)
+![alt anubis-cluster](design-tex/figures/cluster.mmd.png)
 
 \pagebreak
 
@@ -88,7 +88,7 @@ before they get their final grades.
 
 > live feedback, before final grades
 
-![alt autograde-results.png](./figures/autograde-results.png)
+![alt autograde-results.png](design-tex/figures/autograde-results.png)
 
 New in version v2.2.0, there is now the Anubis Cloud IDE. Using some kubernetes magic, we are able to
 host [theia](https://theia-ide.org/) servers for individual students. These are essentially VSCode instances
@@ -98,7 +98,7 @@ have access to a fully insulated and prebuilt linux environment at a click of a 
 
 > fully insulated and prebuilt linux environment at a click of a button
 
-![alt theia-fullscreen.png](./figures/theia-fullscreen.png)
+![alt theia-fullscreen.png](design-tex/figures/theia-fullscreen.png)
 
 ### 1.2 Motivations
 
@@ -199,7 +199,7 @@ forth between two unix users. There will be the entrypoint program managing the 
 `anubis` user will have much higher privileges than the `student` user. The `student` user will be used whenever
 executing student code. It will not have any level of access to anything from the `anubis` user.
 
-![](./figures/submission-flow.mmd.png)
+![](design-tex/figures/submission-flow.mmd.png)
 
 ##### Clone
 
@@ -248,7 +248,7 @@ Getting the autograde results is as easy as searching a name in the autograde re
 be taken to a page like this where the calculated best submission is shown. The best submission is the
 most recent submission that passed the most tests.
 
-![alt autograde-results-2](./figures/autograde-results-2.png)
+![alt autograde-results-2](design-tex/figures/autograde-results-2.png)
 
 The students see a reduced version of the submission information panel shown to the TAs and professors.
 In the admin view, more data is displayed about the student. The students can see the status of the submission,
@@ -257,7 +257,7 @@ and the build and test results.
 > *Calculating the best submissions requires heavy IO with the database. For this, the autograde results are
 heavily cached. Results are updated hourly.*
 
-![alt autograde-results-1](./figures/autograde-results-1.png)
+![alt autograde-results-1](design-tex/figures/autograde-results-1.png)
 
 
 ### 2.5 Anubis Cloud IDE
@@ -281,13 +281,13 @@ theia-cpp image down from 4GiB to ~1.5GiB. This is still an annoyingly large ima
 Once students have created their repo, they will be able to launch a theia session for a given assignment. At that
 time, Anubis clones exactly what is in their github repo into a theia pod.
 
-![Theia Launch Session](./figures/theia1.png)
+![Theia Launch Session](design-tex/figures/theia1.png)
 
 Once their session pod has been allocated, they can click the goto session button. It is at this point
 that their requests start to go through the theia proxy services. Assuming all goes well with initializing the session,
 and starting the necessary connections, the student will have the access to their very own Cloud IDE.
 
-![Theia Webview](./figures/theia2.png)
+![Theia Webview](design-tex/figures/theia2.png)
 
 Something to point out here is that this looks, feels, and acts exactly as VSCode, but it is accessed over the
 internet. [Most VSCode extensions will just work on theia.](https://theia-ide.org/docs/composing_applications/#consuming-vs-code-extensions)
@@ -316,7 +316,7 @@ at `/home/project` in both containers. This volume is relatively small (~50MiB).
 With this setup, we have autosave running in the background while being completely hidden from the user. When
 explaining autosave to students we usually just say "it is witchcraft, just trust that it works".
 
-![Theia Pod Spec](./figures/theia-pod.mmd.png)
+![Theia Pod Spec](design-tex/figures/theia-pod.mmd.png)
 
 With these lightweight containerized theia servers, we are able to support significantly more concurrent users than
 if we had elected to implement a cloud VM solution. Because Anubis Cloud IDEs do not need to virtualize hardware,
@@ -334,7 +334,7 @@ In the following graph we can see an interesting experiment in student behavior.
 a theia session for the final exam in the Fall 2020 semester for CS-UY 3224. Just about 40% of sessions are destroyed
 after hitting the 6-hour timeout.
 
-![Theia Cumulative Duration](./figures/theia3.png)
+![Theia Cumulative Duration](design-tex/figures/theia3.png)
 
 #### 2.5.4 Management IDE
 
@@ -350,7 +350,7 @@ anubis CLI in the container, and your requests will be authenticated with the AP
 enforces course aware permissions. What this means is that you will be able to create and modify assignments for
 only the courses that you are a TA or Professor for.
 
-![Management IDE](./figures/theia4.png)
+![Management IDE](design-tex/figures/theia4.png)
 
 ### 2.6 Datastores
 
@@ -426,7 +426,7 @@ their tests pass on average. We can also show which tests were causing students 
 
 Here is one such visualization of assignment submissions over time. The peaks are the few days before a due date.
 
-![Submissions Over Time](./figures/submissions-over-time.png)
+![Submissions Over Time](design-tex/figures/submissions-over-time.png)
 
 This incredibly precise view into the actual data that can be generated on a platform such as Anubis is
 something that sets it apart from its competitors. We can show meaningful statistics to the professors and TAs
@@ -570,7 +570,7 @@ For the things that are very important we have daily snapshots, and extra replic
 as simple as checking some boxes. You can see here our mariadb master image with triple replication
 (two in Brooklyn one in Manhattan), with a 7 day snapshot.
 
-![Longhorn Volume Management](./figures/longhorn-mariadb.png)
+![Longhorn Volume Management](design-tex/figures/longhorn-mariadb.png)
 
 #### 3.1.4 Digital Ocean
 
@@ -668,12 +668,12 @@ out with. Here is the template from the final exam for OS this semester. This te
 only contains a hello world c program in the pmerge.c file, and some basic things necessary
 to compile the pmerge program in the Makefile. 
 
-![alt assignment-template-1](./figures/assignment-github-template-1.png)
+![alt assignment-template-1](design-tex/figures/assignment-github-template-1.png)
 
 We can then go into the settings of the repo, and mark it as a template. This is something
 necessary for github classroom.
 
-![alt assignment-template-2](./figures/assignment-github-template-2.png)
+![alt assignment-template-2](design-tex/figures/assignment-github-template-2.png)
 
 Simply by constraining students to have a specific file name for the program, and a
 Makefile to match the submissions are much more uniform. What this means is that
@@ -910,7 +910,7 @@ to end with a `-` followed by the `unique_code` we we given in the
 [generated meta.yml](#52-creating-assignment-tests). Your custom prefix should look something
 like this:
 
-![alt github-classroom-1](./figures/github-classroom-1.png)
+![alt github-classroom-1](design-tex/figures/github-classroom-1.png)
 
 > *The purpose of this custom prefix is to make sure that the `unique_code` will be in the
 > repo title for each student. Anubis needs this unique code to be available in order to 
@@ -939,7 +939,7 @@ tests passed. If they used the Anubis Cloud IDEs as most students do choose to, 
 the graph generated shows a near minute by minute representation of which challenges
 they faced and how long it took for them to overcome them.
 
-![alt student-history](./figures/student-assignment-visual-history-1.png)
+![alt student-history](design-tex/figures/student-assignment-visual-history-1.png)
 
 > This example shows the build as the green line, and the assignment tests as the blue line.
 > We can see that this student spent a good deal of time on the first day just getting their
@@ -951,7 +951,7 @@ Then more generally Anubis can represent how the class as a whole did on the ass
 of the core visuals generated is what we call the "summary sundial". In this sundial, we can
 show a quick view of how well the class did on the assignment.
 
-![alt sundial-1](./figures/sundial-1.png)
+![alt sundial-1](design-tex/figures/sundial-1.png)
 
 The sundial shows how many students submitted work, and which test had the most cases pass.
 This assignment had 5 autograde tests. The inner purple radial represents all the students that
@@ -959,12 +959,12 @@ submitted work for this assignment. Then each of the outer 5 blue radials repres
 test. Then the most outside layer shows in green and red how many students passed, and failed 
 that test. We can hover over an element to get a more detailed look.
 
-![alt sundial-2](./figures/sundial-2.png)
+![alt sundial-2](design-tex/figures/sundial-2.png)
 
 From the detail tree at the bottom, we can see that of the 123 students whose builds passed,
 90 passed the `cat input.txt | pmerge` test.
 
-![alt sundial-3](./figures/sundial-3.png)
+![alt sundial-3](design-tex/figures/sundial-3.png)
 
 Taking a look at another test, we can see that more students failed this test than passed.
 This test is the same as the previous one except it gives the student program a much larger 
@@ -976,5 +976,5 @@ We provide public usage visuals that are generated every few minutes. These visu
 show a near live view of how many submissions, and IDEs are active for each assignment 
 on the platform.
 
-![alt public-usage-1](./figures/public-usage-1.png)
+![alt public-usage-1](design-tex/figures/public-usage-1.png)
 
