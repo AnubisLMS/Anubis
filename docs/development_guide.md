@@ -118,7 +118,6 @@ Things that will not work with `mindebug` are:
 - Cloud IDEs
 - Submission pipelines
 - Most everything that involves RPC
-- API tests will not work
 - Database migrations (we skirt mariadb migrations to use sqlite instead)
 - Things that use libmagic (file upload specifically use this)
 
@@ -126,6 +125,8 @@ One last thing to note with the mindebug environment is that rpc job will be cal
 would be called asynchronously. This is because the library we use for rpc [python-rq](https://python-rq.org/) requires
 a redis backend. Since there is no such service in the mindebug environment, rpc calls are called when they would 
 normally be enqueued.
+
+To run the api tests under while running mindebug, you will want to run the `mintest.sh` script at `api/tests/mindebug.sh`.
 
 Now you can hack Anubis
 

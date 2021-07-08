@@ -1,0 +1,53 @@
+graph LR
+    subgraph Anubis
+
+    subgraph users
+    subgraph students_group[students]
+    student1(student)
+    student2(student)
+    student3(student)
+    student4(student)
+    student5(student) --- student1
+    student6(student) --- student2
+    student7(student) --- student3
+    student8(student) --- student4
+    end
+    subgraph admins [Admins]
+    ta(TA)
+    professor(Professor)
+    end
+    end
+
+
+    subgraph Cluster
+
+    subgraph traefik_group[Traefik]
+    traefik[Traefik]
+    end
+
+    subgraph theia [Anubis Cloud IDE]
+    theia_proxy1((theia proxy))
+    theia_proxy2((theia proxy))
+    end
+
+    subgraph API [API]
+    api1((API 1))
+    api2((API 1))
+    api3((API 1))
+    end
+
+    subgraph web_group [Static]
+    web1((Web Static))
+    web2((Web Static))
+    end
+
+    end
+
+    end
+
+
+    student1 & student2 & student3 & student4 ==> |Ingress| traefik
+    ta & professor --> |Ingress| traefik
+
+    traefik --> web1 & web2 & api1 & api2 & api3
+    traefik --> theia_proxy1 & theia_proxy2

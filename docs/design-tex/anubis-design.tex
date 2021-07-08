@@ -1,0 +1,165 @@
+\documentclass[12pt]{report}
+\usepackage{arxiv}
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc} % use 8-bit T1 fonts
+\usepackage{fancyref} % \fref \Fref
+\usepackage{hyperref} % hyperlinks
+\usepackage{url} % simple URL typesetting
+\usepackage{booktabs} % professional-quality tables
+\usepackage{amsfonts} % blackboard math symbols
+\usepackage{mathtools}
+\usepackage{nicefrac} % compact symbols for 1/2, etc.
+\usepackage{microtype} % microtypography
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{minted}
+\usepackage{amssymb}
+\usepackage{xcolor} % for marking points of confusion
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+\renewcommand{\fancyrefdefaultformat}{plain}
+%\newcommand(\fref)[1]{\cref{#1}} % Because I started with fancyref
+\newcommand{\pref}[1]{(\fref{#1})}
+\newcommand{\sref}[1]{(see
+\fref{#1})}
+
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\bolds}[1]{\boldsymbol{#1}}
+
+%1 Exectation value
+\newcommand{\expect}[1]{\langle{}{#1}\rangle{}}
+
+% Collections of samples
+\newcommand{\mcH}{\mathcal{H}}
+\newcommand{\mcE}{\mathcal{E}}
+\newcommand{\mcB}{\mathcal{B}}
+\newcommand{\mcV}{\mathcal{V}}
+\newcommand{\mcX}{\mathcal{X}}
+\newcommand{\mcY}{\mathcal{Y}}
+\newcommand{\mcC}{\mathcal{C}}
+\newcommand{\mcS}{\mathcal{S}}
+\newcommand{\mcL}{\mathcal{L}}
+\newcommand{\mcR}{\mathcal{R}}
+
+
+% Microstates (bold lowercase)
+\newcommand{\bh}{\bolds{h}}
+\newcommand{\be}{\bolds{e}}
+\newcommand{\bb}{\bolds{b}}
+\newcommand{\bv}{\bolds{v}}
+\newcommand{\bx}{\bolds{x}}
+\newcommand{\by}{\bolds{y}}
+\newcommand{\bs}{\bolds{s}}
+\newcommand{\bo}{\bolds{o}}
+\newcommand{\br}{\bolds{r}}
+
+% Microstates (bold lowercase)
+\newcommand{\bH}{\bolds{H}}
+\newcommand{\bE}{\bolds{E}}
+\newcommand{\bB}{\bolds{B}}
+\newcommand{\bV}{\bolds{V}}
+\newcommand{\bX}{\bolds{X}}
+\newcommand{\bY}{\bolds{Y}}
+\newcommand{\bS}{\bolds{S}}
+\newcommand{\bT}{\bolds{T}}
+
+% microstates explicit (bold lowercase)
+\newcommand{\seth}{\{h_j\}}
+\newcommand{\sete}{\{e\}}
+\newcommand{\setb}{\{b\}}
+\newcommand{\setv}{\{v_i\}}
+\newcommand{\setx}{\{x_i\}}
+\newcommand{\sety}{\{y_j\}}
+\newcommand{\sets}{\{s_i\}}
+\newcommand{\setr}{\{r_j\}}
+
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator{\sgn}{sgn}
+
+% Greek letters
+\renewcommand{\l}{\lambda}
+\renewcommand{\b}{\beta}
+\renewcommand{\L}{\Lambda}
+\renewcommand{\k}{\kappa}
+\newcommand{\T}{\Theta}
+\renewcommand{\P}{\Psi}
+\newcommand{\coloneq}{\mathrel{\resizebox{\widthof{$\mathord{=}$}}{\height}{ $\!\!=\!\!\resizebox{1.2\width}{0.8\height}{\raisebox{0.23ex}{$\mathop{:}$}}\!\!$ }}}
+\newcommand{\eqcolon}{\mathrel{\resizebox{\widthof{$\mathord{=}$}}{\height}{ $\!\!\resizebox{1.2\width}{0.8\height}{\raisebox{0.23ex}{$\mathop{:}$}}\!\!=\!\!$ }}}
+
+
+\title{Anubis Learning Management System}
+\date{2021-07-03}
+\author{%
+    John McCann Cunniff Jr \\
+    New York University\\
+    Brooklyn, New York \\
+    \texttt{john@osiris.cyber.nyu.edu} \\
+    \thanks{A special thanks to Professor Gustavo Sandoval who always believed in me} \\
+}
+
+
+\begin{document}
+
+%  Title
+    \begin{titlepage}
+
+        \maketitle
+
+        \vspace{0.3cm}
+        \begin{center}
+            \includegraphics[width=0.3\textwidth]{figures/anubis-icon-1}
+        \end{center}
+        \vspace{0.3cm}
+
+%  Abstract
+        \begin{abstract}
+            The Anubis Learning Management System (LMS) is a tool designed specifically to automate Computer Science courses. 
+            Cloud IDEs integrated into Anubis provide students with a one click stable, consistent and inulated linux environment
+            in their browser.
+            While students work on their assignments, the provides live autograded feedback \textit{before the deadline}.
+            Powerful behavioral insights are generated for TAs and Professors from data collected by the platform.
+        \end{abstract}
+
+%  Keywords
+        \keywords{LMS, Cloud IDEs, Autograding, Distributed Computing, Kubernetes}
+
+    \end{titlepage}
+
+%  Contents
+    \tableofcontents
+
+    \pagebreak
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=1\textwidth]{figures/cluster.mmd}
+        \caption{The Anubis Cluster\label{fig:cluster}}
+    \end{figure}
+
+
+%    1. overview
+    \include{overview}
+
+%    2. autograding
+    \include{autograding}
+
+%    3. cloud ides
+    \include{cloud_ides}
+
+%    4. insights
+    \include{insights}
+
+%    5. services
+    \include{services}
+
+%    6. deployment
+    \include{deployment}
+
+
+\end{document}
