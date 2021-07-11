@@ -18,7 +18,7 @@ fi
 if ! kubectl get secrets -n anubis | grep api &> /dev/null; then
     # Create the api configuration secrets
     kubectl create secret generic api \
-            --from-literal=database-uri=mysql+pymysql://anubis:anubis@mariadb.mariadb.svc.cluster.local/anubis \
+            --from-literal=database-uri=mysql+pymysql://anubis:anubis@mariadb.anubis.svc.cluster.local/anubis \
             --from-literal=database-password=anubis \
             --from-literal=redis-password=anubis \
             --from-literal=secret-key=$(head -c10 /dev/urandom | openssl sha1 -hex | awk '{print $2}') \
@@ -38,7 +38,7 @@ eval $(minikube docker-env)
 
 pushd ..
 # Build services in parallel to speed things up
-docker-compose build --parallel --pull api web theia-proxy theia-init theia-sidecar
+docker-compose build --parallel --pull api web theia-proxy theia-init theia-sidecar puller
 popd
 
 ./debug/upgrade.sh
@@ -51,6 +51,7 @@ kubectl rollout restart deployments.apps/rpc-theia -n anubis
 kubectl rollout restart deployments.apps/rpc-regrade -n anubis
 kubectl rollout restart deployments.apps/pipeline-api -n anubis
 kubectl rollout restart deployments.apps/theia-proxy -n anubis
+kubectl rollout restart daemonset.apps/image-puller -n anubis
 
 cd ..
 make startup-links

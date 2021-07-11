@@ -78,15 +78,15 @@ helm repo update
 # prod, the mariadb is in a seperate namespace, so we do the same
 # here.
 echo 'Adding mariadb'
-kubectl create namespace mariadb
+kubectl create namespace anubis
 helm upgrade --install mariadb bitnami/mariadb \
     --set 'auth.rootPassword=anubis' \
     --set 'volumePermissions.enabled=true' \
     --set 'auth.username=anubis' \
     --set 'auth.database=anubis' \
     --set 'auth.password=anubis' \
-    --set 'replication.enabled=false' \
-    --namespace mariadb
+    --set 'architecture=standalone' \
+    --namespace anubis
 
 # Install a minimal redis deployment
 echo 'Adding redis'
