@@ -23,13 +23,18 @@ spec:
     spec:
       containers:
       - name: puller
-        command: {{ .Values.puller.command }}
         image: {{ .Values.puller.image }}:{{ .Values.puller.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        command: ["/puller"]
+        args:
+        {{- range $_, $value := .Values.puller.command }}
+        - {{ $value }}
+        {{- end }}
         volumeMounts:
         - name: dockersock
           mountPath: /var/run/docker.sock
         - name: dockerconfig
-          mountPaht: "/anubis"
+          mountPath: "/anubis"
           readOnly: true
       terminationGracePeriodSeconds: 30
       volumes:
@@ -38,6 +43,6 @@ spec:
           path: /var/run/docker.sock
       - name: dockerconfig
         secret:
-          secretName: anubis
+          secretName: {{ .Values.puller.imagePullSecret }}
 
 {{- end }}
