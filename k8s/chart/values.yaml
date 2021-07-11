@@ -70,3 +70,9 @@ hpa:
   - name: rpc-default
   - name: rpc-theia
   - name: rpc-regrade
+
+puller:
+  enable: true
+  image: "registry.digitalocean.com/anubis/puller"
+  tag: "latest"
+  command: ['registry.digitalocean.com/anubis/theia-xv6', 'registry.digitalocean.com/anubis/theia-admin', 'registry.digitalocean.com/anubis/api']
