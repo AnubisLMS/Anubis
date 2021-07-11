@@ -1,6 +1,6 @@
 PERSISTENT_SERVICES := db traefik redis-master
 RESTART_ALWAYS_SERVICES := api web-dev rpc-default rpc-theia rpc-regrade
-PUSH_SERVICES := api web theia-init theia-proxy theia-admin theia-xv6
+PUSH_SERVICES := api web puller theia-init theia-proxy theia-admin theia-xv6
 
 help:
 	@echo 'For convenience'
