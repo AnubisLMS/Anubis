@@ -1,0 +1,43 @@
+{{- if .Values.puller.enable }}
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: image-puller
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: puller
+    component: puller
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: puller
+      component: puller
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: puller
+        component: puller
+    spec:
+      containers:
+      - name: puller
+        command: {{ .Values.puller.command }}
+        image: {{ .Values.puller.image }}:{{ .Values.puller.tag }}
+        volumeMounts:
+        - name: dockersock
+          mountPath: /var/run/docker.sock
+        - name: dockerconfig
+          mountPaht: "/anubis"
+          readOnly: true
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: dockerconfig
+        secret:
+          secretName: anubis
+
+{{- end }}
