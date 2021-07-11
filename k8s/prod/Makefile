@@ -46,7 +46,7 @@ STORAGE_CLASS := do-block-storage
 # Chart versions for things
 TRAEFIK_VERSION := 9.19.1
 ELASTIC_VERSION := 7.12
-MARIADB_VERSION := 9.3.16
+MARIADB_VERSION := 5.10.3
 REDIS_VERSION := 14.6.2
 
 provision: \
@@ -118,10 +118,10 @@ filebeat:
 
 mariadb: ns-anubis
 	helm upgrade \
-		--install mariadb bitnami/mariadb \
+		--install mariadb bitnami/mariadb-galera \
 		--values mariadb-values.yaml \
 		--set primary.persistence.storageClass=$(STORAGE_CLASS) \
-		--set auth.password=$(DB_PASS) \
+		--set db.password=$(DB_PASS) \
 		--version $(MARIADB_VERSION) \
 		--namespace anubis
 
