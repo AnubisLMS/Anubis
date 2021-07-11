@@ -1,9 +1,18 @@
+{{- if .Values.hpa.enable }}
+
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
   name: anubis-api
   namespace: {{ .Release.Namespace }}
 spec:
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
@@ -25,6 +34,13 @@ metadata:
   name: anubis-web
   namespace: {{ .Release.Namespace }}
 spec:
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
@@ -46,6 +62,13 @@ metadata:
   name: anubis-theia-proxy
   namespace: {{ .Release.Namespace }}
 spec:
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
@@ -83,18 +106,20 @@ spec:
         averageUtilization: 100
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: 0
+      stabilizationWindowSeconds: 60
       selectPolicy: Max
       policies:
-      - type: Pods
-        value: 4
-        periodSeconds: 15
+      - type: Percent
+        value: 100
+        periodSeconds: 30
     scaleDown:
       stabilizationWindowSeconds: 30
       selectPolicy: Max
       policies:
-      - type: Pods
-        value: 4
-        periodSeconds: 15
+      - type: Percent
+        value: 100
+        periodSeconds: 30
 ---
+{{- end }}
+
 {{- end }}
