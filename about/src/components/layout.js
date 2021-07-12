@@ -5,7 +5,7 @@ import {Header} from './';
 
 const Layout = ({ children, isCentered = false }) => {
   return (
-    <div className={`flex flex-col h-screen ${isCentered ? 'h-screen' : 'min-h-screen'} bg-secondary text-white bg-swirl bg-cover`}>
+    <div className={`flex flex-col ${isCentered ? 'h-screen' : 'min-h-screen'} bg-secondary text-white bg-swirl bg-cover pb-4`}>
       <div className= 'w-full p-4'>
         <Header/>
       </div>

@@ -12,6 +12,9 @@ export {SecondaryButton} from './buttons';
 
 //Typography
 export {PageTitle} from './typography';
+export {ListItem} from './typography';
+export {Code} from './typography';
+export {Highlight} from './typography';;
 
 //Icons
 export {GradingIcon} from './icons';
