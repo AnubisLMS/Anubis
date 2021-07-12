@@ -3,6 +3,8 @@ import {Layout, FeatureCard} from '../components';
 import {PageTitle} from '../components/atoms';
 import {GradingIcon, GraderIcon, SubmissionIcon, CustomIcon, VirtualIcon, ManagementIcon} from "../components/atoms";
 
+import {useScreenSize} from '../hooks/useScreenSize';
+
 const features = [
   {
     name: 'Grading Insights',
@@ -37,12 +39,13 @@ const features = [
 ]
 
 export const Features = () => {
+  const screenSize = useScreenSize();
   return (
     <Layout isCentered>
       <div className= 'flex items-start w-full max-w-6xl'>
         <PageTitle>Features</PageTitle>
       </div>
-      <div className= 'grid max-w-6xl grid-cols-3 gap-4'>
+      <div className= {`grid max-w-6xl ${screenSize === 'lg' ? 'grid-cols-3' : screenSize === 'md' ? 'grid-cols-2'  : 'grid-cols-1'} gap-4`}>
         {features.map((feature, index) => (
           <FeatureCard {... feature} />
         ))}
