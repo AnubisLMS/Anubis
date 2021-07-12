@@ -18,6 +18,7 @@ COPY autosave-loop.sh /autosave-loop.sh
 COPY autosave.sh /autosave.sh
 COPY app.py /app.py
 
+USER theia
 ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]
 
 
