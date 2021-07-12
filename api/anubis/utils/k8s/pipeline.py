@@ -54,6 +54,12 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
 
         # Set the resource requirements
         resources=client.V1ResourceRequirements(**resource_requirements),
+
+        # Add a security context to disable privilege escalation
+        security_context=client.V1SecurityContext(
+            allow_privilege_escalation=False,
+            run_as_non_root=True,
+        )
     )
 
     # Create and configure a spec section
