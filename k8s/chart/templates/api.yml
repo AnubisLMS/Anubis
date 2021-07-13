@@ -86,14 +86,11 @@ spec:
             secretKeyRef:
               name: api
               key: database-uri
-
         - name: "REDIS_PASS"
           valueFrom:
             secretKeyRef:
               name: api
               key: redis-password
-        - name: "THEIA_DOMAIN"
-          value: {{ .Values.theia.proxy.domain | quote }}
         {{- if .Values.api.healthCheck }}
         livenessProbe:
           httpGet:

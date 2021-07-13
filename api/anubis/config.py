@@ -49,7 +49,6 @@ class Config:
         self.LOGGER_NAME = os.environ.get("LOGGER_NAME", default="anubis-api")
 
         # Theia
-        self.THEIA_DOMAIN = os.environ.get("THEIA_DOMAIN", default="ide.anubis.osiris.services")
         self.THEIA_TIMEOUT = timedelta(hours=6)
 
         # autograding specific config
