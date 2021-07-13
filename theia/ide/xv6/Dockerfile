@@ -41,7 +41,8 @@ RUN set -ex; \
     gcc-multilib g++-multilib \
     python3 python3-pip \
     clangd-12 \
-    qemu-system-i386; \
+    qemu-system-i386 \
+    libsecret-1-0; \
   pip3 install --no-cache-dir supervisor; \
   ln -s /usr/bin/clangd-12 /usr/bin/clangd; \
   echo 'set auto-load safe-path /' > /home/theia/.gdbinit \

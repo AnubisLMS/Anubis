@@ -14,6 +14,21 @@ spec:
   stripPrefix:
     prefixes:
       - "/api"
+---
+# Strip prefix /api
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-ide
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: anubis
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  stripPrefix:
+    prefixes:
+      - "/ide"
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
@@ -106,7 +121,10 @@ spec:
   {{- end }}
   routes:
   - kind: Rule
-    match: Host(`{{ .Values.theia.proxy.domain }}`)
+    match: Host(`{{ .Values.domain }}`) && PathPrefix(`/ide`)
+    middlewares:
+    - name: strip-ide
+      namespace: {{ .Release.Namespace }}
     services:
     - name: anubis-theia-proxy
       port: 5000
