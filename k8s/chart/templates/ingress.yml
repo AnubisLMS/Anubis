@@ -40,7 +40,7 @@ spec:
     - name: strip-api
       namespace: {{ .Release.Namespace }}
     services:
-    - name: anubis
+    - name: anubis-api
       port: 5000
   {{- if not .Values.debug }}
   tls:
@@ -76,7 +76,7 @@ spec:
       namespace: traefik
     {{- end }}
     services:
-    - name: web
+    - name: anubis-web
       port: 3000
   {{- if not .Values.debug }}
   tls:
@@ -108,7 +108,7 @@ spec:
   - kind: Rule
     match: Host(`{{ .Values.theia.proxy.domain }}`)
     services:
-    - name: theia-proxy
+    - name: anubis-theia-proxy
       port: 5000
   {{- if not .Values.debug }}
   tls:

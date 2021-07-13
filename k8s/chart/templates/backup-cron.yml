@@ -2,7 +2,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: backup
+  name: anubis-backup
   namespace: {{ .Release.Namespace }}
   labels:
     heritage: {{ .Release.Service | quote }}

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api
+  name: anubis-api
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: anubis
@@ -71,14 +71,22 @@ spec:
             secretKeyRef:
               name: oauth
               key: consumer-secret
-        - name: DB_HOST
-          value: mariadb.mariadb.svc.cluster.local
-        # sqlalchemy uri
+        - name: "DB_PASSWORD"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-password
+        - name: "DB_HOST"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-host
         - name: "DATABASE_URI"
           valueFrom:
             secretKeyRef:
               name: api
               key: database-uri
+
         - name: "REDIS_PASS"
           valueFrom:
             secretKeyRef:
@@ -99,7 +107,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: anubis
+  name: anubis-api
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: anubis

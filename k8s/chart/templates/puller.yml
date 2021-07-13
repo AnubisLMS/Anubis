@@ -3,7 +3,7 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: image-puller
+  name: anubis-puller
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: puller

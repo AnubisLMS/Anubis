@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: pipeline-rpc
+  name: anubis-rpc
   namespace: {{ .Release.Namespace }}
   labels:
     component: pipeline-rpc
@@ -13,91 +13,25 @@ imagePullSecrets:
 {{- end }}
 ---
 
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: rpc-default
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app.kubernetes.io/name: rpc-default
-    component: rpc-default
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: rpc-default
-      component: rpc-default
-  replicas: {{ .Values.rpc.default.replicas }}
-  {{- if .Values.rollingUpdates }}
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 1
-      maxSurge: 1
-  {{- end }}
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: rpc-default
-        component: rpc-default
-    spec:
-      serviceAccountName: pipeline-rpc
-      dnsPolicy: ClusterFirst
-      containers:
-      - name: anubis-rpc-default
-        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
-        imagePullPolicy: {{ .Values.imagePullPolicy }}
-        command: ["./rq-worker.sh", "default"]
-        resources:
-          requests:
-            cpu: 100m
-            memory: 100Mi
-          limits:
-            cpu: 2000m
-            memory: 1000Mi
-        env:
-        - name: "DEBUG"
-          value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
-        - name: "JOB"
-          value: "1"
-        - name: "IMAGE_PULL_POLICY"
-          value: {{ .Values.imagePullPolicy }}
-        # sqlalchemy uri
-        - name: "DATABASE_URI"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: database-uri
-        - name: "REDIS_PASS"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: redis-password
-        - name: "SECRET_KEY"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: secret-key
+{{- range $.Values.rpc.queues }}
 
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rpc-theia
-  namespace: {{ .Release.Namespace }}
+  name: anubis-rpc-default
+  namespace: {{ $.Release.Namespace }}
   labels:
-    app.kubernetes.io/name: rpc-theia
-    component: rpc-theia
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
+    app.kubernetes.io/name: rpc-{{ . }}
+    component: rpc-{{ . }}
+    heritage: {{ $.Release.Service | quote }}
+    release: {{ $.Release.Name | quote }}
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: rpc-theia
-      component: rpc-theia
-  replicas: {{ .Values.rpc.theia.replicas }}
-  {{- if .Values.rollingUpdates }}
+      app.kubernetes.io/name: rpc-{{ . }}
+      component: rpc-{{ . }}
+  replicas: {{ $.Values.rpc.replicas }}
+  {{- if $.Values.rollingUpdates }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -107,16 +41,16 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: rpc-theia
-        component: rpc-theia
+        app.kubernetes.io/name: rpc-{{ . }}
+        component: rpc-{{ . }}
     spec:
-      serviceAccountName: pipeline-rpc
-      dnsPolicy: ClusterFirst
+      serviceAccountName: anubis-rpc
       containers:
-      - name: anubis-rpc-theia
-        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
-        imagePullPolicy: {{ .Values.imagePullPolicy }}
-        command: ["./rq-worker.sh", "theia"]
+      - name: anubis-rpc-{{ . }}
+        image: {{ $.Values.api.image }}:{{ $.Values.api.tag }}
+        imagePullPolicy: {{ $.Values.imagePullPolicy }}
+        command: ["./rq-worker.sh", {{ . | quote }}]
+        {{- if not $.Values.debug }}
         resources:
           requests:
             cpu: 100m
@@ -124,19 +58,30 @@ spec:
           limits:
             cpu: 2000m
             memory: 1000Mi
+        {{- end }}
         env:
         - name: "DEBUG"
-          value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+          value: {{- if $.Values.debug }} "1"{{- else }} "0"{{- end }}
         - name: "JOB"
           value: "1"
         - name: "IMAGE_PULL_POLICY"
-          value: {{ .Values.imagePullPolicy }}
+          value: {{ $.Values.imagePullPolicy | quote }}
         # sqlalchemy uri
-        - name: "DATABASE_URI"
+        - name: "DB_PASSWORD"
           valueFrom:
             secretKeyRef:
               name: api
-              key: database-uri
+              key: database-password
+        - name: "DB_HOST"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-host
+        - name: "DATABASE_URI"
+         valueFrom:
+           secretKeyRef:
+             name: api
+             key: database-uri
         - name: "REDIS_PASS"
           valueFrom:
             secretKeyRef:
@@ -148,78 +93,13 @@ spec:
               name: api
               key: secret-key
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: rpc-regrade
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app.kubernetes.io/name: rpc-regrade
-    component: rpc-regrade
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: rpc-regrade
-      component: rpc-regrade
-  replicas: {{ .Values.rpc.regrade.replicas }}
-  {{- if .Values.rollingUpdates }}
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 1
-      maxSurge: 1
-  {{- end }}
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: rpc-regrade
-        component: rpc-regrade
-    spec:
-      serviceAccountName: pipeline-rpc
-      dnsPolicy: ClusterFirst
-      containers:
-      - name: anubis-rpc-regrade
-        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
-        imagePullPolicy: {{ .Values.imagePullPolicy }}
-        command: ["./rq-worker.sh", "regrade"]
-        resources:
-          requests:
-            cpu: 100m
-            memory: 100Mi
-          limits:
-            cpu: 2000m
-            memory: 1000Mi
-        env:
-        - name: "DEBUG"
-          value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
-        - name: "JOB"
-          value: "1"
-        - name: "IMAGE_PULL_POLICY"
-          value: {{ .Values.imagePullPolicy }}
-        # sqlalchemy uri
-        - name: "DATABASE_URI"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: database-uri
-        - name: "REDIS_PASS"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: redis-password
-        - name: "SECRET_KEY"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: secret-key
----
+{{- end }}
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: pipeline-create-jobs
+  name: anubis-rpc
   namespace: {{ .Release.Namespace }}
   labels:
     rbac.authorization.k8s.io/pipeline-create-jobs: "true"
@@ -236,7 +116,7 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: pipeline-create-jobs
+  name: anubis-rpc
   namespace: {{ .Release.Namespace }}
   labels:
     heritage: {{ .Release.Service | quote }}
@@ -244,8 +124,8 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: pipeline-create-jobs
+  name: anubis-rpc
 subjects:
   - kind: ServiceAccount
-    name: pipeline-rpc
+    name: anubis-rpc
     namespace: anubis

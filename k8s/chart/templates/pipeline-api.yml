@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pipeline-api
+  name: anubis-pipeline-api
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: pipeline-api
@@ -76,7 +76,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: pipeline-api
+  name: anubis-pipeline-api
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: pipeline-api

@@ -10,27 +10,6 @@ set -e
 # Be super sure that we aren't accidentially interacting with prod
 kubectl config use-context minikube
 
-# Make sure we have an anubis namespace
-if ! kubectl get namespace | grep anubis &> /dev/null; then
-    kubectl create namespace anubis
-fi
-
-if ! kubectl get secrets -n anubis | grep api &> /dev/null; then
-    # Create the api configuration secrets
-    kubectl create secret generic api \
-            --from-literal=database-uri=mysql+pymysql://anubis:anubis@mariadb.anubis.svc.cluster.local/anubis \
-            --from-literal=database-password=anubis \
-            --from-literal=redis-password=anubis \
-            --from-literal=secret-key=$(head -c10 /dev/urandom | openssl sha1 -hex | awk '{print $2}') \
-            -n anubis
-
-    # Create the oauth configuration secrets
-    kubectl create secret generic oauth \
-            --from-literal=consumer-key='aaa' \
-            --from-literal=consumer-secret='aaa' \
-            -n anubis
-fi
-
 # Import the minikube docker environment.
 # For the rest of this script, when we run docker its connecting
 # to the minikube node's docker daemon.
@@ -44,14 +23,14 @@ popd
 ./debug/upgrade.sh
 
 # Restart the most common deployments
-kubectl rollout restart deployments.apps/api -n anubis
-kubectl rollout restart deployments.apps/web -n anubis
-kubectl rollout restart deployments.apps/rpc-default -n anubis
-kubectl rollout restart deployments.apps/rpc-theia -n anubis
-kubectl rollout restart deployments.apps/rpc-regrade -n anubis
-kubectl rollout restart deployments.apps/pipeline-api -n anubis
-kubectl rollout restart deployments.apps/theia-proxy -n anubis
-kubectl rollout restart daemonset.apps/image-puller -n anubis
+kubectl rollout restart deployments.apps/anubis-api -n anubis
+kubectl rollout restart deployments.apps/anubis-web -n anubis
+kubectl rollout restart deployments.apps/anubis-rpc-default -n anubis
+kubectl rollout restart deployments.apps/anubis-rpc-theia -n anubis
+kubectl rollout restart deployments.apps/anubis-rpc-regrade -n anubis
+kubectl rollout restart deployments.apps/anubis-pipeline-api -n anubis
+kubectl rollout restart deployments.apps/anubis-theia-proxy -n anubis
+kubectl rollout restart daemonset.apps/anubis-puller -n anubis
 
 cd ..
 make startup-links
