@@ -41,7 +41,7 @@ RUN set -eux; apt-get update \
   && apt-get update \
   && apt-get install -y --no-install-recommends \
     make build-essential libssl-dev wget curl llvm htop zsh \
-    docker-ce docker-ce-cli containerd.io; \
+    docker-ce docker-ce-cli containerd.io libsecret-1-0; \
   rm -rf /var/lib/apt/lists/* \
   && savedAptMark="$(apt-mark showmanual)" \
   && gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
