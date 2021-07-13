@@ -3,7 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: theia-proxy
+  name: anubis-theia-proxy
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: theia
@@ -49,20 +49,29 @@ spec:
             secretKeyRef:
               name: api
               key: secret-key
+        # sqlalchemy uri
         - name: "DB_PASSWORD"
           valueFrom:
             secretKeyRef:
               name: api
               key: database-password
         - name: "DB_HOST"
-          value: "mariadb.mariadb.svc.cluster.local"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-host
+        - name: "DATABASE_URI"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-uri
 
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: theia-proxy
+  name: anubis-theia-proxy
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: theia

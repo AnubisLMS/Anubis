@@ -1,6 +1,8 @@
 FROM python:3.9-slim-buster
 
 ENV SECRET_KEY=DEFAULT
+ENV DEBUG=0
+ENV MINDEBUG=0
 
 WORKDIR /opt/app
 

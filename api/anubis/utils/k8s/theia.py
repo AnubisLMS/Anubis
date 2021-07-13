@@ -105,6 +105,10 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
             value=base64.b64encode(token.encode()).decode(),
         ))
 
+    user_id = 1001
+    if theia_session.privileged:
+        user_id = 0
+
     # Create the main theia container. This is where the theia server runs, and
     # where the student will have a shell on.
     theia_container = client.V1Container(
@@ -156,7 +160,9 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         # containers should only exist for the management IDEs so that
         # docker can run.
         security_context=client.V1SecurityContext(
+            allow_privilege_escalation=theia_session.privileged,
             privileged=theia_session.privileged,
+            run_as_user=user_id,
         ),
     )
 
@@ -189,6 +195,13 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
                 value='ON' if autosave else 'OFF',
             ),
         ],
+
+        # Add a security context to disable privilege escalation
+        security_context=client.V1SecurityContext(
+            allow_privilege_escalation=False,
+            run_as_non_root=True,
+            run_as_user=1001,
+        ),
 
         # Add the shared volume mount to /home/project
         volume_mounts=[

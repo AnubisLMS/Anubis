@@ -81,9 +81,9 @@ def fix_permissions():
     :return:
     """
     # Update file permissions
-    if os.getcwd() == '/root/anubis':
+    if os.getcwd() == '/anubis':
         os.system('chown student:student -R ./student')
-    elif os.getcwd() == '/root/anubis/student':
+    elif os.getcwd() == '/anubis/student':
         os.system('chown student:student -R .')
     else:
         print('PANIC I DONT KNOW WHERE I AM')

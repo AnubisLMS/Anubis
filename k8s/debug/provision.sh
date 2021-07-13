@@ -74,23 +74,25 @@ kubectl apply -f ./debug/traefik.yaml
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
 
+# Create the anubis namespace
+kubectl create namespace anubis
+
 # Create a minimal mariadb deployment in a mariadb namespace. On
 # prod, the mariadb is in a seperate namespace, so we do the same
 # here.
 echo 'Adding mariadb'
-kubectl create namespace anubis
 helm upgrade --install mariadb bitnami/mariadb \
     --set 'auth.rootPassword=anubis' \
     --set 'volumePermissions.enabled=true' \
     --set 'auth.username=anubis' \
     --set 'auth.database=anubis' \
     --set 'auth.password=anubis' \
+    --set 'fullnameOverride=anubis' \
     --set 'architecture=standalone' \
     --namespace anubis
 
 # Install a minimal redis deployment
 echo 'Adding redis'
-kubectl create namespace anubis
 helm upgrade --install redis bitnami/redis \
     --set fullnameOverride=redis \
     --set global.redis.password=anubis \
@@ -101,6 +103,20 @@ helm upgrade --install redis bitnami/redis \
 if [ -f debug/init-secrets.sh ]; then
     bash debug/init-secrets.sh
 fi
+
+kubectl create secret generic api \
+    --from-literal=database-uri=mysql+pymysql://anubis:anubis@mariadb.anubis.svc.cluster.local/anubis \
+    --from-literal=database-host=mariadb.anubis.svc.cluster.local \
+    --from-literal=database-password=anubis \
+    --from-literal=redis-password=anubis \
+    --from-literal=secret-key=$(head -c10 /dev/urandom | openssl sha1 -hex | awk '{print $2}') \
+    --namespace anubis
+
+# Create the oauth configuration secrets
+kubectl create secret generic oauth \
+    --from-literal=consumer-key='aaa' \
+    --from-literal=consumer-secret='aaa' \
+    --namespace anubis
 
 # Run the debug.sh script to build, then install all the stuff
 # for anubis.

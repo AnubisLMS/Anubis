@@ -200,6 +200,8 @@ def clone():
 
     fix_permissions()
     os.system('rm -rf ./student/.git')
+    os.system('rm -rf /home/anubis/.git-credentials')
+    os.system('rm -rf /home/anubis/.gitconfig')
 
 
 def run_build(assignment_data: dict):

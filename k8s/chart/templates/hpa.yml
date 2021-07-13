@@ -1,4 +1,5 @@
 {{- if .Values.hpa.enable }}
+{{- if not .Values.debug }}
 
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
@@ -122,4 +123,5 @@ spec:
 ---
 {{- end }}
 
+{{- end }}
 {{- end }}
