@@ -44,7 +44,6 @@ theia:
   enable: true
   proxy:
     replicas: 1
-    domain: "ide.anubis.osiris.services"
     image: "registry.digitalocean.com/anubis/theia-proxy"
     tag: "latest"
 
@@ -72,4 +71,4 @@ puller:
   image: "registry.digitalocean.com/anubis/puller"
   tag: "latest"
   imagePullSecret: "anubis"
-  command: ['registry.digitalocean.com/anubis/theia-xv6', 'registry.digitalocean.com/anubis/theia-admin', 'registry.digitalocean.com/anubis/api']
+  command: ['registry.digitalocean.com/anubis/theia-xv6', 'registry.digitalocean.com/anubis/theia-admin']

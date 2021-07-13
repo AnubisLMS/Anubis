@@ -134,10 +134,11 @@ redis: ns-anubis
 		--namespace anubis
 
 api-secret:
-	@if ! kubectl get secret api -n anubis; then;
+	@if ! kubectl get secret api -n anubis; then \
 		kubectl create secret generic api \
 			--namespace anubis \
 			--from-literal=database-uri=mysql+pymysql://anubis:$(DB_PASS)@mariadb.anubis.svc.cluster.local/anubis \
+			--from-literal=database-host=mariadb.anubis.svc.cluster.local \
 			--from-literal=database-password=$(DB_PASS) \
 			--from-literal=redis-password=$(REDIS_PASS) \
 			--from-literal=secret-key=$(SECRET_KEY); \

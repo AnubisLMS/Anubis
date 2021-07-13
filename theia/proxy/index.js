@@ -91,7 +91,7 @@ const initialize = (req, res, url, query) => {
     session_id: query_token.session_id,
   }, SECRET_KEY, {expiresIn: '6h'});
   res.writeHead(302, {
-    location: '/', "Set-Cookie": `token=${signed_token}; Max-Age=${6 * 3600}; HttpOnly`
+    location: '/ide/', "Set-Cookie": `token=${signed_token}; Max-Age=${6 * 3600}; HttpOnly`
   })
   res.end('redirecting...')
 };

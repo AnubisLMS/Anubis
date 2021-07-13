@@ -10,15 +10,14 @@ metadata:
 {{- if .Values.imagePullSecret }}
 imagePullSecrets:
   - name: {{ .Values.imagePullSecret }}
-{{- end }}
 ---
+{{- end }}
 
 {{- range $.Values.rpc.queues }}
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: anubis-rpc-default
+  name: anubis-rpc-{{ . }}
   namespace: {{ $.Release.Namespace }}
   labels:
     app.kubernetes.io/name: rpc-{{ . }}
@@ -78,10 +77,10 @@ spec:
               name: api
               key: database-host
         - name: "DATABASE_URI"
-         valueFrom:
-           secretKeyRef:
-             name: api
-             key: database-uri
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-uri
         - name: "REDIS_PASS"
           valueFrom:
             secretKeyRef:
@@ -95,7 +94,6 @@ spec:
 ---
 {{- end }}
 
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
