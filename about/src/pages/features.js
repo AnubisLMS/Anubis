@@ -38,14 +38,16 @@ const features = [
   }
 ]
 
+
 export const Features = () => {
   const screenSize = useScreenSize();
   return (
-    <Layout isCentered>
-      <div className= 'flex items-start w-full max-w-6xl'>
-        <PageTitle>Features</PageTitle>
+    <Layout isCentered >
+      <div className = 'flex flex-row items-start max-w-6xl p-4'>
+        <PageTitle className = 'border-b-2 border-primary pb-2'>Features</PageTitle>
       </div>
-      <div className= {`grid max-w-6xl ${screenSize === 'lg' ? 'grid-cols-3' : screenSize === 'md' ? 'grid-cols-2'  : 'grid-cols-1'} gap-4`}>
+
+      <div className= {`mt-6 grid max-w-6xl ${screenSize === 'lg' ? 'grid-cols-3' : screenSize === 'md' ? 'grid-cols-2'  : 'grid-cols-1'} gap-4`}>
         {features.map((feature, index) => (
           <FeatureCard {... feature} />
         ))}

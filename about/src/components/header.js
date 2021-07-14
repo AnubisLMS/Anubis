@@ -4,10 +4,6 @@ import {useScreenSize} from "../hooks/useScreenSize";
 import {FiMenu, FiX} from 'react-icons/fi';
 const links = [
   {
-    name: 'Home',
-    path: '/'
-  },
-  {
     name: 'Features',
     path: '/features'
   },
@@ -27,15 +23,15 @@ const links = [
 
 const HeaderModal = ({callback}) => {
   return (
-    <div className= 'w-full bg-gray-800 rounded-md p-4 relative'>
-      <div  onClick = {() => callback()}className= 'absolute top-2 right-2 cursor-pointer hover:opacity-60'>
+    <div className= 'w-screen h-screen absolute bg-gray-800 rounded-md p-4 relative'>
+      <div  onClick = {() => callback()} className= 'absolute top-2 right-2 cursor-pointer hover:opacity-60'>
         <FiX  className= 'w-6 h-auto'/>
       </div>
       <div className= 'space-y-4'>
-        <div className= 'grid grid-cols-3 grid-rows-2 gap-4'>
+        <div className= 'grid grid-cols-2 grid-rows-2 gap-4'>
           {links.map((link, index) => (
-            <div className= 'cols-span-1 row-span-1'>
-              <HeaderLink key = {`${link.name}-${index}`} to={link.path}>{link.name}</HeaderLink>
+            <div className= 'cols-span-1 row-span-1 flex-row flex space-x-2'>
+              <p className= 'font-bold text-primary'>·</p><HeaderLink key = {`${link.name}-${index}`} to={link.path}>{link.name}</HeaderLink>
             </div>
           ))}
         </div>
