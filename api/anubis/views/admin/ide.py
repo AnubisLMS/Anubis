@@ -20,7 +20,6 @@ ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 @require_admin()
 @json_response
 def admin_ide_admin_settings():
-
     return success_response({'settings': {
         "privileged": True,
         "network_locked": False,

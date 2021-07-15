@@ -19,4 +19,3 @@ def test_lectures_admin():
         files={filename: logo_file},
     )
     su.get('/admin/lectures/list')
-

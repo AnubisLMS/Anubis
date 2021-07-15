@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint
+from flask import Flask
 
 
 def init_services(app):

@@ -4,7 +4,7 @@ from typing import Dict
 
 from flask import Blueprint, request
 
-from anubis.models import User, TheiaSession, db, Assignment, AssignmentRepo
+from anubis.models import TheiaSession, db, Assignment, AssignmentRepo
 from anubis.utils.auth import current_user, require_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, load_from_id

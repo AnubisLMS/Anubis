@@ -104,7 +104,8 @@ def get_number_arg(arg_name: str = "number", default_value: int = 10, reject_neg
         return default_value
 
 
-def get_request_file_stream(with_filename=False, fail_ok=False) -> Union[bytes, None, Tuple[bytes, str], Tuple[None, None]]:
+def get_request_file_stream(with_filename=False, fail_ok=False) -> Union[
+    bytes, None, Tuple[bytes, str], Tuple[None, None]]:
     """
     Get first file uploaded in the request. Will return None if
     there is no file uploaded.

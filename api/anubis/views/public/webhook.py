@@ -101,7 +101,7 @@ def public_webhook():
 
         if repo.owner_id == None:
             return success_response("initial dangling")
-            
+
         return success_response("initial commit")
 
     repo = (

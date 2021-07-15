@@ -4,7 +4,7 @@ import os
 
 import requests
 
-from anubis.models import db, User, Assignment, InCourse, Course, AssignmentRepo
+from anubis.models import db, User, Assignment, InCourse, Course
 from anubis.utils.data import with_context
 
 
@@ -59,7 +59,7 @@ def create_user(github_username: str):
 def do_webhook_tests_user(github_username):
     user = User.query.filter_by(github_username=github_username).first()
     assignment = Assignment.query.join(Course).filter(Course.name == 'Intro to OS').first()
-    
+
     assignment_id = assignment.id
     assignment_name = assignment.name
     assignment_unique_code = assignment.unique_code
@@ -80,7 +80,7 @@ def do_webhook_tests_user(github_username):
         )
     )
     assert response.fetchone()[0] == 1
-    
+
     r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, user_github_username)).json()
     db.session.expire_all()
     assert r['data'] != 'initial commit'

@@ -1,17 +1,17 @@
 import json
 import traceback
+from datetime import datetime, timedelta
+from typing import List
 
 from parse import parse
-from typing import List
-from datetime import datetime, timedelta
 
 from anubis.models import db, Submission, Assignment, Course
 from anubis.utils.data import with_context
 from anubis.utils.lms.autograde import bulk_autograde
 from anubis.utils.lms.submissions import init_submission
-from anubis.utils.services.rpc import enqueue_ide_reap_stale, enqueue_autograde_pipeline
 from anubis.utils.services.github import fix_github_broken_repos
 from anubis.utils.services.logger import logger
+from anubis.utils.services.rpc import enqueue_ide_reap_stale, enqueue_autograde_pipeline
 
 
 def reap_stale_submissions():

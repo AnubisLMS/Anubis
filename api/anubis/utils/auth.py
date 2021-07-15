@@ -80,6 +80,7 @@ def _create_get_current_user_field(field: str) -> Callable:
 
         # Return the user.id
         return getattr(user, field)
+
     return _func
 
 

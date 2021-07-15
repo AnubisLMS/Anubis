@@ -1,6 +1,5 @@
 from flask import Blueprint, request
 
-from anubis.models import LectureNotes
 from anubis.utils.auth import require_user, current_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response

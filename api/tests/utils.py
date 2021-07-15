@@ -1,7 +1,7 @@
 import base64
+import copy
 import json
 import os
-import copy
 import sys
 import traceback
 
