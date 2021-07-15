@@ -211,9 +211,9 @@ affinity: {}
 envFrom: []
 extraEnvs:
   - name: ELASTICSEARCH_HOSTS
-    value: elasticsearch-master.anubis.svc.cluster.local:9200
+    value: elasticsearch-master.elastic.svc.cluster.local:9200
   - name: KIBANA_HOSTS
-    value: kibana-kibana.anubis.svc.cluster.local:5601
+    value: kibana-kibana.elastic.svc.cluster.local:5601
 extraVolumes: []
 extraVolumeMounts: []
 # Allows you to add any config files in /usr/share/filebeat

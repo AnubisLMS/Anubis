@@ -100,13 +100,13 @@ longhorn: ns-longhorn-system
 	kubectl patch storageclass longhorn \
 		-p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 
-elasticsearch: ns-anubis
+elasticsearch: ns-elastic
 	helm upgrade \
 		--install elasticsearch elastic/elasticsearch \
 		--values elastic-values.yaml \
 		--set volumeClaimTemplate.storageClassName=$(STORAGE_CLASS) \
 		--version $(ELASTIC_VERSION) \
-		--namespace anubis
+		--namespace elastic
 
 filebeat:
 	helm upgrade \
@@ -120,7 +120,7 @@ mariadb: ns-anubis
 	helm upgrade \
 		--install mariadb bitnami/mariadb-galera \
 		--values mariadb-values.yaml \
-		--set primary.persistence.storageClass=$(STORAGE_CLASS) \
+		--set global.storageClass=$(STORAGE_CLASS) \
 		--set db.password=$(DB_PASS) \
 		--version $(MARIADB_VERSION) \
 		--namespace anubis
