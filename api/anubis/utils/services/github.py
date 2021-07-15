@@ -18,7 +18,7 @@ def fix_github_broken_repos(org_name: str):
     # Do graphql nonsense
     # Refer to here for graphql over https: https://graphql.org/learn/serving-over-http/
     query = '''
-    query githubCommits($orgName: String) {
+    query githubCommits($orgName: String!) {
       organization(login: $orgName){
         repositories(first:100,orderBy:{field:CREATED_AT,direction:DESC}){
           nodes{
@@ -45,7 +45,7 @@ def fix_github_broken_repos(org_name: str):
     # Make the graph request over http
     try:
         r = requests.post(url=url, json=json, headers=headers)
-        data = r.json()['data']['githubCommits']
+        data = r.json()['data']
         organization = data['organization']
         repositories = organization['repositories']['nodes']
     except Exception as e:
