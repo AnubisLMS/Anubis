@@ -9,7 +9,7 @@ from anubis.utils.auth import require_admin, current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response
-from anubis.utils.lms.courses import get_course_context
+from anubis.utils.lms.courses import course_context
 from anubis.utils.services.rpc import enqueue_ide_initialize
 from anubis.utils.services.rpc import rpc_enqueue, enqueue_ide_stop
 
@@ -20,14 +20,12 @@ ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 @require_admin()
 @json_response
 def admin_ide_admin_settings():
-    # Get the current course context
-    course = get_course_context()
 
     return success_response({'settings': {
         "privileged": True,
         "network_locked": False,
         "image": "registry.digitalocean.com/anubis/theia-admin",
-        "repo_url": course.autograde_tests_repo,
+        "repo_url": course_context.autograde_tests_repo,
         "options": '{"limits": {"cpu": "2", "memory": "2Gi"}, "autosave": true, "credentials": true}',
     }})
 
@@ -45,18 +43,12 @@ def admin_ide_initialize_custom(settings: dict, **_):
     :return:
     """
 
-    # Get the current user
-    user = current_user()
-
-    # Get the current course context
-    course = get_course_context()
-
     # Check to see if there is already a management session
     # allocated for the current user
     session = TheiaSession.query.filter(
         TheiaSession.active,
-        TheiaSession.owner_id == user.id,
-        TheiaSession.course_id == course.id,
+        TheiaSession.owner_id == current_user.id,
+        TheiaSession.course_id == course_context.id,
         TheiaSession.assignment_id == None,
     ).first()
 
@@ -79,7 +71,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
 
     # Create a new session
     session = TheiaSession(
-        owner_id=user.id, assignment_id=None, course_id=course.id,
+        owner_id=current_user.id, assignment_id=None, course_id=course_context.id,
         network_locked=network_locked, privileged=privileged,
         image=image, repo_url=repo_url, options=options,
         active=True, state="Initializing",
@@ -108,17 +100,11 @@ def admin_ide_active():
     :return:
     """
 
-    # Get the current user
-    user = current_user()
-
-    # Get the course context
-    course = get_course_context()
-
     # Query for an active theia session within this course context
     session = TheiaSession.query.filter(
         TheiaSession.active,
-        TheiaSession.owner_id == user.id,
-        TheiaSession.course_id == course.id,
+        TheiaSession.owner_id == current_user.id,
+        TheiaSession.course_id == course_context.id,
         TheiaSession.assignment_id == None,
     ).first()
 
@@ -143,12 +129,10 @@ def admin_ide_list():
     :return:
     """
 
-    course = get_course_context()
-
     # Get all active sessions
     sessions = TheiaSession.query.filter(
         TheiaSession.active == True,
-        TheiaSession.course_id == course.id,
+        TheiaSession.course_id == course_context.id,
     ).all()
 
     # Hand back response
@@ -165,13 +149,10 @@ def admin_ide_stop_id(id: str):
     :return:
     """
 
-    # Get the course context
-    course = get_course_context()
-
     # Search for the theia session
     session = TheiaSession.query.filter(
         TheiaSession.id == id,
-        TheiaSession.course_id == course.id,
+        TheiaSession.course_id == course_context.id,
     ).first()
 
     # Verify it exists
@@ -204,11 +185,8 @@ def private_ide_reap_all():
     :return:
     """
 
-    # Get the course context
-    course = get_course_context()
-
     # Send reap job to rpc cluster
-    rpc_enqueue(reap_theia_sessions_in_course, 'theia', args=(course.id,))
+    rpc_enqueue(reap_theia_sessions_in_course, 'theia', args=(course_context.id,))
 
     # Hand back status
     return success_response({

@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from anubis.models import db, User, InCourse, Course
+from anubis.models import db, InCourse, Course
 from anubis.utils.auth import require_user, current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
@@ -23,12 +23,9 @@ def public_classes():
     :return:
     """
 
-    # Current user
-    user: User = current_user()
-
     # Get the (possibly cached) courses
     # that the current user is in.
-    courses = get_courses(user.netid)
+    courses = get_courses(current_user.netid)
 
     # Give back the courses that the
     # student is in. This information
@@ -47,7 +44,6 @@ def public_courses_join(join_code):
 
     :return:
     """
-    user: User = current_user()
 
     # Validate that the join code contains valid characters
     if not valid_join_code(join_code):
@@ -64,7 +60,7 @@ def public_courses_join(join_code):
     # Check to see if student is already in course
     in_course = InCourse.query.filter(
         InCourse.course_id == course.id,
-        InCourse.owner_id == user.id,
+        InCourse.owner_id == current_user.id,
     ).first()
 
     # If they are already in the course, then we can give them a warning
@@ -77,7 +73,7 @@ def public_courses_join(join_code):
     # Create the new in-course
     in_course = InCourse(
         course_id=course.id,
-        owner_id=user.id,
+        owner_id=current_user.id,
     )
 
     # Add and commit the course join entry
@@ -85,9 +81,9 @@ def public_courses_join(join_code):
     db.session.commit()
 
     # Clear the cached entries for getting course data
-    cache.delete_memoized(get_courses, user.netid)
-    cache.delete_memoized(get_assignments, user.netid)
-    cache.delete_memoized(get_assignments, user.netid, course.id)
+    cache.delete_memoized(get_courses, current_user.netid)
+    cache.delete_memoized(get_assignments, current_user.netid)
+    cache.delete_memoized(get_assignments, current_user.netid, course.id)
 
     return success_response({
         "status": f"Joined {course.course_code}"

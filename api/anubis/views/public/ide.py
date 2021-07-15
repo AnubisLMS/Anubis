@@ -52,13 +52,10 @@ def public_ide_active(assignment_id):
     :return:
     """
 
-    # Get current user
-    user = current_user()
-
     # Find if they have an active session for this assignment
     session = TheiaSession.query.filter(
         TheiaSession.active,
-        TheiaSession.owner_id == user.id,
+        TheiaSession.owner_id == current_user.id,
         TheiaSession.assignment_id == assignment_id,
     ).first()
 
@@ -85,13 +82,10 @@ def public_ide_stop(theia_session_id: str) -> Dict[str, str]:
     :return:
     """
 
-    # Get current user
-    user: User = current_user()
-
     # Find the theia session
     theia_session: TheiaSession = TheiaSession.query.filter(
         TheiaSession.id == theia_session_id,
-        TheiaSession.owner_id == user.id,
+        TheiaSession.owner_id == current_user.id,
     ).first()
 
     # Verify that the session exists
@@ -126,11 +120,8 @@ def public_ide_poll(theia_session_id: str) -> Dict[str, str]:
     :return:
     """
 
-    # Get current user
-    user: User = current_user()
-
     # Find the (possibly cached) session data
-    session_data = theia_poll_ide(theia_session_id, user.id)
+    session_data = theia_poll_ide(theia_session_id, current_user.id)
 
     # Assert that the session exists
     req_assert(session_data is not None, message='session does not exist')
@@ -157,13 +148,10 @@ def public_ide_redirect_url(theia_session_id: str) -> Dict[str, str]:
     :return:
     """
 
-    # Get current user
-    user: User = current_user()
-
     # Search for session
     theia_session: TheiaSession = TheiaSession.query.filter(
         TheiaSession.id == theia_session_id,
-        TheiaSession.owner_id == user.id,
+        TheiaSession.owner_id == current_user.id,
     ).first()
 
     # Verify that the session exists
@@ -171,7 +159,7 @@ def public_ide_redirect_url(theia_session_id: str) -> Dict[str, str]:
 
     # Pass back redirect link
     return success_response({
-        "redirect": theia_redirect_url(theia_session.id, user.netid)
+        "redirect": theia_redirect_url(theia_session.id, current_user.netid)
     })
 
 
@@ -186,9 +174,6 @@ def public_ide_initialize(assignment: Assignment):
     :return:
     """
 
-    # Get current user
-    user: User = current_user()
-
     # verify that ides are enabled for this assignment
     req_assert(assignment.ide_enabled, message='IDEs are not enabled for this assignment')
 
@@ -196,7 +181,7 @@ def public_ide_initialize(assignment: Assignment):
     active_session = (
         TheiaSession.query.join(Assignment)
             .filter(
-            TheiaSession.owner_id == user.id,
+            TheiaSession.owner_id == current_user.id,
             TheiaSession.assignment_id == assignment.id,
             TheiaSession.active,
         )
@@ -217,7 +202,7 @@ def public_ide_initialize(assignment: Assignment):
 
     # Make sure we have a repo we can use
     repo = AssignmentRepo.query.filter(
-        AssignmentRepo.owner_id == user.id,
+        AssignmentRepo.owner_id == current_user.id,
         AssignmentRepo.assignment_id == assignment.id,
     ).first()
 
@@ -237,7 +222,7 @@ def public_ide_initialize(assignment: Assignment):
 
     # Create a new session
     session = TheiaSession(
-        owner_id=user.id,
+        owner_id=current_user.id,
         assignment_id=assignment.id,
         course_id=assignment.course.id,
         repo_url=repo.repo_url,

@@ -94,15 +94,12 @@ def public_whoami():
 
     :return:
     """
-    u: User = current_user()
-    if u is None:
-        return success_response({})
 
     # If their github username is not set, then we want to send
     # a warning telling the user they need to set it in their
     # profile panel.
     status = None
-    if u.github_username is None:
+    if current_user.github_username is None:
         status = "Please set your github username in your profile so we can identify your repos!"
 
     course_context = None
@@ -114,7 +111,7 @@ def public_whoami():
         }
 
     return success_response({
-        "user": u.data,
+        "user": current_user.data,
         "context": course_context,
         "status": status,
         "variant": "warning",
@@ -131,23 +128,21 @@ def public_auth_set_github_username(github_username):
     :return:
     """
 
-    user: User = current_user()
-
     # Make sure github username was specified
     if github_username is None:
         return error_response("github username not specified")
 
     # Make sure the github username is not already being used
     other: User = User.query.filter(
-        User.github_username == github_username, User.id != user.id
+        User.github_username == github_username, User.id != current_user.id
     ).first()
 
     # Assert that there is not a duplicate github username
     req_assert(other is None, message='github username is already taken')
 
     # Set github username and commit
-    user.github_username = github_username
-    db.session.add(user)
+    current_user.github_username = github_username
+    db.session.add(current_user)
     db.session.commit()
 
     # Run the fix dangling in case there are some
@@ -169,10 +164,8 @@ def public_cli_auth():
     :return:
     """
 
-    user: User = current_user()
-
     # Create a token with 30 days to expire
-    token = create_token(user.netid, exp_kwargs={'days': 30})
+    token = create_token(current_user.netid, exp_kwargs={'days': 30})
 
     # Grab the docker config out of the environ if it is there
     docker_token = os.environ.get('DOCKER_TOKEN', None)

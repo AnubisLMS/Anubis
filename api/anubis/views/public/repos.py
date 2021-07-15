@@ -20,11 +20,8 @@ def public_repos():
     :return:
     """
 
-    # Get current user
-    user: User = current_user()
-
     # Get all repos for the user
-    repos = get_repos(user.id)
+    repos = get_repos(current_user.id)
 
     # Pass them back
     return success_response({"repos": repos})

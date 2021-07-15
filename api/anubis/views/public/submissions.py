@@ -40,8 +40,7 @@ def public_submissions():
     offset: int = get_number_arg('offset', default_value=0)
 
     # Load current user
-    user: User = current_user()
-    perspective_of = user
+    perspective_of = current_user
     if perspective_of_id is not None:
         perspective_of = User.query.filter(User.id == perspective_of_id).first()
 
@@ -56,7 +55,7 @@ def public_submissions():
 
     # Get a possibly cached list of submission data
     submissions, total = get_submissions(
-        user_id=perspective_of_id or user.id,
+        user_id=perspective_of_id or current_user.id,
         course_id=course_id,
         assignment_id=assignment_id,
         limit=limit,
@@ -84,8 +83,6 @@ def public_submission(commit: str):
     :param commit:
     :return:
     """
-    # Get current user
-    user: User = current_user()
 
     # Build submission query
     query = (
@@ -95,8 +92,8 @@ def public_submission(commit: str):
 
     # If the current user is not a superuser, then add a filter
     # to make sure the submission is owned by the current user.
-    if not user.is_superuser:
-        query = query.filter(Submission.owner_id == user.id)
+    if not current_user.is_superuser:
+        query = query.filter(Submission.owner_id == current_user.id)
 
     # Do query
     submission = query.first()
@@ -118,9 +115,6 @@ def public_regrade_commit(commit: str):
     netid, then reset the submission and re-enqueue the submission job.
     """
 
-    # Load current user
-    user: User = current_user()
-
     # Build submission query
     query = (
         Submission.query
@@ -129,8 +123,8 @@ def public_regrade_commit(commit: str):
 
     # If the current user is not a superuser, then add a filter
     # to make sure the submission is owned by the current user.
-    if not user.is_superuser:
-        query = query.filter(Submission.owner_id == user.id)
+    if not current_user.is_superuser:
+        query = query.filter(Submission.owner_id == current_user.id)
 
     # Do query
     submission = query.first()
@@ -139,7 +133,7 @@ def public_regrade_commit(commit: str):
     req_assert(submission is not None, message='submission does not exist')
 
     # Check that the owner matches the user
-    if submission.owner_id != user.id:
+    if submission.owner_id != current_user.id:
         # If the user is not the owner, then full stop if
         assert_course_context(submission)
 

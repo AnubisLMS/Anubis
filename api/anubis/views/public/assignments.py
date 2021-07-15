@@ -28,11 +28,8 @@ def public_assignments():
     # Get optional class filter from get query
     course_id = request.args.get("courseId", default=None)
 
-    # Load current user
-    user: User = current_user()
-
     # Get (possibly cached) assignment data
-    assignment_data = get_assignments(user.netid, course_id)
+    assignment_data = get_assignments(current_user.netid, course_id)
 
     # Iterate over assignments, getting their data
     return success_response({"assignments": assignment_data})

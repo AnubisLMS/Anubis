@@ -6,7 +6,8 @@ import copy
 import urllib.parse
 from typing import Union, Tuple, Any, List, Dict
 
-from flask import request
+from flask import request, g
+from werkzeug.local import LocalProxy
 
 from anubis.models import (
     Course,
@@ -103,15 +104,17 @@ def get_course_context(full_stop: bool = True) -> Union[None, Course]:
         return course
 
     # Get the current course context
-    context = _get_course_context()
+    if 'course_context' not in g:
+        _course_context = _get_course_context()
+        g.course_context = _course_context
 
     # If full_stop is on, then verify we got a valid context,
     # or raise a LackCourseContext.
-    if context is None and full_stop:
+    if g.course_context is None and full_stop:
         raise LackCourseContext()
 
     # Return the course context
-    return context
+    return g.course_context
 
 
 def is_course_superuser(course_id: str, user_id: str = None) -> bool:
@@ -127,7 +130,7 @@ def is_course_superuser(course_id: str, user_id: str = None) -> bool:
 
     # Get the current user
     if user_id is None:
-        user = current_user()
+        user = current_user
     else:
         user = User.query.filter(User.id == user_id).first()
 
@@ -158,7 +161,7 @@ def is_course_admin(course_id: str, user_id: str = None) -> bool:
 
     # Get the current user
     if user_id is None:
-        user = current_user()
+        user = current_user
     else:
         user = User.query.filter(User.id == user_id).first()
 
@@ -358,6 +361,7 @@ def get_student_course_ids(user: User, default: str = None) -> List[str]:
     # Pass back list of course ids
     return course_ids
 
+
 def get_user_permissions(user: User) -> Dict[str, Any]:
     """
     Get a user's `professor_for`, `ta_for`, and `admin_for` permissions
@@ -397,3 +401,6 @@ def get_user_permissions(user: User) -> Dict[str, Any]:
         "ta_for": ta_for,
         "admin_for": admin_for,
     }
+
+
+course_context: Course = LocalProxy(get_course_context)

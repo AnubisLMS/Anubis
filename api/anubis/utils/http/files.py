@@ -3,7 +3,7 @@ from flask import Response, make_response
 from anubis.models import db, StaticFile
 from anubis.utils.data import rand, req_assert
 from anubis.utils.http.https import get_request_file_stream
-from anubis.utils.lms.courses import get_course_context
+from anubis.utils.lms.courses import course_context
 
 
 def get_mime_type(blob: bytes) -> str:
@@ -59,9 +59,6 @@ def make_blob_response(file: StaticFile) -> Response:
 
 
 def process_file_upload() -> StaticFile:
-    # Get the current course context
-    course = get_course_context()
-
     # Create a path hash
     path = "/" + rand(16)
 
@@ -82,7 +79,7 @@ def process_file_upload() -> StaticFile:
 
     # If the blob doesn't already exist, create one
     if blob is None:
-        blob = StaticFile(path=path, course_id=course.id)
+        blob = StaticFile(path=path, course_id=course_context.id)
 
     # Update the fields
     blob.filename = filename

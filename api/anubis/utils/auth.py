@@ -1,10 +1,11 @@
 import traceback
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import Union
+from typing import Union, Optional, Callable, Any
 
 import jwt
 from flask import g, request, has_request_context
+from werkzeug.local import LocalProxy
 
 from anubis.config import config
 from anubis.models import User, TAForCourse, ProfessorForCourse
@@ -29,7 +30,7 @@ def get_user(netid: Union[str, None]) -> Union[User, None]:
     return user
 
 
-def current_user() -> Union[User, None]:
+def get_current_user() -> Union[User, None]:
     """
     Load current user based on the token
 
@@ -61,6 +62,25 @@ def current_user() -> Union[User, None]:
     g.user = user
 
     return user
+
+
+def _create_get_current_user_field(field: str) -> Callable:
+    def _func() -> Optional[Any]:
+        """
+        Load current_user.id
+        :return:
+        """
+
+        # Get current user
+        user = get_current_user()
+
+        # Make sure they exist
+        if user is None:
+            return None
+
+        # Return the user.id
+        return getattr(user, field)
+    return _func
 
 
 def get_token() -> Union[str, None]:
@@ -123,7 +143,7 @@ def require_user(unless_debug=False):
         def wrapper(*args, **kwargs):
             # Get the user in the current
             # request context.
-            user = current_user()
+            user = get_current_user()
 
             # Bypass auth if the api is in debug
             # mode and unless_debug is true.
@@ -160,7 +180,7 @@ def require_admin(unless_debug=False):
         def wrapper(*args, **kwargs):
             # Get the user in the current
             # request context.
-            user = current_user()
+            user = get_current_user()
 
             # Bypass auth if the api is in debug
             # mode and unless_debug is true.
@@ -208,7 +228,7 @@ def require_superuser(unless_debug=False):
         def wrapper(*args, **kwargs):
             # Get the user in the current
             # request context.
-            user = current_user()
+            user = get_current_user()
 
             # Bypass auth if the api is in debug
             # mode and unless_debug is true.
@@ -233,3 +253,6 @@ def require_superuser(unless_debug=False):
         return wrapper
 
     return decorator
+
+
+current_user: User = LocalProxy(get_current_user)

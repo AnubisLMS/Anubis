@@ -24,9 +24,6 @@ def public_set_github_username():
     :return:
     """
 
-    # Get the current user
-    user = current_user()
-
     # Read the github username from the http query
     github_username = request.args.get("github_username", default=None)
 
@@ -61,7 +58,7 @@ def public_set_github_username():
     # Check to see if the github username they gave us belongs to
     # someone else in the system.
     other = User.query.filter(
-        User.id != user.id,
+        User.id != current_user.id,
         User.github_username == github_username
     ).first()
 
@@ -70,10 +67,10 @@ def public_set_github_username():
     req_assert(other is None, message='That github username is already taken!')
 
     # If all the tests and checks pass, then we can update their github username
-    user.github_username = github_username
+    current_user.github_username = github_username
 
     # Then commit the change
-    db.session.add(user)
+    db.session.add(current_user)
     db.session.commit()
 
     # And give back the new github username as the response

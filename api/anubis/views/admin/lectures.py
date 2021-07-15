@@ -9,7 +9,7 @@ from anubis.utils.auth import require_admin
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.files import process_file_upload, get_mime_type
 from anubis.utils.http.https import success_response, get_number_arg, get_request_file_stream
-from anubis.utils.lms.courses import get_course_context, assert_course_context
+from anubis.utils.lms.courses import course_context, assert_course_context
 
 lectures_ = Blueprint('admin-lectures', __name__, url_prefix='/admin/lectures')
 
@@ -26,13 +26,10 @@ def admin_static_lectures_list():
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Build Query. Defer the blob field so
     # it is not loaded.
     query = LectureNotes.query \
-        .filter(LectureNotes.course_id == course.id) \
+        .filter(LectureNotes.course_id == course_context.id) \
         .order_by(LectureNotes.post_time.desc())
 
     # Get all public static files within this course
@@ -55,13 +52,10 @@ def admin_lecture_delete_lecture_id(lecture_notes_id: str):
     :return:
     """
 
-    # Get course context
-    course = get_course_context()
-
     # Get lecture notes
     lecture_notes = LectureNotes.query.filter(
         LectureNotes.id == lecture_notes_id,
-        LectureNotes.course_id == course.id,
+        LectureNotes.course_id == course_context.id,
     ).first()
 
     # Assert that the static file is within the current course context
@@ -99,9 +93,6 @@ def admin_lecture_save(lecture_notes_id: str):
     :return:
     """
 
-    # Get course context
-    course = get_course_context()
-
     # Get fields from params
     post_time = request.args.get('post_time', default=None)
     title = request.args.get('title', default='')
@@ -117,7 +108,7 @@ def admin_lecture_save(lecture_notes_id: str):
     # Get lecture notes
     lecture_notes: LectureNotes = LectureNotes.query.filter(
         LectureNotes.id == lecture_notes_id,
-        LectureNotes.course_id == course.id,
+        LectureNotes.course_id == course_context.id,
     ).first()
 
     # If post time is None for whatever reason, then
@@ -168,9 +159,6 @@ def admin_lecture_upload():
     :return:
     """
 
-    # Get course context
-    course = get_course_context()
-
     # Get fields from params
     post_time = request.args.get('post_time', default=None)
     title = request.args.get('title', default='')
@@ -194,7 +182,7 @@ def admin_lecture_upload():
     # Create the lecture notes to match
     lecture_notes = LectureNotes(
         static_file_id=blob.id,
-        course_id=course.id,
+        course_id=course_context.id,
         post_time=post_time,
         title=title,
         description=description,
