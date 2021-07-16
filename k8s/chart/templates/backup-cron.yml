@@ -35,7 +35,10 @@ spec:
             - name: "PYTHONPATH"
               value: "/opt/app"
             - name: DB_HOST
-              value: mariadb.mariadb.svc.cluster.local
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-host
             # sqlalchemy uri
             - name: "DATABASE_PASSWORD"
               valueFrom:
