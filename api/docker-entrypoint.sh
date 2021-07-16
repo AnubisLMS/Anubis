@@ -20,10 +20,6 @@ if [ "${DEBUG}" = "1" ]; then
     done
 fi
 
-if [ "${MIGRATE}" = "1" ]; then
-    alembic upgrade head
-fi
-
 echo 'Starting api'
 exec gunicorn ${GUNICORN_OPTIONS} \
     -w ${WORKERS:-4} \

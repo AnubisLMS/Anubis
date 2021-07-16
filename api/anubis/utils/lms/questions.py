@@ -1,5 +1,8 @@
+import io
 import random
-from typing import List, Dict
+import zipfile
+from typing import List, Dict, Optional
+import yaml
 
 from anubis.models import (
     db,
@@ -13,6 +16,7 @@ from anubis.models import (
 from anubis.utils.data import _verify_data_shape, is_debug
 from anubis.utils.lms.students import get_students
 from anubis.utils.services.cache import cache
+from anubis.utils.services.logger import logger
 
 
 def get_question_pool_mapping(
@@ -313,3 +317,41 @@ def get_question_assignments(assignment: Assignment):
         }
 
     return assignments
+
+
+@cache.memoize(timeout=60, unless=is_debug)
+def export_assignment_questions(assignment_id: str) -> Optional[bytes]:
+    assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
+    if assignment is None:
+        return None
+
+    assignments = get_question_assignments(assignment)
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+        zip_file.writestr('assignment.yaml', yaml.safe_dump({'assignment': assignment.data}))
+        logger.info(yaml.safe_dump(assignment.data))
+        for netid, data in assignments.items():
+            name = data['name']
+            logger.info(name)
+            responses = []
+            for question_data in data['questions']:
+                response_text = question_data['response']['text']
+                response_late = question_data['response']['late']
+                response_time = question_data['response']['submitted']
+                pool = question_data['question']['pool']
+                question = question_data['question']['question']
+                solution = question_data['question']['solution']
+
+                zip_file.writestr(f'{netid}/{pool}/question.md', question)
+                zip_file.writestr(f'{netid}/{pool}/solution.md', solution)
+                zip_file.writestr(f'{netid}/{pool}/response.txt', response_text)
+
+                responses.append({'pool': pool, 'late': response_late, 'time': response_time})
+            zip_file.writestr(f'{netid}/meta.yaml', yaml.safe_dump({
+                'netid': netid,
+                'name': name,
+                'responses': responses,
+            }))
+
+    return zip_buffer.getvalue()
