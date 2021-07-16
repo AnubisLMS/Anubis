@@ -19,4 +19,3 @@ def test_lectures_public():
 
     student = Session('student')
     student.get('/public/lectures/list')
-

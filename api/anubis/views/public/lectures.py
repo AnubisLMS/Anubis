@@ -1,7 +1,6 @@
 from flask import Blueprint, request
 
-from anubis.models import LectureNotes
-from anubis.utils.auth import current_user, require_user
+from anubis.utils.auth import require_user, current_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response
 from anubis.utils.lms.lectures import get_lecture_notes
@@ -24,11 +23,8 @@ def public_static_lectures_list():
     # Get optional class filter from get query
     course_id = request.args.get("courseId", default=None)
 
-    # Load current user
-    user = current_user()
-
     # Get all public static files within this course
-    lectures_data = get_lecture_notes(user.id, course_id)
+    lectures_data = get_lecture_notes(current_user.id, course_id)
 
     # Pass back the list of files
     return success_response({

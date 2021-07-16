@@ -6,5 +6,4 @@ if git status | grep 'nothing to commit' &> /dev/null; then
     exit 1
 fi
 
-exec curl http://localhost:5001/ \
-     --data "message=${@}"
+exec curl http://localhost:5001/ --data "message=$*"

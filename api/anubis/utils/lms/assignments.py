@@ -8,7 +8,6 @@ from sqlalchemy import or_
 from anubis.models import (
     db,
     Course,
-    InCourse,
     User,
     Assignment,
     Submission,

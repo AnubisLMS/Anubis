@@ -7,7 +7,7 @@ from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.files import process_file_upload
 from anubis.utils.http.https import success_response
-from anubis.utils.lms.courses import get_course_context, assert_course_context
+from anubis.utils.lms.courses import course_context, assert_course_context
 
 static = Blueprint("admin-static", __name__, url_prefix="/admin/static")
 
@@ -60,13 +60,10 @@ def admin_static_list():
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Build Query. Defer the blob field so
     # it is not loaded.
     query = StaticFile.query \
-        .filter(StaticFile.course_id == course.id) \
+        .filter(StaticFile.course_id == course_context.id) \
         .order_by(StaticFile.created.desc()) \
         .options(defer(StaticFile.blob))
 

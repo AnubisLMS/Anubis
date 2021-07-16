@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Blueprint
 from sqlalchemy.exc import IntegrityError, DataError
 
-from anubis.models import db, Assignment, AssignedStudentQuestion, AssignedQuestionResponse, User
+from anubis.models import db, Assignment, AssignedStudentQuestion, AssignedQuestionResponse
 from anubis.utils.auth import require_user, current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_endpoint, load_from_id, json_response
@@ -26,11 +26,9 @@ def public_assignment_questions_id(assignment: Assignment):
     :param assignment:
     :return:
     """
-    # Load current user
-    user: User = current_user()
 
     return success_response({
-        "questions": get_assigned_questions(assignment.id, user.id)
+        "questions": get_assigned_questions(assignment.id, current_user.id)
     })
 
 
@@ -50,9 +48,6 @@ def public_questions_save(assignment_question_id: str, response: str):
     :return:
     """
 
-    # Get the current user
-    user: User = current_user()
-
     # Try to find the assigned question
     assigned_question = AssignedStudentQuestion.query.filter(
         AssignedStudentQuestion.id == assignment_question_id,
@@ -65,9 +60,9 @@ def public_questions_save(assignment_question_id: str, response: str):
     # Check that the person that the assigned question belongs to the
     # user. If the current user is a course admin (TA, Professor or superuser)
     # then we can skip this check.
-    if not is_course_admin(assigned_question.assignment.course_id, user.id):
+    if not is_course_admin(assigned_question.assignment.course_id, current_user.id):
         req_assert(
-            assigned_question.owner_id == user.id,
+            assigned_question.owner_id == current_user.id,
             message='assigned question does not exist'
         )
 
@@ -85,7 +80,7 @@ def public_questions_save(assignment_question_id: str, response: str):
         now = datetime.now()
 
         # Calculate the assignment due date for this student
-        due_date = get_assignment_due_date(user, assignment)
+        due_date = get_assignment_due_date(current_user, assignment)
 
         # Make sure that the deadline has not passed. If it has, then
         # we should give them an error saying that they can request a

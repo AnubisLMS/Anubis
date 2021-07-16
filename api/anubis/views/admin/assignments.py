@@ -19,7 +19,7 @@ from anubis.utils.data import row2dict, req_assert
 from anubis.utils.http.decorators import load_from_id, json_response, json_endpoint
 from anubis.utils.http.https import error_response, success_response
 from anubis.utils.lms.assignments import assignment_sync
-from anubis.utils.lms.courses import get_course_context, assert_course_context
+from anubis.utils.lms.courses import course_context, assert_course_context
 from anubis.utils.lms.questions import get_assigned_questions
 from anubis.utils.services.logger import logger
 
@@ -125,13 +125,10 @@ def admin_assignments_list():
     :return:
     """
 
-    # Get the course context
-    course = get_course_context()
-
     # Get all the assignment objects within the course context,
     # sorted by the due date.
     all_assignments = Assignment.query.filter(
-        Assignment.course_id == course.id
+        Assignment.course_id == course_context.id
     ).order_by(Assignment.due_date.desc()).all()
 
     # Pass back the row2dict of each assignment object

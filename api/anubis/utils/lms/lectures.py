@@ -1,14 +1,13 @@
 from typing import Optional, List
 
-from anubis.utils.services.cache import cache
 from anubis.models import User, LectureNotes
 from anubis.utils.data import is_debug
 from anubis.utils.lms.courses import get_student_course_ids
+from anubis.utils.services.cache import cache
 
 
 @cache.memoize(timeout=10, unless=is_debug, source_check=True)
 def get_lecture_notes(user_id: str, course_id: Optional[str] = None):
-
     # Load user
     user = User.query.filter(User.id == user_id).first()
 

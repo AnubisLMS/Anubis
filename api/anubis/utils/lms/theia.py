@@ -3,7 +3,6 @@ from typing import List, Tuple, Union, Dict
 
 from werkzeug.utils import redirect
 
-from anubis.config import config
 from anubis.models import TheiaSession, User, Config
 from anubis.utils.auth import create_token
 from anubis.utils.data import is_debug

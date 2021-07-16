@@ -215,7 +215,7 @@ class Assignment(db.Model):
         from anubis.utils.lms.assignments import get_assignment_due_date
         from anubis.utils.auth import current_user
 
-        due_date = get_assignment_due_date(current_user(), self)
+        due_date = get_assignment_due_date(current_user, self)
 
         return {
             "id": self.id,

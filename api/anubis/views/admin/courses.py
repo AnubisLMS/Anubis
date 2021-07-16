@@ -6,7 +6,7 @@ from anubis.utils.auth import require_admin, require_superuser, current_user
 from anubis.utils.data import row2dict, req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response
-from anubis.utils.lms.courses import assert_course_superuser, get_course_context
+from anubis.utils.lms.courses import assert_course_superuser, course_context
 from anubis.utils.lms.courses import valid_join_code
 
 courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
@@ -23,12 +23,9 @@ def admin_courses_list():
     :return:
     """
 
-    # Get the course context
-    course = get_course_context()
-
     # Return the course context broken down
     return success_response({
-        "course": row2dict(course),
+        "course": row2dict(course_context),
     })
 
 
@@ -122,12 +119,9 @@ def admin_course_list_tas():
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Get all the TAs in the current course context
     tas = User.query.join(TAForCourse).filter(
-        TAForCourse.course_id == course.id,
+        TAForCourse.course_id == course_context.id,
     ).all()
 
     # Return the list of basic user information about the tas
@@ -150,12 +144,9 @@ def admin_course_list_professors():
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Get all the professors within the current course context
     professors = User.query.join(ProfessorForCourse).filter(
-        ProfessorForCourse.course_id == course.id,
+        ProfessorForCourse.course_id == course_context.id,
     ).all()
 
     # Return the list of basic user information about the professors
@@ -179,9 +170,6 @@ def admin_course_make_ta_id(user_id: str):
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Get the user that will be the TA
     other = User.query.filter(User.id == user_id).first()
 
@@ -191,7 +179,7 @@ def admin_course_make_ta_id(user_id: str):
     # Check to see if the user is already a ta
     ta = TAForCourse.query.filter(
         TAForCourse.owner_id == user_id,
-        TAForCourse.course_id == course.id,
+        TAForCourse.course_id == course_context.id,
     ).first()
 
     # Check that they are not already a TA
@@ -200,7 +188,7 @@ def admin_course_make_ta_id(user_id: str):
     # Make the user a TA if they are not already
     ta = TAForCourse(
         owner_id=user_id,
-        course_id=course.id,
+        course_id=course_context.id,
     )
 
     # Add and commit the change
@@ -224,14 +212,8 @@ def admin_course_remove_ta_id(user_id: str):
     :return:
     """
 
-    # Get the current user
-    user = current_user()
-
-    # Get the course context
-    course = get_course_context()
-
     # Assert that the current user is a professor or superuser
-    assert_course_superuser(course.id)
+    assert_course_superuser(course_context.id)
 
     # Get the user object for the specified user
     other = User.query.filter(User.id == user_id).first()
@@ -240,13 +222,13 @@ def admin_course_remove_ta_id(user_id: str):
     req_assert(other is not None, message='user does not exist')
 
     # If the other user is the current user, then stop
-    if not user.is_superuser:
-        req_assert(other.id != user.id, message='cannot remove yourself')
+    if not current_user.is_superuser:
+        req_assert(other.id != current_user.id, message='cannot remove yourself')
 
     # Delete the TA
     TAForCourse.query.filter(
         TAForCourse.owner_id == user_id,
-        TAForCourse.course_id == course.id,
+        TAForCourse.course_id == course_context.id,
     ).delete()
 
     # Commit the delete
@@ -270,9 +252,6 @@ def admin_course_make_professor_id(user_id: str):
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Get the other user
     other = User.query.filter(User.id == user_id).first()
 
@@ -283,7 +262,7 @@ def admin_course_make_professor_id(user_id: str):
     # for this course
     prof = ProfessorForCourse.query.filter(
         ProfessorForCourse.owner_id == user_id,
-        ProfessorForCourse.course_id == course.id,
+        ProfessorForCourse.course_id == course_context.id,
     ).first()
 
     # If they are already a professor, then stop
@@ -292,7 +271,7 @@ def admin_course_make_professor_id(user_id: str):
     # Create a new professor
     prof = ProfessorForCourse(
         owner_id=user_id,
-        course_id=course.id,
+        course_id=course_context.id,
     )
 
     # Add and commit the change
@@ -316,9 +295,6 @@ def admin_course_remove_professor_id(user_id: str):
     :return:
     """
 
-    # Get the current user
-    course = get_course_context()
-
     # Get the other user
     other = User.query.filter(User.id == user_id).first()
 
@@ -328,7 +304,7 @@ def admin_course_remove_professor_id(user_id: str):
     # Delete the professor
     ProfessorForCourse.query.filter(
         ProfessorForCourse.owner_id == user_id,
-        ProfessorForCourse.course_id == course.id,
+        ProfessorForCourse.course_id == course_context.id,
     ).delete()
 
     # Commit the delete

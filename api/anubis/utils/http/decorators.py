@@ -43,7 +43,7 @@ def load_from_id(model, verify_owner=False):
             # If the verify_owner option is on, then
             # check the object's owner against the currently
             # logged in user.
-            if verify_owner and current_user().id != r.owner.id:
+            if verify_owner and current_user.id != r.owner.id:
                 raise AuthenticationError()
 
             return func(r, *args, **kwargs)

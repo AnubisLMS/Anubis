@@ -5,7 +5,7 @@ from anubis.utils.auth import require_admin, current_user, require_superuser
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, get_number_arg
-from anubis.utils.lms.courses import assert_course_superuser, get_course_context, assert_course_context
+from anubis.utils.lms.courses import assert_course_superuser, course_context, assert_course_context
 from anubis.utils.lms.repos import get_repos
 from anubis.utils.lms.students import get_students
 from anubis.utils.lms.theia import get_recent_sessions
@@ -46,11 +46,8 @@ def admin_students_list():
     :return:
     """
 
-    # Get the current course context
-    course = get_course_context()
-
     # Get all students within the current course context
-    students = get_students(course_id=course.id)
+    students = get_students(course_id=course_context.id)
 
     # Pass back the students
     return success_response({
@@ -123,9 +120,6 @@ def admin_students_submissions_id(id: str):
     limit = get_number_arg("limit", 50)
     offset = get_number_arg("offset", 0)
 
-    # Get the current course context
-    course = get_course_context()
-
     # Get the user object
     student = User.query.filter(User.id == id).first()
 
@@ -136,7 +130,7 @@ def admin_students_submissions_id(id: str):
     submissions = (
         Submission.query.join(Assignment).filter(
             Submission.owner_id == student.id,
-            Assignment.course_id == course.id,
+            Assignment.course_id == course_context.id,
         ).order_by(Submission.created.desc()).limit(limit).offset(offset).all()
     )
 
@@ -163,15 +157,12 @@ def admin_students_update_id(id: str, name: str = None, github_username: str = N
     :return:
     """
 
-    # Get the course context
-    course = get_course_context()
-
     # Assert that the current user is a professor
     # or superuser in the course context
-    assert_course_superuser(course.id)
+    assert_course_superuser(course_context.id)
 
     # Get the current user
-    user = current_user()
+    user = current_user
 
     # Get the student object
     student = User.query.filter(User.id == id).first()
@@ -185,7 +176,7 @@ def admin_students_update_id(id: str, name: str = None, github_username: str = N
     # Make sure that the student is within the course context
     in_course = InCourse.query.filter(
         InCourse.owner_id == student.id,
-        InCourse.course_id == course.id,
+        InCourse.course_id == course_context.id,
     ).first()
 
     # Verify that the student is in the context
@@ -215,20 +206,17 @@ def admin_students_toggle_superuser(id: str):
     :return:
     """
 
-    # Get the current user
-    user = current_user()
-
     # Get the other user
     other = User.query.filter(User.id == id).first()
 
     # Double check that the current user is a superuser
-    req_assert(user.is_superuser, message='only superusers can create superusers')
+    req_assert(current_user.is_superuser, message='only superusers can create superusers')
 
     # If the other user was not found, then stop
     req_assert(other is not None, message='user does not exist')
 
     # Make sure that the other user is not also the current user
-    req_assert(user.id != other.id, message='cannot toggle your own superuser')
+    req_assert(current_user.id != other.id, message='cannot toggle your own superuser')
 
     # Toggle the superuser field
     other.is_superuser = not other.is_superuser
