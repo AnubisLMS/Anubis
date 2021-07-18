@@ -42,7 +42,16 @@ export default function CourseCard({course}) {
   const classes = useStyles();
   const bull = <span className={classes.bullet}>•</span>;
 
-  const {id, name, course_code, section, professor_display_name, total_assignments, open_assignments, semester} = course;
+  const {
+    id,
+    name,
+    course_code,
+    section,
+    professor_display_name,
+    total_assignments,
+    open_assignments,
+    semester
+  } = course;
 
   return (
     <Badge badgeContent={open_assignments} color="error" fontSize="medium">

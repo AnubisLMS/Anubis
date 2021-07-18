@@ -78,7 +78,7 @@ def seed():
     mmds_students = create_students(50)
     mmds_course = create_course(
         mmds_students,
-        name="Mining Massive Datasets", course_code="CS-UY 3843", section="A", professor="Gustavo",
+        name="Mining Massive Datasets", course_code="CS-UY 3843", section="A", professor_display_name="Gustavo",
         autograde_tests_repo='https://github.com/os3224/anubis-assignment-tests',
         github_org_url='https://github.com/os3224'
     )
