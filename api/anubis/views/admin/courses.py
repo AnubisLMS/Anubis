@@ -48,7 +48,7 @@ def admin_courses_new():
         name="placeholder",
         course_code="placeholder",
         section="a",
-        professor="placeholder",
+        professor_display_name="placeholder",
     )
 
     # Add it to the session

@@ -36,7 +36,7 @@ const editableFields = [
   {field: 'name', label: 'Course Name'},
   {field: 'course_code', label: 'Course Code'},
   {field: 'section', label: 'Section'},
-  {field: 'professor', label: 'Professor'},
+  {field: 'professor_display_name', label: 'Professor'},
   {field: 'autograde_tests_repo', label: 'Autograde Tests Repo'},
   {field: 'theia_default_image', label: 'Theia Default Image'},
   {field: 'theia_default_options', label: 'Theia Default Options'},
