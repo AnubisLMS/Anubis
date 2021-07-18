@@ -1,5 +1,8 @@
+import io
+from datetime import datetime
+
 import sqlalchemy.exc
-from flask import Blueprint
+from flask import Blueprint, send_file
 
 from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQuestion
 from anubis.utils.auth import require_admin
@@ -16,6 +19,7 @@ from anubis.utils.lms.questions import (
     assign_questions,
     reset_question_assignments,
     get_question_assignments,
+    export_assignment_questions,
 )
 
 questions = Blueprint("admin-questions", __name__, url_prefix="/admin/questions")
@@ -341,3 +345,42 @@ def private_questions_assign_unique_code(assignment_id: str):
         'assigned': assigned_questions,
         'status': 'Questions assigned'
     })
+
+
+@questions.get('/export/<string:assignment_id>')
+@require_admin()
+def admin_assignments_export(assignment_id: str):
+    """
+    Export question assignments to a (potentially) large zip archive.
+
+    :param assignment_id:
+    :return:
+    """
+
+    # Get the assignment
+    assignment = Assignment.query.filter(
+        Assignment.id == assignment_id
+    ).first()
+
+    # Verify that we got an assignment
+    req_assert(assignment is not None, message='assignment does not exist')
+
+    # Verify that the assignment is accessible to the user in the current course context
+    assert_course_context(assignment)
+
+    # Get now datetime
+    now = datetime.now().replace(microsecond=0)
+
+    # Generate an export of the assignment data
+    zip_blob = export_assignment_questions(assignment.id)
+
+    # Get a filename from the assignment name and datetime
+    filename = f'{assignment.name}-{str(now)}.zip'.replace(' ', '_').replace(':', '')
+
+    # Send the file back
+    return send_file(
+        io.BytesIO(zip_blob),
+        attachment_filename=filename,
+        as_attachment=True
+    )
+

@@ -1,10 +1,8 @@
-import io
 import json
-from datetime import datetime
 
 import parse
 from dateutil.parser import parse as dateparse
-from flask import Blueprint, make_response, send_file
+from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
 
 from anubis.models import (
@@ -21,7 +19,6 @@ from anubis.utils.data import row2dict, req_assert
 from anubis.utils.http.decorators import load_from_id, json_response, json_endpoint
 from anubis.utils.http.https import error_response, success_response
 from anubis.utils.lms.assignments import assignment_sync
-from anubis.utils.lms.questions import export_assignment_questions
 from anubis.utils.lms.courses import course_context, assert_course_context
 from anubis.utils.lms.questions import get_assigned_questions
 from anubis.utils.services.logger import logger
@@ -341,15 +338,3 @@ def private_assignment_sync(assignment: dict):
 
     # Return
     return success_response(message)
-
-
-@assignments.get('/export/<string:assignment_id>')
-@require_admin()
-def admin_assignments_export(assignment_id: str):
-    assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
-    now = datetime.now()
-    zip_blob = export_assignment_questions(assignment.id)
-    return send_file(io.BytesIO(zip_blob), attachment_filename=f'{assignment.name}-{str(now)}.zip'.replace(' ', '_').replace(':', ''), as_attachment=True)
-
-
-

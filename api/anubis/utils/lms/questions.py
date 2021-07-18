@@ -319,39 +319,75 @@ def get_question_assignments(assignment: Assignment):
     return assignments
 
 
-@cache.memoize(timeout=60, unless=is_debug)
+@cache.memoize(timeout=120, unless=is_debug)
 def export_assignment_questions(assignment_id: str) -> Optional[bytes]:
+    """
+    Export an assignment questions to a zip file.
+
+    :param assignment_id:
+    :return:
+    """
+
+    # Get the assignment
     assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
+
+    # If the assignment does not exist, then return None
     if assignment is None:
         return None
 
-    assignments = get_question_assignments(assignment)
+    # Get the question assignments. This data includes all the
+    # question strs, solution strs, and student responses for
+    # an assignment.
+    question_assignments = get_question_assignments(assignment)
 
+    # Create an in-memory zip file buffer
     zip_buffer = io.BytesIO()
+
+    # Create a zip file using the in-memory buffer
     with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
-        zip_file.writestr('assignment.yaml', yaml.safe_dump({'assignment': assignment.data}))
-        logger.info(yaml.safe_dump(assignment.data))
-        for netid, data in assignments.items():
+
+        # List of student meta data
+        student_metas = []
+
+        # Iterate through all the student question assignments
+        for netid, data in question_assignments.items():
+
+            # Get the name of the student
             name = data['name']
-            logger.info(name)
+
+            # List of responses for this student
             responses = []
-            for question_data in data['questions']:
-                response_text = question_data['response']['text']
-                response_late = question_data['response']['late']
-                response_time = question_data['response']['submitted']
-                pool = question_data['question']['pool']
-                question = question_data['question']['question']
-                solution = question_data['question']['solution']
 
-                zip_file.writestr(f'{netid}/{pool}/question.md', question)
-                zip_file.writestr(f'{netid}/{pool}/solution.md', solution)
-                zip_file.writestr(f'{netid}/{pool}/response.txt', response_text)
+            # Iterate through each question assigned to the student
+            for student_question_data in data['questions']:
 
+                # Pull fields from the question_data
+                response_text = student_question_data['response']['text']
+                response_late = student_question_data['response']['late']
+                response_time = student_question_data['response']['submitted']
+                pool = student_question_data['question']['pool']
+                question = student_question_data['question']['question']
+                solution = student_question_data['question']['solution']
+
+                # Write files to zip archive
+                zip_file.writestr(f'{netid}/q{pool}/question.md', question)
+                zip_file.writestr(f'{netid}/q{pool}/solution.md', solution)
+                zip_file.writestr(f'{netid}/q{pool}/response.txt', response_text)
+
+                # Append the responses
                 responses.append({'pool': pool, 'late': response_late, 'time': response_time})
-            zip_file.writestr(f'{netid}/meta.yaml', yaml.safe_dump({
-                'netid': netid,
-                'name': name,
-                'responses': responses,
-            }))
 
+            # Create the student meta data
+            student_data = {'netid': netid, 'name': name, 'responses': responses}
+
+            # Append the student meta data to the global value
+            student_metas.append(student_data)
+
+            # Write this students meta data to their directory
+            zip_file.writestr(f'{netid}/meta.yaml', yaml.safe_dump(student_data))
+
+            # Write a global assignment and student meta data file
+        zip_file.writestr('assignment.yaml', yaml.safe_dump({'assignment': assignment.data, 'students': student_metas}))
+
+    # Pass back the buffer in bytes
     return zip_buffer.getvalue()
