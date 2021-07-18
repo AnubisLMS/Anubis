@@ -16,13 +16,12 @@ import TextField from '@material-ui/core/TextField';
 import CheckOutlinedIcon from '@material-ui/icons/Check';
 import CancelIcon from '@material-ui/icons/Cancel';
 import NotInterested from '@material-ui/icons/NotInterested';
-
-import useQuery from '../../../hooks/useQuery';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import AutogradeVisuals from '../../../Components/Admin/Visuals/AutogradeVisuals';
 import Button from '@material-ui/core/Button';
 import RefreshIcon from '@material-ui/icons/Refresh';
+import ArchiveIcon from '@material-ui/icons/Archive';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -202,13 +201,35 @@ export default function Results() {
         <Typography variant={'subtitle1'} color={'textSecondary'}>
           Results for {assignment?.name}
         </Typography>
-        <Button
-          variant={'contained'}
-          color={'primary'}
-          onClick={clearCache}
-        >
-          Clear Cache
-        </Button>
+
+        <Grid container spacing={1}>
+
+          {/* Clear Cache button */}
+          <Grid item>
+            <Button
+              variant={'contained'}
+              color={'primary'}
+              onClick={clearCache}
+            >
+              Clear Cache
+            </Button>
+          </Grid>
+
+          {/* Reset questions icon */}
+          <Grid item>
+            <Button
+              startIcon={<ArchiveIcon/>}
+              color={'primary'}
+              variant={'contained'}
+              component={'a'}
+              href={`/api/admin/questions/export/${assignmentId}`}
+              download
+            >
+              Question Assignments (zip)
+            </Button>
+          </Grid>
+
+        </Grid>
       </Grid>
       <Grid item xs={12}>
         <AutogradeVisuals assignmentId={assignmentId}/>
@@ -245,10 +266,12 @@ export default function Results() {
             pageSize={pageSize}
             rowsPerPageOptions={[10, 15]}
             onPageChange={(params) => {
-              setLoading(true); setPage(params.page);
+              setLoading(true);
+              setPage(params.page);
             }}
             onPageSizeChange={(params) => {
-              setLoading(true); setPageSize(params.pageSize);
+              setLoading(true);
+              setPageSize(params.pageSize);
             }}
             onRowClick={({row}) => setSelected(row)}
           />

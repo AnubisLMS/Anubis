@@ -8,12 +8,5 @@ RUN yarn run build \
   && find / -depth -name '.cache' -exec 'rm' '-rf' '{}' ';'
 
 
-FROM node:alpine
-WORKDIR /opt/app
-RUN apk add --update --no-cache curl \
-  && yarn global add serve \
-  && find / -depth -name '.cache' -exec 'rm' '-rf' '{}' ';'
-COPY --from=0 /opt/app/build /opt/app/build
-
-USER nobody
-CMD serve -s build -l 3000
+FROM nginx:alpine
+COPY --from=0 /opt/app/build /usr/share/nginx/html

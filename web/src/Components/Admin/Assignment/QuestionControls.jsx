@@ -1,21 +1,24 @@
 import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
+
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Tooltip from '@material-ui/core/Tooltip';
-import CloudDownload from '@material-ui/icons/CloudDownload';
-import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
-import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import CardHeader from '@material-ui/core/CardHeader';
+
+import CloudDownload from '@material-ui/icons/CloudDownload';
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
 import AddIcon from '@material-ui/icons/Add';
+import ArchiveIcon from '@material-ui/icons/Archive';
 
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
@@ -128,7 +131,7 @@ export default function QuestionControls({assignmentId, reload, questionsAssigne
           <Grid container spacing={2}>
 
             {/* Assign questions button */}
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={6} md={3}>
               <Tooltip title={'Assign questions to students'}>
                 <Button
                   fullWidth
@@ -143,7 +146,7 @@ export default function QuestionControls({assignmentId, reload, questionsAssigne
             </Grid>
 
             {/* Add question button */}
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={6} md={3}>
               <Tooltip title={'Add question'}>
                 <Button
                   fullWidth
@@ -158,7 +161,7 @@ export default function QuestionControls({assignmentId, reload, questionsAssigne
             </Grid>
 
             {/* Reset questions icon */}
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={6} md={3}>
               <Tooltip title={'Download question assignments'}>
                 <Button
                   fullWidth
@@ -167,7 +170,24 @@ export default function QuestionControls({assignmentId, reload, questionsAssigne
                   variant={'contained'}
                   onClick={downloadQuestionAssignments}
                 >
-                  Download question assignments
+                  Assignments (json)
+                </Button>
+              </Tooltip>
+            </Grid>
+
+            {/* Download assignments icon */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Tooltip title={'Download question assignments'}>
+                <Button
+                  fullWidth
+                  startIcon={<ArchiveIcon/>}
+                  color={'primary'}
+                  variant={'contained'}
+                  component={'a'}
+                  href={`/api/admin/questions/export/${assignmentId}`}
+                  download
+                >
+                  Assignments (zip)
                 </Button>
               </Tooltip>
             </Grid>
