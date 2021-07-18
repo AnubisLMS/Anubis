@@ -50,7 +50,7 @@ export default function CourseCard({course}) {
     professor_display_name,
     total_assignments,
     open_assignments,
-    semester
+    semester,
   } = course;
 
   return (
