@@ -88,7 +88,7 @@ class Course(db.Model):
     course_code = db.Column(db.TEXT, nullable=False)
     semester = db.Column(db.TEXT, nullable=True)
     section = db.Column(db.TEXT, nullable=True)
-    professor = db.Column(db.TEXT, nullable=False)
+    professor_display_name = db.Column(db.TEXT, nullable=False)
     autograde_tests_repo = db.Column(db.TEXT, nullable=False,
                                      default='https://github.com/os3224/anubis-assignment-tests')
     theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.digitalocean.com/anubis/xv6')
@@ -124,7 +124,7 @@ class Course(db.Model):
             "name": self.name,
             "course_code": self.course_code,
             "section": self.section,
-            "professor": self.professor,
+            "professor_display_name": self.professor_display_name,
             "total_assignments": self.total_assignments,
             "open_assignment": self.open_assignments,
             "join_code": self.id[:6],

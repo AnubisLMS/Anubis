@@ -63,7 +63,7 @@ def seed():
     intro_to_os_students = create_students(50) + [superuser, professor_user, ta_user, student_user]
     intro_to_os_course = create_course(
         intro_to_os_students,
-        name="Intro to OS", course_code="CS-UY 3224", section="A", professor="Gustavo",
+        name="Intro to OS", course_code="CS-UY 3224", section="A", professor_display_name="Gustavo",
         autograde_tests_repo='https://github.com/os3224/anubis-assignment-tests',
         github_org_url='https://github.com/os3224',
     )
