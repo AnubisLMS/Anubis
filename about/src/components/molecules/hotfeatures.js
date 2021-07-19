@@ -2,6 +2,7 @@ import React from 'react';
 import assignmentsIcon from '../../images/svg/assignments.svg';
 import analyticsIcon from '../../images/svg/analytics.svg';
 import ideIcon from '../../images/svg/ide.svg';
+import {useScreenSize} from "../../hooks/useScreenSize"
 
 const features = [
   {
@@ -25,10 +26,11 @@ const features = [
 ]
 
 const HotFeatures = () => {
+  const screen = useScreenSize();
   return (
-    <div className= 'w-full grid grid-cols-3 gap-6'>
+    <div className= {`w-full grid grid-cols-3 gap-6`}>
       {features.map(({icon, title, description}, index) => (
-        <div className= 'flex flex-col items-start w-full space-y-4'>
+        <div className= {`flex flex-col ${(screen !== 'lg') ? 'col-span-3 p-6': 'col-span-1'} items-start w-full space-y-4`}>
           <img alt = 'title' src = {icon} className= 'w-8 h-auto' />
           <div className= 'text-left'>
             <h2 className= 'text-lg text-light-100 '>{title}</h2>
