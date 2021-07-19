@@ -1,29 +1,25 @@
 import React, {useState} from 'react';
-import {Logo, HeaderLink, PrimaryButton, Button} from './atoms';
+import {Logo, HeaderLink, SecondaryButton, PrimaryButton, Button} from './atoms';
 import {useScreenSize} from "../hooks/useScreenSize";
 import {FiMenu, FiX} from 'react-icons/fi';
 const links = [
   {
-    name: 'Features',
-    path: '/features'
+    name: 'Documentation',
+    path: '/documentation'
   },
   {
     name: 'Blog',
     path: '/blog'
   },
   {
-    name: 'Contribute',
-    path: '/contribute',
-  },
-  {
-    name: 'Contact Us',
-    path: '/contact'
+    name: 'Contact',
+    path: '/contact',
   }
 ];
 
 const HeaderModal = ({callback}) => {
   return (
-    <div className= 'w-screen h-screen absolute bg-gray-800 rounded-md p-4 relative'>
+    <div className= 'w-full  bg-gray-800 rounded-md p-4 relative'>
       <div  onClick = {() => callback()} className= 'absolute top-2 right-2 cursor-pointer hover:opacity-60'>
         <FiX  className= 'w-6 h-auto'/>
       </div>
@@ -70,8 +66,7 @@ export const Header = () => {
 
       {screenSize === 'lg' &&
         <div className= 'space-x-2'>
-          <PrimaryButton>Log In</PrimaryButton>
-          <Button className= 'hover:text-primary'>Get Started</Button>
+          <SecondaryButton>Log In</SecondaryButton>
         </div>
       }
 
