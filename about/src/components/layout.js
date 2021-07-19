@@ -2,6 +2,7 @@
 import * as React from "react"
 import PropTypes from "prop-types"
 import {Header} from './';
+import {Fade} from './atoms';
 
 const Layout = ({ children, isCentered = false }) => {
   return (
@@ -10,7 +11,9 @@ const Layout = ({ children, isCentered = false }) => {
         <Header/>
       </div>
       <div className= {`h-full w-full flex flex-col items-center  p-4 ${isCentered ? 'mb-20 justify-center' : 'mt-20'} space-y-6`}>
-        {children}
+        <Fade>
+          {children}
+        </Fade>
       </div>
     </div>
   )

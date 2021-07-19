@@ -49,7 +49,7 @@ export const Features = () => {
 
       <div className= {`mt-6 grid max-w-6xl ${screenSize === 'lg' ? 'grid-cols-3' : screenSize === 'md' ? 'grid-cols-2'  : 'grid-cols-1'} gap-4`}>
         {features.map((feature, index) => (
-          <FeatureCard {... feature} />
+          <FeatureCard {... feature} key = {`${feature.name}-${index}`}/>
         ))}
       </div>
     </Layout>

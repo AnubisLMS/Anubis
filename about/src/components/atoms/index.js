@@ -23,3 +23,6 @@ export {SubmissionIcon} from './icons';
 export {CustomIcon} from './icons';
 export {VirtualIcon} from './icons';
 export {ManagementIcon} from './icons';
+
+//Animation
+export {Fade} from './animation';
