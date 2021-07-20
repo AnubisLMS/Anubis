@@ -1,3 +1,11 @@
+---
+title: Anubis Cloud IDEs 
+slug: anubis-cloud-ide
+date: 2021-04-13
+author: John Cunniff
+description: Assignment in Anubis work unlike any other homework solution. In most college classes, when students finish their work, they turn in a final copy into the professor. With Anubis, we eliminate this process by making it so that students turn in their homework simply by working on it.
+published: true
+---
 One of the more exciting new features of Anubis is that of the cloud ide. Leveraging some magic
 that [Kubernetes Pods](https://kubernetes.io/docs/concepts/workloads/pods/) give us, we can provide a fully isolated IDE environment for all ~130 students in Intro to OS concurrently.
 

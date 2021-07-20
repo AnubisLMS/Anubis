@@ -1,3 +1,11 @@
+---
+title: Anubis LMS 
+slug: elavator-pitch
+date: 2021-03-17
+author: John Cunniff
+description: Assignment in Anubis work unlike any other homework solution. In most college classes, when students finish their work, they turn in a final copy into the professor. With Anubis, we eliminate this process by making it so that students turn in their homework simply by working on it.
+published: true
+---
 ![logo](/logocenter.png)
 
 #### What you gain by using Anubis

@@ -3,10 +3,10 @@ import {Logo, HeaderLink, SecondaryButton, PrimaryButton, Button} from './atoms'
 import {useScreenSize} from "../hooks/useScreenSize";
 import {FiMenu, FiX} from 'react-icons/fi';
 const links = [
-  {
-    name: 'Documentation',
-    path: '/documentation'
-  },
+  // {
+  //   name: 'Documentation',
+  //   path: '/documentation'
+  // },
   {
     name: 'Blog',
     path: '/blog'

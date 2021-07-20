@@ -1,3 +1,11 @@
+---
+title: Reorganizing RPC While Under Load 
+slug: midterm-retro
+date: 2021-04-06
+author: John Cunniff
+description: Assignment in Anubis work unlike any other homework solution. In most college classes, when students finish their work, they turn in a final copy into the professor. With Anubis, we eliminate this process by making it so that students turn in their homework simply by working on it.
+published: true
+---
 During the midterm this semester there were a few issues that came up. In this post,
 I'm going to be explaining how I went about live patching the RPC queues while
 the cluster was running and under load from users.
