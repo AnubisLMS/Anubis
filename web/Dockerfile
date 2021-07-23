@@ -1,4 +1,5 @@
 FROM node:alpine
+
 WORKDIR /opt/app
 COPY package.json yarn.lock /opt/app/
 RUN yarn
@@ -8,5 +9,11 @@ RUN yarn run build \
   && find / -depth -name '.cache' -exec 'rm' '-rf' '{}' ';'
 
 
-FROM nginx:alpine
-COPY --from=0 /opt/app/build /usr/share/nginx/html
+FROM node:alpine
+
+WORKDIR /opt/app
+RUN yarn global add serve \
+  && find / -depth -name '.cache' -exec 'rm' '-rf' '{}' ';'
+COPY --from=0 /opt/app/build /opt/app/build
+USER nobody
+CMD serve -s build -l 3000

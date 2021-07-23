@@ -42,13 +42,14 @@ spec:
         ports:
         - name: web
           containerPort: 3000
+        { { - if .Values.api.healthCheck } }
         livenessProbe:
-          exec:
-            command:
-              - curl
-              - http://localhost:3000/
-          initialDelaySeconds: 30
-          periodSeconds: 5
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 3
+        { { - end } }
 
 ---
 apiVersion: v1
