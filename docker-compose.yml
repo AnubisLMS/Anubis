@@ -12,10 +12,8 @@ services:
     image: "traefik:v2.2"
     command:
       - "--api.insecure=true"
-
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-
       - "--entrypoints.http.address=:80"
       - "--entrypoints.https.address=:443"
 
@@ -24,7 +22,6 @@ services:
       - "443:443"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "traefik_data:/letsencrypt"
     labels:
       - "traefik.enable=false"
 
@@ -43,11 +40,8 @@ services:
       - "./api:/opt/app"
     labels:
       - "traefik.enable=true"
-
       - "traefik.http.services.api.loadbalancer.server.port=5000"
       - "traefik.http.middlewares.strip-api.stripprefix.prefixes=/api"
-
-      # Public router without auth
       - "traefik.http.routers.api-public.rule=Host(`localhost`) && PathPrefix(`/api/`)"
       - "traefik.http.routers.api-public.entrypoints=http,https"
       - "traefik.http.routers.api-public.middlewares=strip-api@docker"
@@ -118,9 +112,7 @@ services:
       - 127.0.0.1:3000:3000
     labels:
       - "traefik.enable=true"
-
       - "traefik.http.services.web.loadbalancer.server.port=3000"
-
       - "traefik.http.routers.web-public.rule=Host(`localhost`)"
       - "traefik.http.routers.web-public.entrypoints=http,https"
 
@@ -177,6 +169,4 @@ services:
     build: ./puller
 
 volumes:
-  traefik_data:
   db_data:
-  el_data:
