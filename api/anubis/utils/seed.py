@@ -73,7 +73,7 @@ def rand_commit(n=40) -> str:
 def create_assignment(course, users):
     # Assignment 1 uniq
     assignment = Assignment(
-        id=rand(), name=f"assignment {course.name}", unique_code=rand(8), hidden=False,
+        id=rand(), name=f"{course.course_code} Assignment 1", unique_code=rand(8), hidden=False,
         pipeline_image=f"registry.digitalocean.com/anubis/assignment/{rand(8)}",
         github_classroom_url='http://localhost',
         release_date=datetime.now() - timedelta(hours=2),
