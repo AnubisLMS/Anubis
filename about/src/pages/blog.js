@@ -1,6 +1,6 @@
 import React from 'react';
 import {Layout} from '../components';
-import { Link, graphql } from "gatsby"
+import { Link, graphql , navigate} from "gatsby"
 import { FiArrowRight } from "react-icons/fi";
 import { motion } from 'framer-motion';
 
@@ -23,6 +23,7 @@ const PostItem = ({title, description, date, author, slug}) => {
 
   return (
     <motion.li
+      onClick = {() => navigate(slug)}
       variants = {parentVariant}
       className='flex flex-row bg-light-600  pt-4 pb-4 pr-6 pl-6 rounded-lg w-full items-center space-x-10  justify-between cursor-pointer  '
       layout initial="initial" whileHover="hover">
@@ -42,8 +43,8 @@ const PostItem = ({title, description, date, author, slug}) => {
 
 const PostList = ({posts}) => (
   <div className= 'flex col-span-3 flex-col w-full items-center  space-y-8'>
-    {posts.map(({frontmatter}, index) => (
-      <PostItem {... frontmatter} />
+    {posts.map(({frontmatter, fields}, index) => (
+      <PostItem {... frontmatter } {... fields} />
     ))}
   </div>
 )
@@ -84,7 +85,9 @@ export const pageQuery = graphql`
                     date
                     author
                     description
-                    slug
+                }
+                fields {
+                 slug
                 }
             }
         }

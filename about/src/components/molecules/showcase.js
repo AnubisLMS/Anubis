@@ -29,7 +29,7 @@ const Showcase = () => {
   return (
     <div className = 'w-full flex-col flex items-center'>
       {/*<div className= 'w-full h-screen/3 bg-light-500 rounded-lg bg-ide bg-cover'></div>*/}
-      <img className= 'w-full h-full h-screen43 rounded-lg' src = {ideGIF} />
+      <img className= 'w-full  rounded-lg' src = {ideGIF} />
       <div className= 'flex flex-row items-center justify-between p-4 space-x-6 text-light-300'>
         {tabs.map((tab, index) => (
           <TabSelector onClick = {() => setSelectedTab(tab.id)} active = {selectedTab === tab.id} key = {`${index}-${tab.id}`}>{tab.title}</TabSelector>
