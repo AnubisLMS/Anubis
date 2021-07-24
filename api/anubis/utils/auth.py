@@ -10,7 +10,7 @@ from werkzeug.local import LocalProxy
 from anubis.config import config
 from anubis.models import User, TAForCourse, ProfessorForCourse
 from anubis.utils.data import is_debug
-from anubis.utils.exceptions import AuthenticationError
+from anubis.utils.exceptions import AuthenticationError, AssertError
 from anubis.utils.services.logger import logger
 
 
@@ -245,7 +245,7 @@ def require_superuser(unless_debug=False):
             # If the user is not a superuser, then return a 400 error
             # so it will be displayed in a snackbar.
             if user.is_superuser is False:
-                raise AuthenticationError("Requires superuser")
+                raise AssertError("This requires superuser permissions", 200)
 
             # Pass the parameters to the
             # decorated function.
