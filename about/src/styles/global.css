@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+.blue-circle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    top: 50vh;
+    background: transparent;
+    box-shadow: 4px 4px 250px 500px rgba(86, 134, 245, 0.06);
+}

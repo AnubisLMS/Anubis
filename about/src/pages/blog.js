@@ -13,15 +13,25 @@ const PostItem = ({title, description, date, author, slug}) => {
     initial: {
       opacity: 0,
     },
+  };
+
+  const parentVariant = {
+    hover: {
+      scale: 1.04
+    },
   }
 
   return (
     <motion.li
+      variants = {parentVariant}
       className='flex flex-row bg-light-600  pt-4 pb-4 pr-6 pl-6 rounded-lg w-full items-center space-x-10  justify-between cursor-pointer  '
       layout initial="initial" whileHover="hover">
       <div className='flex flex-col space-y-2 items-start'>
-        <p className='text-xl text-light-100'>{title}</p>
-        <p className='text-sm text-light-400'>Posted by {author} on {date}</p>
+        <div className= 'flex flex-row items-center justify-between space-x-6'>
+          <p className='text-xl text-light-100'>{title}</p>
+        </div>
+        <p className= 'text-light-400'>{description.substr(0, 120)}...</p>
+        <p className='text-sm text-light-500'>Posted by {author} on {date}</p>
       </div>
       <motion.div variants = {arrowButtonVariant} transition={{duration: 0.25}}>
         <FiArrowRight className='w-6 h-auto' />
@@ -42,9 +52,8 @@ const Blog = ({data}) => {
   const posts = data.allMdx.nodes;
   return (
     <Layout>
-      {/*<div className= 'w-full border-2 border-light-100' />*/}
-      <div className= 'flex flex-col max-w-5xl w-full items-start justify-center  space-y-24 inline'>
-          <h1 className= 'text-6xl font-gosha w-full'>~ Blog</h1>
+      <div className= 'flex flex-col max-w-5xl w-full items-start justify-center  space-y-24 inline pt-20'>
+          <h1 className= 'text-6xl font-gosha w-full'><span className= 'text-primary'>~</span> Blog</h1>
           <div className= 'w-full'>
             <PostList posts={posts} />
           </div>
@@ -75,6 +84,7 @@ export const pageQuery = graphql`
                     date
                     author
                     description
+                    slug
                 }
             }
         }

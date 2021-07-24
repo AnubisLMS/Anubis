@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-
+import {StaticImage} from "gatsby-plugin-image";
+import ideGIF from '../../images/ide.gif';
 const tabs = [
   {
     title: 'Assignments',
@@ -24,10 +25,11 @@ const TabSelector = ({active = false, children, onClick = () => {}}) => (
 )
 
 const Showcase = () => {
-  const [selectedTab, setSelectedTab] = useState('assignments');
+  const [selectedTab, setSelectedTab] = useState('ides');
   return (
     <div className = 'w-full flex-col flex items-center'>
-      <div className= 'w-full h-96 bg-light-500 rounded-lg '></div>
+      {/*<div className= 'w-full h-screen/3 bg-light-500 rounded-lg bg-ide bg-cover'></div>*/}
+      <img className= 'w-full h-full h-screen43 rounded-lg' src = {ideGIF} />
       <div className= 'flex flex-row items-center justify-between p-4 space-x-6 text-light-300'>
         {tabs.map((tab, index) => (
           <TabSelector onClick = {() => setSelectedTab(tab.id)} active = {selectedTab === tab.id} key = {`${index}-${tab.id}`}>{tab.title}</TabSelector>

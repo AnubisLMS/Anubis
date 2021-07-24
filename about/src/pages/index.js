@@ -9,7 +9,9 @@ export const Home = () => {
     <Layout>
       <link rel="preload" href="/fonts/GoshaSans-Bold.woff" as="font" type="font/woff" crossOrigin />
       <link rel="preload" href="/fonts/GoshaSans-Bold.woff2" as="font" type="font/woff2" crossOrigin />
-      <div className= 'flex flex-col max-w-5xl items-center justify-center text-center space-y-32'>
+      <div className= 'blue-circle' />
+
+      <div className= 'flex flex-col max-w-5xl items-center justify-center text-center space-y-24 pb-28 pt-40'>
         <div>
           <h1 className= 'text-6xl font-gosha font-bold '>Completely Automate your Course</h1>
           <div className= 'space-x-4 mt-12'>
@@ -18,8 +20,7 @@ export const Home = () => {
           </div>
         </div>
         <Showcase />
-        <HotFeatures />
-
+        {/*<HotFeatures />*/}
       </div>
     </Layout>
   )
