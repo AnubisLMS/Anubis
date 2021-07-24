@@ -9,11 +9,12 @@
 \section{Cloud IDE Overview}\label{sec:cloud-ide-overview}
 
 One of the more exciting new features of Anubis is that of the Cloud IDEs.
-Anubis Cloud IDEs are \href{https://theia-ide.org/}{Theia} IDE servers that run in containers.
+Anubis Cloud IDEs are \href{https://theia-ide.org/}{Theia} IDE servers that run
+in docker containers.
 Since the containers are themselves linux environments, we can allow students
 to run commands in that environment with the built in terminal in Theia.
 
-\section{Packaging of Course Software}\label{sec:packaing-of-course-software}
+\section{Packaging of Course Software}\label{sec:packaging-of-course-software}
 
 Taking these IDE container servers to the next level, we can add whatever 
 other software is necessary for the course.
@@ -49,9 +50,9 @@ Networking traffic to Cloud IDEs need to also be automatically detected and bala
 \subsection{Scaling IDEs}\label{subsec:scaling-ides}
 
 Kubernetes tracks what resources are reserved for specific containers.
-When it runs out of a resource like memory of cpu, it will automatically
+When the cluster runs out of a resource like memory of cpu, it will automatically
 add more nodes to the cluster and spread the load.
-There resource reservations are added to each student Cloud IDE.
+Resource reservations are added to each student Cloud IDE.
 If there are more students asking for Cloud IDEs resources than exist
 in the cluster, it will automatically scale to handle the load.
 
@@ -76,11 +77,11 @@ of that pod is recorded in the database (called a \textit{ClusterIP}).
 
 Once the Cloud IDE has been initialized, then a \textit{goto ide} button
 will become available.
-When clicked, the student will be redirected to \textit{ide.anubis.osiris.services}.
-That domain points to the \textit{theia-proxy} service.
-The proxy then parses the cookie set for the user, and pulls the 
-cloud ide pod ip address from the database.
-The proxy then forwards the request to the proper Cloud IDE container.
+When clicked, the student will be redirected to the address of the \textit{theia-proxy} service.
+The proxy then parses the cookie set for the user, and pulls the
+Cloud IDE pod ClusterIP address from the database.
+The proxy then begins forwarding requests to the proper Cloud IDE container.
+In a sense, the \textit{theia-proxy} is a router for the IDEs.
 
 The \textit{theia-proxy} service is setup with a 
 \href{https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/}{Horizontal Pod Autoscaler} or HPA.
@@ -90,7 +91,6 @@ The HPA for the \textit{theia-proxy} is configured to detect when
 there is prolonged cpu load and automatically add new proxy containers.
 The load balancer will then automatically distribute incomming connections
 between \textit{theia-proxy} containers.
-
 
 \section{IDE Pod Design}\label{sec:ide-pod-design}
 
@@ -113,7 +113,7 @@ correct pod.
 These IDE servers are temporary. When the student finishes working (or after a timeout) we reclaim the resources by
 deleting the pod and shared volume. Because of this, we needed some form of autosave. Saving is pushing to github.
 The issue we need to contend with is automatically committing and pushing to github without exposing a sensitive
-password or api token to the users. We handle this by having a second container whose only role is committing and
+password or api token to the students. We handle this by having a second container whose only role is committing and
 pushing to github. The credentials live in that container, completely separate and inaccessible to the user who
 may be working in the other theia server container. These two containers are connected by a shared volume mounted
 at `/home/project` in both containers. This volume is relatively small (~50MiB).
@@ -121,9 +121,14 @@ at `/home/project` in both containers. This volume is relatively small (~50MiB).
 With this setup, we have autosave running in the background while being completely hidden from the user. When
 explaining autosave to students we usually just say "it is witchcraft, just trust that it works".
 
+\section{IDE Resources}\label{sec:ide-resources}
 
-With these lightweight containerized theia servers, we are able to support significantly more concurrent users than
-if we had elected to implement a cloud VM solution. Because Anubis Cloud IDEs do not need to virtualize hardware,
-the resources on the system for each user is significantly less. Given the resources that we have on Digital Ocean,
-we would be able to have maybe 20-30 concurrent users using cloud virtual machines. With our containerized theia,
-we can handle all ~130 students in CS-UY 3224 at the same time with room to breath.
+The Anubis Cloud IDEs are lightweight containerized theia servers.
+Due to this, we are able to support significantly more concurrent students
+than if we had elected to implement a cloud VM solution.
+Because Anubis Cloud IDEs do not need to virtualize hardware,
+the resources on the system per each user is significantly less.
+Given the resources that we have on Digital Ocean,
+we would be able to have maybe 20-30 concurrent students using cloud virtual machines.
+With our containerized theia, we can handle all ~130 students in CS-UY 3224 at the same
+time with room to breath.
