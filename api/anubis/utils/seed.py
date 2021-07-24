@@ -2,9 +2,14 @@ import random
 import string
 from datetime import datetime, timedelta
 
-from anubis.models import Assignment, AssignmentQuestion, db, AssignmentTest, AssignmentRepo, Submission, User, Course, \
-    InCourse
+from anubis.models import (
+    db,
+    Assignment, AssignmentQuestion, AssignmentTest,
+    AssignmentRepo, Submission, User, Course,
+    InCourse, TheiaSession
+)
 from anubis.utils.data import rand
+from anubis.utils.lms.theia import mark_session_ended
 
 names = ["Joette", "Anabelle", "Fred", "Woodrow", "Neoma", "Dorian", "Treasure", "Tami", "Berdie", "Jordi", "Frances",
          "Gerhardt", "Kristina", "Carmelita", "Sim", "Hideo", "Arland", "Wirt", "Robt", "Narcissus", "Steve", "Monique",
@@ -110,28 +115,13 @@ def create_assignment(course, users):
             )
         )
 
-        # for _ in range(2):
-        #     theia_sessions.append(
-        #         TheiaSession(
-        #             owner=user,
-        #             assignment=assignment,
-        #             repo_url=repos[-1].repo_url,
-        #             active=False,
-        #             ended=datetime.now(),
-        #             state="state",
-        #             cluster_address="127.0.0.1",
-        #         )
-        #     )
-        # theia_sessions.append(
-        #     TheiaSession(
-        #         owner=user,
-        #         assignment=assignment,
-        #         repo_url=repos[-1].repo_url,
-        #         active=True,
-        #         state="state",
-        #         cluster_address="127.0.0.1",
-        #     )
-        # )
+        for _ in range(3):
+            theia_session = TheiaSession(
+                owner=user, assignment=assignment, course=course,
+                repo_url=repos[-1].repo_url, cluster_address="127.0.0.1",
+            )
+            mark_session_ended(theia_session)
+            theia_sessions.append(theia_session)
 
         if random.randint(0, 3) != 0:
             for i in range(random.randint(1, 10)):
