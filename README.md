@@ -25,7 +25,7 @@
 
 ## Design and Internals 
 
-Want to know how Anubis works internally? We have a 36 page design doc that thoroughly explains how Anubis works 
+Want to know how Anubis works internally? We have a 20+ page design doc that thoroughly explains how Anubis works 
 under [our docs](./docs). Don't worry, there are a lot of pictures :)
 
 ## Blog
@@ -63,7 +63,7 @@ the browser.
 ![alt docs/img/theia-fullscreen.png](docs/design-tex/figures/theia-fullscreen.png)
 
 > _If you would like a more detailed description of how the IDEs work internally, check out the 
-> [sections on the IDEs in our design doc](docs/README.md#25-anubis-cloud-ide)_ 
+> [sections on the IDEs in our design doc](docs/README.md)_ 
 
 ### Insights
 
@@ -71,7 +71,7 @@ Simply by placing timestamps on thing that are already tracked like submissions 
 we can start to both ask and answer some interesting questions about how well students are understanding certain topics.
 
 > _For a more detailed description (plus visuals) of how admin insights work in Anubis, check out
-> the [section on usage statistics in our design doc](/docs/README.md#6-usage-statistics)_
+> the [section on usage statistics in our design doc](/docs/README.md)_
 
 
 ## How to contribute

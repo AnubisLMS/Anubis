@@ -107,7 +107,7 @@ export default function UserCard({user, setUser}) {
                     checked={user.is_superuser}
                     color={'primary'}
                     onChange={() => {
-                      axios.get(`/api/admin/students/toggle-superuser/${user.student.id}`).then((response) => {
+                      axios.get(`/api/admin/students/toggle-superuser/${user.id}`).then((response) => {
                         const data = standardStatusHandler(response, enqueueSnackbar);
                         if (data) {
                           setUser((state) => {

@@ -1,23 +1,24 @@
 \chapter{Autograding}\label{ch:assignments}
 
+Much of this chapter will be assuming that you are using the Anubis Management IDE. These are special
+Anubis Cloud IDEs \ref{ch:cloud_ides} that have the CLI and docker packaged into them. These
+IDEs are only available to course admins.
 
 \section{Assignment Structure}\label{sec:assignment-structure}
 
-Under Anubis each student gets their own github repo for each assignment.
-When they push to their repos, Anubis sees the push and runs tests on their code.
-The results are then available to students on the Anubis website before the deadline.
+Under Anubis each student gets their own github repository for each assignment.
+When they push to their repo, Anubis sees the push event and runs tests on their code.
+The results are then available to students on the Anubis website in real time.
 Under this model students can push as many times as they would like before the assignment deadline.
 
 Assignment repositories are created from template repositories.
-TAs or professors can set up a repo with the necessary files or starter code for students
-to work on.
+TAs or professors can set up a repo with the necessary files or starter code for students to work on.
 Template repositories can be set up in such a way that constrains student code.
-With c or c++ assignments, starter files c or c++ with a Makefile constrains students
+With C or C++ assignments, adding some starter files with a Makefile constrains students
 to all start from the same point.
-Instead of getting N submissions all with different file names and run options,
+Instead of getting \textit{N} submissions all with different file names and run options,
 everyone's code will compile and run with the same commands.
-This structure makes automating tests possible.
-
+This structure makes automating tests trivial and effective.
 
 \section{Creating Autograde Tests}\label{sec:creating-autograde-tests}
 
@@ -63,7 +64,7 @@ assignment:
 Here is an example generated meta.yml from the OS final exam this semester.
 The only fields that you will need to fill in are the github classroom url.
 This is the URL that is given to you when you create a github classroom assignment.
-That link will then be provided as a button for students to click in the frontend.
+That link will then be provided as a button for students to click on the Anubis website.
 
 
 \section{Writing Autograde Tests}\label{sec:writing-autograde-tests}
@@ -126,7 +127,7 @@ The \textit{register\_build} and \textit{register\_test} decorators are how
 you tell anubis about your build and test.
 The \textit{exec\_as\_student} function is how you should call any and all student code.
 It lowers the privileges way down so that even if the student pushes something
-malicious, they are still low privileged enough where they can not do much.
+malicious, they are still low privileged enough where they cannot do much.
 It also adds timeouts to their commands.
 Boxing student code in like this is absolutely essential.
 Do not underestimate the creative and surprising ways students will find to break things.
@@ -262,7 +263,7 @@ anubis assignment build --push
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=1\textwidth]{figures/submission-flow.mmd}
+    \includegraphics[width=1\textwidth]{figures/submission-flow.mmd.png}
     \caption{Submission Pipelines are a complex multi service data flow. \label{fig:submission-flow} }
 \end{figure}
 
@@ -305,7 +306,7 @@ It will not have any level of access to anything from the \textit{anubis} user.
 
 \subsubsection{Clone}
 
-n this initial stage, we will pull the current repo down from github.
+In this initial stage, we will pull the current repo down from github.
 After checking out the commit for the current submission, we will also delete
 the \textit{.git} directory as it is not needed.
 Lastly we will chown the entire repo as \textit{student:student}.
@@ -348,11 +349,11 @@ We are executing student code in the submission pipeline containers.
 Due to this reality, the pipelines are designed from the ground
 up to be isolated in whatever way they can be.
 
-There is a special \href{https://kubernetes.io/docs/concepts/services-networking/network-policies/}{kubernetes network} that is applied to 
-all the submission pipeline pods.
-This policy limits the pod to only being able to connect to the \textit{pipeline-api}
-service.
-Using simple resource requests and limits in kubernets enables
+There is a special
+\href{https://kubernetes.io/docs/concepts/services-networking/network-policies/}{kubernetes network policy}
+that is applied to  all the submission pipeline pods.
+This policy limits the pod to only being able to connect to the \textit{pipeline-api} service.
+Using simple resource requests and limits in kubernetes enables
 limits on resources like cpu and memory.
 
 In early versions of Anubis, there were not memory limits on submission
@@ -363,7 +364,7 @@ how memory works in C that well.
 When this would happen, the node would be quickly drained of available memory,
 and the OOM killer would start taking other processes and containers down.
 Obviously this lead to sensible resources limits being placed
-on student code. In more modern versions of Anubis there are proper isolation and
+on student code. In more modern versions of Anubis there is proper isolation and
 resource limits that are placed on students.
 
 

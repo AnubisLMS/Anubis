@@ -98,12 +98,13 @@ export default function Results() {
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState(null);
   const [searched, setSearched] = useState(null);
+  const [error, setError] = useState(null);
   const columns = useColumns();
 
   React.useEffect(() => {
     axios.get('/api/admin/students/list').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      if (data) {
+      if (data.students) {
         setStudents(data.students);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
@@ -118,6 +119,11 @@ export default function Results() {
       {params: {limit, offset}},
     ).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
+
+      if (!data) {
+        setError(true);
+        return;
+      }
 
       setStats((state) => {
         let j = 0;
@@ -164,6 +170,10 @@ export default function Results() {
 
   if (selected) {
     return <Redirect to={`/admin/autograde/submission?assignmentId=${assignment.id}&netid=${selected.id}`}/>;
+  }
+
+  if (error) {
+    return <Redirect to={`/error`}/>;
   }
 
   const clearCache = () => {

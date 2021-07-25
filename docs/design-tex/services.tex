@@ -5,11 +5,11 @@
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.5\textwidth]{figures/traefik.mmd}
+    \includegraphics[width=0.5\textwidth]{figures/traefik.mmd.png}
     \caption{Traefik Traffic in Anubis\label{fig:traefik}}
 \end{figure}
 
-For our edge router, we use traefik~\fref{fig:traefik}.
+For our edge router, we use traefik~\ref{fig:traefik}.
 Traefik will be what actually listens on the servers external ports.
 All external traffic will be routed through Traefik.
 Above all else, we will be using Traefik's powerful routing features to handle the ingress of requests.
@@ -21,12 +21,12 @@ and even change requests as they pass through.
 Among other things, the routing rules make it so that we can have
 both the static store and api on the same domain.
 The rules are set up such that every request that
-starts with a path of \textit{anubis.osiris.services/api/*} goes to the api~\fref{sec:api} service.
-All other requests \textit{anubis.osiris.services/*} are routed to the web static~\fref{sec:web} service.
+starts with a path of \textit{anubis.osiris.services/api/*} goes to the api~\ref{sec:api} service.
+All other requests \textit{anubis.osiris.services/*} are routed to the web static~\ref{sec:web} service.
 
-In addition to having the web static~\fref{sec:web} and the anubis api~\fref{sec:api} services on
-the same domain, we can add routing rules for the theia-proxy~\fref{sec:theia-proxy} service.
-Anything that is \textit{ide.anubis.osiris.service/*} will be routed to the theia-proxy service~\fref{sec:theia-proxy}.
+In addition to having the web static~\ref{sec:web} and the anubis api~\ref{sec:api} services on
+the same domain, we can add routing rules for the theia-proxy~\ref{sec:theia-proxy} service.
+Anything that is \textit{ide.anubis.osiris.service/*} will be routed to the theia-proxy service~\ref{sec:theia-proxy}.
 
 By leveraging these features of Traefik, we can make it appear that
 the services work different when being accessed externally.
@@ -36,8 +36,8 @@ the services work different when being accessed externally.
 
 The API is the backbone of Anubis.
 It is where most of the heavy lifting is done.
-The service relies on both the cache~\fref{sec:caching} and mariadb data
-stores~\fref{sec:data-stores} to maintain state.
+The service relies on both the cache~\ref{sec:caching} and mariadb data
+stores~\ref{sec:data-stores} to maintain state.
 
 The Anubis API is itself nothing more than a simple \href{https://flask.palletsprojects.com/en/2.0.x/}{Flask} app.
 As of version \textit{v3.1.16} it is about 25,000 lines of python.
@@ -48,7 +48,7 @@ The API is split into two distinct, and uniquely treated zones.
 There is a public and a admin zone.
 All endpoints for Anubis fall within one of these zones.
 In the source code for Anubis, the views for these zones exist
-in seperate public and admin python modules.
+in separate public and admin python modules.
 
 All public view endpoints will start with the url \textit{anubis.osiris.services/api/public/*}.
 Similarly, the admin view endpoints will start with \textit{anubis.osiris.services/api/admin/*}.
@@ -57,7 +57,7 @@ Similarly, the admin view endpoints will start with \textit{anubis.osiris.servic
 The majority of the public API does require authentication.
 This is mostly handled by the \textit{@require\_auth} decorator applied to the view function.
 Additional checks will be done to verify that the resource, or calculation being requested are
-something the requestor (the user making the request) is authorized to see.
+something the requester (the user making the request) is authorized to see.
 The distinction must be made that public here means that it is public to users.
 Students that open Anubis in a web browser and navigate through their submissions and assignments
 will only be using the public API.
@@ -91,8 +91,8 @@ The endpoint \textit{anubis.osiris.services/} will run the following view functi
         return "Healthy"
 \end{minted}
 
-The view checks that the database~\fref{sec:mariadb} is accessible by running a query, then calls a function that relies on the
-redis cache~\fref{sec:caching}.
+The view checks that the database~\ref{subsec:mariadb} is accessible by running a query, then calls a function that relies on the
+redis cache~\ref{subsec:caching}.
 While this view function may be simple, it is quite effective.
 Most of the incidents of degraded service or downtime come down to either the database or cache being temporary
 unavailable.
@@ -127,7 +127,7 @@ All that is necessary are some keys from NYU IT.
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.75\textwidth]{figures/anubis-frontend}
+    \includegraphics[width=0.75\textwidth]{figures/anubis-frontend.png}
     \caption{Anubis Web Frontend\label{fig:web-frontend}}
 \end{figure}
 
@@ -138,7 +138,7 @@ One thing of note that is not in this service are most images.
 The only images that are in this web static image are the logo favicons
 and some others.
 The majority of images that are on the frontend (through the blog or assignment questions and whatnot)
-are saved in the database and accessed through the api~\fref{sec:api}.
+are saved in the database and accessed through the api~\ref{sec:api}.
 
 The frontend is designed to be a simple reflection of the backend data.
 Once authenticated, users will be able to see the classes they are a part of,
@@ -156,8 +156,8 @@ Internals of this service are described in section~\ref{subsec:balancing-network
 
 \section{Reaper CronJob}\label{sec:reaper}
 
-Many of the resources that Anubis allocates within the cluster are shortlived. The Cloud IDE, and Submission Pipeline
-pods are the most fluid of all.
+Many of the resources that Anubis allocates within the cluster are short lived.
+The Cloud IDE, and Submission Pipeline pods are the most fluid of all.
 The Cloud IDEs will be created and destroyed at the behest of students.
 The Submission Pipeline pods rarely last for more than a few minutes. 
 For these reasons Anubis needs a frequent recurring job that keeps resources in check.
@@ -192,8 +192,8 @@ About 60\% of all IDE sessions reached the 6 hour limit.
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.5\textwidth]{figures/theia3}
-    \caption{Cumlative Duration of a Theia Session\label{fig:theia3}}
+    \includegraphics[width=0.5\textwidth]{figures/theia3.png}
+    \caption{Cumulative Duration of a Theia Session\label{fig:theia3}}
 \end{figure}
 
 \subsection{Reaping Submission Pipeline Resources}\label{subsec:reaping-submission-pipeline-resources}
@@ -204,7 +204,7 @@ Batch jobs are not automatically removed (at least not without enabling
 Finished Submission Pipeline jobs are unnecessary resources.
 
 For this reason, the reaper job will also schedule all finished and successful Submission Pipeline batch jobs
-for deleteion.
+for deletion.
 Pipeline jobs that failed for whatever reason are not deleted.
 This is purposeful in design so that if there is an issue with a pipeline,
 there are logs that can be examined.
@@ -214,12 +214,12 @@ there are logs that can be examined.
 The last main responsibility of the reaper is fixing broken submissions.
 Anubis is what is called an \href{https://en.wikipedia.org/wiki/Eventual_consistency}{Eventually Consistent}
 system.
-That means that there is a certain tollerance of short term inconsistency that is expected
-and handled by the system.
-The place that many of these inconsistencies are remedied are in the reaper cron.
+That means that there is a certain tolerance of short term inconsistency that is expected and
+handled.
+Most inconsistencies are fixed by the reaper cron.
 
 The reaper cron searches recent submissions for common signs of breakage.
-These breakages could be inconsitentcies that were caused by a failed or stalled Submission Pipeline
+These breakages could be inconsistencies that were caused by a failed or stalled Submission Pipeline
 for example.
 Depending on the issue, the reaper may be able to fix or not.
 For issues that cannot be fixed by the reaper, the submission is marked as broken.
@@ -230,18 +230,18 @@ The reaper has saved countless hours for students and staff alike.
 
 \section{RPC in Anubis}\label{sec:rpc-in-anubis}
 
-Remote Procedual Calls are common place is many distributed systems.
+Remote Procedural Calls are common place is many distributed systems.
 Anubis relies on them quite heavily.
 Many workflows in Anubis push work to RPC job queues through using the
 \href{https://python-rq.org}{python-rq} library.
 
-These calculations happen asyncronusly in worker deployments on the cluster.
+These calculations happen asynchronously in worker deployments on the cluster.
 RPC worker pods have additional \href{https://kubernetes.io/docs/reference/access-authn-authz/rbac/}{RBAC}
 permissions that the api does not have.
 These permissions enable these worker instances to interface with the kubernetes api in ways
 that the api cannot.
 The RPC workers can create and destroy Cloud IDE~\ref{ch:cloud-ides}
-and Submission Pipeline~\fref{sec:submission-pipelines} resources in the cluster.
+and Submission Pipeline~\ref{sec:submission-pipelines} resources in the cluster.
 
 Jobs are organized into separate queues depending on the subject of the job.
 To learn more behind the reasoning for this separation, check out the
