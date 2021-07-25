@@ -1,3 +1,4 @@
+.PHONY: README.md
 README.md:
 	sed -i 's/\\usepackage{arxiv}/% \\usepackage{arxiv}/' anubis-design.tex
 	pandoc -s --verbose --toc anubis-design.tex -o ../README.md
@@ -10,6 +11,7 @@ README.md:
 	sed -i 's/figures\//design-tex\/figures\//g' ../README.md
 	sed -i 's/{#.*}//g' ../README.md
 
+.PHONY: anubis-design.pdf
 anubis-design.pdf:
 	latex -shell-escape  -output-format=pdf anubis-design.tex
 
