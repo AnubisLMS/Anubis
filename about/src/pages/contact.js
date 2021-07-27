@@ -1,8 +1,8 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { Layout } from "../components"
 import {FiArrowRight} from 'react-icons/fi';
 import {motion} from 'framer-motion'
-
+import {useQuery} from '../hooks/useQuery';
 const reasons = [
   'You want to get involved in building Anubis',
   'You are an institution, and are looking to automate your CS Classes',
@@ -10,9 +10,15 @@ const reasons = [
   'You just want to say Hi'
 ]
 
-const Contact = () => {
+const Contact = (props) => {
+  const {location: {search}} = props;
+  const query = useQuery(search);
 
   const [subject, setSubject] = useState('');
+
+  useEffect(() => {
+    if (query?.demo) setSubject('Anubis Demo Request')
+  }, [])
 
   return (
     <Layout>
@@ -30,7 +36,7 @@ const Contact = () => {
             ))}
           </div>
           <div className= 'relative w-5/6'>
-            <input className= 'bg-light-500 pt-3 pb-3 pl-4 pr-4  border-2 border-primary rounded-lg w-full text-light-100'  placeholder = 'Email Subject'/>
+            <input className= 'bg-light-500 pt-3 pb-3 pl-4 pr-4  border-2 border-primary rounded-lg w-full text-light-100'  value = {subject} onChange = {(event) => setSubject(event.target.value)} placeholder = 'Email Subject'/>
             <motion.a  whileHover={{ scale: 1.1}} className= 'absolute right-0 bg-primary rounded-lg h-full pr-6 pl-6 leading-loose text-center pt-2 cursor-pointer'>
               Send!
             </motion.a>
