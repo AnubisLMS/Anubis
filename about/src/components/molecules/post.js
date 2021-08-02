@@ -3,8 +3,7 @@ import { graphql, Link } from 'gatsby';
 import { MDXProvider } from '@mdx-js/react';
 import { MDXRenderer } from 'gatsby-plugin-mdx';
 import { Layout } from '../';
-import { motion } from 'framer-motion';
-import { FiArrowRight } from 'react-icons/fi';
+import {formatDate} from '../../utils/date';
 
 export const pageQuery = graphql`
   query($slug: String!) {
@@ -35,7 +34,7 @@ const Post = ({ data }) => {
             <span className="text-light-300 "> {frontmatter.author}</span>
           </p>
           <p className="text-light-200 space-x-4">
-            Date: <span className="text-light-300">{frontmatter.date}</span>
+            Date: <span className="text-light-300">{formatDate(frontmatter.date)}</span>
           </p>
         </div>
         <div className="space-y-8 pl-4 pr-4 pb-20">

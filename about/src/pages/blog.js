@@ -3,6 +3,7 @@ import { Layout } from '../components';
 import { Link, graphql, navigate } from 'gatsby';
 import { FiArrowRight } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import {formatDate} from '../utils/date';
 
 const PostItem = ({ title, description, date, author, slug }) => {
   const arrowButtonVariant = {
@@ -35,7 +36,7 @@ const PostItem = ({ title, description, date, author, slug }) => {
         </div>
         <p className="text-light-400">{description.substr(0, 120)}...</p>
         <p className="text-sm text-light-500">
-          Posted by {author} on {date}
+          Posted by {author} on {formatDate(date)}
         </p>
       </div>
       <motion.div variants={arrowButtonVariant} transition={{ duration: 0.25 }}>
