@@ -7,12 +7,12 @@ module.exports = {
         gosha: ['Gosha Sans', 'Arial', 'Helvetica', 'sans-serif'],
         serif: ['Gosha Sans', 'Arial', 'Helvetica', 'sans-serif'],
       },
-      backgroundImage: (theme)  => ({
-        'swirl': "url('../images/swirl-bg.png')",
-        'ide': "url('../images/ide.gif')"
+      backgroundImage: (theme) => ({
+        swirl: "url('../images/swirl-bg.png')",
+        ide: "url('../images/ide.gif')",
       }),
       height: (theme) => ({
-        "screen43" : "43vh",
+        screen43: '43vh',
       }),
       colors: {
         white: '#FFFFFF',
@@ -26,14 +26,14 @@ module.exports = {
           100: '#F7F8F9',
           400: '#9FAFB7',
           500: '#424C52',
-          600: '#212428'
-        }
+          600: '#212428',
+        },
       },
     },
   },
   variants: {
     extend: {},
-    width: ["responsive", "hover", "focus"]
+    width: ['responsive', 'hover', 'focus'],
   },
   plugins: [],
-}
+};

@@ -1,11 +1,12 @@
 ---
-title: Anubis Cloud IDEs 
+title: Anubis Cloud IDEs
 slug: anubis-cloud-ide
 date: 2021-04-13
 author: John Cunniff
 description: Assignment in Anubis work unlike any other homework solution. In most college classes, when students finish their work, they turn in a final copy into the professor. With Anubis, we eliminate this process by making it so that students turn in their homework simply by working on it.
 published: true
 ---
+
 One of the more exciting new features of Anubis is that of the cloud ide. Leveraging some magic
 that [Kubernetes Pods](https://kubernetes.io/docs/concepts/workloads/pods/) give us, we can provide a fully isolated IDE environment for all ~130 students in Intro to OS concurrently.
 
@@ -90,14 +91,14 @@ the resources that we have in the Space Cluster, we would be able to have maybe 
 using cloud virtual machines. With our containerized theia, we can handle all ~130 students at the same
 time with room to breath.
 
-
 #### Reclaiming Theia Resources
-  The theia sessions are often forgotten about. Students will create an IDE server, work on it for a bit,
-  then forget manually close it. Due to this, we have a time to live of 6 hours for each session. A
-  cronjob runs every 5 minutes to look for and schedule delete for stale resources. We do provide a button
-  in the anubis panel as a way for students to manually schedule their session for deletion. Even when we
-  ask students to click this button when they are done, some still do not. In the following graph we can
-  see an interesting experiment in student behavior. It shows a cumulative graph showing the duration of a
-  theia session for the final exam. Just about 40% of sessions hit the 6-hour timeout.
 
-  ![theia3](/api/public/static/52f59217b8caaa02)
+The theia sessions are often forgotten about. Students will create an IDE server, work on it for a bit,
+then forget manually close it. Due to this, we have a time to live of 6 hours for each session. A
+cronjob runs every 5 minutes to look for and schedule delete for stale resources. We do provide a button
+in the anubis panel as a way for students to manually schedule their session for deletion. Even when we
+ask students to click this button when they are done, some still do not. In the following graph we can
+see an interesting experiment in student behavior. It shows a cumulative graph showing the duration of a
+theia session for the final exam. Just about 40% of sessions hit the 6-hour timeout.
+
+![theia3](/api/public/static/52f59217b8caaa02)

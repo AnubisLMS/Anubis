@@ -1,11 +1,12 @@
 ---
-title: How Assignments Work In Anubis  
-slug: /blog/packaging 
-date: 2021-07-08 
+title: How Assignments Work In Anubis
+slug: /blog/packaging
+date: 2021-07-08
 author: John Cunniff
-description: Assignment in Anubis work unlike any other homework solution. In most college classes, when students finish their work, they turn in a final copy into the professor. With Anubis, we eliminate this process by making it so that students turn in their homework simply by working on it. 
+description: Assignment in Anubis work unlike any other homework solution. In most college classes, when students finish their work, they turn in a final copy into the professor. With Anubis, we eliminate this process by making it so that students turn in their homework simply by working on it.
 published: true
 ---
+
 Assignment in Anubis work unlike any other homework solution. In most college classes,
 when students finish their work, they turn in a final copy into the professor. With Anubis,
 we eliminate this process by making it so that students turn in their homework simply by
@@ -16,14 +17,13 @@ working on it.
 Each student will get their very own private repository on github that is created from an
 assignment template. With this repository, students can work on their homework and submit by
 pushing to their repo. The Anubis servers track the repos and launch &quot;submission pipelines&quot;
-for each push. *More on that later...*
+for each push. _More on that later..._
 
 This process is designed to be seamless. The only thing students need to do is enter their github
 username into Anubis at the beginning of the semester. The student&apos;s github username, not their
 netid
 is tied to the repo. For this, we need to be able to match the student&apos;s github username to their
 NYU netid.
-
 
 #### Submission Pipelines
 
@@ -38,9 +38,9 @@ is registered. This is
 the first time Anubis can account for this work, so it is this time that is counted as the time of
 submission.
 
- > I point out the submission times because we could have just trusted the git repo commit times and used
-those for the time of submission. But as you could probably guess commit timestamps are trivially easy
-to fake.
+> I point out the submission times because we could have just trusted the git repo commit times and used
+> those for the time of submission. But as you could probably guess commit timestamps are trivially easy
+> to fake.
 
 With the submission accounted for, a submission pipeline job is enqueued in the RPC queue. The
 reason for the queue is that there may be times when we actually have more submissions that need

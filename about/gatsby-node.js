@@ -1,8 +1,8 @@
 const { createFilePath } = require(`gatsby-source-filesystem`);
-const path = require("path")
+const path = require('path');
 
 exports.onCreateNode = ({ node, actions, getNode }) => {
-  const { createNodeField } = actions
+  const { createNodeField } = actions;
 
   if (node.internal.type === `Mdx`) {
     const slug = createFilePath({ node, getNode, basePath: `content` });
@@ -11,30 +11,29 @@ exports.onCreateNode = ({ node, actions, getNode }) => {
       name: `slug`,
       node,
       value: `/blog${slug}`,
-    })
+    });
   }
-}
+};
 
 exports.createPages = async ({ graphql, actions, reporter }) => {
-  const { createPage } = actions
+  const { createPage } = actions;
 
-  const result = await graphql
-  (`
-{
-  allMdx {
-    edges {
-      node {
-        id
-        fields {
-          slug
+  const result = await graphql(`
+    {
+      allMdx {
+        edges {
+          node {
+            id
+            fields {
+              slug
+            }
+          }
         }
       }
     }
-  }
-    }
-    `)
+  `);
 
-  const posts = result.data.allMdx.edges
+  const posts = result.data.allMdx.edges;
   console.log(posts);
 
   posts.forEach(({ node }, index) => {
@@ -44,6 +43,6 @@ exports.createPages = async ({ graphql, actions, reporter }) => {
       context: {
         slug: node.fields.slug,
       },
-    })
-  })
-}
+    });
+  });
+};

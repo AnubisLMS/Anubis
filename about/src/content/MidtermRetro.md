@@ -1,11 +1,12 @@
 ---
-title: Reorganizing RPC While Under Load 
+title: Reorganizing RPC While Under Load
 slug: midterm-retro
 date: 2021-04-06
 author: John Cunniff
 description: Assignment in Anubis work unlike any other homework solution. In most college classes, when students finish their work, they turn in a final copy into the professor. With Anubis, we eliminate this process by making it so that students turn in their homework simply by working on it.
 published: true
 ---
+
 During the midterm this semester there were a few issues that came up. In this post,
 I'm going to be explaining how I went about live patching the RPC queues while
 the cluster was running and under load from users.
@@ -23,7 +24,7 @@ form of a [Kubernetes deployment](https://kubernetes.io/docs/concepts/workloads/
 
 #### Bulk Regrades
 
- A bulk regrade is where we regrade a large number of assignment submissions.
+A bulk regrade is where we regrade a large number of assignment submissions.
 Any time the test cases change while an assignment is out, I will run a full
 bulk regrade. These operations are probably when Anubis is under the highest
 sustained load. Some assignments can get up to 5,000+ individual submissions
@@ -31,10 +32,10 @@ that would need to be regraded. On their own and over time, this is quite
 minimal load. Even on the night of a deadline, there are rarely more than 3
 concurrent submission jobs.
 
- > It takes so long to enqueue all the rpc calls, that the function to bulk regrade
-an assignment is itself an RPC call. It enqueues batch jobs that enqueue 100
-individual submission jobs to the RPC queue. This was the fastest way to get
-around things timing out!
+> It takes so long to enqueue all the rpc calls, that the function to bulk regrade
+> an assignment is itself an RPC call. It enqueues batch jobs that enqueue 100
+> individual submission jobs to the RPC queue. This was the fastest way to get
+> around things timing out!
 
 This is one of the places I have introduced artificial limits into Anubis. If
 we were to say create a kubernetes job for each submission all at once, we will
@@ -61,11 +62,11 @@ users online while I needed to run bulk regrade jobs.
 
 The result of this situation was that the RPC queues were saturated with thousands
 of individual submissions. This made it so that if you went to start a Cloud IDE,
-the spinner would just keep spinning. *Let me demonstrate...*
+the spinner would just keep spinning. _Let me demonstrate..._
 
 ![rpx-queue-1](/api/public/static/88a52255687d6d56)
 
-Imagine this is our RPC queue while a bulk regrade is running. The ...  is meant to
+Imagine this is our RPC queue while a bulk regrade is running. The ... is meant to
 represent the hundreds if not several thousands of submission jobs in the queue at that time.
 Now if someone clicks the button to start a new Cloud IDE at that time, then it would be thrown
 into the same job queue.
@@ -125,5 +126,3 @@ the nodes pulling the updated images from the registry. Thankfully, everything j
 The old RPC worker pool was replaced with the two new ones. The RPC function calls were properly
 putting jobs in the right place. This new arrangement alleviated the issues immediately.
 Students could start their IDEs with no delay, and I could do my bulk regrades.
-
-

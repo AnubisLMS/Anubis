@@ -1,6 +1,6 @@
 ---
-title: Assignment Packaging 
-slug: assignment-packaging 
+title: Assignment Packaging
+slug: assignment-packaging
 date: 2021-03-24
 author: John Cunniff
 description: Assignment in Anubis work unlike any other homework solution. In most college classes, when students finish their work, they turn in a final copy into the professor. With Anubis, we eliminate this process by making it so that students turn in their homework simply by working on it.
@@ -25,8 +25,8 @@ by the last assignment.
 For version 2 we needed better packaging of the assignment tests.
 There are two main improvements that made this change work.
 
- - Assignment Templating
- - Standardizing API and parsing
+- Assignment Templating
+- Standardizing API and parsing
 
 Each assignment is packaged essentially as a docker image. The
 image has the metadata for the assignment, the tests specific for
@@ -49,11 +49,9 @@ Anubis was first developed before coronavirus made everything remote,
 so it did not make sense to have timestamps be interpreted as a more
 international friendly format like UTC.
 
-
 ![demo assignment](/api/public/static/dcf6dc895dcb75f2)
 
 #### Writing Tests
-
 
 The build and test code is all in assingment.py from the generated
 template. There is not actually much code that needs to change from
@@ -72,11 +70,9 @@ All we need to do is generate a file and compile it into xv6, then
 run the student&apos;s xv6 and the sed included in coreutils and
 compare the two outputs.
 
-
 #### Building
 
 ![demo build](/api/public/static/243d6d28714e96f5)
-
 
 > To let anubis know that this is the build function, we simply decorate it with `@register_build`.
 
@@ -84,13 +80,12 @@ The build is pretty simple for this assignment. We use a
 lorem ipsum generator library to fill in a file text.txt with
 a few sentences separated by newlines. This will make it so that
 each time this is run, we should get a relatively random text.txt.
-This fulfills our randomized input requirement. 
+This fulfills our randomized input requirement.
 
 Once our input file is generated, we can build the student xv6
 and report the stdout and build status. We communicate back to
 Anubis by setting the values of the stdout and passed fields in
 a build_result object passed to the build function.
-
 
 #### Tests
 
