@@ -2,7 +2,7 @@
 
 set -e
 
-kubectl rollout restart deploy -n anubis \
+kubectl rollout restart -n anubis deploy \
         anubis-api \
         anubis-web \
         anubis-pipeline-api \

@@ -16,19 +16,6 @@ COPY latest.package.json package.json
 COPY motd.txt /etc/motd
 
 RUN set -ex; \
-  chown -R 1001:1001 /home/theia; \
-  cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/theia/; \
-  adduser --disabled-password --gecos '' --uid 1001 theia; \
-  yarn --pure-lockfile; \
-  NODE_OPTIONS="--max_old_space_size=4096" yarn theia build; \
-  yarn theia download:plugins; \
-  yarn --production; \
-  yarn autoclean --init; \
-  echo *.ts >> .yarnclean; \
-  echo *.ts.map >> .yarnclean; \
-  echo *.spec.* >> .yarnclean; \
-  yarn autoclean --force; \
-  yarn cache clean; \
   apt update; \
   apt-get install -y --no-install-recommends \
     wget gpg apt-transport-https ca-certificates apt-utils; \
@@ -43,6 +30,19 @@ RUN set -ex; \
     clangd-12 \
     qemu-system-i386 \
     libsecret-1-0; \
+  chown -R 1001:1001 /home/theia; \
+  cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/theia/; \
+  adduser --disabled-password --gecos '' --uid 1001 theia; \
+  yarn --pure-lockfile; \
+  NODE_OPTIONS="--max_old_space_size=4096" yarn theia build; \
+  yarn theia download:plugins; \
+  yarn --production; \
+  yarn autoclean --init; \
+  echo *.ts >> .yarnclean; \
+  echo *.ts.map >> .yarnclean; \
+  echo *.spec.* >> .yarnclean; \
+  yarn autoclean --force; \
+  yarn cache clean; \
   pip3 install --no-cache-dir supervisor; \
   ln -s /usr/bin/clangd-12 /usr/bin/clangd; \
   echo 'set auto-load safe-path /' > /home/theia/.gdbinit \

@@ -15,8 +15,8 @@ import click
 import requests
 import yaml
 
-INCLUSTER = False
-API_URL = 'https://anubis.osiris.services/api'
+INCLUSTER = True
+API_URL = 'http://anubis-api:5000'
 COURSE_ID = os.environ.get('COURSE_ID', None)
 COURSE_CODE = os.environ.get('COURSE_CODE', 'CS-UY 3224')
 conf_dir = os.path.join(os.environ.get("HOME"), ".anubis")
@@ -63,7 +63,7 @@ def init_conf():
 
     if not os.path.isfile(conf_file):
         set_conf({
-            "url": "https://anubis.osiris.services/",
+            "url": "http://anubis-api:5000",
             "token": None,
         })
 
@@ -75,6 +75,7 @@ def _make_request(path, request_func, **kwargs):
     r = request_func(
         API_URL + path,
         headers={'Content-Type': 'application/json'},
+        cookies={'token': get_conf('incluster')},
         **kwargs
     )
 

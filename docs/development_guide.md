@@ -4,7 +4,7 @@
   <a href="https://anubis.osiris.services/">
     <img
       alt="Anubis"
-      src="https://raw.githubusercontent.com/GusSand/Anubis/HEAD/docs/img/anubis-icon-1.png"
+      src="https://raw.githubusercontent.com/GusSand/Anubis/master/docs/design-tex/figures/anubis-icon-1.png"
       width="400"
     />
   </a>
