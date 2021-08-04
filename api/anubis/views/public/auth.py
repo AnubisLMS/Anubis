@@ -82,7 +82,7 @@ def public_oauth():
     r = make_response(redirect(next_url))
 
     # Set the token cookie
-    r.set_cookie("token", create_token(user.netid))
+    r.set_cookie("token", create_token(user.netid), httponly=True)
 
     return r
 
