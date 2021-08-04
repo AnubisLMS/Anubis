@@ -56,16 +56,19 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
         resources=client.V1ResourceRequirements(**resource_requirements),
 
         # Add a security context to disable privilege escalation
-        security_context=client.V1SecurityContext(
-            allow_privilege_escalation=False,
-            run_as_non_root=True,
-        )
+        # security_context=client.V1SecurityContext(
+        #     allow_privilege_escalation=False,
+        # )
     )
 
     # Create and configure a spec section
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(
-            labels={"app.kubernetes.io/name": "submission-pipeline", "role": "submission-pipeline-worker"}
+            labels={
+                "app.kubernetes.io/name": "submission-pipeline",
+                "role": "submission-pipeline-worker",
+                "network-policy": "submission-pipeline",
+            }
         ),
         spec=client.V1PodSpec(restart_policy="Never", containers=[container]),
     )

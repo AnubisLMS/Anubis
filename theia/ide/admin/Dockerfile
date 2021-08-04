@@ -1,27 +1,34 @@
 ARG NODE_VERSION=12.18.3
 
-FROM node:${NODE_VERSION}
+FROM node:${NODE_VERSION} as build
 ARG version=latest
 WORKDIR /home/theia
 ADD $version.package.json ./package.json
-RUN yarn --pure-lockfile \
-  && NODE_OPTIONS="--max_old_space_size=4096" yarn theia build \
-  && yarn theia download:plugins \
-  && yarn --production \
-  && yarn autoclean --init \
-  && echo *.ts >> .yarnclean \
-  && echo *.ts.map >> .yarnclean \
-  && echo *.spec.* >> .yarnclean \
-  && yarn autoclean --force \
-  && yarn cache clean \
-  && rm -rf /usr/share/doc \
-  && rm -rf /home/theia/node_modules/.cache \
-  && rm -rf /usr/local/share/.cache \
-  && find /usr -depth \( -type d -a \( -name '.cache' \) \) -exec rm -rf '{}' + \
-  && find /home -depth \( -type d -a \( -name '.cache' \) \) -exec rm -rf '{}' +
+RUN set -ex; \
+  apt-get update; \
+  apt-get install -y --no-install-recommends libsecret-1-0; \
+  yarn --pure-lockfile; \
+  NODE_OPTIONS="--max_old_space_size=4096" yarn theia build; \
+  yarn theia download:plugins; \
+  yarn --production; \
+  yarn autoclean --init; \
+  echo *.ts >> .yarnclean; \
+  echo *.ts.map >> .yarnclean; \
+  echo *.spec.* >> .yarnclean; \
+  yarn autoclean --force; \
+  yarn cache clean; \
+  rm -rf /usr/share/doc; \
+  rm -rf /home/theia/node_modules/.cache; \
+  rm -rf /usr/local/share/.cache; \
+  find /usr -depth \( -type d -a \( -name '.cache' \) \) -exec rm -rf '{}' +; \
+  find /home -depth \( -type d -a \( -name '.cache' \) \) -exec rm -rf '{}' +; \
+  apt autoremove -y; \
+  apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+  rm -rf /var/cache/apt/*; \
+  rm -rf /var/lib/apt/lists/*
 
 
-FROM node:${NODE_VERSION}
+FROM node:${NODE_VERSION} as theia
 ARG PY_VERSION=3.9.3
 
 COPY --from=0 /home/theia /home/theia
