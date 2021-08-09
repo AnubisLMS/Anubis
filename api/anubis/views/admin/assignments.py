@@ -13,7 +13,7 @@ from anubis.models import (
     AssignmentTest,
     SubmissionTestResult,
 )
-from anubis.utils.auth import require_admin
+from anubis.utils.auth.http import require_admin
 from anubis.utils.data import rand
 from anubis.utils.data import row2dict, req_assert
 from anubis.utils.http.decorators import load_from_id, json_response, json_endpoint

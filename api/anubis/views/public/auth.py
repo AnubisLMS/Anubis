@@ -5,7 +5,9 @@ import os
 from flask import Blueprint, make_response, redirect, request
 
 from anubis.models import User, db
-from anubis.utils.auth import create_token, current_user, require_user, require_admin
+from anubis.utils.auth.http import require_user, require_admin
+from anubis.utils.auth.token import create_token
+from anubis.utils.auth.user import current_user
 from anubis.utils.data import is_debug, req_assert
 from anubis.utils.http.decorators import json_endpoint
 from anubis.utils.http.https import success_response, error_response

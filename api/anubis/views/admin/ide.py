@@ -5,7 +5,8 @@ from flask import Blueprint
 
 from anubis.models import db, TheiaSession
 from anubis.rpc.theia import reap_theia_sessions_in_course
-from anubis.utils.auth import require_admin, current_user
+from anubis.utils.auth.http import require_admin
+from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response

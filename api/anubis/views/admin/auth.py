@@ -3,7 +3,8 @@ import json
 from flask import Blueprint, Response
 
 from anubis.models import User
-from anubis.utils.auth import create_token, require_superuser
+from anubis.utils.auth.http import require_superuser
+from anubis.utils.auth.token import create_token
 from anubis.utils.data import is_debug, req_assert
 from anubis.utils.http.https import success_response
 

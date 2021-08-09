@@ -1,7 +1,8 @@
 from flask import Blueprint, request
 
 from anubis.models import User, Submission
-from anubis.utils.auth import current_user, require_user
+from anubis.utils.auth.http import require_user
+from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response, get_number_arg

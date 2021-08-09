@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 from anubis.models import Submission
-from anubis.utils.auth import require_superuser
+from anubis.utils.auth.http import require_superuser
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response
 from anubis.utils.lms.submissions import fix_dangling, init_submission

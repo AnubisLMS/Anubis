@@ -4,7 +4,7 @@ from dateutil.parser import parse as date_parse, ParserError
 from flask import Blueprint
 
 from anubis.models import db, LateException, Assignment, User
-from anubis.utils.auth import require_admin
+from anubis.utils.auth.http import require_admin
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response
