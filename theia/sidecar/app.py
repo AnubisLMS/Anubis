@@ -1,21 +1,36 @@
 #!/usr/bin/python3
 
-from flask import Flask, request, make_response
+import os.path
 import subprocess
+
+from flask import Flask, request, make_response
 
 app = Flask(__name__)
 
+
 @app.route('/', methods=['POST'])
 def index():
-    message = request.form.get('message', default='Anubis Cloud IDE Autosave')
-    if message.strip() == '':
+    # Get options from the form
+    repo: str = request.form.get('repo', default=None)
+    message: str = request.form.get('message', default='Anubis Cloud IDE Autosave').strip()
+
+    # Default commit message if empty
+    if message == '':
         message = 'Anubis Cloud IDE Autosave'
+
+    # Make sure that the repo given exists and is a git repo
+    if repo is None or not os.path.isdir(os.path.join(repo, '.git')):
+        response = make_response(
+            'Please navigate to the repository that you would like to autosave\n',
+        )
+        response.headers = {'Content-Type': 'text/plain'}
+        return response
 
     try:
         # Add
         add = subprocess.run(
             ['git', 'add', '.'],
-            cwd='/home/project',
+            cwd=repo,
             timeout=3,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -30,7 +45,7 @@ def index():
         # Commit
         commit = subprocess.run(
             ['git', 'commit', '--no-verify', '-m', message],
-            cwd='/home/project',
+            cwd=repo,
             timeout=3,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -45,7 +60,7 @@ def index():
         # Push
         push = subprocess.run(
             ['git', 'push', '--no-verify'],
-            cwd='/home/project',
+            cwd=repo,
             timeout=3,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,

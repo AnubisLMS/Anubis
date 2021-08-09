@@ -1,10 +1,10 @@
 FROM python:3-alpine
 
-RUN adduser -D -u 1001 theia \
+RUN adduser -D -u 1001 anubis \
   && apk add --update --no-cache dcron git busybox-suid \
   && pip3 install --no-cache-dir flask supervisor gunicorn
 
-USER theia
+USER anubis
 RUN git config --global user.email noreply@anubis.osiris.services \
   && git config --global user.name os3224-robot \
   && git config --global credential.store helper \
