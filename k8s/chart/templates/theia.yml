@@ -65,6 +65,22 @@ spec:
             secretKeyRef:
               name: api
               key: database-uri
+        {{- if .Values.healthChecks }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 60
+          failureThreshold: 10
+          periodSeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 3
+          periodSeconds: 3
+          failureThreshold: 1
+        {{- end }}
 
 ---
 
