@@ -1,8 +1,11 @@
 FROM node:alpine
 
+# This disables webpack source maps from being created in the build step
+ENV GENERATE_SOURCEMAP=false
+
 WORKDIR /opt/app
 COPY package.json yarn.lock /opt/app/
-RUN yarn
+RUN yarn install --frozen-lockfile
 COPY . .
 RUN yarn run build \
   && rm -rf node_modules src public package.json yarn.lock \
