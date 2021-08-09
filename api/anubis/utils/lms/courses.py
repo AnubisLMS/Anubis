@@ -26,7 +26,7 @@ from anubis.models import (
     LateException,
     LectureNotes,
 )
-from anubis.utils.auth import current_user
+from anubis.utils.auth.user import current_user
 from anubis.utils.data import is_debug
 from anubis.utils.exceptions import AuthenticationError, LackCourseContext
 from anubis.utils.services.cache import cache

@@ -16,7 +16,6 @@ from anubis.models import (
     SubmissionTestResult,
     LateException,
 )
-from anubis.utils.auth import get_user
 from anubis.utils.data import is_debug
 from anubis.utils.lms.courses import assert_course_admin, get_student_course_ids
 from anubis.utils.lms.courses import is_course_admin
@@ -36,7 +35,7 @@ def get_assignments(netid: str, course_id=None) -> Union[List[Dict[str, str]], N
     :return: List[Assignment.data]
     """
     # Load user
-    user = get_user(netid)
+    user = User.query.filter_by(netid=netid).first()
 
     # Verify user exists
     if user is None:

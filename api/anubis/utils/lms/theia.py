@@ -4,7 +4,7 @@ from typing import List, Tuple, Union, Dict
 from werkzeug.utils import redirect
 
 from anubis.models import TheiaSession, User, Config
-from anubis.utils.auth import create_token
+from anubis.utils.auth.token import create_token
 from anubis.utils.data import is_debug
 from anubis.utils.services.cache import cache
 
