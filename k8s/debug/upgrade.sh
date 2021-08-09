@@ -26,4 +26,5 @@ helm upgrade \
      --set "rollingUpdates=false" \
      --set "domain=localhost" \
      --set "puller.enable=false" \
+     --set "backup.enable=false" \
      $@
