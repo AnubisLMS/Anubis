@@ -147,7 +147,7 @@ export default function Users() {
         for (const student of data.students) {
           student.search = student.name.toLowerCase() +
             student.netid.toLowerCase() +
-            student.github_username.toString() +
+            (student.github_username ?? '').toString() +
             student.id.toLowerCase();
         }
 
