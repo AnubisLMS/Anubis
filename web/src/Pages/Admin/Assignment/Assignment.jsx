@@ -26,6 +26,7 @@ const editableFields = [
   {field: 'pipeline_image', label: 'Pipeline Image'},
   {field: 'unique_code', label: 'Unique Code', disabled: true},
   {field: 'hidden', label: 'Hidden', type: 'boolean'},
+  {field: 'github_repo_required', label: 'Github Repo Required', type: 'boolean'},
   {field: 'accept_late', label: 'Accept Late Submissions', type: 'boolean'},
   {field: 'ide_enabled', label: 'Theia Enabled', type: 'boolean'},
   {field: 'autograde_enabled', label: 'Autograde Enabled', type: 'boolean'},
