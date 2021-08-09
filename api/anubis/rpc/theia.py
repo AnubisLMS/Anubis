@@ -102,8 +102,19 @@ def initialize_theia_session(theia_session_id: str):
     # these resources under the anubis namespace. These actions are by default
     # backgrounded. That means that these functions will almost certainly return
     # before the resources have actually been created and initialized.
-    v1.create_namespaced_persistent_volume_claim(namespace="anubis", body=pvc)
     v1.create_namespaced_pod(namespace="anubis", body=pod)
+
+    # Create the PVC if it did not already exist
+    try:
+        # This function will throw a 404 client.exceptions.ApiException
+        # if the pvc does not exist
+        v1.read_namespaced_persistent_volume_claim(namespace="anubis", name=pvc.metadata.name)
+        logger.info(f"PVC for user already exists: {pvc.metadata.name}")
+
+    # Catch the exception thrown if the pvc does not exist
+    except client.exceptions.ApiException:
+        logger.info(f"PVC for user does not exist (Creating): {pvc.metadata.name}")
+        v1.create_namespaced_persistent_volume_claim(namespace="anubis", body=pvc)
 
     # Get the name of the pod we just created
     name = get_theia_pod_name(theia_session)
