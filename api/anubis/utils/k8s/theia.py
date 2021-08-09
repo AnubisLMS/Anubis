@@ -6,7 +6,7 @@ from typing import Tuple
 from kubernetes import client
 
 from anubis.models import TheiaSession, db
-from anubis.utils.auth import create_token
+from anubis.utils.auth.token import create_token
 from anubis.utils.lms.theia import get_theia_pod_name, mark_session_ended
 from anubis.utils.services.logger import logger
 
@@ -22,11 +22,18 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     :return:
     """
 
+    # Get the owner of the theia session's netid
+    netid = theia_session.owner.netid
+
     # Construct the theia pod name
     name = get_theia_pod_name(theia_session)
 
     # List of container objects
     containers = []
+
+    # Get the set repo url for this session. If the assignment has github repos disabled,
+    # then default to an empty string.
+    repo_url = theia_session.repo_url or ''
 
     # Get the theia session options
     limits = theia_session.options.get('limits', {"cpu": "2", "memory": "500Mi"})
@@ -35,7 +42,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     credentials = theia_session.options.get('credentials', False)
 
     # Construct the PVC name from the theia pod name
-    volume_name = name + "-volume"
+    volume_name = netid + "-volume"
 
     # Create the persistent volume claim object. Since this is a
     # ReadWriteMany volume, the default storage class should
@@ -44,10 +51,9 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         metadata=client.V1ObjectMeta(
             name=volume_name,
             labels={
-                "app.kubernetes.io/name": "theia",
+                "app.kubernetes.io/name": "anubis",
                 "role": "session-storage",
-                "netid": theia_session.owner.netid,
-                "session": theia_session.id,
+                "netid": netid,
             },
         ),
         spec=client.V1PersistentVolumeClaimSpec(
@@ -55,7 +61,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
             volume_mode="Filesystem",
             resources=client.V1ResourceRequirements(
                 requests={
-                    "storage": "50M",
+                    "storage": "250Mi",
                 }
             ),
         ),
@@ -68,7 +74,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         image="registry.digitalocean.com/anubis/theia-init:latest",
         image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
         env=[
-            client.V1EnvVar(name="GIT_REPO", value=theia_session.repo_url),
+            client.V1EnvVar(name="GIT_REPO", value=repo_url),
             client.V1EnvVar(
                 name="GIT_CRED",
                 value_from=client.V1EnvVarSource(
@@ -151,10 +157,26 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         # repo exists.
         volume_mounts=[
             client.V1VolumeMount(
-                mount_path="/home/project",
+                mount_path="/home/anubis",
                 name=volume_name,
             )
         ],
+
+        # Startup probe is the way that kubernetes can
+        # check to see if the theia has started correctly.
+        # The pod will not be marked as ready until the
+        # webserver has started and the startup probe has
+        # succeeded.
+        startup_probe=client.V1Probe(
+            http_get=client.V1HTTPGetAction(
+                path='/',
+                port=5000,
+            ),
+            initial_delay_seconds=3,
+            period_seconds=1,
+            failure_threshold=60,
+            success_threshold=1,
+        ),
 
         # If the session should be privileged, set it here. Privileged
         # containers should only exist for the management IDEs so that
@@ -206,7 +228,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         # Add the shared volume mount to /home/project
         volume_mounts=[
             client.V1VolumeMount(
-                mount_path="/home/project",
+                mount_path="/home/anubis",
                 name=volume_name,
             )
         ],
@@ -300,16 +322,7 @@ def reap_theia_session_k8s_resources(theia_session_id: str):
     v1.delete_collection_namespaced_pod(
         namespace="anubis",
         label_selector="app.kubernetes.io/name=theia,role=theia-session,session={}".format(
-            theia_session_id
-        ),
-        propagation_policy="Background",
-    )
-
-    # Mark the shared PVC for deletion by a label selector
-    v1.delete_collection_namespaced_persistent_volume_claim(
-        namespace="anubis",
-        label_selector="app.kubernetes.io/name=theia,role=session-storage,session={}".format(
-            theia_session_id
+            theia_session_id,
         ),
         propagation_policy="Background",
     )

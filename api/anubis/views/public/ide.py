@@ -5,7 +5,8 @@ from typing import Dict
 from flask import Blueprint, request
 
 from anubis.models import TheiaSession, db, Assignment, AssignmentRepo
-from anubis.utils.auth import current_user, require_user
+from anubis.utils.auth.http import require_user
+from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, load_from_id
 from anubis.utils.http.https import error_response, success_response
@@ -178,40 +179,51 @@ def public_ide_initialize(assignment: Assignment):
     req_assert(assignment.ide_enabled, message='IDEs are not enabled for this assignment')
 
     # Check for existing active session
-    active_session = (
-        TheiaSession.query.join(Assignment)
-            .filter(
-            TheiaSession.owner_id == current_user.id,
-            TheiaSession.assignment_id == assignment.id,
-            TheiaSession.active,
-        )
-            .first()
-    )
+    active_session = TheiaSession.query.join(Assignment).filter(
+        TheiaSession.owner_id == current_user.id,
+        TheiaSession.assignment_id == assignment.id,
+        TheiaSession.active,
+    ).first()
+
+    # If there was an existing session for this assignment found, skip
+    # the initialization, and return the active session information.
     if active_session is not None:
         return success_response({
             "active": active_session.active,
             "session": active_session.data
         })
 
+    # If it is a student (not a ta) requesting the ide, then we will need to
+    # make sure that the assignment has actually been released.
     if not is_course_admin(assignment.course_id):
-        if datetime.now() <= assignment.release_date:
-            return error_response("Assignment has not been released.")
 
+        # If the assignment has been released, then we cannot allocate a session to a student
+        req_assert(assignment.release_date < datetime.now(), message="Assignment has not been released")
+
+        # If 3 weeks has passed since the assignment has been due, then we should not allow
+        # new sessions to be created
         if assignment.due_date + timedelta(days=3 * 7) <= datetime.now():
             return error_response("Assignment due date passed over 3 weeks ago.")
 
-    # Make sure we have a repo we can use
-    repo = AssignmentRepo.query.filter(
-        AssignmentRepo.owner_id == current_user.id,
-        AssignmentRepo.assignment_id == assignment.id,
-    ).first()
+    # If github repos are enabled for this assignment, then we will
+    # need to get the repo url.
+    repo_url: str = ''
+    if assignment.github_repo_required:
 
-    # Verify that the repo exists
-    req_assert(
-        repo is not None,
-        message='Anubis can not find your assignment repo. '
-                'Please make sure your github username is set and is correct.'
-    )
+        # Make sure we have a repo we can use
+        repo: AssignmentRepo = AssignmentRepo.query.filter(
+            AssignmentRepo.owner_id == current_user.id,
+            AssignmentRepo.assignment_id == assignment.id,
+        ).first()
+
+        # Verify that the repo exists
+        req_assert(
+            repo is not None,
+            message='Anubis can not find your assignment repo. '
+                    'Please make sure your github username is set and is correct.'
+        )
+        # Update the repo url
+        repo_url = repo.repo_url
 
     # Figure out if autosave was enabled or disabled
     autosave = request.args.get('autosave', 'true') == 'true'
@@ -225,7 +237,7 @@ def public_ide_initialize(assignment: Assignment):
         owner_id=current_user.id,
         assignment_id=assignment.id,
         course_id=assignment.course.id,
-        repo_url=repo.repo_url,
+        repo_url=repo_url,
         network_locked=True,
         privileged=False,
         active=True,

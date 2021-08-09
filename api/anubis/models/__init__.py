@@ -190,6 +190,7 @@ class Assignment(db.Model):
         default=lambda: base64.b16encode(os.urandom(4)).decode(),
     )
     ide_enabled = db.Column(db.Boolean, default=True)
+    github_repo_required = db.Column(db.Boolean, default=True)
     accept_late = db.Column(db.Boolean, default=True)
     autograde_enabled = db.Column(db.Boolean, default=True)
     theia_image = db.Column(
@@ -213,7 +214,7 @@ class Assignment(db.Model):
     @property
     def data(self):
         from anubis.utils.lms.assignments import get_assignment_due_date
-        from anubis.utils.auth import current_user
+        from anubis.utils.auth.user import current_user
 
         due_date = get_assignment_due_date(current_user, self)
 
@@ -227,6 +228,7 @@ class Assignment(db.Model):
             "course": self.course.data,
             "description": self.description,
             "ide_enabled": self.ide_enabled,
+            "github_repo_required": self.github_repo_required,
             "autograde_enabled": self.autograde_enabled,
             "ide_active": self.due_date + timedelta(days=3 * 7) > datetime.now(),
             "github_classroom_link": self.github_classroom_url,
