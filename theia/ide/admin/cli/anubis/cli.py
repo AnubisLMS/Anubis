@@ -152,15 +152,15 @@ def config():
     pass
 
 
-@config.command()
-@click.argument('key')
-@click.argument('value')
-def set(key, value):
-    conf = load_conf()
-    conf[key] = value
-    set_conf(conf)
-
-    click.echo(json.dumps(conf, indent=2))
+# @config.command()
+# @click.argument('key')
+# @click.argument('value')
+# def set(key, value):
+#     conf = load_conf()
+#     conf[key] = value
+#     set_conf(conf)
+#
+#     click.echo(json.dumps(conf, indent=2))
 
 
 @config.command()
