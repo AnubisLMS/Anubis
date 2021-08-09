@@ -648,7 +648,7 @@ class TheiaSession(db.Model):
     assignment_id = db.Column(
         db.String(128), db.ForeignKey(Assignment.id), nullable=True
     )
-    repo_url = db.Column(db.String(128), nullable=False)
+    repo_url = db.Column(db.String(128), nullable=True)
 
     # Fields
     active = db.Column(db.Boolean, default=True)
