@@ -4,7 +4,7 @@ FROM alpine:latest
 VOLUME /out
 
 # Only dependency is git
-RUN apk --update --no-cache add git
+RUN apk --update --no-cache add git bash
 
 # Copy entrypoint
 COPY entrypoint.sh /entrypoint.sh
