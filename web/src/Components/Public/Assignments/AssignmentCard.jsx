@@ -101,6 +101,7 @@ export default function AssignmentCard({
     has_repo,
     repo_url,
     past_due,
+    github_repo_required,
     // accept_late,
   } = assignment;
 
@@ -124,7 +125,8 @@ export default function AssignmentCard({
     setPollingAssignmentId(id);
   }, [setRunAssignmentPolling, setPollingAssignmentId, id]);
 
-  const githubLinkEnabled = typeof github_classroom_link === 'string';
+  const githubLinkEnabled = typeof github_classroom_link === 'string' && github_repo_required;
+  const ideLinkEnabled = ide_enabled && (has_repo || runAssignmentPolling || !github_repo_required);
 
   return (
     <Card className={classes.root}>
@@ -170,7 +172,7 @@ export default function AssignmentCard({
             color={'primary'}
             className={classes.button}
             startIcon={<CodeOutlinedIcon/>}
-            disabled={!ide_enabled || !has_repo || past_due || runAssignmentPolling}
+            disabled={!ideLinkEnabled}
             onClick={() => setSelectedTheia(assignment)}
           >
           Anubis Cloud IDE
@@ -190,7 +192,7 @@ export default function AssignmentCard({
           >
             {has_repo ? 'Go to repo' : 'Create repo'}
           </Button>
-          {!assignment.description &&
+          {assignment.description &&
             <Button
               size='small'
               variant='contained'
