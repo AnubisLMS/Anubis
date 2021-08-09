@@ -25,4 +25,5 @@ helm upgrade \
      --set "theia.proxy.domain=ide.localhost" \
      --set "rollingUpdates=false" \
      --set "domain=localhost" \
+     --set "puller.enable=false" \
      $@
