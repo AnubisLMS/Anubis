@@ -5,7 +5,14 @@ def test_ide_public():
     s = Session('student', new=True)
     s.get('/public/ide/available')
     assignments = s.get('/public/assignments/list')['assignments']
-    assignment_id = assignments[0]['id']
+    assignment_id = None
+
+    for a in assignments:
+        if a['github_repo_required']:
+            assignment_id = a['id']
+            break
+
+    assert assignment_id is not None
 
     s.get(f'/public/ide/active/{assignment_id}')
     active = s.get(f'/public/ide/active/{assignment_id}')['active']
