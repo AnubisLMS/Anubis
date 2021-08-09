@@ -64,7 +64,6 @@ webrun:
 .PHONY: mkdebug     # Start minikube debug
 mkdebug:
 	./k8s/debug/provision.sh
-	make startup-links
 
 .PHONY: restart-mk   # Restart minikube debug
 restart-mk:
