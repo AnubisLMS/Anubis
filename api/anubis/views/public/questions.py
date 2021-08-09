@@ -87,7 +87,7 @@ def public_questions_save(assignment_question_id: str, response: str):
         # regrade from the Professor.
         req_assert(
             now < due_date,
-            message='This assignment does not accept late submissions. You can request an extension from your Professor.'
+            message='This assignment does not accept late submissions.'
         )
 
     # Create a new response
