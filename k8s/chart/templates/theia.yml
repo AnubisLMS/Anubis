@@ -68,14 +68,14 @@ spec:
         {{- if .Values.healthChecks }}
         livenessProbe:
           httpGet:
-            path: /
+            path: /ping
             port: 5000
           initialDelaySeconds: 60
           failureThreshold: 10
           periodSeconds: 60
         readinessProbe:
           httpGet:
-            path: /
+            path: /ping
             port: 5000
           initialDelaySeconds: 3
           periodSeconds: 3
