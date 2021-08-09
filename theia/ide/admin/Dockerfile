@@ -2,7 +2,7 @@ ARG NODE_VERSION=12.18.3
 
 FROM node:${NODE_VERSION} as build
 ARG version=latest
-WORKDIR /home/theia
+WORKDIR /opt/theia
 ADD $version.package.json ./package.json
 RUN set -ex; \
   apt-get update; \
@@ -18,7 +18,7 @@ RUN set -ex; \
   yarn autoclean --force; \
   yarn cache clean; \
   rm -rf /usr/share/doc; \
-  rm -rf /home/theia/node_modules/.cache; \
+  rm -rf /opt/theia/node_modules/.cache; \
   rm -rf /usr/local/share/.cache; \
   find /usr -depth \( -type d -a \( -name '.cache' \) \) -exec rm -rf '{}' +; \
   find /home -depth \( -type d -a \( -name '.cache' \) \) -exec rm -rf '{}' +; \
@@ -31,7 +31,7 @@ RUN set -ex; \
 FROM node:${NODE_VERSION} as theia
 ARG PY_VERSION=3.9.3
 
-COPY --from=0 /home/theia /home/theia
+COPY --from=0 /opt/theia /opt/theia
 COPY motd.txt /etc/motd
 COPY cli /cli
 COPY supervisord.conf initialize-incluster.py autosave-dump.sh /
@@ -82,8 +82,8 @@ RUN set -eux; apt-get update \
   && rm get-pip.py; \
   pip3 install --upgrade --no-cache-dir pip \
   && pip3 install --upgrade --no-cache-dir python-language-server flake8 autopep8 pylint supervisor \
-  && adduser --disabled-password --gecos '' --uid 1001 theia; \
-  cd /home/theia; \
+  && adduser --disabled-password --gecos '' --uid 1001 anubis; \
+  cd /home/anubis; \
   git clone https://github.com/ohmyzsh/ohmyzsh.git .oh-my-zsh; \
   git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
     .oh-my-zsh/custom/plugins/zsh-syntax-highlighting; \
@@ -91,20 +91,19 @@ RUN set -eux; apt-get update \
   sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="gnzh"/' .zshrc; \
   sed -i 's/plugins=(git)/plugins=(git zsh-syntax-highlighting)/' .zshrc; \
   echo 'cat /etc/motd' >> .zshrc; \
-  mkdir -p /home/theia/.theia; \
-  mkdir -p /home/theia/.theia; \
+  mkdir -p /home/anubis/.theia; \
+  mkdir -p /home/anubis/.theia; \
   echo '{"terminal.integrated.shell.linux": "/usr/bin/zsh"}' \
-    > /home/theia/.theia/settings.json; \
+    > /home/anubis/.theia/settings.json; \
   rm -rf /tmp/* \
   && rm -rf /usr/share/doc \
   && rm -rf /root/.cache \
-  && rm -rf /home/theia/node_modules/.cache \
+  && rm -rf /home/anubis/node_modules/.cache \
   && mkdir -p /home/project \
   && chmod g+rw /home \
   && mkdir -p /home/project \
-  && chown -R theia:theia /home/theia \
-  && chown -R theia:theia /home/project \
-  && usermod -aG docker theia \
+  && chown -R anubis:anubis /home/anubis \
+  && usermod -aG docker anubis \
   && find /usr/local -depth \
   \( \
   \( -type d -a \( -name test -o -name tests -o -name idle_test \) \) \

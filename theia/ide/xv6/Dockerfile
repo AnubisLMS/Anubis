@@ -10,7 +10,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Theia application
 
-WORKDIR /home/theia
+WORKDIR /opt/theia
 
 COPY latest.package.json package.json
 COPY motd.txt /etc/motd
@@ -30,9 +30,6 @@ RUN set -ex; \
     clangd-12 \
     qemu-system-i386 \
     libsecret-1-0; \
-  chown -R 1001:1001 /home/theia; \
-  cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/theia/; \
-  adduser --disabled-password --gecos '' --uid 1001 theia; \
   yarn --pure-lockfile; \
   NODE_OPTIONS="--max_old_space_size=4096" yarn theia build; \
   yarn theia download:plugins; \
@@ -43,14 +40,18 @@ RUN set -ex; \
   echo *.spec.* >> .yarnclean; \
   yarn autoclean --force; \
   yarn cache clean; \
+  adduser --disabled-password --gecos '' --uid 1001 anubis; \
+  chown -R 1001:1001 /home/anubis; \
+  cd /home/anubis; \
+  cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/anubis/; \
   pip3 install --no-cache-dir supervisor; \
   ln -s /usr/bin/clangd-12 /usr/bin/clangd; \
-  echo 'set auto-load safe-path /' > /home/theia/.gdbinit \
-  && echo 'source /opt/pwndbg/gdbinit.py' >> /home/theia/.gdbinit \
-  && git clone https://github.com/pwndbg/pwndbg.git /opt/pwndbg \
-  && cd /opt/pwndbg \
-  && ./setup.sh; \
-  cd /home/theia; \
+  echo 'set auto-load safe-path /' > /home/anubis/.gdbinit; \
+  echo 'source /opt/pwndbg/gdbinit.py' >> /home/anubis/.gdbinit; \
+  git clone https://github.com/pwndbg/pwndbg.git /opt/pwndbg; \
+  cd /opt/pwndbg; \
+  ./setup.sh; \
+  cd /home/anubis; \
   git clone https://github.com/ohmyzsh/ohmyzsh.git .oh-my-zsh; \
   git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
     .oh-my-zsh/custom/plugins/zsh-syntax-highlighting; \
@@ -58,13 +59,11 @@ RUN set -ex; \
   sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="gnzh"/' .zshrc; \
   sed -i 's/plugins=(git)/plugins=(git zsh-syntax-highlighting)/' .zshrc; \
   echo 'cat /etc/motd' >> .zshrc; \
-  mkdir -p /home/theia/.theia; \
+  mkdir -p /opt/anubis/.theia; \
   echo '{"terminal.integrated.shell.linux": "/usr/bin/zsh"}' \
-    > /home/theia/.theia/settings.json; \
-  chmod g+rw /home \
-  && mkdir -p /home/project \
-  && chown -R theia:theia /home/theia \
-  && chown -R theia:theia /home/project; \
+    > /opt/anubis/.theia/settings.json; \
+  chmod g+rw /home; \
+  chown -R anubis:anubis /home/anubis; \
   apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
   rm -rf /tmp/*; \
   rm -rf /usr/share/doc; \
@@ -77,5 +76,6 @@ RUN set -ex; \
 COPY supervisord.conf autosave-dump.sh /
 COPY autosave /usr/local/bin/autosave
 
-USER theia
+USER anubis
+WORKDIR /opt/anubis
 ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]
