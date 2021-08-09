@@ -27,7 +27,6 @@ spec:
         app.kubernetes.io/name: anubis
         component: api
     spec:
-      # dnsPolicy: Default
       containers:
       - name: api
         image: {{ .Values.api.image }}:{{ .Values.api.tag }}
@@ -91,13 +90,21 @@ spec:
             secretKeyRef:
               name: api
               key: redis-password
-        {{- if .Values.api.healthCheck }}
+        {{- if .Values.healthChecks }}
         livenessProbe:
           httpGet:
             path: /
             port: 5000
-          initialDelaySeconds: 15
+          initialDelaySeconds: 60
+          failureThreshold: 10
+          periodSeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 5
           periodSeconds: 3
+          failureThreshold: 1
         {{- end }}
 
 ---

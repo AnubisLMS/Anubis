@@ -27,7 +27,8 @@ def private_token_netid(netid):
     req_assert(other is not None, message='user does not exist')
 
     # Verify that the other user is not a superuser
-    req_assert(is_debug() or other.is_superuser, message='You cannot log in as a superuser')
+    if not is_debug():
+        req_assert(not other.is_superuser, message='You cannot log in as a superuser')
 
     token = create_token(other.netid)
     res = Response(
