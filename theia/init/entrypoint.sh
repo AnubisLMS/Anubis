@@ -2,6 +2,14 @@
 
 set -e
 
+fix_permissions() {
+    # Fix permissions
+    echo "fixing permissions"
+    chown -R 1001:1001 /out
+}
+
+fix_permissions
+
 if [ ! "${GIT_REPO}" ]; then
     echo "GIT_REPO is empty, exiting"
     exit 0
@@ -28,5 +36,4 @@ for i in $(find . -maxdepth 2 -name '.git' -type d); do
     popd
 done
 
-# Fix permissions
-chown -R 1001:1001 /out
+fix_permissions
