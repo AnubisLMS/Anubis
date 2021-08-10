@@ -48,6 +48,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     # ReadWriteMany volume, the default storage class should
     # support it.
     pvc = client.V1PersistentVolumeClaim(
+
         metadata=client.V1ObjectMeta(
             name=volume_name,
             labels={
@@ -72,7 +73,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     init_container = client.V1Container(
         name=f"theia-init",
         image="registry.digitalocean.com/anubis/theia-init:latest",
-        image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
+        image_pull_policy="IfNotPresent",
         env=[
             client.V1EnvVar(name="GIT_REPO", value=repo_url),
             client.V1EnvVar(
@@ -294,7 +295,14 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
             containers=containers,
 
             # Add the shared Volume
-            volumes=[client.V1Volume(name=volume_name)],
+            volumes=[
+                client.V1Volume(
+                    name=volume_name,
+                    persistent_volume_claim=client.V1PersistentVolumeClaimVolumeSource(
+                        claim_name=volume_name,
+                    )
+                )
+            ],
 
             # Add any extra things in the spec (depending on the
             # options set for the session)

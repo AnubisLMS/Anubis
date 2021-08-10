@@ -98,12 +98,6 @@ def initialize_theia_session(theia_session_id: str):
     # Log the creation of the pod
     logger.info("creating theia pod: " + pod.to_str())
 
-    # Send the pvc and pod to the kubernetes api. Ask to create
-    # these resources under the anubis namespace. These actions are by default
-    # backgrounded. That means that these functions will almost certainly return
-    # before the resources have actually been created and initialized.
-    v1.create_namespaced_pod(namespace="anubis", body=pod)
-
     # Create the PVC if it did not already exist
     try:
         # This function will throw a 404 client.exceptions.ApiException
@@ -115,6 +109,12 @@ def initialize_theia_session(theia_session_id: str):
     except client.exceptions.ApiException:
         logger.info(f"PVC for user does not exist (Creating): {pvc.metadata.name}")
         v1.create_namespaced_persistent_volume_claim(namespace="anubis", body=pvc)
+
+    # Send the pod to the kubernetes api. Ask to create
+    # these resources under the anubis namespace. These actions are by default
+    # backgrounded. That means that these functions will almost certainly return
+    # before the resources have actually been created and initialized.
+    v1.create_namespaced_pod(namespace="anubis", body=pod)
 
     # Get the name of the pod we just created
     name = get_theia_pod_name(theia_session)
