@@ -29,12 +29,13 @@ if [ -n "${GIT_CRED}" ]; then
     echo "    helper = store" >> /root/.gitconfig
 fi
 
-set -x
+
+set +e
 
 # Clone
+set -x
 cd /out
 git clone ${GIT_REPO}
-
 set +x
 
 # Pull any and all repos

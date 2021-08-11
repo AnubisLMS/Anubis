@@ -104,7 +104,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     init_container = client.V1Container(
         name=f"theia-init",
         image="registry.digitalocean.com/anubis/theia-init:latest",
-        image_pull_policy="IfNotPresent",
+        image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
         env=[
             client.V1EnvVar(name="GIT_REPO", value=repo_url),
             client.V1EnvVar(
@@ -148,7 +148,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     # where the student will have a shell on.
     theia_container = client.V1Container(
         name="theia",
-        image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
+        image_pull_policy="IfNotPresent",
         ports=[client.V1ContainerPort(container_port=5000)],
 
         # Use the theia image that was specified in the database. If this is
