@@ -88,9 +88,11 @@ class Course(db.Model):
     course_code = db.Column(db.TEXT, nullable=False)
     semester = db.Column(db.TEXT, nullable=True)
     section = db.Column(db.TEXT, nullable=True)
-    professor_display_name = db.Column(db.TEXT, nullable=False)
+    professor_display_name = db.Column(db.TEXT)
     autograde_tests_repo = db.Column(db.TEXT, nullable=False,
                                      default='https://github.com/os3224/anubis-assignment-tests')
+    theia_persistent_storage = db.Column(db.Boolean, default=False)
+    github_repo_required = db.Column(db.Boolean, default=True)
     theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.digitalocean.com/anubis/xv6')
     theia_default_options = db.Column(MutableJson, default=lambda: {"limits": {"cpu": "2", "memory": "500Mi"}})
     github_org_url = db.Column(db.TEXT, default='')
@@ -189,6 +191,7 @@ class Assignment(db.Model):
         unique=True,
         default=lambda: base64.b16encode(os.urandom(4)).decode(),
     )
+    theia_persistent_storage = db.Column(db.Boolean, default=False)
     ide_enabled = db.Column(db.Boolean, default=True)
     github_repo_required = db.Column(db.Boolean, default=True)
     accept_late = db.Column(db.Boolean, default=True)
@@ -228,6 +231,7 @@ class Assignment(db.Model):
             "course": self.course.data,
             "description": self.description,
             "ide_enabled": self.ide_enabled,
+            "theia_persistent_storage": self.theia_persistent_storage,
             "github_repo_required": self.github_repo_required,
             "autograde_enabled": self.autograde_enabled,
             "ide_active": self.due_date + timedelta(days=3 * 7) > datetime.now(),
