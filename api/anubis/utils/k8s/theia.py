@@ -52,6 +52,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     autosave = theia_session.autosave
     credentials = theia_session.autosave
     privileged = theia_session.privileged
+    persistent_storage = theia_session.persistent_storage
 
     # Construct the PVC name from the theia pod name
     theia_volume_name = f"{netid}-{theia_session.id[:6]}-ide"
@@ -60,7 +61,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     theia_project_pvc = None
 
     # If persistent storage is enabled for this assignment, then we should create a pvc
-    if assignment is not None and assignment.theia_persistent_storage:
+    if persistent_storage:
         # Overwrite the volume name to be the user's persistent volume
         theia_volume_name = netid + "-ide-volume"
 

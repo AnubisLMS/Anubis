@@ -1,5 +1,5 @@
 import base64
-import json
+import copy
 import os
 from datetime import datetime, timedelta
 
@@ -10,6 +10,15 @@ from sqlalchemy_json import MutableJson
 from anubis.utils.data import rand
 
 db = SQLAlchemy()
+
+THEIA_DEFAULT_OPTIONS = {
+    "persistent_storage": False,
+    "network_policy": "os-student",
+    "resources": {
+        "requests": {"cpu": "300m", "memory": "100Mi"},
+        "limits": {"cpu": "2", "memory": "500Mi"},
+    },
+}
 
 
 def default_id(max_len=None) -> db.Column:
@@ -94,7 +103,7 @@ class Course(db.Model):
     theia_persistent_storage = db.Column(db.Boolean, default=False)
     github_repo_required = db.Column(db.Boolean, default=True)
     theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.digitalocean.com/anubis/xv6')
-    theia_default_options = db.Column(MutableJson, default=lambda: {"limits": {"cpu": "2", "memory": "500Mi"}})
+    theia_default_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
     github_org_url = db.Column(db.TEXT, default='')
     join_code = db.Column(db.String(256), unique=True)
 
@@ -191,7 +200,6 @@ class Assignment(db.Model):
         unique=True,
         default=lambda: base64.b16encode(os.urandom(4)).decode(),
     )
-    theia_persistent_storage = db.Column(db.Boolean, default=False)
     ide_enabled = db.Column(db.Boolean, default=True)
     github_repo_required = db.Column(db.Boolean, default=True)
     accept_late = db.Column(db.Boolean, default=True)
@@ -199,7 +207,7 @@ class Assignment(db.Model):
     theia_image = db.Column(
         db.TEXT, default="registry.digitalocean.com/anubis/theia-xv6"
     )
-    theia_options = db.Column(MutableJson, default=lambda: {})
+    theia_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
 
     # Dates
     release_date = db.Column(db.DateTime, nullable=False)
@@ -216,22 +224,17 @@ class Assignment(db.Model):
 
     @property
     def data(self):
-        from anubis.utils.lms.assignments import get_assignment_due_date
-        from anubis.utils.auth.user import current_user
-
-        due_date = get_assignment_due_date(current_user, self)
-
         return {
             "id": self.id,
             "name": self.name,
-            "due_date": str(due_date),
-            "past_due": due_date < datetime.now(),
+            "due_date": str(self.due_date),
+            "past_due": self.due_date < datetime.now(),
             "hidden": self.hidden,
             "accept_late": self.accept_late,
             "course": self.course.data,
             "description": self.description,
             "ide_enabled": self.ide_enabled,
-            "theia_persistent_storage": self.theia_persistent_storage,
+            "persistent_storage": self.theia_options.get('persistent_storage', False),
             "github_repo_required": self.github_repo_required,
             "autograde_enabled": self.autograde_enabled,
             "ide_active": self.due_date + timedelta(days=3 * 7) > datetime.now(),
@@ -670,6 +673,7 @@ class TheiaSession(db.Model):
     privileged = db.Column(db.Boolean, default=False)
     autosave = db.Column(db.Boolean, default=True)
     credentials = db.Column(db.Boolean, default=False)
+    persistent_storage = db.Column(db.Boolean, default=False)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
@@ -701,7 +705,9 @@ class TheiaSession(db.Model):
             "last_heartbeat": str(self.last_heartbeat),
             "last_proxy": str(self.last_proxy),
             "last_updated": str(self.last_updated),
+
             "autosave": self.autosave,
+            "persistent_storage": self.persistent_storage,
         }
 
     @property
@@ -712,7 +718,8 @@ class TheiaSession(db.Model):
             'autosave': self.autosave,
             'privileged': self.privileged,
             'credentials': self.credentials,
-            'network_locked': self.network_locked
+            'network_locked': self.network_locked,
+            'persistent_storage': self.persistent_storage,
         }
 
 

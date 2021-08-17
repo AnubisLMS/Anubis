@@ -225,18 +225,18 @@ def public_ide_initialize(assignment: Assignment):
         # Update the repo url
         repo_url = repo.repo_url
 
-    # Figure out if autosave was enabled or disabled
-    autosave = request.args.get('autosave', 'true') == 'true'
-
     # Create the theia options from the assignment default
     options = copy.deepcopy(assignment.theia_options)
 
-    # Figure out options
+    # Figure out options from user values
+    autosave = request.args.get('autosave', 'true') == 'true'
+    persistent_storage = request.args.get('persistent_storage', 'true') == 'true'
+
+    # Figure out options from assignment
     privileged = False
     credentials = False
     network_locked = True
     network_policy = options.get('network_policy', 'os-student')
-    autosave = options.get('autosave', True)
     resources = options.get('resources', {
         'requests': {"cpu": "250m", "memory": "100Mi"},
         'limits': {"cpu": "2", "memory": "500Mi"},
@@ -258,6 +258,7 @@ def public_ide_initialize(assignment: Assignment):
         autosave=autosave,
         resources=resources,
         credentials=credentials,
+        persistent_storage=persistent_storage,
     )
     db.session.add(session)
     db.session.commit()

@@ -32,6 +32,7 @@ def admin_ide_admin_settings():
         "resources": '{"limits": {"cpu": "2", "memory": "2Gi"}, "requests": {"cpu": "1", "memory": "500Mi"}}',
         "autosave": True,
         "credentials": True,
+        "persistent_storage": False,
     }})
 
 
@@ -70,6 +71,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
     autosave = settings.get('autosave', True)
     credentials = settings.get('credentials', True)
     privileged = settings.get('privileged', True)
+    persistent_storage = settings.get('persistent_storage', False)
 
     # Attempt to load the options_str into a dict object
     try:
@@ -91,9 +93,10 @@ def admin_ide_initialize_custom(settings: dict, **_):
         network_locked=network_locked,
         network_policy=network_policy,
         autosave=autosave,
-        credentials=credentials,
         resources=resources,
+        credentials=credentials,
         privileged=privileged,
+        persistent_storage=persistent_storage,
     )
     db.session.add(session)
     db.session.commit()

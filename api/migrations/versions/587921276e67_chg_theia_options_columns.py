@@ -31,6 +31,9 @@ def upgrade():
     op.add_column(
         "theia_session", sa.Column("credentials", sa.Boolean(), nullable=True)
     )
+    op.add_column(
+        "theia_session", sa.Column("persistent_storage", sa.Boolean(), nullable=True)
+    )
     op.drop_column("theia_session", "options")
     # ### end Alembic commands ###
 
@@ -49,4 +52,5 @@ def downgrade():
     op.drop_column("theia_session", "autosave")
     op.drop_column("theia_session", "network_policy")
     op.drop_column("theia_session", "resources")
+    op.drop_column("theia_session", "persistent_storage")
     # ### end Alembic commands ###

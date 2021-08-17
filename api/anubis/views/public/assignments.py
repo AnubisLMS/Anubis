@@ -4,7 +4,7 @@ from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response
-from anubis.utils.lms.assignments import get_assignments
+from anubis.utils.lms.assignments import get_assignments, get_assignment_data
 
 assignments = Blueprint(
     "public-assignments", __name__, url_prefix="/public/assignments"
@@ -33,3 +33,20 @@ def public_assignments():
 
     # Iterate over assignments, getting their data
     return success_response({"assignments": assignment_data})
+
+
+@assignments.get('/get/<string:assignment_id>')
+@require_user()
+@json_response
+def public_assignment_get(assignment_id: str):
+    """
+    Get a specific assignment spec
+
+    :param assignment_id:
+    :return:
+    """
+
+    return success_response({
+      'assignment': get_assignment_data(current_user.id, assignment_id)
+    })
+

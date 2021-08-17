@@ -1,9 +1,11 @@
 import random
 import string
+import copy
 from datetime import datetime, timedelta
 
 from anubis.models import (
     db,
+    THEIA_DEFAULT_OPTIONS,
     Assignment, AssignmentQuestion, AssignmentTest,
     AssignmentRepo, Submission, User, Course,
     InCourse, TheiaSession
@@ -82,7 +84,7 @@ def rand_commit(n=40) -> str:
     return rand(n)
 
 
-def create_assignment(course, users, i=1, do_submissions=True, **kwargs):
+def create_assignment(course, users, i=0, do_submissions=True, **kwargs):
     # Assignment 1 uniq
     assignment = Assignment(
         id=rand(), name=f"{course.course_code} Assignment {i}", unique_code=rand(8), hidden=False,
@@ -93,8 +95,12 @@ def create_assignment(course, users, i=1, do_submissions=True, **kwargs):
         due_date=datetime.now() + timedelta(hours=12),
         grace_date=datetime.now() + timedelta(hours=13),
         course_id=course.id, ide_enabled=True, autograde_enabled=False,
+        theia_options=copy.deepcopy(THEIA_DEFAULT_OPTIONS),
         **kwargs,
     )
+
+    if not do_submissions:
+        assignment.theia_options['persistent_storage'] = True
 
     for i in range(random.randint(2, 4)):
         b, c = random.randint(1, 5), random.randint(1, 5)
