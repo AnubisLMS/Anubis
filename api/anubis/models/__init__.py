@@ -663,9 +663,13 @@ class TheiaSession(db.Model):
     image = db.Column(
         db.TEXT, default="registry.digitalocean.com/anubis/theia-xv6"
     )
-    options = db.Column(MutableJson, nullable=False, default=lambda: dict())
+
+    resources = db.Column(MutableJson, default=lambda: {})
+    network_policy = db.Column(db.String(128), default="os-student")
     network_locked = db.Column(db.Boolean, default=True)
     privileged = db.Column(db.Boolean, default=False)
+    autosave = db.Column(db.Boolean, default=True)
+    credentials = db.Column(db.Boolean, default=False)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
@@ -697,7 +701,7 @@ class TheiaSession(db.Model):
             "last_heartbeat": str(self.last_heartbeat),
             "last_proxy": str(self.last_proxy),
             "last_updated": str(self.last_updated),
-            "autosave": self.options.get('autosave', True),
+            "autosave": self.autosave,
         }
 
     @property
@@ -705,8 +709,9 @@ class TheiaSession(db.Model):
         return {
             'image': self.image,
             'repo_url': self.repo_url,
-            'options': json.dumps(self.options),
+            'autosave': self.autosave,
             'privileged': self.privileged,
+            'credentials': self.credentials,
             'network_locked': self.network_locked
         }
 

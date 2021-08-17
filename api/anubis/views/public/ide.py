@@ -230,7 +230,17 @@ def public_ide_initialize(assignment: Assignment):
 
     # Create the theia options from the assignment default
     options = copy.deepcopy(assignment.theia_options)
-    options['autosave'] = autosave
+
+    # Figure out options
+    privileged = False
+    credentials = False
+    network_locked = True
+    network_policy = options.get('network_policy', 'os-student')
+    autosave = options.get('autosave', True)
+    resources = options.get('resources', {
+        'requests': {"cpu": "250m", "memory": "100Mi"},
+        'limits': {"cpu": "2", "memory": "500Mi"},
+    })
 
     # Create a new session
     session = TheiaSession(
@@ -238,11 +248,16 @@ def public_ide_initialize(assignment: Assignment):
         assignment_id=assignment.id,
         course_id=assignment.course.id,
         repo_url=repo_url,
-        network_locked=True,
-        privileged=False,
         active=True,
         state="Initializing",
-        options=options,
+
+        # Options
+        network_locked=network_locked,
+        network_policy=network_policy,
+        privileged=privileged,
+        autosave=autosave,
+        resources=resources,
+        credentials=credentials,
     )
     db.session.add(session)
     db.session.commit()

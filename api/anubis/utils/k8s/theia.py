@@ -47,10 +47,10 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     repo_name = parse_github_repo_name(repo_url)
 
     # Get the theia session options
-    limits = theia_session.options.get('limits', {"cpu": "2", "memory": "500Mi"})
-    requests = theia_session.options.get('requests', {"cpu": "250m", "memory": "100Mi"})
-    autosave = theia_session.options.get('autosave', True)
-    credentials = theia_session.options.get('credentials', False)
+    limits = theia_session.resources.get('limits', {"cpu": "2", "memory": "500Mi"})
+    requests = theia_session.resources.get('requests', {"cpu": "250m", "memory": "100Mi"})
+    autosave = theia_session.autosave
+    credentials = theia_session.autosave
     privileged = theia_session.privileged
 
     # Construct the PVC name from the theia pod name
@@ -318,7 +318,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         # This label will enable the student network policy to be
         # applied to this container. The gist of this policy is that
         # students will only be able to connect to github.
-        extra_labels["network-policy"] = "student"
+        extra_labels["network-policy"] = theia_session.network_policy or 'os-student'
 
         # Set up the pod DNS to be pointed to cloudflare 1.1.1.1 instead
         # of the internal kubernetes dns.
