@@ -26,9 +26,6 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     # Get the owner of the theia session's netid
     netid = theia_session.owner.netid
 
-    # Assignment if there is one
-    assignment: Optional[Assignment] = theia_session.assignment
-
     # Construct the theia pod name
     pod_name = get_theia_pod_name(theia_session)
 
@@ -106,7 +103,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     init_container = client.V1Container(
         name=f"theia-init",
         image="registry.digitalocean.com/anubis/theia-init:latest",
-        image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
+        image_pull_policy="IfNotPresent",
         env=[
             client.V1EnvVar(name="GIT_REPO", value=repo_url),
             client.V1EnvVar(
@@ -262,7 +259,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     sidecar_container = client.V1Container(
         name="sidecar",
         image="registry.digitalocean.com/anubis/theia-sidecar:latest",
-        image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
+        image_pull_policy="IfNotPresent",
 
         env=[
             # Add the git credentials secret to the container. The entrypoint
