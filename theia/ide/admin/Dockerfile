@@ -32,10 +32,7 @@ FROM node:${NODE_VERSION} as theia
 ARG PY_VERSION=3.9.3
 
 COPY --from=0 /opt/theia /opt/theia
-COPY motd.txt /etc/motd
 COPY cli /cli
-COPY supervisord.conf initialize-incluster.py autosave-dump.sh /
-COPY autosave /usr/local/bin/autosave
 
 RUN set -eux; apt-get update \
   && apt-get upgrade -y --no-install-recommends \
@@ -99,9 +96,7 @@ RUN set -eux; apt-get update \
   && rm -rf /usr/share/doc \
   && rm -rf /root/.cache \
   && rm -rf /home/anubis/node_modules/.cache \
-  && mkdir -p /home/project \
   && chmod g+rw /home \
-  && mkdir -p /home/project \
   && chown -R anubis:anubis /home/anubis \
   && usermod -aG docker anubis \
   && find /usr/local -depth \
@@ -127,10 +122,16 @@ RUN set -eux; apt-get update \
     -exec 'rm' '-rf' '{}' '+' \
   && pip3 install --no-cache-dir /cli \
   && rm -rf /cli \
+  && rm -rf /home/node \
   && find /usr/local -depth \
   \( \
   \( -type d -a \( -name test -o -name tests -o -name idle_test -o -name __pycache__ \) \) \
   -o \( -type f -a \( -name '*.pyc' -o -name '*.pyo' -o -name '*.a' \) \) \
   \) -exec 'rm' '-rf' '{}' '+'
+
+COPY motd.txt /etc/motd
+COPY supervisord.conf initialize-incluster.py autosave-dump.sh /
+COPY autosave /usr/local/bin/autosave
+
 
 ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]

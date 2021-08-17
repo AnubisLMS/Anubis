@@ -1,7 +1,7 @@
 #!/bin/bash
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2> /dev/null)"
-if [ ! "${REPO_ROOT}" ]; then
+if [ -z "${REPO_ROOT}" ]; then
     echo 'You are not in a git repo! Please navigate to one to save something!'
     exit 1
 fi
@@ -11,4 +11,4 @@ if git status | grep 'nothing to commit' &> /dev/null; then
     exit 2
 fi
 
-exec curl http://localhost:5001/ --data "path=${REPO_ROOT}&message=$*"
+exec curl http://localhost:5001/ --data "repo=${REPO_ROOT}&message=$*"
