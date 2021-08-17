@@ -69,6 +69,7 @@ RUN set -ex; \
   rm -rf /usr/share/doc; \
   rm -rf /var/cache/apt/*; \
   rm -rf /var/lib/apt/lists/*; \
+  rm -rf /home/node/*; \
   find / -depth \
     \( -name .cache -o -name __pycache__ -o -name '*.pyc' -o -name '*.a' -o -name .git -o -name .github \) \
     -exec 'rm' '-rf' '{}' '+';
