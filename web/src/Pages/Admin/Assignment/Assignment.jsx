@@ -24,7 +24,7 @@ const editableFields = [
   {field: 'theia_image', label: 'IDE Docker Image'},
   {field: 'theia_options', label: 'IDE Options', type: 'json'},
   {field: 'pipeline_image', label: 'Pipeline Image'},
-  {field: 'unique_code', label: 'Unique Code', disabled: true},
+  {field: 'unique_code', label: 'Unique Code'},
   {field: 'hidden', label: 'Hidden', type: 'boolean'},
   {field: 'github_repo_required', label: 'Github Repo Required', type: 'boolean'},
   {field: 'accept_late', label: 'Accept Late Submissions', type: 'boolean'},

@@ -134,7 +134,7 @@ export default function AssignmentCard({assignment, editableFields, updateField,
                 );
               case 'boolean':
                 return (
-                  <Grid item xs={12} key={field}>
+                  <Grid item xs={12} md={6} key={field}>
                     <FormControlLabel
                       value={assignment[field]}
                       control={
