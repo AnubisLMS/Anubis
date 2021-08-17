@@ -21,6 +21,9 @@ import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import IDEInstructions from './IDEInstructions';
 import IDEHeader from './IDEHeader';
 import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+import HelpOutlineOutlinedIcon from '@material-ui/icons/HelpOutlineOutlined';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -70,7 +73,7 @@ const pollSession = (id, state, enqueueSnackbar, n = 0) => () => {
 };
 
 const startSession = (state, enqueueSnackbar) => () => {
-  const {autosaveEnabled, session, setSession, selectedTheia, setLoading} = state;
+  const {autosaveEnabled, persistentStorage, session, setSession, selectedTheia, setLoading} = state;
   if (session) {
     const a = document.createElement('a');
     a.setAttribute('href', session.redirect_url);
@@ -81,7 +84,7 @@ const startSession = (state, enqueueSnackbar) => () => {
     return;
   }
 
-  const params = {autosave: autosaveEnabled};
+  const params = {autosave: autosaveEnabled, persistent_storage: persistentStorage};
   setLoading(true);
   axios.get(`/api/public/ide/initialize/${selectedTheia.id}`, {params}).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
@@ -121,6 +124,8 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState(false);
   const [autosaveEnabled, setAutosaveEnabled] = useState(true);
+  const [persistentStorage, setPersistentStorage] = useState(false);
+  const [assignment, setAssignment] = useState(null);
 
   React.useEffect(() => {
     axios.get('/api/public/ide/available').then((response) => {
@@ -136,6 +141,22 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
       return null;
     }
 
+    axios.get(`/api/public/assignments/get/${selectedTheia.id}`).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data.assignment) {
+        setAssignment(data.assignment);
+        if (data.assignment?.persistent_storage !== undefined) {
+          setPersistentStorage(data.assignment.persistent_storage);
+        }
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  }, [selectedTheia]);
+
+  React.useEffect(() => {
+    if (!selectedTheia) {
+      return null;
+    }
+
     axios.get(`/api/public/ide/active/${selectedTheia.id}`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data.session) {
@@ -143,6 +164,9 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
       }
       if (data?.session?.autosave !== undefined) {
         setAutosaveEnabled(data.session.autosave);
+      }
+      if (data?.session?.persistent_storage !== undefined) {
+        setPersistentStorage(data.session.persistent_storage);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [selectedTheia]);
@@ -153,6 +177,8 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
     loading, setLoading,
     session, setSession,
     autosaveEnabled, setAutosaveEnabled,
+    persistentStorage, setPersistentStorage,
+    assignment, setAssignment,
   };
 
   return (
@@ -180,23 +206,64 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
           <Grid item xs={12}>
             <IDEInstructions/>
           </Grid>
-          <FormControlLabel
-            disabled={!!session}
-            checked={autosaveEnabled}
-            onChange={() => setAutosaveEnabled(!autosaveEnabled)}
-            control={<Switch color={'primary'}/>}
-            label={
-              <Typography color={autosaveEnabled ? '' : 'secondary'} variant={'body1'}>
-                {autosaveEnabled ?
-                  'Autosave Enabled' :
-                  (
-                    'With autosave disabled you are responsible for saving your progress. ' +
-                    'No exceptions will be made for lost work!'
-                  )}
-              </Typography>
-            }
-            labelPlacement="start"
-          />
+          <Grid item xs={12}>
+            <FormControlLabel
+              disabled={!!session}
+              checked={autosaveEnabled}
+              onChange={() => setAutosaveEnabled(!autosaveEnabled)}
+              control={<Switch color={'primary'}/>}
+              label={
+                <div style={{display: 'flex', alignItems: 'center'}}>
+                  <Typography color={autosaveEnabled ? '' : 'secondary'} variant={'body1'}>
+                    {autosaveEnabled ?
+                      'Autosave Enabled' :
+                      (
+                        'With autosave disabled you are responsible for saving your progress. ' +
+                        'No exceptions will be made for lost work!'
+                      )}
+                  </Typography>
+                  <Tooltip title={persistentStorage ?
+                    'Anubis will automatically try to commit and push any git repo in /home/anubis to github ' +
+                    'every 5 minutes. You can also use the autosave command in the terminal to manually tell Anubis ' +
+                    'to commit and push. It is still your ' +
+                    'responsibility to make sure that your work is saved, and submitted on time.' :
+                    'Anubis will not try to automatically commit and push your work to github. It is your ' +
+                    'responsibility to make sure that your work is saved, and submitted on time.'}>
+                    <IconButton>
+                      <HelpOutlineOutlinedIcon fontSize={'small'}/>
+                    </IconButton>
+                  </Tooltip>
+                </div>
+              }
+              labelPlacement="end"
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControlLabel
+              disabled={!!session}
+              checked={persistentStorage}
+              onChange={() => setPersistentStorage(!persistentStorage)}
+              control={<Switch color={'primary'}/>}
+              label={
+                <div style={{display: 'flex', alignItems: 'center'}}>
+                  <Typography variant={'body1'}>
+                    Persistent Storage
+                  </Typography>
+                  <Tooltip title={persistentStorage ?
+                    'Anubis will mount a persistent volume to your session. Everything in /home/anubis ' +
+                    'will be saved in your Cloud IDE volume. We recommend still making sure valuble data is backed' +
+                    'up elsewhere.' :
+                    'Anubis will not mount a persistent volume to your session. All work not saved elsewhere (like ' +
+                    'github) will be deleted when the session ends.'}>
+                    <IconButton>
+                      <HelpOutlineOutlinedIcon fontSize={'small'}/>
+                    </IconButton>
+                  </Tooltip>
+                </div>
+              }
+              labelPlacement="end"
+            />
+          </Grid>
         </Grid>
       </DialogContent>
       <DialogActions>
