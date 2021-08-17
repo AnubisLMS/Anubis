@@ -233,7 +233,7 @@ def admin_assignments_add():
         theia_options=course_context.theia_default_options,
         release_date=datetime.now() + timedelta(weeks=1),
         due_date=datetime.now() + timedelta(weeks=2),
-        grade_date=datetime.now() + timedelta(weeks=2),
+        grace_date=datetime.now() + timedelta(weeks=2),
     )
     db.session.add(new_assignment)
     db.session.commit()
