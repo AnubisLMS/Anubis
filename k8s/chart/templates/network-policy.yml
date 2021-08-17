@@ -11,7 +11,7 @@ spec:
   podSelector:
     matchLabels:
       app.kubernetes.io/name: theia
-      network-policy: student
+      network-policy: os-student
       role: theia-session
   policyTypes:
   - Ingress
