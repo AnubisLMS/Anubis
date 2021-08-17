@@ -81,7 +81,7 @@ def public_questions_save(assignment_question_id: str, response: str):
         now = datetime.now()
 
         # Calculate the assignment due date for this student
-        due_date = get_assignment_due_date(current_user, assignment)
+        due_date = get_assignment_due_date(current_user.id, assignment.id)
 
         # Make sure that the deadline has not passed. If it has, then
         # we should give them an error saying that they can request a
