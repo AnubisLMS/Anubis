@@ -75,11 +75,11 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
                 },
             ),
             spec=client.V1PersistentVolumeClaimSpec(
-                access_modes=["ReadWriteMany"],
+                access_modes=["ReadWriteOnce"],
                 volume_mode="Filesystem",
                 resources=client.V1ResourceRequirements(
                     requests={
-                        "storage": "250Mi",
+                        "storage": "1Gi",
                     }
                 ),
             ),
