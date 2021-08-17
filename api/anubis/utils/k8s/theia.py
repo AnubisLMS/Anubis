@@ -33,10 +33,10 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     pod_name = get_theia_pod_name(theia_session)
 
     # List of container objects
-    containers = []
+    pod_containers = []
 
     # List of volumes
-    volumes = []
+    pod_volumes = []
 
     # Extra env to add to the main theia server container
     theia_extra_env = []
@@ -51,24 +51,25 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     requests = theia_session.options.get('requests', {"cpu": "250m", "memory": "100Mi"})
     autosave = theia_session.options.get('autosave', True)
     credentials = theia_session.options.get('credentials', False)
+    privileged = theia_session.privileged
 
     # Construct the PVC name from the theia pod name
-    volume_name = f"{netid}-{theia_session.id[:6]}-ide"
+    theia_volume_name = f"{netid}-{theia_session.id[:6]}-ide"
 
     # Default the pvc to None
-    pvc = None
+    theia_project_pvc = None
 
     # If persistent storage is enabled for this assignment, then we should create a pvc
     if assignment is not None and assignment.theia_persistent_storage:
         # Overwrite the volume name to be the user's persistent volume
-        volume_name = netid + "-ide-volume"
+        theia_volume_name = netid + "-ide-volume"
 
         # Create the persistent volume claim object. Since this is a
         # ReadWriteMany volume, the default storage class should
         # support it.
-        pvc = client.V1PersistentVolumeClaim(
+        theia_project_pvc = client.V1PersistentVolumeClaim(
             metadata=client.V1ObjectMeta(
-                name=volume_name,
+                name=theia_volume_name,
                 labels={
                     "app.kubernetes.io/name": "anubis",
                     "role": "session-storage",
@@ -87,17 +88,17 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         )
 
         # Append the PVC to the volume list
-        volumes.append(client.V1Volume(
-            name=volume_name,
+        pod_volumes.append(client.V1Volume(
+            name=theia_volume_name,
             persistent_volume_claim=client.V1PersistentVolumeClaimVolumeSource(
-                claim_name=volume_name,
+                claim_name=theia_volume_name,
             )
         ))
 
     # If the assignment does not have persistent volumes enabled, then create a blank
     # "empty-dir" volume. This skips the allocation of the pvc.
     else:
-        volumes.append(client.V1Volume(name=volume_name))
+        pod_volumes.append(client.V1Volume(name=theia_volume_name))
 
     # Create the init container. This will clone the initial repo onto
     # the shared volume.
@@ -119,7 +120,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         volume_mounts=[
             client.V1VolumeMount(
                 mount_path="/out",
-                name=volume_name,
+                name=theia_volume_name,
             )
         ],
     )
@@ -140,9 +141,43 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
             value=base64.b64encode(token.encode()).decode(),
         ))
 
-    user_id = 1001
-    if theia_session.privileged:
-        user_id = 0
+    # Figure out which uid to use
+    theia_user_id = 1001
+    if privileged:
+        theia_user_id = 0
+
+    # If privileged, add docker config file to pod as a volume
+    if privileged:
+        pod_volumes.append(client.V1Volume(
+            name='docker-config',
+            secret=client.V1SecretVolumeSource(
+                default_mode=0o644,
+                secret_name="anubis",
+                items=[
+                    client.V1KeyToPath(
+                        key=".dockerconfigjson",
+                        path="config.json"
+                    )
+                ]
+            )
+        ))
+
+    # Initialize theia volume mounts array with
+    # the project volume mount
+    theia_volume_mounts = [
+        client.V1VolumeMount(
+            mount_path="/home/anubis",
+            name=theia_volume_name,
+        )
+    ]
+
+    # If the pod is privileged, add the docker config values
+    # to the /etc/default in the theia pod
+    if privileged:
+        theia_volume_mounts.append(client.V1VolumeMount(
+            mount_path="/docker",
+            name="docker-config",
+        ))
 
     # Create the main theia container. This is where the theia server runs, and
     # where the student will have a shell on.
@@ -191,12 +226,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
 
         # Setup the shared volume where the student
         # repo exists.
-        volume_mounts=[
-            client.V1VolumeMount(
-                mount_path="/home/anubis",
-                name=volume_name,
-            )
-        ],
+        volume_mounts=theia_volume_mounts,
 
         # Startup probe is the way that kubernetes can
         # check to see if the theia has started correctly.
@@ -220,7 +250,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         security_context=client.V1SecurityContext(
             allow_privilege_escalation=theia_session.privileged,
             privileged=theia_session.privileged,
-            run_as_user=user_id,
+            run_as_user=theia_user_id,
         ),
     )
 
@@ -265,15 +295,15 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         volume_mounts=[
             client.V1VolumeMount(
                 mount_path="/home/anubis",
-                name=volume_name,
+                name=theia_volume_name,
             )
         ],
     )
 
     # Add the main theia container, and the sidecar
     # to the containers list.
-    containers.append(theia_container)
-    containers.append(sidecar_container)
+    pod_containers.append(theia_container)
+    pod_containers.append(sidecar_container)
 
     # Extra labels to be applied to the pod
     extra_labels = {}
@@ -326,10 +356,10 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
             init_containers=[init_container],
 
             # Set the containers list
-            containers=containers,
+            containers=pod_containers,
 
             # Add the shared Volume(s)
-            volumes=volumes,
+            volumes=pod_volumes,
 
             # Add any extra things in the spec (depending on the
             # options set for the session)
@@ -337,7 +367,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         ),
     )
 
-    return pod, pvc
+    return pod, theia_project_pvc
 
 
 def reap_theia_session_k8s_resources(theia_session_id: str):
