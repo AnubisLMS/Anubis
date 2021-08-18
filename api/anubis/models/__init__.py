@@ -436,7 +436,7 @@ class AssignedQuestionResponse(db.Model):
 
         return {
             'submitted': str(self.created),
-            'late': get_assignment_due_date(self.question.owner, self.question.assignment) < self.created,
+            'late': get_assignment_due_date(self.question.owner.id, self.question.assignment.id) < self.created,
             'text': self.response,
         }
 
