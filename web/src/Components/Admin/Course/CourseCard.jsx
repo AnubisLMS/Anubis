@@ -10,8 +10,10 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import yellow from '@material-ui/core/colors/yellow';
 import EditIcon from '@material-ui/icons/Edit';
+import Switch from '@material-ui/core/Switch';
 
 import AuthContext from '../../../Contexts/AuthContext';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -27,16 +29,28 @@ export default function CourseCard({course, _disabled, editableFields, updateFie
     <Card>
       <CardContent>
         <Grid container spacing={2}>
-          {editableFields.map(({field, label, disabled = false}) => (
+          {editableFields.map(({field, label, type = 'text', disabled = false}) => (
             <Grid item xs={12} key={field}>
-              <TextField
+              {type === 'text' && <TextField
                 fullWidth
                 disabled={disabled || _disabled}
                 variant={'outlined'}
                 label={label}
                 value={course[field]}
                 onChange={updateField(course.id, field)}
-              />
+              />}
+              {type === 'boolean' && <FormControlLabel
+                value={course[field]}
+                label={label}
+                labelPlacement="end"
+                control={
+                  <Switch
+                    checked={course[field]}
+                    color={'primary'}
+                    onClick={updateField(course.id, field, true)}
+                  />
+                }
+              />}
             </Grid>
           ))}
         </Grid>

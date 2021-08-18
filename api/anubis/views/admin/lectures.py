@@ -4,7 +4,7 @@ from dateutil.parser import parse as date_parse
 from flask import Blueprint, request
 
 from anubis.models import db, LectureNotes
-from anubis.utils.auth import require_admin
+from anubis.utils.auth.http import require_admin
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.files import process_file_upload, get_mime_type

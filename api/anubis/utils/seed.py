@@ -1,15 +1,24 @@
 import random
 import string
+import copy
 from datetime import datetime, timedelta
 
 from anubis.models import (
     db,
+    THEIA_DEFAULT_OPTIONS,
     Assignment, AssignmentQuestion, AssignmentTest,
     AssignmentRepo, Submission, User, Course,
     InCourse, TheiaSession
 )
 from anubis.utils.data import rand
 from anubis.utils.lms.theia import mark_session_ended
+
+lorem = """
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore 
+magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+"""
 
 names = ["Joette", "Anabelle", "Fred", "Woodrow", "Neoma", "Dorian", "Treasure", "Tami", "Berdie", "Jordi", "Frances",
          "Gerhardt", "Kristina", "Carmelita", "Sim", "Hideo", "Arland", "Wirt", "Robt", "Narcissus", "Steve", "Monique",
@@ -75,17 +84,23 @@ def rand_commit(n=40) -> str:
     return rand(n)
 
 
-def create_assignment(course, users):
+def create_assignment(course, users, i=0, do_submissions=True, **kwargs):
     # Assignment 1 uniq
     assignment = Assignment(
-        id=rand(), name=f"{course.course_code} Assignment 1", unique_code=rand(8), hidden=False,
+        id=rand(), name=f"{course.course_code} Assignment {i}", unique_code=rand(8), hidden=False,
+        description=lorem,
         pipeline_image=f"registry.digitalocean.com/anubis/assignment/{rand(8)}",
         github_classroom_url='http://localhost',
         release_date=datetime.now() - timedelta(hours=2),
         due_date=datetime.now() + timedelta(hours=12),
         grace_date=datetime.now() + timedelta(hours=13),
         course_id=course.id, ide_enabled=True, autograde_enabled=False,
+        theia_options=copy.deepcopy(THEIA_DEFAULT_OPTIONS),
+        **kwargs,
     )
+
+    if not do_submissions:
+        assignment.theia_options['persistent_storage'] = True
 
     for i in range(random.randint(2, 4)):
         b, c = random.randint(1, 5), random.randint(1, 5)
@@ -106,39 +121,40 @@ def create_assignment(course, users):
     submissions = []
     repos = []
     theia_sessions = []
-    for user in users:
-        repos.append(
-            AssignmentRepo(
-                id=rand(), owner=user, assignment_id=assignment.id,
-                repo_url="https://github.com/wabscale/xv6-public",
-                github_username=user.github_username,
-            )
-        )
-
-        for _ in range(3):
-            theia_session = TheiaSession(
-                owner=user, assignment=assignment, course=course,
-                repo_url=repos[-1].repo_url, cluster_address="127.0.0.1",
-            )
-            mark_session_ended(theia_session)
-            theia_sessions.append(theia_session)
-
-        if random.randint(0, 3) != 0:
-            for i in range(random.randint(1, 10)):
-                submission = Submission(
-                    id=rand(),
-                    commit=rand_commit(),
-                    state="Waiting for resources...",
-                    owner=user,
-                    assignment_id=assignment.id,
+    if do_submissions:
+        for user in users:
+            repos.append(
+                AssignmentRepo(
+                    id=rand(), owner=user, assignment_id=assignment.id,
+                    repo_url="https://github.com/wabscale/xv6-public",
+                    github_username=user.github_username,
                 )
-                submission.repo = repos[-1]
-                submissions.append(submission)
+            )
 
+            for _ in range(3):
+                theia_session = TheiaSession(
+                    owner=user, assignment=assignment, course=course,
+                    repo_url=repos[-1].repo_url, cluster_address="127.0.0.1",
+                )
+                mark_session_ended(theia_session)
+                theia_sessions.append(theia_session)
+
+            if random.randint(0, 3) != 0:
+                for i in range(random.randint(1, 10)):
+                    submission = Submission(
+                        id=rand(),
+                        commit=rand_commit(),
+                        state="Waiting for resources...",
+                        owner=user,
+                        assignment_id=assignment.id,
+                    )
+                    submission.repo = repos[-1]
+                    submissions.append(submission)
+
+        db.session.add_all(submissions)
+        db.session.add_all(theia_sessions)
+        db.session.add_all(repos)
     db.session.add_all(tests)
-    db.session.add_all(submissions)
-    db.session.add_all(theia_sessions)
-    db.session.add_all(repos)
     db.session.add(assignment)
 
     return assignment, tests, submissions, repos

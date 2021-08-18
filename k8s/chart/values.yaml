@@ -71,4 +71,9 @@ puller:
   image: "registry.digitalocean.com/anubis/puller"
   tag: "latest"
   imagePullSecret: "anubis"
-  command: ['registry.digitalocean.com/anubis/theia-xv6', 'registry.digitalocean.com/anubis/theia-admin']
+  command: [
+      'registry.digitalocean.com/anubis/theia-xv6',
+      'registry.digitalocean.com/anubis/theia-admin',
+      'registry.digitalocean.com/anubis/theia-sidecar',
+      'registry.digitalocean.com/anubis/theia-init',
+  ]

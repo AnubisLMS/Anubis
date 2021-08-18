@@ -231,11 +231,17 @@ export default function ManagementIDEDialog() {
             </Grid>
             <Grid item xs={12}>
               <TextField
-                fullWidth label="Options JSON" variant="outlined"
-                value={settings.options} onChange={updateSetting('options')}
+                fullWidth label="Resources JSON" variant="outlined"
+                value={settings.resources} onChange={updateSetting('options')}
               />
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth label="Network Policy" variant="outlined"
+                value={settings.network_policy} onChange={updateSetting('network_policy')}
+              />
+            </Grid>
+            <Grid item xs={12}>
               <FormControlLabel
                 control={
                   <Switch
@@ -247,16 +253,28 @@ export default function ManagementIDEDialog() {
                 label="Privileged"
               />
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12}>
               <FormControlLabel
                 control={
                   <Switch
-                    checked={settings.network_locked} onChange={updateSetting('network_locked')}
-                    name="network_locked" color="primary"
+                    checked={settings.autosave} onChange={updateSetting('autosave')}
+                    name="autosave" color="primary"
                   />
                 }
                 labelPlacement={'end'}
-                label="Network Locked"
+                label="Autosave"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.credentials} onChange={updateSetting('credentials')}
+                    name="credentials" color="primary"
+                  />
+                }
+                labelPlacement={'end'}
+                label="Credentials"
               />
             </Grid>
           </Grid>

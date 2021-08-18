@@ -67,9 +67,16 @@ def seed():
         autograde_tests_repo='https://github.com/os3224/anubis-assignment-tests',
         github_org_url='https://github.com/os3224',
     )
-    os_assignment, _, os_submissions, _ = create_assignment(intro_to_os_course, intro_to_os_students)
-    init_submissions(os_submissions)
-    assign_questions(os_assignment)
+    os_assignment0, _, os_submissions0, _ = create_assignment(
+        intro_to_os_course, intro_to_os_students, i=0
+    )
+    os_assignment1, _, os_submissions1, _ = create_assignment(
+        intro_to_os_course, intro_to_os_students, i=1, do_submissions=False, github_repo_required=False,
+    )
+    init_submissions(os_submissions0)
+    assign_questions(os_assignment0)
+    init_submissions(os_submissions1)
+    assign_questions(os_assignment1)
     ta = TAForCourse(owner=ta_user, course=intro_to_os_course)
     professor = ProfessorForCourse(owner=professor_user, course=intro_to_os_course)
     db.session.add_all([professor, ta])

@@ -4,7 +4,8 @@ from flask import Blueprint
 from sqlalchemy.exc import IntegrityError, DataError
 
 from anubis.models import db, Assignment, AssignedStudentQuestion, AssignedQuestionResponse
-from anubis.utils.auth import require_user, current_user
+from anubis.utils.auth.http import require_user
+from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_endpoint, load_from_id, json_response
 from anubis.utils.http.https import success_response, error_response
@@ -80,14 +81,14 @@ def public_questions_save(assignment_question_id: str, response: str):
         now = datetime.now()
 
         # Calculate the assignment due date for this student
-        due_date = get_assignment_due_date(current_user, assignment)
+        due_date = get_assignment_due_date(current_user.id, assignment.id)
 
         # Make sure that the deadline has not passed. If it has, then
         # we should give them an error saying that they can request a
         # regrade from the Professor.
         req_assert(
             now < due_date,
-            message='This assignment does not accept late submissions. You can request an extension from your Professor.'
+            message='This assignment does not accept late submissions.'
         )
 
     # Create a new response

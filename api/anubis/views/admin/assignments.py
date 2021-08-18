@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timedelta
 
 import parse
 from dateutil.parser import parse as dateparse
@@ -13,7 +14,7 @@ from anubis.models import (
     AssignmentTest,
     SubmissionTestResult,
 )
-from anubis.utils.auth import require_admin
+from anubis.utils.auth.http import require_admin
 from anubis.utils.data import rand
 from anubis.utils.data import row2dict, req_assert
 from anubis.utils.http.decorators import load_from_id, json_response, json_endpoint
@@ -219,7 +220,31 @@ def admin_assignment_tests_delete_assignment_test_id(assignment_test_id: str):
     })
 
 
-@assignments.route("/save", methods=["POST"])
+@assignments.post('/add')
+@require_admin()
+@json_response
+def admin_assignments_add():
+    new_assignment = Assignment(
+        course_id=course_context.id,
+        name='New Assignment',
+        description='',
+        hidden=True,
+        theia_image=course_context.theia_default_image,
+        theia_options=course_context.theia_default_options,
+        release_date=datetime.now() + timedelta(weeks=1),
+        due_date=datetime.now() + timedelta(weeks=2),
+        grace_date=datetime.now() + timedelta(weeks=2),
+    )
+    db.session.add(new_assignment)
+    db.session.commit()
+
+    return success_response({
+        'status': 'New assignment created.',
+        'assignment': new_assignment.data,
+    })
+
+
+@assignments.post("/save")
 @require_admin()
 @json_endpoint(required_fields=[("assignment", dict)])
 def private_assignment_save(assignment: dict):

@@ -1,5 +1,5 @@
 import base64
-import json
+import copy
 import os
 from datetime import datetime, timedelta
 
@@ -10,6 +10,15 @@ from sqlalchemy_json import MutableJson
 from anubis.utils.data import rand
 
 db = SQLAlchemy()
+
+THEIA_DEFAULT_OPTIONS = {
+    "persistent_storage": False,
+    "network_policy": "os-student",
+    "resources": {
+        "requests": {"cpu": "300m", "memory": "100Mi"},
+        "limits": {"cpu": "2", "memory": "500Mi"},
+    },
+}
 
 
 def default_id(max_len=None) -> db.Column:
@@ -88,11 +97,13 @@ class Course(db.Model):
     course_code = db.Column(db.TEXT, nullable=False)
     semester = db.Column(db.TEXT, nullable=True)
     section = db.Column(db.TEXT, nullable=True)
-    professor_display_name = db.Column(db.TEXT, nullable=False)
+    professor_display_name = db.Column(db.TEXT)
     autograde_tests_repo = db.Column(db.TEXT, nullable=False,
                                      default='https://github.com/os3224/anubis-assignment-tests')
+    theia_persistent_storage = db.Column(db.Boolean, default=False)
+    github_repo_required = db.Column(db.Boolean, default=True)
     theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.digitalocean.com/anubis/xv6')
-    theia_default_options = db.Column(MutableJson, default=lambda: {"limits": {"cpu": "2", "memory": "500Mi"}})
+    theia_default_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
     github_org_url = db.Column(db.TEXT, default='')
     join_code = db.Column(db.String(256), unique=True)
 
@@ -190,12 +201,13 @@ class Assignment(db.Model):
         default=lambda: base64.b16encode(os.urandom(4)).decode(),
     )
     ide_enabled = db.Column(db.Boolean, default=True)
+    github_repo_required = db.Column(db.Boolean, default=True)
     accept_late = db.Column(db.Boolean, default=True)
     autograde_enabled = db.Column(db.Boolean, default=True)
     theia_image = db.Column(
         db.TEXT, default="registry.digitalocean.com/anubis/theia-xv6"
     )
-    theia_options = db.Column(MutableJson, default=lambda: {})
+    theia_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
 
     # Dates
     release_date = db.Column(db.DateTime, nullable=False)
@@ -212,21 +224,18 @@ class Assignment(db.Model):
 
     @property
     def data(self):
-        from anubis.utils.lms.assignments import get_assignment_due_date
-        from anubis.utils.auth import current_user
-
-        due_date = get_assignment_due_date(current_user, self)
-
         return {
             "id": self.id,
             "name": self.name,
-            "due_date": str(due_date),
-            "past_due": due_date < datetime.now(),
+            "due_date": str(self.due_date),
+            "past_due": self.due_date < datetime.now(),
             "hidden": self.hidden,
             "accept_late": self.accept_late,
             "course": self.course.data,
             "description": self.description,
             "ide_enabled": self.ide_enabled,
+            "persistent_storage": self.theia_options.get('persistent_storage', False),
+            "github_repo_required": self.github_repo_required,
             "autograde_enabled": self.autograde_enabled,
             "ide_active": self.due_date + timedelta(days=3 * 7) > datetime.now(),
             "github_classroom_link": self.github_classroom_url,
@@ -427,7 +436,7 @@ class AssignedQuestionResponse(db.Model):
 
         return {
             'submitted': str(self.created),
-            'late': get_assignment_due_date(self.question.owner, self.question.assignment) < self.created,
+            'late': get_assignment_due_date(self.question.owner.id, self.question.assignment.id) < self.created,
             'text': self.response,
         }
 
@@ -648,7 +657,7 @@ class TheiaSession(db.Model):
     assignment_id = db.Column(
         db.String(128), db.ForeignKey(Assignment.id), nullable=True
     )
-    repo_url = db.Column(db.String(128), nullable=False)
+    repo_url = db.Column(db.String(128), nullable=True)
 
     # Fields
     active = db.Column(db.Boolean, default=True)
@@ -657,9 +666,14 @@ class TheiaSession(db.Model):
     image = db.Column(
         db.TEXT, default="registry.digitalocean.com/anubis/theia-xv6"
     )
-    options = db.Column(MutableJson, nullable=False, default=lambda: dict())
+
+    resources = db.Column(MutableJson, default=lambda: {})
+    network_policy = db.Column(db.String(128), default="os-student")
     network_locked = db.Column(db.Boolean, default=True)
     privileged = db.Column(db.Boolean, default=False)
+    autosave = db.Column(db.Boolean, default=True)
+    credentials = db.Column(db.Boolean, default=False)
+    persistent_storage = db.Column(db.Boolean, default=False)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
@@ -691,7 +705,9 @@ class TheiaSession(db.Model):
             "last_heartbeat": str(self.last_heartbeat),
             "last_proxy": str(self.last_proxy),
             "last_updated": str(self.last_updated),
-            "autosave": self.options.get('autosave', True),
+
+            "autosave": self.autosave,
+            "persistent_storage": self.persistent_storage,
         }
 
     @property
@@ -699,9 +715,11 @@ class TheiaSession(db.Model):
         return {
             'image': self.image,
             'repo_url': self.repo_url,
-            'options': json.dumps(self.options),
+            'autosave': self.autosave,
             'privileged': self.privileged,
-            'network_locked': self.network_locked
+            'credentials': self.credentials,
+            'network_locked': self.network_locked,
+            'persistent_storage': self.persistent_storage,
         }
 
 

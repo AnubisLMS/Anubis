@@ -1,17 +1,18 @@
 import base64
 import os
 from datetime import datetime
-from typing import Tuple
+from typing import Tuple, Optional
 
 from kubernetes import client
 
-from anubis.models import TheiaSession, db
-from anubis.utils.auth import create_token
+from anubis.models import db, TheiaSession, Assignment
+from anubis.utils.auth.token import create_token
 from anubis.utils.lms.theia import get_theia_pod_name, mark_session_ended
 from anubis.utils.services.logger import logger
+from anubis.utils.services.github import parse_github_repo_name
 
 
-def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod, client.V1PersistentVolumeClaim]:
+def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod, Optional[client.V1PersistentVolumeClaim]]:
     """
     Create the python kubernetes objects for a theia session. This is
     basically building the yaml for the theia session pod and pvc. There is
@@ -22,53 +23,89 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     :return:
     """
 
+    # Get the owner of the theia session's netid
+    netid = theia_session.owner.netid
+
     # Construct the theia pod name
-    name = get_theia_pod_name(theia_session)
+    pod_name = get_theia_pod_name(theia_session)
 
     # List of container objects
-    containers = []
+    pod_containers = []
+
+    # List of volumes
+    pod_volumes = []
+
+    # Extra env to add to the main theia server container
+    theia_extra_env = []
+
+    # Get the set repo url for this session. If the assignment has github repos disabled,
+    # then default to an empty string.
+    repo_url = theia_session.repo_url or ''
+    repo_name = parse_github_repo_name(repo_url)
 
     # Get the theia session options
-    limits = theia_session.options.get('limits', {"cpu": "2", "memory": "500Mi"})
-    requests = theia_session.options.get('requests', {"cpu": "250m", "memory": "100Mi"})
-    autosave = theia_session.options.get('autosave', True)
-    credentials = theia_session.options.get('credentials', False)
+    limits = theia_session.resources.get('limits', {"cpu": "2", "memory": "500Mi"})
+    requests = theia_session.resources.get('requests', {"cpu": "250m", "memory": "100Mi"})
+    autosave = theia_session.autosave
+    credentials = theia_session.autosave
+    privileged = theia_session.privileged
+    persistent_storage = theia_session.persistent_storage
 
     # Construct the PVC name from the theia pod name
-    volume_name = name + "-volume"
+    theia_volume_name = f"{netid}-{theia_session.id[:6]}-ide"
 
-    # Create the persistent volume claim object. Since this is a
-    # ReadWriteMany volume, the default storage class should
-    # support it.
-    pvc = client.V1PersistentVolumeClaim(
-        metadata=client.V1ObjectMeta(
-            name=volume_name,
-            labels={
-                "app.kubernetes.io/name": "theia",
-                "role": "session-storage",
-                "netid": theia_session.owner.netid,
-                "session": theia_session.id,
-            },
-        ),
-        spec=client.V1PersistentVolumeClaimSpec(
-            access_modes=["ReadWriteMany"],
-            volume_mode="Filesystem",
-            resources=client.V1ResourceRequirements(
-                requests={
-                    "storage": "50M",
-                }
+    # Default the pvc to None
+    theia_project_pvc = None
+
+    # If persistent storage is enabled for this assignment, then we should create a pvc
+    if persistent_storage:
+        # Overwrite the volume name to be the user's persistent volume
+        theia_volume_name = netid + "-ide-volume"
+
+        # Create the persistent volume claim object. Since this is a
+        # ReadWriteMany volume, the default storage class should
+        # support it.
+        theia_project_pvc = client.V1PersistentVolumeClaim(
+            metadata=client.V1ObjectMeta(
+                name=theia_volume_name,
+                labels={
+                    "app.kubernetes.io/name": "anubis",
+                    "role": "session-storage",
+                    "netid": netid,
+                },
             ),
-        ),
-    )
+            spec=client.V1PersistentVolumeClaimSpec(
+                access_modes=["ReadWriteOnce"],
+                volume_mode="Filesystem",
+                resources=client.V1ResourceRequirements(
+                    requests={
+                        "storage": "1Gi",
+                    }
+                ),
+            ),
+        )
+
+        # Append the PVC to the volume list
+        pod_volumes.append(client.V1Volume(
+            name=theia_volume_name,
+            persistent_volume_claim=client.V1PersistentVolumeClaimVolumeSource(
+                claim_name=theia_volume_name,
+            )
+        ))
+
+    # If the assignment does not have persistent volumes enabled, then create a blank
+    # "empty-dir" volume. This skips the allocation of the pvc.
+    else:
+        pod_volumes.append(client.V1Volume(name=theia_volume_name))
 
     # Create the init container. This will clone the initial repo onto
     # the shared volume.
     init_container = client.V1Container(
         name=f"theia-init",
         image="registry.digitalocean.com/anubis/theia-init:latest",
-        image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
+        image_pull_policy="IfNotPresent",
         env=[
-            client.V1EnvVar(name="GIT_REPO", value=theia_session.repo_url),
+            client.V1EnvVar(name="GIT_REPO", value=repo_url),
             client.V1EnvVar(
                 name="GIT_CRED",
                 value_from=client.V1EnvVarSource(
@@ -81,13 +118,10 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         volume_mounts=[
             client.V1VolumeMount(
                 mount_path="/out",
-                name=volume_name,
+                name=theia_volume_name,
             )
         ],
     )
-
-    # Extra env to add to the main theia server container
-    extra_env = []
 
     # If this is an admin IDE session, then we should add a token
     # for the anubis cli to be able to authenticate to the anubis
@@ -100,20 +134,54 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         # encoded token. This token should be picked up by the
         # theia init process to initialize the anubis cli with
         # the token.
-        extra_env.append(client.V1EnvVar(
+        theia_extra_env.append(client.V1EnvVar(
             name='INCLUSTER',
             value=base64.b64encode(token.encode()).decode(),
         ))
 
-    user_id = 1001
-    if theia_session.privileged:
-        user_id = 0
+    # Figure out which uid to use
+    theia_user_id = 1001
+    if privileged:
+        theia_user_id = 0
+
+    # If privileged, add docker config file to pod as a volume
+    if privileged:
+        pod_volumes.append(client.V1Volume(
+            name='docker-config',
+            secret=client.V1SecretVolumeSource(
+                default_mode=0o644,
+                secret_name="anubis",
+                items=[
+                    client.V1KeyToPath(
+                        key=".dockerconfigjson",
+                        path="config.json"
+                    )
+                ]
+            )
+        ))
+
+    # Initialize theia volume mounts array with
+    # the project volume mount
+    theia_volume_mounts = [
+        client.V1VolumeMount(
+            mount_path="/home/anubis",
+            name=theia_volume_name,
+        )
+    ]
+
+    # If the pod is privileged, add the docker config values
+    # to the /etc/default in the theia pod
+    if privileged:
+        theia_volume_mounts.append(client.V1VolumeMount(
+            mount_path="/docker",
+            name="docker-config",
+        ))
 
     # Create the main theia container. This is where the theia server runs, and
     # where the student will have a shell on.
     theia_container = client.V1Container(
         name="theia",
-        image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
+        image_pull_policy="IfNotPresent",
         ports=[client.V1ContainerPort(container_port=5000)],
 
         # Use the theia image that was specified in the database. If this is
@@ -137,8 +205,15 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
                 value=theia_session.course.course_code,
             ),
 
+            # Setting the repo name makes some of the initialization
+            # a little easier.
+            client.V1EnvVar(
+                name='REPO_NAME',
+                value=repo_name,
+            ),
+
             # Add any extra env if it was specified.
-            *extra_env,
+            *theia_extra_env,
         ],
 
         # Set the resource limits and requests
@@ -149,12 +224,23 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
 
         # Setup the shared volume where the student
         # repo exists.
-        volume_mounts=[
-            client.V1VolumeMount(
-                mount_path="/home/project",
-                name=volume_name,
-            )
-        ],
+        volume_mounts=theia_volume_mounts,
+
+        # Startup probe is the way that kubernetes can
+        # check to see if the theia has started correctly.
+        # The pod will not be marked as ready until the
+        # webserver has started and the startup probe has
+        # succeeded.
+        startup_probe=client.V1Probe(
+            http_get=client.V1HTTPGetAction(
+                path='/',
+                port=5000,
+            ),
+            initial_delay_seconds=3,
+            period_seconds=1,
+            failure_threshold=60,
+            success_threshold=1,
+        ),
 
         # If the session should be privileged, set it here. Privileged
         # containers should only exist for the management IDEs so that
@@ -162,7 +248,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         security_context=client.V1SecurityContext(
             allow_privilege_escalation=theia_session.privileged,
             privileged=theia_session.privileged,
-            run_as_user=user_id,
+            run_as_user=theia_user_id,
         ),
     )
 
@@ -173,7 +259,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     sidecar_container = client.V1Container(
         name="sidecar",
         image="registry.digitalocean.com/anubis/theia-sidecar:latest",
-        image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
+        image_pull_policy="IfNotPresent",
 
         env=[
             # Add the git credentials secret to the container. The entrypoint
@@ -206,16 +292,16 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         # Add the shared volume mount to /home/project
         volume_mounts=[
             client.V1VolumeMount(
-                mount_path="/home/project",
-                name=volume_name,
+                mount_path="/home/anubis",
+                name=theia_volume_name,
             )
         ],
     )
 
     # Add the main theia container, and the sidecar
     # to the containers list.
-    containers.append(theia_container)
-    containers.append(sidecar_container)
+    pod_containers.append(theia_container)
+    pod_containers.append(sidecar_container)
 
     # Extra labels to be applied to the pod
     extra_labels = {}
@@ -230,7 +316,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         # This label will enable the student network policy to be
         # applied to this container. The gist of this policy is that
         # students will only be able to connect to github.
-        extra_labels["network-policy"] = "student"
+        extra_labels["network-policy"] = theia_session.network_policy or 'os-student'
 
         # Set up the pod DNS to be pointed to cloudflare 1.1.1.1 instead
         # of the internal kubernetes dns.
@@ -247,12 +333,11 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     # Create pod object
     pod = client.V1Pod(
         metadata=client.V1ObjectMeta(
-
-            name=name,
+            name=pod_name,
             labels={
                 "app.kubernetes.io/name": "theia",
                 "role": "theia-session",
-                "netid": theia_session.owner.netid,
+                "netid": netid,
                 "session": theia_session.id,
                 **extra_labels,
             },
@@ -269,10 +354,10 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
             init_containers=[init_container],
 
             # Set the containers list
-            containers=containers,
+            containers=pod_containers,
 
-            # Add the shared Volume
-            volumes=[client.V1Volume(name=volume_name)],
+            # Add the shared Volume(s)
+            volumes=pod_volumes,
 
             # Add any extra things in the spec (depending on the
             # options set for the session)
@@ -280,7 +365,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         ),
     )
 
-    return pod, pvc
+    return pod, theia_project_pvc
 
 
 def reap_theia_session_k8s_resources(theia_session_id: str):
@@ -300,16 +385,7 @@ def reap_theia_session_k8s_resources(theia_session_id: str):
     v1.delete_collection_namespaced_pod(
         namespace="anubis",
         label_selector="app.kubernetes.io/name=theia,role=theia-session,session={}".format(
-            theia_session_id
-        ),
-        propagation_policy="Background",
-    )
-
-    # Mark the shared PVC for deletion by a label selector
-    v1.delete_collection_namespaced_persistent_volume_claim(
-        namespace="anubis",
-        label_selector="app.kubernetes.io/name=theia,role=session-storage,session={}".format(
-            theia_session_id
+            theia_session_id,
         ),
         propagation_policy="Background",
     )

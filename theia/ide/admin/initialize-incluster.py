@@ -13,9 +13,8 @@ if incluster is None:
 
 incluster = base64.b64decode(incluster.encode()).decode()
 
-os.makedirs('/home/theia/.anubis/', exist_ok=True)
+os.makedirs('/home/anubis/.anubis/', exist_ok=True)
 json.dump({
-    "auth": {"username": None, "password": None},
     "incluster": incluster
-}, open('/home/theia/.anubis/config.json', 'w'))
+}, open('/home/anubis/.anubis/config.json', 'w'))
 

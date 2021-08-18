@@ -5,7 +5,7 @@ import sqlalchemy.exc
 from flask import Blueprint, send_file
 
 from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQuestion
-from anubis.utils.auth import require_admin
+from anubis.utils.auth.http import require_admin
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import error_response, success_response

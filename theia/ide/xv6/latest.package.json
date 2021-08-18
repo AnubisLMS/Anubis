@@ -8,8 +8,7 @@
       "config": {
         "applicationName": "Anubis IDE",
         "preferences": {
-          "files.enableTrash": false,
-          "uri": "http://localhost:3000/theia"
+          "files.enableTrash": false
         }
       }
     }

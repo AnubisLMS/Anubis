@@ -5,7 +5,8 @@ from flask import Blueprint
 
 from anubis.models import db, TheiaSession
 from anubis.rpc.theia import reap_theia_sessions_in_course
-from anubis.utils.auth import require_admin, current_user
+from anubis.utils.auth.http import require_admin
+from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response
@@ -21,11 +22,17 @@ ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 @json_response
 def admin_ide_admin_settings():
     return success_response({'settings': {
-        "privileged": True,
-        "network_locked": False,
         "image": "registry.digitalocean.com/anubis/theia-admin",
         "repo_url": course_context.autograde_tests_repo,
-        "options": '{"limits": {"cpu": "2", "memory": "2Gi"}, "autosave": true, "credentials": true}',
+
+        # Options
+        "privileged": True,
+        "network_locked": False,
+        "network_policy": "admin",
+        "resources": '{"limits": {"cpu": "2", "memory": "2Gi"}, "requests": {"cpu": "1", "memory": "500Mi"}}',
+        "autosave": True,
+        "credentials": True,
+        "persistent_storage": False,
     }})
 
 
@@ -44,7 +51,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
 
     # Check to see if there is already a management session
     # allocated for the current user
-    session = TheiaSession.query.filter(
+    session: TheiaSession = TheiaSession.query.filter(
         TheiaSession.active,
         TheiaSession.owner_id == current_user.id,
         TheiaSession.course_id == course_context.id,
@@ -56,24 +63,40 @@ def admin_ide_initialize_custom(settings: dict, **_):
         return success_response({"session": session.data})
 
     # Read the options out of the posted data
-    network_locked = settings.get('network_locked', False)
-    privileged = settings.get('privileged', True)
     image = settings.get('image', 'registry.digitalocean.com/anubis/theia-admin')
     repo_url = settings.get('repo_url', 'https://github.com/os3224/anubis-assignment-tests')
-    options_str = settings.get('options', '{"limits": {"cpu": "4", "memory": "4Gi"}}')
+    resources_str = settings.get('resources', '{"limits":{"cpu":"4","memory":"4Gi"}}')
+    network_locked = settings.get('network_locked', False)
+    network_policy = settings.get('network_policy', 'admin')
+    autosave = settings.get('autosave', True)
+    credentials = settings.get('credentials', True)
+    privileged = settings.get('privileged', True)
+    persistent_storage = settings.get('persistent_storage', False)
 
     # Attempt to load the options_str into a dict object
     try:
-        options = json.loads(options_str)
+        resources = json.loads(resources_str)
     except json.JSONDecodeError:
         return error_response('Can not parse JSON options')
 
     # Create a new session
     session = TheiaSession(
-        owner_id=current_user.id, assignment_id=None, course_id=course_context.id,
-        network_locked=network_locked, privileged=privileged,
-        image=image, repo_url=repo_url, options=options,
-        active=True, state="Initializing",
+        owner_id=current_user.id,
+        assignment_id=None,
+        course_id=course_context.id,
+        image=image,
+        repo_url=repo_url,
+        active=True,
+        state="Initializing",
+
+        # Options
+        network_locked=network_locked,
+        network_policy=network_policy,
+        autosave=autosave,
+        resources=resources,
+        credentials=credentials,
+        privileged=privileged,
+        persistent_storage=persistent_storage,
     )
     db.session.add(session)
     db.session.commit()

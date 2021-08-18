@@ -1,15 +1,18 @@
 import os
 import traceback
+from typing import Optional
 
 import requests
+from parse import parse
 
 from anubis.models import db, Submission, Assignment, AssignmentRepo
-from anubis.utils.lms.submissions import init_submission
-from anubis.utils.lms.webhook import check_repo, guess_github_username
-from anubis.utils.services.rpc import enqueue_autograde_pipeline
 
 
 def fix_github_broken_repos(org_name: str):
+    from anubis.utils.lms.submissions import init_submission
+    from anubis.utils.lms.webhook import check_repo, guess_github_username
+    from anubis.utils.services.rpc import enqueue_autograde_pipeline
+
     token = os.environ.get('GITHUB_TOKEN', None)
     if token is None:
         print('MISSING GITHUB_TOKEN')
@@ -136,3 +139,21 @@ def fix_github_broken_repos(org_name: str):
 
         if repo:
             print(f'checked repo: {repo_name} {github_username} {user} {repo.id}')
+
+
+def parse_github_repo_name(repo_url: str) -> Optional[str]:
+    """
+    Get github repo name from https url.
+
+    parse_github_repo_name("https://github.com/GusSand/Anubis")
+    -> "Anubis"
+
+    :param repo_url:
+    :return:
+    """
+    r = parse("https://github.com/{}/{}", repo_url)
+
+    if r is None:
+        return ''
+
+    return r[1]

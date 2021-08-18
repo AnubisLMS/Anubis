@@ -2,7 +2,8 @@ from flask import Blueprint
 from sqlalchemy.exc import IntegrityError, DataError
 
 from anubis.models import db, Course, TAForCourse, ProfessorForCourse, User
-from anubis.utils.auth import require_admin, require_superuser, current_user
+from anubis.utils.auth.http import require_admin, require_superuser
+from anubis.utils.auth.user import current_user
 from anubis.utils.data import row2dict, req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response, error_response

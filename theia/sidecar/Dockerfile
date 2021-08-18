@@ -1,7 +1,7 @@
-FROM python:3-alpine
+FROM python:3.9-alpine
 
 RUN adduser -D -u 1001 theia \
-  && apk add --update --no-cache dcron git busybox-suid \
+  && apk add --update --no-cache git bash \
   && pip3 install --no-cache-dir flask supervisor gunicorn
 
 USER theia

@@ -2,7 +2,7 @@ from flask import Blueprint
 from sqlalchemy.orm import defer
 
 from anubis.models import db, StaticFile
-from anubis.utils.auth import require_admin
+from anubis.utils.auth.http import require_admin
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.files import process_file_upload

@@ -23,14 +23,7 @@ popd
 ./debug/upgrade.sh
 
 # Restart the most common deployments
-kubectl rollout restart deployments.apps/anubis-api -n anubis
-kubectl rollout restart deployments.apps/anubis-web -n anubis
-kubectl rollout restart deployments.apps/anubis-rpc-default -n anubis
-kubectl rollout restart deployments.apps/anubis-rpc-theia -n anubis
-kubectl rollout restart deployments.apps/anubis-rpc-regrade -n anubis
-kubectl rollout restart deployments.apps/anubis-pipeline-api -n anubis
-kubectl rollout restart deployments.apps/anubis-theia-proxy -n anubis
-kubectl rollout restart daemonset.apps/anubis-puller -n anubis
+./restart.sh
 
 cd ..
 make startup-links

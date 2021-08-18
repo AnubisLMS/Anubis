@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 from anubis.models import db, Config
-from anubis.utils.auth import require_admin, require_superuser
+from anubis.utils.auth.http import require_admin, require_superuser
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http.https import success_response
 

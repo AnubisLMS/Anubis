@@ -33,6 +33,8 @@ spec:
         volumeMounts:
         - name: dockersock
           mountPath: /var/run/docker.sock
+        - name: containerdsock
+          mountPath: /run/containerd/containerd.sock
         - name: dockerconfig
           mountPath: "/anubis"
           readOnly: true
@@ -41,6 +43,9 @@ spec:
       - name: dockersock
         hostPath:
           path: /var/run/docker.sock
+      - name: containerdsock
+        hostPath:
+          path: /run/containerd/containerd.sock
       - name: dockerconfig
         secret:
           secretName: {{ .Values.puller.imagePullSecret }}
