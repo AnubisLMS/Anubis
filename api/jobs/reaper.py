@@ -9,7 +9,7 @@ from anubis.models import db, Submission, Assignment, Course
 from anubis.utils.data import with_context
 from anubis.utils.lms.autograde import bulk_autograde
 from anubis.utils.lms.submissions import init_submission
-from anubis.utils.services.github import fix_github_broken_repos
+from anubis.utils.github.fix import fix_github_missing_submissions
 from anubis.utils.services.logger import logger
 from anubis.utils.services.rpc import enqueue_ide_reap_stale, enqueue_autograde_pipeline
 
@@ -107,7 +107,7 @@ def reap_broken_repos():
 
         # Attempt to fix any broken or lost repos for the course org.
         try:
-            fix_github_broken_repos(org_name)
+            fix_github_missing_submissions(org_name)
         except Exception as e:
             logger.error('reaper.reap_broken_repos failed', org_name, e)
             logger.error(traceback.format_exc())
