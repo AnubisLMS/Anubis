@@ -65,7 +65,7 @@ def seed():
         intro_to_os_students,
         name="Intro to OS", course_code="CS-UY 3224", section="A", professor_display_name="Gustavo",
         autograde_tests_repo='https://github.com/os3224/anubis-assignment-tests',
-        github_org_url='https://github.com/os3224',
+        github_org='os3224',
     )
     os_assignment0, _, os_submissions0, _ = create_assignment(
         intro_to_os_course, intro_to_os_students, i=0
@@ -87,7 +87,7 @@ def seed():
         mmds_students,
         name="Mining Massive Datasets", course_code="CS-UY 3843", section="A", professor_display_name="Gustavo",
         autograde_tests_repo='https://github.com/os3224/anubis-assignment-tests',
-        github_org_url='https://github.com/os3224'
+        github_org='os3224'
     )
     mmds_assignment, _, mmds_submissions, _ = create_assignment(mmds_course, mmds_students)
     init_submissions(mmds_submissions)

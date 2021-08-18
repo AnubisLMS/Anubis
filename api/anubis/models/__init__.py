@@ -193,21 +193,27 @@ class Assignment(db.Model):
     name = db.Column(db.TEXT, nullable=False, index=True)
     hidden = db.Column(db.Boolean, default=False)
     description = db.Column(db.TEXT, nullable=True)
-    github_template = db.Column(db.TEXT, nullable=True, default=None)
-    pipeline_image = db.Column(db.TEXT, nullable=True, index=True)
     unique_code = db.Column(
         db.String(8),
         unique=True,
         default=lambda: base64.b16encode(os.urandom(4)).decode(),
     )
-    ide_enabled = db.Column(db.Boolean, default=True)
-    github_repo_required = db.Column(db.Boolean, default=True)
     accept_late = db.Column(db.Boolean, default=True)
+
+    # Autograde
+    pipeline_image = db.Column(db.TEXT, nullable=True, index=True)
     autograde_enabled = db.Column(db.Boolean, default=True)
+
+    # IDE
+    ide_enabled = db.Column(db.Boolean, default=True)
     theia_image = db.Column(
         db.TEXT, default="registry.digitalocean.com/anubis/theia-xv6"
     )
     theia_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
+
+    # Github
+    github_template = db.Column(db.TEXT, nullable=True, default=None)
+    github_repo_required = db.Column(db.Boolean, default=True)
 
     # Dates
     release_date = db.Column(db.DateTime, nullable=False)
@@ -281,8 +287,13 @@ class AssignmentRepo(db.Model):
     github_username = db.Column(db.TEXT, nullable=False)
     repo_url = db.Column(db.TEXT, nullable=False)
 
-    created = db.Column(db.Boolean, default=False)
+    # State booleans
+    repo_created = db.Column(db.Boolean, default=False)
     collaborator_configured = db.Column(db.Boolean, default=False)
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     @property
     def data(self):
