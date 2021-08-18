@@ -20,13 +20,13 @@ const useStyles = makeStyles((theme) => ({
 
 const editableFields = [
   {field: 'name', label: 'Assignment Name'},
-  {field: 'github_classroom_url', label: 'Github Classroom URL'},
+  {field: 'github_template', label: 'Github Template (ex: wabscale/xv6-public)'},
   {field: 'theia_image', label: 'IDE Docker Image'},
-  {field: 'theia_options', label: 'IDE Options', type: 'json'},
-  {field: 'pipeline_image', label: 'Pipeline Image'},
+  {field: 'theia_options', label: 'IDE Options JSON', type: 'json'},
+  {field: 'pipeline_image', label: 'Autograde Docker Image'},
   {field: 'unique_code', label: 'Unique Code'},
   {field: 'hidden', label: 'Hidden', type: 'boolean'},
-  {field: 'github_repo_required', label: 'Github Repo Required', type: 'boolean'},
+  {field: 'github_repo_required', label: 'Github Repos Enabled', type: 'boolean'},
   {field: 'accept_late', label: 'Accept Late Submissions', type: 'boolean'},
   {field: 'ide_enabled', label: 'IDEs Enabled', type: 'boolean'},
   {field: 'autograde_enabled', label: 'Autograde Enabled', type: 'boolean'},
