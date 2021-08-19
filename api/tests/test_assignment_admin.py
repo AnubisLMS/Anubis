@@ -6,7 +6,8 @@ sample_sync = {
     "name": "name",
     "course": "CS-UY 3224",
     "hidden": True,
-    "github_classroom_url": "",
+    "github_template": "wabscale/xv6-public",
+    "github_repo_required": True,
     "unique_code": "aa11bb22",
     "pipeline_image": "registry.digitalocean.com/anubis/assignment/aa11bb2233",
     "date": {
