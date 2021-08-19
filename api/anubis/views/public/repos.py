@@ -54,7 +54,7 @@ def public_repos_create(assignment_id: str):
     if assignment.release_date < datetime.now():
         req_assert(is_course_admin(assignment.course_id, current_user.id), message='Assignment does not exist')
 
-    repo = create_assignment_repo(assignment, current_user)
+    repo = create_assignment_repo(current_user, assignment)
 
     req_assert(repo.repo_created, message='Repo could not be created')
     req_assert(repo.collaborator_configured, message='Student could not be added as a collaborator to repo')

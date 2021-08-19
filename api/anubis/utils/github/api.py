@@ -9,16 +9,20 @@ from anubis.utils.services.logger import logger
 
 def get_github_token() -> Optional[str]:
 
-    # Get GITHUB token
+    # Get GITHUB token from environment
     token = os.environ.get('GITHUB_TOKEN', None)
+
+    # If we could not get the token, log and return None
     if token is None:
         logger.error('MISSING GITHUB_TOKEN')
         return None
+
     return token
 
 
 def github_rest_put(url, body=None):
 
+    # Get the github api token
     token = get_github_token()
 
     url = 'https://api.github.com' + url
@@ -53,6 +57,10 @@ def github_graphql(query: str, variables: Dict[str, Any] = None) -> Optional[Dic
     try:
         r = requests.post(url=url, json=json, headers=headers)
         return r.json()['data']
+    except KeyError as e:
+        logger.error(traceback.format_exc())
+        logger.error(r.content)
+        return None
     except Exception as e:
         logger.error(traceback.format_exc())
         logger.error(f'Request to github api Failed {e}')

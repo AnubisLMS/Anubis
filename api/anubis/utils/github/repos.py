@@ -60,7 +60,7 @@ def add_collaborator(github_org: str, new_repo_name: str, github_username: str):
 
 def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo:
     # Get template information
-    template_repo_path = assignment.template_repo
+    template_repo_path = assignment.github_template
     github_org = assignment.course.github_org
 
     # Get assignment name (lowercase and spaces removed)
