@@ -88,9 +88,8 @@ def create_assignment(course, users, i=0, do_submissions=True, **kwargs):
     # Assignment 1 uniq
     assignment = Assignment(
         id=rand(), name=f"{course.course_code} Assignment {i}", unique_code=rand(8), hidden=False,
-        description=lorem,
+        description=lorem, github_template='wabscale/xv6-public',
         pipeline_image=f"registry.digitalocean.com/anubis/assignment/{rand(8)}",
-        github_classroom_url='http://localhost',
         release_date=datetime.now() - timedelta(hours=2),
         due_date=datetime.now() + timedelta(hours=12),
         grace_date=datetime.now() + timedelta(hours=13),

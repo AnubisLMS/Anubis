@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useCallback, useState} from 'react';
 import {Link} from 'react-router-dom';
 
 import makeStyles from '@material-ui/core/styles/makeStyles';
@@ -22,6 +22,10 @@ import ReactMarkdown from 'react-markdown';
 import Box from '@material-ui/core/Box';
 
 import {nonStupidDatetimeFormat} from '../../../Utils/datetime';
+import axios from 'axios';
+import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../../Utils/standardErrorHandler';
+import {useSnackbar} from 'notistack';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -82,6 +86,12 @@ const remainingTime = (dueDate) => {
   return timeLeft;
 };
 
+const createAssignmentRepo = (assignment, enqueueSnackbar) => () => {
+  axios.post(`/api/public/repos/create/${assignment.id}`).then((response) => {
+    standardStatusHandler(response, enqueueSnackbar);
+  }).catch(standardErrorHandler(enqueueSnackbar));
+};
+
 export default function AssignmentCard({
   assignment,
   setSelectedTheia,
@@ -96,7 +106,6 @@ export default function AssignmentCard({
     due_date,
     course: {course_code},
     has_submission,
-    github_classroom_link,
     ide_enabled,
     has_repo,
     repo_url,
@@ -104,6 +113,8 @@ export default function AssignmentCard({
     github_repo_required,
     // accept_late,
   } = assignment;
+
+  const {enqueueSnackbar} = useSnackbar();
 
   const [timeLeft] = useState(remainingTime(due_date));
   const [isOpen, setIsOpen] = useState(false);
@@ -120,12 +131,12 @@ export default function AssignmentCard({
     );
   });
 
-  const handleGithubClassroomLinkClicked = useCallback(() => {
+  const handleGithubCreateLinkClicked = useCallback(() => {
     setRunAssignmentPolling(true);
     setPollingAssignmentId(id);
   }, [setRunAssignmentPolling, setPollingAssignmentId, id]);
 
-  const githubLinkEnabled = typeof github_classroom_link === 'string' && github_repo_required;
+  const githubLinkEnabled = github_repo_required;
   const ideLinkEnabled = ide_enabled && (has_repo || runAssignmentPolling || !github_repo_required);
 
   return (
@@ -165,7 +176,7 @@ export default function AssignmentCard({
         </CardContent>
       </CardActionArea>
       <CardActions>
-        <Box display = 'flex' flexDirection="column" width={'100%'}>
+        <Box display='flex' flexDirection="column" width={'100%'}>
           <Button
             size={'small'}
             variant={'contained'}
@@ -175,41 +186,59 @@ export default function AssignmentCard({
             disabled={!ideLinkEnabled}
             onClick={() => setSelectedTheia(assignment)}
           >
-          Anubis Cloud IDE
+            Anubis Cloud IDE
           </Button>
-          {runAssignmentPolling && <CircularProgress size={24} className={classes.pollingProgress} />}
-          <Button
-            size={'small'}
-            variant={'contained'}
-            color={'primary'}
-            disabled={!githubLinkEnabled}
-            startIcon={has_repo ? <ExitToAppIcon/> : <GitHubIcon/>}
-            className={classes.button}
-            component={'a'}
-            href={has_repo ? repo_url : github_classroom_link}
-            target={'_blank'}
-            onClickCapture={!has_repo && handleGithubClassroomLinkClicked}
-          >
-            {has_repo ? 'Go to repo' : 'Create repo'}
-          </Button>
+          {runAssignmentPolling && <CircularProgress size={24} className={classes.pollingProgress}/>}
+          {githubLinkEnabled && (
+            <React.Fragment>
+              {!has_repo && (
+                <Button
+                  size={'small'}
+                  variant={'contained'}
+                  color={'primary'}
+                  startIcon={<GitHubIcon/>}
+                  className={classes.button}
+                  onClick={createAssignmentRepo(assignment, enqueueSnackbar)}
+                  onClickCapture={handleGithubCreateLinkClicked}
+                >
+                  Create assignment repo
+                </Button>
+              )}
+
+              {has_repo && (
+                <Button
+                  size={'small'}
+                  variant={'contained'}
+                  color={'primary'}
+                  startIcon={<GitHubIcon/>}
+                  className={classes.button}
+                  component={'a'}
+                  href={repo_url}
+                  target={'_blank'}
+                >
+                  Go to assignment repo
+                </Button>
+              )}
+            </React.Fragment>
+          )}
           {assignment.description &&
-            <Button
-              size='small'
-              variant='contained'
-              color='primary'
-              className={classes.button}
-              component='a'
-              onClick = {() => setIsOpen(true)}
-            >
-              View Description
-            </Button>
+          <Button
+            size='small'
+            variant='contained'
+            color='primary'
+            className={classes.button}
+            component='a'
+            onClick={() => setIsOpen(true)}
+          >
+            View Description
+          </Button>
           }
           <Dialog
-            onClose = {() => setIsOpen(false)}
-            open = {isOpen}
+            onClose={() => setIsOpen(false)}
+            open={isOpen}
           >
             <div className={classes.dialog}>
-              <Typography variant = 'h6'>Assignment - {assignment.name}</Typography>
+              <Typography variant='h6'>Assignment - {assignment.name}</Typography>
               <ReactMarkdown>
                 {assignment.description}
               </ReactMarkdown>

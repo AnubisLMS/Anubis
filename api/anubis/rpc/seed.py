@@ -65,18 +65,23 @@ def seed():
         intro_to_os_students,
         name="Intro to OS", course_code="CS-UY 3224", section="A", professor_display_name="Gustavo",
         autograde_tests_repo='https://github.com/os3224/anubis-assignment-tests',
-        github_org_url='https://github.com/os3224',
+        github_org='os3224',
     )
     os_assignment0, _, os_submissions0, _ = create_assignment(
         intro_to_os_course, intro_to_os_students, i=0
     )
     os_assignment1, _, os_submissions1, _ = create_assignment(
-        intro_to_os_course, intro_to_os_students, i=1, do_submissions=False, github_repo_required=False,
+        intro_to_os_course, intro_to_os_students, i=1, do_submissions=False,
+    )
+    os_assignment2, _, os_submissions2, _ = create_assignment(
+        intro_to_os_course, intro_to_os_students, i=2, do_submissions=False, github_repo_required=False,
     )
     init_submissions(os_submissions0)
     assign_questions(os_assignment0)
     init_submissions(os_submissions1)
     assign_questions(os_assignment1)
+    init_submissions(os_submissions2)
+    assign_questions(os_assignment2)
     ta = TAForCourse(owner=ta_user, course=intro_to_os_course)
     professor = ProfessorForCourse(owner=professor_user, course=intro_to_os_course)
     db.session.add_all([professor, ta])
@@ -87,7 +92,7 @@ def seed():
         mmds_students,
         name="Mining Massive Datasets", course_code="CS-UY 3843", section="A", professor_display_name="Gustavo",
         autograde_tests_repo='https://github.com/os3224/anubis-assignment-tests',
-        github_org_url='https://github.com/os3224'
+        github_org='os3224'
     )
     mmds_assignment, _, mmds_submissions, _ = create_assignment(mmds_course, mmds_students)
     init_submissions(mmds_submissions)

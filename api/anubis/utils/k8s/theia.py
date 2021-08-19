@@ -1,15 +1,14 @@
 import base64
-import os
 from datetime import datetime
 from typing import Tuple, Optional
 
 from kubernetes import client
 
-from anubis.models import db, TheiaSession, Assignment
+from anubis.models import db, TheiaSession
 from anubis.utils.auth.token import create_token
 from anubis.utils.lms.theia import get_theia_pod_name, mark_session_ended
 from anubis.utils.services.logger import logger
-from anubis.utils.services.github import parse_github_repo_name
+from anubis.utils.github.parse import parse_github_repo_name
 
 
 def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod, Optional[client.V1PersistentVolumeClaim]]:

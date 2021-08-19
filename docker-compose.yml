@@ -36,6 +36,7 @@ services:
       - "DEBUG=1"
       - "DB_HOST=db"
       - "MIGRATE=1"
+      - "GITHUB_TOKEN"
     volumes:
       - "./api:/opt/app"
     labels:
@@ -52,8 +53,8 @@ services:
     environment:
       - "DEBUG=1"
       - "DB_HOST=db"
+      - "GITHUB_TOKEN"
       - "CREATE_APP_FUNCTION=create_pipeline_app"
-      - "GUNICORN_OPTIONS=--reload"
     ports:
       - 127.0.0.1:5004:5004
     volumes:
@@ -67,6 +68,7 @@ services:
     environment:
       - "DEBUG=1"
       - "DB_HOST=db"
+      - "GITHUB_TOKEN"
     volumes:
       - "./api:/opt/app"
     labels:
@@ -78,6 +80,7 @@ services:
     environment:
       - "DEBUG=1"
       - "DB_HOST=db"
+      - "GITHUB_TOKEN"
     volumes:
       - "./api:/opt/app"
     labels:
@@ -89,6 +92,7 @@ services:
     environment:
       - "DEBUG=1"
       - "DB_HOST=db"
+      - "GITHUB_TOKEN"
     volumes:
       - "./api:/opt/app"
     labels:

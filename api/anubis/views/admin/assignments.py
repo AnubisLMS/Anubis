@@ -302,7 +302,6 @@ def private_assignment_sync(assignment: dict):
         "name": "{name}",
         "course": "CS-UY 3224",
         "hidden": true,
-        "github_classroom_url": "",
         "unique_code": "{code}",
         "pipeline_image": "registry.digitalocean.com/anubis/assignment/{code}",
         "date": {
@@ -347,9 +346,6 @@ def private_assignment_sync(assignment: dict):
       }
     }
 
-    :param assignment_data:
-    :param test_data:
-    :param question_data:
     :return:
     """
 

@@ -1,22 +1,52 @@
-import os
-import traceback
-from typing import Optional
+from datetime import datetime, timedelta
+from typing import List
 
-import requests
-from parse import parse
+from sqlalchemy.sql import or_, and_
 
-from anubis.models import db, Submission, Assignment, AssignmentRepo
+from anubis.models import (
+    db,
+    User,
+    Assignment,
+    Submission,
+    AssignmentRepo,
+)
+from anubis.utils.github.api import github_graphql
+from anubis.utils.github.repos import create_assignment_repo
+from anubis.utils.services.logger import logger
 
 
-def fix_github_broken_repos(org_name: str):
+def fix_github_broken_repos():
+    # Search for broken repos
+    broken_repos: List[AssignmentRepo] = AssignmentRepo.query.filter(or_(
+        # Repo not created
+        AssignmentRepo.repo_created == False,
+
+        # Collaborator not configured
+        AssignmentRepo.collaborator_configured == False,
+    ),
+        AssignmentRepo.created > datetime.now() + timedelta(minutes=1),
+        AssignmentRepo.created < datetime.now() - timedelta(hours=1),
+    ).all()
+
+    # Iterate over broken repos, fixing as we go
+    for repo in broken_repos:
+
+        # Get student & assignment
+        student: User = repo.owner
+        assignment: Assignment = repo.assignment
+
+        # Log fix event
+        logger.info(f'Attempting to fix broken repo netid={student.netid} assignment={assignment.unique_code}')
+
+        # The create assignment repo function will attempt
+        # to fix missing steps.
+        create_assignment_repo(student, assignment)
+
+
+def fix_github_missing_submissions(org_name: str):
     from anubis.utils.lms.submissions import init_submission
     from anubis.utils.lms.webhook import check_repo, guess_github_username
     from anubis.utils.services.rpc import enqueue_autograde_pipeline
-
-    token = os.environ.get('GITHUB_TOKEN', None)
-    if token is None:
-        print('MISSING GITHUB_TOKEN')
-        return
 
     # Do graphql nonsense
     # Refer to here for graphql over https: https://graphql.org/learn/serving-over-http/
@@ -41,20 +71,17 @@ def fix_github_broken_repos(org_name: str):
       }
     }
     '''
-    url = 'https://api.github.com/graphql'
-    json = {'query': query, 'variables': {'orgName': org_name}}
-    headers = {'Authorization': 'token %s' % token}
 
-    # Make the graph request over http
-    try:
-        r = requests.post(url=url, json=json, headers=headers)
-        data = r.json()['data']
-        organization = data['organization']
-        repositories = organization['repositories']['nodes']
-    except Exception as e:
-        print(traceback.format_exc())
-        print(f'Request to github api Failed {e}')
+    # Make the github query
+    data = github_graphql(query, {'orgName': org_name})
+
+    # Check that the data is there
+    if data is None:
         return
+
+    # Get organization and repositories from response
+    organization = data['organization']
+    repositories = organization['repositories']['nodes']
 
     # Running map of unique_code -> assignment objects
     assignments = dict()
@@ -139,21 +166,3 @@ def fix_github_broken_repos(org_name: str):
 
         if repo:
             print(f'checked repo: {repo_name} {github_username} {user} {repo.id}')
-
-
-def parse_github_repo_name(repo_url: str) -> Optional[str]:
-    """
-    Get github repo name from https url.
-
-    parse_github_repo_name("https://github.com/GusSand/Anubis")
-    -> "Anubis"
-
-    :param repo_url:
-    :return:
-    """
-    r = parse("https://github.com/{}/{}", repo_url)
-
-    if r is None:
-        return ''
-
-    return r[1]

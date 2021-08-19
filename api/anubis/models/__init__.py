@@ -104,7 +104,7 @@ class Course(db.Model):
     github_repo_required = db.Column(db.Boolean, default=True)
     theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.digitalocean.com/anubis/xv6')
     theia_default_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
-    github_org_url = db.Column(db.TEXT, default='')
+    github_org = db.Column(db.TEXT, default='')
     join_code = db.Column(db.String(256), unique=True)
 
     assignments = db.relationship('Assignment', cascade='all,delete', backref='course')
@@ -193,21 +193,27 @@ class Assignment(db.Model):
     name = db.Column(db.TEXT, nullable=False, index=True)
     hidden = db.Column(db.Boolean, default=False)
     description = db.Column(db.TEXT, nullable=True)
-    github_classroom_url = db.Column(db.TEXT, nullable=True, default=None)
-    pipeline_image = db.Column(db.TEXT, nullable=True, index=True)
     unique_code = db.Column(
         db.String(8),
         unique=True,
         default=lambda: base64.b16encode(os.urandom(4)).decode(),
     )
-    ide_enabled = db.Column(db.Boolean, default=True)
-    github_repo_required = db.Column(db.Boolean, default=True)
     accept_late = db.Column(db.Boolean, default=True)
+
+    # Autograde
+    pipeline_image = db.Column(db.TEXT, nullable=True, index=True)
     autograde_enabled = db.Column(db.Boolean, default=True)
+
+    # IDE
+    ide_enabled = db.Column(db.Boolean, default=True)
     theia_image = db.Column(
         db.TEXT, default="registry.digitalocean.com/anubis/theia-xv6"
     )
     theia_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
+
+    # Github
+    github_template = db.Column(db.TEXT, nullable=True, default=None)
+    github_repo_required = db.Column(db.Boolean, default=True)
 
     # Dates
     release_date = db.Column(db.DateTime, nullable=False)
@@ -238,7 +244,6 @@ class Assignment(db.Model):
             "github_repo_required": self.github_repo_required,
             "autograde_enabled": self.autograde_enabled,
             "ide_active": self.due_date + timedelta(days=3 * 7) > datetime.now(),
-            "github_classroom_link": self.github_classroom_url,
             "tests": [t.data for t in self.tests if t.hidden is False],
         }
 
@@ -247,23 +252,6 @@ class Assignment(db.Model):
         data = self.data
         data['tests'] = [t.data for t in self.tests]
         return data
-
-    @property
-    def meta_shape(self):
-        return {
-            "assignment": {
-                "name": str,
-                "course": str,
-                "unique_code": str,
-                "hidden": bool,
-                "github_classroom_url": str,
-                "pipeline_image": str,
-                "release_date": str,
-                "due_date": str,
-                "grace_date": str,
-                "description": str,
-            }
-        }
 
 
 class AssignmentRepo(db.Model):
@@ -281,6 +269,14 @@ class AssignmentRepo(db.Model):
     # Fields
     github_username = db.Column(db.TEXT, nullable=False)
     repo_url = db.Column(db.TEXT, nullable=False)
+
+    # State booleans
+    repo_created = db.Column(db.Boolean, default=False)
+    collaborator_configured = db.Column(db.Boolean, default=False)
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     @property
     def data(self):
