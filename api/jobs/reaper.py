@@ -9,7 +9,7 @@ from anubis.models import db, Submission, Assignment, Course
 from anubis.utils.data import with_context
 from anubis.utils.lms.autograde import bulk_autograde
 from anubis.utils.lms.submissions import init_submission
-from anubis.utils.github.fix import fix_github_missing_submissions
+from anubis.utils.github.fix import fix_github_missing_submissions, fix_github_broken_repos
 from anubis.utils.services.logger import logger
 from anubis.utils.services.rpc import enqueue_ide_reap_stale, enqueue_autograde_pipeline
 
@@ -71,7 +71,7 @@ def reap_recent_assignments():
         bulk_autograde(assignment.id)
 
 
-def reap_broken_repos():
+def reap_github():
     """
     For reasons not clear to me yet, the webhooks are sometimes missing
     on the first commit. The result is that repos will be created on
@@ -114,6 +114,9 @@ def reap_broken_repos():
             logger.error('continuing')
             continue
 
+    # Attempt to fix any broken github repo permissions
+    fix_github_broken_repos()
+
 
 @with_context
 def reap():
@@ -124,7 +127,7 @@ def reap():
     reap_stale_submissions()
 
     # Reap broken repos
-    reap_broken_repos()
+    reap_github()
 
     # Reap broken submissions in recent assignments
     reap_recent_assignments()
