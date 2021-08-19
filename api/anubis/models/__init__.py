@@ -253,23 +253,6 @@ class Assignment(db.Model):
         data['tests'] = [t.data for t in self.tests]
         return data
 
-    @property
-    def meta_shape(self):
-        return {
-            "assignment": {
-                "name": str,
-                "course": str,
-                "unique_code": str,
-                "hidden": bool,
-                "github_classroom_url": str,
-                "pipeline_image": str,
-                "release_date": str,
-                "due_date": str,
-                "grace_date": str,
-                "description": str,
-            }
-        }
-
 
 class AssignmentRepo(db.Model):
     __tablename__ = "assignment_repo"

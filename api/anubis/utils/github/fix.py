@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import List
 
-from sqlalchemy.sql import or_
+from sqlalchemy.sql import or_, and_
 
 from anubis.models import (
     db,
@@ -23,7 +23,10 @@ def fix_github_broken_repos():
 
         # Collaborator not configured
         AssignmentRepo.collaborator_configured == False,
-    ), AssignmentRepo.created > datetime.now() + timedelta(minutes=1)).all()
+    ),
+        AssignmentRepo.created > datetime.now() + timedelta(minutes=1),
+        AssignmentRepo.created < datetime.now() - timedelta(hours=1),
+    ).all()
 
     # Iterate over broken repos, fixing as we go
     for repo in broken_repos:
