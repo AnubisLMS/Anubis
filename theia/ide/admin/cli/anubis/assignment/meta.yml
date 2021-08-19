@@ -3,14 +3,10 @@ assignment:
   class: "{course_code}"
   hidden: true
 
-  # Optionally specify the github classroom link
+  # Optionally specify the github template
   # for students to get their repo.
-  #
-  #  !! Remember to set the Custom repository
-  #  !! prefix to {name}-{unique_code}
-  #  !! when creating the assignment on
-  #  !! Github Classroom
-  github_classroom_url: ""
+  github_repo_required: true
+  github_template: "wabscale/xv6-public"
 
   # Don't change these!
   unique_code: "{unique_code}"
