@@ -10,7 +10,7 @@
     "lru-cache": "^6.0.0",
     "mysql": "^2.18.1",
     "universal-cookie": "^4.0.4",
-    "url-parse": "^1.4.7"
+    "url-parse": "^1.5.2"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
