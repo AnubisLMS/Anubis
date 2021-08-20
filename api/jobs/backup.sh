@@ -10,9 +10,10 @@ set -ex
 
 echo 'Creating backup file'
 mysqldump \
-    -u anubis \
-    -h ${DB_HOST} \
-    --password=${DATABASE_PASSWORD} \
+    --user=anubis \
+    --host=${DB_HOST} \
+    --port=${DB_PORT} \
+    --password=${DB_PASSWORD} \
     --skip-create-options \
     anubis \
     | gzip - > /tmp/${BACKUP_FILE}
@@ -22,5 +23,3 @@ if [ -n "${SFTP_LOCATION}" ]; then
     echo "put /tmp/${BACKUP_FILE} ${SFTP_LOCATION}" | sftp ${SFTP_USER}@${SFTP_HOST}
 fi
 
-echo 'copying to DO volume'
-cp /tmp/${BACKUP_FILE} /mnt/backups/${BACKUP_FILE}

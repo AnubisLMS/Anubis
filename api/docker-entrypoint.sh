@@ -3,7 +3,7 @@
 set -ex
 
 echo 'Waiting for db...'
-until mysqladmin ping -h "${DB_HOST}"; do
+until mysqladmin ping -h "${DB_HOST}" -P "${DB_PORT:-3306}"; do
     sleep 1
 done
 echo 'db ready'

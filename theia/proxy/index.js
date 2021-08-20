@@ -11,12 +11,13 @@ const SECRET_KEY = process.env.SECRET_KEY ?? 'DEBUG';
 const cache = new LRU(100);
 
 const knex = Knex({
-  client: "mysql",
+  client: "mysql2",
   connection: {
     database: "anubis",
     user: "anubis",
     password: process.env.DB_PASSWORD || "anubis",
     host: process.env.DB_HOST || "127.0.0.1",
+    port: process.env.DB_PORT || "3306",
   }
 });
 

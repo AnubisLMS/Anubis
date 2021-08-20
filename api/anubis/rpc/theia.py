@@ -283,6 +283,9 @@ def reap_stale_theia_sessions(*_):
     :return:
     """
 
+    # Load the incluster config
+    config.load_incluster_config()
+
     # Log the event
     logger.info("Clearing stale theia sessions")
 

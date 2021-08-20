@@ -28,7 +28,7 @@ pipeline_api:
   workers: 1
 
 web:
-  replicas: 1
+  replicas: 2
   image: "registry.digitalocean.com/anubis/web"
   tag: "latest"
 
@@ -53,11 +53,8 @@ elasticsearch:
 backup:
   enable: true
   suspend: false
-  schedule: "0 */6 * * *"
-  storageClassName: do-block-storage
-  remote:
-    enable: true
-    secretName: anubis-backup-creds
+  schedule: "0 0 * * *"
+  secretName: anubis-backup-creds
 
 hpa:
   enable: true

@@ -8,7 +8,7 @@
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.21.12",
     "lru-cache": "^6.0.0",
-    "mysql": "^2.18.1",
+    "mysql2": "^2.3.0",
     "universal-cookie": "^4.0.4",
     "url-parse": "^1.5.2"
   },
