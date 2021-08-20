@@ -90,20 +90,12 @@ def reap_github():
     # Iterate over all course attempting to fix issues
     # on each github org.
     for course in courses:
-        # Get the admin specified github org url
-        org_url = (course.github_org_url or '').rstrip('/')
-
-        # Try to parse out the org name from the expected structure
-        # of the org url.
-        match = parse('https://github.com/{}', org_url)
-
-        # If a match for the org name was not found, then we note in the logs and continue
-        if match is None:
-            logger.info('Could not find org_name for reaper.reap_broken_repos')
-            continue
-
         # Get the org_name from the matches values
-        org_name = match[0]
+        org_name = course.github_org
+
+        if org_name is None or org_name == '':
+            logger.warning(f'skipping fix_github_missing_submissions for course: {course.course_code}')
+            continue
 
         # Attempt to fix any broken or lost repos for the course org.
         try:

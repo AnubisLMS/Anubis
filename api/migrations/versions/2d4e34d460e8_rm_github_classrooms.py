@@ -31,6 +31,9 @@ def upgrade():
     )
     op.add_column("course", sa.Column("github_org", sa.TEXT(), nullable=True))
     op.drop_column("course", "github_org_url")
+    conn = op.get_bind()
+    with conn.begin():
+        conn.execute("update assignment_repo set repo_created=1, collaborator_configured=1;")
     # ### end Alembic commands ###
 
 

@@ -80,7 +80,7 @@ def admin_courses_save_id(course: dict):
     course_id = course.get("id", None)
 
     # Try to get the database object corresponding to that course
-    db_course = Course.query.filter(Course.id == course_id).first()
+    db_course: Course = Course.query.filter(Course.id == course_id).first()
 
     # Make sure we got a course
     req_assert(db_course is not None, message='course not found')
@@ -97,7 +97,10 @@ def admin_courses_save_id(course: dict):
     # Update all the items in the course with the posted data
     for column in Course.__table__.columns:
         if column.name in course:
-            setattr(db_course, column.name, course[column.name])
+            key, value = column.name, course[column.name]
+            if isinstance(value, str):
+                value = value.strip()
+            setattr(db_course, key, value)
 
     # Commit the changes
     try:
