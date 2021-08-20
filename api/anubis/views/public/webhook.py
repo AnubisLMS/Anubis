@@ -125,10 +125,11 @@ def public_webhook():
         },
     )
 
-    if not is_debug():
+    org_name = assignment.course.github_org
+    if not is_debug() and org_name is not None and org_name != '':
         # Make sure that the repo we're about to process actually belongs to
-        # a github organization that matches a course.
-        if not repo_url.startswith(assignment.course.github_org_url):
+        # a github organization that matches the course.
+        if not repo_url.startswith(f'https://github.com/{org_name}'):
             logger.error(
                 "Invalid github organization in webhook.",
                 extra={
