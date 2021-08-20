@@ -1,16 +1,31 @@
+from kubernetes import config, client
+from datetime import datetime, timedelta
+
 from anubis.utils.data import db, TheiaSession
 from anubis.utils.lms.theia import get_theia_pod_name
-from kubernetes import client
-from datetime import datetime, timedelta
 
 from anubis.utils.services.logger import logger
 
 
 def poller():
+    """
+    Poll Database for sessions created within the last 10 minutes
+    if they are active and dont have a cluster_address.
+
+    If the session is running match the podd to the cluster_address
+
+    If the session has failed, update the session to failed.
+    """
+
+    # Load the kubernetes incluster config
+    config = config.load_incluster_config()
     v1 = client.CoreV1Api()
+
+    # Get all theia sessions within the last 10 minutes that are 
+    # active and dont have cluster_address
     theia_sessions = TheiaSession.query.filter(
         TheiaSession.active == True,
-        TheiaSession.clusterip == None,
+        TheiaSession.cluster_address == None,
         TheiaSession.created > datetime.now() - timedelta(minutes=10),
     ).all()
 
