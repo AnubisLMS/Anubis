@@ -40,12 +40,24 @@ spec:
                 secretKeyRef:
                   name: api
                   key: redis-password
-            - name: DB_HOST
-              value: mariadb.mariadb.svc.cluster.local
-              # sqlalchemy uri
             - name: "DATABASE_URI"
               valueFrom:
                 secretKeyRef:
                   name: api
                   key: database-uri
+            - name: "DB_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-password
+            - name: "DB_HOST"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-host
+            - name: "DB_PORT"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-port
 {{- end }}

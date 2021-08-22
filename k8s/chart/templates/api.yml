@@ -70,6 +70,11 @@ spec:
             secretKeyRef:
               name: oauth
               key: consumer-secret
+        - name: "DATABASE_URI"
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: database-uri
         - name: "DB_PASSWORD"
           valueFrom:
             secretKeyRef:
@@ -80,11 +85,11 @@ spec:
             secretKeyRef:
               name: api
               key: database-host
-        - name: "DATABASE_URI"
+        - name: "DB_PORT"
           valueFrom:
             secretKeyRef:
               name: api
-              key: database-uri
+              key: database-port
         - name: "REDIS_PASS"
           valueFrom:
             secretKeyRef:

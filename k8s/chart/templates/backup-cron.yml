@@ -16,15 +16,6 @@ spec:
       template:
         spec:
           restartPolicy: Never
-
-          initContainers:
-          - name: volume-permissions
-            image: busybox:1.31.1
-            command: ["sh", "-c", "chmod -Rv 666 /data/*; chmod 777 /data"]
-            volumeMounts:
-            - name: anubis-backups
-              mountPath: /data
-
           containers:
           - name: backup
             image: {{ .Values.api.image }}:{{ .Values.api.tag }}
@@ -34,72 +25,52 @@ spec:
             env:
             - name: "PYTHONPATH"
               value: "/opt/app"
-            - name: DB_HOST
+            - name: "DATABASE_URI"
               valueFrom:
                 secretKeyRef:
                   name: api
-                  key: database-host
-            # sqlalchemy uri
-            - name: "DATABASE_PASSWORD"
+                  key: database-uri
+            - name: "DB_PASSWORD"
               valueFrom:
                 secretKeyRef:
                   name: api
                   key: database-password
+            - name: "DB_HOST"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-host
+            - name: "DB_PORT"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-port
             - name: "REDIS_PASS"
               valueFrom:
                 secretKeyRef:
                   name: api
                   key: redis-password
-            {{- if .Values.backup.remote.enable }}
             - name: "SFTP_HOST"
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.backup.remote.secretName }}
+                  name: {{ .Values.backup.secretName }}
                   key: sftp-host
             - name: "SFTP_USER"
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.backup.remote.secretName }}
+                  name: {{ .Values.backup.secretName }}
                   key: sftp-user
             - name: "SFTP_LOCATION"
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.backup.remote.secretName }}
+                  name: {{ .Values.backup.secretName }}
                   key: sftp-location
-            {{- end }}
             volumeMounts:
-            - name: anubis-backups
-              mountPath: "/mnt/backups"
-            {{- if .Values.backup.remote.enable }}
-            - name: {{ .Values.backup.remote.secretName }}
+            - name: {{ .Values.backup.secretName }}
               mountPath: "/home/anubis/.ssh"
-            {{- end }}
           volumes:
-          - name: anubis-backups
-            persistentVolumeClaim:
-              claimName: anubis-backups
-          {{- if .Values.backup.remote.enable }}
           - name: anubis-backup-creds
             secret:
-              secretName: {{ .Values.backup.remote.secretName }}
+              secretName: {{ .Values.backup.secretName }}
               defaultMode: 0644
-          {{- end }}
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: anubis-backups
-  namespace: {{ .Release.Namespace }}
-  labels:
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: {{ .Values.backup.storageClassName | default "do-block-storage" | quote }}
-  volumeMode: Filesystem
-  resources:
-    requests:
-      storage: 8Gi
-
 {{- end }}

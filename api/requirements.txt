@@ -8,7 +8,7 @@ alembic==1.6.5
     # via
     #   -r requirements.in
     #   flask-migrate
-cachelib==0.2.0
+cachelib==0.3.0
     # via flask-oauthlib
 cachetools==4.2.2
     # via google-auth
@@ -16,6 +16,8 @@ certifi==2021.5.30
     # via
     #   kubernetes
     #   requests
+cffi==1.14.6
+    # via cryptography
 charset-normalizer==2.0.4
     # via requests
 click==7.1.2
@@ -23,6 +25,8 @@ click==7.1.2
     #   -r requirements.in
     #   flask
     #   rq
+cryptography==3.4.7
+    # via -r requirements.in
 cycler==0.10.0
     # via matplotlib
 docker==5.0.0
@@ -47,7 +51,7 @@ flask-sqlalchemy==2.5.1
     # via
     #   -r requirements.in
     #   flask-migrate
-google-auth==1.34.0
+google-auth==2.0.1
     # via kubernetes
 greenlet==1.1.1
     # via sqlalchemy
@@ -61,19 +65,19 @@ jinja2==3.0.1
     # via flask
 kiwisolver==1.3.1
     # via matplotlib
-kubernetes==17.17.0
+kubernetes==18.20.0
     # via -r requirements.in
 limits==1.5.1
     # via flask-limiter
-mako==1.1.4
+mako==1.1.5
     # via alembic
 markupsafe==2.0.1
     # via
     #   jinja2
     #   mako
-matplotlib==3.4.2
+matplotlib==3.4.3
     # via -r requirements.in
-numpy==1.21.1
+numpy==1.21.2
     # via
     #   -r requirements.in
     #   matplotlib
@@ -82,7 +86,7 @@ oauthlib==2.1.0
     # via
     #   flask-oauthlib
     #   requests-oauthlib
-pandas==1.3.1
+pandas==1.3.2
     # via -r requirements.in
 parse==1.19.0
     # via -r requirements.in
@@ -94,6 +98,8 @@ pyasn1==0.4.8
     #   rsa
 pyasn1-modules==0.2.8
     # via google-auth
+pycparser==2.20
+    # via cffi
 pyjwt==2.1.0
     # via -r requirements.in
 pymysql==1.0.2
@@ -140,12 +146,11 @@ six==1.16.0
     # via
     #   cycler
     #   flask-limiter
-    #   google-auth
     #   kubernetes
     #   limits
     #   python-dateutil
     #   sqlalchemy-json
-sqlalchemy==1.4.22
+sqlalchemy==1.4.23
     # via
     #   alembic
     #   flask-sqlalchemy
@@ -156,7 +161,7 @@ urllib3==1.26.6
     # via
     #   kubernetes
     #   requests
-websocket-client==1.2.0
+websocket-client==1.2.1
     # via
     #   docker
     #   kubernetes
