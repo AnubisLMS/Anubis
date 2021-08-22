@@ -38,7 +38,7 @@ const editableFields = [
   {field: 'section', label: 'Section'},
   {field: 'professor_display_name', label: 'Professor'},
   {field: 'autograde_tests_repo', label: 'Autograde Tests Repo'},
-  {field: 'github_org_url', label: 'Github Org URL'},
+  {field: 'github_org', label: 'Github Org'},
   {field: 'join_code', label: 'Join Code'},
   {field: 'theia_default_image', label: 'IDE Default Image'},
   {field: 'theia_default_options', label: 'IDE Default Options'},
@@ -118,11 +118,11 @@ export default function Course() {
         </Typography>
       </Grid>
       <Switch>
-        <Route path={'/admin/courses'} exact>
+        <Route path={'/admin/course'} exact>
           <AuthContext.Consumer>
             {(user) => (
               <>
-                {!!user ? (
+                {user.is_superuser && (
                   <Grid item xs={12}>
                     <Button
                       variant={'contained'}
@@ -132,7 +132,7 @@ export default function Course() {
                       Create Course
                     </Button>
                   </Grid>
-                ) : null}
+                )}
               </>
             )}
           </AuthContext.Consumer>
