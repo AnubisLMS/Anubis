@@ -2,6 +2,8 @@
 
 set -e
 
+echo "this is changing"
+
 fix_permissions() {
     # Fix permissions
     echo "fixing permissions"
@@ -15,6 +17,15 @@ for i in $(ls -A /etc/skel/); do
         cp /etc/skel/$i /out/$i
     fi
 done
+
+# Add motd to bashrc if it is not there already
+if ! grep '/etc/motd' /out/.bashrc; then
+    echo "adding motd to bashrc"
+    echo "" >> /out/.bashrc
+    echo "cat /etc/motd" >> /out/.bashrc
+else
+    echo "skipping adding motd to bashrc"
+fi
 
 fix_permissions
 

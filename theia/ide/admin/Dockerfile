@@ -31,6 +31,11 @@ RUN set -ex; \
 FROM node:${NODE_VERSION} as theia
 ARG PY_VERSION=3.9.3
 
+ENV NODE_VERSION=$NODE_VERSION
+ENV TERM=xterm-256color
+ENV DEBIAN_FRONTEND=noninteractive
+ENV REPO_NAME=""
+
 COPY --from=0 /opt/theia /opt/theia
 COPY cli /cli
 
@@ -81,7 +86,7 @@ RUN set -eux; apt-get update \
   && pip3 install --upgrade --no-cache-dir python-language-server flake8 autopep8 pylint supervisor \
   && adduser --disabled-password --gecos '' --uid 1001 anubis; \
   cd /home/anubis; \
-  echo 'cat /etc/motd' >> /etc/profile; \
+  echo 'cat /etc/motd' >> /etc/skel/.bashrc; \
   rm -rf /tmp/* \
   && rm -rf /usr/share/doc \
   && rm -rf /root/.cache \

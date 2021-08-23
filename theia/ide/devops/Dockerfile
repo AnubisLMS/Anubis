@@ -84,7 +84,7 @@ RUN set -eux; apt-get update; \
   pip3 install --no-cache-dir -r /requirements.txt -r /requirements-dev.txt; \
   adduser --disabled-password --gecos '' --uid 1001 anubis; \
   cd /home/anubis; \
-  echo 'cat /etc/motd' >> /etc/profile; \
+  echo 'cat /etc/motd' >> /etc/skel/.bashrc; \
   rm -rf /tmp/* \
   rm -rf /usr/share/doc; \
   rm -rf /root/.cache; \

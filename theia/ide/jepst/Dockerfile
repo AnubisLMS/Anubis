@@ -7,6 +7,7 @@ FROM node:${NODE_VERSION}-buster as theia
 ENV NODE_VERSION=$NODE_VERSION
 ENV TERM=xterm-256color
 ENV DEBIAN_FRONTEND=noninteractive
+ENV REPO_NAME=""
 
 # Theia application
 
