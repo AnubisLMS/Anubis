@@ -81,6 +81,7 @@ RUN set -eux; apt-get update; \
   rm get-pip.py; \
   pip3 install --upgrade --no-cache-dir pip; \
   pip3 install --upgrade --no-cache-dir python-language-server flake8 autopep8 pylint supervisor; \
+  pip3 install --no-cache-dir -r /requirements.txt -r /requirements-dev.txt; \
   adduser --disabled-password --gecos '' --uid 1001 anubis; \
   cd /home/anubis; \
   echo 'cat /etc/motd' >> /etc/profile; \
