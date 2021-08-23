@@ -101,7 +101,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     # the shared volume.
     init_container = client.V1Container(
         name=f"theia-init",
-        image="registry.digitalocean.com/anubis/theia-init:latest",
+        image="registry.digitalocean.com/anubis/theia-init",
         image_pull_policy="IfNotPresent",
         env=[
             client.V1EnvVar(name="GIT_REPO", value=repo_url),
@@ -257,7 +257,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     # the repo between these two containers.
     sidecar_container = client.V1Container(
         name="sidecar",
-        image="registry.digitalocean.com/anubis/theia-sidecar:latest",
+        image="registry.digitalocean.com/anubis/theia-sidecar",
         image_pull_policy="IfNotPresent",
 
         env=[
