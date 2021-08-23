@@ -7,6 +7,7 @@ FROM node:${NODE_VERSION}-buster as theia
 ENV NODE_VERSION=$NODE_VERSION
 ENV TERM=xterm-256color
 ENV DEBIAN_FRONTEND=noninteractive
+ENV REPO_NAME=""
 
 # Theia application
 
@@ -46,6 +47,7 @@ RUN set -ex; \
   cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/anubis/; \
   pip3 install --no-cache-dir supervisor; \
   ln -s /usr/bin/clangd-12 /usr/bin/clangd; \
+  echo 'cat /etc/motd' >> /etc/skel/.bashrc; \
   echo 'set auto-load safe-path /' > /etc/skel/.gdbinit; \
   echo 'source /opt/pwndbg/gdbinit.py' >> /etc/skel/.gdbinit; \
   git clone https://github.com/pwndbg/pwndbg.git /opt/pwndbg; \

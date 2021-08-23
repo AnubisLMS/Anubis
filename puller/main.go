@@ -72,7 +72,7 @@ func pullImage(image string) {
 	}
 
 	defer out.Close()
-	io.Copy(os.Stdout, out)
+	io.Copy(os.Stderr, out)
 }
 
 func main() {
