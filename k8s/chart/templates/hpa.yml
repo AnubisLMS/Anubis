@@ -65,11 +65,11 @@ metadata:
 spec:
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: 60
+      stabilizationWindowSeconds: 10
       policies:
       - type: Percent
         value: 100
-        periodSeconds: 30
+        periodSeconds: 20
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
@@ -80,6 +80,12 @@ spec:
   - type: Resource
     resource:
       name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 100
+  - type: Resource
+    resource:
+      name: memory
       target:
         type: Utilization
         averageUtilization: 100
@@ -107,12 +113,12 @@ spec:
         averageUtilization: 100
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: 60
+      stabilizationWindowSeconds: 10
       selectPolicy: Max
       policies:
       - type: Percent
         value: 100
-        periodSeconds: 30
+        periodSeconds: 20
     scaleDown:
       stabilizationWindowSeconds: 30
       selectPolicy: Max

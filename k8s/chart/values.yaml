@@ -38,12 +38,12 @@ logstash:
 
 rpc:
   queues: ["default", "theia", "regrade"]
-  replicas: 1
+  replicas: 3
 
 theia:
   enable: true
   proxy:
-    replicas: 1
+    replicas: 3
     image: "registry.digitalocean.com/anubis/theia-proxy"
     tag: "latest"
 

@@ -247,6 +247,8 @@ def public_ide_initialize(assignment: Assignment):
         owner_id=current_user.id,
         assignment_id=assignment.id,
         course_id=assignment.course.id,
+        image=assignment.theia_image,
+
         repo_url=repo_url,
         active=True,
         state="Initializing",
