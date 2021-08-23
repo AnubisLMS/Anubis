@@ -42,7 +42,6 @@ const editableFields = [
   {field: 'join_code', label: 'Join Code'},
   {field: 'theia_default_image', label: 'IDE Default Image'},
   {field: 'theia_default_options', label: 'IDE Default Options'},
-  {field: 'theia_persistent_storage', label: 'IDE Persistent Storage', type: 'boolean'},
   {field: 'github_repo_required', label: 'Github Repos Required', type: 'boolean'},
 ];
 
