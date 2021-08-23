@@ -141,7 +141,7 @@ def is_course_superuser(course_id: str, user_id: str = None) -> bool:
     # Check to see if they are a professor for the current course
     prof = ProfessorForCourse.query.filter(
         ProfessorForCourse.owner_id == user.id,
-        TAForCourse.course_id == course_id,
+        ProfessorForCourse.course_id == course_id,
     ).first()
 
     # Return True if they are a professor for the course
