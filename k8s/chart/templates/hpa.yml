@@ -17,9 +17,9 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: api
+    name: anubis-api
   minReplicas: 1
-  maxReplicas: 3
+  maxReplicas: 5
   metrics:
   - type: Resource
     resource:
@@ -45,7 +45,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: web
+    name: anubis-web
   minReplicas: 1
   maxReplicas: 5
   metrics:
@@ -73,9 +73,9 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: theia-proxy
+    name: anubis-theia-proxy
   minReplicas: 1
-  maxReplicas: 5
+  maxReplicas: 10
   metrics:
   - type: Resource
     resource:
@@ -95,7 +95,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ .name }}
+    name: anubis-{{ .name }}
   minReplicas: 1
   maxReplicas: 15
   metrics:
