@@ -46,22 +46,12 @@ RUN set -ex; \
   cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/anubis/; \
   pip3 install --no-cache-dir supervisor; \
   ln -s /usr/bin/clangd-12 /usr/bin/clangd; \
-  echo 'set auto-load safe-path /' > /home/anubis/.gdbinit; \
-  echo 'source /opt/pwndbg/gdbinit.py' >> /home/anubis/.gdbinit; \
+  echo 'set auto-load safe-path /' > /etc/skel/.gdbinit; \
+  echo 'source /opt/pwndbg/gdbinit.py' >> /etc/skel/.gdbinit; \
   git clone https://github.com/pwndbg/pwndbg.git /opt/pwndbg; \
   cd /opt/pwndbg; \
   ./setup.sh; \
   cd /home/anubis; \
-  git clone https://github.com/ohmyzsh/ohmyzsh.git .oh-my-zsh; \
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
-    .oh-my-zsh/custom/plugins/zsh-syntax-highlighting; \
-  cp .oh-my-zsh/templates/zshrc.zsh-template .zshrc; \
-  sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="gnzh"/' .zshrc; \
-  sed -i 's/plugins=(git)/plugins=(git zsh-syntax-highlighting)/' .zshrc; \
-  echo 'cat /etc/motd' >> .zshrc; \
-  mkdir -p /opt/anubis/.theia; \
-  echo '{"terminal.integrated.shell.linux": "/usr/bin/zsh"}' \
-    > /opt/anubis/.theia/settings.json; \
   chmod g+rw /home; \
   chown -R anubis:anubis /home/anubis; \
   apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
@@ -78,5 +68,5 @@ COPY supervisord.conf autosave-dump.sh /
 COPY autosave /usr/local/bin/autosave
 
 USER anubis
-WORKDIR /opt/anubis
+WORKDIR /opt/theia
 ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]
