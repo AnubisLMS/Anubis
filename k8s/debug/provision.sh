@@ -108,6 +108,7 @@ kubectl create secret generic api \
     --from-literal=database-uri=mysql+pymysql://anubis:anubis@mariadb.anubis.svc.cluster.local/anubis \
     --from-literal=database-host=mariadb.anubis.svc.cluster.local \
     --from-literal=database-password=anubis \
+    --from-literal=database-port=3306 \
     --from-literal=redis-password=anubis \
     --from-literal=secret-key=$(head -c10 /dev/urandom | openssl sha1 -hex | awk '{print $2}') \
     --namespace anubis

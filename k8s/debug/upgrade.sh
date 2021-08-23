@@ -15,9 +15,7 @@ helm upgrade \
      --set "api.replicas=1" \
      --set "web.replicas=1" \
      --set "pipeline_api.replicas=1" \
-     --set "rpc.default.replicas=1" \
-     --set "rpc.theia.replicas=1" \
-     --set "rpc.regrade.replicas=1" \
+     --set "rpc.replicas=1" \
      --set "theia.proxy.replicas=1" \
      --set "api.datacenter=false" \
      --set "reaper.suspend=true" \

@@ -10,8 +10,43 @@ metadata:
 {{- if .Values.imagePullSecret }}
 imagePullSecrets:
   - name: {{ .Values.imagePullSecret }}
----
 {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: anubis-rpc
+  namespace: {{ .Release.Namespace }}
+  labels:
+    rbac.authorization.k8s.io/pipeline-create-jobs: "true"
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+rules:
+- apiGroups: ["batch", "extensions"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "watch", "create", "delete"]
+- apiGroups: [""]
+  resources: ["pods", "persistentvolumeclaims"]
+  verbs: ["get", "list", "watch", "create", "delete", "deletecollection"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: anubis-rpc
+  namespace: {{ .Release.Namespace }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: anubis-rpc
+subjects:
+  - kind: ServiceAccount
+    name: anubis-rpc
+    namespace: anubis
+
+---
 
 {{- range $.Values.rpc.queues }}
 apiVersion: apps/v1
@@ -103,37 +138,3 @@ spec:
               key: secret-key
 ---
 {{- end }}
-
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: anubis-rpc
-  namespace: {{ .Release.Namespace }}
-  labels:
-    rbac.authorization.k8s.io/pipeline-create-jobs: "true"
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
-rules:
-- apiGroups: ["batch", "extensions"]
-  resources: ["jobs"]
-  verbs: ["get", "list", "watch", "create", "delete"]
-- apiGroups: [""]
-  resources: ["pods", "persistentvolumeclaims"]
-  verbs: ["get", "list", "watch", "create", "delete", "deletecollection"]
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: anubis-rpc
-  namespace: {{ .Release.Namespace }}
-  labels:
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: anubis-rpc
-subjects:
-  - kind: ServiceAccount
-    name: anubis-rpc
-    namespace: anubis

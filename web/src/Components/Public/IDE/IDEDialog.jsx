@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
 const pollSession = (id, state, enqueueSnackbar, n = 0) => () => {
   const {setLoading, setSession} = state;
 
-  if (n > 60) {
+  if (n > 300) {
     return;
   }
 

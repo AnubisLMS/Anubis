@@ -42,6 +42,8 @@ rpc:
 
 theia:
   enable: true
+  poller:
+    replicas: 1
   proxy:
     replicas: 3
     image: "registry.digitalocean.com/anubis/theia-proxy"
