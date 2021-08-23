@@ -33,10 +33,10 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
           requests:
-            cpu: 100m
+            cpu: 500m
             memory: 100Mi
           limits:
-            cpu: {{ .Values.api.workers }}
+            cpu: 2
             memory: 300Mi
         ports:
         - name: web
