@@ -9,4 +9,5 @@ kubectl rollout restart -n anubis deploy \
         anubis-theia-proxy \
         anubis-rpc-default \
         anubis-rpc-theia \
-        anubis-rpc-regrade
+        anubis-rpc-regrade \
+        anubis-theia-poller
