@@ -69,6 +69,7 @@ puller:
   tag: "latest"
   imagePullSecret: "anubis"
   command: [
+      'registry.digitalocean.com/anubis/theia-devops',
       'registry.digitalocean.com/anubis/theia-jepst',
       'registry.digitalocean.com/anubis/theia-xv6',
       'registry.digitalocean.com/anubis/theia-admin',

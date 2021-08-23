@@ -81,17 +81,7 @@ RUN set -eux; apt-get update \
   && pip3 install --upgrade --no-cache-dir python-language-server flake8 autopep8 pylint supervisor \
   && adduser --disabled-password --gecos '' --uid 1001 anubis; \
   cd /home/anubis; \
-  git clone https://github.com/ohmyzsh/ohmyzsh.git .oh-my-zsh; \
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
-    .oh-my-zsh/custom/plugins/zsh-syntax-highlighting; \
-  cp .oh-my-zsh/templates/zshrc.zsh-template .zshrc; \
-  sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="gnzh"/' .zshrc; \
-  sed -i 's/plugins=(git)/plugins=(git zsh-syntax-highlighting)/' .zshrc; \
-  echo 'cat /etc/motd' >> .zshrc; \
-  mkdir -p /home/anubis/.theia; \
-  mkdir -p /home/anubis/.theia; \
-  echo '{"terminal.integrated.shell.linux": "/usr/bin/zsh"}' \
-    > /home/anubis/.theia/settings.json; \
+  echo 'cat /etc/motd' >> /etc/profile; \
   rm -rf /tmp/* \
   && rm -rf /usr/share/doc \
   && rm -rf /root/.cache \

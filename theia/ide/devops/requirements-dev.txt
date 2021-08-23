@@ -1,0 +1,8 @@
+jupyter
+flake8
+flake8-functions
+mypy_extensions
+coverage
+nose
+urllib3
+PyGithub

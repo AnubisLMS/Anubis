@@ -53,8 +53,8 @@ RUN set -ex; \
   pip3 install --no-cache-dir supervisor; \
   ln -s /usr/bin/clangd-12 /usr/bin/clangd; \
   cd /home/anubis; \
-  echo 'cat /etc/motd' >> .bashrc; \
-  echo 'alias python=python3' >> .bashrc; \
+  echo 'cat /etc/motd' >> /etc/skel/.bashrc; \
+  echo 'alias python=python3' >> /etc/skel/.bashrc; \
   mkdir -p /opt/anubis/.theia; \
   echo '{"terminal.integrated.shell.linux": "/bin/bash"}' \
     > /opt/anubis/.theia/settings.json; \
@@ -98,5 +98,5 @@ COPY supervisord.conf autosave-dump.sh /
 COPY autosave /usr/local/bin/autosave
 
 USER anubis
-WORKDIR /opt/anubis
+WORKDIR /opt/theia
 ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]
