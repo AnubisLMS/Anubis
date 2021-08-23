@@ -100,7 +100,6 @@ class Course(db.Model):
     professor_display_name = db.Column(db.TEXT)
     autograde_tests_repo = db.Column(db.TEXT, nullable=False,
                                      default='https://github.com/os3224/anubis-assignment-tests')
-    theia_persistent_storage = db.Column(db.Boolean, default=False)
     github_repo_required = db.Column(db.Boolean, default=True)
     theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.digitalocean.com/anubis/xv6')
     theia_default_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
