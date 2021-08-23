@@ -26,7 +26,7 @@ const editableFields = [
   {field: 'pipeline_image', label: 'Autograde Docker Image'},
   {field: 'unique_code', label: 'Unique Code'},
   {field: 'hidden', label: 'Hidden', type: 'boolean'},
-  {field: 'github_repo_required', label: 'Github Repos Enabled', type: 'boolean'},
+  {field: 'github_repo_required', label: 'Github Repos Required', type: 'boolean'},
   {field: 'accept_late', label: 'Accept Late Submissions', type: 'boolean'},
   {field: 'ide_enabled', label: 'IDEs Enabled', type: 'boolean'},
   {field: 'autograde_enabled', label: 'Autograde Enabled', type: 'boolean'},

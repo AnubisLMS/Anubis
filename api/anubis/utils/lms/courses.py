@@ -175,14 +175,19 @@ def is_course_admin(course_id: str, user_id: str = None) -> bool:
         TAForCourse.course_id == course_id,
     ).first()
 
+    if ta is not None:
+        return True
+
     # Check to see if they are a professor for the course
     prof = ProfessorForCourse.query.filter(
         ProfessorForCourse.owner_id == user.id,
-        TAForCourse.course_id == course_id,
+        ProfessorForCourse.course_id == course_id,
     ).first()
 
-    # Return True if they are either a ta or professor
-    return ta is not None or prof is not None
+    if prof is not None:
+        return True
+
+    return False
 
 
 def assert_course_admin(course_id: str = None):

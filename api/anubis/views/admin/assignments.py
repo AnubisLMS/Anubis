@@ -229,6 +229,7 @@ def admin_assignments_add():
         name='New Assignment',
         description='',
         hidden=True,
+        github_repo_required=course_context.github_repo_required,
         theia_image=course_context.theia_default_image,
         theia_options=course_context.theia_default_options,
         release_date=datetime.now() + timedelta(weeks=1),
