@@ -148,6 +148,10 @@ services:
     labels:
       - "traefik.enable=false"
 
+  theia-devops:
+    image: registry.digitalocean.com/anubis/theia-devops:latest
+    build: ./theia/ide/devops
+
   theia-jepst:
     image: registry.digitalocean.com/anubis/theia-jepst:latest
     build: ./theia/ide/jepst
