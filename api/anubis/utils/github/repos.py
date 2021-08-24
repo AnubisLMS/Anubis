@@ -60,16 +60,34 @@ def add_collaborator(github_org: str, new_repo_name: str, github_username: str):
     })
 
 
-def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo:
-    # Get template information
-    template_repo_path = assignment.github_template
-    github_org = assignment.course.github_org
-
+def assignment_repo_name(user: User, assignment: Assignment) -> str:
     # Get assignment name (lowercase and spaces removed)
     assignment_name = assignment.name.lower().replace(' ', '-')
 
     # Create a repo name from assignment name, unique code and github username
     new_repo_name = f'{assignment_name}-{assignment.unique_code}-{user.github_username}'
+
+    return new_repo_name
+
+
+def assignment_repo_url(user: User, assignment: Assignment) -> str:
+    # Create a repo url from assignment name, unique code and github username
+    new_repo_name = assignment_repo_name(user, assignment)
+
+    github_org = assignment.course.github_org
+    new_repo_url = f'https://github.com/{github_org}/{new_repo_name}'
+
+    return new_repo_url
+
+
+def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo:
+    # Get template information
+    template_repo_path = assignment.github_template
+    github_org = assignment.course.github_org
+
+    # Get a generated assignment repo name
+    new_repo_name = assignment_repo_name(user, assignment)
+    new_repo_url = assignment_repo_url(user, assignment)
 
     # Try to get the assignment repo from the database
     repo: AssignmentRepo = AssignmentRepo.query.filter(
@@ -83,7 +101,7 @@ def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo
             assignment_id=assignment.id,
             owner_id=user.id,
             github_username=user.github_username,
-            repo_url=f'https://github.com/{github_org}/{new_repo_name}',
+            repo_url=new_repo_url,
         )
         db.session.add(repo)
         db.session.commit()
