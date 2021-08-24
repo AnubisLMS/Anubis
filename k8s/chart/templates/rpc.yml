@@ -100,6 +100,11 @@ spec:
           value: "1"
         - name: "IMAGE_PULL_POLICY"
           value: {{ $.Values.imagePullPolicy | quote }}
+        - name: "GITHUB_TOKEN"
+          valueFrom:
+            secretKeyRef:
+              name: git
+              key: token
         # sqlalchemy uri
         - name: "DB_PASSWORD"
           valueFrom:

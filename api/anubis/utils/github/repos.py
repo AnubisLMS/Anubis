@@ -1,3 +1,5 @@
+import traceback
+
 from parse import parse
 
 from anubis.models import User, Assignment, AssignmentRepo, db
@@ -86,48 +88,58 @@ def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo
         db.session.add(repo)
         db.session.commit()
 
-    # If repo has not been created yet
-    if not repo.repo_created:
+    try:
+        # If repo has not been created yet
+        if not repo.repo_created:
 
-        # We need to use some of github's internal ID values
-        # for creating a repo from the template.
-        data = get_github_template_ids(template_repo_path, github_org)
+            # We need to use some of github's internal ID values
+            # for creating a repo from the template.
+            data = get_github_template_ids(template_repo_path, github_org)
 
-        # If the response was None, the api request failed
-        if data is None:
-            return repo
+            # If the response was None, the api request failed
+            if data is None:
+                return repo
 
-        # Get organization and template repo IDs
-        owner_id = data['organization']['id']
-        template_repo_id = data['repository']['id']
+            # Get organization and template repo IDs
+            owner_id = data['organization']['id']
+            template_repo_id = data['repository']['id']
 
-        # Try to create the student's assignment repo from the template
-        # using the github graphql api.
-        data = create_repo_from_template(owner_id, template_repo_id, new_repo_name)
+            # Try to create the student's assignment repo from the template
+            # using the github graphql api.
+            data = create_repo_from_template(owner_id, template_repo_id, new_repo_name)
 
-        # If the response was None, the api request failed
-        if data is None:
-            logger.error('Create repo failed')
-            return repo
+            # If the response was None, the api request failed
+            if data is None:
+                logger.error('Create repo failed')
+                return repo
 
-        # Mark the repo as created
-        repo.repo_created = True
-        db.session.commit()
+            # Mark the repo as created
+            repo.repo_created = True
+            db.session.commit()
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        logger.error(f'Failed to create repo {e}')
+        logger.error(f'continuing')
 
-    # If repo has not been configured
-    if not repo.collaborator_configured:
+    try:
+        # If repo has not been configured
+        if not repo.collaborator_configured:
 
-        # Use github REST api to to add the student as a collaborator
-        # to the repo.
-        data = add_collaborator(github_org, new_repo_name, user.github_username)
+            # Use github REST api to to add the student as a collaborator
+            # to the repo.
+            data = add_collaborator(github_org, new_repo_name, user.github_username)
 
-        # If the response was None, the api request failed
-        if data is None:
-            logger.error('Failed to set permissions')
-            return repo
+            # If the response was None, the api request failed
+            if data is None:
+                logger.error('Failed to set permissions')
+                return repo
 
-        # Mark the repo as collaborator configured
-        repo.collaborator_configured = True
-        db.session.commit()
+            # Mark the repo as collaborator configured
+            repo.collaborator_configured = True
+            db.session.commit()
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        logger.error(f'Failed to configure collaborators {e}')
+        logger.error(f'continuing')
 
     return repo

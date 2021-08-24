@@ -75,6 +75,17 @@ export default function CourseCard({course, _disabled, editableFields, updateFie
                 variant={'contained'}
                 className={classes.button}
                 component={Link}
+                to={`/admin/course/students`}
+              >
+                Edit Students
+              </Button>
+              <Button
+                size={'small'}
+                startIcon={<EditIcon/>}
+                style={{backgroundColor: yellow[500]}}
+                variant={'contained'}
+                className={classes.button}
+                component={Link}
                 to={`/admin/course/tas`}
               >
                 Edit TAs

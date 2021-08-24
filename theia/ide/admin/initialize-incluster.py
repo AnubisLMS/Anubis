@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 import json
 import base64
 
 incluster = os.environ.get('INCLUSTER', None)
 
 if incluster is None:
-    print('CANNOT SEE INCLUSTER ENV', file=sys.stderr)
+    print('CANNOT SEE INCLUSTER ENV')
     exit(1)
 
 incluster = base64.b64decode(incluster.encode()).decode()

@@ -35,16 +35,16 @@ spec:
               value: "0"
             - name: "LOGGER_NAME"
               value: "reaper"
-            - name: "REDIS_PASS"
-              valueFrom:
-                secretKeyRef:
-                  name: api
-                  key: redis-password
             - name: "GITHUB_TOKEN"
               valueFrom:
                 secretKeyRef:
                   name: git
                   key: token
+            - name: "REDIS_PASS"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: redis-password
             - name: "DATABASE_URI"
               valueFrom:
                 secretKeyRef:

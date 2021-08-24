@@ -79,6 +79,7 @@ def poller():
                 logger.info("Theia session started {}".format(pod_name))
 
                 db.session.commit()
+
         except client.exceptions.ApiException as e:
             if e.status == 404:
                 continue
@@ -90,6 +91,5 @@ if __name__ == "__main__":
     config.load_incluster_config()
 
     while True:
-        logger.info(f"Running poller job - {datetime.now()}")
         poller()
         time.sleep(1)

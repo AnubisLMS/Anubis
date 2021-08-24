@@ -151,7 +151,12 @@ export default function Course() {
             />
           </Grid>
         </Route>
-        <Route path={'/admin/course/tas'} exact={false}>
+        <Route path={'/admin/course/students'}>
+          <Grid item xs={12} sm={10} md={8}>
+            <CourseTasProfessors base={'student'}/>
+          </Grid>
+        </Route>
+        <Route path={'/admin/course/tas'}>
           <Grid item xs={12} sm={10} md={8}>
             <CourseTasProfessors base={'ta'}/>
           </Grid>

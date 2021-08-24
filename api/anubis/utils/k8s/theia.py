@@ -46,7 +46,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     limits = theia_session.resources.get('limits', {"cpu": "2", "memory": "500Mi"})
     requests = theia_session.resources.get('requests', {"cpu": "250m", "memory": "100Mi"})
     autosave = theia_session.autosave
-    credentials = theia_session.autosave
+    credentials = theia_session.credentials
     privileged = theia_session.privileged
     persistent_storage = theia_session.persistent_storage
 
@@ -422,7 +422,7 @@ def active_theia_pod_count() -> int:
 def update_theia_pod_cluster_addresses(theia_pods: client.V1PodList):
     """
     Iterate through all theia pods, updating the pod cluster
-    addresses in the databse as we go.
+    addresses in the database as we go.
 
     :param theia_pods:
     :return:

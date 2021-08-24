@@ -9,6 +9,7 @@ from anubis.utils.services.rpc import enqueue_seed
 seed = Blueprint("admin-seed", __name__, url_prefix="/admin/seed")
 
 
+@seed.route("")
 @seed.route("/")
 @require_superuser(unless_debug=True)
 @json_response

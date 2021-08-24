@@ -10,7 +10,7 @@ help:
 
 startup-links:
 	@echo ''
-	@echo 'seed: http://localhost/api/admin/seed/'
+	@echo 'seed: http://localhost/api/admin/seed'
 	@echo 'auth: http://localhost/api/admin/auth/token/superuser'
 	@echo 'auth: http://localhost/api/admin/auth/token/professor'
 	@echo 'auth: http://localhost/api/admin/auth/token/ta'
