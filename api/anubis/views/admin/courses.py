@@ -1,7 +1,7 @@
 from flask import Blueprint
 from sqlalchemy.exc import IntegrityError, DataError
 
-from anubis.models import db, Course, TAForCourse, ProfessorForCourse, User
+from anubis.models import db, Course, TAForCourse, ProfessorForCourse, User, InCourse
 from anubis.utils.auth.http import require_admin, require_superuser
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import row2dict, req_assert
@@ -113,6 +113,31 @@ def admin_courses_save_id(course: dict):
     return success_response({"course": db_course.data, "status": "Changes saved."})
 
 
+@courses_.route('/list/students')
+@require_admin()
+@json_response
+def admin_course_list_students():
+    """
+    List all students for the current course context.
+
+    :return:
+    """
+
+    # Get all the students in the current course context
+    students = User.query.join(InCourse).filter(
+        InCourse.course_id == course_context.id,
+    ).all()
+
+    # Return the list of basic user information about the tas
+    return success_response({'users': [
+        {
+            'id': user.id, 'netid': user.netid,
+            'name': user.name, 'github_username': user.github_username
+        }
+        for user in students
+    ]})
+
+
 @courses_.route('/list/tas')
 @require_admin()
 @json_response
@@ -161,6 +186,82 @@ def admin_course_list_professors():
         }
         for user in professors
     ]})
+
+
+@courses_.route('/make/student/<string:user_id>')
+@require_admin()
+@json_response
+def admin_course_make_student_id(user_id: str):
+    """
+    Make a user a professor for a course
+
+    :param user_id:
+    :return:
+    """
+
+    # Get the other user
+    other = User.query.filter(User.id == user_id).first()
+
+    # Make sure they exist
+    req_assert(other is not None, message='user does not exist')
+
+    # Check to see if the other user is already a professor
+    # for this course
+    student = InCourse.query.filter(
+        InCourse.owner_id == user_id,
+        InCourse.course_id == course_context.id,
+    ).first()
+
+    # If they are already a professor, then stop
+    req_assert(student is None, message='they are already a student')
+
+    # Create a new professor
+    student = InCourse(
+        owner_id=user_id,
+        course_id=course_context.id,
+    )
+
+    # Add and commit the change
+    db.session.add(student)
+    db.session.commit()
+
+    # Return the status
+    return success_response({
+        'status': 'Student added to course'
+    })
+
+
+@courses_.route('/remove/student/<string:user_id>')
+@require_admin()
+@json_response
+def admin_course_remove_student_id(user_id: str):
+    """
+    Remove a professor from a course.
+
+    :param user_id:
+    :return:
+    """
+
+    # Get the other user
+    other = User.query.filter(User.id == user_id).first()
+
+    # Make sure the other user exists
+    req_assert(other is not None, message='user does not exist')
+
+    # Delete the professor
+    InCourse.query.filter(
+        InCourse.owner_id == user_id,
+        InCourse.course_id == course_context.id,
+    ).delete()
+
+    # Commit the delete
+    db.session.commit()
+
+    # Return the status
+    return success_response({
+        'status': 'Student removed from course',
+        'variant': 'warning',
+    })
 
 
 @courses_.route('/make/ta/<string:user_id>')

@@ -37,7 +37,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV REPO_NAME=""
 
 COPY --from=0 /opt/theia /opt/theia
-COPY cli /cli
 
 RUN set -eux; apt-get update \
   && apt-get upgrade -y --no-install-recommends \
@@ -83,8 +82,9 @@ RUN set -eux; apt-get update \
     --no-cache-dir \
   && rm get-pip.py; \
   pip3 install --upgrade --no-cache-dir pip \
-  && pip3 install --upgrade --no-cache-dir python-language-server flake8 autopep8 pylint supervisor \
-  && adduser --disabled-password --gecos '' --uid 1001 anubis; \
+  && pip3 install --upgrade --no-cache-dir python-language-server flake8 autopep8 pylint supervisor
+
+RUN adduser --disabled-password --gecos '' --uid 1001 anubis; \
   cd /home/anubis; \
   echo 'cat /etc/motd' >> /etc/skel/.bashrc; \
   rm -rf /tmp/* \
@@ -114,8 +114,10 @@ RUN set -eux; apt-get update \
   && rm -rf /var/lib/apt/lists/*; \
   find / -depth \
     \( -name .cache -o -name __pycache__ -o -name *.pyc -o -name *.a -o -name .git -o -name .github \) \
-    -exec 'rm' '-rf' '{}' '+' \
-  && pip3 install --no-cache-dir /cli \
+    -exec 'rm' '-rf' '{}' '+'
+
+COPY cli /cli
+RUN pip3 install --no-cache-dir /cli \
   && rm -rf /cli \
   && rm -rf /home/node \
   && find /usr/local -depth \

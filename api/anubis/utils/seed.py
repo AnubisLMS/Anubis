@@ -12,6 +12,7 @@ from anubis.models import (
 )
 from anubis.utils.data import rand
 from anubis.utils.lms.theia import mark_session_ended
+from anubis.utils.github.repos import assignment_repo_name
 
 lorem = """
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore 
@@ -122,10 +123,12 @@ def create_assignment(course, users, i=0, do_submissions=True, **kwargs):
     theia_sessions = []
     if do_submissions:
         for user in users:
+            repo_name = assignment_repo_name(user, assignment)
+            repo_url = f'https://github.com/os3224/{repo_name}'
             repos.append(
                 AssignmentRepo(
                     id=rand(), owner=user, assignment_id=assignment.id,
-                    repo_url="https://github.com/wabscale/xv6-public",
+                    repo_url=repo_url,
                     github_username=user.github_username,
                 )
             )

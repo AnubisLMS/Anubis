@@ -55,6 +55,11 @@ spec:
         - name: "GUNICORN_OPTIONS"
           value: {{ .Values.api.gunicorn_options | quote }}
         {{- end }}
+        - name: "GITHUB_TOKEN"
+          valueFrom:
+            secretKeyRef:
+              name: git
+              key: token
         - name: "SECRET_KEY"
           valueFrom:
             secretKeyRef:
