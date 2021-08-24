@@ -201,7 +201,7 @@ spec:
         {{- if not .Values.debug}}
         resources:
           requests:
-            cpu: 250m
+            cpu: 200m
             memory: 250Mi
           limits:
             cpu: 1
