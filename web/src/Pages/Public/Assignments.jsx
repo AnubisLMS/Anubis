@@ -37,20 +37,23 @@ export default function AssignmentView() {
       }, 60_000);
 
       const runPollingInterval = setInterval(() => {
-        axios.get('/api/public/assignments/', {params: {courseId: query.get('courseId')}}).then((response) => {
+        axios.get(`/api/public/repos/get/${pollingAssignmentId}`).then((response) => {
           const data = standardStatusHandler(response, enqueueSnackbar);
 
-          if (data) {
-            // compare assignments to see if any have a corresponding repo now
-            const currentPollingAssignment = data.assignments.find((a) => a.id === pollingAssignmentId);
-
-            if (currentPollingAssignment.has_repo) {
-              setAssignments(data.assignments);
-              setRunAssignmentPolling(false);
-            }
+          if (data.repo) {
+            setAssignments((prev) => {
+              for (const assignment of prev) {
+                if (assignment.id === pollingAssignmentId) {
+                  assignment.has_repo = true;
+                  assignment.repo_url = data.repo.repo_url;
+                }
+              }
+              return [...prev];
+            });
+            setRunAssignmentPolling(false);
           }
         }).catch(standardErrorHandler(enqueueSnackbar));
-      }, 5_000);
+      }, 1_000);
 
       return () => {
         clearTimeout(endPollingTimeout);

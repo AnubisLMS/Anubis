@@ -33,6 +33,39 @@ def public_repos_list():
     return success_response({"repos": repos})
 
 
+@repos_.get('/get/<string:assignment_id>')
+@require_user()
+@json_response
+def public_repos_get(assignment_id: str):
+    """
+    Get all unique repos for a user
+
+    :return:
+    """
+
+    assignment: Assignment = Assignment.query.filter(
+        Assignment.id == assignment_id,
+    ).first()
+
+    # Verify assignment exists
+    req_assert(assignment is not None, message='Assignment does not exist')
+
+    # If it has not been released, make sure the current user is an admin
+    if assignment.release_date < datetime.now():
+        req_assert(is_course_admin(assignment.course_id, current_user.id), message='Assignment does not exist')
+
+    repo = AssignmentRepo.query.filter(
+        AssignmentRepo.owner_id == current_user.id,
+        AssignmentRepo.assignment_id == assignment.id,
+    ).first()
+
+    if repo is None:
+        return success_response({'repo': None})
+
+    # Pass them back
+    return success_response({"repo": repo.data})
+
+
 @repos_.post('/create/<string:assignment_id>')
 @require_user()
 @json_response
