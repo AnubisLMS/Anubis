@@ -103,7 +103,7 @@ class Course(db.Model):
     github_repo_required = db.Column(db.Boolean, default=True)
     theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.digitalocean.com/anubis/xv6')
     theia_default_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
-    github_org = db.Column(db.TEXT, default='')
+    github_org = db.Column(db.TEXT, default='os3224')
     join_code = db.Column(db.String(256), unique=True)
 
     assignments = db.relationship('Assignment', cascade='all,delete', backref='course')
