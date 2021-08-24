@@ -1,4 +1,5 @@
 import React, {useCallback, useState} from 'react';
+import axios from 'axios';
 import {Link} from 'react-router-dom';
 
 import makeStyles from '@material-ui/core/styles/makeStyles';
@@ -20,12 +21,14 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import Dialog from '@material-ui/core/Dialog';
 import ReactMarkdown from 'react-markdown';
 import Box from '@material-ui/core/Box';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import grey from '@material-ui/core/colors/grey';
 
 import {nonStupidDatetimeFormat} from '../../../Utils/datetime';
-import axios from 'axios';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import {useSnackbar} from 'notistack';
+import {Tooltip} from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -146,9 +149,16 @@ export default function AssignmentCard({
         to={`/courses/assignments/submissions?assignmentId=${id}`}>
         <CardContent>
 
-          <Typography variant={'subtitle1'} color="textSecondary" gutterBottom>
-            {course_code}
-          </Typography>
+          <div style={{display: 'flex', justifyContent: 'space-between'}}>
+            <Typography variant={'subtitle1'} color="textSecondary" gutterBottom>
+              {course_code}
+            </Typography>
+            {!assignment.visible_to_students && (
+              <Tooltip title={'Not visible to students'}>
+                <VisibilityOffIcon style={{color: grey[500]}}/>
+              </Tooltip>
+            )}
+          </div>
 
           <Typography variant={'h6'}>
             {name}

@@ -242,6 +242,7 @@ class Assignment(db.Model):
             "persistent_storage": self.theia_options.get('persistent_storage', False),
             "github_repo_required": self.github_repo_required,
             "autograde_enabled": self.autograde_enabled,
+            "visible_to_students": datetime.now() > self.release_date,
             "ide_active": self.due_date + timedelta(days=3 * 7) > datetime.now(),
             "tests": [t.data for t in self.tests if t.hidden is False],
         }
