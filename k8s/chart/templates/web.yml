@@ -43,6 +43,13 @@ spec:
         - name: web
           containerPort: 3000
         {{- if .Values.healthChecks }}
+        startupProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 1
+          periodSeconds: 1
+          failureThreshold: 60
         livenessProbe:
           httpGet:
             path: /

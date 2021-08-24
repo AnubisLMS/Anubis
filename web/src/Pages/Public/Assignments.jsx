@@ -40,7 +40,7 @@ export default function AssignmentView() {
         axios.get(`/api/public/repos/get/${pollingAssignmentId}`).then((response) => {
           const data = standardStatusHandler(response, enqueueSnackbar);
 
-          if (data.repo) {
+          if (data.repo && data.repo.ready) {
             setAssignments((prev) => {
               for (const assignment of prev) {
                 if (assignment.id === pollingAssignmentId) {

@@ -195,7 +195,7 @@ class Assignment(db.Model):
     unique_code = db.Column(
         db.String(8),
         unique=True,
-        default=lambda: base64.b16encode(os.urandom(4)).decode(),
+        default=lambda: base64.b16encode(os.urandom(4)).decode().lower(),
     )
     accept_late = db.Column(db.Boolean, default=True)
 
@@ -267,7 +267,7 @@ class AssignmentRepo(db.Model):
 
     # Fields
     github_username = db.Column(db.TEXT, nullable=False)
-    repo_url = db.Column(db.TEXT, nullable=False)
+    repo_url = db.Column(db.TEXT, nullable=False, unique=True)
 
     # State booleans
     repo_created = db.Column(db.Boolean, default=False)
@@ -283,6 +283,7 @@ class AssignmentRepo(db.Model):
             "id": self.id,
             "github_username": self.github_username,
             "assignment_name": self.assignment.name,
+            "ready": self.repo_created and self.collaborator_configured,
             "course_code": self.assignment.course.course_code,
             "repo_url": self.repo_url,
         }

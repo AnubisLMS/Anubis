@@ -93,7 +93,9 @@ def get_course_context(full_stop: bool = True) -> Union[None, Course]:
         # Verify that the current user is actually an admin for
         # this course.
         if not is_course_admin(course_id):
-            raise AuthenticationError()
+            if full_stop:
+                raise AuthenticationError()
+            return None
 
         # Get the course object
         course = Course.query.filter(

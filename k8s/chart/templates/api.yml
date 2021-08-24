@@ -101,6 +101,13 @@ spec:
               name: api
               key: redis-password
         {{- if .Values.healthChecks }}
+        startupProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 1
+          periodSeconds: 1
+          failureThreshold: 60
         livenessProbe:
           httpGet:
             path: /

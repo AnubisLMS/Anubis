@@ -19,6 +19,7 @@ import {Hidden} from '@material-ui/core';
 export default function Header({classes, open, onDrawerToggle, user}) {
   const cookie = new Cookies();
   const {enqueueSnackbar} = useSnackbar();
+  const [netid, setNetid] = useState(null);
   const [course, setCourse] = useState((() => {
     try {
       return JSON.parse(atob(cookie.get('course')));
@@ -35,6 +36,9 @@ export default function Header({classes, open, onDrawerToggle, user}) {
         cookie.set('course', btoa(JSON.stringify(user.admin_for[0])), {path: '/'});
         setCourse(user.admin_for[0]);
       }
+    }
+    if (user?.netid) {
+      setNetid(user.netid);
     }
   }, [user]);
 
@@ -65,7 +69,7 @@ export default function Header({classes, open, onDrawerToggle, user}) {
             </Hidden>
             <Grid item>
               <div style={{display: 'flex', flexDirection: 'row'}}>
-                {user?.is_admin ? (
+                {user?.is_admin && (
                   <Autocomplete
                     options={user.admin_for ?? []}
                     getOptionLabel={(option) => option.name}
@@ -96,9 +100,9 @@ export default function Header({classes, open, onDrawerToggle, user}) {
                       <TextField {...params} label="Context"/>
                     )}
                   />
-                ) : null}
+                )}
                 <div className={classes.avatar}>
-                  {user?.netid && <Chip clickable label={user?.netid}/>}
+                  {netid && <Chip clickable label={netid}/>}
                 </div>
               </div>
             </Grid>
