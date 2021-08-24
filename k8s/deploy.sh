@@ -13,8 +13,8 @@ BUILD=(
 )
 
 pushd ..
-docker-compose build --parallel --pull ${BUILD} ${EXTRA_BUILD}
-docker-compose push ${BUILD} ${EXTRA_BUILD}
+docker-compose build --parallel --pull ${BUILD[@]} ${EXTRA_BUILD}
+docker-compose push ${BUILD[@]} ${EXTRA_BUILD}
 popd
 
 exec helm upgrade --install anubis ./chart -n anubis $@
