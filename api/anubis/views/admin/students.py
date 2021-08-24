@@ -1,3 +1,5 @@
+from typing import List
+
 from flask import Blueprint
 
 from anubis.models import db, User, Course, InCourse, Submission, Assignment
@@ -26,12 +28,12 @@ def admin_student_list_basic():
     """
 
     # Get all users
-    students = get_students()
+    students: List[User] = User.query.all()
 
     # Return their id and netid
     return success_response({
         'users': [
-            {'id': user['id'], 'netid': user['netid'], 'name': user['name']}
+            {'id': user.id, 'netid': user.netid, 'name': user.name}
             for user in students
         ]
     })
