@@ -73,6 +73,13 @@ spec:
               name: api
               key: database-port
         {{- if .Values.healthChecks }}
+        startupProbe:
+          httpGet:
+            path: /ping
+            port: 5000
+          initialDelaySeconds: 1
+          periodSeconds: 1
+          failureThreshold: 60
         livenessProbe:
           httpGet:
             path: /ping
@@ -201,7 +208,7 @@ spec:
         {{- if not .Values.debug}}
         resources:
           requests:
-            cpu: 250m
+            cpu: 200m
             memory: 250Mi
           limits:
             cpu: 1

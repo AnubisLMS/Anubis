@@ -80,11 +80,13 @@ export default function Assignments() {
           <DataGrid columns={[
             {field: 'name', headerName: 'Assignment Name', width: 200},
             {field: 'hidden', headerName: 'Visibility', width: 110, renderCell: ({row}) => (
-              <Tooltip title={row.hidden ? 'Hidden' : 'Visible'}>
+              <Tooltip title={
+                row.visible_to_students ? 'Visible to students' : 'Hidden to students'
+              }>
                 {
-                  row.hidden ?
-                    <VisibilityOffIcon style={{color: grey[500]}}/> :
-                    <VisibilityIcon style={{color: green[500]}}/>
+                  row.visible_to_students ?
+                    <VisibilityIcon style={{color: green[500]}}/> :
+                    <VisibilityOffIcon style={{color: grey[500]}}/>
                 }
               </Tooltip>
             )},

@@ -36,6 +36,12 @@ ARG NODE_VERSION=12.18.3
 FROM node:${NODE_VERSION} as theia
 ARG PY_VERSION=3.9.6
 
+ENV PY_VERSION=$PY_VERSION
+ENV NODE_VERSION=$NODE_VERSION
+ENV TERM=xterm-256color
+ENV DEBIAN_FRONTEND=noninteractive
+ENV REPO_NAME=""
+
 COPY --from=0 /opt/theia /opt/theia
 COPY requirements.txt requirements-dev.txt /
 

@@ -106,6 +106,10 @@ def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo
         db.session.add(repo)
         db.session.commit()
 
+    if repo.repo_url != new_repo_url:
+        repo.repo_url = new_repo_url
+        db.session.commit()
+
     try:
         # If repo has not been created yet
         if not repo.repo_created:

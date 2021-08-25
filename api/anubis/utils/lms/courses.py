@@ -93,7 +93,9 @@ def get_course_context(full_stop: bool = True) -> Union[None, Course]:
         # Verify that the current user is actually an admin for
         # this course.
         if not is_course_admin(course_id):
-            raise AuthenticationError()
+            if full_stop:
+                raise AuthenticationError()
+            return None
 
         # Get the course object
         course = Course.query.filter(
@@ -333,8 +335,15 @@ def get_courses(netid: str):
     :param netid:
     :return:
     """
+
+    # Get user
+    user = User.query.filter(User.netid == netid).first()
+
+    # Get course ids
+    course_ids = get_student_course_ids(user)
+
     # Query for classes
-    classes = Course.query.join(InCourse).join(User).filter(User.netid == netid).all()
+    classes = Course.query.filter(Course.id.in_(course_ids)).all()
 
     # Convert to list of data representation
     return [c.data for c in classes]
@@ -349,15 +358,35 @@ def get_student_course_ids(user: User, default: str = None) -> List[str]:
     :return:
     """
 
-    # Get all the courses the user is in
-    in_courses = InCourse.query.join(Course).filter(
-        InCourse.owner_id == user.id,
-    ).all()
+    # Superuser
+    if user.is_superuser:
+        # Get all
+        courses = Course.query.all()
 
-    # Build a list of course ids. If the user
-    # specified a specific course, make a list
-    # of only that course id.
-    course_ids = [in_course.course.id for in_course in in_courses]
+        # List of course ids
+        course_ids = list(map(lambda x: x.id, courses))
+
+    # Regular User
+    else:
+        # Get all the courses the user is in
+        in_courses = InCourse.query.join(Course).filter(
+            InCourse.owner_id == user.id,
+        ).all()
+
+        # Get all the courses the user is in
+        professor_in = ProfessorForCourse.query.join(Course).filter(
+            ProfessorForCourse.owner_id == user.id,
+        ).all()
+
+        # Get all the courses the user is in
+        ta_in = TAForCourse.query.join(Course).filter(
+            TAForCourse.owner_id == user.id,
+        ).all()
+
+        # Build a list of course ids. If the user
+        # specified a specific course, make a list
+        # of only that course id.
+        course_ids = list(set(in_course.course.id for in_course in in_courses + ta_in + professor_in))
 
     # If a default was specified, check
     if default is not None and default in course_ids:

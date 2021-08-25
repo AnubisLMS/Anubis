@@ -34,6 +34,12 @@ def public_set_github_username():
     # Take of any whitespace that may be in the github username
     github_username = github_username.strip()
 
+    # Make sure it is not an empty string
+    req_assert(len(github_username) > 0, message='Please provide at least one character')
+
+    # Make sure it is not too long
+    req_assert(len(github_username) < 512, message='Please provide less than 512 characters')
+
     # Check to see if there is any whitespace in the username
     req_assert(
         all(i not in string.whitespace for i in github_username),

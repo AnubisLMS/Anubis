@@ -29,6 +29,7 @@ const editableFields = [
   {field: 'github_repo_required', label: 'Github Repos Required', type: 'boolean'},
   {field: 'accept_late', label: 'Accept Late Submissions', type: 'boolean'},
   {field: 'ide_enabled', label: 'IDEs Enabled', type: 'boolean'},
+  {field: 'hide_due_date', label: 'Hide Due Date', type: 'boolean'},
   {field: 'autograde_enabled', label: 'Autograde Enabled', type: 'boolean'},
   {field: 'release_date', label: 'Release Date', type: 'datetime'},
   {field: 'due_date', label: 'Due Date', type: 'datetime'},

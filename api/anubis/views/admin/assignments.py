@@ -229,7 +229,9 @@ def admin_assignments_add():
         name='New Assignment',
         description='',
         hidden=True,
+        autograde_enabled=False,
         github_repo_required=course_context.github_repo_required,
+        ide_enabled=True,
         theia_image=course_context.theia_default_image,
         theia_options=course_context.theia_default_options,
         release_date=datetime.now() + timedelta(weeks=1),
@@ -248,7 +250,7 @@ def admin_assignments_add():
 @assignments.post("/save")
 @require_admin()
 @json_endpoint(required_fields=[("assignment", dict)])
-def private_assignment_save(assignment: dict):
+def admin_assignments_save(assignment: dict):
     """
     Save assignment from raw fields
 
@@ -272,7 +274,7 @@ def private_assignment_save(assignment: dict):
 
     # Update all it's fields
     for key, value in assignment.items():
-        if 'date' in key:
+        if 'date' in key and isinstance(value, str):
             value = dateparse(value.replace('T', ' ').replace('Z', ''))
         setattr(db_assignment, key, value)
 

@@ -5,7 +5,6 @@ import axios from 'axios';
 
 import {DataGrid} from '@material-ui/data-grid';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 
@@ -51,16 +50,20 @@ const useColumns = () => ([
   },
   {
     field: 'processed', headerName: 'Processed', width: 150, renderCell: ({row}) => (
-      row.processed && (row.processed ?
-        <CheckCircleIcon style={{color: green[500]}}/> :
-        <CancelIcon style={{color: red[500]}}/>)
+      <React.Fragment>
+        {row.processed ?
+          <CheckCircleIcon style={{color: green[500]}}/> :
+          <CancelIcon style={{color: red[500]}}/>}
+      </React.Fragment>
     ),
   },
   {
     field: 'on_time', headerName: 'On Time', width: 150, renderCell: ({row}) => (
-      row?.timeStamp && (row.timeStamp <= row.assignmentDue ?
-        <CheckCircleIcon style={{color: green[500]}}/> :
-        <CancelIcon style={{color: red[500]}}/>)
+      <React.Fragment>
+        {(row?.timeStamp && row.timeStamp <= row.assignmentDue) ?
+          <CheckCircleIcon style={{color: green[500]}}/> :
+          <CancelIcon style={{color: red[500]}}/>}
+      </React.Fragment>
     ),
   },
   {
