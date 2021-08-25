@@ -54,8 +54,6 @@ RUN set -ex; \
   pip3 install --no-cache-dir supervisor; \
   ln -s /usr/bin/clangd-12 /usr/bin/clangd; \
   cd /home/anubis; \
-  echo 'cat /etc/motd' >> /home/anubis/.bashrc; \
-  echo 'alias python=python3' >> /home/anubis/.bashrc; \
   mkdir -p /opt/anubis/.theia; \
   echo '{"terminal.integrated.shell.linux": "/bin/bash"}' \
     > /opt/anubis/.theia/settings.json; \
