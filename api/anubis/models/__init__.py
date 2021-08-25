@@ -15,7 +15,7 @@ THEIA_DEFAULT_OPTIONS = {
     "persistent_storage": False,
     "network_policy": "os-student",
     "resources": {
-        "requests": {"cpu": "300m", "memory": "100Mi"},
+        "requests": {"cpu": "200m", "memory": "250Mi"},
         "limits": {"cpu": "2", "memory": "500Mi"},
     },
 }
@@ -101,7 +101,7 @@ class Course(db.Model):
     autograde_tests_repo = db.Column(db.TEXT, nullable=False,
                                      default='https://github.com/os3224/anubis-assignment-tests')
     github_repo_required = db.Column(db.Boolean, default=True)
-    theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.digitalocean.com/anubis/xv6')
+    theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.digitalocean.com/anubis/theia-xv6')
     theia_default_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
     github_org = db.Column(db.TEXT, default='os3224')
     join_code = db.Column(db.String(256), unique=True)
@@ -198,6 +198,7 @@ class Assignment(db.Model):
         default=lambda: base64.b16encode(os.urandom(4)).decode().lower(),
     )
     accept_late = db.Column(db.Boolean, default=True)
+    hide_due_date = db.Column(db.Boolean, default=False)
 
     # Autograde
     pipeline_image = db.Column(db.TEXT, nullable=True, index=True)
@@ -236,15 +237,20 @@ class Assignment(db.Model):
             "past_due": self.due_date < datetime.now(),
             "hidden": self.hidden,
             "accept_late": self.accept_late,
+            "autograde_enabled": self.autograde_enabled,
+            "hide_due_date": self.hide_due_date,
             "course": self.course.data,
             "description": self.description,
-            "ide_enabled": self.ide_enabled,
-            "persistent_storage": self.theia_options.get('persistent_storage', False),
-            "github_repo_required": self.github_repo_required,
-            "autograde_enabled": self.autograde_enabled,
             "visible_to_students": not self.hidden and (datetime.now() > self.release_date),
             "ide_active": self.due_date + timedelta(days=3 * 7) > datetime.now(),
             "tests": [t.data for t in self.tests if t.hidden is False],
+
+            # IDE
+            "ide_enabled": self.ide_enabled,
+            "persistent_storage": self.theia_options.get('persistent_storage', False),
+
+            # Github
+            "github_repo_required": self.github_repo_required,
         }
 
     @property

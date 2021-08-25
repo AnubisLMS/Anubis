@@ -113,6 +113,7 @@ export default function AssignmentCard({
     has_repo,
     repo_url,
     past_due,
+    hide_due_date,
     github_repo_required,
     // accept_late,
   } = assignment;
@@ -164,25 +165,29 @@ export default function AssignmentCard({
             {name}
           </Typography>
 
-          <div className={classes.datePos}>
-            <EventNoteIcon style={{marginRight: 7}}/>
-            <p className={classes.dateText}>Due: {nonStupidDatetimeFormat(new Date(due_date))}</p>
-          </div>
+          {!hide_due_date && (
+            <React.Fragment>
+              <div className={classes.datePos}>
+                <EventNoteIcon style={{marginRight: 7}}/>
+                <p className={classes.dateText}>Due: {nonStupidDatetimeFormat(new Date(due_date))}</p>
+              </div>
 
-          <div className={classes.statusPos} style={has_submission ? {} : {color: red[500]}}>
-            {has_submission ?
-              <CheckCircleIcon style={{color: green[500], marginRight: 6}}/> :
-              <AlarmIcon style={{marginRight: 7}}/>
-            }
+              <div className={classes.statusPos} style={has_submission ? {} : {color: red[500]}}>
+                {has_submission ?
+                  <CheckCircleIcon style={{color: green[500], marginRight: 6}}/> :
+                  <AlarmIcon style={{marginRight: 7}}/>
+                }
 
-            <p className={classes.statusText}>
-              {has_submission ?
-                'Assignment Submitted' :
-                timerComponents.length ?
-                  timerComponents[0] :
-                  'Past Due'}
-            </p>
-          </div>
+                <p className={classes.statusText}>
+                  {has_submission ?
+                    'Assignment Submitted' :
+                    timerComponents.length ?
+                      timerComponents[0] :
+                      'Past Due'}
+                </p>
+              </div>
+            </React.Fragment>
+          )}
         </CardContent>
       </CardActionArea>
       <CardActions>

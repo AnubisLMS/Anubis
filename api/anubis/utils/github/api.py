@@ -31,10 +31,16 @@ def github_rest_put(url, body=None):
         'Authorization': 'token %s' % token,
     }
 
+    r = None
     try:
         r = requests.put(url, headers=headers, json=body)
+        if r.status_code == 204:
+            return dict()
         return r.json()
     except Exception as e:
+        if r is not None and isinstance(r, requests.Response):
+            logger.error(str(r))
+            logger.error(r.content)
         logger.error(traceback.format_exc())
         logger.error(f'Request to github api Failed {e}')
         return None
