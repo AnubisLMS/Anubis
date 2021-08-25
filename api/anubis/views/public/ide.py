@@ -210,6 +210,9 @@ def public_ide_initialize(assignment: Assignment):
     repo_url: str = ''
     if assignment.github_repo_required:
 
+        # Make sure github username is set
+        req_assert(current_user.github_username is not None, message='Please set github username')
+
         # Make sure we have a repo we can use
         repo: AssignmentRepo = AssignmentRepo.query.filter(
             AssignmentRepo.owner_id == current_user.id,

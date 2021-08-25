@@ -76,6 +76,9 @@ def public_repos_create(assignment_id: str):
     :return:
     """
 
+    if current_user.github_username == '' or current_user.github_username is None:
+        return error_response('Please set github username on profile page')
+
     assignment: Assignment = Assignment.query.filter(
         Assignment.id == assignment_id,
     ).first()

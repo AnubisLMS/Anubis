@@ -296,6 +296,15 @@ def admin_course_make_ta_id(user_id: str):
         course_id=course_context.id,
     )
 
+    # Make sure they are in the course
+    in_course = InCourse.query.filter(
+        InCourse.course_id == course_context.id,
+        InCourse.owner_id == current_user.id,
+    ).first()
+    if in_course is None:
+        in_course = InCourse(course_id=course_context.id, owner_id=current_user.id)
+        db.session.add(in_course)
+
     # Add and commit the change
     db.session.add(ta)
     db.session.commit()
@@ -378,6 +387,15 @@ def admin_course_make_professor_id(user_id: str):
         owner_id=user_id,
         course_id=course_context.id,
     )
+
+    # Make sure they are in the course
+    in_course = InCourse.query.filter(
+        InCourse.course_id == course_context.id,
+        InCourse.owner_id == current_user.id,
+    ).first()
+    if in_course is None:
+        in_course = InCourse(course_id=course_context.id, owner_id=current_user.id)
+        db.session.add(in_course)
 
     # Add and commit the change
     db.session.add(prof)
