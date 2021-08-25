@@ -68,10 +68,10 @@ def seed():
         github_org='os3224',
     )
     os_assignment0, _, os_submissions0, _ = create_assignment(
-        intro_to_os_course, intro_to_os_students, i=0
+        intro_to_os_course, intro_to_os_students, i=0, github_repo_required=True,
     )
     os_assignment1, _, os_submissions1, _ = create_assignment(
-        intro_to_os_course, intro_to_os_students, i=1, do_submissions=False,
+        intro_to_os_course, intro_to_os_students, i=1, do_submissions=False, github_repo_required=True,
     )
     os_assignment2, _, os_submissions2, _ = create_assignment(
         intro_to_os_course, intro_to_os_students, i=2, do_submissions=False, github_repo_required=False,
