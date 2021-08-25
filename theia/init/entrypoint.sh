@@ -22,6 +22,7 @@ done
 if ! grep '/etc/motd' /out/.bashrc; then
     echo "adding motd to bashrc"
     echo "" >> /out/.bashrc
+    echo "alias python=python3" >> /out/.bashrc
     echo "cat /etc/motd" >> /out/.bashrc
 else
     echo "skipping adding motd to bashrc"
