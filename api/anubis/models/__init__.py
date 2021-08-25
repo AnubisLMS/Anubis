@@ -211,8 +211,8 @@ class Assignment(db.Model):
     theia_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
 
     # Github
-    github_template = db.Column(db.TEXT, nullable=True, default=None)
-    github_repo_required = db.Column(db.Boolean, default=True)
+    github_template = db.Column(db.TEXT, nullable=True, default='')
+    github_repo_required = db.Column(db.Boolean, default=False)
 
     # Dates
     release_date = db.Column(db.DateTime, nullable=False)
@@ -242,7 +242,7 @@ class Assignment(db.Model):
             "persistent_storage": self.theia_options.get('persistent_storage', False),
             "github_repo_required": self.github_repo_required,
             "autograde_enabled": self.autograde_enabled,
-            "visible_to_students": datetime.now() > self.release_date,
+            "visible_to_students": not self.hidden and (datetime.now() > self.release_date),
             "ide_active": self.due_date + timedelta(days=3 * 7) > datetime.now(),
             "tests": [t.data for t in self.tests if t.hidden is False],
         }
