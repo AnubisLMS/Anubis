@@ -274,7 +274,7 @@ class AssignmentRepo(db.Model):
 
     # Fields
     github_username = db.Column(db.TEXT, nullable=False)
-    repo_url = db.Column(db.String(512), nullable=False, unique=True)
+    repo_url = db.Column(db.String(512), nullable=False)
 
     # State booleans
     repo_created = db.Column(db.Boolean, default=False)
