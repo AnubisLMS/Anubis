@@ -41,6 +41,9 @@ ENV NODE_VERSION=$NODE_VERSION
 ENV TERM=xterm-256color
 ENV DEBIAN_FRONTEND=noninteractive
 ENV REPO_NAME=""
+ENV INDRA_HOME="/home/anubis/IndraABM"
+ENV PYTHONPATH=${INDRA_HOME}
+
 
 COPY --from=0 /opt/theia /opt/theia
 COPY requirements.txt requirements-dev.txt /
