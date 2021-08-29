@@ -181,7 +181,19 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
     theia_container = client.V1Container(
         name="theia",
         image_pull_policy="IfNotPresent",
-        ports=[client.V1ContainerPort(container_port=5000)],
+        ports=[
+            client.V1ContainerPort(container_port=5000),
+
+            # Optional proxy ports
+            *(
+                client.V1ContainerPort(container_port=8000 + i, protocol='TCP')
+                for i in range(11)
+            ),
+            *(
+                client.V1ContainerPort(container_port=8000 + i, protocol='UDP')
+                for i in range(11)
+            ),
+        ],
 
         # Use the theia image that was specified in the database. If this is
         # a student session, this should be the theia image that is default either
