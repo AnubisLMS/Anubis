@@ -23,10 +23,34 @@ spec:
           app.kubernetes.io/name: theia
           component: proxy
     ports:
-    - protocol: TCP
-      port: 5000
-    - protocol: UDP
-      port: 5000
+    # Theia port
+    - {protocol: TCP, port: 5000}
+    - {protocol: UDP, port: 5000}
+
+    # Optional proxy ports
+    - {protocol: TCP, port: 8000}
+    - {protocol: UDP, port: 8000}
+    - {protocol: TCP, port: 8001}
+    - {protocol: UDP, port: 8001}
+    - {protocol: TCP, port: 8002}
+    - {protocol: UDP, port: 8002}
+    - {protocol: TCP, port: 8003}
+    - {protocol: UDP, port: 8003}
+    - {protocol: TCP, port: 8004}
+    - {protocol: UDP, port: 8004}
+    - {protocol: TCP, port: 8005}
+    - {protocol: UDP, port: 8005}
+    - {protocol: TCP, port: 8006}
+    - {protocol: UDP, port: 8006}
+    - {protocol: TCP, port: 8007}
+    - {protocol: UDP, port: 8007}
+    - {protocol: TCP, port: 8008}
+    - {protocol: UDP, port: 8008}
+    - {protocol: TCP, port: 8009}
+    - {protocol: UDP, port: 8009}
+    - {protocol: TCP, port: 8010}
+    - {protocol: UDP, port: 8010}
+
   egress:
   - to:
      # Github IP Addresses

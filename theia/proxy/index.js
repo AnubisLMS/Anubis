@@ -64,17 +64,30 @@ const get_session_ip = session_id => {
 
 
 const log_req = (req, url) => {
-  console.log(req.method, (new Date()).toISOString(), url.pathname, url.query);
+  if (url.pathname !== '/ping') {
+    console.log(req.method, (new Date()).toISOString(), url.pathname, url.query);
+  }
 };
 
+const parse_port = req => {
+  const portr = /\/proxy:\d+|\/proxy%3A\d+|\/proxy%3a\d+/;
+  const portm = req.url.match(portr) ?? [];
+  let port = 5000;
+  if (portm.length === 1) {
+    [, port] = portm[0].split(':');
+    req.url = req.url.replaceAll(portm[0], '');
+  }
+  return port ?? 5000;
+}
 
 const parse_req = req => {
+  const port = parse_port(req);
   const url = urlparse(req.url);
   const {cookies} = new Cookie(req.headers.cookie);
   const query = new URLSearchParams(url.query);
   let {ide} = cookies;
   token = authenticate(ide);
-  return {url, token, query, cookies};
+  return {url, token, query, cookies, port};
 };
 
 const initialize = (req, res, url, query) => {
@@ -122,12 +135,12 @@ const updateProxyTime = session_id => {
 
 
 var proxyServer = http.createServer(function (req, res) {
-  const {url, token, query} = parse_req(req);
+  const {url, token, query, port} = parse_req(req);
   log_req(req, url);
 
   switch (url.pathname) {
     case '/initialize':
-      initialize(req, res, url, query)
+      initialize(req, res, url, query);
       return;
 
     case '/ping':
@@ -137,25 +150,28 @@ var proxyServer = http.createServer(function (req, res) {
 
     default:
       if (token === null) {
-        res.writeHead(401)
-        res.end('nah')
+        res.writeHead(401);
+        res.end('Please start an ide at https://anubis.osiris.services and click go to ide.');
+        return;
+      }
+
+      if (port !== 5000 && (port < 8000 || port > 8010)) {
+        res.writeHead(400)
+        res.end('Only valid proxy ports are 8000-8010');
         return;
       }
 
       // updateProxyTime(token.session_id);
-      get_session_ip(token.session_id).then((session_ip) => {
+      get_session_ip(token.session_id).then((host) => {
         proxy.web(req, res, {
-          target: {
-            host: session_ip,
-            port: 5000
-          }
+          target: {host, port}
         });
       })
   }
 });
 
 proxyServer.on("upgrade", function (req, socket) {
-  const {token, url} = parse_req(req);
+  const {token, url, port} = parse_req(req);
   log_req(req, url);
 
   if (token === null) {
@@ -163,12 +179,9 @@ proxyServer.on("upgrade", function (req, socket) {
   }
 
   // updateProxyTime(token.session_id);
-  get_session_ip(token.session_id).then((session_ip) => {
+  get_session_ip(token.session_id).then((host) => {
     proxy.ws(req, socket, {
-      target: {
-        host: session_ip,
-        port: 5000
-      }
+      target: {host, port}
     });
   });
 });
