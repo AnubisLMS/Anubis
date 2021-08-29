@@ -12,3 +12,9 @@
   minutes your work will be pushed to github.
 - Use the autosave command to manually trigger
   an autosave.
+- For servers running in your ide, valid ports
+  are 8000-8010. You can access them through
+  your browser by specifying ports in the url
+  https://anubis.osiris.services/ide/proxy:8000/
+  The "/ide/proxy:8000" will be removed from the
+  url before reaching your server.
