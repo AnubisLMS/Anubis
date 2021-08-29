@@ -7,6 +7,7 @@ const urlparse = require("url-parse");
 const LRU = require("lru-cache");
 
 const SECRET_KEY = process.env.SECRET_KEY ?? 'DEBUG';
+const DEBUG = process.env.DEBUG === '1';
 
 const cache = new LRU(100);
 
@@ -92,7 +93,6 @@ const parse_req = req => {
 
 const initialize = (req, res, url, query) => {
   // Authenticate the token in the http query
-  console.log(`token: ${query.get('token')}`)
   const query_token = authenticate(query.get('token'));
   if (query_token === null) {
     res.writeHead(302, {location: 'https://anubis.osiris.services/error'});
@@ -100,12 +100,14 @@ const initialize = (req, res, url, query) => {
     return;
   }
 
+  let domain = DEBUG ? 'localhost' : 'anubis.osiris.services';
+
   // Set cookie for ide session & redirect
   const signed_token = jwt.sign({
     session_id: query_token.session_id,
   }, SECRET_KEY, {expiresIn: '6h'});
   res.writeHead(302, {
-    location: '/ide/', "Set-Cookie": `ide=${signed_token}; Path=/ide; Max-Age=${6 * 3600}; HttpOnly`
+    location: '/ide/', "Set-Cookie": `ide=${signed_token}; Path=/; Domain=${domain}; Max-Age=${6 * 3600}; HttpOnly`
   })
   res.end('redirecting...')
 };
@@ -135,8 +137,11 @@ const updateProxyTime = session_id => {
 
 
 var proxyServer = http.createServer(function (req, res) {
-  const {url, token, query, port} = parse_req(req);
+  let {url, token, query, port} = parse_req(req);
   log_req(req, url);
+  
+  if ((req.headers?.host ?? '').startsWith('ide8000.'))
+    port = 8000;
 
   switch (url.pathname) {
     case '/initialize':

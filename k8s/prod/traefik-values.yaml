@@ -89,7 +89,7 @@ persistence:
   name: data
   #  existingClaim: ""
   accessMode: ReadWriteOnce
-  size: 1Gi
+  size: 8Gi
   # storageClass: ""
   path: /data
   annotations: {}
@@ -154,6 +154,7 @@ ports:
       - main: anubis.osiris.services
         sans:
           - ide.anubis.osiris.services
+          - ide8000.anubis.osiris.services
 
 podSecurityContext: null
 securityContext: null

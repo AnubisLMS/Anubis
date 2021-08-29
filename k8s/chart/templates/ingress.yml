@@ -100,7 +100,7 @@ spec:
 
 ---
 
-# Public Ingress Route ide.anubis.osiris.services
+# Public Ingress Route anubis.osiris.services/ide/
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
@@ -128,7 +128,13 @@ spec:
     services:
     - name: anubis-theia-proxy
       port: 5000
+  - kind: Rule
+    match: Host(`ide8000.{{ .Values.domain }}`)
+    services:
+    - name: anubis-theia-proxy
+      port: 5000
   {{- if not .Values.debug }}
   tls:
     certResolver: le
   {{- end }}
+

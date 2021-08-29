@@ -46,6 +46,8 @@ spec:
         - name: http
           containerPort: 5000
         env:
+        - name: "DEBUG"
+          value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
         - name: "SECRET_KEY"
           valueFrom:
             secretKeyRef:
