@@ -87,7 +87,7 @@ traefik: ns-anubis
 		--install traefik traefik/traefik \
 		--values traefik-values.yaml \
 		--version $(TRAEFIK_VERSION) \
-		--namespace anubis
+		--namespace traefik
 
 # We need the default storage class to
 # be longhorn (or really any class that
