@@ -95,7 +95,7 @@ def public_ide_stop(theia_session_id: str) -> Dict[str, str]:
     # Mark the session as stopped.
     theia_session.active = False
     theia_session.ended = datetime.now()
-    theia_session.state = "Ending"
+    theia_session.state = "Ended"
 
     # Commit the change
     db.session.commit()
@@ -128,7 +128,7 @@ def public_ide_poll(theia_session_id: str) -> Dict[str, str]:
     req_assert(session_data is not None, message='session does not exist')
 
     # Check to see if it is still initializing
-    loading = session_data["state"] == "Initializing"
+    loading = session_data["state"] not in {"Running", "Ended", "Failed"}
 
     # Pass back the status and data
     return success_response({
