@@ -40,8 +40,6 @@ export default function Repos() {
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, []);
 
-  console.log(lectures);
-
   const get_href = (row) => (
     `${window.location.origin}/api/public/static${row.static_file.path}/${row.static_file.filename}`
   );
