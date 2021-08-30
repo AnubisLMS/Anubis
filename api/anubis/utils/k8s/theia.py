@@ -1,4 +1,5 @@
 import base64
+import traceback
 from datetime import datetime
 from typing import Tuple, Optional
 
@@ -590,4 +591,75 @@ def reap_theia_session(theia_session: TheiaSession, commit: bool = True):
 
     # Commit the changes to the database entry
     if commit:
+        db.session.commit()
+
+
+def update_theia_session(session: TheiaSession):
+    # Load the kubernetes incluster config
+    v1 = client.CoreV1Api()
+
+    # Get the name of the pod
+    pod_name = get_theia_pod_name(session)
+
+    try:
+        # If the pod has not been created yet, then a 404 will be thrown.
+        # Skip logging if that is the case.
+        # Get the pod information from the kubernetes api
+        pod: client.V1Pod = v1.read_namespaced_pod(
+            namespace="anubis",
+            name=pod_name,
+        )
+
+    except client.exceptions.ApiException as e:
+
+        # If the status code is 404, then it has not been created yet
+        if e.status == 404:
+            if session.state != 'Waiting for IDE to be scheduled...':
+                session.state = 'Waiting for IDE to be scheduled...'
+                db.session.commit()
+            return
+
+        # Error
+        logger.error(traceback.format_exc())
+        logger.error('continuing')
+
+    # Update the session state from the pod status
+    if pod.status.phase == 'Pending':
+        session.state = 'Waiting for IDE server to start...'
+        db.session.commit()
+
+    # If the pod has failed. There are more than a few ways that
+    # the pod could have failed. If we reach this, then we should
+    # just mark the theia session as failed, then let the reaper
+    # job clean up the kubernetes resources at a later date.
+    if pod.status.phase == "Failed":
+        # Set cluster address and state
+        session.active = False
+        session.state = "Failed"
+
+        # Log the failure
+        logger.error("Theia session failed {}".format(pod_name))
+
+        db.session.commit()
+
+    # If the pod is marked as running. The pod is marked as
+    # running when the main containers have started
+    if pod.status.phase == "Running":
+        # Set the cluster address and state
+        session.cluster_address = pod.status.pod_ip
+        session.state = "Running"
+
+        # Index the event
+        logger.info(
+            "theia",
+            extra={
+                "event": "session-init",
+                "session_id": session.id,
+                "netid": session.owner.netid,
+            },
+        )
+
+        # Log the success
+        logger.info("Theia session started {}".format(pod_name))
+
         db.session.commit()

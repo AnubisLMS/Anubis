@@ -54,14 +54,16 @@ const useStyles = makeStyles((theme) => ({
 
 
 const pollSession = (id, state, enqueueSnackbar, n = 0) => () => {
-  const {setLoading, setSession} = state;
+  const {setLoading, setSession, setSessionState} = state;
 
-  if (n > 300) {
+  if (n > 600) {
     return;
   }
 
   axios.get(`/api/public/ide/poll/${id}`).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
+
+    setSessionState(data.session?.state ?? '');
     if (!data.loading) {
       setSession(data.session);
       setLoading(false);
@@ -73,7 +75,7 @@ const pollSession = (id, state, enqueueSnackbar, n = 0) => () => {
 };
 
 const startSession = (state, enqueueSnackbar) => () => {
-  const {autosaveEnabled, persistentStorage, session, setSession, selectedTheia, setLoading} = state;
+  const {autosaveEnabled, persistentStorage, setSession, session, selectedTheia, setLoading} = state;
   if (session) {
     const a = document.createElement('a');
     a.setAttribute('href', session.redirect_url);
@@ -102,7 +104,7 @@ const startSession = (state, enqueueSnackbar) => () => {
 };
 
 const stopSession = (state, enqueueSnackbar) => () => {
-  const {session, setAutosaveEnabled, setSession, setLoading} = state;
+  const {session, setAutosaveEnabled, setSession, setLoading, setSessionState} = state;
   if (!session) {
     return;
   }
@@ -110,6 +112,7 @@ const stopSession = (state, enqueueSnackbar) => () => {
   axios.get(`/api/public/ide/stop/${session.id}`).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
     if (data) {
+      setSessionState('Stopped');
       setSession(null);
       setAutosaveEnabled(true);
     }
@@ -123,6 +126,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
   const [sessionsAvailable, setSessionsAvailable] = useState(null);
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState(false);
+  const [sessionState, setSessionState] = useState(null);
   const [autosaveEnabled, setAutosaveEnabled] = useState(true);
   const [persistentStorage, setPersistentStorage] = useState(false);
   const [assignment, setAssignment] = useState(null);
@@ -160,6 +164,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
     axios.get(`/api/public/ide/active/${selectedTheia.id}`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data.session) {
+        setSessionState(data.session.state);
         setSession(data.session);
       }
       if (data?.session?.autosave !== undefined) {
@@ -179,6 +184,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
     autosaveEnabled, setAutosaveEnabled,
     persistentStorage, setPersistentStorage,
     assignment, setAssignment,
+    sessionState, setSessionState,
   };
 
   return (
@@ -263,6 +269,13 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
               }
               labelPlacement="end"
             />
+          </Grid>
+          <Grid item xs={12}>
+            <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+              <Typography>
+                {sessionState || 'No Active IDE'}
+              </Typography>
+            </div>
           </Grid>
         </Grid>
       </DialogContent>

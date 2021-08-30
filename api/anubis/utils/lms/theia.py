@@ -48,8 +48,6 @@ def theia_redirect_url(theia_session_id: str, netid: str) -> str:
     :param netid:
     :return:
     """
-    scheme = 'https' if not is_debug() else 'http'
-
     return "/ide/initialize?token={}&anubis=1".format(
         create_token(netid, session_id=theia_session_id),
     )
