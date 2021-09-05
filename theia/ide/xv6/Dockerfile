@@ -26,7 +26,7 @@ RUN set -ex; \
   apt-get update; \
     apt-get install -y --no-install-recommends \
     zsh gdb git build-essential cmake \
-    gcc-multilib g++-multilib \
+    gcc-multilib g++-multilib libc6-dev \
     python3 python3-pip \
     clangd-12 \
     qemu-system-i386 \
