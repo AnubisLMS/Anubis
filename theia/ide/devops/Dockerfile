@@ -117,13 +117,13 @@ RUN set -eux; apt-get update; \
   rm -rf /var/cache/apt/*; \
   rm -rf /var/lib/apt/lists/*; \
   find / -depth \
-    \( -name .cache -o -name __pycache__ -o -name *.pyc -o -name *.a -o -name .git -o -name .github \) \
+    \( -name .cache -o -name __pycache__ -o -name '*.pyc' -o -name .git -o -name .github \) \
     -exec 'rm' '-rf' '{}' '+'; \
   rm -rf /home/node; \
   find /usr/local -depth \
   \( \
   \( -type d -a \( -name test -o -name tests -o -name idle_test -o -name __pycache__ \) \) \
-  -o \( -type f -a \( -name '*.pyc' -o -name '*.pyo' -o -name '*.a' \) \) \
+  -o \( -type f -a \( -name '*.pyc' -o -name '*.pyo' \) \) \
   \) -exec 'rm' '-rf' '{}' '+'
 
 COPY motd.txt /etc/motd

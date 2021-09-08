@@ -1,6 +1,6 @@
 # https://github.com/theia-ide/theia-apps/tree/master/theia-cpp-docker
 
-ARG NODE_VERSION=12.18.3
+ARG NODE_VERSION=12.22.6
 
 FROM node:${NODE_VERSION}-buster as theia
 
@@ -21,14 +21,14 @@ RUN set -ex; \
   apt-get install -y --no-install-recommends \
     wget gpg apt-transport-https ca-certificates apt-utils; \
   wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -; \
-  echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-12 main" \
+  echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster main" \
     > /etc/apt/sources.list.d/llvm.list; \
   apt-get update; \
     apt-get install -y --no-install-recommends \
     zsh gdb git build-essential cmake \
     gcc-multilib g++-multilib libc6-dev \
     python3 python3-pip \
-    clangd-12 \
+    clangd \
     qemu-system-i386 \
     libsecret-1-0; \
   yarn --pure-lockfile; \
@@ -46,7 +46,6 @@ RUN set -ex; \
   cd /home/anubis; \
   cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/anubis/; \
   pip3 install --no-cache-dir supervisor; \
-  ln -s /usr/bin/clangd-12 /usr/bin/clangd; \
   echo 'cat /etc/motd' >> /etc/skel/.bashrc; \
   echo 'set auto-load safe-path /' > /etc/skel/.gdbinit; \
   echo 'source /opt/pwndbg/gdbinit.py' >> /etc/skel/.gdbinit; \
@@ -56,14 +55,13 @@ RUN set -ex; \
   cd /home/anubis; \
   chmod g+rw /home; \
   chown -R anubis:anubis /home/anubis; \
-  apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+  apt reinstall libc6-dev libgcc-8-dev libgcc1 gcc-8 -y; \
   rm -rf /tmp/*; \
   rm -rf /usr/share/doc; \
-  rm -rf /var/cache/apt/*; \
   rm -rf /var/lib/apt/lists/*; \
   rm -rf /home/node/*; \
   find / -depth \
-    \( -name .cache -o -name __pycache__ -o -name '*.pyc' -o -name '*.a' -o -name .git -o -name .github \) \
+    \( -name .cache -o -name __pycache__ -o -name '*.pyc' -o -name .git -o -name .github \) \
     -exec 'rm' '-rf' '{}' '+';
 
 COPY supervisord.conf autosave-dump.sh /

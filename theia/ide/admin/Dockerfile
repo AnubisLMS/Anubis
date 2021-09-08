@@ -113,7 +113,7 @@ RUN adduser --disabled-password --gecos '' --uid 1001 anubis; \
   && rm -rf /var/cache/apt/* \
   && rm -rf /var/lib/apt/lists/*; \
   find / -depth \
-    \( -name .cache -o -name __pycache__ -o -name *.pyc -o -name *.a -o -name .git -o -name .github \) \
+    \( -name .cache -o -name __pycache__ -o -name '*.pyc' -o -name .git -o -name .github \) \
     -exec 'rm' '-rf' '{}' '+'
 
 COPY cli /cli
