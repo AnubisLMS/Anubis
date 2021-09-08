@@ -150,7 +150,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
             name='docker-config',
             secret=client.V1SecretVolumeSource(
                 default_mode=0o644,
-                secret_name="anubis",
+                secret_name="anubis-registry",
                 items=[
                     client.V1KeyToPath(
                         key=".dockerconfigjson",

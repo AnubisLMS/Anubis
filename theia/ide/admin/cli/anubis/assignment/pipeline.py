@@ -27,7 +27,7 @@ def post(path: str, data: dict, params=None):
     # Attempt to contact the pipeline API
     try:
         res = requests.post(
-            'http://pipeline-api:5000' + path,
+            'http://anubis-pipeline-api:5000' + path,
             headers=headers,
             params=params,
             json=data,
