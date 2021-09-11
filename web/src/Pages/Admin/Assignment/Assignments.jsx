@@ -81,10 +81,10 @@ export default function Assignments() {
             {field: 'name', headerName: 'Assignment Name', width: 200},
             {field: 'hidden', headerName: 'Visibility', width: 110, renderCell: ({row}) => (
               <Tooltip title={
-                row.visible_to_students ? 'Visible to students' : 'Hidden to students'
+                !row.hidden ? 'Visible to students' : 'Hidden to students'
               }>
                 {
-                  row.visible_to_students ?
+                  !row.hidden ?
                     <VisibilityIcon style={{color: green[500]}}/> :
                     <VisibilityOffIcon style={{color: grey[500]}}/>
                 }
