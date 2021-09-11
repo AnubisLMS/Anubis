@@ -51,7 +51,7 @@ def public_repos_get(assignment_id: str):
     req_assert(assignment is not None, message='Assignment does not exist')
 
     # If it has not been released, make sure the current user is an admin
-    if assignment.release_date < datetime.now():
+    if assignment.release_date > datetime.now():
         req_assert(is_course_admin(assignment.course_id, current_user.id), message='Assignment does not exist')
 
     repo = AssignmentRepo.query.filter(
@@ -87,7 +87,7 @@ def public_repos_create(assignment_id: str):
     req_assert(assignment is not None, message='Assignment does not exist')
 
     # If it has not been released, make sure the current user is an admin
-    if assignment.release_date < datetime.now():
+    if assignment.release_date > datetime.now():
         req_assert(is_course_admin(assignment.course_id, current_user.id), message='Assignment does not exist')
 
     repo = create_assignment_repo(current_user, assignment)
