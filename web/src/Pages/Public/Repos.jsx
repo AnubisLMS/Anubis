@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import useSWR from 'swr';
 import {Redirect} from 'react-router-dom';
 
@@ -9,15 +9,25 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import ReposTable from '../../Components/Public/Repos/ReposTable';
 import StandardLayout from '../../Components/Layouts/StandardLayout';
 import AuthContext from '../../Contexts/AuthContext';
+import axios from 'axios';
+import standardStatusHandler from '../../Utils/standardStatusHandler';
+import {useSnackbar} from 'notistack';
+import standardErrorHandler from '../../Utils/standardErrorHandler';
 
 
 export default function Repos() {
-  const {isValidating: loading, error, data} = useSWR('/api/public/repos/');
+  const [rows, setRows] = useState([]);
+  const [reset, setReset] = useState(0);
+  const {enqueueSnackbar} = useSnackbar();
 
-  if (loading) return <CircularProgress/>;
-  if (error) return <Redirect to={`/error`}/>;
-
-  const repos = data?.data?.repos ?? [];
+  React.useEffect(() => {
+    axios.get('/api/public/repos').then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data?.repos) {
+        setRows(data.repos);
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  }, [reset]);
 
   return (
     <AuthContext.Consumer>
@@ -25,7 +35,7 @@ export default function Repos() {
         <StandardLayout description={`${user?.name}'s Repos`}>
           <Grid container spacing={1} justify={'center'}>
             <Grid item xs={12}>
-              <ReposTable rows={repos}/>
+              <ReposTable rows={rows} setReset={setReset}/>
             </Grid>
           </Grid>
         </StandardLayout>

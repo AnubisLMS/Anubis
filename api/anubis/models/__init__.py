@@ -289,6 +289,7 @@ class AssignmentRepo(db.Model):
         return {
             "id": self.id,
             "github_username": self.github_username,
+            "assignment_id": self.assignment_id,
             "assignment_name": self.assignment.name,
             "ready": self.repo_created and self.collaborator_configured,
             "course_code": self.assignment.course.course_code,

@@ -8,14 +8,15 @@ from anubis.utils.auth.user import current_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.https import success_response, error_response, req_assert
 from anubis.utils.lms.repos import get_repos
+from anubis.utils.github.repos import delete_assignment_repo
 from anubis.utils.lms.courses import is_course_admin
 from anubis.utils.github.repos import create_assignment_repo
+from anubis.utils.services.cache import cache
 
 repos_ = Blueprint("public-repos", __name__, url_prefix="/public/repos")
 
 
 @repos_.get('')
-@repos_.get("/")
 @repos_.get("/list")
 @require_user()
 @json_response
@@ -97,5 +98,37 @@ def public_repos_create(assignment_id: str):
 
     # Pass them back
     return success_response({"repo": repo.data})
+
+
+@repos_.delete('/delete/<string:assignment_id>')
+@require_user()
+@json_response
+def public_repos_delete(assignment_id: str):
+    """
+    Get all unique repos for a user
+
+    :return:
+    """
+
+    if current_user.github_username == '' or current_user.github_username is None:
+        return error_response('Please set github username on profile page')
+
+    assignment: Assignment = Assignment.query.filter(
+        Assignment.id == assignment_id,
+    ).first()
+
+    # Verify assignment exists
+    req_assert(assignment is not None, message='Assignment does not exist')
+
+    # If it has not been released, make sure the current user is an admin
+    if assignment.release_date > datetime.now():
+        req_assert(is_course_admin(assignment.course_id, current_user.id), message='Assignment does not exist')
+
+    delete_assignment_repo(current_user, assignment)
+
+    cache.delete_memoized(get_repos, current_user.id)
+
+    # Pass them back
+    return success_response({'status': 'Github Repo & Submissions deleted'})
 
 

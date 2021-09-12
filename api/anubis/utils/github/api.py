@@ -20,7 +20,7 @@ def get_github_token() -> Optional[str]:
     return token
 
 
-def github_rest_put(url, body=None):
+def github_rest(url, body=None, method: str = 'get'):
 
     # Get the github api token
     token = get_github_token()
@@ -31,9 +31,19 @@ def github_rest_put(url, body=None):
         'Authorization': 'token %s' % token,
     }
 
+    req_function = {
+        'put': requests.put,
+        'get': requests.get,
+        'del': requests.delete,
+        'delete': requests.delete,
+    }[method.lower()]
+
     r = None
     try:
-        r = requests.put(url, headers=headers, json=body)
+        if body is not None:
+            r = req_function(url, headers=headers, json=body)
+        else:
+            r = req_function(url, headers=headers)
         if r.status_code == 204:
             return dict()
         return r.json()
