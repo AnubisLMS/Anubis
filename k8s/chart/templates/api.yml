@@ -105,8 +105,8 @@ spec:
           httpGet:
             path: /
             port: 5000
-          initialDelaySeconds: 3
-          periodSeconds: 1
+          initialDelaySeconds: 5
+          periodSeconds: 3
           failureThreshold: 60
         livenessProbe:
           httpGet:
