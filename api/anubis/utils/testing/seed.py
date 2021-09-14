@@ -85,7 +85,7 @@ def rand_commit(n=40) -> str:
     return rand(n)
 
 
-def create_assignment(course, users, i=0, do_submissions=True, **kwargs):
+def create_assignment(course, users, i=0, do_submissions=True, submission_count=10, **kwargs):
     # Assignment 1 uniq
     assignment = Assignment(
         id=rand(), name=f"{course.course_code} Assignment {i}", unique_code=rand(8), hidden=False,
@@ -141,8 +141,8 @@ def create_assignment(course, users, i=0, do_submissions=True, **kwargs):
                 mark_session_ended(theia_session)
                 theia_sessions.append(theia_session)
 
-            if random.randint(0, 3) != 0:
-                for i in range(random.randint(1, 10)):
+            if submission_count is not None:
+                for i in range(submission_count):
                     submission = Submission(
                         id=rand(),
                         commit=rand_commit(),
@@ -195,7 +195,10 @@ def init_submissions(submissions):
 
     # Init models
     for submission in submissions:
-        init_submission(submission)
+        init_submission(submission, commit=False)
+    db.session.commit()
+
+    for submission in submissions:
         submission.processed = True
 
         build_pass = random.randint(0, 2) != 0

@@ -50,3 +50,7 @@ pydoc: venv
 		| sed 's/\//./g; s/.py$//' \
 		| sort \
 		| xargs ./venv/bin/python -m pydoc -w
+
+autograde-timings: venv
+	env DB_HOST=127.0.0.1 DEBUG=1 \
+		venv/bin/python3 -c "import anubis.utils.testing.autograde_timings; anubis.utils.testing.autograde_timings.main()"
