@@ -38,8 +38,8 @@ debug:
 	docker-compose up \
 		-d --force-recreate \
 		$(RESTART_ALWAYS_SERVICES)
-	@echo 'Waiting a moment before running migrations'
-	sleep 3
+	@echo 'Waiting for db'
+	@until mysqladmin -h 127.0.0.1 ping &> /dev/null; do sleep 1; done
 	@echo 'running migrations'
 	docker-compose exec api alembic upgrade head
 	make startup-links
