@@ -6,9 +6,9 @@ from anubis.utils.auth.http import require_admin
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http import success_response, get_number_arg
-from anubis.utils.lms.autograde import bulk_autograde, autograde, autograde_submission_result_wrapper
-from anubis.utils.lms.courses import assert_course_context
-from anubis.utils.lms.questions import get_assigned_questions
+from anubis.lms.autograde import bulk_autograde, autograde, autograde_submission_result_wrapper
+from anubis.lms.courses import assert_course_context
+from anubis.lms.questions import get_assigned_questions
 from anubis.utils.cache import cache
 from anubis.utils.visuals.assignments import (
     get_admin_assignment_visual_data,

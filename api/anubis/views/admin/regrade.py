@@ -11,9 +11,9 @@ from anubis.utils.data import split_chunks, req_assert
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.decorators import load_from_id
 from anubis.utils.http import success_response, get_number_arg
-from anubis.utils.lms.autograde import bulk_autograde, autograde
-from anubis.utils.lms.courses import assert_course_context
-from anubis.utils.lms.submissions import init_submission
+from anubis.lms.autograde import bulk_autograde, autograde
+from anubis.lms.courses import assert_course_context
+from anubis.lms.submissions import init_submission
 from anubis.utils.cache import cache
 from anubis.utils.rpc import enqueue_autograde_pipeline, rpc_enqueue
 

@@ -16,7 +16,7 @@ from anubis.models import (
 from anubis.rpc.batch import rpc_bulk_regrade
 from anubis.utils.data import is_debug, split_chunks
 from anubis.utils.http import error_response, success_response
-from anubis.utils.lms.assignments import get_assignment_due_date
+from anubis.lms.assignments import get_assignment_due_date
 from anubis.utils.cache import cache
 from anubis.utils.logging import logger
 from anubis.utils.rpc import rpc_enqueue, enqueue_autograde_pipeline

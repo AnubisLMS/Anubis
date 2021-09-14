@@ -69,7 +69,7 @@ class User(db.Model):
 
     @property
     def data(self):
-        from anubis.utils.lms.courses import get_user_permissions
+        from anubis.lms.courses import get_user_permissions
 
         return {
             "id": self.id,
@@ -436,7 +436,7 @@ class AssignedQuestionResponse(db.Model):
 
     @property
     def data(self):
-        from anubis.utils.lms.assignments import get_assignment_due_date
+        from anubis.lms.assignments import get_assignment_due_date
 
         return {
             'submitted': str(self.created),
@@ -688,7 +688,7 @@ class TheiaSession(db.Model):
 
     @property
     def data(self):
-        from anubis.utils.lms.theia import theia_redirect_url
+        from anubis.lms.theia import theia_redirect_url
 
         return {
             "id": self.id,

@@ -10,8 +10,8 @@ from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, load_from_id
 from anubis.utils.http import error_response, success_response
-from anubis.utils.lms.courses import is_course_admin
-from anubis.utils.lms.theia import (
+from anubis.lms.courses import is_course_admin
+from anubis.lms.theia import (
     theia_redirect_url,
     get_n_available_sessions,
     theia_poll_ide,

@@ -15,7 +15,7 @@ def create_submission_pipeline(submission_id: str):
     :param submission_id: submission.id of to test
     """
     from anubis.utils.rpc import enqueue_autograde_pipeline
-    from anubis.utils.lms.submissions import init_submission
+    from anubis.lms.submissions import init_submission
 
     # Log the creation event
     logger.info(

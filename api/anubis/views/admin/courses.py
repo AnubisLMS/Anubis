@@ -7,8 +7,8 @@ from anubis.utils.auth.user import current_user
 from anubis.utils.data import row2dict, req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http import error_response, success_response
-from anubis.utils.lms.courses import assert_course_superuser, course_context
-from anubis.utils.lms.courses import valid_join_code
+from anubis.lms.courses import assert_course_superuser, course_context
+from anubis.lms.courses import valid_join_code
 
 courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
 

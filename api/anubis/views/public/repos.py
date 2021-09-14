@@ -8,9 +8,9 @@ from anubis.utils.auth.user import current_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http import req_assert
 from anubis.utils.http import error_response, success_response
-from anubis.utils.lms.repos import get_repos
+from anubis.lms.repos import get_repos
 from anubis.utils.github.repos import delete_assignment_repo
-from anubis.utils.lms.courses import is_course_admin
+from anubis.lms.courses import is_course_admin
 from anubis.utils.github.repos import create_assignment_repo
 from anubis.utils.cache import cache
 

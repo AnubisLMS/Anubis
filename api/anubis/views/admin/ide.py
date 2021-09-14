@@ -10,7 +10,7 @@ from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http import error_response, success_response
-from anubis.utils.lms.courses import course_context
+from anubis.lms.courses import course_context
 from anubis.utils.rpc import enqueue_ide_initialize
 from anubis.utils.rpc import rpc_enqueue, enqueue_ide_stop
 

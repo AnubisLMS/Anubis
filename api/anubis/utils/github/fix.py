@@ -44,8 +44,8 @@ def fix_github_broken_repos():
 
 
 def fix_github_missing_submissions(org_name: str):
-    from anubis.utils.lms.submissions import init_submission
-    from anubis.utils.lms.webhook import check_repo, guess_github_username
+    from anubis.lms.submissions import init_submission
+    from anubis.lms.webhook import check_repo, guess_github_username
     from anubis.utils.rpc import enqueue_autograde_pipeline
 
     # Do graphql nonsense

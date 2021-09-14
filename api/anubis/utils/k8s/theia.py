@@ -7,7 +7,7 @@ from kubernetes import client
 
 from anubis.models import db, TheiaSession
 from anubis.utils.auth.token import create_token
-from anubis.utils.lms.theia import get_theia_pod_name, mark_session_ended
+from anubis.lms.theia import get_theia_pod_name, mark_session_ended
 from anubis.utils.logging import logger
 from anubis.utils.github.parse import parse_github_repo_name
 

@@ -1,5 +1,5 @@
 from anubis.models import db, User, AssignmentRepo
-from anubis.utils.lms.repos import get_repos
+from anubis.lms.repos import get_repos
 from anubis.utils.cache import cache
 
 

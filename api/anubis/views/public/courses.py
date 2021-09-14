@@ -6,8 +6,8 @@ from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http import error_response, success_response
-from anubis.utils.lms.assignments import get_assignments
-from anubis.utils.lms.courses import valid_join_code, get_courses
+from anubis.lms.assignments import get_assignments
+from anubis.lms.courses import valid_join_code, get_courses
 from anubis.utils.cache import cache
 
 courses_ = Blueprint("public-courses", __name__, url_prefix="/public/courses")

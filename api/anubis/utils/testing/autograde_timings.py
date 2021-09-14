@@ -21,7 +21,7 @@ from anubis.models import (
     LectureNotes,
 )
 from anubis.utils.data import with_context
-from anubis.utils.lms.questions import assign_questions
+from anubis.lms.questions import assign_questions
 from anubis.utils.testing.seed import (
     create_assignment,
     create_students,
@@ -29,7 +29,7 @@ from anubis.utils.testing.seed import (
     init_submissions,
 )
 from anubis.utils.logging import logger
-from anubis.utils.lms.autograde import bulk_autograde
+from anubis.lms.autograde import bulk_autograde
 
 
 def do_seed() -> str:

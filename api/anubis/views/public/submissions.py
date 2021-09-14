@@ -6,8 +6,8 @@ from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http import success_response, get_number_arg
-from anubis.utils.lms.courses import is_course_admin, assert_course_context
-from anubis.utils.lms.submissions import regrade_submission, get_submissions
+from anubis.lms.courses import is_course_admin, assert_course_context
+from anubis.lms.submissions import regrade_submission, get_submissions
 
 submissions_ = Blueprint(
     "public-submissions", __name__, url_prefix="/public/submissions"

@@ -4,7 +4,7 @@ from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http import success_response
-from anubis.utils.lms.lectures import get_lecture_notes
+from anubis.lms.lectures import get_lecture_notes
 
 lectures_ = Blueprint('public-lectures', __name__, url_prefix='/public/lectures')
 

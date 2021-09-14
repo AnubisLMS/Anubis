@@ -8,8 +8,8 @@ from anubis.utils.auth.http import require_admin
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http import error_response, success_response
-from anubis.utils.lms.courses import assert_course_context
-from anubis.utils.lms.submissions import recalculate_late_submissions
+from anubis.lms.courses import assert_course_context
+from anubis.lms.submissions import recalculate_late_submissions
 
 late_exceptions_ = Blueprint('admin-late-exceptions', __name__, url_prefix='/admin/late-exceptions')
 

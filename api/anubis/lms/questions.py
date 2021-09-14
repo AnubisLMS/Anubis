@@ -14,7 +14,7 @@ from anubis.models import (
     InCourse,
 )
 from anubis.utils.data import _verify_data_shape, is_debug
-from anubis.utils.lms.students import get_students
+from anubis.lms.students import get_students
 from anubis.utils.cache import cache
 
 

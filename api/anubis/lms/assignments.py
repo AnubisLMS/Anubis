@@ -17,9 +17,9 @@ from anubis.models import (
     LateException,
 )
 from anubis.utils.data import is_debug
-from anubis.utils.lms.courses import assert_course_admin, get_student_course_ids
-from anubis.utils.lms.courses import is_course_admin
-from anubis.utils.lms.questions import ingest_questions
+from anubis.lms.courses import assert_course_admin, get_student_course_ids
+from anubis.lms.courses import is_course_admin
+from anubis.lms.questions import ingest_questions
 from anubis.utils.cache import cache
 from anubis.utils.logging import logger
 

@@ -11,7 +11,7 @@ from anubis.models import (
     InCourse, TheiaSession
 )
 from anubis.utils.data import rand
-from anubis.utils.lms.theia import mark_session_ended
+from anubis.lms.theia import mark_session_ended
 from anubis.utils.github.repos import assignment_repo_name
 
 lorem = """
@@ -191,7 +191,7 @@ def create_course(users, **kwargs):
 
 
 def init_submissions(submissions):
-    from anubis.utils.lms.submissions import init_submission
+    from anubis.lms.submissions import init_submission
 
     # Init models
     for submission in submissions:

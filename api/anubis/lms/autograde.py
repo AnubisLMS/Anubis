@@ -5,7 +5,7 @@ from parse import parse
 from anubis.models import db, Submission, SubmissionBuild, SubmissionTestResult, Assignment, AssignmentTest
 from anubis.utils.data import is_debug
 from anubis.utils.http import error_response
-from anubis.utils.lms.students import get_students_in_class
+from anubis.lms.students import get_students_in_class
 from anubis.utils.cache import cache
 
 
