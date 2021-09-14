@@ -11,7 +11,7 @@ assignments = Blueprint(
 )
 
 
-@assignments.route("/")
+@assignments.route("")
 @assignments.route("/list")
 @require_user()
 @json_response

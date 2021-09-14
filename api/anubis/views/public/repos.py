@@ -17,7 +17,7 @@ from anubis.utils.cache import cache
 repos_ = Blueprint("public-repos", __name__, url_prefix="/public/repos")
 
 
-@repos_.get('')
+@repos_.get("")
 @repos_.get("/list")
 @require_user()
 @json_response
