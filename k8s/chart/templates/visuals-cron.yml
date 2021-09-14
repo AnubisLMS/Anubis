@@ -15,6 +15,10 @@ spec:
   suspend: {{ .Values.visuals.suspend }}
   concurrencyPolicy: Replace
   jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: anubis
+        component: visuals-job
     spec:
       template:
         spec:
