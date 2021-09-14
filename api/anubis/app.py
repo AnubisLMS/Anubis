@@ -9,8 +9,8 @@ def init_services(app):
     :return:
     """
     from anubis.models import db, Config
-    from anubis.utils.services.cache import cache, cache_health
-    from anubis.utils.services.migrate import migrate
+    from anubis.utils.cache import cache, cache_health
+    from anubis.utils.migrate import migrate
     from anubis.utils.exceptions import add_app_exception_handlers
 
     # Init services

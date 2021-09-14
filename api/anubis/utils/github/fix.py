@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import List
 
-from sqlalchemy.sql import or_, and_
+from sqlalchemy.sql import or_
 
 from anubis.models import (
     db,
@@ -12,7 +12,7 @@ from anubis.models import (
 )
 from anubis.utils.github.api import github_graphql
 from anubis.utils.github.repos import create_assignment_repo
-from anubis.utils.services.logger import logger
+from anubis.utils.logging import logger
 
 
 def fix_github_broken_repos():
@@ -46,7 +46,7 @@ def fix_github_broken_repos():
 def fix_github_missing_submissions(org_name: str):
     from anubis.utils.lms.submissions import init_submission
     from anubis.utils.lms.webhook import check_repo, guess_github_username
-    from anubis.utils.services.rpc import enqueue_autograde_pipeline
+    from anubis.utils.rpc import enqueue_autograde_pipeline
 
     # Do graphql nonsense
     # Refer to here for graphql over https: https://graphql.org/learn/serving-over-http/

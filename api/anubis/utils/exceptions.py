@@ -51,8 +51,8 @@ def add_app_exception_handlers(app: Flask):
     :return:
     """
 
-    from anubis.utils.http.https import error_response
-    from anubis.utils.services.logger import logger
+    from anubis.utils.http import error_response
+    from anubis.utils.logging import logger
 
     # Set AuthenticationError handler
     @app.errorhandler(AuthenticationError)

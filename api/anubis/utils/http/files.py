@@ -2,7 +2,7 @@ from flask import Response, make_response
 
 from anubis.models import db, StaticFile
 from anubis.utils.data import rand, req_assert
-from anubis.utils.http.https import get_request_file_stream
+from anubis.utils.http import get_request_file_stream
 from anubis.utils.lms.courses import course_context
 
 

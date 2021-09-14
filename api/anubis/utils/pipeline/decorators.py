@@ -4,7 +4,7 @@ from functools import wraps
 from flask import request
 
 from anubis.models import Submission
-from anubis.utils.http.https import error_response
+from anubis.utils.http import error_response
 
 
 def check_submission_token(func):

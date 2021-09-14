@@ -1,10 +1,10 @@
 import traceback
-from typing import List, Optional
+from typing import List
 from parse import parse
 
 from anubis.models import User, Assignment, AssignmentRepo, db, Submission, SubmissionBuild, SubmissionTestResult
 from anubis.utils.github.api import github_graphql, github_rest
-from anubis.utils.services.logger import logger
+from anubis.utils.logging import logger
 
 
 def get_github_template_ids(template_repo: str, github_org: str):

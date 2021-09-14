@@ -29,8 +29,8 @@ from anubis.models import (
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import is_debug
 from anubis.utils.exceptions import AuthenticationError, LackCourseContext
-from anubis.utils.services.cache import cache
-from anubis.utils.services.logger import logger
+from anubis.utils.cache import cache
+from anubis.utils.logging import logger
 
 
 def get_course_context(full_stop: bool = True) -> Union[None, Course]:

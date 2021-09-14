@@ -1,6 +1,6 @@
 from anubis.models import db, User, AssignmentRepo
 from anubis.utils.lms.repos import get_repos
-from anubis.utils.services.cache import cache
+from anubis.utils.cache import cache
 
 
 def parse_webhook(webhook):

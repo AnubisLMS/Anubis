@@ -7,7 +7,7 @@ from anubis.utils.auth.http import require_admin, require_superuser
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
-from anubis.utils.http.https import success_response, get_number_arg
+from anubis.utils.http import success_response, get_number_arg
 from anubis.utils.lms.courses import assert_course_superuser, course_context, assert_course_context
 from anubis.utils.lms.repos import get_repos
 from anubis.utils.lms.students import get_students

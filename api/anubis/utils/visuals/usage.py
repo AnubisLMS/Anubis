@@ -7,8 +7,8 @@ import pandas as pd
 
 from anubis.models import Assignment, Submission, TheiaSession
 from anubis.utils.data import is_job
-from anubis.utils.services.cache import cache
-from anubis.utils.services.logger import logger
+from anubis.utils.cache import cache
+from anubis.utils.logging import logger
 
 
 def get_submissions() -> pd.DataFrame:

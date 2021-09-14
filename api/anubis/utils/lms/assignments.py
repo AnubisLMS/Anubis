@@ -20,8 +20,8 @@ from anubis.utils.data import is_debug
 from anubis.utils.lms.courses import assert_course_admin, get_student_course_ids
 from anubis.utils.lms.courses import is_course_admin
 from anubis.utils.lms.questions import ingest_questions
-from anubis.utils.services.cache import cache
-from anubis.utils.services.logger import logger
+from anubis.utils.cache import cache
+from anubis.utils.logging import logger
 
 
 @cache.memoize(timeout=30, unless=is_debug)

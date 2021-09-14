@@ -1,14 +1,11 @@
 import time
-import traceback
 from typing import List
 from datetime import datetime, timedelta
 
-from kubernetes import config, client
+from kubernetes import config
 
-from anubis.models import db, TheiaSession
+from anubis.models import TheiaSession
 from anubis.utils.data import with_context
-from anubis.utils.lms.theia import get_theia_pod_name
-from anubis.utils.services.logger import logger
 from anubis.utils.k8s.theia import update_theia_session
 
 

@@ -6,7 +6,7 @@ from anubis.models import User
 from anubis.utils.auth.http import require_superuser
 from anubis.utils.auth.token import create_token
 from anubis.utils.data import is_debug, req_assert
-from anubis.utils.http.https import success_response
+from anubis.utils.http import success_response
 
 auth = Blueprint("admin-auth", __name__, url_prefix="/admin/auth")
 

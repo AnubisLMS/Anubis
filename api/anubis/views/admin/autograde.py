@@ -5,11 +5,11 @@ from anubis.models import Submission, Assignment, User, InCourse
 from anubis.utils.auth.http import require_admin
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
-from anubis.utils.http.https import success_response, get_number_arg
+from anubis.utils.http import success_response, get_number_arg
 from anubis.utils.lms.autograde import bulk_autograde, autograde, autograde_submission_result_wrapper
 from anubis.utils.lms.courses import assert_course_context
 from anubis.utils.lms.questions import get_assigned_questions
-from anubis.utils.services.cache import cache
+from anubis.utils.cache import cache
 from anubis.utils.visuals.assignments import (
     get_admin_assignment_visual_data,
     get_assignment_history,

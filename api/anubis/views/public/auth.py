@@ -10,10 +10,10 @@ from anubis.utils.auth.token import create_token
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import is_debug, req_assert
 from anubis.utils.http.decorators import json_endpoint
-from anubis.utils.http.https import success_response, error_response
+from anubis.utils.http import error_response, success_response
 from anubis.utils.lms.courses import get_course_context
 from anubis.utils.lms.submissions import fix_dangling
-from anubis.utils.services.oauth import OAUTH_REMOTE_APP as provider
+from anubis.utils.auth.oauth import OAUTH_REMOTE_APP as provider
 
 auth_ = Blueprint("public-auth", __name__, url_prefix="/public/auth")
 oauth_ = Blueprint("public-oauth", __name__, url_prefix="/public")

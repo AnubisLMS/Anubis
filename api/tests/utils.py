@@ -10,7 +10,7 @@ import requests
 from anubis.app import create_app
 from anubis.models import db, User, Course, InCourse, TAForCourse, ProfessorForCourse, AssignmentRepo
 from anubis.utils.data import with_context
-from anubis.utils.seed import create_name, create_netid
+from anubis.utils.testing.seed import create_name, create_netid
 
 os.environ["DEBUG"] = "1"
 os.environ["DISABLE_ELK"] = "1"
@@ -281,7 +281,7 @@ def run_main(func):
 
 @with_context
 def create_repo(s: Session, assignment_id: str = None):
-    from anubis.utils.services.cache import cache
+    from anubis.utils.cache import cache
     from anubis.utils.lms.repos import get_repos
     if assignment_id is None:
         assignments = s.get('/public/assignments/list')['assignments']

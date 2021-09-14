@@ -3,8 +3,8 @@ from flask import Blueprint
 from anubis.utils.auth.http import require_superuser
 from anubis.utils.data import is_debug, req_assert
 from anubis.utils.http.decorators import json_response
-from anubis.utils.http.https import success_response
-from anubis.utils.services.rpc import enqueue_seed
+from anubis.utils.http import success_response
+from anubis.utils.rpc import enqueue_seed
 
 seed = Blueprint("admin-seed", __name__, url_prefix="/admin/seed")
 
