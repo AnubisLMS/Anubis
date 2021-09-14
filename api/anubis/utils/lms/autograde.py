@@ -1,14 +1,23 @@
+from datetime import datetime
+
 from parse import parse
 
-from anubis.models import Submission, Assignment
+from anubis.models import db, Submission, SubmissionBuild, SubmissionTestResult, Assignment, AssignmentTest
 from anubis.utils.data import is_debug
 from anubis.utils.http import error_response
 from anubis.utils.lms.students import get_students_in_class
 from anubis.utils.cache import cache
 
 
-@cache.memoize(timeout=5 * 60, unless=is_debug)
-def autograde(student_id, assignment_id):
+@cache.memoize(timeout=60, unless=is_debug, source_check=True)
+def _get_assignment_test_count(assignment_id) -> int:
+    return AssignmentTest.query.filter(
+        AssignmentTest.assignment_id == assignment_id,
+    ).count()
+
+
+@cache.memoize(timeout=5 * 60, unless=is_debug, source_check=True)
+def autograde(student_id, assignment_id, max_time: datetime = None):
     """
     Get the stats for a specific student on a specific assignment.
 
@@ -19,8 +28,16 @@ def autograde(student_id, assignment_id):
 
     :param student_id:
     :param assignment_id:
+    :param max_time:
     :return:
     """
+
+    # List of filters for submission query
+    submission_filters = []
+
+    # maximum time to check
+    if max_time is not None:
+        submission_filters.append(Submission.created <= max_time)
 
     # best is the best submission seen so far
     best = None
@@ -28,6 +45,11 @@ def autograde(student_id, assignment_id):
     # best_count is the most tests that have
     # passed for this student so far
     best_count = -1
+
+    # Get the max number of assignment tests that can be passed
+    # so we can stop early if we find a submission that has all
+    # tests passing
+    max_correct = _get_assignment_test_count(assignment_id)
 
     # Iterate over all submissions for this student, tracking
     # the best submission so far (based on number of tests passed).
@@ -38,6 +60,7 @@ def autograde(student_id, assignment_id):
                 Submission.owner_id == student_id,
                 Submission.processed == True,
                 Submission.accepted == True,
+                *submission_filters
             )
                     .order_by(Submission.created.desc())
                     .all()
@@ -53,6 +76,11 @@ def autograde(student_id, assignment_id):
         if correct_count >= best_count:
             best_count = correct_count
             best = submission
+
+        # If the number of passed tests is equal to the number
+        # of tests then we can stop and use this assignment.
+        if best_count == max_correct:
+            break
 
     # return the submission id of the best if there is one, otherwise None
     return best.id if best is not None else None
