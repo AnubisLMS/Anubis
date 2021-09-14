@@ -5,8 +5,8 @@ from typing import List
 
 from anubis.models import db, Submission, Assignment, Course
 from anubis.utils.data import with_context
-from anubis.utils.lms.autograde import bulk_autograde
-from anubis.utils.lms.submissions import init_submission
+from anubis.lms.autograde import bulk_autograde
+from anubis.lms.submissions import init_submission
 from anubis.utils.github.fix import fix_github_missing_submissions, fix_github_broken_repos
 from anubis.utils.logging import logger
 from anubis.utils.rpc import enqueue_ide_reap_stale, enqueue_autograde_pipeline
