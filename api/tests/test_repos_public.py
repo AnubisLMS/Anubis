@@ -12,5 +12,5 @@ def test_repos_public():
 
     repos = s.get('/public/repos/list')['repos']
     assert len(repos) == 1
-    repos = s.get('/public/repos/')['repos']
+    repos = s.get('/public/repos')['repos']
     assert len(repos) == 1

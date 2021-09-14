@@ -7,7 +7,7 @@ from utils import Session
 
 def test_lectures_public():
     # upload a lecture as a superuser
-    logo = requests.get('https://linux.org/images/logo.png').content
+    logo = open('logo.png', 'rb').read()
     filename = 'logo.png'
     su = Session('superuser')
     logo_file = io.BytesIO(logo)
