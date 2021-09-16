@@ -31,7 +31,7 @@ export const useStyles = makeStyles((theme) => ({
     fontSize: '14px',
     borderRadius: '3px',
     backgroundColor: theme.palette.primary.main,
-    padding: '3px 10px 3px',
+    padding: '5px 10px 5px',
   },
   totalAssignments: {
     fontSize: '.8rem',
