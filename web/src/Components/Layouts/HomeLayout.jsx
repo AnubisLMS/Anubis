@@ -9,7 +9,7 @@ import IconButton from '@material-ui/core/IconButton';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    color: theme.palette.common.white,
+    color: theme.palette.white,
     position: 'relative',
     display: 'flex',
     alignItems: 'center',
