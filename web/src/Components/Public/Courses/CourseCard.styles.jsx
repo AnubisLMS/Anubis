@@ -1,11 +1,12 @@
 import {makeStyles} from '@material-ui/core/styles';
 
-export const useStyles = makeStyles({
+export const useStyles = makeStyles((theme) => ({
   courseCardContainer: {
+    color: theme.palette.white,
     flexGrow: 1,
     minWidth: 275,
     maxWidth: 280,
-    backgroundColor: '#21262D',
+    backgroundColor: theme.palette.dark.blue['200'],
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
@@ -16,7 +17,7 @@ export const useStyles = makeStyles({
     fontSize: '20px',
   },
   instructorName: {
-    color: '#7A7D81',
+    color: theme.palette.gray['200'],
     fontSize: '16px',
   },
   courseActionsContainer: {
@@ -29,12 +30,12 @@ export const useStyles = makeStyles({
   openCourseButton: {
     fontSize: '12px',
     borderRadius: '3px',
-    backgroundColor: '#5686F5',
+    backgroundColor: theme.palette.primary.main,
     padding: '3px 10px 3px',
   },
   totalAssignments: {
     fontSize: '.8rem',
     marginLeft: '10px;',
-    color: '#7A7D81',
+    color: theme.palette.gray['200'],
   },
-});
+}));

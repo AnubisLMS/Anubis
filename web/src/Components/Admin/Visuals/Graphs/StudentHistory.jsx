@@ -19,7 +19,7 @@ import {
 
 const useStyles = makeStyles((theme) => ({
   legend: {
-    color: theme.palette.text.primary,
+    color: theme.palette.primary,
   },
   typography: {
     paddingLeft: theme.spacing(1),
