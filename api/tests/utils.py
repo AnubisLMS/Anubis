@@ -282,7 +282,7 @@ def run_main(func):
 @with_context
 def create_repo(s: Session, assignment_id: str = None):
     from anubis.utils.cache import cache
-    from anubis.utils.lms.repos import get_repos
+    from anubis.lms.repos import get_repos
     if assignment_id is None:
         assignments = s.get('/public/assignments/list')['assignments']
         assignment_id = assignments[0]['id']
