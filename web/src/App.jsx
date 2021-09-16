@@ -25,7 +25,7 @@ import AuthContext from './Contexts/AuthContext';
 import {drawerWidth} from './navconfig';
 
 // Dark theme
-import theme from './Theme/Dark';
+import theme from './Theme/Theme';
 
 import AuthWrapper from './Components/AuthWrapper';
 import Main from './Main';

@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
   },
   firebase: {
     fontSize: 24,
-    color: theme.palette.common.white,
+    color: theme.palette.white,
   },
   itemActiveItem: {
     color: '#4fc3f7',
