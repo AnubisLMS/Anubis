@@ -14,7 +14,8 @@ import TextField from '@material-ui/core/TextField';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 
 import StandardLayout from '../../Components/Layouts/StandardLayout';
-import CourseCard from '../../Components/Public/Courses/CourseCard';
+import CourseCard from '../../Components/Public/Courses/CourseCard/CourseCard';
+import EmptyCourseCard from '../../Components/Public/Courses/EmptyCourseCard/EmptyCourseCard';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 
@@ -97,11 +98,6 @@ export default function CourseView() {
         </DialogActions>
       </Dialog>
       <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <Button color={'primary'} variant={'contained'} onClick={() => setJoinOpen(true)}>
-            Join Class
-          </Button>
-        </Grid>
         {courses.map((course, pos) => (
           <Grid item xs={12} md={6} lg={3} key={course.courseCode}>
             <Grow
@@ -113,6 +109,15 @@ export default function CourseView() {
             </Grow>
           </Grid>
         ))}
+        <Grid item>
+          <Grow
+            in={true}
+            style={{transformOrigin: '0 0 0'}}
+            timeout={300 * (courses.length + 1)}
+          >
+            <EmptyCourseCard callback={() => setJoinOpen(true)}/>
+          </Grow>
+        </Grid>
       </Grid>
     </StandardLayout>
   );

@@ -43,8 +43,7 @@ const useStyles = makeStyles(() => ({
     height: '100%',
     minHeight: '100vh',
     // width: '100%',
-    backgroundImage: `url(/curvylines.png)`,
-    backgroundRepeat: 'repeat',
+    backgroundColor: theme.palette.dark.black,
   },
   app: {
     flex: 1,
@@ -59,6 +58,7 @@ const useStyles = makeStyles(() => ({
   },
   drawerPaper: {
     width: drawerWidth,
+    backgroundColor: theme.palette.dark.blue['100'],
   },
   drawerHeader: {
     display: 'flex',

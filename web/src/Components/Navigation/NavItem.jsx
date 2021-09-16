@@ -10,13 +10,13 @@ import ListItemText from '@material-ui/core/ListItemText';
 
 const useStyles = makeStyles((theme) => ({
   item: {
-    'color': 'rgba(255, 255, 255, 0.7)',
+    'color': theme.palette.white,
     '&:hover,&:focus': {
-      backgroundColor: 'rgba(255, 255, 255, 0.08)',
+      backgroundColor: theme.palette.dark.blue['200'],
     },
   },
   itemActiveItem: {
-    color: '#4fc3f7',
+    color: theme.palette.primary.main,
   },
   itemPrimary: {
     fontSize: 'inherit',

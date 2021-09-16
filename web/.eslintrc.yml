@@ -24,3 +24,4 @@ rules:
   react/display-name: off
   indent: ["error", 2]
   max-len: ["error", { "code": 120 }]
+  quote-props: ["off", "consistent-as-needed"]
