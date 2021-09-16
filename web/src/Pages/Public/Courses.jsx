@@ -50,6 +50,7 @@ export default function CourseView() {
   React.useEffect(() => {
     axios.get('/api/public/courses/').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
+      console.log(data.courses);
       if (data) {
         setCourses(data.courses);
       }
@@ -108,7 +109,7 @@ export default function CourseView() {
               style={{transformOrigin: '0 0 0'}}
               timeout={300 * (pos + 1)}
             >
-              <CourseCard course={course}/>
+              <CourseCard {... course}/>
             </Grow>
           </Grid>
         ))}
