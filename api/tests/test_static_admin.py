@@ -6,7 +6,7 @@ from utils import Session
 
 
 def test_static_admin():
-    logo = requests.get('https://linux.org/images/logo.png').content
+    logo = open('logo.png', 'rb').read()
     filename = 'logo.png'
 
     student = Session('student')

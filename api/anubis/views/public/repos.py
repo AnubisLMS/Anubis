@@ -6,17 +6,18 @@ from anubis.models import Assignment, AssignmentRepo
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.http.decorators import json_response
-from anubis.utils.http.https import success_response, error_response, req_assert
-from anubis.utils.lms.repos import get_repos
+from anubis.utils.http import req_assert
+from anubis.utils.http import error_response, success_response
+from anubis.lms.repos import get_repos
 from anubis.utils.github.repos import delete_assignment_repo
-from anubis.utils.lms.courses import is_course_admin
+from anubis.lms.courses import is_course_admin
 from anubis.utils.github.repos import create_assignment_repo
-from anubis.utils.services.cache import cache
+from anubis.utils.cache import cache
 
 repos_ = Blueprint("public-repos", __name__, url_prefix="/public/repos")
 
 
-@repos_.get('')
+@repos_.get("")
 @repos_.get("/list")
 @require_user()
 @json_response

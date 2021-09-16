@@ -14,9 +14,8 @@ from anubis.models import (
     InCourse,
 )
 from anubis.utils.data import _verify_data_shape, is_debug
-from anubis.utils.lms.students import get_students
-from anubis.utils.services.cache import cache
-from anubis.utils.services.logger import logger
+from anubis.lms.students import get_students
+from anubis.utils.cache import cache
 
 
 def get_question_pool_mapping(

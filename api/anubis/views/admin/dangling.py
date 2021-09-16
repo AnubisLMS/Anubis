@@ -3,8 +3,8 @@ from flask import Blueprint
 from anubis.models import Submission
 from anubis.utils.auth.http import require_superuser
 from anubis.utils.http.decorators import json_response
-from anubis.utils.http.https import success_response
-from anubis.utils.lms.submissions import fix_dangling, init_submission
+from anubis.utils.http import success_response
+from anubis.lms.submissions import fix_dangling, init_submission
 
 dangling = Blueprint("admin-dangling", __name__, url_prefix="/admin/dangling")
 

@@ -3,7 +3,7 @@ from flask import Blueprint
 from anubis.models import db, Config
 from anubis.utils.auth.http import require_admin, require_superuser
 from anubis.utils.http.decorators import json_response, json_endpoint
-from anubis.utils.http.https import success_response
+from anubis.utils.http import success_response
 
 config_ = Blueprint('config', __name__, url_prefix='/admin/config')
 

@@ -8,7 +8,7 @@ from werkzeug.local import LocalProxy
 from anubis.config import config
 from anubis.models import User
 from anubis.utils.auth.token import get_token
-from anubis.utils.services.logger import logger
+from anubis.utils.logging import logger
 
 
 def get_current_user() -> Union[User, None]:

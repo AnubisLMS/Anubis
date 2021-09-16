@@ -20,8 +20,8 @@ from anubis.models import (
     LectureNotes,
 )
 from anubis.utils.data import with_context
-from anubis.utils.lms.questions import assign_questions
-from anubis.utils.seed import (
+from anubis.lms.questions import assign_questions
+from anubis.utils.testing.seed import (
     create_assignment,
     create_students,
     create_course,

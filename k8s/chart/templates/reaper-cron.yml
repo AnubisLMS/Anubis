@@ -15,6 +15,10 @@ spec:
   suspend: {{ .Values.reaper.suspend }}
   concurrencyPolicy: Replace
   jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: anubis
+        component: reaper-job
     spec:
       template:
         spec:

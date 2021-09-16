@@ -3,7 +3,7 @@ from kubernetes import config, client
 from anubis.models import db, Config, Submission
 from anubis.utils.data import with_context
 from anubis.utils.k8s.pipeline import create_pipeline_job_obj, reap_pipeline_jobs
-from anubis.utils.services.logger import logger
+from anubis.utils.logging import logger
 
 
 @with_context
@@ -14,8 +14,8 @@ def create_submission_pipeline(submission_id: str):
 
     :param submission_id: submission.id of to test
     """
-    from anubis.utils.services.rpc import enqueue_autograde_pipeline
-    from anubis.utils.lms.submissions import init_submission
+    from anubis.utils.rpc import enqueue_autograde_pipeline
+    from anubis.lms.submissions import init_submission
 
     # Log the creation event
     logger.info(

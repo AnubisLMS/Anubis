@@ -8,8 +8,8 @@ from anubis.utils.auth.http import require_admin
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.files import process_file_upload, get_mime_type
-from anubis.utils.http.https import success_response, get_request_file_stream
-from anubis.utils.lms.courses import course_context, assert_course_context
+from anubis.utils.http import success_response, get_request_file_stream
+from anubis.lms.courses import course_context, assert_course_context
 
 lectures_ = Blueprint('admin-lectures', __name__, url_prefix='/admin/lectures')
 

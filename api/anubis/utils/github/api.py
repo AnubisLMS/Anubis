@@ -4,7 +4,7 @@ from typing import Optional, Dict, Any
 
 import requests
 
-from anubis.utils.services.logger import logger
+from anubis.utils.logging import logger
 
 
 def get_github_token() -> Optional[str]:

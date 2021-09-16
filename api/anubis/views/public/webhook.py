@@ -14,14 +14,14 @@ from anubis.models import (
 )
 from anubis.utils.data import is_debug, req_assert
 from anubis.utils.http.decorators import json_response
-from anubis.utils.http.https import error_response, success_response
-from anubis.utils.lms.assignments import get_assignment_due_date
-from anubis.utils.lms.submissions import get_submissions
-from anubis.utils.lms.submissions import reject_late_submission, init_submission
-from anubis.utils.lms.webhook import parse_webhook, guess_github_username, check_repo
-from anubis.utils.services.cache import cache
-from anubis.utils.services.logger import logger
-from anubis.utils.services.rpc import enqueue_autograde_pipeline
+from anubis.utils.http import error_response, success_response
+from anubis.lms.assignments import get_assignment_due_date
+from anubis.lms.submissions import get_submissions
+from anubis.lms.submissions import reject_late_submission, init_submission
+from anubis.lms.webhook import parse_webhook, guess_github_username, check_repo
+from anubis.utils.cache import cache
+from anubis.utils.logging import logger
+from anubis.utils.rpc import enqueue_autograde_pipeline
 
 webhook = Blueprint("public-webhook", __name__, url_prefix="/public/webhook")
 

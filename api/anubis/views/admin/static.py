@@ -6,8 +6,8 @@ from anubis.utils.auth.http import require_admin
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.files import process_file_upload
-from anubis.utils.http.https import success_response
-from anubis.utils.lms.courses import course_context, assert_course_context
+from anubis.utils.http import success_response
+from anubis.lms.courses import course_context, assert_course_context
 
 static = Blueprint("admin-static", __name__, url_prefix="/admin/static")
 

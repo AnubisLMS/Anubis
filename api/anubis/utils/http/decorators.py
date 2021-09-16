@@ -6,7 +6,7 @@ from flask import request
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import jsonify, _verify_data_shape
 from anubis.utils.exceptions import AuthenticationError
-from anubis.utils.http.https import error_response
+from anubis.utils.http import error_response
 
 
 def load_from_id(model, verify_owner=False):

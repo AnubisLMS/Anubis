@@ -18,11 +18,11 @@ from anubis.utils.auth.http import require_admin
 from anubis.utils.data import rand
 from anubis.utils.data import row2dict, req_assert
 from anubis.utils.http.decorators import load_from_id, json_response, json_endpoint
-from anubis.utils.http.https import error_response, success_response
-from anubis.utils.lms.assignments import assignment_sync
-from anubis.utils.lms.courses import course_context, assert_course_context
-from anubis.utils.lms.questions import get_assigned_questions
-from anubis.utils.services.logger import logger
+from anubis.utils.http import error_response, success_response
+from anubis.lms.assignments import assignment_sync
+from anubis.lms.courses import course_context, assert_course_context
+from anubis.lms.questions import get_assigned_questions
+from anubis.utils.logging import logger
 
 assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
 

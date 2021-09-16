@@ -22,7 +22,7 @@ export default function AssignmentView() {
   const [pollingAssignmentId, setPollingAssignmentId] = useState(null);
 
   useEffect(() => {
-    axios.get('/api/public/assignments/', {params: {courseId: query.get('courseId')}}).then((response) => {
+    axios.get('/api/public/assignments', {params: {courseId: query.get('courseId')}}).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
         setAssignments(data.assignments);

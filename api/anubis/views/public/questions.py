@@ -8,10 +8,10 @@ from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_endpoint, load_from_id, json_response
-from anubis.utils.http.https import success_response, error_response
-from anubis.utils.lms.assignments import get_assignment_due_date
-from anubis.utils.lms.courses import is_course_admin
-from anubis.utils.lms.questions import get_assigned_questions
+from anubis.utils.http import error_response, success_response
+from anubis.lms.assignments import get_assignment_due_date
+from anubis.lms.courses import is_course_admin
+from anubis.lms.questions import get_assigned_questions
 
 questions = Blueprint("public-questions", __name__, url_prefix="/public/questions")
 

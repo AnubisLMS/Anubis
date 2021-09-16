@@ -7,7 +7,7 @@ from utils import Session
 
 def test_static_public():
     # Upload image as a professor first so we have a image to test downloading
-    logo = requests.get('https://linux.org/images/logo.png').content
+    logo = open('logo.png', 'rb').read()
     filename = 'logo.png'
     prof = Session('professor')
     logo_file = io.BytesIO(logo)

@@ -129,6 +129,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
   const [sessionState, setSessionState] = useState(null);
   const [autosaveEnabled, setAutosaveEnabled] = useState(true);
   const [persistentStorage, setPersistentStorage] = useState(false);
+  const [showPersistentStorage, setShowPersistentStorage] = useState(false);
   const [assignment, setAssignment] = useState(null);
 
   React.useEffect(() => {
@@ -150,6 +151,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
       if (data.assignment) {
         setAssignment(data.assignment);
         if (data.assignment?.persistent_storage !== undefined) {
+          setShowPersistentStorage(!!data.assignment.persistent_storage);
           setPersistentStorage(data.assignment.persistent_storage);
         }
       }
@@ -185,6 +187,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
     persistentStorage, setPersistentStorage,
     assignment, setAssignment,
     sessionState, setSessionState,
+    showPersistentStorage, setShowPersistentStorage,
   };
 
   return (
@@ -244,32 +247,34 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
               labelPlacement="end"
             />
           </Grid>
-          <Grid item xs={12}>
-            <FormControlLabel
-              disabled={!!session}
-              checked={persistentStorage}
-              onChange={() => setPersistentStorage(!persistentStorage)}
-              control={<Switch color={'primary'}/>}
-              label={
-                <div style={{display: 'flex', alignItems: 'center'}}>
-                  <Typography variant={'body1'}>
+          {showPersistentStorage && (
+            <Grid item xs={12}>
+              <FormControlLabel
+                disabled={!!session}
+                checked={persistentStorage}
+                onChange={() => setPersistentStorage(!persistentStorage)}
+                control={<Switch color={'primary'}/>}
+                label={
+                  <div style={{display: 'flex', alignItems: 'center'}}>
+                    <Typography variant={'body1'}>
                     Persistent Storage
-                  </Typography>
-                  <Tooltip title={persistentStorage ?
-                    'Anubis will mount a persistent volume to your session. Everything in /home/anubis ' +
+                    </Typography>
+                    <Tooltip title={persistentStorage ?
+                      'Anubis will mount a persistent volume to your session. Everything in /home/anubis ' +
                     'will be saved in your Cloud IDE volume. We recommend still making sure valuble data is backed' +
                     'up elsewhere.' :
-                    'Anubis will not mount a persistent volume to your session. All work not saved elsewhere (like ' +
+                      'Anubis will not mount a persistent volume to your session. All work not saved elsewhere (like ' +
                     'github) will be deleted when the session ends.'}>
-                    <IconButton>
-                      <HelpOutlineOutlinedIcon fontSize={'small'}/>
-                    </IconButton>
-                  </Tooltip>
-                </div>
-              }
-              labelPlacement="end"
-            />
-          </Grid>
+                      <IconButton>
+                        <HelpOutlineOutlinedIcon fontSize={'small'}/>
+                      </IconButton>
+                    </Tooltip>
+                  </div>
+                }
+                labelPlacement="end"
+              />
+            </Grid>
+          )}
           <Grid item xs={12}>
             <div style={{display: 'flex', justifyContent: 'flex-end'}}>
               <Typography>

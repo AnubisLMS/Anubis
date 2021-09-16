@@ -2,8 +2,8 @@ from typing import Optional, List
 
 from anubis.models import User, LectureNotes
 from anubis.utils.data import is_debug
-from anubis.utils.lms.courses import get_student_course_ids
-from anubis.utils.services.cache import cache
+from anubis.lms.courses import get_student_course_ids
+from anubis.utils.cache import cache
 
 
 @cache.memoize(timeout=10, unless=is_debug, source_check=True)

@@ -12,8 +12,8 @@ from anubis.models import (
     Submission
 )
 from anubis.utils.data import is_debug, is_job
-from anubis.utils.lms.autograde import bulk_autograde
-from anubis.utils.services.cache import cache
+from anubis.lms.autograde import bulk_autograde
+from anubis.utils.cache import cache
 from anubis.utils.visuals.queries import (
     time_to_pass_test_sql,
     assignment_test_fail_nosub_sql,

@@ -6,7 +6,7 @@ from utils import Session
 
 
 def test_lectures_admin():
-    logo = requests.get('https://linux.org/images/logo.png').content
+    logo = open('logo.png', 'rb').read()
     filename = 'logo.png'
 
     su = Session('superuser')

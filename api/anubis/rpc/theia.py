@@ -1,5 +1,3 @@
-import time
-
 from kubernetes import config, client
 
 from anubis.models import db, Config, TheiaSession
@@ -12,8 +10,7 @@ from anubis.utils.k8s.theia import (
     reap_theia_session,
     list_theia_pods,
 )
-from anubis.utils.lms.theia import get_theia_pod_name
-from anubis.utils.services.logger import logger
+from anubis.utils.logging import logger
 
 
 @with_context
@@ -58,7 +55,7 @@ def initialize_theia_session(theia_session_id: str):
             TheiaSession.active == True,
             TheiaSession.state != 'Initializing',
     ).count() >= max_ides:
-        from anubis.utils.services.rpc import enqueue_ide_initialize
+        from anubis.utils.rpc import enqueue_ide_initialize
 
         # If there are too many active pods, recycle the job through the queue.
         logger.info(

@@ -4,7 +4,7 @@ from sqlalchemy.sql import or_
 
 from anubis.models import StaticFile
 from anubis.utils.http.files import make_blob_response
-from anubis.utils.services.cache import cache
+from anubis.utils.cache import cache
 
 static = Blueprint("public-static", __name__, url_prefix="/public/static")
 

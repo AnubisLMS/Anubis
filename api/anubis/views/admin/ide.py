@@ -9,10 +9,10 @@ from anubis.utils.auth.http import require_admin
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response, json_endpoint
-from anubis.utils.http.https import success_response, error_response
-from anubis.utils.lms.courses import course_context
-from anubis.utils.services.rpc import enqueue_ide_initialize
-from anubis.utils.services.rpc import rpc_enqueue, enqueue_ide_stop
+from anubis.utils.http import error_response, success_response
+from anubis.lms.courses import course_context
+from anubis.utils.rpc import enqueue_ide_initialize
+from anubis.utils.rpc import rpc_enqueue, enqueue_ide_stop
 
 ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 
