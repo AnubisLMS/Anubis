@@ -14,7 +14,9 @@ import AttachFileIcon from '@material-ui/icons/AttachFile';
 import BookIcon from '@material-ui/icons/Book';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import ImportContactsIcon from '@material-ui/icons/ImportContacts';
+import DashboardIcon from '@material-ui/icons/Dashboard';
 
+import Dashboard from './Pages/Public/Dashboard/Dashboard';
 import About from './Pages/Public/About';
 import Courses from './Pages/Public/Courses';
 import Assignments from './Pages/Public/Assignments';
@@ -71,6 +73,12 @@ export const public_nav = [
   {
     id: 'Anubis',
     children: [
+      {
+        id: 'Dashboard',
+        icon: <DashboardIcon/>,
+        path: '/dashboard',
+        Page: Dashboard,
+      },
       {
         id: 'Courses',
         icon: <SchoolIcon/>,

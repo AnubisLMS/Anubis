@@ -71,6 +71,11 @@ let theme = createMuiTheme({
 theme = {
   ...theme,
   overrides: {
+    MuiButton: {
+      label: {
+        textTransform: 'none',
+      },
+    },
     MuiDialog: {
       paper: {
         backgroundColor: theme.palette.dark.blue['200'],
