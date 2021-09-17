@@ -45,7 +45,6 @@ export default function Header({classes, open, onDrawerToggle, user}) {
   return (
     <React.Fragment>
       <AppBar
-        color="primary"
         elevation={0}
         position="fixed"
         className={clsx(classes.appBar, {
@@ -102,7 +101,7 @@ export default function Header({classes, open, onDrawerToggle, user}) {
                   />
                 )}
                 <div className={classes.avatar}>
-                  {netid && <Chip clickable label={netid}/>}
+                  {netid && <Chip clickable className={classes.appBarChip} label={netid}/>}
                 </div>
               </div>
             </Grid>

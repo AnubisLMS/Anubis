@@ -71,83 +71,21 @@ let theme = createMuiTheme({
 theme = {
   ...theme,
   overrides: {
-    MuiCssBaseline: {
-      '@global': {
-        '@font-face': [fira],
-      },
-    },
-    MuiDrawer: {
+    MuiDialog: {
       paper: {
-        backgroundColor: '#18202c',
+        backgroundColor: theme.palette.dark.blue['200'],
+        padding: '20px',
       },
     },
-    MuiButton: {
-      label: {
-        textTransform: 'none',
-      },
-      contained: {
-        'boxShadow': 'none',
-        '&:active': {
-          boxShadow: 'none',
-        },
-      },
-    },
-    MuiTabs: {
+    MuiPaper: {
       root: {
-        marginLeft: theme.spacing(1),
-      },
-      indicator: {
-        height: 3,
-        borderTopLeftRadius: 3,
-        borderTopRightRadius: 3,
-        backgroundColor: theme.palette.white,
+        backgroundColor: theme.palette.dark.blue['200'],
       },
     },
-    MuiTab: {
+    MuiDataGrid: {
       root: {
-        textTransform: 'none',
-        margin: '0 16px',
-        minWidth: 0,
-        padding: 0,
-        [theme.breakpoints.up('md')]: {
-          padding: 0,
-          minWidth: 0,
-        },
-      },
-    },
-    MuiIconButton: {
-      root: {
-        padding: theme.spacing(1),
-      },
-    },
-    MuiTooltip: {
-      tooltip: {
-        borderRadius: 4,
-      },
-    },
-    MuiDivider: {
-      root: {
-        backgroundColor: '#404854',
-      },
-    },
-    MuiListItemText: {
-      primary: {
-        fontWeight: theme.typography.fontWeightMedium,
-      },
-    },
-    MuiListItemIcon: {
-      root: {
-        'color': 'inherit',
-        'marginRight': -7,
-        '& svg': {
-          fontSize: 20,
-        },
-      },
-    },
-    MuiAvatar: {
-      root: {
-        width: 32,
-        height: 32,
+        backgroundColor: theme.palette.dark.blue['100'],
+        borderColor: theme.palette.primary.main,
       },
     },
   },
