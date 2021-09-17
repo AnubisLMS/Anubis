@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
   },
   itemCategory: {
     backgroundColor: '#232f3e',
-    boxShadow: '0 -1px 0 #404854 inset',
+    boxShadow: `0 -1px 0 ${theme.palette.gray['200']} inset`,
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(2),
   },

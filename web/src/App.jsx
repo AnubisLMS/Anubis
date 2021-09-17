@@ -98,6 +98,7 @@ const useStyles = makeStyles(() => ({
   },
   appBar: {
     // height: 50,
+    backgroundColor: theme.palette.dark.blue['200'],
     transition: theme.transitions.create(['margin', 'width'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -110,6 +111,9 @@ const useStyles = makeStyles(() => ({
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
+  },
+  appBarChip: {
+    backgroundColor: theme.palette.primary.main,
   },
   main: {
     [theme.breakpoints.up('sm')]: {
