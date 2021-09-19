@@ -7,7 +7,7 @@ import Button from '@material-ui/core/Button';
 
 import {useStyles} from './CourseCard.styles';
 
-const CourseCardV2 = ({
+const CourseCard = ({
   id,
   name,
   professor_display_name,
@@ -35,5 +35,5 @@ const CourseCardV2 = ({
   );
 };
 
-export default CourseCardV2;
+export default CourseCard;
 
