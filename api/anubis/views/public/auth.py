@@ -97,6 +97,14 @@ def public_whoami():
     :return:
     """
 
+    # When the current_user is None (ie no one is logged in)
+    # just pass back Nones.
+    if current_user is None:
+        return success_response({
+            'user': None,
+            'context': None,
+        })
+
     # If their github username is not set, then we want to send
     # a warning telling the user they need to set it in their
     # profile panel.
