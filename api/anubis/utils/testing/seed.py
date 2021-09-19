@@ -1,3 +1,4 @@
+import math
 import random
 import string
 import copy
@@ -85,15 +86,19 @@ def rand_commit(n=40) -> str:
     return rand(n)
 
 
-def create_assignment(course, users, i=0, do_submissions=True, submission_count=10, **kwargs):
+def create_assignment(course, users, i=0, do_submissions=True, submission_count=30, **kwargs):
+    release = datetime.now() - timedelta(hours=2)
+    due = datetime.now() + timedelta(hours=36) + timedelta(days=i)
+    grace = due + timedelta(hours=1)
+
     # Assignment 1 uniq
     assignment = Assignment(
         id=rand(), name=f"{course.course_code} Assignment {i}", unique_code=rand(8), hidden=False,
         description=lorem, github_template='wabscale/xv6-public',
         pipeline_image=f"registry.digitalocean.com/anubis/assignment/{rand(8)}",
-        release_date=datetime.now() - timedelta(hours=2),
-        due_date=datetime.now() + timedelta(hours=12),
-        grace_date=datetime.now() + timedelta(hours=13),
+        release_date=release,
+        due_date=due,
+        grace_date=grace,
         course_id=course.id, ide_enabled=True, autograde_enabled=False,
         theia_options=copy.deepcopy(THEIA_DEFAULT_OPTIONS),
         **kwargs,
@@ -149,6 +154,7 @@ def create_assignment(course, users, i=0, do_submissions=True, submission_count=
                         state="Waiting for resources...",
                         owner=user,
                         assignment_id=assignment.id,
+                        created=grace - timedelta(hours=math.sqrt(i+1)),
                     )
                     submission.repo = repos[-1]
                     submissions.append(submission)
