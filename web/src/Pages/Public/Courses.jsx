@@ -102,7 +102,7 @@ export default function CourseView() {
           </Button>
         </Grid>
         {courses.map((course, pos) => (
-          <Grid item key={course.courseCode}>
+          <Grid item xs={12} md={6} lg={3} key={course.courseCode}>
             <Grow
               in={true}
               style={{transformOrigin: '0 0 0'}}

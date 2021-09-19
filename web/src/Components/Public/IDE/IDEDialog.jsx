@@ -15,15 +15,15 @@ import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+import HelpOutlineOutlinedIcon from '@material-ui/icons/HelpOutlineOutlined';
 
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import IDEInstructions from './IDEInstructions';
 import IDEHeader from './IDEHeader';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
-import HelpOutlineOutlinedIcon from '@material-ui/icons/HelpOutlineOutlined';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -54,7 +54,11 @@ const useStyles = makeStyles((theme) => ({
 
 
 const pollSession = (id, state, enqueueSnackbar, n = 0) => () => {
-  const {setLoading, setSession, setSessionState} = state;
+  const {setLoading, setSession, setSessionState, setShowStop} = state;
+
+  if (n === 60) {
+    setShowStop(true);
+  }
 
   if (n > 600) {
     return;
@@ -65,8 +69,15 @@ const pollSession = (id, state, enqueueSnackbar, n = 0) => () => {
 
     setSessionState(data.session?.state ?? '');
     if (!data.loading) {
-      setSession(data.session);
-      setLoading(false);
+      if (data.session.state === 'Running') {
+        setSession(data.session);
+        setLoading(false);
+        setShowStop(true);
+      } else {
+        setSession(null);
+        setLoading(false);
+        setShowStop(false);
+      }
       return;
     }
 
@@ -75,7 +86,7 @@ const pollSession = (id, state, enqueueSnackbar, n = 0) => () => {
 };
 
 const startSession = (state, enqueueSnackbar) => () => {
-  const {autosaveEnabled, persistentStorage, setSession, session, selectedTheia, setLoading} = state;
+  const {autosaveEnabled, persistentStorage, setSession, session, selectedTheia, setLoading, setShowStop} = state;
   if (session) {
     const a = document.createElement('a');
     a.setAttribute('href', session.redirect_url);
@@ -90,24 +101,26 @@ const startSession = (state, enqueueSnackbar) => () => {
   setLoading(true);
   axios.get(`/api/public/ide/initialize/${selectedTheia.id}`, {params}).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
-    if (data.session) {
-      if (data.session.state === 'Initializing') {
-        pollSession(data.session.id, state, enqueueSnackbar)();
-      } else {
-        setSession(data.session);
-        setTimeout(() => {
-          setLoading(false);
-        }, 1000);
-      }
+    if (data?.session?.state === 'Running') {
+      setSession(data.session);
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+    } else {
+      setShowStop(false);
+      setSession(data.session);
+      pollSession(data.session.id, state, enqueueSnackbar)();
     }
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
 const stopSession = (state, enqueueSnackbar) => () => {
-  const {session, setAutosaveEnabled, setSession, setLoading, setSessionState} = state;
+  console.log('STOP');
+  const {session, setAutosaveEnabled, setSession, setLoading, setSessionState, setShowStop} = state;
   if (!session) {
     return;
   }
+  setShowStop(false);
   setLoading(true);
   axios.get(`/api/public/ide/stop/${session.id}`).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
@@ -131,6 +144,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
   const [persistentStorage, setPersistentStorage] = useState(false);
   const [showPersistentStorage, setShowPersistentStorage] = useState(false);
   const [assignment, setAssignment] = useState(null);
+  const [showStop, setShowStop] = useState(false);
 
   React.useEffect(() => {
     axios.get('/api/public/ide/available').then((response) => {
@@ -175,6 +189,11 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
       if (data?.session?.persistent_storage !== undefined) {
         setPersistentStorage(data.session.persistent_storage);
       }
+      if (data?.session?.state === 'Initializing') {
+        setLoading(true);
+        setShowStop(true);
+        pollSession(data.session.id, state, enqueueSnackbar)();
+      }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [selectedTheia]);
 
@@ -188,6 +207,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
     assignment, setAssignment,
     sessionState, setSessionState,
     showPersistentStorage, setShowPersistentStorage,
+    showStop, setShowStop,
   };
 
   return (
@@ -257,14 +277,14 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
                 label={
                   <div style={{display: 'flex', alignItems: 'center'}}>
                     <Typography variant={'body1'}>
-                    Persistent Storage
+                      Persistent Storage
                     </Typography>
                     <Tooltip title={persistentStorage ?
                       'Anubis will mount a persistent volume to your session. Everything in /home/anubis ' +
-                    'will be saved in your Cloud IDE volume. We recommend still making sure valuble data is backed' +
-                    'up elsewhere.' :
+                      'will be saved in your Cloud IDE volume. We recommend still making sure valuble data is backed' +
+                      'up elsewhere.' :
                       'Anubis will not mount a persistent volume to your session. All work not saved elsewhere (like ' +
-                    'github) will be deleted when the session ends.'}>
+                      'github) will be deleted when the session ends.'}>
                       <IconButton>
                         <HelpOutlineOutlinedIcon fontSize={'small'}/>
                       </IconButton>
@@ -285,7 +305,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
         </Grid>
       </DialogContent>
       <DialogActions>
-        <div className={classes.wrapper} hidden={!session}>
+        <div className={classes.wrapper} hidden={!showStop}>
           <Button
             onClick={stopSession(state, enqueueSnackbar)}
             variant={'contained'}

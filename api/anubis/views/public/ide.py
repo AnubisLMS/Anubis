@@ -128,13 +128,23 @@ def public_ide_poll(theia_session_id: str) -> Dict[str, str]:
     req_assert(session_data is not None, message='session does not exist')
 
     # Check to see if it is still initializing
-    loading = session_data["state"] not in {"Running", "Ended", "Failed"}
+    session_state = session_data["state"]
+    loading = session_state not in {"Running", "Ended", "Failed"}
+
+    # Map of session state code to the status message that should
+    # be displayed on the frontend.
+    status, variant = {
+        "Running": ("Session is now ready.", "success"),
+        # "Ended": ("Session ended.", "warning"),
+        "Failed": ("Session failed to start. Please try again.", "error"),
+    }.get(session_state, (None, None))
 
     # Pass back the status and data
     return success_response({
         "loading": loading,
         "session": session_data,
-        "status": "Session is now ready." if not loading else None,
+        "status": status,
+        "variant": variant,
     })
 
 
