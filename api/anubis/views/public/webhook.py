@@ -181,7 +181,7 @@ def public_webhook():
     if assignment.autograde_enabled:
 
         # Check that the current assignment is still accepting submissions
-        if not assignment.accept_late and datetime.now() < get_assignment_due_date(user, assignment):
+        if not assignment.accept_late and datetime.now() < get_assignment_due_date(user, assignment, grace=True):
             reject_late_submission(submission)
 
     else:
