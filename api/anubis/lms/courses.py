@@ -437,4 +437,30 @@ def get_user_permissions(user: User) -> Dict[str, Any]:
     }
 
 
+@cache.memoize(timeout=60, unless=is_debug, source_check=True)
+def get_courses_with_visuals() -> List[Dict[str, Any]]:
+    """
+    Get a list of the course data for courses with
+    usage visuals enabled.
+
+    :return: [
+       Course.data,
+       ...
+    ]
+    """
+
+    # Query for courses with display_visuals on
+    query = Course.query.filter(
+        Course.display_visuals == True
+    )
+
+    # Get the list of courses
+    courses: List[Course] = query.all()
+
+    # Break down course db objects into dictionary
+    return [
+        course.data for course in courses
+    ]
+
+
 course_context: Course = LocalProxy(get_course_context)

@@ -105,6 +105,7 @@ class Course(db.Model):
     theia_default_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
     github_org = db.Column(db.TEXT, default='os3224')
     join_code = db.Column(db.String(256), unique=True)
+    display_visuals = db.Column(db.Boolean, default=True)
 
     assignments = db.relationship('Assignment', cascade='all,delete', backref='course')
     ta_for_course = db.relationship('TAForCourse', cascade='all,delete', backref='course')
@@ -480,12 +481,6 @@ class Submission(db.Model):
     build = db.relationship("SubmissionBuild", cascade="all,delete", uselist=False, backref='submission', lazy=False)
     test_results = db.relationship("SubmissionTestResult", cascade="all,delete", backref='submission', lazy=False)
     repo = db.relationship(AssignmentRepo, backref='submissions')
-
-    @property
-    def netid(self):
-        if self.owner is not None:
-            return self.owner.netid
-        return "null"
 
     @property
     def visible_tests(self):

@@ -1,3 +1,5 @@
+from typing import List, Dict, Any
+
 from flask import Blueprint
 
 from anubis.models import db, InCourse, Course
@@ -7,7 +9,7 @@ from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http import error_response, success_response
 from anubis.lms.assignments import get_assignments
-from anubis.lms.courses import valid_join_code, get_courses
+from anubis.lms.courses import valid_join_code, get_courses, get_courses_with_visuals
 from anubis.utils.cache import cache
 
 courses_ = Blueprint("public-courses", __name__, url_prefix="/public/courses")
@@ -17,9 +19,10 @@ courses_ = Blueprint("public-courses", __name__, url_prefix="/public/courses")
 @courses_.route("/list")
 @require_user()
 @json_response
-def public_classes():
+def public_courses_list():
     """
-    Get class data for current user
+    Get courses that the student is currently enrolled in.
+    This requires authentication.
 
     :return:
     """
@@ -88,4 +91,27 @@ def public_courses_join(join_code):
 
     return success_response({
         "status": f"Joined {course.course_code}"
+    })
+
+
+@courses_.get("/visuals-list")
+@json_response
+def public_courses_visuals_list():
+    """
+    Get a list of the courses that allow for usage visuals
+    to be displayed for them. This is pulled by the frontend
+    to determine which visuals are "gettable".
+
+    * Possibly slightly cached *
+
+    :return:
+    """
+
+    # Get (possibly) slightly cached course data for courses with
+    # visuals enabled.
+    courses_data: List[Dict[str, Any]] = get_courses_with_visuals()
+
+    # Pass back the cached response
+    return success_response({
+        'courses': courses_data
     })

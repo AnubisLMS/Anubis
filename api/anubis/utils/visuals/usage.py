@@ -1,24 +1,28 @@
 from datetime import datetime
 from io import BytesIO
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 import numpy as np
 import pandas as pd
 
-from anubis.models import Assignment, Submission, TheiaSession
+from anubis.models import Assignment, Submission, TheiaSession, Course
 from anubis.utils.data import is_job
 from anubis.utils.cache import cache
 from anubis.utils.logging import logger
+from anubis.utils.data import is_debug
 
 
-def get_submissions() -> pd.DataFrame:
+def get_submissions(course_id: str) -> pd.DataFrame:
     """
     Get all submissions from visible assignments, and put them in a dataframe
 
     :return:
     """
     # Get the submission sqlalchemy objects
-    raw_submissions = Submission.query.join(Assignment).filter(Assignment.hidden == False).all()
+    raw_submissions = Submission.query.join(Assignment).filter(
+        Assignment.hidden == False,
+        Assignment.course_id == course_id,
+    ).all()
 
     # Specify which columns we want
     columns = ['id', 'owner_id', 'assignment_id', 'processed', 'created']
@@ -38,7 +42,7 @@ def get_submissions() -> pd.DataFrame:
     return submissions
 
 
-def get_theia_sessions() -> pd.DataFrame:
+def get_theia_sessions(course_id: str) -> pd.DataFrame:
     """
     Get all theia session objects, and throw them into a dataframe
 
@@ -46,7 +50,7 @@ def get_theia_sessions() -> pd.DataFrame:
     """
 
     # Get all the theia session sqlalchemy objects
-    raw_theia_sessions = TheiaSession.query.all()
+    raw_theia_sessions = TheiaSession.query.join(Assignment).filter(Assignment.course_id == course_id).all()
 
     # Specify which columns we want
     columns = ['id', 'owner_id', 'assignment_id', 'created', 'ended']
@@ -111,19 +115,27 @@ def get_raw_submissions() -> List[Dict[str, Any]]:
     return list(response.values())
 
 
-@cache.memoize(timeout=-1, forced_update=is_job)
-def get_usage_plot():
+@cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
+def get_usage_plot(course_id: Optional[str]) -> Optional[bytes]:
     import matplotlib.pyplot as plt
     import matplotlib.colors as mcolors
 
     logger.info('GENERATING USAGE PLOT PNG')
 
+    course: Course = Course.query.filter(
+        Course.id == course_id
+    ).first()
+
+    if course is None:
+        return None
+
     assignments = Assignment.query.filter(
         Assignment.hidden == False,
         Assignment.release_date <= datetime.now(),
+        Assignment.course_id == course_id,
     ).all()
-    submissions = get_submissions()
-    theia_sessions = get_theia_sessions()
+    submissions = get_submissions(course_id)
+    theia_sessions = get_theia_sessions(course_id)
 
     fig, axs = plt.subplots(2, 1, figsize=(12, 10))
 
@@ -167,7 +179,7 @@ def get_usage_plot():
         ha='right', va='center',
     )
     axs[0].legend(handles=legend_handles0, loc='upper left')
-    axs[0].set(title='Submissions over time', xlabel='time', ylabel='count')
+    axs[0].set(title=f'{course.course_code} - Submissions over time', xlabel='time', ylabel='count')
     axs[0].grid(True)
 
     axs[1].text(
@@ -176,7 +188,7 @@ def get_usage_plot():
         ha='right', va='center',
     )
     axs[1].legend(handles=legend_handles1, loc='upper left')
-    axs[1].set(title='Cloud IDEs over time', xlabel='time', ylabel='count')
+    axs[1].set(title=f'{course.course_code} - Cloud IDEs over time', xlabel='time', ylabel='count')
     axs[1].grid(True)
 
     file_bytes = BytesIO()

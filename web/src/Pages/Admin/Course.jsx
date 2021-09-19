@@ -43,6 +43,7 @@ const editableFields = [
   {field: 'theia_default_image', label: 'IDE Default Image'},
   {field: 'theia_default_options', label: 'IDE Default Options'},
   {field: 'github_repo_required', label: 'Github Repos Required', type: 'boolean'},
+  {field: 'display_visuals', label: 'Display Public Usage Visuals', type: 'boolean'},
 ];
 
 export default function Course() {
