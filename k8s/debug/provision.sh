@@ -48,7 +48,8 @@ minikube start \
          --network-plugin=cni \
          --cpus=${CPUS} \
          --memory=${MEM} \
-         --cni=calico
+         --cni=calico \
+         --kubernetes-version=v1.21.5
 
 # Give the cluster a second
 sleep 1
