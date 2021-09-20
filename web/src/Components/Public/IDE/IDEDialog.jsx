@@ -104,6 +104,7 @@ const startSession = (state, enqueueSnackbar) => () => {
     if (data?.session?.state === 'Running') {
       setSession(data.session);
       setTimeout(() => {
+        setShowStop(true);
         setLoading(false);
       }, 1000);
     } else {
@@ -191,8 +192,10 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
       }
       if (data?.session?.state === 'Initializing') {
         setLoading(true);
-        setShowStop(true);
         pollSession(data.session.id, state, enqueueSnackbar)();
+      }
+      if (data?.session?.state === 'Running') {
+        setShowStop(true);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [selectedTheia]);

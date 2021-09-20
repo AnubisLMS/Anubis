@@ -3,6 +3,7 @@ import axios from 'axios';
 import {useSnackbar} from 'notistack';
 
 import {DataGrid} from '@material-ui/data-grid';
+import green from '@material-ui/core/colors/green';
 import Grid from '@material-ui/core/Grid';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Button from '@material-ui/core/Button';
@@ -61,11 +62,13 @@ const useColumns = (state, enqueueSnackbar) => ([
   {field: 'course_code', headerName: 'Course', width: 120},
   {field: 'assignment_name', headerName: 'Assignment', width: 200},
   {field: 'created', headerName: 'Created', type: 'dateTime', width: 170},
-  {field: 'autosave', headerName: 'Autosave', width: 100, renderCell: ({row}) => (
-    <IconButton color={row.autosave ? 'primary' : 'secondary'}>
-      {row.autosave ? <CheckIcon/> : <CancelIcon/>}
-    </IconButton>
-  )},
+  {
+    field: 'autosave', headerName: 'Autosave', width: 100, renderCell: ({row}) => (
+      <IconButton color={row.autosave ? 'primary' : 'secondary'}>
+        {row.autosave ? <CheckIcon/> : <CancelIcon/>}
+      </IconButton>
+    ),
+  },
   {
     field: 'repo_url', headerName: 'Repo', width: 75, renderCell: ({row}) => (
       <IconButton color={'primary'} component={'a'} href={row.repo_url} target={'_blank'}>
@@ -74,7 +77,32 @@ const useColumns = (state, enqueueSnackbar) => ([
     ),
   },
   {
-    field: 'kill', headerName: 'End Session', width: 150, renderCell: ({row}) => (
+    field: 'redirect_url', headerName: 'Go To IDE', width: 120, renderCell: ({row}) => (
+      <React.Fragment>
+        {row.state === 'Running' && (
+          <Button
+            style={{
+              buttonSuccess: {
+                'backgroundColor': green[500],
+                '&:hover': {
+                  backgroundColor: green[700],
+                },
+              },
+            }}
+            variant={'contained'}
+            color={'primary'}
+            component={'a'}
+            href={row.redirect_url}
+            target={'_blank'}
+          >
+            Go To IDE
+          </Button>
+        )}
+      </React.Fragment>
+    ),
+  },
+  {
+    field: 'kill', headerName: 'Kill Session', width: 150, renderCell: ({row}) => (
       <Button
         variant={'contained'}
         color={'secondary'}
