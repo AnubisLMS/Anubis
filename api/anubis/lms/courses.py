@@ -452,7 +452,7 @@ def get_courses_with_visuals() -> List[Dict[str, Any]]:
     # Query for courses with display_visuals on
     query = Course.query.filter(
         Course.display_visuals == True
-    )
+    ).order_by(Course.course_code.desc())
 
     # Get the list of courses
     courses: List[Course] = query.all()
