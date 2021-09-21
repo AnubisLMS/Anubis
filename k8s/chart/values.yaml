@@ -74,6 +74,7 @@ puller:
       'registry.digitalocean.com/anubis/theia-devops',
       'registry.digitalocean.com/anubis/theia-jepst',
       'registry.digitalocean.com/anubis/theia-xv6',
+      'registry.digitalocean.com/anubis/theia-distributed-systems',
       'registry.digitalocean.com/anubis/theia-admin',
       'registry.digitalocean.com/anubis/theia-sidecar',
       'registry.digitalocean.com/anubis/theia-init',
