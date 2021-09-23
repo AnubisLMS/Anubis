@@ -13,7 +13,7 @@ import IDEDialog from '../../Components/Public/IDE/IDEDialog';
 import StandardLayout from '../../Components/Layouts/StandardLayout';
 
 
-export default function AssignmentView() {
+const Assignments = () => {
   const query = useQuery();
   const {enqueueSnackbar} = useSnackbar();
   const [assignments, setAssignments] = useState([]);
@@ -89,4 +89,6 @@ export default function AssignmentView() {
       </Grid>
     </StandardLayout>
   );
-}
+};
+
+export default Assignments;
