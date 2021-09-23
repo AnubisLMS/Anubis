@@ -1,7 +1,5 @@
 import React, {useState} from 'react';
 
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -9,51 +7,12 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ExitToAppOutlinedIcon from '@material-ui/icons/ExitToAppOutlined';
 import LaunchOutlinedIcon from '@material-ui/icons/LaunchOutlined';
 
-import AuthContext from '../../Contexts/AuthContext';
-import NavItem from './NavItem';
-import {admin_nav, footer_nav, public_nav} from '../../navconfig';
+import {useStyles} from './NavList.styles';
+import AuthContext from '../../../Contexts/AuthContext';
+import NavItem from '../NavItem/NavItem';
+import {admin_nav, footer_nav, public_nav} from '../../../navconfig';
 
-const useStyles = makeStyles((theme) => ({
-  categoryHeader: {
-    paddingTop: theme.spacing(2),
-    paddingBottom: theme.spacing(2),
-  },
-  categoryHeaderPrimary: {
-    color: theme.palette.common.white,
-  },
-  item: {
-    'color': 'rgba(255, 255, 255, 0.7)',
-    '&:hover,&:focus': {
-      backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    },
-  },
-  itemCategory: {
-    backgroundColor: '#232f3e',
-    boxShadow: `0 -1px 0 ${theme.palette.gray['200']} inset`,
-    paddingTop: theme.spacing(2),
-    paddingBottom: theme.spacing(2),
-  },
-  firebase: {
-    fontSize: 24,
-    color: theme.palette.white,
-  },
-  itemActiveItem: {
-    color: '#4fc3f7',
-  },
-  itemPrimary: {
-    fontSize: 'inherit',
-  },
-  itemIcon: {
-    minWidth: 'auto',
-    marginRight: theme.spacing(2),
-  },
-  divider: {
-    marginTop: theme.spacing(2),
-  },
-}));
-
-
-export default function NavList({open, handleDrawerClose}) {
+const NavList = ({open, handleDrawerClose}) => {
   const classes = useStyles();
   const [pathname, setPathname] = useState(window.location.pathname);
   const onClickWrap = (func) => () => {
@@ -66,9 +25,14 @@ export default function NavList({open, handleDrawerClose}) {
 
   return (
     <div>
-      <List disablePadding>
+      <List disablePadding className={classes.root}>
         {public_nav.map(({id, children}) => (
           <React.Fragment key={`${id}-thing`}>
+            <ListItem className={classes.categoryHeader}>
+              <ListItemText classes ={{primary: classes.categoryHeaderText}}>
+                LEARNING
+              </ListItemText>
+            </ListItem>
             {children.map(({id: childId, icon, path}) => (
               <NavItem
                 key={childId}
@@ -79,7 +43,6 @@ export default function NavList({open, handleDrawerClose}) {
                 pathname={pathname}
               />
             ))}
-            <Divider className={classes.divider}/>
           </React.Fragment>
         ))}
         <AuthContext.Consumer>
@@ -88,12 +51,8 @@ export default function NavList({open, handleDrawerClose}) {
               {user && user.is_admin ? (
                 <React.Fragment>
                   <ListItem className={classes.categoryHeader}>
-                    <ListItemText
-                      classes={{
-                        primary: classes.categoryHeaderPrimary,
-                      }}
-                    >
-                      Admin
+                    <ListItemText classes ={{primary: classes.categoryHeaderText}}>
+                      ADMIN
                     </ListItemText>
                   </ListItem>
                   {admin_nav.map(({id: childId, icon, path}) => (
@@ -106,7 +65,6 @@ export default function NavList({open, handleDrawerClose}) {
                       pathname={pathname}
                     />
                   ))}
-                  <Divider className={classes.divider}/>
                 </React.Fragment>
               ) : null}
             </React.Fragment>
@@ -115,6 +73,11 @@ export default function NavList({open, handleDrawerClose}) {
       </List>
       <div className={classes.bottomPush}>
         <List>
+          <ListItem className={classes.categoryHeader}>
+            <ListItemText classes ={{primary: classes.categoryHeaderText}}>
+              OPTIONS
+            </ListItemText>
+          </ListItem>
           {footer_nav.map(({id: childId, icon, path}) => (
             <NavItem
               key={childId}
@@ -125,26 +88,11 @@ export default function NavList({open, handleDrawerClose}) {
               pathname={pathname}
             />
           ))}
-          <ListItem
-            button
-            component={'a'}
-            href={'/api/public/auth/login'}
-            className={classes.item}
-          >
-            <ListItemIcon><ExitToAppOutlinedIcon/></ListItemIcon>
-            <ListItemText primary={'Login'}/>
-          </ListItem>
-          <ListItem
-            button
-            className={classes.item}
-            component={'a'}
-            href={'/api/public/auth/logout'}
-          >
-            <ListItemIcon><LaunchOutlinedIcon/></ListItemIcon>
-            <ListItemText primary={'Logout'}/>
-          </ListItem>
         </List>
       </div>
     </div>
   );
-}
+};
+
+export default NavList;
+

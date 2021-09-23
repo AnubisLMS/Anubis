@@ -47,13 +47,6 @@ import AdminAssignmentRepos from './Pages/Admin/Assignment/Repos';
 
 export const footer_nav = [
   {
-    id: 'About',
-    icon: <PublicIcon/>,
-    exact: true,
-    path: '/about',
-    Page: About,
-  },
-  {
     id: 'Visuals',
     icon: <TimelineIcon/>,
     exact: true,

@@ -51,22 +51,6 @@ const useStyles = makeStyles(() => ({
     flexDirection: 'column',
     height: '100%',
   },
-  drawer: {
-    height: '100%',
-    width: drawerWidth,
-    flexShrink: 0,
-  },
-  drawerPaper: {
-    width: drawerWidth,
-    backgroundColor: theme.palette.dark.blue['100'],
-  },
-  drawerHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: theme.spacing(0, 1),
-    // necessary for content to be below app bar
-    ...theme.mixins.toolbar,
-  },
   githubButton: {
     margin: theme.spacing(2, 1),
   },
@@ -151,7 +135,6 @@ export default function App() {
                   {(user) => (
                     <CssBaseline>
                       <Nav
-                        classes={classes}
                         open={open}
                         handleDrawerClose={() => setOpen(!open)}
                       />
