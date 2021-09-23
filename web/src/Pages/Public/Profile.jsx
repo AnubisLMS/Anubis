@@ -8,7 +8,7 @@ import ProfileCard from '../../Components/Public/Profile/ProfileCard';
 import StandardLayout from '../../Components/Layouts/StandardLayout';
 
 
-export default function Profile() {
+const Profile = () => {
   const [_github_username, set_github_username] = useState(null);
   const {isValidating: loading, error, data} = useSWR('/api/public/auth/whoami');
 
@@ -40,5 +40,8 @@ export default function Profile() {
       </Grid>
     </StandardLayout>
   );
-}
+};
+
+export default Profile;
+
 
