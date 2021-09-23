@@ -3,27 +3,17 @@ import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
 import {DataGrid} from '@material-ui/data-grid';
-import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 
-import StandardLayout from '../../Components/Layouts/StandardLayout';
-import useQuery from '../../hooks/useQuery';
-import standardErrorHandler from '../../Utils/standardErrorHandler';
-import standardStatusHandler from '../../Utils/standardStatusHandler';
+import {useStyles} from './Lectures.styles';
+import StandardLayout from '../../../Components/Layouts/StandardLayout';
+import useQuery from '../../../hooks/useQuery';
+import standardErrorHandler from '../../../Utils/standardErrorHandler';
+import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import Typography from '@material-ui/core/Typography';
 
-
-const useStyles = makeStyles((theme) => ({
-  root: {},
-  paper: {
-    height: 700,
-    padding: theme.spacing(1),
-  },
-}));
-
-
-export default function Repos() {
+const Lectures = () => {
   const classes = useStyles();
   const query = useQuery();
   const {enqueueSnackbar} = useSnackbar();
@@ -80,4 +70,6 @@ export default function Repos() {
       </Grid>
     </StandardLayout>
   );
-}
+};
+
+export default Lectures;
