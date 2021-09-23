@@ -2,53 +2,17 @@ import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import green from '@material-ui/core/colors/green';
 
-import useQuery from '../../hooks/useQuery';
-import {translateSubmission} from '../../Utils/submission';
-import StandardLayout from '../../Components/Layouts/StandardLayout';
-import SubmissionSummary from '../../Components/Public/Submission/SubmissionSummary';
-import SubmissionBuild from '../../Components/Public/Submission/SubmissionBuild';
-import SubmissionTests from '../../Components/Public/Submission/SubmissionTests';
-import standardStatusHandler from '../../Utils/standardStatusHandler';
+import {useStyles} from './Submission.styles';
+import useQuery from '../../../hooks/useQuery';
+import {translateSubmission} from '../../../Utils/submission';
+import StandardLayout from '../../../Components/Layouts/StandardLayout';
+import SubmissionSummary from '../../../Components/Public/Submission/SubmissionSummary';
+import SubmissionBuild from '../../../Components/Public/Submission/SubmissionBuild';
+import SubmissionTests from '../../../Components/Public/Submission/SubmissionTests';
+import standardStatusHandler from '../../../Utils/standardStatusHandler';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-  },
-  heading: {
-    padding: theme.spacing(2),
-    display: 'flex',
-  },
-  wrapper: {
-    margin: theme.spacing(1),
-    position: 'relative',
-  },
-  buttonSuccess: {
-    'backgroundColor': green[500],
-    '&:hover': {
-      backgroundColor: green[700],
-    },
-  },
-  fabProgress: {
-    color: green[500],
-    position: 'absolute',
-    top: -6,
-    left: -6,
-    zIndex: 1,
-  },
-  buttonProgress: {
-    color: green[500],
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    marginTop: -12,
-    marginLeft: -12,
-  },
-}));
 
 const regrade = ({commit, submission, setSubmission, setStep, setErrorStop}, enqueueSnackbar) => () => {
   if (!submission.processed) {
