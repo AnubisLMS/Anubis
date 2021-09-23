@@ -18,7 +18,7 @@ import DashboardIcon from '@material-ui/icons/Dashboard';
 
 import Dashboard from './Pages/Public/Dashboard/Dashboard';
 import About from './Pages/Public/About';
-import Courses from './Pages/Public/Courses';
+import Courses from './Pages/Public/Courses/Courses';
 import Assignments from './Pages/Public/Assignments';
 import Profile from './Pages/Public/Profile';
 import Repos from './Pages/Public/Repos';
