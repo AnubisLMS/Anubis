@@ -1,13 +1,16 @@
 import React from 'react';
 
-import Button from '@material-ui/core/Button';
 import Drawer from '@material-ui/core/Drawer';
-import Typography from '@material-ui/core/Typography';
-import GitHubIcon from '@material-ui/icons/GitHub';
+import Box from '@material-ui/core/Box';
+import {ReactComponent as Logo} from '../../Images/Logo.svg';
 
-import NavList from './NavList';
+import {useStyles} from './Nav.styles';
 
-export default function Nav({classes, open, handleDrawerClose}) {
+import Ad from './Ad/Ad';
+import NavList from './NavList/NavList';
+
+const Nav = ({open, handleDrawerClose}) => {
+  const classes = useStyles();
   return (
     <Drawer
       className={classes.drawer}
@@ -19,33 +22,21 @@ export default function Nav({classes, open, handleDrawerClose}) {
       }}
       style={{height: '100%'}}
     >
-      <div className={classes.drawerHeader}>
-        <Typography variant={'h6'} style={{marginRight: 'auto'}}>
-          Anubis
-        </Typography>
-      </div>
-      <NavList
-        variant="temporary"
-        open={open}
-        handleDrawerClose={handleDrawerClose}
-      />
-      <div style={{display: 'flex', flexDirection: 'column-reverse', height: '100%'}}>
-        <div style={{display: 'flex', justifyContent: 'center', marginTop: '10px'}}>
-          <Button
-            variant="contained"
-            color="primary"
-            className={classes.githubButton}
-            startIcon={<GitHubIcon size="small"/>}
-            component="a"
-            href="https://github.com/GusSand/Anubis"
-            target="_blank"
-            rel="noreferrer"
-            size="small"
-          >
-            We&apos;re on Github
-          </Button>
-        </div>
-      </div>
+      <Box className={classes.listContainer}>
+        <Box className={classes.logoContainer}>
+          <Logo className={classes.logo}/>
+        </Box>
+        <NavList
+          variant="temporary"
+          open={open}
+          handleDrawerClose={handleDrawerClose}
+        />
+      </Box>
+      <Box marginLeft="16px">
+        <Ad />
+      </Box>
     </Drawer>
   );
-}
+};
+
+export default Nav;
