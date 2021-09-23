@@ -2,30 +2,11 @@ import React from 'react';
 import clsx from 'clsx';
 import {Link} from 'react-router-dom';
 
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import {useStyles} from './NavItem.styles';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 
-
-const useStyles = makeStyles((theme) => ({
-  item: {
-    'color': theme.palette.white,
-    '&:hover,&:focus': {
-      backgroundColor: theme.palette.dark.blue['200'],
-    },
-  },
-  itemActiveItem: {
-    color: theme.palette.primary.main,
-  },
-  itemPrimary: {
-    fontSize: 'inherit',
-  },
-  itemIcon: {
-    minWidth: 'auto',
-    marginRight: theme.spacing(2),
-  },
-}));
 
 export default function NavItem({childId, path, icon, pathname, ...props}) {
   const classes = useStyles();
@@ -37,7 +18,11 @@ export default function NavItem({childId, path, icon, pathname, ...props}) {
       to={path}
       {...props}
     >
-      <ListItemIcon className={classes.itemIcon}>{icon}</ListItemIcon>
+      <ListItemIcon
+        className={clsx(classes.itemIcon, pathname === path && classes.itemActiveIcon)}
+      >
+        {icon}
+      </ListItemIcon>
       <ListItemText classes={{primary: classes.itemPrimary}}>
         {childId}
       </ListItemText>
