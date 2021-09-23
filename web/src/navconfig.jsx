@@ -25,7 +25,7 @@ import Repos from './Pages/Public/Repos';
 import Submissions from './Pages/Public/Submissions';
 import Submission from './Pages/Public/Submission';
 import Blog from './Pages/Public/Blog';
-import Visuals from './Pages/Public/Visuals';
+import Visuals from './Pages/Public/Visuals/Visuals';
 import Lectures from './Pages/Public/Lectures';
 
 import AdminUsers from './Pages/Admin/Users';
