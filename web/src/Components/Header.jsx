@@ -15,6 +15,7 @@ import TextField from '@material-ui/core/TextField';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import {Hidden} from '@material-ui/core';
 
+import ProfileAvatar from '../Components/Shared/ProfileAvatar/ProfileAvatar';
 
 export default function Header({classes, open, onDrawerToggle, user}) {
   const cookie = new Cookies();
@@ -42,6 +43,28 @@ export default function Header({classes, open, onDrawerToggle, user}) {
     }
   }, [user]);
 
+  const onContextChange = (course) => {
+    cookie.remove('course', {path: '/'});
+    if (!!course) {
+      cookie.set('course', btoa(JSON.stringify(course)), {path: '/'});
+      enqueueSnackbar('You may need to reload the page', {
+        variant: 'warning',
+        action: (
+          <Button
+            size="small"
+            startIcon={<RefreshIcon/>}
+            color={'primary'}
+            variant={'contained'}
+            onClick={() => window.location.reload(true)}
+          >
+            Reload
+          </Button>
+        ),
+      });
+    }
+    setCourse(course);
+  };
+
   return (
     <React.Fragment>
       <AppBar
@@ -68,41 +91,7 @@ export default function Header({classes, open, onDrawerToggle, user}) {
             </Hidden>
             <Grid item>
               <div style={{display: 'flex', flexDirection: 'row'}}>
-                {user?.is_admin && (
-                  <Autocomplete
-                    options={user.admin_for ?? []}
-                    getOptionLabel={(option) => option.name}
-                    value={course}
-                    style={{width: 200}}
-                    onChange={(_, e) => {
-                      cookie.remove('course', {path: '/'});
-                      if (!!e) {
-                        cookie.set('course', btoa(JSON.stringify(e)), {path: '/'});
-                        enqueueSnackbar('You may need to reload the page', {
-                          variant: 'warning',
-                          action: (
-                            <Button
-                              size="small"
-                              startIcon={<RefreshIcon/>}
-                              color={'primary'}
-                              variant={'contained'}
-                              onClick={() => window.location.reload(true)}
-                            >
-                              Reload
-                            </Button>
-                          ),
-                        });
-                      }
-                      setCourse(e);
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Context"/>
-                    )}
-                  />
-                )}
-                <div className={classes.avatar}>
-                  {netid && <Chip clickable className={classes.appBarChip} label={netid}/>}
-                </div>
+                {netid && <ProfileAvatar user={user} netid={netid} onContextChange={onContextChange} course={course}/>}
               </div>
             </Grid>
           </Grid>
