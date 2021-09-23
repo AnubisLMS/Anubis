@@ -11,20 +11,13 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
-import makeStyles from '@material-ui/core/styles/makeStyles';
 
-import StandardLayout from '../../Components/Layouts/StandardLayout';
-import CourseCard from '../../Components/Public/Courses/CourseCard/CourseCard';
-import EmptyCourseCard from '../../Components/Public/Courses/EmptyCourseCard/EmptyCourseCard';
-import standardErrorHandler from '../../Utils/standardErrorHandler';
-import standardStatusHandler from '../../Utils/standardStatusHandler';
-
-
-const useStyles = makeStyles((theme) => ({
-  inline: {
-    display: 'inline',
-  },
-}));
+import {useStyles} from './Courses.styles';
+import StandardLayout from '../../../Components/Layouts/StandardLayout';
+import CourseCard from '../../../Components/Public/Courses/CourseCard/CourseCard';
+import EmptyCourseCard from '../../../Components/Public/Courses/EmptyCourseCard/EmptyCourseCard';
+import standardErrorHandler from '../../../Utils/standardErrorHandler';
+import standardStatusHandler from '../../../Utils/standardStatusHandler';
 
 
 const joinCourse = (state, enqueueSnackbar) => () => {
@@ -40,7 +33,7 @@ const joinCourse = (state, enqueueSnackbar) => () => {
 };
 
 
-export default function CourseView() {
+const Courses = () => {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [courses, setCourses] = useState([]);
@@ -121,4 +114,7 @@ export default function CourseView() {
       </Grid>
     </StandardLayout>
   );
-}
+};
+
+export default Courses;
+
