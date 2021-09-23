@@ -19,8 +19,7 @@ COPY motd.txt /etc/motd
 ENV GO_VERSION=1.15 \
    GOOS=linux \
    GOARCH=amd64 \
-   GOROOT=/home/anubis/go \
-   GOPATH=/home/anubis/go-tools
+   GOROOT=/home/anubis/go
 ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 RUN set -ex; \
@@ -74,11 +73,9 @@ RUN set -ex; \
   mkdir -p /home/anubis/go; \
   mkdir -p /home/anubis/go-tools; \
   chown -R anubis:anubis /home/anubis/go; \
-  chown -R anubis:anubis /home/anubis/go-tools; \
   curl -fsSL https://storage.googleapis.com/golang/go$GO_VERSION.$GOOS-$GOARCH.tar.gz | tar -C /home/anubis -xzv; \
   cd /home/anubis; \
   echo 'export GO111MODULE=on' >> .bashrc; \
-  echo 'export GOPATH=/home/anubis/go' >> .bashrc; \
   go get -u -v github.com/mdempsky/gocode; \
   go get -u -v github.com/uudashr/gopkgs/cmd/gopkgs; \
   go get -u -v github.com/ramya-rao-a/go-outline; \
