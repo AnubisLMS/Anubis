@@ -13,11 +13,12 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import green from '@material-ui/core/colors/green';
 import red from '@material-ui/core/colors/red';
 
-import useQuery from '../../hooks/useQuery';
-import standardStatusHandler from '../../Utils/standardStatusHandler';
-import standardErrorHandler from '../../Utils/standardErrorHandler';
-import Questions from '../../Components/Public/Questions/Questions';
-import StandardLayout from '../../Components/Layouts/StandardLayout';
+import SubmissionRow from './SubmissionRow/SubmissionRow';
+import useQuery from '../../../hooks/useQuery';
+import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../../Utils/standardErrorHandler';
+import Questions from '../../../Components/Public/Questions/Questions';
+import StandardLayout from '../../../Components/Layouts/StandardLayout';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -129,12 +130,14 @@ export default function Submissions() {
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [pageSize, page]);
 
+  console.log(rows);
+
   if (redirect !== null) {
     return <Redirect to={redirect}/>;
   }
 
   return (
-    <StandardLayout description={user && `${user?.name}'s Submissions`}>
+    <StandardLayout title={`Submissions`}>
       <Grid container spacing={4}>
 
         {/* Questions */}
@@ -145,24 +148,9 @@ export default function Submissions() {
         ) : null}
 
         {/* Table */}
-        <Grid item xs>
-          <Paper className={classes.paper}>
-            <DataGrid
-              pagination
-              rowsPerPageOptions={[10, 20, 30]}
-              page={page}
-              pageSize={pageSize}
-              onPageChange={({page}) => setPage(page)}
-              onPageSizeChange={({pageSize}) => setPageSize(pageSize)}
-              onRowClick={({row}) => setRedirect(`/submission?commit=${row.commit}`)}
-              columns={columns}
-              rows={rows}
-              rowCount={rowCount}
-              loading={loading}
-            />
-          </Paper>
-
-        </Grid>
+        {rows.map((row, index) => (
+          <SubmissionRow {... row} key={`${row.commit}-${index}`} />
+        ))}
       </Grid>
     </StandardLayout>
 
