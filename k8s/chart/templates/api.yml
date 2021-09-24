@@ -37,7 +37,7 @@ spec:
             memory: 100Mi
           limits:
             cpu: 2
-            memory: 300Mi
+            memory: 500Mi
         ports:
         - name: web
           containerPort: 5000

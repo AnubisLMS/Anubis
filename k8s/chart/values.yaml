@@ -59,7 +59,7 @@ backup:
   secretName: anubis-backup-creds
 
 hpa:
-  enable: true
+  enable: false
   rpc:
   - name: rpc-default
   - name: rpc-theia
