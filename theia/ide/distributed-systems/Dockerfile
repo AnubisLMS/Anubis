@@ -16,26 +16,19 @@ WORKDIR /opt/theia
 COPY latest.package.json package.json
 COPY motd.txt /etc/motd
 
-ENV GO_VERSION=1.15 \
+ENV GO_VERSION=1.17 \
    GOOS=linux \
    GOARCH=amd64 \
-   GOROOT=/home/anubis/go
-ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+   GOROOT=/opt/go
+ENV PATH=$GOROOT/bin:$PATH
 
 RUN set -ex; \
   apt update; \
   apt-get install -y --no-install-recommends \
-    wget gpg apt-transport-https ca-certificates apt-utils; \
-  wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -; \
-  echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster main" \
-    > /etc/apt/sources.list.d/llvm.list; \
-  apt-get update; \
-    apt-get install -y --no-install-recommends \
-    zsh gdb git build-essential cmake \
-    gcc-multilib g++-multilib libc6-dev \
+    wget gpg apt-transport-https ca-certificates apt-utils \
+    zsh git build-essential \
+    gcc g++ libc6-dev \
     python3 python3-pip \
-    clangd \
-    qemu-system-i386 \
     libsecret-1-0; \
   yarn --pure-lockfile; \
   NODE_OPTIONS="--max_old_space_size=4096" yarn theia build; \
@@ -51,13 +44,8 @@ RUN set -ex; \
   chown -R 1001:1001 /home/anubis; \
   cd /home/anubis; \
   cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/anubis/; \
-  pip3 install --no-cache-dir supervisor; \
+  pip3 install --no-cache-dir supervisor setuptools; \
   echo 'cat /etc/motd' >> /etc/skel/.bashrc; \
-  echo 'set auto-load safe-path /' > /etc/skel/.gdbinit; \
-  echo 'source /opt/pwndbg/gdbinit.py' >> /etc/skel/.gdbinit; \
-  git clone https://github.com/pwndbg/pwndbg.git /opt/pwndbg; \
-  cd /opt/pwndbg; \
-  ./setup.sh; \
   cd /home/anubis; \
   chmod g+rw /home; \
   chown -R anubis:anubis /home/anubis; \
@@ -70,14 +58,12 @@ RUN set -ex; \
     \( -name .cache -o -name __pycache__ -o -name '*.pyc' -o -name .git -o -name .github \) \
     -exec 'rm' '-rf' '{}' '+'; \
   cd /home/anubis; \
-  mkdir -p /home/anubis/go; \
-  mkdir -p /home/anubis/go-tools; \
-  chown -R anubis:anubis /home/anubis/go; \
-  curl -fsSL https://storage.googleapis.com/golang/go$GO_VERSION.$GOOS-$GOARCH.tar.gz | tar -C /home/anubis -xzv; \
+  mkdir -p $GOROOT; \
+  chown -R anubis:anubis $GOROOT; \
+  curl -fsSL https://storage.googleapis.com/golang/go$GO_VERSION.$GOOS-$GOARCH.tar.gz | tar -C $(dirname $GOROOT) -xzv; \
   cd /home/anubis; \
   echo 'export GO111MODULE=on' >> .bashrc; \
   go get -u -v github.com/mdempsky/gocode; \
-  go get -u -v github.com/uudashr/gopkgs/cmd/gopkgs; \
   go get -u -v github.com/ramya-rao-a/go-outline; \
   go get -u -v github.com/acroca/go-symbols; \
   go get -u -v golang.org/x/tools/cmd/guru; \
@@ -93,16 +79,13 @@ RUN set -ex; \
   go get -u -v winterdrache.de/goformat/goformat; \
   go get -u -v golang.org/x/lint/golint; \
   go get -u -v github.com/cweill/gotests/...; \
-  go get -u -v github.com/alecthomas/gometalinter; \
   go get -u -v honnef.co/go/tools/...; \
   GO111MODULE=on go get github.com/golangci/golangci-lint/cmd/golangci-lint; \
   go get -u -v github.com/mgechev/revive; \
   go get -u -v github.com/sourcegraph/go-langserver; \
   go get -u -v github.com/go-delve/delve/cmd/dlv; \
   go get -u -v github.com/davidrjenni/reftools/cmd/fillstruct; \
-  go get -u -v github.com/godoctor/godoctor; \
-  go get -u -v -d github.com/stamblerre/gocode; \
-  go build -o $GOPATH/bin/gocode-gomod github.com/stamblerre/gocode;
+  go get -u -v -d github.com/stamblerre/gocode
 
 COPY supervisord.conf autosave-dump.sh /
 COPY autosave /usr/local/bin/autosave
