@@ -51,7 +51,7 @@ RUN set -ex; \
   chown -R 1001:1001 /home/anubis; \
   cd /home/anubis; \
   cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/anubis/; \
-  pip3 install --no-cache-dir supervisor; \
+  pip3 install --no-cache-dir supervisor setuptools; \
   ln -s /usr/bin/clangd-12 /usr/bin/clangd; \
   cd /home/anubis; \
   mkdir -p /opt/anubis/.theia; \

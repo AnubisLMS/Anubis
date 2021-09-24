@@ -82,7 +82,7 @@ RUN set -eux; apt-get update \
     --no-cache-dir \
   && rm get-pip.py; \
   pip3 install --upgrade --no-cache-dir pip \
-  && pip3 install --upgrade --no-cache-dir python-language-server flake8 autopep8 pylint supervisor
+  && pip3 install --upgrade --no-cache-dir python-language-server flake8 autopep8 pylint supervisor setuptools
 
 RUN adduser --disabled-password --gecos '' --uid 1001 anubis; \
   cd /home/anubis; \

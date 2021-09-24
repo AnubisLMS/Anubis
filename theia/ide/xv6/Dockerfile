@@ -45,7 +45,7 @@ RUN set -ex; \
   chown -R 1001:1001 /home/anubis; \
   cd /home/anubis; \
   cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/anubis/; \
-  pip3 install --no-cache-dir supervisor; \
+  pip3 install --no-cache-dir supervisor setuptools; \
   echo 'cat /etc/motd' >> /etc/skel/.bashrc; \
   echo 'set auto-load safe-path /' > /etc/skel/.gdbinit; \
   echo 'source /opt/pwndbg/gdbinit.py' >> /etc/skel/.gdbinit; \
