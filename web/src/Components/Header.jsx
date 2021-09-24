@@ -15,7 +15,7 @@ import TextField from '@material-ui/core/TextField';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import {Hidden} from '@material-ui/core';
 
-import ProfileAvatar from '../Components/Shared/ProfileAvatar/ProfileAvatar';
+import ProfileAvatar from './Shared/AccountChip/AccountChip';
 
 export default function Header({classes, open, onDrawerToggle, user}) {
   const cookie = new Cookies();

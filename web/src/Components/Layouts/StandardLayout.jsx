@@ -15,7 +15,7 @@ export default function StandardLayout({title = 'Anubis', description = '', chil
 
   return (
     <Grid container spacing={4} justify={'center'}>
-      <Grid item xs={12}>
+      <Grid item xs={12} md={11}>
         <Typography variant="h5">
           {title}
         </Typography>
@@ -26,7 +26,7 @@ export default function StandardLayout({title = 'Anubis', description = '', chil
         ))}
       </Grid>
       <Grid item/>
-      <Grid item xs={12} md={10}>
+      <Grid item xs={12} md={11}>
         {children}
       </Grid>
     </Grid>

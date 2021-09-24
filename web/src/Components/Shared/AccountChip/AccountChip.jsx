@@ -4,6 +4,8 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import {useStyles} from './AccountChip.styles';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 const AccountChip = ({user, netid, onContextChange, course}) => {
   const classes = useStyles();
@@ -17,8 +19,13 @@ const AccountChip = ({user, netid, onContextChange, course}) => {
       <Typography className={classes.netid}>
         {netid}
       </Typography>
-      <Box onClick={() => setOpen(!open)} className={classes.avatar}>
-        {netid.substring(0, 1).toUpperCase()}
+      <Box className={classes.clickableContainer} onClick={() => setOpen(!open)}>
+        <Box className={classes.avatar}>
+          {netid.substring(0, 1).toUpperCase()}
+        </Box>
+        <Box className={classes.expandIcon}>
+          {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        </Box>
       </Box>
       {open &&
         <Box className={classes.profileActions}>

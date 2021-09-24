@@ -22,7 +22,7 @@ import Courses from './Pages/Public/Courses/Courses';
 import Assignments from './Pages/Public/Assignments';
 import Profile from './Pages/Public/Profile';
 import Repos from './Pages/Public/Repos';
-import Submissions from './Pages/Public/Submissions';
+import Submissions from './Pages/Public/Submissions/Submissions';
 import Submission from './Pages/Public/Submission/Submission';
 import Blog from './Pages/Public/Blog';
 import Visuals from './Pages/Public/Visuals/Visuals';
