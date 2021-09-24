@@ -55,6 +55,7 @@ const useStyles = makeStyles(() => ({
     margin: theme.spacing(2, 1),
   },
   content: {
+    marginTop: theme.spacing(6),
     flexGrow: 1,
     // padding: theme.spacing(3),
     marginBottom: '20px',

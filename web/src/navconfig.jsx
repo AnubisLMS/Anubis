@@ -22,12 +22,13 @@ import Courses from './Pages/Public/Courses/Courses';
 import Assignments from './Pages/Public/Assignments';
 import Profile from './Pages/Public/Profile';
 import Repos from './Pages/Public/Repos';
-import Submissions from './Pages/Public/Submissions';
+import Submissions from './Pages/Public/Submissions/Submissions';
 import Submission from './Pages/Public/Submission/Submission';
 import Blog from './Pages/Public/Blog';
 import Visuals from './Pages/Public/Visuals/Visuals';
 import Lectures from './Pages/Public/Lectures/Lectures';
 
+import Assignment from './Pages/Public/Assignment/Assignment';
 import AdminUsers from './Pages/Admin/Users';
 import AdminUser from './Pages/Admin/User';
 import AdminCourse from './Pages/Admin/Course';
@@ -71,6 +72,12 @@ export const public_nav = [
         icon: <DashboardIcon/>,
         path: '/dashboard',
         Page: Dashboard,
+      },
+      {
+        id: 'Assignment',
+        icon: <AssignmentOutlinedIcon/>,
+        path: '/courses/assignment',
+        Page: Assignment,
       },
       {
         id: 'Courses',
@@ -171,6 +178,11 @@ export const not_shown_nav = [
     path: '/submission',
     Page: Submission,
   },
+  // {
+  //   id: 'Assignment',
+  //   path: '/courses/assignment',
+  //   page: Assignment,
+  // },
   {
     id: 'User',
     path: '/admin/user',

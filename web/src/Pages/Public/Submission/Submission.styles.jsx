@@ -13,20 +13,20 @@ export const useStyles = makeStyles((theme) => ({
     position: 'relative',
   },
   buttonSuccess: {
-    'backgroundColor': green[500],
+    'backgroundColor': theme.palette.color.green,
     '&:hover': {
-      backgroundColor: green[700],
+      backgroundColor: theme.palette.color.green,
     },
   },
   fabProgress: {
-    color: green[500],
+    color: theme.palette.color.green,
     position: 'absolute',
     top: -6,
     left: -6,
     zIndex: 1,
   },
   buttonProgress: {
-    color: green[500],
+    color: theme.palette.color.green,
     position: 'absolute',
     top: '50%',
     left: '50%',

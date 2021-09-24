@@ -23,6 +23,17 @@ export const useStyles = makeStyles((theme) => ({
       opacity: 0.8,
     },
   },
+  clickableContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+  },
+  expandIcon: {
+    marginLeft: theme.spacing(1),
+    opacity: .3,
+  },
   profileActions: {
     paddingTop: theme.spacing(2),
     width: '250px',

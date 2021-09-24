@@ -17,6 +17,7 @@
     "axios": "^0.21.1",
     "clsx": "^1.1.0",
     "date-fns": "^2.0.0",
+    "framer-motion": "^4.1.17",
     "http-proxy-middleware": "^2.0.0",
     "markdown-to-jsx": "^7.1.2",
     "notistack": "^1.0.3",
