@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const checkSession = (id, state, enqueueSnackbar, after=null) => {
+const checkSession = (id, state, enqueueSnackbar, after = null) => {
   if (id === undefined || id === null) {
     if (after !== null) {
       after();
@@ -164,6 +164,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
   const [autosaveEnabled, setAutosaveEnabled] = useState(true);
   const [persistentStorage, setPersistentStorage] = useState(false);
   const [showPersistentStorage, setShowPersistentStorage] = useState(false);
+  const [showAutosave, setShowAutosave] = useState(false);
   const [assignment, setAssignment] = useState(null);
   const [showStop, setShowStop] = useState(false);
 
@@ -188,6 +189,9 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
         if (data.assignment?.persistent_storage !== undefined) {
           setShowPersistentStorage(!!data.assignment.persistent_storage);
           setPersistentStorage(data.assignment.persistent_storage);
+
+          setShowAutosave(!!data.assignment.autosave);
+          setAutosaveEnabled(!!data.assignment.autosave);
         }
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
@@ -230,6 +234,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
     assignment, setAssignment,
     sessionState, setSessionState,
     showPersistentStorage, setShowPersistentStorage,
+    showAutosave, setShowAutosave,
     showStop, setShowStop,
   };
 
@@ -259,38 +264,41 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
           <Grid item xs={12}>
             <IDEInstructions/>
           </Grid>
-          <Grid item xs={12}>
-            <FormControlLabel
-              disabled={!!session}
-              checked={autosaveEnabled}
-              onChange={() => setAutosaveEnabled(!autosaveEnabled)}
-              control={<Switch color={'primary'}/>}
-              label={
-                <div style={{display: 'flex', alignItems: 'center'}}>
-                  <Typography color={autosaveEnabled ? '' : 'secondary'} variant={'body1'}>
-                    {autosaveEnabled ?
-                      'Autosave Enabled' :
-                      (
-                        'With autosave disabled you are responsible for saving your progress. ' +
-                        'No exceptions will be made for lost work!'
-                      )}
-                  </Typography>
-                  <Tooltip title={persistentStorage ?
-                    'Anubis will automatically try to commit and push any git repo in /home/anubis to github ' +
-                    'every 5 minutes. You can also use the autosave command in the terminal to manually tell Anubis ' +
-                    'to commit and push. It is still your ' +
-                    'responsibility to make sure that your work is saved, and submitted on time.' :
-                    'Anubis will not try to automatically commit and push your work to github. It is your ' +
-                    'responsibility to make sure that your work is saved, and submitted on time.'}>
-                    <IconButton>
-                      <HelpOutlineOutlinedIcon fontSize={'small'}/>
-                    </IconButton>
-                  </Tooltip>
-                </div>
-              }
-              labelPlacement="end"
-            />
-          </Grid>
+          {showAutosave && (
+            <Grid item xs={12}>
+              <FormControlLabel
+                disabled={!!session}
+                checked={autosaveEnabled}
+                onChange={() => setAutosaveEnabled(!autosaveEnabled)}
+                control={<Switch color={'primary'}/>}
+                label={
+                  <div style={{display: 'flex', alignItems: 'center'}}>
+                    <Typography color={autosaveEnabled ? '' : 'secondary'} variant={'body1'}>
+                      {autosaveEnabled ?
+                        'Autosave Enabled' :
+                        (
+                          'With autosave disabled you are responsible for saving your progress. ' +
+                          'No exceptions will be made for lost work!'
+                        )}
+                    </Typography>
+                    <Tooltip title={persistentStorage ?
+                      'Anubis will automatically try to commit and push any git repo in /home/anubis to github ' +
+                      'every 5 minutes. You can also use the autosave command in the terminal ' +
+                      'to manually tell Anubis ' +
+                      'to commit and push. It is still your ' +
+                      'responsibility to make sure that your work is saved, and submitted on time.' :
+                      'Anubis will not try to automatically commit and push your work to github. It is your ' +
+                      'responsibility to make sure that your work is saved, and submitted on time.'}>
+                      <IconButton>
+                        <HelpOutlineOutlinedIcon fontSize={'small'}/>
+                      </IconButton>
+                    </Tooltip>
+                  </div>
+                }
+                labelPlacement="end"
+              />
+            </Grid>
+          )}
           {showPersistentStorage && (
             <Grid item xs={12}>
               <FormControlLabel

@@ -12,10 +12,11 @@ from anubis.utils.data import rand
 db = SQLAlchemy()
 
 THEIA_DEFAULT_OPTIONS = {
+    "autosave": True,
     "persistent_storage": False,
     "network_policy": "os-student",
     "resources": {
-        "requests": {"cpu": "200m", "memory": "250Mi"},
+        "requests": {"cpu": "300m", "memory": "300Mi"},
         "limits": {"cpu": "2", "memory": "500Mi"},
     },
 }
@@ -248,6 +249,7 @@ class Assignment(db.Model):
 
             # IDE
             "ide_enabled": self.ide_enabled,
+            "autosave": self.theia_options.get('autosave', True),
             "persistent_storage": self.theia_options.get('persistent_storage', False),
 
             # Github
