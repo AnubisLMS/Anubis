@@ -673,11 +673,11 @@ class TheiaSession(db.Model):
     autosave = db.Column(db.Boolean, default=True)
     credentials = db.Column(db.Boolean, default=False)
     persistent_storage = db.Column(db.Boolean, default=False)
+    k8s_requested = db.Column(db.Boolean, default=False)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
     ended = db.Column(db.DateTime, nullable=True, default=None)
-    last_heartbeat = db.Column(db.DateTime, default=datetime.now)
     last_proxy = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 

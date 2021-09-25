@@ -115,6 +115,9 @@ def initialize_theia_session(theia_session_id: str):
     # before the resources have actually been created and initialized.
     v1.create_namespaced_pod(namespace="anubis", body=pod)
 
+    # Mark theia session as k8s resources requested
+    theia_session.k8s_requested = True
+
     # Commit any and all changes that have been made
     # in the database up to this point.
     db.session.commit()
