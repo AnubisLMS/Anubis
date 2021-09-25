@@ -4,6 +4,7 @@ from anubis.models import db, Config, Submission
 from anubis.utils.data import with_context
 from anubis.utils.k8s.pipeline import create_pipeline_job_obj, reap_pipeline_jobs
 from anubis.utils.logging import logger
+from anubis.utils.config import get_config_int
 
 
 @with_context
@@ -26,8 +27,7 @@ def create_submission_pipeline(submission_id: str):
     )
 
     # Calculate the maximum number of jobs allowed in the cluster
-    max_jobs = Config.query.filter(Config.key == "MAX_JOBS").first()
-    max_jobs = int(max_jobs.value) if max_jobs is not None else 10
+    max_jobs = get_config_int('PIPELINE_MAX_JOBS', default=10)
 
     # Initialize kube client
     config.load_incluster_config()

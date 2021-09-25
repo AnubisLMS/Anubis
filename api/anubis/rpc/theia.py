@@ -1,6 +1,7 @@
 from kubernetes import config, client
 
-from anubis.models import db, Config, TheiaSession
+from anubis.models import db, TheiaSession
+from anubis.utils.config import get_config_int
 from anubis.utils.data import with_context
 from anubis.utils.k8s.theia import (
     update_theia_pod_cluster_addresses,
@@ -46,8 +47,7 @@ def initialize_theia_session(theia_session_id: str):
     )
 
     # Calculate the maximum IDEs that are allowed to exist at any given time
-    max_ides = Config.query.filter(Config.key == "MAX_IDES").first()
-    max_ides = int(max_ides.value) if max_ides is not None else 10
+    max_ides = get_config_int('MAX_THEIA_SESSIONS', default=50)
 
     # Check to ses how many theia sessions are marked as active in the database. If that
     # count exceeds the artificial limit of IDEs, then we need to re-enqueue this job.

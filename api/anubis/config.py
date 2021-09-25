@@ -47,12 +47,6 @@ class Config:
         # Logger
         self.LOGGER_NAME = os.environ.get("LOGGER_NAME", default="anubis-api")
 
-        # Theia
-        self.THEIA_TIMEOUT = timedelta(hours=6)
-
-        # autograding specific config
-        self.STATS_REAP_DURATION = timedelta(days=60)
-
         print("Starting with DATABASE_URI: {}".format(self.SQLALCHEMY_DATABASE_URI))
         print("Starting with CACHE_TYPE: {}".format(self.CACHE_TYPE))
         print("Starting with SECRET_KEY: {}".format(self.SECRET_KEY))

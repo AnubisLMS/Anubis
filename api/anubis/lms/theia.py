@@ -7,6 +7,7 @@ from anubis.models import TheiaSession, User, Config
 from anubis.utils.auth.token import create_token
 from anubis.utils.data import is_debug
 from anubis.utils.cache import cache
+from anubis.utils.config import get_config_int
 
 
 @cache.memoize(timeout=5, source_check=True)
@@ -32,9 +33,8 @@ def get_n_available_sessions() -> Tuple[int, int]:
 
     :return:
     """
-    max_ides_config: Config = Config.query.filter(Config.key == "MAX_IDES").first()
+    max_ides = get_config_int('MAX_THEIA_SESSIONS', default=50)
     active_ide_count: int = TheiaSession.query.filter(TheiaSession.active).count()
-    max_ides = int(max_ides_config.value) if max_ides_config is not None else 50
 
     return active_ide_count, max_ides
 

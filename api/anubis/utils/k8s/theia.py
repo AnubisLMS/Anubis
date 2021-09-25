@@ -10,6 +10,7 @@ from anubis.utils.auth.token import create_token
 from anubis.lms.theia import get_theia_pod_name, mark_session_ended
 from anubis.utils.logging import logger
 from anubis.utils.github.parse import parse_github_repo_name
+from anubis.utils.config import get_config_int
 
 
 def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod, Optional[client.V1PersistentVolumeClaim]]:
@@ -471,8 +472,10 @@ def reap_old_theia_sessions(theia_pods: client.V1PodList):
     :param theia_pods:
     :return:
     """
-    # Get the app config
-    from anubis.config import config as _config
+
+    # Get stale timeout hours
+    theia_stale_timeout_hours = get_config_int('THEIA_STALE_TIMEOUT_HOURS', default=6)
+    theia_stale_timeout = timedelta(hours=theia_stale_timeout_hours)
 
     # Iterate through all active
     for n, pod in enumerate(theia_pods.items):
@@ -490,7 +493,7 @@ def reap_old_theia_sessions(theia_pods: client.V1PodList):
             continue
 
         # If the session is younger than 6 hours old, continue
-        if datetime.now() <= theia_session.created + _config.THEIA_TIMEOUT:
+        if datetime.now() <= theia_session.created + theia_stale_timeout:
             logger.info(f'NOT reaping session {theia_session.id}')
             continue
 
@@ -522,13 +525,16 @@ def fix_stale_theia_resources(theia_pods: client.V1PodList):
     # Log the event
     logger.info("Checking active ActiveTheia sessions")
 
+    # Get the theia timeout config value
+    theia_timeout = get_config_int('THEIA_STALE_PROXY_MINUTES', default=10)
+
     # Get active pods and db rows
     active_db_sessions = TheiaSession.query.filter(
         # Get sessions marked as active
         TheiaSession.active == True,
 
         # Filter for sessions that have had a proxy in the last 10 minutes
-        TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=10),
+        TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=theia_timeout),
     ).all()
 
     # Build set of active pod session ids

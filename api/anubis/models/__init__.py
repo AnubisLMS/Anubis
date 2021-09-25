@@ -701,7 +701,6 @@ class TheiaSession(db.Model):
             "state": self.state,
             "created": str(self.created),
             "ended": str(self.ended),
-            "last_heartbeat": str(self.last_heartbeat),
             "last_proxy": str(self.last_proxy),
             "last_updated": str(self.last_updated),
 

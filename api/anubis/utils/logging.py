@@ -19,12 +19,6 @@ def _get_logger(logger_name):
     # name specified
     _logger = logging.getLogger(logger_name)
 
-    # Set the log level to debug if in debug mode
-    if is_debug():
-        _logger.setLevel(logging.DEBUG)
-    else:
-        _logger.setLevel(logging.INFO)
-
     return _logger
 
 
