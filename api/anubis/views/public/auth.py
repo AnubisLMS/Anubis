@@ -7,7 +7,7 @@ from flask import Blueprint, make_response, redirect, request
 from anubis.models import User, db
 from anubis.utils.auth.http import require_user, require_admin
 from anubis.utils.auth.token import create_token
-from anubis.utils.auth.user import current_user
+from anubis.utils.auth.user import current_user, get_current_user
 from anubis.utils.data import is_debug, req_assert
 from anubis.utils.http.decorators import json_endpoint
 from anubis.utils.http import error_response, success_response
@@ -99,7 +99,7 @@ def public_whoami():
 
     # When the current_user is None (ie no one is logged in)
     # just pass back Nones.
-    if current_user is None:
+    if get_current_user() is None:
         return success_response({
             'user': None,
             'context': None,
