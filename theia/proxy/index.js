@@ -9,8 +9,16 @@ const LRU = require("lru-cache");
 const SECRET_KEY = process.env.SECRET_KEY ?? 'DEBUG';
 const DEBUG = process.env.DEBUG === '1';
 
+/**
+ * Least Recently Used Cache for ip address lookups. Creating an
+ * in-memory cache of session id -> session ip address cuts down
+ * on latency and round trips to the database.
+ */
 const cache = new LRU(100);
 
+/**
+ * Knex connection to the database.
+ */
 const knex = Knex({
   client: "mysql2",
   connection: {
@@ -22,6 +30,9 @@ const knex = Knex({
   }
 });
 
+/**
+ * Proxy server with websocket forwarding enabled.
+ */
 const proxy = httpProxy.createProxyServer({
   ws: true,
 });
