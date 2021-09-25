@@ -29,19 +29,18 @@ spec:
         app.kubernetes.io/name: theia
         component: proxy
     spec:
+      # There is a weird issue with the dns where it is sometimes not
+      # looking up the database correctly. Set the dns to cloudflare
+      # to fix it.
+      dnsPolicy: 'None'
+      dnsConfig:
+        nameservers:
+          - 1.1.1.1
+
       containers:
       - name: proxy
         image: {{ .Values.theia.proxy.image }}:{{ .Values.theia.proxy.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
-
-        # There is a weird issue with the dns where it is sometimes not
-        # looking up the database correctly. Set the dns to cloudflare
-        # to fix it.
-        dnsPolicy: 'none'
-        dnsConfig:
-          nameservers:
-            - 1.1.1.1
-
         {{- if not .Values.debug}}
         resources:
           requests:
