@@ -58,9 +58,10 @@ const useColumns = (config, setConfig, enqueueSnackbar) => ([
   {
     field: 'key',
     headerName: 'Key',
-    width: 150,
+    width: 350,
     renderCell: (params) => (
       <TextField
+        fullWidth
         disabled={params.row.action === 'disabled'}
         value={params.row.key}
         onChange={updateRow(params.rowIndex, 'key', setConfig)}
@@ -73,6 +74,7 @@ const useColumns = (config, setConfig, enqueueSnackbar) => ([
     width: 250,
     renderCell: (params) => (
       <TextField
+        fullWidth
         disabled={params.row.action === 'disabled'}
         value={params.row.value}
         onChange={updateRow(params.rowIndex, 'value', setConfig)}
@@ -82,7 +84,7 @@ const useColumns = (config, setConfig, enqueueSnackbar) => ([
   {
     field: 'action',
     headerName: 'Edit',
-    width: 200,
+    width: 100,
     renderCell: (params) => (
       <Button
         color={'primary'}
