@@ -149,6 +149,7 @@ var proxyServer = http.createServer(function (req, res) {
       return;
 
     case '/ping':
+      if (token !== null) updateProxyTime(token.session_id);
       res.writeHead(200);
       res.end('pong');
       return;
@@ -166,7 +167,6 @@ var proxyServer = http.createServer(function (req, res) {
         return;
       }
 
-      // updateProxyTime(token.session_id);
       get_session_ip(token.session_id).then((host) => {
         proxy.web(req, res, {
           target: {host, port}

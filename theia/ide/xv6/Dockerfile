@@ -33,6 +33,9 @@ RUN set -ex; \
     libsecret-1-0; \
   yarn --pure-lockfile; \
   NODE_OPTIONS="--max_old_space_size=4096" yarn theia build; \
+  HEAD_LINE_NUMBER=$(grep -n '</head>' lib/index.html | cut -f1 -d:); \
+  SCRIPT_LINE='<script>function ping(){if (document.hasFocus()){fetch("/ide/ping")}};document.addEventListener("focus",ping);setInterval(ping,60000)</script>'; \
+  sed -i "${HEAD_LINE_NUMBER}i${SCRIPT_LINE}" lib/index.html; \
   yarn theia download:plugins; \
   yarn --production; \
   yarn autoclean --init; \

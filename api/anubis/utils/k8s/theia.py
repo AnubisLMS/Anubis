@@ -1,6 +1,6 @@
 import base64
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Tuple, Optional
 
 from kubernetes import client
@@ -524,7 +524,11 @@ def fix_stale_theia_resources(theia_pods: client.V1PodList):
 
     # Get active pods and db rows
     active_db_sessions = TheiaSession.query.filter(
+        # Get sessions marked as active
         TheiaSession.active == True,
+
+        # Filter for sessions that have had a proxy in the last 10 minutes
+        TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=10),
     ).all()
 
     # Build set of active pod session ids
