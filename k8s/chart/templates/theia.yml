@@ -29,6 +29,8 @@ spec:
         app.kubernetes.io/name: theia
         component: proxy
     spec:
+
+      {{- if not .Values.debug }}
       # There is a weird issue with the dns where it is sometimes not
       # looking up the database correctly. Set the dns to cloudflare
       # to fix it.
@@ -36,6 +38,7 @@ spec:
       dnsConfig:
         nameservers:
           - 1.1.1.1
+      {{- end }}
 
       containers:
       - name: proxy
