@@ -83,7 +83,7 @@ export default function Submission() {
   const [errorStop, setErrorStop] = useState(false);
 
   const continueSubscribe = () => setTimeout(() => {
-    if (step < 60) {
+    if (step < 300) {
       setStep((state) => ++state);
     }
   }, 1000);
@@ -131,7 +131,9 @@ export default function Submission() {
         }
       }
 
-      continueSubscribe();
+      if (!submission.processed) {
+        continueSubscribe();
+      }
     }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
   }, [step]);
 

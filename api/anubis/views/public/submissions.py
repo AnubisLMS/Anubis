@@ -100,7 +100,7 @@ def public_submission(commit: str):
     submission = query.first()
 
     # Make sure we caught one
-    req_assert(submission is not None, 'submission does not exist')
+    req_assert(submission is not None, message='submission does not exist')
 
     # Hand back submission
     return success_response({"submission": submission.full_data})
@@ -139,10 +139,10 @@ def public_regrade_commit(commit: str):
         assert_course_context(submission)
 
     # Check that autograde is enabled for the assignment
-    req_assert(submission.assignment.autograde_enabled, 'Autograde is disabled for this assignment')
+    req_assert(submission.assignment.autograde_enabled, message='Autograde is disabled for this assignment')
 
     # Check that the submission is allowed to be accepted
-    req_assert(submission.accepted, 'Submission was rejected for being late')
+    req_assert(submission.accepted, message='Submission was rejected for being late')
 
     # Regrade
     return regrade_submission(submission)
