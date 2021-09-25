@@ -52,17 +52,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-
-const pollSession = (id, state, enqueueSnackbar, n = 0) => () => {
-  const {setLoading, setSession, setSessionState, setShowStop} = state;
-
-  if (n === 60) {
-    setShowStop(true);
-  }
-
-  if (n > 600) {
+const checkSession = (id, state, enqueueSnackbar, after=null) => {
+  if (id === undefined || id === null) {
+    if (after !== null) {
+      after();
+    }
     return;
   }
+
+  const {setLoading, setSession, setSessionState, setShowStop} = state;
 
   axios.get(`/api/public/ide/poll/${id}`).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
@@ -81,8 +79,30 @@ const pollSession = (id, state, enqueueSnackbar, n = 0) => () => {
       return;
     }
 
-    setTimeout(pollSession(id, state, enqueueSnackbar, ++n), 1000);
+    if (after !== null) {
+      after();
+    }
   }).catch(standardErrorHandler(enqueueSnackbar));
+};
+
+
+const pollSession = (id, state, enqueueSnackbar, n = 0) => () => {
+  const {setShowStop} = state;
+
+  if (n === 30) {
+    setShowStop(true);
+  }
+
+  if (n > 600) {
+    return;
+  }
+
+  checkSession(
+    id,
+    state,
+    enqueueSnackbar,
+    () => setTimeout(pollSession(id, state, enqueueSnackbar, ++n), 1000),
+  );
 };
 
 const startSession = (state, enqueueSnackbar) => () => {
@@ -217,6 +237,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
     <Dialog
       open={selectedTheia !== null}
       onClose={() => setSelectedTheia(null)}
+      onFocus={() => session && checkSession(session.id, state, () => null)}
     >
       <DialogTitle>Anubis Cloud IDE</DialogTitle>
       <DialogContent>
