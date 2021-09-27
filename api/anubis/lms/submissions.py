@@ -118,7 +118,7 @@ def fix_dangling():
 
             # Find all the submissions that belong to that
             # repo, fix then grade them.
-            for submission in dangling_repo.submissions_:
+            for submission in dangling_repo.submissions:
                 # Give the submission an owner
                 submission.owner_id = owner.id
                 db.session.add(submission)
@@ -128,7 +128,7 @@ def fix_dangling():
                 fixed.append(submission.data)
 
                 # Get the due date
-                due_date = get_assignment_due_date(owner, dangling_repo.assignment)
+                due_date = get_assignment_due_date(owner.id, dangling_repo.assignment.id)
 
                 # Check if the submission should be accepted
                 if dangling_repo.assignment.accept_late and submission.created < due_date:
@@ -168,7 +168,7 @@ def fix_dangling():
             fixed.append(submission.data)
 
             # Get the due date
-            due_date = get_assignment_due_date(owner, submission.assignment)
+            due_date = get_assignment_due_date(owner.id, submission.assignment.id)
 
             # Check if the submission should be accepted
             if submission.assignment.accept_late and submission.created < due_date:
