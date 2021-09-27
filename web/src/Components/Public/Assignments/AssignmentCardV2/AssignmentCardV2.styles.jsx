@@ -11,8 +11,8 @@ export const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
-    padding: '20px',
-    borderRadius: '10px',
+    padding: `${theme.spacing(2.5)}px`,
+    borderRadius: `${theme.spacing(1.25)}px`,
     margin: theme.spacing(5),
   },
   dueBadge: {

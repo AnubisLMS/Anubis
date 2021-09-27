@@ -77,13 +77,6 @@ const Assignments = () => {
               style={{transformOrigin: '0 0 0'}}
               {...({timeout: 300 * (pos + 1)})}
             >
-              {/* <AssignmentCard
-                assignment={assignment}
-                setSelectedTheia={setSelectedTheia}
-                runAssignmentPolling={assignment.id === pollingAssignmentId && runAssignmentPolling}
-                setRunAssignmentPolling={setRunAssignmentPolling}
-                setPollingAssignmentId={setPollingAssignmentId}
-              /> */}
               <AssignmentCardV2 {... assignment}/>
             </Grow>
           </Grid>

@@ -20,27 +20,29 @@ const AssignmentCardV2 = ({
   repo_url,
 }) => {
   const classes = useStyles();
-  const due_days = Math.round((new Date(due_date) - new Date())/(1000*3600*24));
-
+  let due_days = Math.round((new Date(due_date) - new Date())/(1000*3600*24));
+  due_days=9;
   return (
 
     <Box className={classes.asignmentContainer}>
-      <Box
-        className={
-          clsx(classes.dueBadge,
-            due_days > 7 ? classes.greenBadge : due_days <= 5 && due_days > 3 ? classes.orangeBadge : classes.redBadge)
-        }
-      >
-        <Typography className={classes.dueDate} align='center'>
-          {`${due_days} ${due_days == 1 ? 'day' : 'days'}`} remaining
-        </Typography>
-      </Box>
+      {due_days > 0 &&
+        <Box
+          className={
+            clsx(classes.dueBadge,
+              due_days > 7 ? classes.greenBadge :due_days <= 5 && due_days > 3 ? classes.orangeBadge : classes.redBadge)
+          }
+        >
+          <Typography className={classes.dueDate} align='center'>
+            {`${due_days} ${due_days == 1 ? 'day' : 'days'}`} remaining
+          </Typography>
+        </Box>
+      }
       <Typography className={classes.assignmentName}>{name}</Typography>
       <Typography className={classes.courseName}>{course.name}</Typography>
       <Box className={classes.courseActionsContainer}>
         <Button
           onClick = {() => {
-            history.push(`/courses/assignments?courseId=${id}`);
+            history.push(`/courses/assignments/submissions?assignmentId=${id}`);
           }}
           className={classes.openCourseButton}
         >
@@ -48,7 +50,7 @@ const AssignmentCardV2 = ({
         </Button>
         <Button
           onClick = {() => {
-            history.push(`/courses/assignments?courseId=${id}`);
+            history.push(repo_url);
           }}
           className={classes.viewRepoButon}
         >
