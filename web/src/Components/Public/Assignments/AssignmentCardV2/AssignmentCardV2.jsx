@@ -17,20 +17,22 @@ const AssignmentCardV2 = ({
   name,
   due_date,
   course,
+  repo_url,
 }) => {
   const classes = useStyles();
   const due_days = Math.round((new Date(due_date) - new Date())/(1000*3600*24));
+
   return (
 
     <Box className={classes.asignmentContainer}>
       <Box
         className={
           clsx(classes.dueBadge,
-            due_days > 7 ? classes.greenBadge : due_days <=5 && due_days > 3 ? classes.orangeBadge : classes.redBadge)
+            due_days > 7 ? classes.greenBadge : due_days <= 5 && due_days > 3 ? classes.orangeBadge : classes.redBadge)
         }
       >
-        <Typography className={classes.dueDate}>
-          {`${due_days} ${due_days <=1 ? 'day' : 'days'} remaining`}
+        <Typography className={classes.dueDate} align='center'>
+          {`${due_days} ${due_days == 1 ? 'day' : 'days'}`} remaining
         </Typography>
       </Box>
       <Typography className={classes.assignmentName}>{name}</Typography>

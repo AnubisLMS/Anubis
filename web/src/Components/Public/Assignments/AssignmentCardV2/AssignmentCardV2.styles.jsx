@@ -2,6 +2,7 @@ import {makeStyles} from '@material-ui/core/styles';
 
 export const useStyles = makeStyles((theme) => ({
   asignmentContainer: {
+    position: 'relative',
     color: theme.palette.white,
     flexGrow: 1,
     minWidth: 275,
@@ -16,16 +17,17 @@ export const useStyles = makeStyles((theme) => ({
   },
   dueBadge: {
     boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
-    position: 'relative',
-    padding: `${theme.spacing(0.5)}px ${theme.spacing(1.5)}px ${theme.spacing(0.5)}px ${theme.spacing(0.5)}px`,
+    position: 'absolute',
+    padding: `${theme.spacing(0.5)}px ${theme.spacing(1.5)}px ${theme.spacing(0.5)}px ${theme.spacing(1.5)}px`,
     borderRadius: '3px',
-    top: -theme.spacing(5),
-    right: -theme.spacing(16),
+    top: -theme.spacing(2),
+    right: -theme.spacing(1),
     flexGrow: 1,
     minWidth: 100,
     maxWidth: 150,
     display: 'flex',
-
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   dueDate: {
     color: 'black',
