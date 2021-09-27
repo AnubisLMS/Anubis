@@ -137,7 +137,7 @@ export default function Submissions() {
   }
 
   return (
-    <StandardLayout description={user && `${user?.name}'s Submissions`}>
+    <StandardLayout title={`Submissions`}>
       <Grid container spacing={4}>
 
         {/* Questions */}

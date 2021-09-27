@@ -20,6 +20,7 @@ const Assignments = () => {
   const [selectedTheia, setSelectedTheia] = useState(null);
   const [runAssignmentPolling, setRunAssignmentPolling] = useState(false);
   const [pollingAssignmentId, setPollingAssignmentId] = useState(null);
+  console.log(assignments);
 
   useEffect(() => {
     axios.get('/api/public/assignments', {params: {courseId: query.get('courseId')}}).then((response) => {
