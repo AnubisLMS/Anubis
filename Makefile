@@ -1,7 +1,7 @@
 PERSISTENT_SERVICES := db traefik redis-master
 RESTART_ALWAYS_SERVICES := api web-dev rpc-default rpc-theia rpc-regrade
 PUSH_SERVICES := api web puller theia-init theia-proxy
-THEIA_IDES := theia-xv6 theia-admin theia-devops theia-jepst theia-distributed-systems
+THEIA_IDES := theia-xv6 theia-admin theia-devops theia-jepst theia-distributed-systems theia-software-engineering
 
 
 help:
@@ -29,18 +29,22 @@ deploy:
 build:
 	docker-compose build --parallel --pull
 
-.PHONY: build-ide    # Build all ide docker images
-build-ides:
-	docker-compose build --parallel --pull $(THEIA_IDES)
-
 .PHONY: push         # Push images to registry.digitalocean.com (requires vpn)
 push:
 	docker-compose build --parallel --pull $(PUSH_SERVICES)
 	docker-compose push $(PUSH_SERVICES)
 
-.PHONY: push-ides    # Push images to registry.digitalocean.com (requires vpn)
+.PHONY: build-ides   # Build all ide docker images
+build-ides:
+	docker-compose build --parallel --pull $(THEIA_IDES)
+
+.PHONY: push-ides    # Push ide images to registry.digitalocean.com (requires vpn)
 push-ides:
 	docker-compose push $(THEIA_IDES)
+
+.PHONY: prop-ides    # Create theia-prop daemonset to propigate latest ide images
+prop-ides:
+	kubectl apply -f theia/ide/theia-prop.yaml
 
 .PHONY: debug        # Start the cluster in debug mode
 debug:
