@@ -53,7 +53,7 @@ COPY requirements.txt requirements-dev.txt /
 RUN set -eux; \
   apt-get update; \
   apt-get install -y --no-install-recommends \
-    apt-transport-https ca-certificates gnupg lsb-release; \
+    apt-transport-https ca-certificates gnupg lsb-release \
     make build-essential libssl-dev wget curl htop \
     libsecret-1-0; \
   apt remove python python3 -y; \
