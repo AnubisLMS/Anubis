@@ -44,6 +44,7 @@ ENV NODE_VERSION=$NODE_VERSION
 ENV TERM=xterm-256color
 ENV DEBIAN_FRONTEND=noninteractive
 ENV REPO_NAME=""
+ENV PYTHONPATH=/home/anubis
 
 
 COPY --from=0 /opt/theia /opt/theia
