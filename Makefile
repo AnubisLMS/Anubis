@@ -38,6 +38,10 @@ push:
 	docker-compose build --parallel --pull $(PUSH_SERVICES)
 	docker-compose push $(PUSH_SERVICES)
 
+.PHONY: push-ides    # Push images to registry.digitalocean.com (requires vpn)
+push-ides:
+	docker-compose push $(THEIA_IDES)
+
 .PHONY: debug        # Start the cluster in debug mode
 debug:
 	docker-compose up -d $(PERSISTENT_SERVICES)
