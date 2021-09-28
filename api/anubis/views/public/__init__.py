@@ -1,6 +1,7 @@
 def register_public_views(app):
     from anubis.views.public.auth import auth_
     from anubis.views.public.auth import oauth_
+    from anubis.views.public.auth import github_oauth_
     from anubis.views.public.ide import ide
     from anubis.views.public.repos import repos_
     from anubis.views.public.webhook import webhook
@@ -17,6 +18,7 @@ def register_public_views(app):
     views = [
         auth_,
         oauth_,
+        github_oauth_,
         ide,
         repos_,
         webhook,

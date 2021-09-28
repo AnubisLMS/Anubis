@@ -95,17 +95,25 @@ def public_oauth():
     return r
 
 
+@github_oauth_.route("/link")
+@require_user()
+def public_github_link():
+    return github_provider.authorize(
+        callback="http://localhost:3000/api/public/github/oauth"
+    )
+
+
 @github_oauth_.route("/oauth")
 @require_user()
 def public_github_oauth():
     """
-    This is the endpoint Github oauth sends the user to after
+    This is the endpoint Github OAuth sends the user to after
     authentication. Here we need to verify the oauth response,
     and update user's Github username to the database.
 
     :return:
     """
-    pass
+    return github_provider.authorized_response()
 
 
 @auth_.route("/whoami")
