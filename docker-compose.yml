@@ -164,6 +164,10 @@ services:
     image: registry.digitalocean.com/anubis/theia-distributed-systems:latest
     build: ./theia/ide/distributed-systems
 
+  theia-software-engineering:
+    image: registry.digitalocean.com/anubis/theia-software-engineering:latest
+    build: ./theia/ide/software-engineering
+
   theia-admin:
     image: registry.digitalocean.com/anubis/theia-admin:latest
     build: ./theia/ide/admin
