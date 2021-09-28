@@ -174,8 +174,9 @@ def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo
             # for creating a repo from the template.
             data = get_github_template_ids(template_repo_path, github_org)
 
-            # If the response was None, the api request failed
-            if data is None:
+            # If the response was None, the api request failed. Also check that
+            # some expected values are present in the json data response.
+            if data is None and 'repository' in data and 'id' in data['repository']:
                 return repo
 
             # Get organization and template repo IDs
@@ -207,9 +208,16 @@ def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo
             # to the repo.
             data = add_collaborator(github_org, new_repo_name, user.github_username)
 
+            # Sometimes it takes a moment before we are able to add collaborators to
+            # the repo. The message in the response will be Not Found in this situation.
+            # We can have it try again to fix.
+            if data.get("message", None) == "Not Found":
+                logger.error('Failed to add collaborator (Not Found). Trying again.')
+                data = add_collaborator(github_org, new_repo_name, user.github_username)
+
             # If the response was None, the api request failed
-            if data is None:
-                logger.error('Failed to set permissions')
+            if data is None or data.get("message", None) == "Not Found":
+                logger.error('Failed to add collaborator')
                 return repo
 
             # Mark the repo as collaborator configured
