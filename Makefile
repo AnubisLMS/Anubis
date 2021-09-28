@@ -1,6 +1,8 @@
 PERSISTENT_SERVICES := db traefik redis-master
 RESTART_ALWAYS_SERVICES := api web-dev rpc-default rpc-theia rpc-regrade
-PUSH_SERVICES := api web puller theia-init theia-proxy theia-admin xv6-theia
+PUSH_SERVICES := api web puller theia-init theia-proxy
+THEIA_IDES := theia-xv6 theia-admin theia-devops theia-jepst theia-distributed-systems
+
 
 help:
 	@echo 'For convenience'
@@ -26,6 +28,10 @@ deploy:
 .PHONY: build        # Build all docker images
 build:
 	docker-compose build --parallel --pull
+
+.PHONY: build-ide    # Build all ide docker images
+build-ides:
+	docker-compose build --parallel --pull $(THEIA_IDES)
 
 .PHONY: push         # Push images to registry.digitalocean.com (requires vpn)
 push:
