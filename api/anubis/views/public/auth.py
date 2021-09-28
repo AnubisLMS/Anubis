@@ -14,9 +14,15 @@ from anubis.utils.http import error_response, success_response
 from anubis.lms.courses import get_course_context
 from anubis.lms.submissions import fix_dangling
 from anubis.utils.auth.oauth import OAUTH_REMOTE_APP as provider
+from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_GITHUB as github_provider
 
 auth_ = Blueprint("public-auth", __name__, url_prefix="/public/auth")
 oauth_ = Blueprint("public-oauth", __name__, url_prefix="/public")
+github_oauth_ = Blueprint(
+    "public-github-oauth",
+    __name__,
+    url_prefix="/public/github"
+)
 
 
 @auth_.route("/login")
@@ -87,6 +93,19 @@ def public_oauth():
     r.set_cookie("token", create_token(user.netid), httponly=True)
 
     return r
+
+
+@github_oauth_.route("/oauth")
+@require_user()
+def public_github_oauth():
+    """
+    This is the endpoint Github oauth sends the user to after
+    authentication. Here we need to verify the oauth response,
+    and update user's Github username to the database.
+
+    :return:
+    """
+    pass
 
 
 @auth_.route("/whoami")
