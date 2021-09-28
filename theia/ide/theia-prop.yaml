@@ -1,0 +1,58 @@
+#
+# Use this to propigate new ide images to the kubernetes cluster 
+#   kubectl apply -f theia-prop.yaml
+#
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: theia-prop
+spec:
+  selector:
+    matchLabels:
+      name: theia-prop
+  template:
+    metadata:
+      labels:
+        name: theia-prop
+    spec:
+      containers:
+      - name: theia-init
+        image: registry.digitalocean.com/anubis/theia-init:latest
+        imagePullPolicy: Always
+        command: ['bash', '-c', 'while true; do sleep 60; done']
+
+      - name: theia-sidecar
+        image: registry.digitalocean.com/anubis/theia-sidecar:latest
+        imagePullPolicy: Always
+        command: ['bash', '-c', 'while true; do sleep 60; done']
+
+      - name: theia-xv6
+        image: registry.digitalocean.com/anubis/theia-xv6:latest
+        imagePullPolicy: Always
+        command: ['bash', '-c', 'while true; do sleep 60; done']
+
+      - name: theia-distributed-systems
+        image: registry.digitalocean.com/anubis/theia-distributed-systems:latest
+        imagePullPolicy: Always
+        command: ['bash', '-c', 'while true; do sleep 60; done']
+
+      - name: theia-software-engineering
+        image: registry.digitalocean.com/anubis/theia-software-engineering:latest
+        imagePullPolicy: Always
+        command: ['bash', '-c', 'while true; do sleep 60; done']
+
+      - name: theia-jepst
+        image: registry.digitalocean.com/anubis/theia-jepst:latest
+        imagePullPolicy: Always
+        command: ['bash', '-c', 'while true; do sleep 60; done']
+
+      - name: theia-devops
+        image: registry.digitalocean.com/anubis/theia-devops:latest
+        imagePullPolicy: Always
+        command: ['bash', '-c', 'while true; do sleep 60; done']
+        
+      - name: theia-admin
+        image: registry.digitalocean.com/anubis/theia-admin:latest
+        imagePullPolicy: Always
+        command: ['bash', '-c', 'while true; do sleep 60; done']
