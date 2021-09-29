@@ -1,6 +1,7 @@
 import base64
 import json
 import os
+import requests
 
 from flask import Blueprint, make_response, redirect, request
 
@@ -113,7 +114,32 @@ def public_github_oauth():
 
     :return:
     """
-    return github_provider.authorized_response()
+
+    # Get the authorized response from Github OAuth
+    resp = github_provider.authorized_response()
+    if resp is None or "access_token" not in resp:
+        return "Access Denied"
+    
+    # Setup headers and url
+    github_api_headers = {
+        "authorization": "bearer " + resp["access_token"],
+        "accept": "application/vnd.github.v3+json"
+    }
+    github_api_url = "https://api.github.com/user"
+
+    # Request Github User API
+    github_user_info = requests.get(
+        github_api_url,
+        headers=github_api_headers,
+    ).json()
+
+    # Set github username and commit
+    current_user.github_username = github_user_info["login"]
+    db.session.add(current_user)
+    db.session.commit()
+    
+    # Notify them with status
+    return success_response({"status": "github username updated"})
 
 
 @auth_.route("/whoami")
