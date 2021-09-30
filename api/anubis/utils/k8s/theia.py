@@ -10,7 +10,7 @@ from anubis.utils.auth.token import create_token
 from anubis.lms.theia import get_theia_pod_name, mark_session_ended
 from anubis.utils.logging import logger
 from anubis.utils.github.parse import parse_github_repo_name
-from anubis.utils.config import get_config_int
+from anubis.utils.config import get_config_int, get_config_str
 
 
 def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod, Optional[client.V1PersistentVolumeClaim]]:
@@ -63,6 +63,11 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
         # Overwrite the volume name to be the user's persistent volume
         theia_volume_name = netid + "-ide-volume"
 
+        # The storage class to be used on prod is probably going to be longhorn. Regardless,
+        # we'll want to be able to set this on the fly from a config value. If we default
+        # to None, then the cluster default storage class will be used.
+        theia_storage_class_name = get_config_str('THEIA_STORAGE_CLASS_NAME', default=None)
+
         # Create the persistent volume claim object. Since this is a
         # ReadWriteMany volume, the default storage class should
         # support it.
@@ -78,6 +83,7 @@ def create_theia_k8s_pod_pvc(theia_session: TheiaSession) -> Tuple[client.V1Pod,
             spec=client.V1PersistentVolumeClaimSpec(
                 access_modes=["ReadWriteOnce"],
                 volume_mode="Filesystem",
+                storage_class_name=theia_storage_class_name,
                 resources=client.V1ResourceRequirements(
                     requests={
                         "storage": "1Gi",
