@@ -14,11 +14,11 @@ from anubis.utils.http.decorators import json_endpoint
 from anubis.utils.http import error_response, success_response
 from anubis.lms.courses import get_course_context
 from anubis.lms.submissions import fix_dangling
-from anubis.utils.auth.oauth import OAUTH_REMOTE_APP as provider
+from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_NYU as nyu_provider
 from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_GITHUB as github_provider
 
 auth_ = Blueprint("public-auth", __name__, url_prefix="/public/auth")
-oauth_ = Blueprint("public-oauth", __name__, url_prefix="/public")
+nyu_oauth_ = Blueprint("public-oauth", __name__, url_prefix="/public")
 github_oauth_ = Blueprint(
     "public-github-oauth",
     __name__,
@@ -30,7 +30,7 @@ github_oauth_ = Blueprint(
 def public_login():
     if is_debug():
         return "AUTH"
-    return provider.authorize(
+    return nyu_provider.authorize(
         callback="https://anubis.osiris.services/api/public/oauth"
     )
 
@@ -42,7 +42,7 @@ def public_logout():
     return r
 
 
-@oauth_.route("/oauth")
+@nyu_oauth_.route("/oauth")
 def public_oauth():
     """
     This is the endpoint NYU oauth sends the user to after
@@ -59,13 +59,13 @@ def public_oauth():
     next_url = request.args.get("next") or "/courses"
 
     # Get the authorized response from NYU oauth
-    resp = provider.authorized_response()
+    resp = nyu_provider.authorized_response()
     if resp is None or "access_token" not in resp:
         return "Access Denied"
 
     # This is the data we get from NYU's oauth. It has basic information
     # on who is logging in
-    user_data = provider.get("userinfo?schema=openid", token=(resp["access_token"],))
+    user_data = nyu_provider.get("userinfo?schema=openid", token=(resp["access_token"],))
 
     # Load the netid name from the response
     netid = user_data.data["netid"]
