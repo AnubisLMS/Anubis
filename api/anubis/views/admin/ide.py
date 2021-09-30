@@ -13,6 +13,7 @@ from anubis.utils.http import error_response, success_response
 from anubis.lms.courses import course_context
 from anubis.utils.rpc import enqueue_ide_initialize
 from anubis.utils.rpc import rpc_enqueue, enqueue_ide_stop
+from anubis.utils.config import get_config_int
 
 ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 
@@ -78,6 +79,18 @@ def admin_ide_initialize_custom(settings: dict, **_):
         resources = json.loads(resources_str)
     except json.JSONDecodeError:
         return error_response('Can not parse JSON options')
+
+    # Get the config value for if ide starts are allowed.
+    theia_starts_enabled = get_config_int('THEIA_STARTS_ENABLED', default=1) == 1
+
+    # Assert that new ide starts are allowed. If they are not, then
+    # we return a status message to the user saying they are not able
+    # to start a new ide.
+    req_assert(
+        theia_starts_enabled,
+        message='Starting new IDEs is currently disabled by an Anubis administrator. '
+                'Please try again later.',
+    )
 
     # Create a new session
     session = TheiaSession(

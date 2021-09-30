@@ -4,21 +4,148 @@ from typing import Dict
 
 from flask import Blueprint, request
 
-from anubis.models import TheiaSession, db, Assignment, AssignmentRepo
-from anubis.utils.auth.http import require_user
-from anubis.utils.auth.user import current_user
-from anubis.utils.data import req_assert
-from anubis.utils.http.decorators import json_response, load_from_id
-from anubis.utils.http import error_response, success_response
 from anubis.lms.courses import is_course_admin
 from anubis.lms.theia import (
     theia_redirect_url,
     get_n_available_sessions,
     theia_poll_ide,
 )
+from anubis.models import TheiaSession, db, Assignment, AssignmentRepo
+from anubis.utils.auth.http import require_user
+from anubis.utils.auth.user import current_user
+from anubis.utils.config import get_config_int
+from anubis.utils.data import req_assert
+from anubis.utils.http import error_response, success_response
+from anubis.utils.http.decorators import json_response, load_from_id
 from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_initialize
 
 ide = Blueprint("public-ide", __name__, url_prefix="/public/ide")
+
+
+@ide.route("/initialize/<string:id>")
+@require_user()
+@load_from_id(Assignment, verify_owner=False)
+def public_ide_initialize(assignment: Assignment):
+    """
+    Redirect to theia proxy.
+
+    :param assignment:
+    :return:
+    """
+
+    # verify that ides are enabled for this assignment
+    req_assert(assignment.ide_enabled, message='IDEs are not enabled for this assignment')
+
+    # Check for existing active session
+    active_session = TheiaSession.query.join(Assignment).filter(
+        TheiaSession.owner_id == current_user.id,
+        TheiaSession.assignment_id == assignment.id,
+        TheiaSession.active,
+    ).first()
+
+    # If there was an existing session for this assignment found, skip
+    # the initialization, and return the active session information.
+    if active_session is not None:
+        return success_response({
+            "active": active_session.active,
+            "session": active_session.data
+        })
+
+    # Get the config value for if ide starts are allowed.
+    theia_starts_enabled = get_config_int('THEIA_STARTS_ENABLED', default=1) == 1
+
+    # Assert that new ide starts are allowed. If they are not, then
+    # we return a status message to the user saying they are not able
+    # to start a new ide.
+    req_assert(
+        theia_starts_enabled,
+        message='Starting new IDEs is currently disabled by an Anubis administrator. '
+                'Please try again later.',
+    )
+
+    # If it is a student (not a ta) requesting the ide, then we will need to
+    # make sure that the assignment has actually been released.
+    if not is_course_admin(assignment.course_id):
+
+        # If the assignment has been released, then we cannot allocate a session to a student
+        req_assert(assignment.release_date < datetime.now(), message="Assignment has not been released")
+
+        # If 3 weeks has passed since the assignment has been due, then we should not allow
+        # new sessions to be created
+        if assignment.due_date + timedelta(days=3 * 7) <= datetime.now():
+            return error_response("Assignment due date passed over 3 weeks ago.")
+
+    # If github repos are enabled for this assignment, then we will
+    # need to get the repo url.
+    repo_url: str = ''
+    if assignment.github_repo_required:
+        # Make sure github username is set
+        req_assert(current_user.github_username is not None, message='Please set github username')
+
+        # Make sure we have a repo we can use
+        repo: AssignmentRepo = AssignmentRepo.query.filter(
+            AssignmentRepo.owner_id == current_user.id,
+            AssignmentRepo.assignment_id == assignment.id,
+        ).first()
+
+        # Verify that the repo exists
+        req_assert(
+            repo is not None,
+            message='Anubis can not find your assignment repo. '
+                    'Please make sure your github username is set and is correct.'
+        )
+        # Update the repo url
+        repo_url = repo.repo_url
+
+    # Create the theia options from the assignment default
+    options = copy.deepcopy(assignment.theia_options)
+
+    # Figure out options from user values
+    autosave = request.args.get('autosave', 'true') == 'true'
+    persistent_storage = request.args.get('persistent_storage', 'true') == 'true'
+
+    # Figure out options from assignment
+    privileged = False
+    credentials = False
+    network_locked = True
+    network_policy = options.get('network_policy', 'os-student')
+    resources = options.get('resources', {
+        'requests': {"cpu": "250m", "memory": "100Mi"},
+        'limits': {"cpu": "2", "memory": "500Mi"},
+    })
+
+    # Create a new session
+    session = TheiaSession(
+        owner_id=current_user.id,
+        assignment_id=assignment.id,
+        course_id=assignment.course.id,
+        image=assignment.theia_image,
+
+        repo_url=repo_url,
+        active=True,
+        state="Initializing",
+
+        # Options
+        network_locked=network_locked,
+        network_policy=network_policy,
+        privileged=privileged,
+        autosave=autosave,
+        resources=resources,
+        credentials=credentials,
+        persistent_storage=persistent_storage,
+    )
+    db.session.add(session)
+    db.session.commit()
+
+    # Send kube resource initialization rpc job
+    enqueue_ide_initialize(session.id)
+
+    # Redirect to proxy
+    return success_response({
+        "active": session.active,
+        "session": session.data,
+        "status": "Session created",
+    })
 
 
 @ide.route("/available")
@@ -171,119 +298,4 @@ def public_ide_redirect_url(theia_session_id: str) -> Dict[str, str]:
     # Pass back redirect link
     return success_response({
         "redirect": theia_redirect_url(theia_session.id, current_user.netid)
-    })
-
-
-@ide.route("/initialize/<string:id>")
-@require_user()
-@load_from_id(Assignment, verify_owner=False)
-def public_ide_initialize(assignment: Assignment):
-    """
-    Redirect to theia proxy.
-
-    :param assignment:
-    :return:
-    """
-
-    # verify that ides are enabled for this assignment
-    req_assert(assignment.ide_enabled, message='IDEs are not enabled for this assignment')
-
-    # Check for existing active session
-    active_session = TheiaSession.query.join(Assignment).filter(
-        TheiaSession.owner_id == current_user.id,
-        TheiaSession.assignment_id == assignment.id,
-        TheiaSession.active,
-    ).first()
-
-    # If there was an existing session for this assignment found, skip
-    # the initialization, and return the active session information.
-    if active_session is not None:
-        return success_response({
-            "active": active_session.active,
-            "session": active_session.data
-        })
-
-    # If it is a student (not a ta) requesting the ide, then we will need to
-    # make sure that the assignment has actually been released.
-    if not is_course_admin(assignment.course_id):
-
-        # If the assignment has been released, then we cannot allocate a session to a student
-        req_assert(assignment.release_date < datetime.now(), message="Assignment has not been released")
-
-        # If 3 weeks has passed since the assignment has been due, then we should not allow
-        # new sessions to be created
-        if assignment.due_date + timedelta(days=3 * 7) <= datetime.now():
-            return error_response("Assignment due date passed over 3 weeks ago.")
-
-    # If github repos are enabled for this assignment, then we will
-    # need to get the repo url.
-    repo_url: str = ''
-    if assignment.github_repo_required:
-
-        # Make sure github username is set
-        req_assert(current_user.github_username is not None, message='Please set github username')
-
-        # Make sure we have a repo we can use
-        repo: AssignmentRepo = AssignmentRepo.query.filter(
-            AssignmentRepo.owner_id == current_user.id,
-            AssignmentRepo.assignment_id == assignment.id,
-        ).first()
-
-        # Verify that the repo exists
-        req_assert(
-            repo is not None,
-            message='Anubis can not find your assignment repo. '
-                    'Please make sure your github username is set and is correct.'
-        )
-        # Update the repo url
-        repo_url = repo.repo_url
-
-    # Create the theia options from the assignment default
-    options = copy.deepcopy(assignment.theia_options)
-
-    # Figure out options from user values
-    autosave = request.args.get('autosave', 'true') == 'true'
-    persistent_storage = request.args.get('persistent_storage', 'true') == 'true'
-
-    # Figure out options from assignment
-    privileged = False
-    credentials = False
-    network_locked = True
-    network_policy = options.get('network_policy', 'os-student')
-    resources = options.get('resources', {
-        'requests': {"cpu": "250m", "memory": "100Mi"},
-        'limits': {"cpu": "2", "memory": "500Mi"},
-    })
-
-    # Create a new session
-    session = TheiaSession(
-        owner_id=current_user.id,
-        assignment_id=assignment.id,
-        course_id=assignment.course.id,
-        image=assignment.theia_image,
-
-        repo_url=repo_url,
-        active=True,
-        state="Initializing",
-
-        # Options
-        network_locked=network_locked,
-        network_policy=network_policy,
-        privileged=privileged,
-        autosave=autosave,
-        resources=resources,
-        credentials=credentials,
-        persistent_storage=persistent_storage,
-    )
-    db.session.add(session)
-    db.session.commit()
-
-    # Send kube resource initialization rpc job
-    enqueue_ide_initialize(session.id)
-
-    # Redirect to proxy
-    return success_response({
-        "active": session.active,
-        "session": session.data,
-        "status": "Session created",
     })
