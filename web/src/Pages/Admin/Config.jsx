@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
   },
   paper: {
     padding: theme.spacing(1),
-    height: 400,
+    height: 700,
   },
 }));
 
@@ -154,7 +154,7 @@ export default function Config() {
             <DataGrid
               rows={config}
               columns={columns}
-              pageSize={5}
+              pageSize={10}
             />
           </Paper>
         </Grid>
