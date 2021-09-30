@@ -3,7 +3,7 @@ import json
 import os
 import requests
 
-from flask import Blueprint, make_response, redirect, request
+from flask import Blueprint, make_response, redirect, request, url_for
 
 from anubis.models import User, db
 from anubis.utils.auth.http import require_user, require_admin
@@ -100,7 +100,7 @@ def public_oauth():
 @require_user()
 def public_github_link():
     return github_provider.authorize(
-        callback="http://localhost:3000/api/public/github/oauth"
+        callback="https://anubis.osiris.services/api/public/github/oauth"
     )
 
 
