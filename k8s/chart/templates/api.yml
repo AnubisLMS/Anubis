@@ -65,16 +65,26 @@ spec:
             secretKeyRef:
               name: api
               key: secret-key
-        - name: "OAUTH_CONSUMER_KEY"
+        - name: "OAUTH_NYU_CONSUMER_KEY"
           valueFrom:
             secretKeyRef:
               name: oauth
-              key: consumer-key
-        - name: "OAUTH_CONSUMER_SECRET"
+              key: nyu-consumer-key
+        - name: "OAUTH_NYU_CONSUMER_SECRET"
           valueFrom:
             secretKeyRef:
               name: oauth
-              key: consumer-secret
+              key: nyu-consumer-secret
+        - name: "OAUTH_GITHUB_CLIENT_KEY"
+          valueFrom:
+            secretKeyRef:
+              name: oauth
+              key: github-client-key
+        - name: "OAUTH_GITHUB_CLIENT_SECRET"
+          valueFrom:
+            secretKeyRef:
+              name: oauth
+              key: github-client-secret
         - name: "DATABASE_URI"
           valueFrom:
             secretKeyRef:
