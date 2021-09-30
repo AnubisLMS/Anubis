@@ -41,7 +41,7 @@ class Panic(Exception):
     pass
 
 
-def exec_as_student(cmd, timeout=60) -> typing.Tuple[bytes, int]:
+def exec_as_student(cmd, timeout=60) -> typing.Tuple[str, int]:
     """
     Run a command as the student. Any and all times that student
     code is run, it should be done through this function. Any other
@@ -64,7 +64,7 @@ def exec_as_student(cmd, timeout=60) -> typing.Tuple[bytes, int]:
             stderr=subprocess.STDOUT,
         )
     except subprocess.CalledProcessError as e:
-        stdout = e.output
+        stdout = e.output.decode('utf-8', 'ignore')
         return_code = e.returncode
 
     logging.info('exec_as_student command={} return_code={} stdout={}'.format(
@@ -281,7 +281,7 @@ def xv6_run(cmd: str, test_result: TestResult, timeout=5) -> typing.List[str]:
     with open('command', 'w') as f:
         f.write('\n' + cmd + '\n')
     stdout, retcode = exec_as_student(command + ' < command', timeout=timeout+1)
-    stdout = stdout.decode()
+    stdout = stdout.decode('utf-8', 'ignore')
     stdout = stdout.split('\n')
 
     boot_line = None

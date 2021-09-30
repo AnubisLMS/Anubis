@@ -16,7 +16,7 @@ if DEBUG:
 def build(build_result: BuildResult):
     stdout, retcode = exec_as_student('make xv6.img fs.img')
 
-    build_result.stdout = stdout.decode()
+    build_result.stdout = stdout
     build_result.passed = retcode == 0
 
     if 'this is a bad thing' in build_result.stdout:
@@ -32,7 +32,7 @@ def test_1(test_result: TestResult):
 
     # Run echo 123 as student user and capture output lines
     expected_raw, _ = exec_as_student('echo 123')
-    expected = expected_raw.decode().strip().split('\n')
+    expected = expected_raw.strip().split('\n')
 
     # Attempt to detect crash
     if did_xv6_crash(stdout_lines, test_result):
@@ -51,7 +51,7 @@ def test_2(test_result: TestResult):
 
     # Run echo 123 as student user and capture output lines
     expected_raw, _ = exec_as_student('grep the README.md')
-    expected = expected_raw.decode().strip().split('\n')
+    expected = expected_raw.strip().split('\n')
 
     # Attempt to detect crash
     if did_xv6_crash(stdout_lines, test_result):
