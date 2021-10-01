@@ -41,8 +41,12 @@ class Config:
             self.CACHE_TYPE = 'NullCache'
 
         # OAuth
-        self.OAUTH_CONSUMER_KEY = os.environ.get("OAUTH_CONSUMER_KEY", default="DEBUG")
-        self.OAUTH_CONSUMER_SECRET = os.environ.get("OAUTH_CONSUMER_SECRET", default="DEBUG")
+        self.OAUTH_NYU_CONSUMER_KEY = os.environ.get("OAUTH_NYU_CONSUMER_KEY", default="DEBUG")
+        self.OAUTH_NYU_CONSUMER_SECRET = os.environ.get("OAUTH_NYU_CONSUMER_SECRET", default="DEBUG")
+
+        # Github OAuth
+        self.OAUTH_GITHUB_CLIENT_KEY = os.environ.get("OAUTH_GITHUB_CLIENT_KEY", default="DEBUG")
+        self.OAUTH_GITHUB_CLIENT_SECRET = os.environ.get("OAUTH_GITHUB_CLIENT_SECRET", default="DEBUG")
 
         # Logger
         self.LOGGER_NAME = os.environ.get("LOGGER_NAME", default="anubis-api")
