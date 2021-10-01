@@ -1,5 +1,5 @@
 import React from 'react';
-
+import {useHistory} from 'react-router-dom';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
@@ -19,9 +19,9 @@ const AssignmentCardV2 = ({
   course,
   repo_url,
 }) => {
+  const history = useHistory();
   const classes = useStyles();
-  let due_days = Math.round((new Date(due_date) - new Date())/(1000*3600*24));
-  due_days=9;
+  const due_days = Math.round((new Date(due_date) - new Date())/(1000*3600*24));
   return (
 
     <Box className={classes.asignmentContainer}>
@@ -42,7 +42,7 @@ const AssignmentCardV2 = ({
       <Box className={classes.courseActionsContainer}>
         <Button
           onClick = {() => {
-            history.push('/courses/assignment?assignmentId=${id}');
+            history.push(`/courses/assignment?assignmentId=${id}`);
           }}
           className={classes.openCourseButton}
         >
