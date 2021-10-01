@@ -42,7 +42,7 @@ const AssignmentCardV2 = ({
       <Box className={classes.courseActionsContainer}>
         <Button
           onClick = {() => {
-            history.push(`/courses/assignments/submissions?assignmentId=${id}`);
+            history.push('/courses/assignment?assignmentId=${id}');
           }}
           className={classes.openCourseButton}
         >
