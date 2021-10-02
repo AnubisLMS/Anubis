@@ -181,8 +181,10 @@ make mkdebug
 ```
 
 There is also a special script that is called when provisioning the minikube cluster. The purpose of it
-is to place any kubernetes secret create commands that you may need. Place that script at `k8s/debug/init-secrets.sh`.
-The file will be gitignored, but be extra sure you do not commit it on accident.
+is to place any kubernetes secret create commands that you may need. To configure it, copy the content from
+`k8s/debug/init-secrets-template.sh` to `k8s/debug/init-secrets.sh` and edit the secrets. It will be
+created automatically using the defaults if you haven't done so already. The file will be gitignored,
+but be extra sure you do not commit it on accident.
 
 The startup links for the minikube debug environment work exactly the same as with the debug and mindebug environments.
 When you have a change that you want to push to the minikube cluster you can run the `./k8s/debug/restart.sh` script. It
