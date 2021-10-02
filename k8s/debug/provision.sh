@@ -9,6 +9,13 @@ set -ex
 
 echo 'This script will provision a minikube cluster for debugging'
 
+# Check if init-secrets.sh has been created. If not, we create it from the
+# defaults configured in the template.
+if [ ! -f debug/init-secrets.sh ]; then
+    echo "k8s/debug/init-secrets.sh is not found. Creating it from the template..."
+    sed 's/COPY.*/Edit the content below to configure the secrets\./' debug/init-secrets-template.sh > debug/init-secrets.sh
+fi
+
 # Delete the minikube cluster if one exists
 minikube delete
 
@@ -101,9 +108,10 @@ helm upgrade --install redis bitnami/redis \
     --set 'master.persistence.enabled=false' \
     --namespace anubis
 
-if [ -f debug/init-secrets.sh ]; then
-    bash debug/init-secrets.sh
-fi
+# The defaults in init-secrets-template.sh will be used when init-secrets
+# does not present.
+echo 'Adding kubernetes secrets'
+bash debug/init-secrets.sh
 
 # Run the debug.sh script to build, then install all the stuff
 # for anubis.
