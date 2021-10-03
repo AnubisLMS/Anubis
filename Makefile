@@ -45,6 +45,7 @@ push-ides:
 .PHONY: prop-ides    # Create theia-prop daemonset to propigate latest ide images
 prop-ides:
 	kubectl apply -f theia/ide/theia-prop.yaml
+	kubectl rollout restart ds theia-prop
 
 .PHONY: debug        # Start the cluster in debug mode
 debug:
