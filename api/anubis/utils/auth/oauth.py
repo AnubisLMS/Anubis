@@ -25,9 +25,9 @@ OAUTH_REMOTE_APP_GITHUB = oauth.remote_app(
     },
     access_token_url="https://github.com/login/oauth/access_token",
     access_token_params={
-        "client_id": config.OAUTH_GITHUB_CLIENT_KEY,
-        "client_secret": config.OAUTH_GITHUB_CLIENT_SECRET,
+        "client_id": config.OAUTH_GITHUB_CONSUMER_KEY,
+        "client_secret": config.OAUTH_GITHUB_CONSUMER_SECRET,
     },
-    consumer_key=config.OAUTH_GITHUB_CLIENT_KEY,
-    consumer_secret=config.OAUTH_GITHUB_CLIENT_SECRET,
+    consumer_key=config.OAUTH_GITHUB_CONSUMER_KEY,
+    consumer_secret=config.OAUTH_GITHUB_CONSUMER_SECRET,
 )
