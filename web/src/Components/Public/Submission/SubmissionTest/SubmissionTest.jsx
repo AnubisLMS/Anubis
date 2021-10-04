@@ -5,7 +5,6 @@ import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 const SubmissionTest = ({
-  test,
 }) =>{
   const classes = useStyles();
   const submission = {
