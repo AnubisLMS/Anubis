@@ -12,7 +12,7 @@ fi
 
 set +e
 while true; do
-    if [ "${AUTOSAVE}" = "ON" ]; then
+    if [ "${AUTOSAVE}" = "ON" ] && [ -n "${GIT_CRED}" ]; then
         /autosave.sh
     fi
     sleep "5m"

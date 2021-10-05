@@ -28,6 +28,11 @@ rules:
 - apiGroups: [""]
   resources: ["pods", "persistentvolumeclaims"]
   verbs: ["get", "list", "watch", "create", "delete", "deletecollection"]
+{{- if .Values.debug }}
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "read"]
+{{- end}}
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1

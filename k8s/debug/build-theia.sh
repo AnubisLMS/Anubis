@@ -5,4 +5,4 @@ cd ../../
 
 eval $(minikube docker-env)
 
-docker-compose build --parallel theia-admin theia-xv6
+docker-compose build --parallel theia-xv6

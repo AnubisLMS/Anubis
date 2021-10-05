@@ -86,7 +86,7 @@ def rand_commit(n=40) -> str:
     return rand(n)
 
 
-def create_assignment(course, users, i=0, do_submissions=True, submission_count=30, **kwargs):
+def create_assignment(course, users, i=0, do_submissions=True, do_repos=False, submission_count=30, **kwargs):
     release = datetime.now() - timedelta(hours=2)
     due = datetime.now() + timedelta(hours=36) + timedelta(days=i)
     grace = due + timedelta(hours=1)
@@ -130,11 +130,14 @@ def create_assignment(course, users, i=0, do_submissions=True, submission_count=
         for user in users:
             repo_name = assignment_repo_name(user, assignment)
             repo_url = f'https://github.com/os3224/{repo_name}'
+            if do_repos:
+                repo_url = 'https://github.com/wabscale/xv6-public'
             repos.append(
                 AssignmentRepo(
                     id=rand(), owner=user, assignment_id=assignment.id,
                     repo_url=repo_url,
                     github_username=user.github_username,
+                    repo_created=True, collaborator_configured=True,
                 )
             )
 

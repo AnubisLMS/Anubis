@@ -76,12 +76,17 @@ def seed():
     os_assignment2, _, os_submissions2, _ = create_assignment(
         intro_to_os_course, intro_to_os_students, i=2, do_submissions=False, github_repo_required=False,
     )
+    os_assignment3, _, os_submissions3, _ = create_assignment(
+        intro_to_os_course, intro_to_os_students, i=3, do_submissions=True, do_repos=True, github_repo_required=True,
+    )
     init_submissions(os_submissions0)
     assign_questions(os_assignment0)
     init_submissions(os_submissions1)
     assign_questions(os_assignment1)
     init_submissions(os_submissions2)
     assign_questions(os_assignment2)
+    init_submissions(os_submissions3)
+    assign_questions(os_assignment3)
     ta = TAForCourse(owner=ta_user, course=intro_to_os_course)
     professor = ProfessorForCourse(owner=professor_user, course=intro_to_os_course)
     db.session.add_all([professor, ta])

@@ -101,10 +101,6 @@ helm upgrade --install redis bitnami/redis \
     --set 'master.persistence.enabled=false' \
     --namespace anubis
 
-if [ -f debug/init-secrets.sh ]; then
-    bash debug/init-secrets.sh
-fi
-
 kubectl create secret generic api \
     --from-literal=database-uri=mysql+pymysql://anubis:anubis@mariadb.anubis.svc.cluster.local/anubis \
     --from-literal=database-host=mariadb.anubis.svc.cluster.local \
@@ -121,6 +117,23 @@ kubectl create secret generic oauth \
     --from-literal=github-consumer-key='aaa' \
     --from-literal=github-consumer-secret='aaa' \
     --namespace anubis
+
+# Create default git secret
+kubectl create secret generic git \
+        --from-literal=credentials=DEBUG \
+        --from-literal=token=DEBUG \
+        --namespace anubis
+
+# Create default anubis secret
+kubectl create secret generic anubis \
+        --from-literal=.dockerconfigjson=DEBUG \
+        --namespace anubis
+
+# Give a place to put a git-ignored script for
+# adding / updating sensitive secrets for debugging
+if [ -f debug/init-secrets.sh ]; then
+    bash debug/init-secrets.sh
+fi
 
 # Run the debug.sh script to build, then install all the stuff
 # for anubis.
