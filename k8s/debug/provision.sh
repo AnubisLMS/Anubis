@@ -111,13 +111,15 @@ kubectl create secret generic api \
     --from-literal=database-password=anubis \
     --from-literal=database-port=3306 \
     --from-literal=redis-password=anubis \
-    --from-literal=secret-key=$(head -c10 /dev/urandom | openssl sha1 -hex | awk '{print $2}') \
+    --from-literal=secret-key=anubis \
     --namespace anubis
 
 # Create the oauth configuration secrets
 kubectl create secret generic oauth \
-    --from-literal=consumer-key='aaa' \
-    --from-literal=consumer-secret='aaa' \
+    --from-literal=nyu-consumer-key='aaa' \
+    --from-literal=nyu-consumer-secret='aaa' \
+    --from-literal=github-consumer-key='aaa' \
+    --from-literal=github-consumer-secret='aaa' \
     --namespace anubis
 
 # Run the debug.sh script to build, then install all the stuff
