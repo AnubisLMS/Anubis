@@ -19,5 +19,6 @@ sed -i 's/^COPY student \/student/# COPY student \/student/' Dockerfile
 
 docker run -it \
        -e DEBUG=1 \
+       -v $(pwd)/student:/student \
        registry.digitalocean.com/anubis/assignment/{unique_code} $@
 

@@ -59,7 +59,7 @@ def exec_as_student(cmd, timeout=60) -> typing.Tuple[str, int]:
     try:
         print('{} {}'.format(os.getcwd(), ["env", "-i", "su", "student", "-c", cmd]))
         stdout = subprocess.check_output(
-            ["env", "-i", "su", "student", "-c", cmd],
+            ["env", "-i", "PATH={}".format(os.environ["PATH"]), "su", "student", "-c", cmd],
             timeout=timeout,
             stderr=subprocess.STDOUT,
         )
@@ -82,9 +82,9 @@ def fix_permissions():
     """
     # Update file permissions
     if os.getcwd() == '/anubis':
-        os.system('chown student:student -R ./student')
+        os.system('chown student:student -R ./student &>/dev/null')
     elif os.getcwd() == '/anubis/student':
-        os.system('chown student:student -R .')
+        os.system('chown student:student -R . &>/dev/null')
     else:
         print('PANIC I DONT KNOW WHERE I AM')
         exit(0)
