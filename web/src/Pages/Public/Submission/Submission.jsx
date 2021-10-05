@@ -3,6 +3,7 @@ import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
 import Grid from '@material-ui/core/Grid';
+import {Box} from '@material-ui/core';
 
 import {useStyles} from './Submission.styles';
 import useQuery from '../../../hooks/useQuery';
@@ -12,7 +13,9 @@ import SubmissionSummary from '../../../Components/Public/Submission/SubmissionS
 import SubmissionBuild from '../../../Components/Public/Submission/SubmissionBuild';
 import SubmissionTests from '../../../Components/Public/Submission/SubmissionTests';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import SubmissionHeader from '../../../Components/Public/Submission/SubmissionHeader/SubmissionHeader';
 
+import {Button, Typography} from '@material-ui/core';
 
 const regrade = ({commit, submission, setSubmission, setStep, setErrorStop}, enqueueSnackbar) => () => {
   if (!submission.processed) {
@@ -116,6 +119,9 @@ export default function Submission() {
       `Assignment: ${submission.assignment_name}`,
       submission.commit,
     ]}>
+      <Box>
+        <SubmissionHeader {... submission}/>
+      </Box>
       <Grid container spacing={4}>
         {/* Summary */}
         <Grid item xs={12} md={4} key={'summary'}>
