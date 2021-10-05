@@ -8,6 +8,8 @@ ENV NODE_VERSION=$NODE_VERSION
 ENV TERM=xterm-256color
 ENV DEBIAN_FRONTEND=noninteractive
 ENV REPO_NAME=""
+ENV ANUBIS=1
+ENV ANUBIS_IDE=1
 
 # Theia application
 

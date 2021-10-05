@@ -46,6 +46,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV REPO_NAME=""
 ENV INDRA_HOME="/home/anubis/IndraABM"
 ENV PYTHONPATH=${INDRA_HOME}
+ENV ANUBIS=1
+ENV ANUBIS_IDE=1
 
 
 COPY --from=0 /opt/theia /opt/theia
