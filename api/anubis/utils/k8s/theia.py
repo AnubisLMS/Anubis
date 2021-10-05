@@ -1,13 +1,14 @@
 import base64
 import traceback
 from datetime import datetime, timedelta
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
 
 from kubernetes import client
 
-from anubis.models import db, TheiaSession
+from anubis.models import db, TheiaSession, Course
 from anubis.utils.auth.token import create_token
 from anubis.lms.theia import get_theia_pod_name, mark_session_ended
+from anubis.lms.courses import get_course_admin_ids
 from anubis.utils.logging import logger
 from anubis.utils.github.parse import parse_github_repo_name
 from anubis.utils.config import get_config_int, get_config_str
@@ -532,20 +533,84 @@ def fix_stale_theia_resources(theia_pods: client.V1PodList):
     logger.info("Checking active ActiveTheia sessions")
 
     # Get the theia timeout config value
-    theia_timeout = get_config_int('THEIA_STALE_PROXY_MINUTES', default=10)
+    standard_theia_timeout = get_config_int('THEIA_STALE_PROXY_MINUTES', default=10)
+    admin_theia_timeout = get_config_int('THEIA_ADMIN_STALE_PROXY_MINUTES', default=60)
 
-    # Get active pods and db rows
-    active_db_sessions = TheiaSession.query.filter(
+    # Get list of all courses
+    courses: List[Course] = Course.query.all()
+
+    active_db_sessions: List[TheiaSession] = []
+
+    # Iterate over all courses
+    for course in courses:
+        print("filtering stale ides for course {} - {}".format(course.name, course.course_code))
+
+        # Get a list of (heavily cached) admin id strings
+        course_admin_ids = get_course_admin_ids(course.id)
+        print('course_admin_ids', course.name, course_admin_ids, sep=' :: ')
+
+        # Build query for theia active sessions within the course
+        query = TheiaSession.query.filter(
+            # Get sessions marked as active
+            TheiaSession.active == True,
+
+            # Only consider sessions that have had some
+            # time to have their k8s resources requested.
+            TheiaSession.k8s_requested == True,
+
+            # Only consider sessions that are a part of
+            # this course.
+            TheiaSession.course_id == course.id,
+        )
+
+        # Get a list of the standard (student) theia sessions that are active
+        standard_active_db_theia_sessions: List[TheiaSession] = query.filter(
+            # Filter out admin users (only students in the course)
+            ~TheiaSession.owner_id.in_(course_admin_ids),
+
+            # Filter for sessions that have had a proxy in the last 10 minutes
+            TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=standard_theia_timeout),
+        ).all()
+
+        # Get a list of the admin (professor/ta) theia sessions that are active
+        admin_active_db_theia_sessions: List[TheiaSession] = query.filter(
+            # Filter for admin users (only professors+tas)
+            TheiaSession.owner_id.in_(course_admin_ids),
+
+            # Filter for sessions that have had a proxy in the last 60 minutes
+            TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=admin_theia_timeout),
+        ).all()
+
+        # Build list of all the active theia ides (in the database)
+        # from the standard and admin sessions.
+        active_db_sessions.extend(standard_active_db_theia_sessions)
+        active_db_sessions.extend(admin_active_db_theia_sessions)
+
+    # Make sure to cover theia sessions that do not have a set
+    # course as well. Hold these course-less ides to the
+    # standard timeout.
+    no_course_db_active_sessions: List[TheiaSession] = TheiaSession.query.filter(
         # Get sessions marked as active
         TheiaSession.active == True,
 
-        # Only consider sessions that have had some time to have their k8s
-        # resources requested.
+        # Only consider sessions that have had some
+        # time to have their k8s resources requested.
         TheiaSession.k8s_requested == True,
 
+        # Course-less theia session
+        TheiaSession.course_id == None,
+
         # Filter for sessions that have had a proxy in the last 10 minutes
-        TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=theia_timeout),
+        TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=standard_theia_timeout),
     ).all()
+
+    # Print the course-less ides to the screen
+    print('no-course ides', no_course_db_active_sessions, sep=' :: ')
+
+    # Add the no-course theia sessions to the active db sessions list
+    active_db_sessions.extend(no_course_db_active_sessions)
+
+    print('active_db_sessions', active_db_sessions)
 
     # Build set of active pod session ids
     active_pod_ids = set()

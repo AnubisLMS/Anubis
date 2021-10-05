@@ -463,4 +463,38 @@ def get_courses_with_visuals() -> List[Dict[str, Any]]:
     ]
 
 
+@cache.memoize(timeout=3600, source_check=True, unless=is_debug)
+def get_course_admin_ids(course_id: str) -> List[str]:
+    """
+    Get a list of course admin id values.
+
+    * highly cached *
+
+    :param course_id:
+    :return:
+    """
+
+    # Query for the course
+    course: Course = Course.query.filter(
+        Course.id == course_id
+    ).first()
+
+    # If the course does not exist, then soft fail
+    if course is None:
+        return []
+
+    # Query TAs
+    tas: List[TAForCourse] = TAForCourse.query.filter(
+        TAForCourse.course_id == course.id,
+    ).all()
+
+    # Query professors
+    professors: List[ProfessorForCourse] = ProfessorForCourse.query.filter(
+        ProfessorForCourse.course_id == course.id,
+    ).all()
+
+    # Generate list from the owner_id values from each list of users
+    return list(map(lambda x: x.owner_id, tas)) + list(map(lambda x: x.owner_id, professors))
+
+
 course_context: Course = LocalProxy(get_course_context)
