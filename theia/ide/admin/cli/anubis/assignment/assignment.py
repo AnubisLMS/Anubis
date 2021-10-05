@@ -19,7 +19,8 @@ def build(build_result: BuildResult):
     build_result.stdout = stdout
     build_result.passed = retcode == 0
 
-    if 'this is a bad thing' in build_result.stdout:
+    print(type(stdout), stdout)
+    if 'this is a bad thing' in stdout:
         raise Panic("This is a bad thing that just happened. We need to stop this pipeline right here and now")
 
 

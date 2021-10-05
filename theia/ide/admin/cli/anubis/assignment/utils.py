@@ -1,5 +1,6 @@
 import subprocess
 import functools
+import warnings
 import logging
 import typing
 import json
@@ -64,13 +65,17 @@ def exec_as_student(cmd, timeout=60) -> typing.Tuple[str, int]:
             stderr=subprocess.STDOUT,
         )
     except subprocess.CalledProcessError as e:
-        stdout = e.output.decode('utf-8', 'ignore')
+        stdout = e.output
         return_code = e.returncode
+
+    # Normalize stdout to string
+    if isinstance(stdout, bytes):
+        stdout = stdout.decode('utf-8', 'ignore')
 
     logging.info('exec_as_student command={} return_code={} stdout={}'.format(
         cmd, return_code, stdout
     ))
-    fix_permissions()
+
     return stdout, return_code
 
 
@@ -78,16 +83,11 @@ def fix_permissions():
     """
     Fix the file permissions of the student repo
 
+    * DEPRECATED *
+
     :return:
     """
-    # Update file permissions
-    if os.getcwd() == '/anubis':
-        os.system('chown student:student -R ./student &>/dev/null')
-    elif os.getcwd() == '/anubis/student':
-        os.system('chown student:student -R . &>/dev/null')
-    else:
-        print('PANIC I DONT KNOW WHERE I AM')
-        exit(0)
+    warnings.warn('DEPRECATED WARNING: fix_permissions no longer has any affect')
 
 
 def register_test(test_name):
@@ -281,7 +281,6 @@ def xv6_run(cmd: str, test_result: TestResult, timeout=5) -> typing.List[str]:
     with open('command', 'w') as f:
         f.write('\n' + cmd + '\n')
     stdout, retcode = exec_as_student(command + ' < command', timeout=timeout+1)
-    stdout = stdout.decode('utf-8', 'ignore')
     stdout = stdout.split('\n')
 
     boot_line = None

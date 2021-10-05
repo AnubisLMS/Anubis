@@ -198,7 +198,6 @@ def clone():
         report_panic('Git error', traceback.format_exc())
         exit(0)
 
-    fix_permissions()
     os.system('rm -rf ./student/.git')
     os.system('rm -rf /home/anubis/.git-credentials')
     os.system('rm -rf /home/anubis/.gitconfig')
