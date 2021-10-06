@@ -1,8 +1,8 @@
 import {makeStyles} from '@material-ui/core/styles';
 
 export const useStyles = makeStyles((theme) => ({
-  submissionTestMain: {
-    padding: theme.spacing(2),
+  root: {
+    padding: theme.spacing(3),
     borderRadius: '10px',
     background: theme.palette.dark.blue['200'],
     height: '79px',
@@ -26,10 +26,12 @@ export const useStyles = makeStyles((theme) => ({
   },
   name: {
     fontSize: '20px',
+    paddingLeft: '15px',
   },
   testStatus: {
-    marginLeft: '9px',
-    paddingTop: '5px',
+    alignSelf: 'flex-end',
+    paddingBottom: '1px',
+    paddingLeft: '10px',
   },
   success: {
     color: theme.palette.color.green,
@@ -38,6 +40,5 @@ export const useStyles = makeStyles((theme) => ({
     color: theme.palette.color.red,
   },
   expand: {
-    // marginRight: '12px',
   },
 }));

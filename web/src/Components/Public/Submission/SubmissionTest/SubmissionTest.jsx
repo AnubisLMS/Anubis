@@ -13,7 +13,7 @@ const SubmissionTest = ({
   };
   return (
     <Box
-      className={classes.submissionTestMain}
+      className={classes.root}
     >
       <Box
         className={classes.title}
