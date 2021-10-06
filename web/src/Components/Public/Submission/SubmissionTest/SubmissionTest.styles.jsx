@@ -19,11 +19,12 @@ export const useStyles = makeStyles((theme) => ({
     height: '20px',
   },
   iconWrapper: {
-    marginTop: '6px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     fontSize: '14px',
   },
   name: {
-    marginLeft: '17px',
     fontSize: '20px',
   },
   testStatus: {
@@ -37,6 +38,6 @@ export const useStyles = makeStyles((theme) => ({
     color: theme.palette.color.red,
   },
   expand: {
-    marginRight: '12px',
+    // marginRight: '12px',
   },
 }));
