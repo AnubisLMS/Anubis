@@ -14,7 +14,6 @@ mysqldump \
     --host=${DB_HOST} \
     --port=${DB_PORT} \
     --password=${DB_PASSWORD} \
-    --skip-create-options \
     anubis \
     | gzip - > /tmp/${BACKUP_FILE}
 
