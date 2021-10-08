@@ -9,7 +9,11 @@ import Typography from '@material-ui/core/Typography';
 import QuestionGrid from './QuestionGrid';
 
 export default function Questions({assignment_id}) {
-  const {isValidating: loading, error, data} = useSWR(`/api/public/questions/get/${assignment_id}`);
+  const {isValidating: loading, error, data} = useSWR(`/api/public/questions/get/${assignment_id}`, {
+    revalidateOnFocus: false,
+  });
+
+  console.log('questions reloaded');
 
   if (assignment_id === null) return <React.Fragment/>;
   if (loading) return <CircularProgress/>;
