@@ -13,8 +13,6 @@ export default function Questions({assignment_id}) {
     revalidateOnFocus: false,
   });
 
-  console.log('questions reloaded');
-
   if (assignment_id === null) return <React.Fragment/>;
   if (loading) return <CircularProgress/>;
   if (error) return <Redirect to={`/error`}/>;
