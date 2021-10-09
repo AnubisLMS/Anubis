@@ -26,17 +26,15 @@ const SubmissionHeader = ({
       <Box className={classes.dataContainer}>
         <Typography className={classes.assignmentName}>{assignment_name}</Typography>
         <Typography className={classes.textLabel}>{'Submission: '}</Typography>
-        <Typography className={classes.textContent}>{commit} </Typography>
+        <Typography className={classes.textContent}>{commit.substring(0, 20)}</Typography>
         <Typography className={classes.textLabel}>{'Submitted: '}</Typography>
         <Typography className={classes.textContent}>
           {new Date(timestamp).toLocaleDateString('en-US', DATE_OPTIONS)}
         </Typography>
       </Box>
       <Box className={classes.dataContainer}>
-        <Typography className={classes.circleIcon}>
-          { on_time ?
-            <CheckCircleIcon style={{color: green[500], fontSize: 20}}/> :
-            <CancelIcon style={{color: red[500], fontSize: 20}}/>
+        <Typography className={clsx(classes.circleIcon, on_time ? classes.sucess : classes.error)}>
+          { on_time ? <CheckCircleIcon/> : <CancelIcon/>
           }
         </Typography>
         <Typography

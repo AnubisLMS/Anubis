@@ -4,11 +4,11 @@ export const useStyles = makeStyles((theme) => ({
   submissionSummaryContainer: {
     width: '100%',
     height: '50px',
-    backgroundColor: '#21262D',
+    // backgroundColor: '#21262D',
+    backgroundColor: theme.palette.grey[900],
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    // alignItems: 'center',
     position: 'relative',
     borderRadius: theme.spacing(.5),
     padding: `${theme.spacing(0)}px ${theme.spacing(2)}px ${theme.spacing(0)}px ${theme.spacing(2)}px`,
@@ -44,10 +44,10 @@ export const useStyles = makeStyles((theme) => ({
   submittedStatus: {
     fontSize: '13px',
     display: 'flex',
-    whiteSpace: 'nowrap',
+    whiteSpace: 'normal',
   },
   circleIcon: {
-    width: '30px',
+    width: '25px',
     height: '20px',
   },
   sucess: {
