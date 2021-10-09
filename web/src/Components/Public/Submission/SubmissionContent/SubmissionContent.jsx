@@ -1,15 +1,9 @@
 
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
-import Tooltip from '@material-ui/core/Tooltip';
-import CancelIcon from '@material-ui/icons/Cancel';
 import React from 'react';
-import {makeStyles} from '@material-ui/core/styles';
-import {useSnackbar} from 'notistack';
-import clsx from 'clsx';
 import {RadialChart} from 'react-vis';
 import {useStyles} from './SubmissionContent.styles';
-import {Item, Grid} from '@material-ui/core';
 
 export default function SubmissionContent({submission, regrade, stop}) {
   const classes = useStyles();
@@ -32,12 +26,15 @@ export default function SubmissionContent({submission, regrade, stop}) {
           data={myData}
           width={60}
           height={60} />
-        <Typography className={classes.failedContainer}>{totalFails} Failed</Typography>
-        <Typography className={classes.statsContainer}>
-          {submission.build.passed ? '1 successful build, ' :'1 failed build,  '}
-          {testsFailed == 1 ? '1 failed test ' : (testsFailed+' failed tests ')}
-          and {testsPassed == 1 ? '1 successful test' : (testsPassed+' successful tests')}
-        </Typography>
+        <Box>
+          <Typography className={classes.failedContainer}>      {totalFails}   Failed
+          </Typography>
+          <Typography className={classes.statsContainer}>
+            {submission.build.passed ? '1 successful build, ' :'1 failed build,  '}
+            {testsFailed == 1 ? '1 failed test ' : (testsFailed+' failed tests ')}
+            and {testsPassed == 1 ? '1 successful test' : (testsPassed+' successful tests')}
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );

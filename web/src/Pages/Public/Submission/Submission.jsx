@@ -119,7 +119,7 @@ export default function Submission() {
     ]}>
       <Grid container spacing={4}>
         {/* Summary */}
-        <Grid item xs={12} md={4} key={'summary'}>
+        <Grid item xs={12} md={11} key={'summary'}>
           <SubmissionContent
             submission={submission}
             stop={errorStop}
