@@ -13,7 +13,6 @@ import SubmissionSummary from '../../../Components/Public/Submission/SubmissionS
 import SubmissionBuild from '../../../Components/Public/Submission/SubmissionBuild';
 import SubmissionTests from '../../../Components/Public/Submission/SubmissionTests';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
-import SubmissionHeader from '../../../Components/Public/Submission/SubmissionHeader/SubmissionHeader';
 
 import {Button, Typography} from '@material-ui/core';
 
@@ -119,9 +118,6 @@ export default function Submission() {
       `Assignment: ${submission.assignment_name}`,
       submission.commit,
     ]}>
-      <Box>
-        <SubmissionHeader {... submission}/>
-      </Box>
       <Grid container spacing={4}>
         {/* Summary */}
         <Grid item xs={12} md={4} key={'summary'}>

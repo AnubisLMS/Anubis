@@ -4,8 +4,7 @@ export const useStyles = makeStyles((theme) => ({
   submissionSummaryContainer: {
     width: '100%',
     height: '50px',
-    // backgroundColor: '#21262D',
-    backgroundColor: theme.palette.grey[900],
+    backgroundColor: theme.palette.dark.blue['200'],
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -14,7 +13,7 @@ export const useStyles = makeStyles((theme) => ({
     padding: `${theme.spacing(0)}px ${theme.spacing(2)}px ${theme.spacing(0)}px ${theme.spacing(2)}px`,
   },
   assignmentName: {
-    color: theme.palette.color.white,
+    color: theme.palette.white,
     fontSize: '16px',
     fontWeight: 'Normal',
     marginRight: theme.spacing(2),
@@ -26,15 +25,13 @@ export const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
   },
   textLabel: {
-    font: 'Helvetica',
     fontWeight: 'Regular',
     fontSize: '13px',
-    color: '#A3A3A3',
+    color: theme.palette.gray['200'],
     marginRight: theme.spacing(.5),
     whiteSpace: 'nowrap',
   },
   textContent: {
-    font: 'Helvetica',
     fontWeight: 'Regular',
     fontSize: '13px',
     color: theme.palette.color.white,
@@ -44,7 +41,6 @@ export const useStyles = makeStyles((theme) => ({
   submittedStatus: {
     fontSize: '13px',
     display: 'flex',
-    whiteSpace: 'normal',
   },
   circleIcon: {
     width: '25px',
