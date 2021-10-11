@@ -11,8 +11,6 @@ import StandardLayout from '../../../Components/Layouts/StandardLayout';
 import SubmissionSummary from '../../../Components/Public/Submission/SubmissionSummary';
 import SubmissionBuild from '../../../Components/Public/Submission/SubmissionBuild';
 import SubmissionTests from '../../../Components/Public/Submission/SubmissionTests';
-import SubmissionTestExpanded
-  from '../../../Components/Public/Submission/SubmissionTestExpanded/SubmissionTestExpanded';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 
 
@@ -113,23 +111,13 @@ export default function Submission() {
     errorStop, setErrorStop,
   };
 
-  // Shubham
-  const test = {
-    testName: 'Test-Psca',
-    submissionID: '#0c7d483ea3e4b5be135d1b6f3c3ec9075797d5be',
-    assignmentName: 'Assignment 1',
-    testSuccess: true,
-    testExpectedOutput: 'asdajsdjahd adhsudshufhsdufhsfh sdfhsdf sdfhs dfshdfsdf dhf dfh sdf',
-    testActualOutput: 'asdajsdjahd adhsudshufhsdufhsfh sdfhsdf sdfhs dfshdfsdf dhf dfh sdf',
-  };
-
   return (
     <StandardLayout title={'Anubis Submission'} description={[
       `Assignment: ${submission.assignment_name}`,
       submission.commit,
     ]}>
-      {/* <Grid container spacing={4}>
-        {/* Summary */}{/*
+      <Grid container spacing={4}>
+        {/* Summary */}
         <Grid item xs={12} md={4} key={'summary'}>
           <SubmissionSummary
             submission={submission}
@@ -140,19 +128,18 @@ export default function Submission() {
 
         <Grid item xs={12} md={8} key={'build-test'}>
           <Grid container spacing={1}>
-            {/* Build */}{/*
+            {/* Build */}
             <Grid item xs={12} key={'build'}>
               <SubmissionBuild build={build} stop={errorStop}/>
             </Grid>
 
-            {/* Tests */}{/*
+            {/* Tests */}
             <Grid item xs={12} key={'tests'}>
               <SubmissionTests tests={tests} stop={errorStop}/>
             </Grid>
           </Grid>
         </Grid>
-      </Grid> */}
-      <SubmissionTestExpanded {...test}></SubmissionTestExpanded>
+      </Grid>
     </StandardLayout>
   );
 }
