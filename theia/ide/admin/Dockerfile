@@ -1,6 +1,6 @@
 ARG NODE_VERSION=12.18.3
 
-FROM node:${NODE_VERSION} as build
+FROM node:${NODE_VERSION}-buster as build
 ARG version=latest
 WORKDIR /opt/theia
 ADD $version.package.json ./package.json
@@ -31,7 +31,7 @@ RUN set -ex; \
   rm -rf /var/lib/apt/lists/*
 
 
-FROM node:${NODE_VERSION} as theia
+FROM node:${NODE_VERSION}-buster as theia
 ARG PY_VERSION=3.9.3
 
 ENV NODE_VERSION=$NODE_VERSION
