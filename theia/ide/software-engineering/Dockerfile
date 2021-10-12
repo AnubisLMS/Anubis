@@ -2,7 +2,7 @@
 
 ARG NODE_VERSION=12.18.3
 
-FROM node:${NODE_VERSION} as build
+FROM node:${NODE_VERSION}-buster as build
 ARG version=latest
 WORKDIR /opt/theia
 ADD $version.package.json ./package.json
@@ -36,8 +36,8 @@ ARG NODE_VERSION=12.18.3
 
 ##################################################################################
 
-FROM node:${NODE_VERSION} as theia
-ARG PY_VERSION=3.9.6
+FROM node:${NODE_VERSION}-buster as theia
+ARG PY_VERSION=3.10.0
 
 ENV PY_VERSION=$PY_VERSION
 ENV NODE_VERSION=$NODE_VERSION

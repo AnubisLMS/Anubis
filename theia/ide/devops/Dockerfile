@@ -2,7 +2,7 @@
 
 ARG NODE_VERSION=12.18.3
 
-FROM node:${NODE_VERSION} as build
+FROM node:${NODE_VERSION}-buster as build
 ARG version=latest
 WORKDIR /opt/theia
 ADD $version.package.json ./package.json
@@ -36,8 +36,8 @@ ARG NODE_VERSION=12.18.3
 
 ##################################################################################
 
-FROM node:${NODE_VERSION} as theia
-ARG PY_VERSION=3.9.6
+FROM node:${NODE_VERSION}-buster as theia
+ARG PY_VERSION=3.10.0
 
 ENV PY_VERSION=$PY_VERSION
 ENV NODE_VERSION=$NODE_VERSION
@@ -51,7 +51,6 @@ ENV ANUBIS_IDE=1
 
 
 COPY --from=0 /opt/theia /opt/theia
-COPY requirements.txt requirements-dev.txt /
 
 RUN set -eux; apt-get update; \
   apt-get upgrade -y --no-install-recommends; \
@@ -61,7 +60,6 @@ RUN set -eux; apt-get update; \
   apt-get install -y --no-install-recommends \
     make build-essential libssl-dev wget curl htop \
     libsecret-1-0 tk-dev; \
-  apt remove python python3 -y; \
   rm -rf /var/lib/apt/lists/*; \
   savedAptMark="$(apt-mark showmanual)"; \
   gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
@@ -69,6 +67,8 @@ RUN set -eux; apt-get update; \
     gcc dpkg-dev libsqlite3-dev libncurses5-dev libbz2-dev libreadline-dev \
     xz-utils libbz2-dev libc6-dev libffi-dev libexpat1-dev \
     libgdbm-dev liblzma-dev zlib1g-dev; \
+  apt remove python python3 -y; \
+  apt autoremove -y; \
   apt-mark auto '.*' > /dev/null; \
   wget https://www.python.org/ftp/python/$PY_VERSION/Python-$PY_VERSION.tgz; \
   wget https://bootstrap.pypa.io/get-pip.py; \

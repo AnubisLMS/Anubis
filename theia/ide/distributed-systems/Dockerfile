@@ -3,7 +3,9 @@
 ARG NODE_VERSION=12.22.6
 
 FROM node:${NODE_VERSION}-buster as theia
+ARG PY_VERSION=3.10.0
 
+ENV PY_VERSION=$PY_VERSION
 ENV NODE_VERSION=$NODE_VERSION
 ENV TERM=xterm-256color
 ENV DEBIAN_FRONTEND=noninteractive
@@ -29,9 +31,10 @@ RUN set -ex; \
   apt-get install -y --no-install-recommends \
     wget gpg apt-transport-https ca-certificates apt-utils \
     zsh git build-essential \
-    gcc g++ libc6-dev \
-    python3 python3-pip \
+    gcc g++ libc6-dev libffi-dev libexpat1-dev \
+    libgdbm-dev liblzma-dev zlib1g-dev \
     libsecret-1-0; \
+  apt remove -y python python-pip python3-pip python3; \
   yarn --pure-lockfile; \
   NODE_OPTIONS="--max_old_space_size=4096" yarn theia build; \
   HEAD_LINE_NUMBER=$(grep -n '</head>' lib/index.html | cut -f1 -d:); \
@@ -45,6 +48,32 @@ RUN set -ex; \
   echo *.spec.* >> .yarnclean; \
   yarn autoclean --force; \
   yarn cache clean; \
+  cd /; \
+  wget https://www.python.org/ftp/python/$PY_VERSION/Python-$PY_VERSION.tgz; \
+  wget https://bootstrap.pypa.io/get-pip.py; \
+  tar xvf Python-$PY_VERSION.tgz; \
+  cd Python-$PY_VERSION; \
+  ./configure \
+    --build="$gnuArch" \
+    --enable-loadable-sqlite-extensions \
+    --enable-optimizations \
+    --enable-option-checking=fatal \
+    --enable-shared \
+    --with-system-expat \
+    --with-system-ffi \
+    --without-ensurepip; \
+  make -j $(nproc) LDFLAGS="-Wl,--strip-all"; \
+  make install; \
+  ldconfig; \
+  cd ..; \
+  rm -rf Python-$PY_VERSION; \
+  rm Python-$PY_VERSION.tgz; \
+  python3 get-pip.py \
+    --disable-pip-version-check \
+    --no-cache-dir; \
+  rm get-pip.py; \
+  pip3 install --upgrade --no-cache-dir pip; \
+  pip3 install --upgrade --no-cache-dir python-language-server supervisor setuptools; \
   adduser --disabled-password --gecos '' --uid 1001 anubis; \
   chown -R 1001:1001 /home/anubis; \
   cd /home/anubis; \
@@ -67,7 +96,6 @@ RUN set -ex; \
   chown -R anubis:anubis $GOROOT; \
   curl -fsSL https://storage.googleapis.com/golang/go$GO_VERSION.$GOOS-$GOARCH.tar.gz | tar -C $(dirname $GOROOT) -xzv; \
   cd /home/anubis; \
-  echo 'export GO111MODULE=on' >> .bashrc; \
   go get -u -v github.com/mdempsky/gocode; \
   go get -u -v github.com/ramya-rao-a/go-outline; \
   go get -u -v github.com/acroca/go-symbols; \
@@ -91,7 +119,8 @@ RUN set -ex; \
   go get -u -v github.com/sourcegraph/go-langserver; \
   go get -u -v github.com/go-delve/delve/cmd/dlv; \
   go get -u -v github.com/davidrjenni/reftools/cmd/fillstruct; \
-  go get -u -v -d github.com/stamblerre/gocode
+  go get -u -v -d github.com/stamblerre/gocode; \
+  echo 'export GO111MODULE=on' >> .bashrc
 
 COPY supervisord.conf autosave-dump.sh /
 COPY autosave /usr/local/bin/autosave
