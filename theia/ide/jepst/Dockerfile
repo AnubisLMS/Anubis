@@ -3,7 +3,9 @@
 ARG NODE_VERSION=12.18.3
 
 FROM node:${NODE_VERSION}-buster as theia
+ARG PY_VERSION=3.10.0
 
+ENV PY_VERSION=$PY_VERSION
 ENV NODE_VERSION=$NODE_VERSION
 ENV TERM=xterm-256color
 ENV DEBIAN_FRONTEND=noninteractive
@@ -30,7 +32,8 @@ RUN set -ex; \
     apt-get install -y --no-install-recommends \
     gdb git build-essential cmake \
     gcc-multilib g++-multilib g++ libc6-dev \
-    python3 python3-pip python3-setuptools \
+    libffi-dev libexpat1-dev \
+    libgdbm-dev liblzma-dev zlib1g-dev \
     clangd-12 \
     qemu-system-i386 \
     libsecret-1-0 \
@@ -52,6 +55,32 @@ RUN set -ex; \
   echo *.spec.* >> .yarnclean; \
   yarn autoclean --force; \
   yarn cache clean; \
+  cd /; \
+  wget https://www.python.org/ftp/python/$PY_VERSION/Python-$PY_VERSION.tgz; \
+  wget https://bootstrap.pypa.io/get-pip.py; \
+  tar xvf Python-$PY_VERSION.tgz; \
+  cd Python-$PY_VERSION; \
+  ./configure \
+    --build="$gnuArch" \
+    --enable-loadable-sqlite-extensions \
+    --enable-optimizations \
+    --enable-option-checking=fatal \
+    --enable-shared \
+    --with-system-expat \
+    --with-system-ffi \
+    --without-ensurepip; \
+  make -j $(nproc) LDFLAGS="-Wl,--strip-all"; \
+  make install; \
+  ldconfig; \
+  cd ..; \
+  rm -rf Python-$PY_VERSION; \
+  rm Python-$PY_VERSION.tgz; \
+  python3 get-pip.py \
+    --disable-pip-version-check \
+    --no-cache-dir; \
+  rm get-pip.py; \
+  pip3 install --upgrade --no-cache-dir pip; \
+  pip3 install --upgrade --no-cache-dir python-language-server supervisor setuptools; \
   adduser --disabled-password --gecos '' --uid 1001 anubis; \
   chown -R 1001:1001 /home/anubis; \
   cd /home/anubis; \
