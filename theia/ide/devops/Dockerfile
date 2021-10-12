@@ -37,7 +37,7 @@ ARG NODE_VERSION=12.18.3
 ##################################################################################
 
 FROM node:${NODE_VERSION}-buster as theia
-ARG PY_VERSION=3.10.0
+ARG PY_VERSION=3.9.7
 
 ENV PY_VERSION=$PY_VERSION
 ENV NODE_VERSION=$NODE_VERSION
@@ -51,6 +51,7 @@ ENV ANUBIS_IDE=1
 
 
 COPY --from=0 /opt/theia /opt/theia
+COPY requirements.txt requirements-dev.txt /
 
 RUN set -eux; apt-get update; \
   apt-get upgrade -y --no-install-recommends; \
@@ -61,7 +62,7 @@ RUN set -eux; apt-get update; \
     make build-essential libssl-dev wget curl htop \
     libsecret-1-0 tk-dev; \
   rm -rf /var/lib/apt/lists/*; \
-  savedAptMark="$(apt-mark showmanual)"; \
+  savedAptMark="$(apt-mark showmanual | grep -vP 'libglib2.0-dev')"; \
   gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
   apt-get install -y --no-install-recommends \
     gcc dpkg-dev libsqlite3-dev libncurses5-dev libbz2-dev libreadline-dev \
