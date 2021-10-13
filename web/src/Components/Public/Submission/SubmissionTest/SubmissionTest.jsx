@@ -6,44 +6,36 @@ import clsx from 'clsx';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 
 
-export default function SubmissionTest({tests}) {
+export default function SubmissionTest({test}) {
   const classes = useStyles();
-
-  if (!tests) {
-    return null;
-  }
   return (
-    <React.Fragment>
-      {tests.map((test, index) => (
-        <Box key={`test-${index}`}
-          className={classes.root}
+    <Box
+      className={classes.root}
+    >
+      <Box
+        className={classes.title}
+      >
+        <Typography
+          className={classes.iconWrapper}
         >
-          <Box
-            className={classes.title}
-          >
-            <Typography
-              className={classes.iconWrapper}
-            >
-              <FiberManualRecordIcon className={clsx(classes.circleIcon,
-                test.result.passed === true ? classes.success : classes.error)}/>
-            </Typography>
+          <FiberManualRecordIcon className={clsx(classes.circleIcon,
+            test.result.passed === true ? classes.success : classes.error)}/>
+        </Typography>
 
-            <Typography
-              className={classes.name}
-            >
-              {test.test.name}
-            </Typography>
-            <Typography
-              className={clsx(classes.testStatus, test.result.passed === true ? classes.success : classes.error)}
-            >
-              {test.result.passed === true ? 'Successful' : 'Failed'}
-            </Typography>
-          </Box>
-          <Typography className={classes.expand}>
+        <Typography
+          className={classes.name}
+        >
+          {test.test.name}
+        </Typography>
+        <Typography
+          className={clsx(classes.testStatus, test.result.passed === true ? classes.success : classes.error)}
+        >
+          {test.result.passed === true ? 'Successful' : 'Failed'}
+        </Typography>
+      </Box>
+      <Typography className={classes.expand}>
               Expand
-          </Typography>
-        </Box>
-      ))}
-    </React.Fragment>
+      </Typography>
+    </Box>
   );
 }
