@@ -3,7 +3,6 @@ import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
 import Grid from '@material-ui/core/Grid';
-import {Box} from '@material-ui/core';
 
 import {useStyles} from './Submission.styles';
 import useQuery from '../../../hooks/useQuery';
@@ -13,8 +12,6 @@ import SubmissionSummary from '../../../Components/Public/Submission/SubmissionS
 import SubmissionBuild from '../../../Components/Public/Submission/SubmissionBuild';
 import SubmissionTests from '../../../Components/Public/Submission/SubmissionTests';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
-
-import {Button, Typography} from '@material-ui/core';
 
 const regrade = ({commit, submission, setSubmission, setStep, setErrorStop}, enqueueSnackbar) => () => {
   if (!submission.processed) {
