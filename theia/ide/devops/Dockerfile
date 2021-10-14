@@ -1,6 +1,6 @@
 # https://github.com/theia-ide/theia-apps/tree/master/theia-cpp-docker
 
-ARG NODE_VERSION=12.18.3
+ARG NODE_VERSION=12.22.6
 
 FROM node:${NODE_VERSION}-buster as build
 ARG version=latest
@@ -32,7 +32,7 @@ RUN set -ex; \
   rm -rf /var/cache/apt/*; \
   rm -rf /var/lib/apt/lists/*
 
-ARG NODE_VERSION=12.18.3
+ARG NODE_VERSION=12.22.6
 
 ##################################################################################
 

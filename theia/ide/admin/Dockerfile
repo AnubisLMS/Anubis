@@ -1,4 +1,4 @@
-ARG NODE_VERSION=12.18.3
+ARG NODE_VERSION=12.22.6
 
 FROM node:${NODE_VERSION}-buster as build
 ARG version=latest
