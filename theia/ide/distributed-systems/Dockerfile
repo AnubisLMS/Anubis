@@ -21,10 +21,11 @@ COPY latest.package.json package.json
 COPY motd.txt /etc/motd
 
 ENV GO_VERSION=1.17 \
-   GOOS=linux \
-   GOARCH=amd64 \
-   GOROOT=/opt/go
-ENV PATH=$GOROOT/bin:$PATH
+  GOOS=linux \
+  GOARCH=amd64 \
+  GOROOT=/opt/go \
+  GOPATH=/opt/go-tools
+ENV PATH=$GOROOT/bin:$GOPATH/bin:$PATH
 
 RUN set -ex; \
   apt update; \
@@ -93,9 +94,11 @@ RUN set -ex; \
     -exec 'rm' '-rf' '{}' '+'; \
   cd /home/anubis; \
   mkdir -p $GOROOT; \
+  mkdir -p $GOPATH; \
   chown -R anubis:anubis $GOROOT; \
   curl -fsSL https://storage.googleapis.com/golang/go$GO_VERSION.$GOOS-$GOARCH.tar.gz | tar -C $(dirname $GOROOT) -xzv; \
   cd /home/anubis; \
+  GOPROXY=direct go get -u -v github.com/uudashr/gopkgs/cmd/gopkgs; \
   go get -u -v github.com/mdempsky/gocode; \
   go get -u -v github.com/ramya-rao-a/go-outline; \
   go get -u -v github.com/acroca/go-symbols; \
@@ -119,8 +122,12 @@ RUN set -ex; \
   go get -u -v github.com/sourcegraph/go-langserver; \
   go get -u -v github.com/go-delve/delve/cmd/dlv; \
   go get -u -v github.com/davidrjenni/reftools/cmd/fillstruct; \
-  go get -u -v -d github.com/stamblerre/gocode; \
-  echo 'export GO111MODULE=on' >> .bashrc
+  go get -u -v github.com/go-delve/delve/cmd/dlv; \
+  go get -u -v github.com/stamblerre/gocode; \
+  cp /opt/go-tools/bin/gocode /opt/go-tools/bin/gocode-gomod; \
+  cp /opt/go-tools/bin/godef /opt/go-tools/bin/godef-gomod; \
+  echo 'export GO111MODULE=on' >> .bashrc; \
+  sed -i 's/"default": "goreturns"/"default": "goformat"/' /opt/theia/plugins/vscode-go/extension/package.json
 
 COPY supervisord.conf autosave-dump.sh /
 COPY autosave /usr/local/bin/autosave
