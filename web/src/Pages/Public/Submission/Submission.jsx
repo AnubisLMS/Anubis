@@ -8,7 +8,6 @@ import {useStyles} from './Submission.styles';
 import useQuery from '../../../hooks/useQuery';
 import {translateSubmission} from '../../../Utils/submission';
 import StandardLayout from '../../../Components/Layouts/StandardLayout';
-import SubmissionContent from '../../../Components/Public/Submission/SubmissionContent/SubmissionContent';
 import SubmissionSummary from '../../../Components/Public/Submission/SubmissionSummary';
 import SubmissionBuild from '../../../Components/Public/Submission/SubmissionBuild';
 import SubmissionTests from '../../../Components/Public/Submission/SubmissionTests';
@@ -119,23 +118,27 @@ export default function Submission() {
     ]}>
       <Grid container spacing={4}>
         {/* Summary */}
-        <Grid item xs={12} md={11} key={'summary'}>
-          <SubmissionContent
+        <Grid item xs={12} md={4} key={'summary'}>
+          <SubmissionSummary
             submission={submission}
+            regrade={regrade(pageState, enqueueSnackbar)}
             stop={errorStop}
           />
         </Grid>
 
-        {/* <Grid item xs={12} md={8} key={'build-test'}>
+        <Grid item xs={12} md={8} key={'build-test'}>
           <Grid container spacing={1}>
+            {/* Build */}
             <Grid item xs={12} key={'build'}>
               <SubmissionBuild build={build} stop={errorStop}/>
             </Grid>
+
+            {/* Tests */}
             <Grid item xs={12} key={'tests'}>
               <SubmissionTests tests={tests} stop={errorStop}/>
             </Grid>
           </Grid>
-        </Grid> */}
+        </Grid>
       </Grid>
     </StandardLayout>
   );
