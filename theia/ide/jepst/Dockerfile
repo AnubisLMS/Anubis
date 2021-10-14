@@ -1,6 +1,6 @@
 # https://github.com/theia-ide/theia-apps/tree/master/theia-cpp-docker
 
-ARG NODE_VERSION=12.18.3
+ARG NODE_VERSION=12.22.6
 
 FROM node:${NODE_VERSION}-buster as theia
 ARG PY_VERSION=3.10.0
