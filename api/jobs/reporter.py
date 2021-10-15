@@ -24,7 +24,17 @@ def get_course_user_count(course):
     return User.query.join(
         InCourse, User.id==InCourse.owner_id
     ).join(
-        Course, Course.id==course.id
+        Course, Course.id==InCourse.course_id
+    ).filter(
+        Course.id==course.id
+    ).count()
+
+@with_context
+def get_course_theia_session_count(course):
+    return TheiaSession.query.join(
+        Course, TheiaSession.course_id==Course.id
+    ).filter(
+        Course.id==course.id
     ).count()
 
 if __name__ == "__main__":
@@ -50,3 +60,10 @@ if __name__ == "__main__":
     for course in course_query:
         user_count = get_course_user_count(course)
         print(f"{course.name}\t{course.course_code}\t{user_count}")
+
+    print()
+    # Number of IDEs opened for each course
+    print("Course Name\tCourse Code\tTotal IDES opened")
+    for course in course_query:
+        theia_count = get_course_theia_session_count(course)
+        print(f"{course.name}\t{course.course_code}\t{theia_count}")
