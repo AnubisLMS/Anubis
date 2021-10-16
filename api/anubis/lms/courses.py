@@ -4,7 +4,7 @@ import json
 import string
 import traceback
 import urllib.parse
-from typing import Union, Tuple, Any, List, Dict
+from typing import Union, Tuple, Any, List, Dict, Set
 
 from flask import request, g
 from werkzeug.local import LocalProxy
@@ -349,6 +349,7 @@ def get_courses(netid: str):
     return [c.data for c in classes]
 
 
+@cache.memoize(timeout=60, unless=is_debug)
 def get_student_course_ids(user: User, default: str = None) -> List[str]:
     """
     Get the course ids for the courses that the user is in.
@@ -373,20 +374,10 @@ def get_student_course_ids(user: User, default: str = None) -> List[str]:
             InCourse.owner_id == user.id,
         ).all()
 
-        # Get all the courses the user is in
-        professor_in = ProfessorForCourse.query.join(Course).filter(
-            ProfessorForCourse.owner_id == user.id,
-        ).all()
-
-        # Get all the courses the user is in
-        ta_in = TAForCourse.query.join(Course).filter(
-            TAForCourse.owner_id == user.id,
-        ).all()
-
         # Build a list of course ids. If the user
         # specified a specific course, make a list
         # of only that course id.
-        course_ids = list(set(in_course.course.id for in_course in in_courses + ta_in + professor_in))
+        course_ids = list(set(in_course.course.id for in_course in in_courses))
 
     # If a default was specified, check
     if default is not None and default in course_ids:
@@ -461,6 +452,45 @@ def get_courses_with_visuals() -> List[Dict[str, Any]]:
     return [
         course.data for course in courses
     ]
+
+
+@cache.memoize(timeout=60, unless=is_debug, source_check=True)
+def get_user_admin_course_ids(user_id: str) -> Set[str]:
+    admin_course_ids: Set[str] = set()
+
+    # Check to see if they are a TA for the course
+    ta: List[TAForCourse] = TAForCourse.query.filter(
+        TAForCourse.owner_id == user_id,
+    ).all()
+
+    # Check to see if they are a professor for the course
+    prof: List[ProfessorForCourse] = ProfessorForCourse.query.filter(
+        ProfessorForCourse.owner_id == user_id,
+    ).all()
+
+    for in_course in ta:
+        admin_course_ids.add(in_course.course_id)
+
+    for in_course in prof:
+        admin_course_ids.add(in_course.course_id)
+
+    return admin_course_ids
+
+
+def get_user_course_ids(user: User) -> Tuple[Set[str], Set[str]]:
+    # Get the list of course ids
+    course_ids: Set[str] = set(get_student_course_ids(user))
+    admin_course_ids: Set[str]
+
+    # If they are a superuser, then just return True
+    if user.is_superuser:
+        admin_course_ids = set(map(lambda x: x.id, Course.query.all()))
+
+    # Else calculate which courses they are an admin for
+    else:
+        admin_course_ids = get_user_admin_course_ids(user.id)
+
+    return admin_course_ids, course_ids
 
 
 @cache.memoize(timeout=3600, source_check=True, unless=is_debug)

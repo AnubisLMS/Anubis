@@ -1,10 +1,13 @@
 import traceback
 from datetime import datetime
-from typing import Union, List, Dict, Tuple, Optional, Any
+from typing import Union, List, Dict, Tuple, Optional, Any, Set
 
 from dateutil.parser import parse as date_parse, ParserError
 from sqlalchemy import or_
 
+from anubis.lms.courses import assert_course_admin
+from anubis.lms.courses import is_course_admin, get_user_course_ids
+from anubis.lms.questions import ingest_questions
 from anubis.models import (
     db,
     Course,
@@ -16,11 +19,8 @@ from anubis.models import (
     SubmissionTestResult,
     LateException,
 )
-from anubis.utils.data import is_debug
-from anubis.lms.courses import assert_course_admin, get_student_course_ids
-from anubis.lms.courses import is_course_admin
-from anubis.lms.questions import ingest_questions
 from anubis.utils.cache import cache
+from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
 
 
@@ -87,48 +87,60 @@ def get_assignment_data(user_id: str, assignment_id: str) -> Dict[str, Any]:
     return assignment_data
 
 
+def get_all_assignments(course_ids: Set[str], admin_course_ids: Set[str]) -> List[Assignment]:
+    # Build a list of all the assignments visible
+    # to this user for each of the specified courses.
+    assignments: List[Assignment] = []
+
+    # Get the assignment objects that should be visible to this user.
+    regular_course_assignments = Assignment.query.join(Course).filter(
+        Course.id.in_(list(course_ids.difference(admin_course_ids))),
+        Assignment.release_date <= datetime.now(),
+        Assignment.hidden == False,
+    ).all()
+
+    # Get the assignment objects that should be visible to this user.
+    admin_course_assignments = Assignment.query.join(Course).filter(
+        Course.id.in_(list(admin_course_ids)),
+    ).all()
+
+    # Add all the assignment objects to the running list
+    assignments.extend(admin_course_assignments)
+    assignments.extend(regular_course_assignments)
+
+    return assignments
+
+
 @cache.memoize(timeout=10, unless=is_debug, source_check=True)
 def get_assignments(netid: str, course_id=None) -> Optional[List[Dict[str, Any]]]:
     """
-    Get all the current assignments for a netid. Optionally specify a class_name
-    to filter by class.
+    Get all the current assignments for a netid. Optionally specify a course_id
+    to filter by course.
 
     :param netid: netid of user
-    :param course_id: optional class name
+    :param course_id: optional course name
     :return: List[Assignment.data]
     """
     # Load user
     user = User.query.filter_by(netid=netid).first()
 
-    # Verify user exists
-    if user is None:
-        return None
+    course_ids: Set[str] = set()
+    admin_course_ids: Set[str] = set()
 
-    # Get the list of course ids
-    course_ids = get_student_course_ids(user, default=course_id)
+    # If course id was specified, then filter for a specific class
+    if course_id is not None:
+        if is_course_admin(course_id, user.id):
+            admin_course_ids.add(course_id)
+        else:
+            course_ids.add(course_id)
 
-    # Build a list of all the assignments visible
-    # to this user for each of the specified courses.
-    assignments: List[Assignment] = []
-    for _course_id in course_ids:
-        # Query filters
-        filters = []
+    # If course_id was not specified, then pull assignments for all
+    # courses that the user is in.
+    else:
+        admin_course_ids, course_ids = get_user_course_ids(user)
 
-        # If the current user is not a course admin or a superuser, then
-        # we should filter out assignments that have not been released,
-        # and those marked as hidden.
-        if not is_course_admin(_course_id, user_id=user.id):
-            filters.append(Assignment.release_date <= datetime.now())
-            filters.append(Assignment.hidden == False)
-
-        # Get the assignment objects that should be visible to this user.
-        course_assignments = Assignment.query.join(Course).filter(
-            Course.id == _course_id,
-            *filters,
-        ).all()
-
-        # Add all the assignment objects to the running list
-        assignments.extend(course_assignments)
+    # Get assignment objects
+    assignments: List[Assignment] = get_all_assignments(course_ids, admin_course_ids)
 
     # Take all the sqlalchemy assignment objects,
     # and break them into data dictionaries.
