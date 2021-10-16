@@ -54,4 +54,5 @@ def test_assignment_public():
     r = s.get('/public/assignments')
     assert any(map(lambda a: a['name'].startswith('CS-UY 3224'), r['assignments']))
     assert any(map(lambda a: a['name'].startswith('CS-UY 3843'), r['assignments']))
-    assert any(map(lambda a: a['name'] == 'CS-UY 3224 TEST PUBLIC HIDDEN', r['assignments']))
+    assert any(map(lambda a: a['name'] == 'CS-UY 3224 TEST PUBLIC HIDDEN 1', r['assignments']))
+    assert any(map(lambda a: a['name'] == 'CS-UY 3224 TEST PUBLIC HIDDEN 2', r['assignments']))
