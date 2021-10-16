@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from utils import Session, permission_test
 
 sample_sync = {
-    "name": "name",
+    "name": "CS-UY 3224 TEST ADMIN",
     "course": "CS-UY 3224",
     "hidden": True,
     "github_template": "wabscale/xv6-public",
