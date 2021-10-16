@@ -11,22 +11,28 @@ def get_courses():
 
 @with_context
 def get_active_users_this_semester():
-    return User.query.join(InCourse).distinct().count()
+    return User.query.join(
+        InCourse, User.id==InCourse.owner_id
+    ).join(
+        Course, InCourse.course_id==Course.id
+    ).filter(
+        Course.name != "TEST", Course.name != "DEMO"
+    ).distinct().count()
 
 @with_context
 def get_ides_opened_this_semester():
     return TheiaSession.query.join(
-        Course, TheiaSession.course_id==Course.id
+        Course, TheiaSession.course_id == Course.id
     ).count()
 
 @with_context
 def get_course_user_count(course):
     return User.query.join(
-        InCourse, User.id==InCourse.owner_id
+        InCourse, User.id == InCourse.owner_id
     ).join(
-        Course, Course.id==InCourse.course_id
+        Course, Course.id == InCourse.course_id
     ).filter(
-        Course.id==course.id
+        Course.id == course.id
     ).count()
 
 @with_context
@@ -34,7 +40,7 @@ def get_course_theia_session_count(course):
     return TheiaSession.query.join(
         Course, TheiaSession.course_id==Course.id
     ).filter(
-        Course.id==course.id
+        Course.id == course.id
     ).count()
 
 if __name__ == "__main__":
@@ -63,7 +69,7 @@ if __name__ == "__main__":
 
     print()
     # Number of IDEs opened for each course
-    print("Course Name\tCourse Code\tTotal IDES opened")
+    print("Course Name\tCourse Code\tTotal IDEs opened")
     for course in course_query:
         theia_count = get_course_theia_session_count(course)
         print(f"{course.name}\t{course.course_code}\t{theia_count}")
