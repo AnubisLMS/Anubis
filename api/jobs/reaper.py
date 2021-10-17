@@ -3,14 +3,19 @@ import traceback
 from datetime import datetime, timedelta
 from typing import List
 
-from anubis.models import db, Submission, Assignment, Course
-from anubis.utils.data import with_context
 from anubis.lms.autograde import bulk_autograde
 from anubis.lms.submissions import init_submission
+from anubis.models import (
+    db,
+    Submission,
+    Assignment,
+    Course,
+)
+from anubis.utils.config import get_config_int
+from anubis.utils.data import with_context
 from anubis.utils.github.fix import fix_github_missing_submissions, fix_github_broken_repos
 from anubis.utils.logging import logger
 from anubis.utils.rpc import enqueue_ide_reap_stale, enqueue_autograde_pipeline
-from anubis.utils.config import get_config_int
 
 
 def reap_stale_submissions():
@@ -42,7 +47,7 @@ def reap_stale_submissions():
 
 def reap_recent_assignments():
     """
-    Calculate stats for recent submissions
+    Attempt to fix submissions in active (recent) assignments
 
     :return:
     """
@@ -67,9 +72,6 @@ def reap_recent_assignments():
             if submission.build is None:
                 init_submission(submission)
                 enqueue_autograde_pipeline(submission.id)
-
-    for assignment in recent_assignments:
-        bulk_autograde(assignment.id)
 
 
 def reap_github():
