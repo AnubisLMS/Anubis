@@ -10,7 +10,7 @@ metadata:
 spec:
   schedule: {{ .Values.backup.schedule | quote }}
   concurrencyPolicy: Replace
-  suspend: {{ .Values.reaper.suspend }}
+  suspend: {{ .Values.backup.suspend }}
   jobTemplate:
     metadata:
       labels:
