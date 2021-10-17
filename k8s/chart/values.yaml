@@ -52,23 +52,23 @@ theia:
 # Cron Jobs
 reaper:
   enable: true
-  schedule: "*/5 * * * *"
   suspend: false
+  schedule: "*/5 * * * *"
 
 daily_cleanup:
   enable: true
-  schedule: "0 4 * * *"  # 4AM
   suspend: false
+  schedule: "0 4 * * *"  # 4AM
 
 autograde_recalculate:
   enable: true
-  schedule: "*/30 * * * *"
   suspend: false
+  schedule: "*/30 * * * *"
 
 visuals:
   enable: true
-  schedule: "*/5 * * * *"
   suspend: false
+  schedule: "*/5 * * * *"
 
 backup:
   enable: true
