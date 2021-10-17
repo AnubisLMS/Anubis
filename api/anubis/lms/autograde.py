@@ -2,11 +2,11 @@ from datetime import datetime
 
 from parse import parse
 
-from anubis.models import db, Submission, SubmissionBuild, SubmissionTestResult, Assignment, AssignmentTest
-from anubis.utils.data import is_debug
-from anubis.utils.http import error_response
 from anubis.lms.students import get_students_in_class
+from anubis.models import Submission, Assignment, AssignmentTest
 from anubis.utils.cache import cache
+from anubis.utils.data import is_debug, is_job
+from anubis.utils.http import error_response
 
 
 @cache.memoize(timeout=60, unless=is_debug, source_check=True)
@@ -16,7 +16,7 @@ def _get_assignment_test_count(assignment_id) -> int:
     ).count()
 
 
-@cache.memoize(timeout=5 * 60, unless=is_debug, source_check=True)
+@cache.memoize(timeout=5 * 60, unless=is_debug, source_check=True, forced_update=is_job)
 def autograde(student_id, assignment_id, max_time: datetime = None):
     """
     Get the stats for a specific student on a specific assignment.
@@ -150,7 +150,7 @@ def autograde_submission_result_wrapper(assignment: Assignment, user_id: str, ne
         }
 
 
-@cache.memoize(timeout=60 * 60, unless=is_debug)
+@cache.memoize(timeout=60 * 60, unless=is_debug, forced_update=is_job)
 def bulk_autograde(assignment_id, netids=None, offset=0, limit=20):
     """
     Bulk autograde an assignment. Optionally specify a subset of netids.

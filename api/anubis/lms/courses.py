@@ -527,4 +527,66 @@ def get_course_admin_ids(course_id: str) -> List[str]:
     return list(map(lambda x: x.owner_id, tas)) + list(map(lambda x: x.owner_id, professors))
 
 
+def get_course_users(course: Course) -> List[User]:
+    """
+    Get all users within the course. These are the User objects for
+    each student, ta and professor in the course.
+
+    * Assumes the InCourse table is up to date *
+
+    :param course:
+    :return:
+    """
+    return (
+        User.query
+            .join(InCourse, InCourse.owner_id == User.id)
+            .filter(Course.id == course.id)
+            .all()
+    )
+
+
+def get_course_tas(course: Course) -> List[User]:
+    """
+    Get all Users that are TAs for a given course.
+
+    * Assumes the TAForCourse table is up to date *
+
+    :param course:
+    :return:
+    """
+    return (
+        User.query
+            .join(TAForCourse, TAForCourse.owner_id == User.id)
+            .filter(Course.id == course.id)
+            .all()
+    )
+
+
+def get_course_professors(course: Course) -> List[User]:
+    """
+    Get all Users that are Professors for a given course.
+
+    * Assumes the ProfessorForCourse table is up to date *
+
+    :param course:
+    :return:
+    """
+    return (
+        User.query
+            .join(ProfessorForCourse, ProfessorForCourse.owner_id == User.id)
+            .filter(Course.id == course.id)
+            .all()
+    )
+
+
+def user_to_user_id_set(users: List[User]) -> Set[str]:
+    """
+    Convert a list of users to a set of user.ids.
+
+    :param users:
+    :return:
+    """
+    return set(map(lambda user: user.id, users))
+
+
 course_context: Course = LocalProxy(get_course_context)
