@@ -1,0 +1,72 @@
+
+{{- if .Values.daily_cleanup.enable }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: anubis-daily-cleanup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: anubis-daily-cleanup
+    component: "anubis-daily-cleanup"
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  schedule: {{ .Values.daily_cleanup.schedule | quote }}
+  suspend: {{ .Values.daily_cleanup.suspend }}
+  concurrencyPolicy: Replace
+  jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: anubis
+        component: daily-cleanup-job
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: daily-cleanup
+            image: "{{ .Values.api.image }}:{{ .Values.api.tag }}"
+            imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+            command: ["python3", "jobs/daily_cleanup.py"]
+            env:
+            - name: "PYTHONPATH"
+              value: "/opt/app"
+            - name: "DEBUG"
+              value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+            - name: "JOB"
+              value: "1"
+            - name: "DISABLE_ELK"
+              value: "0"
+            - name: "LOGGER_NAME"
+              value: "daily-cleanup"
+            - name: "GITHUB_TOKEN"
+              valueFrom:
+                secretKeyRef:
+                  name: git
+                  key: token
+            - name: "REDIS_PASS"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: redis-password
+            - name: "DATABASE_URI"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-uri
+            - name: "DB_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-password
+            - name: "DB_HOST"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-host
+            - name: "DATABASE_PORT"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-port
+{{- end }}
