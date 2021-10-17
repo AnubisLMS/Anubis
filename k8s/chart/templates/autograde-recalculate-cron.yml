@@ -1,0 +1,72 @@
+
+{{- if .Values.autograde_recalculate.enable }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: anubis-autograde-recalculate
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: anubis-autograde-recalculate
+    component: "anubis-autograde-reclaculate"
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  schedule: {{ .Values.auotgrade_recalculate.schedule | quote }}
+  suspend: {{ .Values.autograde_recalculate.suspend }}
+  concurrencyPolicy: Replace
+  jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: anubis
+        component: autograde-recalculate-job
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: autograde-recalculate
+            image: "{{ .Values.api.image }}:{{ .Values.api.tag }}"
+            imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+            command: ["python3", "jobs/autograde_recalculate.py"]
+            env:
+            - name: "PYTHONPATH"
+              value: "/opt/app"
+            - name: "DEBUG"
+              value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
+            - name: "JOB"
+              value: "1"
+            - name: "DISABLE_ELK"
+              value: "0"
+            - name: "LOGGER_NAME"
+              value: "autograde-reclaculate"
+            - name: "GITHUB_TOKEN"
+              valueFrom:
+                secretKeyRef:
+                  name: git
+                  key: token
+            - name: "REDIS_PASS"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: redis-password
+            - name: "DATABASE_URI"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-uri
+            - name: "DB_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-password
+            - name: "DB_HOST"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-host
+            - name: "DATABASE_PORT"
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: database-port
+{{- end }}
