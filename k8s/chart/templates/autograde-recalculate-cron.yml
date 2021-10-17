@@ -11,7 +11,7 @@ metadata:
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
-  schedule: {{ .Values.auotgrade_recalculate.schedule | quote }}
+  schedule: {{ .Values.autograde_recalculate.schedule | quote }}
   suspend: {{ .Values.autograde_recalculate.suspend }}
   concurrencyPolicy: Replace
   jobTemplate:
