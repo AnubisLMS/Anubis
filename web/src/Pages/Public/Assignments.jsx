@@ -4,7 +4,7 @@ import Grid from '@material-ui/core/Grid';
 import Grow from '@material-ui/core/Grow';
 import useQuery from '../../hooks/useQuery';
 
-import AssignmentCard from '../../Components/Public/Assignments/AssignmentCard';
+import AssignmentCardV2 from '../../Components/Public/Assignments/AssignmentCardV2/AssignmentCardV2';
 import axios from 'axios';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
 import {useSnackbar} from 'notistack';
@@ -77,13 +77,7 @@ const Assignments = () => {
               style={{transformOrigin: '0 0 0'}}
               {...({timeout: 300 * (pos + 1)})}
             >
-              <AssignmentCard
-                assignment={assignment}
-                setSelectedTheia={setSelectedTheia}
-                runAssignmentPolling={assignment.id === pollingAssignmentId && runAssignmentPolling}
-                setRunAssignmentPolling={setRunAssignmentPolling}
-                setPollingAssignmentId={setPollingAssignmentId}
-              />
+              <AssignmentCardV2 {... assignment}/>
             </Grow>
           </Grid>
         ))}
