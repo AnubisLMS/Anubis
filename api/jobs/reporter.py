@@ -1,4 +1,4 @@
-from sqlalchemy import func
+import discord
 
 from anubis.models import Course, User, TheiaSession, InCourse
 from anubis.utils.data import with_context
