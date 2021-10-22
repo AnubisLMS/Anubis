@@ -14,8 +14,9 @@ from anubis.models import (
     InCourse,
 )
 from anubis.utils.data import _verify_data_shape, is_debug
-from anubis.lms.students import get_students
+from anubis.lms.students import get_students, get_students_in_class
 from anubis.utils.cache import cache
+from anubis.utils.logging import logger
 
 
 def get_question_pool_mapping(
@@ -390,3 +391,77 @@ def export_assignment_questions(assignment_id: str) -> Optional[bytes]:
 
     # Pass back the buffer in bytes
     return zip_buffer.getvalue()
+
+
+def fix_missing_question_assignments(assignment: Assignment):
+    """
+    Calculate and assign questions that are not assigned
+    to students for a given assignment. Should be run in
+    the daily cleanup.
+
+    :param assignment:
+    :return:
+    """
+
+    # Get set of student ids
+    students = get_students_in_class(assignment.course_id)
+    student_ids = set(map(lambda u: u['id'], students))
+
+    # Get all assignment questions for this assignment
+    assignment_questions: List[AssignmentQuestion] = AssignmentQuestion.query.filter(
+        AssignmentQuestion.assignment_id == assignment.id,
+    ).all()
+
+    # If there are no assignment questions for this assignment, we can skip
+    if len(assignment_questions) == 0:
+        return
+
+    # Get map of pool -> [assignment question]
+    question_mapping = get_question_pool_mapping(assignment_questions)
+
+    # Get the set of question pools
+    question_pools = set(question_mapping.keys())
+
+    # Iterate over each student in the course
+    for student_id in student_ids:
+
+        # Get the question assignments for this student on this assignment
+        student_questions: List[AssignedStudentQuestion] = AssignedStudentQuestion.query.filter(
+            AssignedStudentQuestion.assignment_id == assignment.id,
+            AssignedStudentQuestion.owner_id == student_id,
+        ).all()
+
+        # Calculate set of which pools this student has questions assigned for
+        student_question_pools = set(map(lambda q: q.question.pool, student_questions))
+
+        # Calculate which question pools have no questions assigned for this student
+        missing_student_question_pools = question_pools.difference(student_question_pools)
+
+        # Iterate over missing question pools
+        for pool in missing_student_question_pools:
+            logger.info(f'FIXING missing question '
+                        f'pool={pool} '
+                        f'student={student_id} '
+                        f'assignment={assignment.id}')
+
+            # Get list of questions for this pool
+            qs = question_mapping[pool]
+
+            # Get a random question from the pool at this sequence
+            selected_question = random.choice(qs)
+
+            # Assign them the question
+            assigned_question = AssignedStudentQuestion(
+                owner_id=student_id,
+                assignment=assignment,
+                question=selected_question,
+            )
+            db.session.add(assigned_question)
+
+    db.session.commit()
+
+
+
+
+
+
