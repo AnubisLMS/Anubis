@@ -9,6 +9,8 @@ from anubis.models import (
 )
 from anubis.utils.data import with_context
 from anubis.utils.logging import logger
+from anubis.lms.assignments import get_recent_assignments
+from anubis.lms.questions import fix_missing_question_assignments
 
 
 def reap_ta_professor():
@@ -64,9 +66,26 @@ def reap_ta_professor():
     db.session.commit()
 
 
+def fix_question_assignments():
+    """
+    Attempt to fix missing question assignments.
+
+    :return:
+    """
+
+    recent_assignments = get_recent_assignments()
+
+    for assignment in recent_assignments:
+        fix_missing_question_assignments(assignment)
+
+
 @with_context
 def reap():
+    # Fix tas and professors missing InCourse
     reap_ta_professor()
+
+    # Fix question assignments
+    fix_question_assignments()
 
 
 if __name__ == "__main__":

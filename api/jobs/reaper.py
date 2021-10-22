@@ -16,6 +16,7 @@ from anubis.utils.data import with_context
 from anubis.utils.github.fix import fix_github_missing_submissions, fix_github_broken_repos
 from anubis.utils.logging import logger
 from anubis.utils.rpc import enqueue_ide_reap_stale, enqueue_autograde_pipeline
+from anubis.lms.assignments import get_recent_assignments
 
 
 def reap_stale_submissions():
@@ -52,13 +53,7 @@ def reap_recent_assignments():
     :return:
     """
 
-    autograde_recalculate_days = get_config_int('AUTOGRADE_RECALCULATE_DAYS', default=60)
-    autograde_recalculate_duration = timedelta(days=autograde_recalculate_days)
-
-    recent_assignments = Assignment.query.filter(
-        Assignment.release_date > datetime.now(),
-        Assignment.due_date > datetime.now() - autograde_recalculate_duration,
-    ).all()
+    recent_assignments = get_recent_assignments()
 
     print(json.dumps({
         'reaping assignments:': [assignment.data for assignment in recent_assignments]

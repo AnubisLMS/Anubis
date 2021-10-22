@@ -1,5 +1,5 @@
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Union, List, Dict, Tuple, Optional, Any, Set
 
 from dateutil.parser import parse as date_parse, ParserError
@@ -22,6 +22,7 @@ from anubis.models import (
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
+from anubis.utils.config import get_config_int
 
 
 @cache.memoize(timeout=30, unless=is_debug)
@@ -288,3 +289,21 @@ def fill_user_assignment_data(user_id: str, assignment_data: Dict[str, Any]):
     due_date = get_assignment_due_date(user_id, assignment_id)
     assignment_data['past_due'] = due_date < datetime.now()
     assignment_data['due_date'] = str(due_date)
+
+
+def get_recent_assignments() -> List[Assignment]:
+    """
+    Get recent assignments. Recent assignments based off of
+    AUTOGRADE_RECALCULATE_DAYS config item value.
+
+    :return:
+    """
+    autograde_recalculate_days = get_config_int('AUTOGRADE_RECALCULATE_DAYS', default=60)
+    autograde_recalculate_duration = timedelta(days=autograde_recalculate_days)
+
+    recent_assignments = Assignment.query.filter(
+        Assignment.release_date > datetime.now(),
+        Assignment.due_date > datetime.now() - autograde_recalculate_duration,
+    ).all()
+
+    return recent_assignments
