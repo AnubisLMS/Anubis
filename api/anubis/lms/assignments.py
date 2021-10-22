@@ -302,8 +302,8 @@ def get_recent_assignments() -> List[Assignment]:
     autograde_recalculate_duration = timedelta(days=autograde_recalculate_days)
 
     recent_assignments = Assignment.query.filter(
-        Assignment.release_date > datetime.now(),
-        Assignment.due_date > datetime.now() - autograde_recalculate_duration,
+        Assignment.release_date > datetime.now() - autograde_recalculate_duration,
+        Assignment.due_date < datetime.now() + autograde_recalculate_duration,
     ).all()
 
     return recent_assignments
