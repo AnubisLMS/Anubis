@@ -11,6 +11,7 @@ import StandardLayout from '../../../Components/Layouts/StandardLayout';
 import SubmissionSummary from '../../../Components/Public/Submission/SubmissionSummary';
 import SubmissionBuild from '../../../Components/Public/Submission/SubmissionBuild';
 import SubmissionTests from '../../../Components/Public/Submission/SubmissionTests';
+import SubmissionHeader from '../../../Components/Public/Submission/SubmissionHeader/SubmissionHeader';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 
 const regrade = ({commit, submission, setSubmission, setStep, setErrorStop}, enqueueSnackbar) => () => {
@@ -116,27 +117,9 @@ export default function Submission() {
       submission.commit,
     ]}>
       <Grid container spacing={4}>
-        {/* Summary */}
-        <Grid item xs={12} md={4} key={'summary'}>
-          <SubmissionSummary
-            submission={submission}
-            regrade={regrade(pageState, enqueueSnackbar)}
-            stop={errorStop}
-          />
-        </Grid>
-
-        <Grid item xs={12} md={8} key={'build-test'}>
-          <Grid container spacing={1}>
-            {/* Build */}
-            <Grid item xs={12} key={'build'}>
-              <SubmissionBuild build={build} stop={errorStop}/>
-            </Grid>
-
-            {/* Tests */}
-            <Grid item xs={12} key={'tests'}>
-              <SubmissionTests tests={tests} stop={errorStop}/>
-            </Grid>
-          </Grid>
+        {/* Submission Header */}
+        <Grid item xs={12}>
+          <SubmissionHeader {... submission}/>
         </Grid>
       </Grid>
     </StandardLayout>
