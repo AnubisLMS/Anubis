@@ -1,5 +1,5 @@
-import discord
-
+import os
+from discord.ext import commands, tasks
 from anubis.models import Course, User, TheiaSession, InCourse
 from anubis.utils.data import with_context
 
@@ -43,33 +43,51 @@ def get_course_theia_session_count(course):
         Course.id == course.id
     ).count()
 
-if __name__ == "__main__":
+def daily_report():
+    report = ""
     course_query = get_courses()
     # Course List
-    print("Course Name\tCourse Code")
+    report += "Course Name\tCourse Code\n"
     for course in course_query:
-        print(f"{course.name}\t{course.course_code}")
+        report += f"{course.name}\t{course.course_code}\n"
     
-    print()
+    report += "\n"
     # Number of users enrolled in at least on class this semester
-    print("Total users enrolled in at least one course this semester")
-    print(get_active_users_this_semester())
+    report += "Total users enrolled in at least one course this semester\n"
+    report += f"{get_active_users_this_semester()}\n"
 
-    print()
+    report += "\n"
     # Number of IDEs opened this semester
-    print("Total IDEs opened this semseter")
-    print(get_ides_opened_this_semester())
+    report += "Total IDEs opened this semseter\n"
+    report += f"{get_ides_opened_this_semester()}\n"
 
-    print()
+    report += "\n"
     # Number of students for each course
-    print("Course Name\tCourse Code\tTotal users enrolled")
+    report += "Course Name\tCourse Code\tTotal users enrolled\n"
     for course in course_query:
         user_count = get_course_user_count(course)
-        print(f"{course.name}\t{course.course_code}\t{user_count}")
+        report += f"{course.name}\t{course.course_code}\t{user_count}\n"
 
-    print()
+    report += "\n"
     # Number of IDEs opened for each course
-    print("Course Name\tCourse Code\tTotal IDEs opened")
+    report += "Course Name\tCourse Code\tTotal IDEs opened\n"
     for course in course_query:
         theia_count = get_course_theia_session_count(course)
-        print(f"{course.name}\t{course.course_code}\t{theia_count}")
+        report += f"{course.name}\t{course.course_code}\t{theia_count}\n"
+    
+    return report
+
+bot = commands.Bot(command_prefix='!')
+channel_id = int(os.environ.get("DISCORD_CHANNEL_ID", "0"))
+
+@bot.command(name="report", help="Anubis Usage Report")
+async def report(ctx):
+    await ctx.send("```" + daily_report() + "```")
+
+@bot.event
+async def on_ready():
+    channel = bot.get_channel(channel_id)
+    await channel.send("Usage Report:```" + daily_report() + "```")
+
+
+bot.run(os.environ.get("DISCORD_BOT_TOKEN", default="DEBUG"))
