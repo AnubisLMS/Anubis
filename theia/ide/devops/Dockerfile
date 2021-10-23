@@ -61,7 +61,6 @@ RUN set -eux; apt-get update; \
   apt-get install -y --no-install-recommends \
     make build-essential libssl-dev wget curl htop \
     libsecret-1-0 tk-dev; \
-  rm -rf /var/lib/apt/lists/*; \
   savedAptMark="$(apt-mark showmanual | grep -vP 'libglib2.0-dev')"; \
   gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
   apt-get install -y --no-install-recommends \
