@@ -11,6 +11,7 @@ from anubis.utils.http import error_response, success_response
 from anubis.lms.assignments import get_assignments
 from anubis.lms.courses import valid_join_code, get_courses, get_courses_with_visuals
 from anubis.utils.cache import cache
+from anubis.utils.rpc import enqueue_assign_missing_questions
 
 courses_ = Blueprint("public-courses", __name__, url_prefix="/public/courses")
 
@@ -88,6 +89,9 @@ def public_courses_join(join_code):
     cache.delete_memoized(get_courses, current_user.netid)
     cache.delete_memoized(get_assignments, current_user.netid)
     cache.delete_memoized(get_assignments, current_user.netid, course.id)
+
+    # Enqueue fixing missing questions job
+    enqueue_assign_missing_questions(current_user.id)
 
     return success_response({
         "status": f"Joined {course.course_code}"
