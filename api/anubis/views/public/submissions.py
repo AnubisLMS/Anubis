@@ -91,16 +91,21 @@ def public_submission(commit: str):
             .filter(Submission.commit == commit)
     )
 
-    # If the current user is not a superuser, then add a filter
-    # to make sure the submission is owned by the current user.
-    if not current_user.is_superuser:
-        query = query.filter(Submission.owner_id == current_user.id)
-
     # Do query
-    submission = query.first()
+    submission: Submission = query.first()
 
     # Make sure we caught one
     req_assert(submission is not None, message='submission does not exist')
+
+    # Make sure the user is allowed to see the submission if it does not belong to them
+    if not submission.owner_id == current_user.id:
+
+        # Course that the submission belongs to
+        course_id = submission.assignment.course_id
+
+        # Assert that the current user is a admin for the course (TA, Professor, Superuser).
+        # If they are not, then pass back that submissions does not exist message.
+        req_assert(is_course_admin(course_id, current_user.id), message='submission does not exist')
 
     # Hand back submission
     return success_response({"submission": submission.full_data})

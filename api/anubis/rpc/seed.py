@@ -67,6 +67,11 @@ def seed():
         autograde_tests_repo='https://github.com/os3224/anubis-assignment-tests',
         github_org='os3224',
     )
+    ta = TAForCourse(owner=ta_user, course=intro_to_os_course)
+    professor = ProfessorForCourse(owner=professor_user, course=intro_to_os_course)
+    db.session.add_all([professor, ta])
+    db.session.commit()
+
     os_assignment0, _, os_submissions0, _ = create_assignment(
         intro_to_os_course, intro_to_os_students, i=0, github_repo_required=True,
     )
@@ -87,9 +92,6 @@ def seed():
     assign_questions(os_assignment2)
     init_submissions(os_submissions3)
     assign_questions(os_assignment3)
-    ta = TAForCourse(owner=ta_user, course=intro_to_os_course)
-    professor = ProfessorForCourse(owner=professor_user, course=intro_to_os_course)
-    db.session.add_all([professor, ta])
 
     # MMDS test course
     mmds_students = create_students(50)
