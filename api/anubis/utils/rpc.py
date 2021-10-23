@@ -12,7 +12,7 @@ from anubis.rpc.theia import (
     reap_stale_theia_sessions,
 )
 from anubis.rpc.visualizations import create_visuals as create_visuals_
-
+from anubis.rpc.lms import assign_missing_questions
 
 def rpc_enqueue(func, queue=None, args=None):
     """
@@ -72,3 +72,9 @@ def enqueue_seed():
 def enqueue_create_visuals(*_):
     """Enqueue create visuals"""
     rpc_enqueue(create_visuals_, queue='default')
+
+
+def enqueue_assign_missing_questions(*args):
+    """Enqueue assign missing questions"""
+    rpc_enqueue(assign_missing_questions, queue='default', args=args)
+

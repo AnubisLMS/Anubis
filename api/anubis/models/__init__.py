@@ -201,6 +201,7 @@ class Assignment(db.Model):
     )
     accept_late = db.Column(db.Boolean, default=True)
     hide_due_date = db.Column(db.Boolean, default=False)
+    questions_assigned = db.Column(db.Boolean, default=False)
 
     # Autograde
     pipeline_image = db.Column(db.TEXT, nullable=True, index=True)
