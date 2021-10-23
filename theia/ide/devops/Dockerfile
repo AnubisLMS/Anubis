@@ -67,7 +67,7 @@ RUN set -eux; apt-get update; \
   apt-get install -y --no-install-recommends \
     gcc dpkg-dev libsqlite3-dev libncurses5-dev libbz2-dev libreadline-dev \
     xz-utils libbz2-dev libc6-dev libffi-dev libexpat1-dev \
-    libgdbm-dev liblzma-dev zlib1g-dev; \
+    libgdbm-dev liblzma-dev zlib1g-dev nano vim; \
   apt remove python python3 -y; \
   apt autoremove -y; \
   apt-mark auto '.*' > /dev/null; \

@@ -65,7 +65,7 @@ RUN set -eux; \
   apt-get install -y --no-install-recommends \
     gcc dpkg-dev libsqlite3-dev libncurses5-dev libbz2-dev libreadline-dev \
     xz-utils libbz2-dev libc6-dev libffi-dev libexpat1-dev \
-    libgdbm-dev liblzma-dev zlib1g-dev; \
+    libgdbm-dev liblzma-dev zlib1g-dev nano vim; \
   apt-mark auto '.*' > /dev/null; \
   wget https://www.python.org/ftp/python/$PY_VERSION/Python-$PY_VERSION.tgz; \
   wget https://bootstrap.pypa.io/get-pip.py; \
