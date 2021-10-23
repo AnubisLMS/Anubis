@@ -78,6 +78,9 @@ def reset_question_assignments(assignment: Assignment, commit: bool = True):
         AssignedStudentQuestion.assignment_id == assignment.id
     ).delete()
 
+    # Mark the assignment as questions not assigned
+    assignment.questions_assigned = False
+
     # Commit the delete
     if commit:
         db.session.commit()
@@ -101,6 +104,9 @@ def hard_reset_questions(assignment: Assignment, commit: bool = True):
     AssignmentQuestion.query.filter(
         AssignmentQuestion.assignment_id == assignment.id
     ).delete()
+
+    # Mark the assignment as questions not assigned
+    assignment.questions_assigned = False
 
     # Commit the delete
     if commit:
@@ -149,6 +155,9 @@ def assign_questions(assignment: Assignment):
             )
             assigned_questions.append(assigned_question.data)
             db.session.add(assigned_question)
+
+    # Mark the assignment as questions assigned
+    assignment.questions_assigned = True
 
     # Commit assignments
     db.session.commit()
@@ -402,6 +411,9 @@ def fix_missing_question_assignments(assignment: Assignment):
     :param assignment:
     :return:
     """
+
+    if not assignment.questions_assigned:
+        logger.info('fix_missing_question_assignments skipping, questions not assigned yet')
 
     # Get set of student ids
     students = get_students_in_class(assignment.course_id)

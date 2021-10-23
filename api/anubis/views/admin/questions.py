@@ -307,7 +307,7 @@ def private_questions_get_unique_code(assignment_id: str):
     return success_response({
         'assignment_name': assignment.name,
         'questions': get_all_questions(assignment),
-        'questions_assigned': assigned_question_count > 0,
+        'questions_assigned': assignment.questions_assigned,
         'assigned_question_count': assigned_question_count,
     })
 
