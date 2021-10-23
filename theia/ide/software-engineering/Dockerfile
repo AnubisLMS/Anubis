@@ -59,7 +59,6 @@ RUN set -eux; \
     make build-essential libssl-dev wget curl htop \
     libsecret-1-0; \
   apt remove python python3 -y; \
-  rm -rf /var/lib/apt/lists/*; \
   savedAptMark="$(apt-mark showmanual)"; \
   gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
   apt-get install -y --no-install-recommends \
