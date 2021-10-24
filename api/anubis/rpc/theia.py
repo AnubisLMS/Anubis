@@ -3,7 +3,7 @@ from kubernetes import config, client
 from anubis.models import db, TheiaSession
 from anubis.utils.config import get_config_int
 from anubis.utils.data import with_context
-from anubis.utils.k8s.theia import (
+from anubis.k8s.theia import (
     update_theia_pod_cluster_addresses,
     fix_stale_theia_resources,
     create_theia_k8s_pod_pvc,

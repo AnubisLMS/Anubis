@@ -6,7 +6,7 @@ from kubernetes import config
 
 from anubis.models import TheiaSession
 from anubis.utils.data import with_context
-from anubis.utils.k8s.theia import update_theia_session
+from anubis.k8s.theia import update_theia_session
 
 
 @with_context
