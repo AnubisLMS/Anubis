@@ -1,8 +1,8 @@
 from kubernetes import config, client
 
-from anubis.models import db, Config, Submission
+from anubis.models import db, Submission
 from anubis.utils.data import with_context
-from anubis.utils.k8s.pipeline import create_pipeline_job_obj, reap_pipeline_jobs
+from anubis.k8s.pipeline import create_pipeline_job_obj, reap_pipeline_jobs
 from anubis.utils.logging import logger
 from anubis.utils.config import get_config_int
 
