@@ -1,4 +1,4 @@
-from utils import Session
+from tests.utils import Session
 
 
 def test_courses_public():

@@ -1,4 +1,4 @@
-from utils import Session, permission_test
+from tests.utils import Session, permission_test
 
 sample_question = {
     "question": "question",

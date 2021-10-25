@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from utils import Session, permission_test
+from tests.utils import Session, permission_test
 
 sample_sync = {
     "name": "CS-UY 3224 TEST ADMIN",

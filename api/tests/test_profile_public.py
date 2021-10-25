@@ -1,6 +1,5 @@
-from utils import Session
-
 from anubis.utils.data import rand
+from tests.utils import Session
 
 
 def test_profile_public():

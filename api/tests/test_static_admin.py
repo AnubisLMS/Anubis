@@ -1,7 +1,8 @@
 import io
 
 import requests
-from utils import Session
+
+from tests.utils import Session
 
 
 def test_static_admin():

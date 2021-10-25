@@ -1,4 +1,4 @@
-from utils import permission_test
+from tests.utils import permission_test
 
 sample_config = [{"key": "MAX_IDES", "value": "75"}]
 

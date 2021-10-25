@@ -1,4 +1,4 @@
-from utils import Session, create_repo
+from tests.utils import Session, create_repo
 
 
 def test_ide_public():

@@ -1,4 +1,4 @@
-from utils import permission_test
+from tests.utils import permission_test
 
 settings_sample = {
     "network_locked": False,

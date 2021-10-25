@@ -1,7 +1,7 @@
 import copy
 from datetime import datetime, timedelta
 
-from utils import Session
+from tests.utils import Session
 
 sample_sync = {
     "name": "CS-UY 3224 TEST PUBLIC HIDDEN 1",

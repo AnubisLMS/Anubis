@@ -735,8 +735,8 @@ test code. Just like all the other cool libraries out there, the anubis pipeline
 functions. Here is a minimal example of an assignment.py that will build and run a single simple test.
 
 ```python
-from utils import register_test, register_build, exec_as_student
-from utils import (
+from tests.utils import register_test, register_build, exec_as_student
+from tests.utils import (
     TestResult, BuildResult, Panic, DEBUG, 
     xv6_run, did_xv6_crash, 
     verify_expected, search_lines, test_lines

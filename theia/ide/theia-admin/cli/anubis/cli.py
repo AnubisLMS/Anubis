@@ -158,7 +158,7 @@ def sync():
     # click.echo(json.dumps(assignment_meta, indent=2))
     try:
         import assignment
-        import utils
+        import tests.utils
     except ImportError:
         click.echo('Not in an assignment directory')
         return 1

@@ -1,4 +1,4 @@
-from utils import Session, permission_test
+from tests.utils import Session, permission_test
 
 
 def test_visuals_admin():
