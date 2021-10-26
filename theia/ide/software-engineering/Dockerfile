@@ -37,7 +37,7 @@ ARG NODE_VERSION=12.22.6
 ##################################################################################
 
 FROM node:${NODE_VERSION}-buster as theia
-ARG PY_VERSION=3.10.0
+ARG PY_VERSION=3.9.7
 
 ENV PY_VERSION=$PY_VERSION
 ENV NODE_VERSION=$NODE_VERSION
