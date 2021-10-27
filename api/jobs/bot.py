@@ -80,33 +80,10 @@ def generate_report():
     return report
 
 bot = commands.Bot(command_prefix='!')
-CHANNEL_ID = int(os.environ.get("DISCORD_CHANNEL_ID", "0"))
-REPORT_TIME = time.fromisoformat(os.environ.get("DAILY_REPORT_TIME", "23:55:00"))
-SLEEP_SECONDS = 15
-SLEEP_SECONDS_REVERSE = SLEEP_SECONDS - timedelta(days=1).total_seconds()
 
 @bot.command(name="report", help="Anubis Usage Report")
 async def report(ctx):
     await ctx.send("```" + generate_report() + "```")
-
-@tasks.loop(seconds=10)
-async def daily_report():
-    channel = bot.get_channel(CHANNEL_ID)
-
-    now = datetime.now()
-    today_report_time = datetime.combine(now.date(), REPORT_TIME)
-    seconds = (today_report_time - now).total_seconds()
-
-    if ((seconds > 0 and seconds <= SLEEP_SECONDS)
-        or (seconds < 0 and seconds < SLEEP_SECONDS_REVERSE)):
-        await asyncio.sleep(seconds)
-        await channel.send(
-            f"{str(today_report_time)} Daily Report:```{generate_report()}```"
-        )
-
-@bot.event
-async def on_ready():
-    daily_report.start()
 
 if __name__ == "__main__":
     bot.run(os.environ.get("DISCORD_BOT_TOKEN", default="DEBUG"))
