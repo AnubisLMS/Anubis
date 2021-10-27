@@ -13,7 +13,6 @@ import SubmissionBuild from '../../../Components/Public/Submission/SubmissionBui
 import SubmissionTests from '../../../Components/Public/Submission/SubmissionTests';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 
-
 const regrade = ({commit, submission, setSubmission, setStep, setErrorStop}, enqueueSnackbar) => () => {
   if (!submission.processed) {
     return enqueueSnackbar('Submission must first finish tests before regrading.', {variant: 'warning'});
