@@ -4,9 +4,10 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import {Button} from '@material-ui/core';
 
 
-export default function SubmissionTest({test}) {
+export default function SubmissionTest({test, callback}) {
   const classes = useStyles();
   return (
     <Box
@@ -33,9 +34,12 @@ export default function SubmissionTest({test}) {
           {test.result.passed === true ? 'Successful' : 'Failed'}
         </Typography>
       </Box>
-      <Typography className={classes.expand}>
-              Expand
-      </Typography>
+      <Button onClick = {
+        () => callback(test)} >
+        <Typography className={classes.expand}>
+                Expand
+        </Typography>
+      </Button>
     </Box>
   );
 }

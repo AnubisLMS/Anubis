@@ -5,7 +5,7 @@ import React from 'react';
 import {RadialChart} from 'react-vis';
 import {useStyles} from './SubmissionContent.styles';
 
-export default function SubmissionContent({submission, regrade, stop}) {
+export default function SubmissionContent({submission, children}) {
   const classes = useStyles();
   const testsPassed = submission.tests.filter((test) => test.result.passed).length;
   const testsFailed = submission.tests.filter((test) => !(test.result.passed)).length;
@@ -35,6 +35,9 @@ export default function SubmissionContent({submission, regrade, stop}) {
             and {testsPassed == 1 ? '1 successful test' : (testsPassed+' successful tests')}
           </Typography>
         </Box>
+      </Box>
+      <Box >
+        {children}
       </Box>
     </Box>
   );

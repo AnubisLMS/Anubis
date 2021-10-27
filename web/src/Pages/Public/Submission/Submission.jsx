@@ -3,15 +3,19 @@ import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
 import Grid from '@material-ui/core/Grid';
-
+import Box from '@material-ui/core/Box';
 import {useStyles} from './Submission.styles';
 import useQuery from '../../../hooks/useQuery';
 import {translateSubmission} from '../../../Utils/submission';
 import StandardLayout from '../../../Components/Layouts/StandardLayout';
 import SubmissionSummary from '../../../Components/Public/Submission/SubmissionSummary';
 import SubmissionBuild from '../../../Components/Public/Submission/SubmissionBuild';
+import SubmissionContent from '../../../Components/Public/Submission/SubmissionContent/SubmissionContent';
+import SubmissionTest from '../../../Components/Public/Submission/SubmissionTest/SubmissionTest';
 import SubmissionTests from '../../../Components/Public/Submission/SubmissionTests';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import SubmissionTestExpanded
+  from '../../../Components/Public/Submission/SubmissionTestExpanded/SubmissionTestExpanded';
 
 const regrade = ({commit, submission, setSubmission, setStep, setErrorStop}, enqueueSnackbar) => () => {
   if (!submission.processed) {
@@ -44,6 +48,15 @@ export default function Submission() {
   const [step, setStep] = useState(0);
   const [submission, setSubmission] = useState(null);
   const [errorStop, setErrorStop] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [curtest, setCurtest] = useState();
+  const handleOpen = (test) => {
+    setCurtest(test);
+    setIsModalOpen(!isModalOpen);
+  };
+  const handleClose = () => (
+    setIsModalOpen(!isModalOpen)
+  );
 
   const continueSubscribe = () => setTimeout(() => {
     if (step < 60) {
@@ -117,25 +130,37 @@ export default function Submission() {
     ]}>
       <Grid container spacing={4}>
         {/* Summary */}
-        <Grid item xs={12} md={4} key={'summary'}>
+        {/* <Grid item xs={12} md={4} key={'summary'}>
           <SubmissionSummary
             submission={submission}
             regrade={regrade(pageState, enqueueSnackbar)}
             stop={errorStop}
           />
-        </Grid>
+        </Grid> */}
 
         <Grid item xs={12} md={8} key={'build-test'}>
           <Grid container spacing={1}>
             {/* Build */}
             <Grid item xs={12} key={'build'}>
-              <SubmissionBuild build={build} stop={errorStop}/>
+              <SubmissionContent submission={submission}>
+                {tests.map((test, key)=>(
+                  <Box key={key}>
+                    <SubmissionTest test={test} callback={handleOpen}/>
+                  </Box>
+                ))}
+              </SubmissionContent>
+              <SubmissionTestExpanded
+                showModal={isModalOpen}
+                handleClose={handleClose}
+                assignmentName={submission.assignment_name}
+                testName={curtest==null?'':curtest.test.name}
+              />
             </Grid>
 
             {/* Tests */}
-            <Grid item xs={12} key={'tests'}>
+            {/* <Grid item xs={12} key={'tests'}>
               <SubmissionTests tests={tests} stop={errorStop}/>
-            </Grid>
+            </Grid> */}
           </Grid>
         </Grid>
       </Grid>

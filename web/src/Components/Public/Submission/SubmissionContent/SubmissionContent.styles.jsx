@@ -5,7 +5,6 @@ export const useStyles = makeStyles((theme) => ({
     color: theme.palette.white,
     flexGrow: 1,
     width: '100%',
-    height: '500px',
     backgroundColor: 'transparent',
     display: 'flex',
     flexDirection: 'column',
