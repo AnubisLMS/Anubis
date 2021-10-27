@@ -82,26 +82,24 @@ def get_number_arg(arg_name: str = "number", default_value: int = 10, reject_neg
     :return:
     """
 
-    # Get the query argument in string form
-    n_str: str = request.args.get(arg_name, default=default_value)
+    # Get the query argument, attempt to convert it
+    # to an int with the built-in `type` argument,
+    # and fallback to default when it fails to convert.
+    n = request.args.get(arg_name, default=default_value, type=int)
 
-    try:
-        # Attempt to convert to a python int
-        n: int = int(n_str)
+    # Type conversion to int fails when arg_name is None
+    # and we fallback to default in that case,
+    # so n can never be None.
+    assert n is not None
 
-        # If reject_negative, then check if
-        # the parsed value is negative.
-        if reject_negative and n < 0:
-            # If it was negative, then fallback to default
-            return default_value
-
-        # Return integer value
-        return n
-    except ValueError:
-        # ValueError is raised if the string to int
-        # conversion was unsuccessful. In that case,
-        # then we fallback to default
+    # If reject_negative, then check if
+    # the parsed value is negative.
+    if reject_negative and n < 0:
+        # If it was negative, then fallback to default
         return default_value
+
+    # Return integer value
+    return n
 
 
 def get_request_file_stream(
