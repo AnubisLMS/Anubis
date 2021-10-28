@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:16-alpine
 
 # This disables webpack source maps from being created in the build step
 ENV GENERATE_SOURCEMAP=false
@@ -12,7 +12,7 @@ RUN yarn run build \
   && find / -depth -name '.cache' -exec 'rm' '-rf' '{}' ';'
 
 
-FROM node:alpine
+FROM node:16-alpine
 
 WORKDIR /opt/app
 RUN yarn global add serve \
