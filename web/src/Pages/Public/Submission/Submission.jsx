@@ -129,39 +129,24 @@ export default function Submission() {
       submission.commit,
     ]}>
       <Grid container spacing={4}>
-        {/* Summary */}
-        {/* <Grid item xs={12} md={4} key={'summary'}>
-          <SubmissionSummary
-            submission={submission}
-            regrade={regrade(pageState, enqueueSnackbar)}
-            stop={errorStop}
+
+        <Grid item xs={12} md={12} key={'build-test'}>
+          {/* Build */}
+          <SubmissionContent submission={submission}>
+            {tests.map((test)=>(
+              <Box key={test.test.id}>
+                <SubmissionTest test={test} callback={handleOpen}/>
+              </Box>
+            ))}
+          </SubmissionContent>
+        </Grid>
+        <Grid container justifyContent="center">
+          <SubmissionTestExpanded
+            showModal={isModalOpen}
+            handleClose={handleClose}
+            assignmentName={submission.assignment_name}
+            testName={curtest==null?'':curtest.test.name}
           />
-        </Grid> */}
-
-        <Grid item xs={12} md={8} key={'build-test'}>
-          <Grid container spacing={1}>
-            {/* Build */}
-            <Grid item xs={12} key={'build'}>
-              <SubmissionContent submission={submission}>
-                {tests.map((test, key)=>(
-                  <Box key={key}>
-                    <SubmissionTest test={test} callback={handleOpen}/>
-                  </Box>
-                ))}
-              </SubmissionContent>
-              <SubmissionTestExpanded
-                showModal={isModalOpen}
-                handleClose={handleClose}
-                assignmentName={submission.assignment_name}
-                testName={curtest==null?'':curtest.test.name}
-              />
-            </Grid>
-
-            {/* Tests */}
-            {/* <Grid item xs={12} key={'tests'}>
-              <SubmissionTests tests={tests} stop={errorStop}/>
-            </Grid> */}
-          </Grid>
         </Grid>
       </Grid>
     </StandardLayout>
