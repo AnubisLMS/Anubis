@@ -70,10 +70,10 @@ def get_assignment_tests_pass_times(assignment_test: AssignmentTest):
     )
 
     # Drop outlier values (> 3 sigma)
-    df = df[np.abs(df.duration - df.duration.mean()) <= (3 * df.duration.std())].value_counts().to_dict()
+    df_dict = df[np.abs(df.duration - df.duration.mean()) <= (3 * df.duration.std())].value_counts().to_dict()
 
     # Return the x and y plot data for the scatter visual
-    return [{"x": np.abs(x[0]), "y": y, "size": 3} for x, y in df.items()]
+    return [{"x": np.abs(x[0]), "y": y, "size": 3} for x, y in df_dict.items()]
 
 
 def get_assignment_tests_pass_counts(assignment_test: AssignmentTest):

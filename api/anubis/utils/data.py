@@ -49,7 +49,7 @@ def jsonify(data, status_code=200):
     return res
 
 
-def send_noreply_email(message: str, subject: str, recipient: str):
+def send_noreply_email(message_raw: str, subject: str, recipient: str):
     """
     Use this function to send a noreply email to a user (ie student).
 
@@ -69,9 +69,9 @@ def send_noreply_email(message: str, subject: str, recipient: str):
     """
 
     if environ.get("DEBUG", False):
-        return print(message, subject, recipient, flush=True)
+        return print(message_raw, subject, recipient, flush=True)
 
-    message = MIMEText(message, "plain")
+    message = MIMEText(message_raw, "plain")
     message["Subject"] = subject
 
     message["From"] = "noreply@anubis.osiris.services"
@@ -256,8 +256,8 @@ def human_readable_to_bytes(size: str) -> int:
     :return:
     """
     size_name = ("B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB")
-    size = size.split()  # divide '1 GB' into ['1', 'GB']
-    num, unit = int(size[0]), size[1]
+    sizes = size.split()  # divide '1 GB' into ['1', 'GB']
+    num, unit = int(sizes[0]), sizes[1]
     # index in list of sizes determines power to raise it to
     idx = size_name.index(unit)
     # ** is the "exponent" operator - you can use it instead of math.pow()

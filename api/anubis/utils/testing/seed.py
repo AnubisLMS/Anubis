@@ -178,7 +178,7 @@ def create_assignment(
 
 
 def create_students(n=10) -> List[User]:
-    students = []
+    students: List[User] = []
     netids = set()
     while len(students) < n:
 

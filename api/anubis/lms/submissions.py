@@ -52,29 +52,31 @@ def regrade_submission(submission: Union[Submission, str], queue: str = "default
     # If the submission is a string, then we consider it to be a submission id
     if isinstance(submission, str):
         # Try to query for the submission
-        submission = Submission.query.filter(
+        prepared_submission: Submission = Submission.query.filter(
             Submission.id == submission,
         ).first()
 
         # If there was no submission found, then return an error status
-        if submission is None:
+        if prepared_submission is None:
             return error_response("could not find submission")
+    else:
+        prepared_submission = submission
 
     # If the submission is already marked as in processing state, then
     # we can skip regrading this submission.
-    if not submission.processed:
+    if not prepared_submission.processed:
         return error_response("submission currently being processed")
 
     # Update the submission fields to reflect the regrade
-    submission.processed = False
-    submission.state = "regrading"
-    submission.last_updated = datetime.now()
+    prepared_submission.processed = False
+    prepared_submission.state = "regrading"
+    prepared_submission.last_updated = datetime.now()
 
     # Reset the accompanying database objects
-    init_submission(submission)
+    init_submission(prepared_submission)
 
     # Enqueue the submission job
-    enqueue_autograde_pipeline(submission.id, queue=queue)
+    enqueue_autograde_pipeline(prepared_submission.id, queue=queue)
 
     return success_response({"message": "regrade started"})
 
@@ -285,7 +287,6 @@ def reject_late_submission(submission: Submission):
 
     # Go through test results, and set them to rejected
     for test_result in submission.test_results:
-        test_result: SubmissionTestResult
         test_result.passed = False
         test_result.message = "Late submissions not accepted"
         test_result.stdout = ""

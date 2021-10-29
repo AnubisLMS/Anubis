@@ -226,7 +226,7 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
         assignment.grace_date = date_parse(assignment_data["date"]["grace"])
     except ParserError:
         logger.error(traceback.format_exc())
-        return "Unable to parse datetime", 406
+        return "Unable to parse datetime", False
 
     db.session.add(assignment)
 

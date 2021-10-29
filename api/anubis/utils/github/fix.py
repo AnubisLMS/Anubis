@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import List
+from typing import Any, Dict, List
 
 from sqlalchemy.sql import or_
 
@@ -77,7 +77,7 @@ def fix_github_missing_submissions(org_name: str):
     repositories = organization["repositories"]["nodes"]
 
     # Running map of unique_code -> assignment objects
-    assignments = dict()
+    assignments: Dict[str, Any] = dict()
 
     # Parse out repo name and url from graphql response
     repos = map(lambda node: (node["name"], node["url"], node["ref"]), repositories)

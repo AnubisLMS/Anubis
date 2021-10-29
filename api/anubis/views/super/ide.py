@@ -51,9 +51,9 @@ def super_ide_images_save(images: list):
 
     db.session.commit()
 
-    images: List[TheiaImage] = TheiaImage.query.populate_existing().all()
+    images_db: List[TheiaImage] = TheiaImage.query.populate_existing().all()
     return success_response({
-        'images': [image.data for image in images],
+        'images': [image.data for image in images_db],
         'status': 'Images saved',
     })
 

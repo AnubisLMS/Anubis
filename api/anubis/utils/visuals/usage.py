@@ -131,7 +131,7 @@ def get_raw_submissions() -> List[Dict[str, Any]]:
 
 
 @cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
-def get_usage_plot(course_id: Optional[str]) -> Optional[bytes]:
+def get_usage_plot(course_id: str) -> Optional[bytes]:
     import matplotlib.colors as mcolors
     import matplotlib.pyplot as plt
 

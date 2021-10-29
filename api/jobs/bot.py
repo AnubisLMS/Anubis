@@ -195,7 +195,7 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
         ("ID", "Age", "Last Proxy")
     )
 
-    report = (
+    report_raw = (
         "IDEs Active ({})\n{}\n\nIDE Time Served Today: {}\nIDE Time Served Total: {}"
     ).format(
         len(active_ides),
@@ -204,22 +204,22 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
         human_readable_datetime(total_ide_seconds)
     )
 
-    print(report)
+    print(report_raw)
     if mobile:
         if len(active_ides) > 20:
-            report = report.split("\n")
+            report = report_raw.split("\n")
             r1 = to_image("\n".join(report[:len(report) // 2]))
             r2 = to_image("\n".join(report[len(report) // 2:]))
             reportImg = Image.new("RGB", (r1.width + r2.width, max(r1.height, r2.height)))
             reportImg.paste(r1, (0, 0))
             reportImg.paste(r2, (r1.width, 0))
         else:
-            reportImg = to_image(report)
+            reportImg = to_image(report_raw)
         return reportImg
     return discord.Embed(
         title="IDE report",
-        description="```" + report + "```"
-    ).set_thumbnail(url=bot.user.avatar_url).set_author(name="Anubis Bot")
+        description="```" + report_raw + "```"
+    ).set_thumbnail(url=str(bot.user.avatar_url)).set_author(name="Anubis Bot")
 
 
 bot = commands.Bot(

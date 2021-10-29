@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from dateutil.parser import parse as date_parse
 from flask import Blueprint, request
@@ -94,14 +95,14 @@ def admin_lecture_save(lecture_notes_id: str):
     """
 
     # Get fields from params
-    post_time = request.args.get("post_time", default=None)
+    post_time_str = request.args.get("post_time", default=None)
     title = request.args.get("title", default="")
     description = request.args.get("description", default="")
 
     # If post time was in the http query, then try to parse it
-    if isinstance(post_time, str):
+    if isinstance(post_time_str, str):
         try:
-            post_time = date_parse(post_time)
+            post_time: Optional[datetime] = date_parse(post_time_str)
         except:
             post_time = None
 

@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import traceback
+from typing import Any, Callable, List
 
 import requests
 
@@ -158,7 +159,7 @@ class Session(object):
         port: int = 5000,
     ):
         self.url = f"http://{domain}:{port}"
-        self.timings = []
+        self.timings: List[Any] = []
         self._session, self.netid = _create_user_session(self.url, permission, new=new, add_to_os=add_to_os)
 
     @staticmethod
@@ -322,7 +323,13 @@ def get_student_id():
     return student.id
 
 
-def permission_test(path, fail_for: list = None, method="get", after: callable = None, **kwargs):
+def permission_test(
+    path,
+    fail_for: list = None,
+    method="get",
+    after: Callable[..., Any] = None,
+    **kwargs,
+):
     def _test_permission(_path, _fail_for, _method, _after, **_kwargs):
         sessions = {
             "student": Session("student"),

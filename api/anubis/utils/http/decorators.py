@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import List, Tuple, Union
+from typing import Iterable, List, Tuple, Union
 
 from flask import request
 
@@ -78,7 +78,7 @@ def json_response(func):
 
 
 def json_endpoint(
-    required_fields: Union[List[str], List[Tuple], None] = None,
+    required_fields: Union[Iterable[str], Iterable[Tuple], None] = None,
     only_required: bool = False,
 ):
     """

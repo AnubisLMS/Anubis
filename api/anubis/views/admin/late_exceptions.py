@@ -93,16 +93,16 @@ def admin_late_exception_update(assignment_id: str = None, user_id: str = None, 
     try:
         if due_date is None:
             raise ParserError
-        due_date = date_parse(due_date)
+        parsed_due_date = date_parse(due_date)
     except ParserError:
         return error_response("datetime could not be parsed")
 
     # Double check that the new due data is not before the actual deadline
-    if due_date <= assignment.due_date:
+    if parsed_due_date <= assignment.due_date:
         return error_response("Exception cannot be before assignment due date")
 
     # Update the due date
-    late_exception.due_date = due_date
+    late_exception.due_date = parsed_due_date
 
     db.session.commit()
 

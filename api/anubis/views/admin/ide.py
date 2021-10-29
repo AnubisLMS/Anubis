@@ -114,7 +114,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
         message="Starting new IDEs is currently disabled by an Anubis administrator. " "Please try again later.",
     )
 
-    session: TheiaSession = initialize_ide(
+    session = initialize_ide(
         image_id=image.id,
 
         assignment_id=None,

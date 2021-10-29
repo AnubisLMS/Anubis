@@ -2,7 +2,7 @@ import base64
 import json
 import traceback
 from datetime import datetime, timedelta
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from kubernetes import client, config
 
@@ -449,7 +449,7 @@ def create_theia_k8s_pod_pvc(
     extra_labels = {}
 
     # Anything extra in the pod spec to be added
-    spec_extra = {}
+    spec_extra: Dict[str, Any] = {}
 
     # If network locked, then set the network policy to student
     # and dns to 1.1.1.1

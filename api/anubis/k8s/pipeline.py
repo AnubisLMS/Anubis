@@ -2,6 +2,7 @@ import os
 import time
 import traceback
 from datetime import datetime, timedelta
+from typing import cast
 
 import kubernetes
 from kubernetes import client
@@ -124,7 +125,7 @@ def reap_pipeline_jobs() -> int:
 
     # Iterate through all pipeline jobs
     for job in jobs.items:
-        job: client.V1Job
+        job = cast(client.V1Job, job)
 
         # Calculate job created time
         job_created = job.metadata.creation_timestamp.replace(tzinfo=None)

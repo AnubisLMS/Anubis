@@ -1,7 +1,7 @@
 import io
 import random
 import zipfile
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import yaml
 
@@ -41,7 +41,7 @@ def get_question_pool_mapping(
     pools = set(question.pool for question in questions)
 
     # Build up sequence to question mapping
-    sequence_to_questions = {pool: [] for pool in pools}
+    sequence_to_questions: Dict[int, List[AssignmentQuestion]] = {pool: [] for pool in pools}
     for question in questions:
         sequence_to_questions[question.pool].append(question)
 
@@ -154,7 +154,7 @@ def assign_questions(assignment: Assignment):
     return assigned_questions
 
 
-def ingest_questions(questions: dict, assignment: Assignment):
+def ingest_questions(questions: List[Any], assignment: Assignment):
     """
     questions: [
       {
