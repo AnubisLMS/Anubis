@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Tuple, Union
+from typing import Literal, Tuple, Union, overload
 
 from flask import request
 from werkzeug.utils import secure_filename
@@ -102,6 +102,18 @@ def get_number_arg(arg_name: str = "number", default_value: int = 10, reject_neg
     return n
 
 
+@overload
+def get_request_file_stream(with_filename: Literal[False], fail_ok: bool = False) -> Union[bytes, None]:
+    ...
+
+
+@overload
+def get_request_file_stream(
+    with_filename: Literal[True], fail_ok: bool = False
+) -> Union[Tuple[bytes, str], Tuple[None, None]]:
+    ...
+
+
 def get_request_file_stream(
     with_filename=False, fail_ok=False
 ) -> Union[bytes, None, Tuple[bytes, str], Tuple[None, None]]:
@@ -126,7 +138,7 @@ def get_request_file_stream(
 
     # If they want the filename too
     if with_filename:
-        return file.stream.read(), secure_filename(file.filename)
+        return file.stream.read(), secure_filename(file.filename if file.filename is not None else "")
 
     # Read its stream
     return file.stream.read()
