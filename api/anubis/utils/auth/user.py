@@ -81,4 +81,4 @@ def _create_get_current_user_field(field: str) -> Callable:
     return _func
 
 
-current_user: User = LocalProxy(get_current_user)
+current_user: User = LocalProxy(get_current_user)  # type: ignore[assignment] # Skip type-check for proxy objects

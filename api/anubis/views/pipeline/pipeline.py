@@ -173,7 +173,7 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
     # Update the fields
     submission_test_result.passed = passed
     submission_test_result.message = message
-    submission_test_result.stdout = stdout
+    submission_test_result.stdout = stdout # type:ignore[assignment]
 
     # Add and commit
     db.session.add(submission_test_result)

@@ -55,18 +55,18 @@ def add_app_exception_handlers(app: Flask):
     from anubis.utils.logging import logger
 
     # Set AuthenticationError handler
-    @app.errorhandler(AuthenticationError)
+    @app.errorhandler(AuthenticationError)  # type: ignore[arg-type] # Flask errorhandler does not support type inference for callables
     def handler_authentication_error(e: AuthenticationError):
         logger.error(traceback.format_exc())
         return jsonify(error_response(str(e) or "Unauthenticated")), 401
 
     # Set LackCourseContext handler
-    @app.errorhandler(LackCourseContext)
+    @app.errorhandler(LackCourseContext)  # type: ignore[arg-type] # Flask errorhandler does not support type inference for callables
     def handle_lack_course_context(e: LackCourseContext):
         logger.error(traceback.format_exc())
         return jsonify(error_response(str(e) or "Please set your course context"))
 
-    @app.errorhandler(AssertError)
+    @app.errorhandler(AssertError)  # type: ignore[arg-type] # Flask errorhandler does not support type inference for callables
     def handle_assertion_error(e: AssertError):
         logger.error(traceback.format_exc())
         message, status_code = e.response()

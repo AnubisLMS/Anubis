@@ -291,7 +291,7 @@ def assert_course_context(*models: BaseModel):
             LateException,
         ]:
             if isinstance(model, model_type):
-                object_stack.append(model.assignment)
+                object_stack.append(model.assignment)  # type: ignore[attr-defined] # Typing for backref is currently not supported
                 continue
 
         # Group together all the models that have a course
@@ -303,7 +303,7 @@ def assert_course_context(*models: BaseModel):
             LectureNotes,
         ]:
             if isinstance(model, model_type):
-                object_stack.append(model.course)
+                object_stack.append(model.course)  # type: ignore[attr-defined] # Typing for backref is currently not supported
                 continue
 
         # ---------------------------------
@@ -710,4 +710,4 @@ def add_all_users_to_course(users: List[User], course: Course) -> int:
     return len(all_not_in_course)
 
 
-course_context: Course = LocalProxy(get_course_context)
+course_context: Course = LocalProxy(get_course_context)  # type: ignore[assignment] # Skip type-check for proxy objects

@@ -27,7 +27,7 @@ THEIA_DEFAULT_OPTIONS = {
 }
 
 
-def default_id(max_len=None) -> db.Column:
+def default_id(max_len=None) -> db.Column:  # type: ignore[name-defined] # `Column` is monkey-patched to the db object
     return db.Column(db.String(128), primary_key=True, default=lambda: rand(max_len or 32))
 
 
@@ -773,13 +773,13 @@ class StaticFile(BaseModel):
 
     lecture_notes = db.relationship("LectureNotes", cascade="all,delete", backref="static_file")
 
-    @hybrid_property
+    @hybrid_property # type:ignore[no-redef]
     def blob(self):
         if isinstance(self._blob, InstrumentedAttribute):
             return self._blob
         return gzip.decompress(self._blob)
 
-    @blob.setter
+    @blob.setter # type:ignore[no-redef]
     def blob(self, blob):
         if isinstance(blob, str):
             self._blob = gzip.compress(blob.encode())

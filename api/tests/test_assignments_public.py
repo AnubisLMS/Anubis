@@ -24,7 +24,7 @@ sample_sync_2 = copy.deepcopy(sample_sync)
 sample_sync_2["name"] = "CS-UY 3224 TEST PUBLIC HIDDEN 2"
 sample_sync_2["hidden"] = False
 sample_sync_2["unique_code"] = "aaaaa2"
-sample_sync_2["date"]["release"] = str(datetime.now() + timedelta(hours=2))
+sample_sync_2["date"]["release"] = str(datetime.now() + timedelta(hours=2))  # type: ignore[index]
 
 
 def create_hidden_assignments():
