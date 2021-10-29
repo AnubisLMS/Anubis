@@ -4,3 +4,31 @@ line-length = 120
 [tool.isort]
 line_length = 120
 profile = "black"
+
+[tool.mypy]
+# We want to skip type check for automatically generated files
+exclude = "venv"
+plugins = [
+    "kubernetes_typed.plugin",
+]
+no_implicit_reexport = false
+namespace_packages = true
+
+[[tool.mypy.overrides]]
+# Skip certain modules that haven't yet been typed or provided stubs
+module = [
+    "sqlalchemy.*",
+    "sqlalchemy_json.*",
+    "parse",
+    "flask_sqlalchemy.*",
+    "flask_migrate.*",
+    "flask_caching.*",
+    "flask_oauthlib.*",
+    "alembic.*",
+    "rq.*",
+    "matplotlib.*",
+    "magic.*",
+    "numpy.*",
+    "PIL.*"
+]
+ignore_missing_imports = true

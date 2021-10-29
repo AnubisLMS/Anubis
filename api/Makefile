@@ -39,6 +39,10 @@ lint: venv
 	@echo 'black to stylize'
 	./venv/bin/black $(LINT_FILES)
 
+.PHONY: check
+check: venv				 # Run static checks without modifying files
+	./venv/bin/mypy --show-error-codes $(LINT_FILES)
+
 .PHONY: clean               # Clean directories
 clean:
 	rm -rf $$(find -name __pycache__) venv .data

@@ -20,6 +20,7 @@ attrs==21.2.0
     # via
     #   -r requirements/common.txt
     #   aiohttp
+    #   jsonschema
     #   pytest
 black==21.9b0
     # via -r requirements/dev.in
@@ -61,8 +62,15 @@ cycler==0.11.0
     # via
     #   -r requirements/common.txt
     #   matplotlib
+discord-ext-typed-commands==1.0.3
+    # via -r requirements/dev.in
 discord.py==1.7.3
-    # via -r requirements/common.txt
+    # via
+    #   -r requirements/common.txt
+    #   discord-ext-typed-commands
+    #   discord.py-stubs
+discord.py-stubs==1.7.3
+    # via -r requirements/dev.in
 docker==5.0.3
     # via -r requirements/common.txt
 flask==2.0.2
@@ -100,6 +108,14 @@ idna==3.3
     #   -r requirements/common.txt
     #   requests
     #   yarl
+importlib-metadata==4.8.1
+    # via
+    #   -r requirements/common.txt
+    #   alembic
+importlib-resources==5.4.0
+    # via
+    #   -r requirements/common.txt
+    #   alembic
 iniconfig==1.1.1
     # via pytest
 isort==5.10.0
@@ -112,12 +128,18 @@ jinja2==3.0.2
     # via
     #   -r requirements/common.txt
     #   flask
+jsonschema==4.1.2
+    # via jsonschema-typed-v2
+jsonschema-typed-v2==0.8.0
+    # via kubernetes-typed
 kiwisolver==1.3.2
     # via
     #   -r requirements/common.txt
     #   matplotlib
 kubernetes==19.15.0
     # via -r requirements/common.txt
+kubernetes-typed==18.20.0
+    # via -r requirements/dev.in
 limits==1.5.1
     # via
     #   -r requirements/common.txt
@@ -138,8 +160,17 @@ multidict==5.2.0
     #   -r requirements/common.txt
     #   aiohttp
     #   yarl
+mypy==0.910
+    # via
+    #   -r requirements/dev.in
+    #   discord.py-stubs
+    #   jsonschema-typed-v2
+    #   kubernetes-typed
 mypy-extensions==0.4.3
-    # via black
+    # via
+    #   black
+    #   kubernetes-typed
+    #   mypy
 numpy==1.21.3
     # via
     #   -r requirements/common.txt
@@ -154,6 +185,8 @@ packaging==21.0
     # via pytest
 pandas==1.3.4
     # via -r requirements/common.txt
+pandas-stubs==1.2.0.35
+    # via -r requirements/dev.in
 parse==1.19.0
     # via -r requirements/common.txt
 pathspec==0.9.0
@@ -194,6 +227,8 @@ pyparsing==3.0.4
     #   -r requirements/common.txt
     #   matplotlib
     #   packaging
+pyrsistent==0.18.0
+    # via jsonschema
 pytest==6.2.5
     # via -r requirements/dev.in
 python-dateutil==2.8.2
@@ -214,6 +249,7 @@ pyyaml==6.0
     # via
     #   -r requirements/common.txt
     #   kubernetes
+    #   kubernetes-typed
 redis==3.5.3
     # via
     #   -r requirements/common.txt
@@ -257,16 +293,34 @@ sqlalchemy-json==0.4.0
 tabulate==0.8.9
     # via -r requirements/common.txt
 toml==0.10.2
-    # via pytest
+    # via
+    #   mypy
+    #   pytest
 tomli==1.2.1
     # via
     #   black
     #   pep517
+types-python-dateutil==2.8.2
+    # via -r requirements/dev.in
+types-pyyaml==6.0.0
+    # via -r requirements/dev.in
+types-redis==3.5.15
+    # via -r requirements/dev.in
+types-requests==2.25.11
+    # via -r requirements/dev.in
+types-setuptools==57.4.2
+    # via -r requirements/dev.in
+types-tabulate==0.8.3
+    # via -r requirements/dev.in
+types-toml==0.10.1
+    # via -r requirements/dev.in
 typing-extensions==3.10.0.2
     # via
     #   -r requirements/common.txt
     #   aiohttp
     #   black
+    #   discord.py-stubs
+    #   mypy
 urllib3==1.26.7
     # via
     #   -r requirements/common.txt
@@ -287,6 +341,11 @@ yarl==1.7.2
     # via
     #   -r requirements/common.txt
     #   aiohttp
+zipp==3.6.0
+    # via
+    #   -r requirements/common.txt
+    #   importlib-metadata
+    #   importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip

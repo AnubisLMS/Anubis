@@ -11,3 +11,17 @@ pip-tools
 
 # Python testing framework
 pytest
+mypy==0.910
+
+# Third-party stubs for mypy
+types-PyYAML
+types-python-dateutil
+types-redis
+types-requests
+types-setuptools
+types-toml
+types-tabulate
+discord.py-stubs
+discord-ext-typed-commands
+kubernetes-typed
+pandas-stubs

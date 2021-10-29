@@ -72,6 +72,10 @@ idna==3.3
     # via
     #   requests
     #   yarl
+importlib-metadata==4.8.1
+    # via alembic
+importlib-resources==5.4.0
+    # via alembic
 itsdangerous==2.0.1
     # via flask
 jinja2==3.0.2
@@ -185,6 +189,10 @@ werkzeug==2.0.2
     # via flask
 yarl==1.7.2
     # via aiohttp
+zipp==3.6.0
+    # via
+    #   importlib-metadata
+    #   importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
