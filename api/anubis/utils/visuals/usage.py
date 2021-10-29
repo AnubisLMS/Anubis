@@ -94,42 +94,6 @@ def get_theia_sessions(course_id: str) -> pd.DataFrame:
     return theia_sessions
 
 
-@cache.memoize(timeout=360)
-def get_raw_submissions() -> List[Dict[str, Any]]:
-    submissions_df = get_submissions()
-    data = (
-        submissions_df.groupby(["assignment_id", "created"])["id"]
-            .count()
-            .reset_index()
-            .rename(columns={"id": "count"})
-            .to_dict()
-    )
-    data["created"] = {k: str(v) for k, v in data["created"].items()}
-
-    assignment_ids = list(set(data["assignment_id"].values()))
-    response = {}
-
-    for assignment_id in assignment_ids:
-        assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
-        response[assignment_id] = {
-            "data": [],
-            "name": assignment.name,
-            "release_date": str(assignment.release_date),
-            "due_date": str(assignment.due_date),
-        }
-
-    for index, assignment_id in data["assignment_id"].items():
-        response[assignment_id]["data"].append(
-            {
-                "x": data["created"][index],
-                "y": data["count"][index],
-                "label": f"{data['created'][index]} {data['count'][index]}",
-            }
-        )
-
-    return list(response.values())
-
-
 @cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
 def get_usage_plot(course_id: str) -> Optional[bytes]:
     import matplotlib.colors as mcolors
