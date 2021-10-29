@@ -496,10 +496,10 @@ def private_assignment_sync(assignment: dict):
     # The course context assertion happens in the sync function
 
     # Create or update assignment
-    message, success = assignment_sync(assignment)
+    data, message, success = assignment_sync(assignment)
 
     # If there was an error, pass it back
     req_assert(success, message=message, status_code=406)
 
     # Return
-    return success_response(message)
+    return success_response(data)

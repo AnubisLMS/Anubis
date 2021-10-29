@@ -1,6 +1,6 @@
 import traceback
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from dateutil.parser import ParserError
 from dateutil.parser import parse as date_parse
@@ -178,7 +178,7 @@ def get_assignments(netid: str, course_id=None) -> Optional[List[Dict[str, Any]]
     return response
 
 
-def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
+def assignment_sync(assignment_data: dict) -> Tuple[Optional[dict], str, bool]:
     """
     Take an assignment_data dictionary from a assignment meta.yaml
     and update any and all existing data about the assignment.
@@ -200,7 +200,7 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
         )
     ).first()
     if course is None:
-        return "Unable to find course", False
+        return None, "Unable to find course", False
 
     assert_course_admin(course.id)
 
@@ -226,7 +226,7 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
         assignment.grace_date = date_parse(assignment_data["date"]["grace"])
     except ParserError:
         logger.error(traceback.format_exc())
-        return "Unable to parse datetime", False
+        return None, "Unable to parse datetime", False
 
     db.session.add(assignment)
 
@@ -279,7 +279,7 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     # Commit changes
     db.session.commit()
 
-    return {"assignment": assignment.data, "questions": question_message}, True
+    return {"assignment": assignment.data, "questions": question_message}, "", True
 
 
 def fill_user_assignment_data(user_id: str, assignment_data: Dict[str, Any]):
