@@ -15,6 +15,7 @@ from anubis.models import (
     AssignmentQuestion,
     AssignmentRepo,
     AssignmentTest,
+    BaseModel,
     Course,
     InCourse,
     LateException,
@@ -225,7 +226,7 @@ def assert_course_superuser(course_id: str = None):
         raise LackCourseContext("Requires course Professor permissions")
 
 
-def assert_course_context(*models: Tuple[Any]):
+def assert_course_context(*models: BaseModel):
     """
     This function checks that all the sqlalchemy objects that are
     passed to this function are within the current course context.

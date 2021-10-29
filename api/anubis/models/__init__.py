@@ -5,6 +5,7 @@ import gzip
 from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy.model import DefaultMeta
 from sqlalchemy.orm import deferred
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_json import MutableJson
@@ -13,6 +14,7 @@ from sqlalchemy.orm import InstrumentedAttribute
 from anubis.utils.data import rand
 
 db = SQLAlchemy()
+BaseModel: DefaultMeta = db.Model
 
 THEIA_DEFAULT_OPTIONS = {
     "autosave": True,
@@ -29,7 +31,7 @@ def default_id(max_len=None) -> db.Column:
     return db.Column(db.String(128), primary_key=True, default=lambda: rand(max_len or 32))
 
 
-class Config(db.Model):
+class Config(BaseModel):
     __tablename__ = "anubis_config"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -45,7 +47,7 @@ class Config(db.Model):
         }
 
 
-class User(db.Model):
+class User(BaseModel):
     __tablename__ = "user"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -91,7 +93,7 @@ class User(db.Model):
         return f"<User {self.netid} {self.github_username}>"
 
 
-class Course(db.Model):
+class Course(BaseModel):
     __tablename__ = "course"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -153,7 +155,7 @@ class Course(db.Model):
         }
 
 
-class TAForCourse(db.Model):
+class TAForCourse(BaseModel):
     __tablename__ = "ta_for_course"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -169,7 +171,7 @@ class TAForCourse(db.Model):
         }
 
 
-class ProfessorForCourse(db.Model):
+class ProfessorForCourse(BaseModel):
     __tablename__ = "professor_for_course"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -185,7 +187,7 @@ class ProfessorForCourse(db.Model):
         }
 
 
-class InCourse(db.Model):
+class InCourse(BaseModel):
     __tablename__ = "in_course"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -194,7 +196,7 @@ class InCourse(db.Model):
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), primary_key=True)
 
 
-class Assignment(db.Model):
+class Assignment(BaseModel):
     __tablename__ = "assignment"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -275,7 +277,7 @@ class Assignment(db.Model):
         return data
 
 
-class AssignmentRepo(db.Model):
+class AssignmentRepo(BaseModel):
     __tablename__ = "assignment_repo"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -313,7 +315,7 @@ class AssignmentRepo(db.Model):
         }
 
 
-class AssignmentTest(db.Model):
+class AssignmentTest(BaseModel):
     __tablename__ = "assignment_test"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -332,7 +334,7 @@ class AssignmentTest(db.Model):
         return {"id": self.id, "name": self.name, "hidden": self.hidden}
 
 
-class AssignmentQuestion(db.Model):
+class AssignmentQuestion(BaseModel):
     __tablename__ = "assignment_question"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -378,7 +380,7 @@ class AssignmentQuestion(db.Model):
         }
 
 
-class AssignedStudentQuestion(db.Model):
+class AssignedStudentQuestion(BaseModel):
     __tablename__ = "assigned_student_question"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -435,7 +437,7 @@ class AssignedStudentQuestion(db.Model):
         return data
 
 
-class AssignedQuestionResponse(db.Model):
+class AssignedQuestionResponse(BaseModel):
     __tablename__ = "assigned_student_response"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -468,7 +470,7 @@ class AssignedQuestionResponse(db.Model):
         }
 
 
-class Submission(db.Model):
+class Submission(BaseModel):
     __tablename__ = "submission"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -540,7 +542,7 @@ class Submission(db.Model):
         return data
 
 
-class SubmissionTestResult(db.Model):
+class SubmissionTestResult(BaseModel):
     __tablename__ = "submission_test_result"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -589,7 +591,7 @@ class SubmissionTestResult(db.Model):
         )
 
 
-class SubmissionBuild(db.Model):
+class SubmissionBuild(BaseModel):
     __tablename__ = "submission_build"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -621,7 +623,7 @@ class SubmissionBuild(db.Model):
         return data
 
 
-class TheiaImage(db.Model):
+class TheiaImage(BaseModel):
     __tablename__ = "theia_image"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -652,7 +654,7 @@ class TheiaImage(db.Model):
         }
 
 
-class TheiaImageTag(db.Model):
+class TheiaImageTag(BaseModel):
     __tablename__ = 'theia_image_tag'
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -675,7 +677,7 @@ class TheiaImageTag(db.Model):
         }
 
 
-class TheiaSession(db.Model):
+class TheiaSession(BaseModel):
     __tablename__ = "theia_session"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -751,7 +753,7 @@ class TheiaSession(db.Model):
         }
 
 
-class StaticFile(db.Model):
+class StaticFile(BaseModel):
     __tablename__ = "static_file"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -798,7 +800,7 @@ class StaticFile(db.Model):
         }
 
 
-class LateException(db.Model):
+class LateException(BaseModel):
     __tablename__ = "late_exception"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
@@ -823,7 +825,7 @@ class LateException(db.Model):
         }
 
 
-class LectureNotes(db.Model):
+class LectureNotes(BaseModel):
     __tablename__ = "lecture_notes"
     __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
