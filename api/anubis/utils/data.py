@@ -125,7 +125,7 @@ def _verify_data_shape(data, shape, path=None) -> Tuple[bool, Union[str, None]]:
       {'data': list}
     ) -> (False, '.data')
 
-    :return: success as bool, error path
+    :return: success as bool, error path (None if success is True, str otherwise)
     """
 
     if path is None:

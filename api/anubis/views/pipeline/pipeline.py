@@ -255,6 +255,9 @@ def pipeline_report_state(submission: Submission, state: str, **kwargs):
     if not hidden_test:
         submission.state = state
 
+    # We have checked that `request.json` is not None with `json_endpoint` already
+    assert request.json is not None
+
     # If processed was specified and is of type bool, then update that too
     if "processed" in request.json and isinstance(request.json["processed"], bool):
         submission.processed = request.json["processed"]

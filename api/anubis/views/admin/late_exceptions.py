@@ -91,6 +91,8 @@ def admin_late_exception_update(assignment_id: str = None, user_id: str = None, 
 
     # Try to parse the datetime
     try:
+        if due_date is None:
+            raise ParserError
         due_date = date_parse(due_date)
     except ParserError:
         return error_response("datetime could not be parsed")

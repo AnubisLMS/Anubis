@@ -295,13 +295,13 @@ def create_assignment_github_repo(
             # for creating a repo from the template.
             data = get_github_template_ids(template_repo_path, github_org)
 
-            # If the response was None, the api request failed. Also check that
-            # some expected values are present in the json data response.
-            if data is None and "repository" in data and "id" in data["repository"]:
+            # If the response was None, the api request failed. No further checks
+            # in the json data response since it is None already.
+            if data is None:
                 for repo in repos:
                     repo.repo_created = False
                 db.session.commit()
-                return repos
+                return repo
 
             # Get organization and template repo IDs
             owner_id = data["organization"]["id"]

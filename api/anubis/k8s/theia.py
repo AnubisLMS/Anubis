@@ -295,6 +295,9 @@ def create_theia_k8s_pod_pvc(
         # Create a token for the session owner
         token = create_token(theia_session.owner.netid)
 
+        # The session must have a owner, so the token must exist
+        assert token is not None
+
         # Create the INCLUSTER environment variable as the base64
         # encoded token. This token should be picked up by the
         # theia init process to initialize the anubis cli with

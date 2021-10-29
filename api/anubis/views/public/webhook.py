@@ -33,6 +33,9 @@ def webhook_log_msg() -> Union[str, None]:
     # If the content type is json, and the github event was a push,
     # then log the repository name
     if content_type == "application/json" and x_github_event == "push":
+        # request.json cannot be None when the content type is json
+        assert request.json is not None
+
         return request.json.get("repository", {}).get("name", None)
 
     return None

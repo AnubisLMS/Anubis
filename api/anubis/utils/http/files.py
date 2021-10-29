@@ -68,6 +68,9 @@ def process_file_upload() -> StaticFile:
     # Make sure we got a file
     req_assert(stream is not None, message="No file uploaded")
 
+    # stream is not None with `req_assert`
+    assert stream is not None
+
     # Figure out content type
     mime_type = get_mime_type(stream)
 

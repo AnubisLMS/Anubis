@@ -190,6 +190,9 @@ def ingest_questions(questions: dict, assignment: Assignment):
     for question_sequence in questions:
         shape_good, err_path = _verify_data_shape(question_sequence, question_shape)
         if not shape_good:
+            # When the shape is not good, err_path will never be None
+            assert err_path is not None
+
             # Reject the question if the shape is bad and continue
             rejected.append(
                 {

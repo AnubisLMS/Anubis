@@ -239,6 +239,10 @@ def assert_course_context(*models: BaseModel):
     # Get the current course context
     context = get_course_context()
 
+    # This check does not make sense when the context is None
+    if context is None:
+        raise LackCourseContext("Cannot find the course context")
+
     # Create a stack of objects to check
     object_stack = list(models)
 
