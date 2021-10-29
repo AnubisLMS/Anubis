@@ -18,6 +18,11 @@ reaper:
   schedule: "*/5 * * * *"
   suspend: false
 
+reporter:
+  enable: true
+  schedule: "0 0 * * *"
+  suspend: false
+
 visuals:
   enable: true
   schedule: "*/5 * * * *"
