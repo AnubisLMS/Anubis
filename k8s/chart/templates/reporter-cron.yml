@@ -1,4 +1,3 @@
-
 {{- if .Values.reporter.enable }}
 apiVersion: batch/v1
 kind: CronJob

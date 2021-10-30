@@ -7,12 +7,23 @@ from anubis.models import Course, User, TheiaSession, InCourse
 
 @with_context
 def get_courses():
+    """
+    A helper function that constructs query for courses
+
+    :return: A query object with TEST and DEMO course filtered
+    """
     return Course.query.filter(
         Course.name != "TEST", Course.name != "DEMO"
     )
 
 @with_context
 def get_active_users_this_semester():
+    """
+    Count the number of users registered for at least one course this semester
+
+    :return: The number of users registers for at least one course this
+             semester
+    """
     return User.query.join(
         InCourse, User.id==InCourse.owner_id
     ).join(
@@ -23,12 +34,23 @@ def get_active_users_this_semester():
 
 @with_context
 def get_ides_opened_this_semester():
+    """
+    Count the total number of IDEs opened this semester
+
+    :return: Total number of IDEs opened this semester
+    """
     return TheiaSession.query.join(
         Course, TheiaSession.course_id == Course.id
     ).count()
 
 @with_context
 def get_course_user_count(course):
+    """
+    Count the number of users registered for a course
+
+    :param course: The course object
+    :return: Number of users registered for this course
+    """
     return User.query.join(
         InCourse, User.id == InCourse.owner_id
     ).join(
@@ -39,6 +61,12 @@ def get_course_user_count(course):
 
 @with_context
 def get_course_theia_session_count(course):
+    """
+    Count the number of IDEs opened for a course this semester
+
+    :param course: The course object
+    :return: Number of IDEs opened this semester
+    """
     return TheiaSession.query.join(
         Course, TheiaSession.course_id==Course.id
     ).filter(
@@ -46,6 +74,16 @@ def get_course_theia_session_count(course):
     ).count()
 
 def generate_report():
+    """
+    Generate a report of the statusesof Anubis. The statuses are:
+        Course names and code
+        Number of active users this semester
+        Number of IDEs opened this semester
+        Number of students for each course
+        Number of IDES opened for each course
+    
+    :return:
+    """
     report = ""
     course_query = get_courses()
     # Course List
@@ -83,6 +121,11 @@ bot = commands.Bot(command_prefix='!')
 
 @bot.command(name="report", help="Anubis Usage Report")
 async def report(ctx):
+    """
+    Respond to `!report` command with a report of the statuses of Anubis
+
+    :return:
+    """
     await ctx.send("```" + generate_report() + "```")
 
 if __name__ == "__main__":
