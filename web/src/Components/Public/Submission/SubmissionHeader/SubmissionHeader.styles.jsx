@@ -3,18 +3,20 @@ import {makeStyles} from '@material-ui/core/styles';
 export const useStyles = makeStyles((theme) => ({
   submissionSummaryContainer: {
     width: '100%',
-    height: '50px',
+    paddingTop: theme.spacing(3),
+    paddingBottom: theme.spacing(3),
+    border: `2px solid ${theme.palette.dark.blue['200']}`,
     backgroundColor: theme.palette.dark.blue['200'],
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     position: 'relative',
-    borderRadius: theme.spacing(.5),
+    borderRadius: theme.spacing(1),
     padding: `${theme.spacing(0)}px ${theme.spacing(2)}px ${theme.spacing(0)}px ${theme.spacing(2)}px`,
   },
   assignmentName: {
     color: theme.palette.white,
-    fontSize: '16px',
+    fontSize: '18px',
     fontWeight: 'Normal',
     marginRight: theme.spacing(2),
     whiteSpace: 'nowrap',

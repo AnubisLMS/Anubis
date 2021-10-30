@@ -2,6 +2,8 @@ import {makeStyles} from '@material-ui/core/styles';
 
 export const useStyles = makeStyles((theme) => ({
   submissionTestExpandedContainer: {
+    width: '90%',
+    minHeight: '400px',
     color: theme.palette.white,
     backgroundColor: theme.palette.dark.blue['200'],
     borderRadius: `${theme.spacing(1.25)}px`,
@@ -14,6 +16,7 @@ export const useStyles = makeStyles((theme) => ({
   },
   testName: {
     display: 'inline',
+    fontSize: '18px',
     color: theme.palette.white,
     paddingRight: `${theme.spacing(3)}px`,
     width: 'fit-content',

@@ -3,39 +3,41 @@ import {makeStyles} from '@material-ui/core/styles';
 export const useStyles = makeStyles((theme) => ({
   submissionContainer: {
     color: theme.palette.white,
-    flexGrow: 1,
     width: '100%',
-    height: '500px',
-    backgroundColor: 'transparent',
+    height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    border: `1px solid ${theme.palette.dark.blue['200']}`,
-    borderRadius: `${theme.spacing(1.4)}px`,
+    border: `2px solid ${theme.palette.dark.blue['200']}`,
+    borderRadius: `${theme.spacing(1)}px`,
   },
   headerContainer: {
     width: '100%',
     display: 'flex',
     flexDirection: 'row',
     backgroundColor: theme.palette.dark.blue['200'],
-    backgroundColor: '#21262D',
-    border: '1px solid white',
-    borderColor: 'transparent',
-    borderRadius: `${theme.spacing(1.25)}px ${theme.spacing(1.25)}px 0px 0px`,
-    padding: `${theme.spacing(1.4)}px`,
+    borderBottom: `1px solid ${theme.palette.dark.blue['200']}`,
+    borderRadius: `${theme.spacing(1)}px ${theme.spacing(1)}px 0px 0px`,
+    alignItems: 'center',
+    padding: theme.spacing(2),
   },
-  failedContainer: {
-    color: theme.palette.color.red,
-    flexGrow: 1,
-    fontSize: '18px',
-    backgroundColor: '#21262D',
-    paddingLeft: `${theme.spacing(1.4)}px`,
-    paddingTop: `${theme.spacing(0.6)}px`,
+  statusContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    marginLeft: theme.spacing(2),
   },
-  statsContainer: {
+  statusText: {
+    fontSize: '16px',
+    fontWeight: 600,
     color: theme.palette.white,
-    fontSize: '13px',
-    flexGrow: 1,
-    backgroundColor: '#21262D',
-    paddingLeft: `${theme.spacing(1.4)}px`,
+  },
+  statusDescriptionText: {
+    fontSize: '14px',
+    opacity: '.8',
+  },
+  testListContainer: {
+    padding: theme.spacing(2),
+    '& > *': {
+      marginTop: theme.spacing(2),
+    },
   },
 }));
