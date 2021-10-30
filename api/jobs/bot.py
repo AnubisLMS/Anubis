@@ -1,10 +1,11 @@
 import os
+import flask_sqlalchemy
 from discord.ext import commands
 from anubis.utils.data import with_context
 from anubis.models import Course, User, TheiaSession, InCourse
 
 @with_context
-def get_courses():
+def get_courses() -> flask_sqlalchemy.BaseQuery:
     """
     A helper function that constructs query for courses
 
@@ -15,7 +16,7 @@ def get_courses():
     )
 
 @with_context
-def get_active_users_this_semester():
+def get_active_users_this_semester() -> int:
     """
     Count the number of users registered for at least one course this semester
 
@@ -31,7 +32,7 @@ def get_active_users_this_semester():
     ).distinct().count()
 
 @with_context
-def get_ides_opened_this_semester():
+def get_ides_opened_this_semester() -> int:
     """
     Count the total number of IDEs opened this semester
 
@@ -42,7 +43,7 @@ def get_ides_opened_this_semester():
     ).count()
 
 @with_context
-def get_course_user_count(course):
+def get_course_user_count(course) -> int:
     """
     Count the number of users registered for a course
 
@@ -58,7 +59,7 @@ def get_course_user_count(course):
     ).count()
 
 @with_context
-def get_course_theia_session_count(course):
+def get_course_theia_session_count(course) -> int:
     """
     Count the number of IDEs opened for a course this semester
 
@@ -71,7 +72,7 @@ def get_course_theia_session_count(course):
         Course.id == course.id
     ).count()
 
-def generate_report():
+def generate_report() -> str:
     """
     Generate a report of the statusesof Anubis. The statuses are:
         Course names and code
@@ -80,7 +81,7 @@ def generate_report():
         Number of students for each course
         Number of IDES opened for each course
     
-    :return:
+    :return: The text of the report
     """
     report = ""
     course_query = get_courses()
