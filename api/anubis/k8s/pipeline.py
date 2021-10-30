@@ -135,8 +135,11 @@ def reap_pipeline_jobs() -> int:
     for job in jobs.items:
         job: client.V1Job
 
+        # Calculate job created time
+        job_created = job.metadata.creation_timestamp.replace(tzinfo=None)
+
         # Delete the job if it is older than a few minutes
-        if datetime.now() - job.metadata.creation_timestamp > timedelta(minutes=autograde_pipeline_timeout_minutes):
+        if datetime.utcnow() - job_created > timedelta(minutes=autograde_pipeline_timeout_minutes):
 
             # Attempt to delete the k8s job
             delete_pipeline_job(batch_v1, job)
