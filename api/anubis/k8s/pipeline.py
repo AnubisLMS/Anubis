@@ -1,13 +1,13 @@
 import os
 import time
 import traceback
-from typing import List
 from datetime import datetime, timedelta
 
 import kubernetes
 from kubernetes import client
 
 from anubis.models import Submission
+from anubis.utils.config import get_config_int
 from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
 
@@ -125,6 +125,9 @@ def reap_pipeline_jobs() -> int:
         label_selector="app.kubernetes.io/name=submission-pipeline,role=submission-pipeline-worker"
     )
 
+    # Get the autograde pipeline timeout from config
+    autograde_pipeline_timeout_minutes = get_config_int('AUTOGRADE_PIPELINE_TIMEOUT_MINUTES', default=5)
+
     # Count the number of active jobs
     active_count = 0
 
@@ -133,7 +136,7 @@ def reap_pipeline_jobs() -> int:
         job: client.V1Job
 
         # Delete the job if it is older than a few minutes
-        if datetime.now() - job.metadata.creation_timestamp > timedelta(minutes=5):
+        if datetime.now() - job.metadata.creation_timestamp > timedelta(minutes=autograde_pipeline_timeout_minutes):
 
             # Attempt to delete the k8s job
             delete_pipeline_job(batch_v1, job)
