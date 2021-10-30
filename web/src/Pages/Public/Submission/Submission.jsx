@@ -1,17 +1,20 @@
 import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
+import clsx from 'clsx';
 
 import Grid from '@material-ui/core/Grid';
-
+import Box from '@material-ui/core/Box';
 import {useStyles} from './Submission.styles';
 import useQuery from '../../../hooks/useQuery';
 import {translateSubmission} from '../../../Utils/submission';
 import StandardLayout from '../../../Components/Layouts/StandardLayout';
-import SubmissionSummary from '../../../Components/Public/Submission/SubmissionSummary';
-import SubmissionBuild from '../../../Components/Public/Submission/SubmissionBuild';
-import SubmissionTests from '../../../Components/Public/Submission/SubmissionTests';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import SubmissionContent from '../../../Components/Public/Submission/SubmissionContent/SubmissionContent';
+import SubmissionHeader from '../../../Components/Public/Submission/SubmissionHeader/SubmissionHeader';
+import SubmissionTest from '../../../Components/Public/Submission/SubmissionTest/SubmissionTest';
+import SubmissionTestExpanded
+  from '../../../Components/Public/Submission/SubmissionTestExpanded/SubmissionTestExpanded';
 
 const regrade = ({commit, submission, setSubmission, setStep, setErrorStop}, enqueueSnackbar) => () => {
   if (!submission.processed) {
@@ -44,6 +47,8 @@ export default function Submission() {
   const [step, setStep] = useState(0);
   const [submission, setSubmission] = useState(null);
   const [errorStop, setErrorStop] = useState(false);
+  const [modalTest, setModalTest] = useState(undefined);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const continueSubscribe = () => setTimeout(() => {
     if (step < 300) {
@@ -98,7 +103,8 @@ export default function Submission() {
         continueSubscribe();
       }
     }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
-  }, [step]);
+  }, []);
+  console.log(submission);
 
   if (!submission) {
     return null;
@@ -112,34 +118,60 @@ export default function Submission() {
     errorStop, setErrorStop,
   };
 
+  const expandModal = (test) => {
+    setModalTest(test);
+    setIsExpanded(true);
+  };
+
+  const closeModal = () => {
+    setIsExpanded(false);
+  };
+
   return (
     <StandardLayout title={'Anubis Submission'} description={[
       `Assignment: ${submission.assignment_name}`,
       submission.commit,
     ]}>
-      <Grid container spacing={4}>
-        {/* Summary */}
-        <Grid item xs={12} md={4} key={'summary'}>
-          <SubmissionSummary
-            submission={submission}
-            regrade={regrade(pageState, enqueueSnackbar)}
-            stop={errorStop}
-          />
-        </Grid>
+      {modalTest && isExpanded &&
+        <Box className={classes.backDrop} />
+      }
+      <Grid container className={classes.root}>
+        <Box className={
+          modalTest && isExpanded ?
+            clsx(classes.headerContainer, classes.blur) :
+            classes.headerContainer}>
+          <SubmissionHeader {...submission} />
+        </Box>
+        <Box className={
+          modalTest && isExpanded ?
+            clsx(classes.submissionContentContainer, classes.blur) :
+            classes.submissionContentContainer}>
+          <SubmissionContent submission={submission}>
+            <SubmissionTest test= {{
+              test: {
+                name: 'Build',
+              },
+              result: {
+                passed: submission.build.passed,
+              },
+            }} />
+            {submission?.tests && submission.tests.map((test, index) => (
+              <SubmissionTest key={index} test={test} expandModal = {() => expandModal(test)}/>
+            ))}
+          </SubmissionContent>
 
-        <Grid item xs={12} md={8} key={'build-test'}>
-          <Grid container spacing={1}>
-            {/* Build */}
-            <Grid item xs={12} key={'build'}>
-              <SubmissionBuild build={build} stop={errorStop}/>
-            </Grid>
-
-            {/* Tests */}
-            <Grid item xs={12} key={'tests'}>
-              <SubmissionTests tests={tests} stop={errorStop}/>
-            </Grid>
-          </Grid>
-        </Grid>
+        </Box>
+        {modalTest && isExpanded &&
+          <Box className={classes.expandedContainer}>
+            <SubmissionTestExpanded
+              testName={modalTest.result.test_name}
+              submissionID={submission.commit}
+              assignmentName={submission.assignment_name}
+              testSuccess={modalTest.result.passed}
+              onClose={() => closeModal()}
+            />
+          </Box>
+        }
       </Grid>
     </StandardLayout>
   );

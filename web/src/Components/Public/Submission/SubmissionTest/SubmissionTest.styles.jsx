@@ -3,16 +3,19 @@ import {makeStyles} from '@material-ui/core/styles';
 export const useStyles = makeStyles((theme) => ({
   root: {
     padding: theme.spacing(3),
-    borderRadius: '10px',
-    background: theme.palette.dark.blue['200'],
-    height: '79px',
+    borderRadius: theme.spacing(1),
+    backgroundColor: theme.palette.dark.blue['200'],
+    border: `1px solid ${theme.palette.dark.blue['200']}`,
+    height: '60px',
     display: 'flex',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   title: {
     display: 'flex',
     flexDirection: 'row',
+    alignItems: 'center',
   },
   circleIcon: {
     width: '20px',
@@ -25,13 +28,12 @@ export const useStyles = makeStyles((theme) => ({
     fontSize: '14px',
   },
   name: {
-    fontSize: '20px',
-    paddingLeft: '15px',
+    fontSize: '16px',
+    marginLeft: theme.spacing(1),
   },
   testStatus: {
     alignSelf: 'flex-end',
-    paddingBottom: '1px',
-    paddingLeft: '10px',
+    marginLeft: theme.spacing(1),
   },
   success: {
     color: theme.palette.color.green,
@@ -40,5 +42,6 @@ export const useStyles = makeStyles((theme) => ({
     color: theme.palette.color.red,
   },
   expand: {
+    fontSize: '14px',
   },
 }));
