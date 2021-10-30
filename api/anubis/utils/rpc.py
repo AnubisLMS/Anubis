@@ -4,7 +4,8 @@ from redis import Redis
 from rq import Queue
 
 from anubis.config import config
-from anubis.rpc.pipeline import create_submission_pipeline
+from anubis.rpc.lms import assign_missing_questions
+from anubis.rpc.pipeline import create_submission_pipeline, reap_stale_submission_pipelines
 from anubis.rpc.seed import seed
 from anubis.rpc.theia import (
     initialize_theia_session,
@@ -12,7 +13,7 @@ from anubis.rpc.theia import (
     reap_stale_theia_sessions,
 )
 from anubis.rpc.visualizations import create_visuals as create_visuals_
-from anubis.rpc.lms import assign_missing_questions
+
 
 def rpc_enqueue(func, queue=None, args=None):
     """
@@ -64,6 +65,11 @@ def enqueue_ide_reap_stale(*args):
     rpc_enqueue(reap_stale_theia_sessions, queue='theia', args=args)
 
 
+def enqueue_pipeline_reap_stale(*args):
+    """Reap stale pipeline job resources"""
+    rpc_enqueue(reap_stale_submission_pipelines, queue='theia', args=args)
+
+
 def enqueue_seed():
     """Enqueue debug seed data"""
     rpc_enqueue(seed, queue='default')
@@ -77,4 +83,3 @@ def enqueue_create_visuals(*_):
 def enqueue_assign_missing_questions(*args):
     """Enqueue assign missing questions"""
     rpc_enqueue(assign_missing_questions, queue='default', args=args)
-
