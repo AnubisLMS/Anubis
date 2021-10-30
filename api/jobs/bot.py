@@ -1,7 +1,5 @@
 import os
-import asyncio
-from discord.ext import commands, tasks
-from datetime import datetime, time, timedelta
+from discord.ext import commands
 from anubis.utils.data import with_context
 from anubis.models import Course, User, TheiaSession, InCourse
 
