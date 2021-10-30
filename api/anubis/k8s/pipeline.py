@@ -1,12 +1,15 @@
-import logging
 import os
 import time
+import traceback
+from typing import List
+from datetime import datetime, timedelta
 
 import kubernetes
 from kubernetes import client
 
 from anubis.models import Submission
 from anubis.utils.data import is_debug
+from anubis.utils.logging import logger
 
 
 def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
@@ -91,6 +94,19 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
     return job
 
 
+def delete_pipeline_job(batch_v1: client.BatchV1Api, job: client.V1Job):
+    # Log that we are cleaning up the job
+    logger.info("deleting namespaced job {}".format(job.metadata.name))
+    try:
+        return batch_v1.delete_namespaced_job(
+            job.metadata.name,
+            job.metadata.namespace,
+            propagation_policy="Background",
+        )
+    except kubernetes.client.exceptions.ApiException:
+        logger.error('failed to delete api job, continuing' + traceback.format_exc())
+
+
 def reap_pipeline_jobs() -> int:
     """
     Runs through all jobs in the namespace. If the job is finished, it will
@@ -114,23 +130,20 @@ def reap_pipeline_jobs() -> int:
 
     # Iterate through all pipeline jobs
     for job in jobs.items:
+        job: client.V1Job
+
+        # Delete the job if it is older than a few minutes
+        if datetime.now() - job.metadata.creation_timestamp > timedelta(minutes=5):
+
+            # Attempt to delete the k8s job
+            delete_pipeline_job(batch_v1, job)
 
         # If the job has finished, and was marked as successful, then
         # we can clean it up
-        if job.status.succeeded is not None and job.status.succeeded >= 1:
-
-            # Log that we are cleaning up the job
-            logging.info("deleting namespaced job {}".format(job.metadata.name))
+        elif job.status.succeeded is not None and job.status.succeeded >= 1:
 
             # Attempt to delete the k8s job
-            try:
-                batch_v1.delete_namespaced_job(
-                    job.metadata.name,
-                    job.metadata.namespace,
-                    propagation_policy="Background",
-                )
-            except kubernetes.client.exceptions.ApiException:
-                pass
+            delete_pipeline_job(batch_v1, job)
 
         # If the job has not finished, then we increment the active_count
         # and continue

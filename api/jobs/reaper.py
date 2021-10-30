@@ -113,6 +113,9 @@ def reap():
     # Enqueue a job to reap stale ide k8s resources
     enqueue_ide_reap_stale()
 
+    # Enqueue a job to reap stale ide k8s resources
+    enqueue_ide_reap_stale()
+
     # Reap the stale submissions
     reap_stale_submissions()
 

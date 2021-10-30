@@ -76,3 +76,10 @@ def create_submission_pipeline(submission_id: str):
     # Send to kube api
     batch_v1 = client.BatchV1Api()
     batch_v1.create_namespaced_job(body=job, namespace="anubis")
+
+
+@with_context
+def reap_stale_submission_pipelines():
+    from anubis.k8s.pipeline import reap_pipeline_jobs
+
+    reap_pipeline_jobs()
