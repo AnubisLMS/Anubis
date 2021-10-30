@@ -3,20 +3,17 @@ import traceback
 from datetime import datetime, timedelta
 from typing import List
 
-from anubis.lms.autograde import bulk_autograde
+from anubis.lms.assignments import get_recent_assignments
 from anubis.lms.submissions import init_submission
 from anubis.models import (
     db,
     Submission,
-    Assignment,
     Course,
 )
-from anubis.utils.config import get_config_int
 from anubis.utils.data import with_context
 from anubis.utils.github.fix import fix_github_missing_submissions, fix_github_broken_repos
 from anubis.utils.logging import logger
-from anubis.utils.rpc import enqueue_ide_reap_stale, enqueue_autograde_pipeline
-from anubis.lms.assignments import get_recent_assignments
+from anubis.utils.rpc import enqueue_ide_reap_stale, enqueue_pipeline_reap_stale, enqueue_autograde_pipeline
 
 
 def reap_stale_submissions():
@@ -113,8 +110,8 @@ def reap():
     # Enqueue a job to reap stale ide k8s resources
     enqueue_ide_reap_stale()
 
-    # Enqueue a job to reap stale ide k8s resources
-    enqueue_ide_reap_stale()
+    # Enqueue a job to reap stale pipeline k8s resources
+    enqueue_pipeline_reap_stale()
 
     # Reap the stale submissions
     reap_stale_submissions()
