@@ -1,8 +1,11 @@
 import os
+
 import flask_sqlalchemy
 from discord.ext import commands
-from anubis.utils.data import with_context
+
 from anubis.models import Course, User, TheiaSession, InCourse
+from anubis.utils.data import with_context
+
 
 @with_context
 def get_courses() -> flask_sqlalchemy.BaseQuery:
@@ -15,6 +18,7 @@ def get_courses() -> flask_sqlalchemy.BaseQuery:
         Course.name != "TEST", Course.name != "DEMO"
     )
 
+
 @with_context
 def get_active_users_this_semester() -> int:
     """
@@ -24,12 +28,13 @@ def get_active_users_this_semester() -> int:
              semester
     """
     return User.query.join(
-        InCourse, User.id==InCourse.owner_id
+        InCourse, User.id == InCourse.owner_id
     ).join(
-        Course, InCourse.course_id==Course.id
+        Course, InCourse.course_id == Course.id
     ).filter(
         Course.name != "TEST", Course.name != "DEMO"
     ).distinct().count()
+
 
 @with_context
 def get_ides_opened_this_semester() -> int:
@@ -41,6 +46,7 @@ def get_ides_opened_this_semester() -> int:
     return TheiaSession.query.join(
         Course, TheiaSession.course_id == Course.id
     ).count()
+
 
 @with_context
 def get_course_user_count(course) -> int:
@@ -58,6 +64,7 @@ def get_course_user_count(course) -> int:
         Course.id == course.id
     ).count()
 
+
 @with_context
 def get_course_theia_session_count(course) -> int:
     """
@@ -67,10 +74,11 @@ def get_course_theia_session_count(course) -> int:
     :return: Number of IDEs opened this semester
     """
     return TheiaSession.query.join(
-        Course, TheiaSession.course_id==Course.id
+        Course, TheiaSession.course_id == Course.id
     ).filter(
         Course.id == course.id
     ).count()
+
 
 def generate_report() -> str:
     """
@@ -89,7 +97,7 @@ def generate_report() -> str:
     report += "Course Name\tCourse Code\n"
     for course in course_query:
         report += f"{course.name}\t{course.course_code}\n"
-    
+
     report += "\n"
     # Number of users enrolled in at least on class this semester
     report += "Total users enrolled in at least one course this semester\n"
@@ -113,10 +121,12 @@ def generate_report() -> str:
     for course in course_query:
         theia_count = get_course_theia_session_count(course)
         report += f"{course.name}\t{course.course_code}\t{theia_count}\n"
-    
+
     return report
 
+
 bot = commands.Bot(command_prefix='!')
+
 
 @bot.command(name="report", help="Anubis Usage Report")
 async def report(ctx):
@@ -126,6 +136,7 @@ async def report(ctx):
     :return:
     """
     await ctx.send("```" + generate_report() + "```")
+
 
 if __name__ == "__main__":
     bot.run(os.environ.get("DISCORD_BOT_TOKEN", default="DEBUG"))
