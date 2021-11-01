@@ -1,6 +1,7 @@
 import {Divider, Typography} from '@material-ui/core';
 import {Close} from '@material-ui/icons';
 import Cancel from '@material-ui/icons/Cancel';
+import Button from '@material-ui/core/Button';
 import CheckCircle from '@material-ui/icons/CheckCircle';
 import React from 'react';
 import {useStyles} from './SubmissionTestExpanded.styles';
@@ -12,6 +13,7 @@ export default function SubmissionTestExpanded({
   testSuccess,
   testExpectedOutput,
   testActualOutput,
+  onClose,
 }) {
   const classes = useStyles();
 
@@ -36,7 +38,9 @@ export default function SubmissionTestExpanded({
               <Cancel className={classes.testStatusIcon} /> Test Execution Failed
             </span>}
         </Typography>
-        <Typography className={classes.closeIconWrapper}><Close /></Typography>
+        <Button onClick = {() => onClose()} className={classes.closeIconWrapper} >
+          <Close />
+        </Button>
       </div>
       <Divider></Divider>
       <div className={classes.testBody}>
