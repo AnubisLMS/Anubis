@@ -22,6 +22,7 @@ helm upgrade \
      --set "rollingUpdates=false" \
      --set "domain=localhost" \
      --set "puller.enable=false" \
+     --set "discordbot.replicas=0" \
      --set "reaper.suspend=true" \
      --set "visuals.suspend=true" \
      --set "backup.suspend=true" \
