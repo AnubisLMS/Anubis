@@ -78,28 +78,5 @@ spec:
             secretKeyRef:
               name: api
               key: redis-password
-        {{- if .Values.healthChecks }}
-        startupProbe:
-          httpGet:
-            path: /
-            port: 5000
-          initialDelaySeconds: 5
-          periodSeconds: 3
-          failureThreshold: 60
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 5000
-          initialDelaySeconds: 60
-          failureThreshold: 10
-          periodSeconds: 60
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 5000
-          initialDelaySeconds: 5
-          periodSeconds: 3
-          failureThreshold: 1
-        {{- end }}
 
 {{- end }}

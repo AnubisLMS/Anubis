@@ -44,6 +44,12 @@ theia:
     image: "registry.digitalocean.com/anubis/theia-proxy"
     tag: "latest"
 
+
+# Discord Bot
+discordbot:
+  enable: true
+  replicas: 1
+
 ###############################################################################
 
 
