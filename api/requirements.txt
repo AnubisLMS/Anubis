@@ -5,7 +5,9 @@
 #    pip-compile requirements.in
 #
 aiohttp==3.7.4.post0
-    # via discord.py
+    # via
+    #   -r requirements.in
+    #   discord.py
 alembic==1.7.4
     # via
     #   -r requirements.in
@@ -37,10 +39,8 @@ cryptography==35.0.0
     # via -r requirements.in
 cycler==0.11.0
     # via matplotlib
-discord==1.7.3
-    # via -r requirements.in
 discord.py==1.7.3
-    # via discord
+    # via -r requirements.in
 docker==5.0.3
     # via -r requirements.in
 flask==2.0.2

@@ -2,6 +2,7 @@ import os
 
 import flask_sqlalchemy
 from discord.ext import commands
+import discord
 
 from anubis.models import Course, User, TheiaSession, InCourse
 from anubis.utils.data import with_context

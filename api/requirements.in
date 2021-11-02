@@ -23,4 +23,5 @@ pandas
 matplotlib
 numpy
 click==7.1.2
-discord
+discord.py
+aiohttp>=3.7.4
