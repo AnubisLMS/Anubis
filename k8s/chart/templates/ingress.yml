@@ -50,7 +50,7 @@ spec:
   {{- end }}
   routes:
   - kind: Rule
-    match: Host(`{{ .Values.domain }}`) && PathPrefix(`/api`)
+    match: (Host(`{{ .Values.domain }}`) && PathPrefix(`/api/`)) || (Host(`{{ .Values.domain }}`) && PathPrefix(`/api/`) && HeadersRegexp(`web`, `new`))
     middlewares:
     - name: strip-api
       namespace: {{ .Release.Namespace }}
@@ -70,8 +70,39 @@ metadata:
   name: ingress.route.anubis.web
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: web
-    component: static
+    app.kubernetes.io/name: anubis
+    component: web
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  {{- if .Values.debug }}
+  entryPoints:
+    - web
+  {{- else }}
+  entryPoints:
+    - websecure
+  {{- end }}
+  routes:
+  - kind: Rule
+    match: Host(`{{ .Values.domain }}`) && HeadersRegexp(`Cookie`, `web=new`)
+    services:
+    - name: anubis-web
+      port: 3000
+  {{- if not .Values.debug }}
+  tls:
+    certResolver: le
+  {{- end }}
+
+---
+# Public Ingress Route /*
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingress.route.anubis.old-web
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: anubis
+    component: old-web
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
@@ -91,7 +122,7 @@ spec:
       namespace: traefik
     {{- end }}
     services:
-    - name: anubis-web
+    - name: anubis-old-web
       port: 3000
   {{- if not .Values.debug }}
   tls:
@@ -121,7 +152,7 @@ spec:
   {{- end }}
   routes:
   - kind: Rule
-    match: Host(`{{ .Values.domain }}`) && PathPrefix(`/ide`)
+    match: (Host(`{{ .Values.domain }}`) && PathPrefix(`/ide/`)) || (Host(`{{ .Values.domain }}`) && PathPrefix(`/ide/`) && HeadersRegexp(`web`, `new`))
     middlewares:
     - name: strip-ide
       namespace: {{ .Release.Namespace }}

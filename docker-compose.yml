@@ -43,7 +43,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.services.api.loadbalancer.server.port=5000"
       - "traefik.http.middlewares.strip-api.stripprefix.prefixes=/api"
-      - "traefik.http.routers.api-public.rule=Host(`localhost`) && PathPrefix(`/api/`)"
+      - "traefik.http.routers.api-public.rule=(Host(`localhost`) && PathPrefix(`/api/`)) || (Host(`localhost`) && PathPrefix(`/api/`) && HeadersRegexp(`web`, `new`))"
       - "traefik.http.routers.api-public.entrypoints=http,https"
       - "traefik.http.routers.api-public.middlewares=strip-api@docker"
 
@@ -103,7 +103,7 @@ services:
     build: ./web
 
   web-dev:
-    image: node:alpine
+    image: node:16-alpine
     user: 1000:1000
     working_dir: /opt/app
     command: sh -c 'yarn && yarn run start'
@@ -117,8 +117,28 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.web.loadbalancer.server.port=3000"
-      - "traefik.http.routers.web-public.rule=Host(`localhost`)"
+      - "traefik.http.routers.web-public.rule=Host(`localhost`) && HeadersRegexp(`Cookie`, `web=new`)"
       - "traefik.http.routers.web-public.entrypoints=http,https"
+
+  old-web:
+    image: registry.digitalocean.com/anubis/old-web:latest
+    build: ./old-web
+
+  old-web-dev:
+    image: node:16-alpine
+    user: 1000:1000
+    working_dir: /opt/app
+    command: sh -c 'yarn && yarn run start'
+    environment:
+      NODE_ENV: development
+      REACT_APP_DEV: dev
+    volumes:
+      - ./old-web:/opt/app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.old-web.loadbalancer.server.port=3000"
+      - "traefik.http.routers.old-web-public.rule=Host(`localhost`)"
+      - "traefik.http.routers.old-web-public.entrypoints=http,https"
 
   db:
     image: mariadb:10.6

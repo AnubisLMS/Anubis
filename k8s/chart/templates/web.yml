@@ -4,15 +4,15 @@ metadata:
   name: anubis-web
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: web
-    component: static
+    app.kubernetes.io/name: anubis
+    component: web
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: web
-      component: static
+      app.kubernetes.io/name: anubis
+      component: web
   replicas: {{ .Values.web.replicas }}
   {{- if .Values.rollingUpdates }}
   strategy:
@@ -24,8 +24,8 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: web
-        component: static
+        app.kubernetes.io/name: anubis
+        component: web
     spec:
       dnsPolicy: ClusterFirst
       containers:
@@ -73,15 +73,14 @@ metadata:
   name: anubis-web
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: web
-    component: static
+    app.kubernetes.io/name: anubis
+    component: web
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
 spec:
-  type: NodePort
   selector:
-    app.kubernetes.io/name: web
-    component: static
+    app.kubernetes.io/name: anubis
+    component: web
   ports:
   - name: web
     port: 3000

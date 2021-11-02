@@ -74,12 +74,6 @@ export const public_nav = [
         Page: Dashboard,
       },
       {
-        id: 'Assignment',
-        icon: <AssignmentOutlinedIcon/>,
-        path: '/courses/assignment',
-        Page: Assignment,
-      },
-      {
         id: 'Courses',
         icon: <SchoolIcon/>,
         path: '/courses',

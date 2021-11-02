@@ -37,6 +37,8 @@ import Header from './Components/Header';
 import DeviceWarning from './Components/DeviceWarning';
 import Container from '@material-ui/core/Container';
 
+import TryNewUI from './Components/TryNewUI';
+
 const useStyles = makeStyles(() => ({
   root: {
     display: 'flex',
@@ -155,6 +157,7 @@ export default function App() {
                           <Error show={showError} onDelete={() => setShowError(false)}/>
                           <div className={classes.main}>
                             <Main user={user}/>
+                            <TryNewUI/>
                           </div>
                           <Footer/>
                         </main>

@@ -1,0 +1,10 @@
+# Did you think you would find something here?
+
+User-agent: *
+Allow: /about
+Allow: /blog
+Allow: /visuals
+Allow: /favicon.ico
+Allow: /api/public/static/
+Allow: /api/public/visuals/
+Disallow: /api
