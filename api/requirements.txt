@@ -172,6 +172,8 @@ sqlalchemy==1.4.26
     #   sqlalchemy-json
 sqlalchemy-json==0.4.0
     # via -r requirements.in
+tabulate==0.8.9
+    # via -r requirements.in
 typing-extensions==3.10.0.2
     # via aiohttp
 urllib3==1.26.7
