@@ -13,7 +13,6 @@ export const useStyles = makeStyles((theme) => ({
     justifyContent: 'space-between',
     padding: `${theme.spacing(2.5)}px`,
     borderRadius: `${theme.spacing(1.25)}px`,
-    margin: theme.spacing(5),
   },
   dueBadge: {
     boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',

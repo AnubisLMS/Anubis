@@ -36,16 +36,18 @@ const Dashboard = () => {
   useEffect(() => {
     axios.get('/api/public/assignments', {params: {courseId: query.get('courseId')}}).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      if (data) {
-        data.assignments.map((assignment) => {
-          const assignmentDueDate = new Date(assignment.dueDate);
-          if (assignmentDueDate < new Date()) {
-            setPastAssignments(pastAssignments.concat(assignment));
-          } else {
-            setActiveAssignments(activeAssignments.concat(assignment));
-          }
-        });
-      }
+      if (!data) return;
+      const past = data?.assignments.filter((assignment) => {
+        const assignmentDueDate = new Date(assignment.due_date);
+        if (assignmentDueDate < new Date()) return assignment;
+      });
+      const active = data?.assignments.filter((assignment) => {
+        const assignmentDueDate = new Date(assignment.due_date);
+        if (assignmentDueDate >= new Date()) return assignment;
+      });
+      setActiveAssignments(active);
+      console.log(active);
+      setPastAssignments(past);
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, []);
 
@@ -68,35 +70,43 @@ const Dashboard = () => {
   return (
     <StandardLayout>
       <SectionContainer title={'Courses'} link={'/courses'} linkTitle={'View All Courses'}>
-        <Grid container spacing={4}>
-          {courses.map((course, pos) => (
+        <Grid container spacing={6} className={classes.container}>
+          {courses.length > 0 && courses ? courses.map((course, pos) => (
             <Grid item key={course.courseCode}>
-              <Grow
-                in={true}
-                style={{transformOrigin: '0 0 0'}}
-                timeout={300 * (pos + 1)}
-              >
-                <CourseCard {... course}/>
-              </Grow>
+              <CourseCard {... course}/>
             </Grid>
-          ))}
+          )): (
+            <Box className={classes.emptyContainer}>
+              <Typography variant="h4" className={classes.emptyText}>You Have no Active Courses</Typography>
+            </Box>
+          )}
         </Grid>
       </SectionContainer>
       <SectionContainer title={'Active Assignments'}>
+        <Grid container spacing={6} className={classes.container}>
+          {activeAssignments.length > 0 && activeAssignments ? activeAssignments.map((assignment, index) => (
+            <Grid item key={`${assignment.name}-${index}`}>
+              <AssignmentCardV2 {... assignment} />
+            </Grid>
+          )) : (
+            <Box className={classes.emptyContainer}>
+              <Typography variant="h4" className={classes.emptyText}>You have no Active Assignments</Typography>
+            </Box>
+          )}
+        </Grid>
       </SectionContainer>
       <SectionContainer title={'Past Assignments'}>
-        {pastAssignments.map((assignment, index) => (
-          <Grid item key={assignment.name}>
-            <h1>Hello</h1>
-            <Grow
-              in={true}
-              style={{transformOrigin: '0 0 0'}}
-              timeout={300 * (index + 1)}
-            >
-              <AssignmentCardV2 {... assignment}/>
-            </Grow>
-          </Grid>
-        ))}
+        <Grid container spacing={6} className={classes.container}>
+          {pastAssignments.length > 0 && pastAssignments ? pastAssignments.map((assignment, index) => (
+            <Grid item key={`${assignment.name}-${index}`}>
+              <AssignmentCardV2 {... assignment} />
+            </Grid>
+          )): (
+            <Box className={classes.emptyContainer}>
+              <Typography variant="h4" className={classes.emptyText}>You have no Past Assignments</Typography>
+            </Box>
+          )}
+        </Grid>
       </SectionContainer>
     </StandardLayout>
   );

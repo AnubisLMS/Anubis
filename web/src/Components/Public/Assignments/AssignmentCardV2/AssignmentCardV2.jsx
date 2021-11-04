@@ -48,14 +48,11 @@ const AssignmentCardV2 = ({
         >
             Open Assignment
         </Button>
-        <Button
-          onClick = {() => {
-            history.push(repo_url);
-          }}
-          className={classes.viewRepoButon}
-        >
-          View Repo
-        </Button>
+        <a href={repo_url}>
+          <Button className={classes.viewRepoButon}>
+            View Repo
+          </Button>
+        </a>
       </Box>
 
     </Box>
