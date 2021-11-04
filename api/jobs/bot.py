@@ -2,6 +2,7 @@ import os
 
 import flask_sqlalchemy
 from discord.ext import commands
+from tabulate import tabulate
 import discord
 
 from anubis.models import Course, User, TheiaSession, InCourse
@@ -95,11 +96,12 @@ def generate_report() -> str:
     report = ""
     course_query = get_courses()
     # Course List
-    report += "Course Name\tCourse Code\n"
+    data = []
     for course in course_query:
-        report += f"{course.name}\t{course.course_code}\n"
+        data.append([course.name, course.course_code])
+    report += tabulate(data, headers=["Course Name", "Course Code"])
 
-    report += "\n"
+    report += "\n\n"
     # Number of users enrolled in at least on class this semester
     report += "Total users enrolled in at least one course this semester\n"
     report += f"{get_active_users_this_semester()}\n"
@@ -111,17 +113,22 @@ def generate_report() -> str:
 
     report += "\n"
     # Number of students for each course
-    report += "Course Name\tCourse Code\tTotal users enrolled\n"
+    data = []
     for course in course_query:
         user_count = get_course_user_count(course)
-        report += f"{course.name}\t{course.course_code}\t{user_count}\n"
+        data.append([course.name, course.course_code, user_count])
+    report += tabulate(
+        data,
+        headers=["Course Name", "Course Code", "Total users enrolled"]
+    )
 
-    report += "\n"
+    report += "\n\n"
     # Number of IDEs opened for each course
-    report += "Course Name\tCourse Code\tTotal IDEs opened\n"
+    data = []
     for course in course_query:
         theia_count = get_course_theia_session_count(course)
-        report += f"{course.name}\t{course.course_code}\t{theia_count}\n"
+        data.append([course.name, course.course_code, theia_count])
+    report += tabulate(data, headers=["Course Name", "Course Code", "Total IDEs opened"])
 
     return report
 
