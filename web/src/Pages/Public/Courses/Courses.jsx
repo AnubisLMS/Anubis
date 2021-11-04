@@ -90,26 +90,14 @@ const Courses = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      <Grid container spacing={4}>
-        {courses.map((course, pos) => (
-          <Grid item xs={12} md={6} lg={3} key={course.courseCode}>
-            <Grow
-              in={true}
-              style={{transformOrigin: '0 0 0'}}
-              timeout={300 * (pos + 1)}
-            >
-              <CourseCard {... course}/>
-            </Grow>
+      <Grid container spacing={6}>
+        {courses.map((course, index) => (
+          <Grid item key={`${course.courseCode}-${index}` }>
+            <CourseCard {... course}/>
           </Grid>
         ))}
         <Grid item>
-          <Grow
-            in={true}
-            style={{transformOrigin: '0 0 0'}}
-            timeout={300 * (courses.length + 1)}
-          >
-            <EmptyCourseCard callback={() => setJoinOpen(true)}/>
-          </Grow>
+          <EmptyCourseCard callback={() => setJoinOpen(true)}/>
         </Grid>
       </Grid>
     </StandardLayout>

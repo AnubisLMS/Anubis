@@ -69,16 +69,10 @@ const Assignments = () => {
       description={'Assignments'}
     >
       <IDEDialog selectedTheia={selectedTheia} setSelectedTheia={setSelectedTheia}/>
-      <Grid container spacing={2}>
+      <Grid container spacing={6}>
         {assignments.map((assignment, pos) => (
-          <Grid item xs={12} sm={6} lg={4} key={assignment.id}>
-            <Grow
-              in={true}
-              style={{transformOrigin: '0 0 0'}}
-              {...({timeout: 300 * (pos + 1)})}
-            >
-              <AssignmentCardV2 {... assignment}/>
-            </Grow>
+          <Grid item key={assignment.id}>
+            <AssignmentCardV2 {... assignment}/>
           </Grid>
         ))}
       </Grid>
