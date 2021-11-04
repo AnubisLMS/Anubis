@@ -6,7 +6,9 @@ from anubis.utils.cache import cache
 
 
 @cache.memoize(timeout=60, unless=is_debug)
-def get_students(course_id: str = None, course_code: str = None) -> List[Dict[str, dict]]:
+def get_students(
+    course_id: str = None, course_code: str = None
+) -> List[Dict[str, dict]]:
     """
     Get students by course code. If no course code is specified,
     then all courses will be considered.
@@ -30,10 +32,7 @@ def get_students(course_id: str = None, course_code: str = None) -> List[Dict[st
 
     # Get all users, and break them into their data props
     return [
-        s.data
-        for s in User.query.join(InCourse).join(Course).filter(
-            *filters
-        ).all()
+        s.data for s in User.query.join(InCourse).join(Course).filter(*filters).all()
     ]
 
 
@@ -59,17 +58,27 @@ def get_students_in_class(course_id, offset=None, limit=None):
         # Get the users, and break them into their data props
         return [
             u.data
-            for u in User.query.join(InCourse).join(Course).filter(
+            for u in User.query.join(InCourse)
+            .join(Course)
+            .filter(
                 Course.id == course_id,
                 InCourse.owner_id == User.id,
-            ).order_by(User.name.desc()).limit(limit).offset(offset).all()
+            )
+            .order_by(User.name.desc())
+            .limit(limit)
+            .offset(offset)
+            .all()
         ]
 
     # Get the users, and break them into their data props
     return [
         u.data
-        for u in User.query.join(InCourse).join(Course).filter(
+        for u in User.query.join(InCourse)
+        .join(Course)
+        .filter(
             Course.id == course_id,
             InCourse.owner_id == User.id,
-        ).order_by(User.name.desc()).all()
+        )
+        .order_by(User.name.desc())
+        .all()
     ]

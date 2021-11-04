@@ -42,7 +42,7 @@ def admin_questions_add_unique_code(assignment_id: str):
     ).first()
 
     # If the assignment does not exist, then stop
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Assert that the set course context matches the course of the assignment
     assert_course_context(assignment)
@@ -51,11 +51,11 @@ def admin_questions_add_unique_code(assignment_id: str):
     aq = AssignmentQuestion(
         assignment_id=assignment.id,
         pool=0,
-        question='',
-        solution='',
+        question="",
+        solution="",
         code_question=False,
-        code_language='',
-        placeholder='',
+        code_language="",
+        placeholder="",
     )
 
     # Add and commit the question
@@ -63,9 +63,11 @@ def admin_questions_add_unique_code(assignment_id: str):
     db.session.commit()
 
     # Return the status
-    return success_response({
-        "status": "Question added",
-    })
+    return success_response(
+        {
+            "status": "Question added",
+        }
+    )
 
 
 @questions.route("/delete/<string:assignment_question_id>")
@@ -85,7 +87,7 @@ def admin_questions_delete_question_id(assignment_question_id: str):
     ).first()
 
     # Verify that the question exists
-    req_assert(assignment_question is not None, message='question does not exist')
+    req_assert(assignment_question is not None, message="question does not exist")
 
     # Assert that the set course context matches the course of the assignment
     assert_course_context(assignment_question)
@@ -104,13 +106,17 @@ def admin_questions_delete_question_id(assignment_question_id: str):
         db.session.rollback()
 
         # If this commit fails, then it is assigned to students
-        return error_response('Question is already assigned to students. Reset assignments to delete.')
+        return error_response(
+            "Question is already assigned to students. Reset assignments to delete."
+        )
 
     # Return the status
-    return success_response({
-        "status": "Question deleted",
-        'variant': 'warning',
-    })
+    return success_response(
+        {
+            "status": "Question deleted",
+            "variant": "warning",
+        }
+    )
 
 
 @questions.route("/hard-reset/<string:assignment_id>")
@@ -143,7 +149,7 @@ def private_questions_hard_reset_unique_code(assignment_id: str):
     ).first()
 
     # If the assignment does not exist, then stop
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Assert that the current user is a professor or superuser
     assert_course_superuser(assignment.course_id)
@@ -155,10 +161,12 @@ def private_questions_hard_reset_unique_code(assignment_id: str):
     hard_reset_questions(assignment)
 
     # Pass back the status
-    return success_response({
-        "status": "Questions hard reset",
-        'variant': 'warning',
-    })
+    return success_response(
+        {
+            "status": "Questions hard reset",
+            "variant": "warning",
+        }
+    )
 
 
 @questions.route("/reset-assignments/<string:assignment_id>")
@@ -191,7 +199,7 @@ def private_questions_reset_assignments_assignment_id(assignment_id: str):
     ).first()
 
     # Verify that the assignment exists
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Assert that the current user is a professor or superuser
     assert_course_superuser(assignment.course_id)
@@ -203,15 +211,17 @@ def private_questions_reset_assignments_assignment_id(assignment_id: str):
     reset_question_assignments(assignment, commit=True)
 
     # Pass back the status
-    return success_response({
-        "status": "Questions assignments reset",
-        'variant': 'warning',
-    })
+    return success_response(
+        {
+            "status": "Questions assignments reset",
+            "variant": "warning",
+        }
+    )
 
 
 @questions.route("/update/<string:assignment_question_id>", methods=["POST"])
 @require_admin()
-@json_endpoint(required_fields=[('question', dict)])
+@json_endpoint(required_fields=[("question", dict)])
 def admin_questions_update(assignment_question_id: str, question: dict):
     """
     Update the text for a question
@@ -227,25 +237,23 @@ def admin_questions_update(assignment_question_id: str, question: dict):
     ).first()
 
     # Verify that the assignment question exists
-    req_assert(db_assignment_question is not None, message='question does not exist')
+    req_assert(db_assignment_question is not None, message="question does not exist")
 
     # Assert that the set course context matches the course of the assignment
     assert_course_context(db_assignment_question)
 
     # Update the fields of the question
-    db_assignment_question.question = question['question']
-    db_assignment_question.solution = question['solution']
-    db_assignment_question.code_language = question['code_language']
-    db_assignment_question.code_question = question['code_question']
-    db_assignment_question.pool = question['pool']
+    db_assignment_question.question = question["question"]
+    db_assignment_question.solution = question["solution"]
+    db_assignment_question.code_language = question["code_language"]
+    db_assignment_question.code_question = question["code_question"]
+    db_assignment_question.pool = question["pool"]
 
     # Commit any changes
     db.session.commit()
 
     # Pass back status
-    return success_response({
-        'status': 'Question updated'
-    })
+    return success_response({"status": "Question updated"})
 
 
 @questions.route("/get-assignments/<string:assignment_id>")
@@ -265,7 +273,7 @@ def private_questions_get_assignments_unique_code(assignment_id: str):
     ).first()
 
     # If the assignment does not exist, then stop
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Assert that the assignment is within the course context
     assert_course_context(assignment)
@@ -273,9 +281,11 @@ def private_questions_get_assignments_unique_code(assignment_id: str):
     # Get all the question assignments
     question_assignments = get_question_assignments(assignment)
 
-    return success_response({
-        'assignments': question_assignments,
-    })
+    return success_response(
+        {
+            "assignments": question_assignments,
+        }
+    )
 
 
 @questions.route("/get/<string:assignment_id>")
@@ -295,7 +305,7 @@ def private_questions_get_unique_code(assignment_id: str):
     ).first()
 
     # Verify that the assignment exists
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Assert that the assignment is within the course context
     assert_course_context(assignment)
@@ -304,12 +314,14 @@ def private_questions_get_unique_code(assignment_id: str):
         AssignedStudentQuestion.assignment_id == assignment.id
     ).count()
 
-    return success_response({
-        'assignment_name': assignment.name,
-        'questions': get_all_questions(assignment),
-        'questions_assigned': assignment.questions_assigned,
-        'assigned_question_count': assigned_question_count,
-    })
+    return success_response(
+        {
+            "assignment_name": assignment.name,
+            "questions": get_all_questions(assignment),
+            "questions_assigned": assignment.questions_assigned,
+            "assigned_question_count": assigned_question_count,
+        }
+    )
 
 
 @questions.route("/assign/<string:assignment_id>")
@@ -332,7 +344,7 @@ def private_questions_assign_unique_code(assignment_id: str):
     ).first()
 
     # Verify that we got an assignment
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Verify that the assignment is accessible to the user in the current course context
     assert_course_context(assignment)
@@ -341,13 +353,12 @@ def private_questions_assign_unique_code(assignment_id: str):
     assigned_questions = assign_questions(assignment)
 
     # Pass back the response
-    return success_response({
-        'assigned': assigned_questions,
-        'status': 'Questions assigned'
-    })
+    return success_response(
+        {"assigned": assigned_questions, "status": "Questions assigned"}
+    )
 
 
-@questions.get('/export/<string:assignment_id>')
+@questions.get("/export/<string:assignment_id>")
 @require_admin()
 def admin_assignments_export(assignment_id: str):
     """
@@ -358,12 +369,10 @@ def admin_assignments_export(assignment_id: str):
     """
 
     # Get the assignment
-    assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     # Verify that we got an assignment
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Verify that the assignment is accessible to the user in the current course context
     assert_course_context(assignment)
@@ -375,12 +384,9 @@ def admin_assignments_export(assignment_id: str):
     zip_blob = export_assignment_questions(assignment.id)
 
     # Get a filename from the assignment name and datetime
-    filename = f'{assignment.name}-{str(now)}.zip'.replace(' ', '_').replace(':', '')
+    filename = f"{assignment.name}-{str(now)}.zip".replace(" ", "_").replace(":", "")
 
     # Send the file back
     return send_file(
-        io.BytesIO(zip_blob),
-        attachment_filename=filename,
-        as_attachment=True
+        io.BytesIO(zip_blob), attachment_filename=filename, as_attachment=True
     )
-

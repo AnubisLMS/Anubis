@@ -14,11 +14,11 @@ def get_student_submission_commit(assignment_ids):
 
 
 def test_regrade_admin():
-    superuser = Session('superuser')
-    assignments = superuser.get('/admin/assignments/list')['assignments']
-    assignment_ids = list(map(lambda x: x['id'], assignments))
+    superuser = Session("superuser")
+    assignments = superuser.get("/admin/assignments/list")["assignments"]
+    assignment_ids = list(map(lambda x: x["id"], assignments))
     commit, assignment_id = get_student_submission_commit(assignment_ids)
 
-    permission_test(f'/admin/regrade/status/{assignment_id}')
-    permission_test(f'/admin/regrade/submission/{commit}')
-    permission_test(f'/admin/regrade/assignment/{assignment_id}')
+    permission_test(f"/admin/regrade/status/{assignment_id}")
+    permission_test(f"/admin/regrade/submission/{commit}")
+    permission_test(f"/admin/regrade/assignment/{assignment_id}")

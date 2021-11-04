@@ -77,4 +77,4 @@ def private_fix_dangling():
 
     :return:
     """
-    return success_response({'fixed': fix_dangling()})
+    return success_response({"fixed": fix_dangling()})

@@ -6,7 +6,7 @@ from anubis.utils.http.decorators import json_response
 from anubis.utils.http import success_response
 from anubis.lms.lectures import get_lecture_notes
 
-lectures_ = Blueprint('public-lectures', __name__, url_prefix='/public/lectures')
+lectures_ = Blueprint("public-lectures", __name__, url_prefix="/public/lectures")
 
 
 @lectures_.get("/list")
@@ -28,6 +28,4 @@ def public_static_lectures_list():
     lectures_data = get_lecture_notes(current_user.id, course_id)
 
     # Pass back the list of files
-    return success_response({
-        "lectures": lectures_data
-    })
+    return success_response({"lectures": lectures_data})

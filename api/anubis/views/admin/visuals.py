@@ -12,10 +12,10 @@ from anubis.utils.visuals.assignments import (
     get_assignment_sundial,
 )
 
-visuals_ = Blueprint('admin-visuals', __name__, url_prefix='/admin/visuals')
+visuals_ = Blueprint("admin-visuals", __name__, url_prefix="/admin/visuals")
 
 
-@visuals_.route('/assignment/<string:assignment_id>')
+@visuals_.route("/assignment/<string:assignment_id>")
 @require_admin()
 @json_response
 def public_visuals_assignment_id(assignment_id: str):
@@ -30,25 +30,21 @@ def public_visuals_assignment_id(assignment_id: str):
     """
 
     # Get the assignment object
-    assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     # If the assignment does not exist, then stop
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Assert that the assignment is within the course context
     assert_course_context(assignment)
 
     # Generate and pass back the visual data
-    return success_response({
-        'assignment_data': get_admin_assignment_visual_data(
-            assignment_id
-        )
-    })
+    return success_response(
+        {"assignment_data": get_admin_assignment_visual_data(assignment_id)}
+    )
 
 
-@visuals_.route('/history/<string:assignment_id>/<string:netid>')
+@visuals_.route("/history/<string:assignment_id>/<string:netid>")
 @require_admin()
 @json_response
 def visual_history_assignment_netid(assignment_id: str, netid: str):
@@ -63,18 +59,16 @@ def visual_history_assignment_netid(assignment_id: str, netid: str):
     """
 
     # Get the assignment object
-    assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     # If the assignment does not exist, then stop
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Get the student
     student = User.query.filter(User.netid == netid).first()
 
     # Make sure that the student exists
-    req_assert(student is not None, message='user does not exist')
+    req_assert(student is not None, message="user does not exist")
 
     # Assert that both the course and the assignment are
     # within the view of the current admin.
@@ -84,7 +78,7 @@ def visual_history_assignment_netid(assignment_id: str, netid: str):
     return success_response(get_assignment_history(assignment.id, student.netid))
 
 
-@visuals_.route('/sundial/<string:assignment_id>')
+@visuals_.route("/sundial/<string:assignment_id>")
 @require_admin()
 @json_response
 def visual_sundial_assignment(assignment_id: str):
@@ -98,16 +92,14 @@ def visual_sundial_assignment(assignment_id: str):
     :return:
     """
     # Get the assignment object
-    assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     # If the assignment does not exist, then stop
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Assert that the assignment is within the view of
     # the current admin.
     assert_course_context(assignment)
 
     # Pull the (maybe cached) sundial data
-    return success_response({'sundial': get_assignment_sundial(assignment.id)})
+    return success_response({"sundial": get_assignment_sundial(assignment.id)})

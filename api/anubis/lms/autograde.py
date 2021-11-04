@@ -55,15 +55,15 @@ def autograde(student_id, assignment_id, max_time: datetime = None):
     # the best submission so far (based on number of tests passed).
     # We start from the oldest submission and move to the newest.
     for submission in (
-            Submission.query.filter(
-                Submission.assignment_id == assignment_id,
-                Submission.owner_id == student_id,
-                Submission.processed == True,
-                Submission.accepted == True,
-                *submission_filters
-            )
-                    .order_by(Submission.created.desc())
-                    .all()
+        Submission.query.filter(
+            Submission.assignment_id == assignment_id,
+            Submission.owner_id == student_id,
+            Submission.processed == True,
+            Submission.accepted == True,
+            *submission_filters
+        )
+        .order_by(Submission.created.desc())
+        .all()
     ):
 
         # Calculate the number of tests that passed in this submission
@@ -86,8 +86,9 @@ def autograde(student_id, assignment_id, max_time: datetime = None):
     return best.id if best is not None else None
 
 
-def autograde_submission_result_wrapper(assignment: Assignment, user_id: str, netid: str, name: str,
-                                        submission_id: str) -> dict:
+def autograde_submission_result_wrapper(
+    assignment: Assignment, user_id: str, netid: str, name: str, submission_id: str
+) -> dict:
     """
     The autograde results require quite of bit more information than
     just the id of the best submission. This function takes some high level
@@ -134,10 +135,16 @@ def autograde_submission_result_wrapper(assignment: Assignment, user_id: str, ne
             "netid": netid,
             "name": name,
             "submission": submission.admin_data,
-            "build_passed": submission.build.passed if submission.build is not None else False,
+            "build_passed": submission.build.passed
+            if submission.build is not None
+            else False,
             "tests_passed": best_count,
             "total_tests": len(submission.test_results),
-            "tests_passed_names": [test.assignment_test.name for test in submission.test_results if test.passed],
+            "tests_passed_names": [
+                test.assignment_test.name
+                for test in submission.test_results
+                if test.passed
+            ],
             "full_stats": "https://anubis.osiris.services/api/private/submission/{}".format(
                 submission.id
             ),
@@ -173,8 +180,8 @@ def bulk_autograde(assignment_id, netids=None, offset=0, limit=20):
 
     # Find the assignment object
     assignment = (
-            Assignment.query.filter_by(name=assignment_id).first()
-            or Assignment.query.filter_by(id=assignment_id).first()
+        Assignment.query.filter_by(name=assignment_id).first()
+        or Assignment.query.filter_by(id=assignment_id).first()
     )
     if assignment is None:
         return error_response("assignment does not exist")

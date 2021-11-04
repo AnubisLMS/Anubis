@@ -5,5 +5,5 @@ migrate = Migrate()
 
 @migrate.configure
 def configure_alembic(config):
-    config.config_file_name = 'alembic.ini'
+    config.config_file_name = "alembic.ini"
     return config

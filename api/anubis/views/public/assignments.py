@@ -35,7 +35,7 @@ def public_assignments():
     return success_response({"assignments": assignment_data})
 
 
-@assignments.get('/get/<string:assignment_id>')
+@assignments.get("/get/<string:assignment_id>")
 @require_user()
 @json_response
 def public_assignment_get(assignment_id: str):
@@ -46,7 +46,6 @@ def public_assignment_get(assignment_id: str):
     :return:
     """
 
-    return success_response({
-      'assignment': get_assignment_data(current_user.id, assignment_id)
-    })
-
+    return success_response(
+        {"assignment": get_assignment_data(current_user.id, assignment_id)}
+    )

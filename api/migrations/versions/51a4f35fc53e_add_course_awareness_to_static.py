@@ -43,12 +43,21 @@ def upgrade():
         op.create_foreign_key(None, "theia_session", "course", ["course_id"], ["id"])
 
         try:
-            course_id, = conn.execute("select id from course where course_code = 'CS-UY 3224';").fetchone()
+            (course_id,) = conn.execute(
+                "select id from course where course_code = 'CS-UY 3224';"
+            ).fetchone()
             conn.execute("update static_file set course_id = %s;", (course_id,))
             conn.execute("update theia_session set course_id = %s;", (course_id,))
 
-            op.alter_column('static_file', 'course_id', existing_type=sa.String(128), nullable=False)
-            op.alter_column('theia_session', 'course_id', existing_type=sa.String(128), nullable=False)
+            op.alter_column(
+                "static_file", "course_id", existing_type=sa.String(128), nullable=False
+            )
+            op.alter_column(
+                "theia_session",
+                "course_id",
+                existing_type=sa.String(128),
+                nullable=False,
+            )
         except TypeError:
             pass
     # ### end Alembic commands ###

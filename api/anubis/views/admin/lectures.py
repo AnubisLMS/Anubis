@@ -11,7 +11,7 @@ from anubis.utils.http.files import process_file_upload, get_mime_type
 from anubis.utils.http import success_response, get_request_file_stream
 from anubis.lms.courses import course_context, assert_course_context
 
-lectures_ = Blueprint('admin-lectures', __name__, url_prefix='/admin/lectures')
+lectures_ = Blueprint("admin-lectures", __name__, url_prefix="/admin/lectures")
 
 
 @lectures_.get("/list")
@@ -28,20 +28,18 @@ def admin_static_lectures_list():
 
     # Build Query. Defer the blob field so
     # it is not loaded.
-    query = LectureNotes.query \
-        .filter(LectureNotes.course_id == course_context.id) \
-        .order_by(LectureNotes.post_time.desc())
+    query = LectureNotes.query.filter(
+        LectureNotes.course_id == course_context.id
+    ).order_by(LectureNotes.post_time.desc())
 
     # Get all public static files within this course
     lectures = query.all()
 
     # Pass back the list of files
-    return success_response({
-        "lectures": [lecture.data for lecture in lectures]
-    })
+    return success_response({"lectures": [lecture.data for lecture in lectures]})
 
 
-@lectures_.get('/delete/<string:lecture_notes_id>')
+@lectures_.get("/delete/<string:lecture_notes_id>")
 @require_admin()
 @json_response
 def admin_lecture_delete_lecture_id(lecture_notes_id: str):
@@ -62,7 +60,7 @@ def admin_lecture_delete_lecture_id(lecture_notes_id: str):
     assert_course_context(lecture_notes)
 
     # Make sure we got one
-    req_assert(lecture_notes is not None, message='Lecture notes not found')
+    req_assert(lecture_notes is not None, message="Lecture notes not found")
 
     # Mark the notes for deletion
     db.session.delete(lecture_notes)
@@ -70,10 +68,12 @@ def admin_lecture_delete_lecture_id(lecture_notes_id: str):
     # Commit the delete
     db.session.commit()
 
-    return success_response({
-        'status': 'Lecture Notes deleted',
-        'variant': 'warning',
-    })
+    return success_response(
+        {
+            "status": "Lecture Notes deleted",
+            "variant": "warning",
+        }
+    )
 
 
 @lectures_.post("/save/<string:lecture_notes_id>")
@@ -94,9 +94,9 @@ def admin_lecture_save(lecture_notes_id: str):
     """
 
     # Get fields from params
-    post_time = request.args.get('post_time', default=None)
-    title = request.args.get('title', default='')
-    description = request.args.get('description', default='')
+    post_time = request.args.get("post_time", default=None)
+    title = request.args.get("title", default="")
+    description = request.args.get("description", default="")
 
     # If post time was in the http query, then try to parse it
     if isinstance(post_time, str):
@@ -134,9 +134,11 @@ def admin_lecture_save(lecture_notes_id: str):
 
     db.session.commit()
 
-    return success_response({
-        'status': 'Lecture notes update',
-    })
+    return success_response(
+        {
+            "status": "Lecture notes update",
+        }
+    )
 
 
 @lectures_.post("/upload")
@@ -160,9 +162,9 @@ def admin_lecture_upload():
     """
 
     # Get fields from params
-    post_time = request.args.get('post_time', default=None)
-    title = request.args.get('title', default='')
-    description = request.args.get('description', default='')
+    post_time = request.args.get("post_time", default=None)
+    title = request.args.get("title", default="")
+    description = request.args.get("description", default="")
 
     # If post time was in the http query, then try to parse it
     if isinstance(post_time, str):
@@ -192,7 +194,9 @@ def admin_lecture_upload():
     db.session.commit()
 
     # Pass back the status
-    return success_response({
-        "status": f"{blob.filename} uploaded",
-        "blob": blob.data,
-    })
+    return success_response(
+        {
+            "status": f"{blob.filename} uploaded",
+            "blob": blob.data,
+        }
+    )

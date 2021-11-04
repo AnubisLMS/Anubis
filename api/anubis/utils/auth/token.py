@@ -19,9 +19,11 @@ def get_token() -> Union[str, None]:
     if not has_request_context():
         return None
 
-    return request.headers.get("token", default=None) or request.cookies.get(
-        "token", default=None
-    ) or request.args.get('token', default=None)
+    return (
+        request.headers.get("token", default=None)
+        or request.cookies.get("token", default=None)
+        or request.args.get("token", default=None)
+    )
 
 
 def create_token(netid: str, exp_kwargs=None, **extras) -> Union[str, None]:
@@ -39,15 +41,18 @@ def create_token(netid: str, exp_kwargs=None, **extras) -> Union[str, None]:
     user: User = User.query.filter_by(netid=netid).first()
 
     if exp_kwargs is None:
-        exp_kwargs = {'hours': 6}
+        exp_kwargs = {"hours": 6}
 
     # Verify user exists
     if user is None:
         return None
 
     # Create new token
-    return jwt.encode({
-        "netid": user.netid,
-        "exp": datetime.utcnow() + timedelta(**exp_kwargs),
-        **extras,
-    }, config.SECRET_KEY)
+    return jwt.encode(
+        {
+            "netid": user.netid,
+            "exp": datetime.utcnow() + timedelta(**exp_kwargs),
+            **extras,
+        },
+        config.SECRET_KEY,
+    )

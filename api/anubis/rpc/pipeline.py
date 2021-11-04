@@ -27,7 +27,7 @@ def create_submission_pipeline(submission_id: str):
     )
 
     # Calculate the maximum number of jobs allowed in the cluster
-    max_jobs = get_config_int('PIPELINE_MAX_JOBS', default=10)
+    max_jobs = get_config_int("PIPELINE_MAX_JOBS", default=10)
 
     # Initialize kube client
     config.load_incluster_config()
@@ -44,9 +44,7 @@ def create_submission_pipeline(submission_id: str):
         exit(0)
 
     # Get the database entry for the submission
-    submission = Submission.query.filter(
-        Submission.id == submission_id
-    ).first()
+    submission = Submission.query.filter(Submission.id == submission_id).first()
 
     # Make sure that the submission exists
     if submission is None:
@@ -64,7 +62,7 @@ def create_submission_pipeline(submission_id: str):
         init_submission(submission, commit=True)
 
     submission.processed = False
-    submission.state = 'Initializing Pipeline'
+    submission.state = "Initializing Pipeline"
     db.session.commit()
 
     # Create k8s job object

@@ -44,17 +44,17 @@ def guess_github_username(assignment, repo_name):
     """
     repo_name_split = repo_name.split("-")
     unique_code_index = repo_name_split.index(assignment.unique_code)
-    repo_name_split = repo_name_split[unique_code_index + 1:]
+    repo_name_split = repo_name_split[unique_code_index + 1 :]
     github_username1 = "-".join(repo_name_split)
     github_username2 = "-".join(repo_name_split[:-1])
     user = User.query.filter(
         User.github_username.in_([github_username1, github_username2]),
-        User.github_username != ''
+        User.github_username != "",
     ).first()
 
     github_username_guess = github_username1
     if user is None:
-        if any(github_username_guess.endswith(i) for i in ['-1', '-2', '-3']):
+        if any(github_username_guess.endswith(i) for i in ["-1", "-2", "-3"]):
             github_username_guess = github_username2
     else:
         github_username_guess = user.github_username
@@ -86,9 +86,7 @@ def check_repo(assignment, repo_url, github_username, user=None) -> AssignmentRe
     # If the user is None, then the submission is
     # dangling.
     else:
-        repo = AssignmentRepo.query.filter(
-            AssignmentRepo.repo_url == repo_url
-        ).first()
+        repo = AssignmentRepo.query.filter(AssignmentRepo.repo_url == repo_url).first()
 
     # If the repo did not exist, then create it.
     if repo is None:

@@ -22,8 +22,8 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
 
     # Set some conservative resources requests and limits
     resource_requirements = {
-        'limits': {"cpu": "2", "memory": "750Mi"},
-        'requests': {"cpu": "500m", "memory": "100Mi"},
+        "limits": {"cpu": "2", "memory": "750Mi"},
+        "requests": {"cpu": "500m", "memory": "100Mi"},
     }
 
     # If we are running in debug mode (like in minikube) then
@@ -36,7 +36,6 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
         name="pipeline",
         image=submission.assignment.pipeline_image,
         image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
-
         # Setup the environment to include everything necessary for the
         # pipeline to be able to clone, test and report to the pipeline api.
         env=[
@@ -54,10 +53,8 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
                 ),
             ),
         ],
-
         # Set the resource requirements
         resources=client.V1ResourceRequirements(**resource_requirements),
-
         # Add a security context to disable privilege escalation
         # security_context=client.V1SecurityContext(
         #     allow_privilege_escalation=False,
@@ -104,7 +101,7 @@ def delete_pipeline_job(batch_v1: client.BatchV1Api, job: client.V1Job):
             propagation_policy="Background",
         )
     except kubernetes.client.exceptions.ApiException:
-        logger.error('failed to delete api job, continuing' + traceback.format_exc())
+        logger.error("failed to delete api job, continuing" + traceback.format_exc())
 
 
 def reap_pipeline_jobs() -> int:
@@ -122,11 +119,13 @@ def reap_pipeline_jobs() -> int:
     # Get all pipeline jobs in the anubis namespace
     jobs = batch_v1.list_namespaced_job(
         namespace="anubis",
-        label_selector="app.kubernetes.io/name=submission-pipeline,role=submission-pipeline-worker"
+        label_selector="app.kubernetes.io/name=submission-pipeline,role=submission-pipeline-worker",
     )
 
     # Get the autograde pipeline timeout from config
-    autograde_pipeline_timeout_minutes = get_config_int('AUTOGRADE_PIPELINE_TIMEOUT_MINUTES', default=5)
+    autograde_pipeline_timeout_minutes = get_config_int(
+        "AUTOGRADE_PIPELINE_TIMEOUT_MINUTES", default=5
+    )
 
     # Count the number of active jobs
     active_count = 0
@@ -139,7 +138,9 @@ def reap_pipeline_jobs() -> int:
         job_created = job.metadata.creation_timestamp.replace(tzinfo=None)
 
         # Delete the job if it is older than a few minutes
-        if datetime.utcnow() - job_created > timedelta(minutes=autograde_pipeline_timeout_minutes):
+        if datetime.utcnow() - job_created > timedelta(
+            minutes=autograde_pipeline_timeout_minutes
+        ):
 
             # Attempt to delete the k8s job
             delete_pipeline_job(batch_v1, job)

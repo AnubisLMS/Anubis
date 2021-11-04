@@ -21,9 +21,7 @@ def upgrade():
     op.alter_column(
         "theia_session",
         "repo_url",
-        existing_type=mysql.VARCHAR(
-            collation="utf8mb4_unicode_ci", length=128
-        ),
+        existing_type=mysql.VARCHAR(collation="utf8mb4_unicode_ci", length=128),
         nullable=True,
     )
     # ### end Alembic commands ###
@@ -34,9 +32,7 @@ def downgrade():
     op.alter_column(
         "theia_session",
         "repo_url",
-        existing_type=mysql.VARCHAR(
-            collation="utf8mb4_unicode_ci", length=128
-        ),
+        existing_type=mysql.VARCHAR(collation="utf8mb4_unicode_ci", length=128),
         nullable=False,
     )
     # ### end Alembic commands ###

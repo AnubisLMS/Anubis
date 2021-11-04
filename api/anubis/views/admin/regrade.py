@@ -52,12 +52,14 @@ def admin_regrade_status(assignment: Assignment):
     percent = math.ceil(((total - processing) / total) * 100) if total > 0 else 0
 
     # Return the status
-    return success_response({
-        'percent': f'{percent}% of submissions processed',
-        'processing': processing,
-        'processed': total - processing,
-        'total': total,
-    })
+    return success_response(
+        {
+            "percent": f"{percent}% of submissions processed",
+            "processing": processing,
+            "processed": total - processing,
+            "total": total,
+        }
+    )
 
 
 @regrade.route("/submission/<string:commit>")
@@ -78,7 +80,7 @@ def admin_regrade_submission_commit(commit: str):
     ).first()
 
     # Make sure the submission exists
-    req_assert(submission is not None, message='submission does not exist')
+    req_assert(submission is not None, message="submission does not exist")
 
     # Assert that the submission is within the current course context
     assert_course_context(submission)
@@ -90,7 +92,9 @@ def admin_regrade_submission_commit(commit: str):
     enqueue_autograde_pipeline(submission.id)
 
     # Return status
-    return success_response({"submission": submission.data, "user": submission.owner.data})
+    return success_response(
+        {"submission": submission.data, "user": submission.owner.data}
+    )
 
 
 @regrade.route("/student/<string:assignment_id>/<string:netid>")
@@ -110,15 +114,13 @@ def private_regrade_student_assignment_netid(assignment_id: str, netid: str):
     ).first()
 
     # Verify that the assignment exists
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Get the student
-    student: User = User.query.filter(
-        User.netid == netid
-    ).first()
+    student: User = User.query.filter(User.netid == netid).first()
 
     # Verify the student exists
-    req_assert(student is not None, message='student does not exist')
+    req_assert(student is not None, message="student does not exist")
 
     # Assert that the course exists
     assert_course_context(student, assignment)
@@ -137,16 +139,18 @@ def private_regrade_student_assignment_netid(assignment_id: str, netid: str):
 
     # Enqueue each chunk as a job for the rpc workers
     for chunk in submission_chunks:
-        rpc_enqueue(rpc_bulk_regrade, 'regrade', args=[chunk])
+        rpc_enqueue(rpc_bulk_regrade, "regrade", args=[chunk])
 
     # Clear cache of autograde results
     cache.delete_memoized(bulk_autograde, assignment.id)
     cache.delete_memoized(autograde, student.id, assignment.id)
 
-    return success_response({
-        "status": f"{submission_count} submissions enqueued. This may take a while.",
-        "submissions": submission_ids,
-    })
+    return success_response(
+        {
+            "status": f"{submission_count} submissions enqueued. This may take a while.",
+            "submissions": submission_ids,
+        }
+    )
 
 
 @regrade.route("/assignment/<string:assignment_id>")
@@ -174,10 +178,10 @@ def private_regrade_assignment(assignment_id):
     """
 
     # Get the options for the regrade
-    hours = get_number_arg('hours', default_value=-1)
-    not_processed = get_number_arg('not_processed', default_value=-1)
-    processed = get_number_arg('processed', default_value=-1)
-    reaped = get_number_arg('reaped', default_value=-1)
+    hours = get_number_arg("hours", default_value=-1)
+    not_processed = get_number_arg("not_processed", default_value=-1)
+    processed = get_number_arg("processed", default_value=-1)
+    reaped = get_number_arg("reaped", default_value=-1)
 
     # Build a list of filters based on the options
     filters = []
@@ -196,7 +200,7 @@ def private_regrade_assignment(assignment_id):
 
     # Only regrade submissions that have been reaped
     if reaped == 1:
-        filters.append(Submission.state == 'Reaped after timeout')
+        filters.append(Submission.state == "Reaped after timeout")
 
     # Find the assignment
     assignment = Assignment.query.filter(
@@ -204,7 +208,7 @@ def private_regrade_assignment(assignment_id):
     ).first()
 
     # Verify that the assignment exists
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Assert that the assignment is within the current course context
     assert_course_context(assignment)
@@ -213,7 +217,7 @@ def private_regrade_assignment(assignment_id):
     submissions = Submission.query.filter(
         Submission.assignment_id == assignment.id,
         Submission.owner_id is not None,
-        *filters
+        *filters,
     ).all()
 
     # Get a count of submissions for the response
@@ -225,10 +229,12 @@ def private_regrade_assignment(assignment_id):
 
     # Enqueue each chunk as a job for the rpc workers
     for chunk in submission_chunks:
-        rpc_enqueue(rpc_bulk_regrade, 'regrade', args=[chunk])
+        rpc_enqueue(rpc_bulk_regrade, "regrade", args=[chunk])
 
     # Pass back the enqueued status
-    return success_response({
-        "status": f"{submission_count} submissions enqueued.",
-        "submissions": submission_ids,
-    })
+    return success_response(
+        {
+            "status": f"{submission_count} submissions enqueued.",
+            "submissions": submission_ids,
+        }
+    )

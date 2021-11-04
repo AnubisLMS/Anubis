@@ -29,7 +29,7 @@ def get_current_user() -> Union[User, None]:
     try:
         decoded = jwt.decode(token, config.SECRET_KEY, algorithms=["HS256"])
     except Exception as e:
-        logger.error('AUTH decode error\n' + traceback.format_exc())
+        logger.error("AUTH decode error\n" + traceback.format_exc())
         return None
 
     # Make sure there is a netid in the jwt

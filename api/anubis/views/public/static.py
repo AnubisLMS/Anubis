@@ -23,10 +23,10 @@ def public_static(path: str, filename: str = None):
     :return:
     """
 
-    query = (
-        StaticFile.query
-            .options(undefer(StaticFile.blob))  # undefer blob attr to avoid followup query
-            .filter(or_(StaticFile.path == path, StaticFile.path == "/" + path))
+    query = StaticFile.query.options(
+        undefer(StaticFile.blob)
+    ).filter(  # undefer blob attr to avoid followup query
+        or_(StaticFile.path == path, StaticFile.path == "/" + path)
     )
 
     # If filename was specified, then include it in the query

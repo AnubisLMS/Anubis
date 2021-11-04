@@ -20,10 +20,14 @@ def get_lecture_notes(user_id: str, course_id: Optional[str] = None):
 
     # Build a list of all the LectureNotes visible
     # to this user for each of the courses they are in.
-    lecture_notes: List[LectureNotes] = LectureNotes.query.filter(
-        LectureNotes.course_id.in_(course_ids),
-        LectureNotes.hidden == False,
-    ).order_by(LectureNotes.post_time.desc()).all()
+    lecture_notes: List[LectureNotes] = (
+        LectureNotes.query.filter(
+            LectureNotes.course_id.in_(course_ids),
+            LectureNotes.hidden == False,
+        )
+        .order_by(LectureNotes.post_time.desc())
+        .all()
+    )
 
     # Pass back the raw data
     return [lecture_note.data for lecture_note in lecture_notes]

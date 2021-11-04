@@ -6,7 +6,11 @@ from anubis.utils.auth.http import require_admin
 from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http import success_response, get_number_arg
-from anubis.lms.autograde import bulk_autograde, autograde, autograde_submission_result_wrapper
+from anubis.lms.autograde import (
+    bulk_autograde,
+    autograde,
+    autograde_submission_result_wrapper,
+)
 from anubis.lms.courses import assert_course_context
 from anubis.lms.questions import get_assigned_questions
 from anubis.utils.cache import cache
@@ -19,7 +23,7 @@ from anubis.utils.visuals.assignments import (
 autograde_ = Blueprint("admin-autograde", __name__, url_prefix="/admin/autograde")
 
 
-@autograde_.route('/cache-reset/<string:assignment_id>')
+@autograde_.route("/cache-reset/<string:assignment_id>")
 @require_admin()
 @cache.memoize(timeout=60)
 @json_response
@@ -31,12 +35,10 @@ def admin_autograde_cache_reset(assignment_id: str):
     :return:
     """
     # Pull the assignment object
-    assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     # Verify that we got an assignment
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Verify that the current course context, and the assignment course match
     assert_course_context(assignment)
@@ -47,9 +49,7 @@ def admin_autograde_cache_reset(assignment_id: str):
     cache.delete_memoized(get_admin_assignment_visual_data)
     cache.delete_memoized(get_assignment_sundial)
 
-    return success_response({
-        'message': 'success'
-    })
+    return success_response({"message": "success"})
 
 
 @autograde_.route("/assignment/<string:assignment_id>")
@@ -78,21 +78,23 @@ def admin_autograde_assignment_assignment_id(assignment_id):
     offset = get_number_arg("offset", 0)
 
     # Pull the assignment object
-    assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     # Verify that we got an assignment
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Verify that the current course context, and the assignment course match
     assert_course_context(assignment)
 
     # Get the (possibly cached) autograde calculations
     bests = bulk_autograde(assignment_id, limit=limit, offset=offset)
-    total = User.query.join(InCourse).filter(
-        InCourse.course_id == assignment.course_id,
-    ).count()
+    total = (
+        User.query.join(InCourse)
+        .filter(
+            InCourse.course_id == assignment.course_id,
+        )
+        .count()
+    )
 
     # Pass back the results
     return success_response({"stats": bests, "total": total})
@@ -111,7 +113,7 @@ def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
     :return:
     """
 
-    force = request.args.get('force', default='no') != 'no'
+    force = request.args.get("force", default="no") != "no"
 
     # Pull the assignment object
     assignment = Assignment.query.filter(
@@ -119,18 +121,16 @@ def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
     ).first()
 
     # Verify that we got an assignment
-    req_assert(assignment is not None, 'assignment does not exist')
+    req_assert(assignment is not None, "assignment does not exist")
 
     # Pull the student user object
-    student = User.query.filter(
-        or_(User.id == user_id, User.netid == user_id)
-    ).first()
+    student = User.query.filter(or_(User.id == user_id, User.netid == user_id)).first()
 
     # Verify that the current course context, and the assignment course match
     assert_course_context(assignment, student)
 
     # Assert that the student does not exist
-    req_assert(student is not None, message='student does not exist')
+    req_assert(student is not None, message="student does not exist")
 
     # If force load, then skip any caching
     if force:
@@ -140,12 +140,13 @@ def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
     submission_id = autograde(student.id, assignment.id)
 
     # Pass back the
-    return success_response({
-        "stats": autograde_submission_result_wrapper(
-            assignment, student.id, student.netid,
-            student.name, submission_id
-        )
-    })
+    return success_response(
+        {
+            "stats": autograde_submission_result_wrapper(
+                assignment, student.id, student.netid, student.name, submission_id
+            )
+        }
+    )
 
 
 @autograde_.route("/submission/<string:assignment_id>/<string:netid>")
@@ -167,13 +168,13 @@ def private_submission_stats_id(assignment_id: str, netid: str):
     student = User.query.filter(User.netid == netid).first()
 
     # Make sure the user exists
-    req_assert(student is not None, message='user does not exist')
+    req_assert(student is not None, message="user does not exist")
 
     # Pull the assignment object
     assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     # Verify that we got an assignment
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Verify that the current course context, and the assignment course match
     assert_course_context(assignment, student)
@@ -187,21 +188,19 @@ def private_submission_stats_id(assignment_id: str, netid: str):
     # Get the submission full_data if there was a best submission
     if submission_id is not None:
         # Pull the submission
-        submission = Submission.query.filter(
-            Submission.id == submission_id
-        ).first()
+        submission = Submission.query.filter(Submission.id == submission_id).first()
 
         # Get the full picture of the submission
         submission_full_data = submission.admin_data
 
     # Pass back the full, unobstructed view of the student,
     # assignment, question assignments, and submission data
-    return success_response({
-        "student": student.data,
-        "course": assignment.course.data,
-        "assignment": assignment.full_data,
-        "submission": submission_full_data,
-        "questions": get_assigned_questions(
-            assignment.id, student.id, True
-        ),
-    })
+    return success_response(
+        {
+            "student": student.data,
+            "course": assignment.course.data,
+            "assignment": assignment.full_data,
+            "submission": submission_full_data,
+            "questions": get_assigned_questions(assignment.id, student.id, True),
+        }
+    )

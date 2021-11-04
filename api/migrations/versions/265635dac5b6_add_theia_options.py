@@ -32,12 +32,8 @@ def upgrade():
         "theia_session",
         sa.Column("network_locked", sa.Boolean(), nullable=True),
     )
-    op.add_column(
-        "theia_session", sa.Column("options", sa.JSON(), nullable=False)
-    )
-    op.add_column(
-        "theia_session", sa.Column("privileged", sa.Boolean(), nullable=True)
-    )
+    op.add_column("theia_session", sa.Column("options", sa.JSON(), nullable=False))
+    op.add_column("theia_session", sa.Column("privileged", sa.Boolean(), nullable=True))
     op.add_column(
         "theia_session",
         sa.Column("repo_url", sa.String(length=128), nullable=False),
@@ -48,9 +44,7 @@ def upgrade():
         existing_type=mysql.VARCHAR(length=128),
         nullable=True,
     )
-    op.drop_constraint(
-        "theia_session_ibfk_3", "theia_session", type_="foreignkey"
-    )
+    op.drop_constraint("theia_session_ibfk_3", "theia_session", type_="foreignkey")
     op.drop_column("theia_session", "repo_id")
     # ### end Alembic commands ###
 

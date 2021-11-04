@@ -114,14 +114,11 @@ def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **_
 
 @pipeline.route("/report/test/<string:submission_id>", methods=["POST"])
 @check_submission_token
-@json_endpoint([("test_name", str), ("passed", bool), ("message", str), ("stdout", str)])
+@json_endpoint(
+    [("test_name", str), ("passed", bool), ("message", str), ("stdout", str)]
+)
 def pipeline_report_test(
-        submission: Submission,
-        test_name: str,
-        passed: bool,
-        message: str,
-        stdout: str,
-        **_
+    submission: Submission, test_name: str, passed: bool, message: str, stdout: str, **_
 ):
     """
     Submission pipelines will hit this endpoint when there
@@ -173,9 +170,7 @@ def pipeline_report_test(
         logger.error(
             "Invalid submission test result reported", extra={"request": request.json}
         )
-        return success_response({
-            'status': "invalid test name"
-        })
+        return success_response({"status": "invalid test name"})
 
     # Update the fields
     submission_test_result.passed = passed
@@ -242,7 +237,7 @@ def pipeline_report_state(submission: Submission, state: str, **kwargs):
     hidden_test = False
 
     # Do a basic match on the expected test
-    match = parse('Running test: {}', state)
+    match = parse("Running test: {}", state)
 
     # If we got a match
     if match:
@@ -252,7 +247,7 @@ def pipeline_report_state(submission: Submission, state: str, **kwargs):
         # Try to get the assignment test
         assignment_test = AssignmentTest.query.filter(
             AssignmentTest.assignment_id == submission.assignment_id,
-            AssignmentTest.name == test_name
+            AssignmentTest.name == test_name,
         ).first()
 
         # Set hidden_test to True if the test exists, and if it is marked as hidden

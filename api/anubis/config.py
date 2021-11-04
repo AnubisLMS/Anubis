@@ -3,12 +3,11 @@ from datetime import timedelta
 
 
 class Config:
-
     def __init__(self):
         # General flask config
         self.MINDEBUG = os.environ.get("MINDEBUG", default="0") == "1"
         self.DEBUG = os.environ.get("DEBUG", default="0") == "1" or self.MINDEBUG
-        self.JOB = os.environ.get('JOB', default='0') == '1'
+        self.JOB = os.environ.get("JOB", default="0") == "1"
         self.SECRET_KEY = os.environ.get("SECRET_KEY", default="DEBUG")
 
         if not self.MINDEBUG:
@@ -25,28 +24,36 @@ class Config:
             )
 
             # cache
-            self.CACHE_TYPE = 'RedisCache'
+            self.CACHE_TYPE = "RedisCache"
             self.CACHE_REDIS_HOST = os.environ.get("REDIS_HOST", default="redis-master")
             self.CACHE_REDIS_PASSWORD = os.environ.get("REDIS_PASS", default="anubis")
 
         # MINDEBUG
         else:
-            os.makedirs('.data/', exist_ok=True)
+            os.makedirs(".data/", exist_ok=True)
 
             # sqlalchemy
-            self.SQLALCHEMY_DATABASE_URI = 'sqlite:///../.data/anubis.db'
+            self.SQLALCHEMY_DATABASE_URI = "sqlite:///../.data/anubis.db"
             self.SQLALCHEMY_TRACK_MODIFICATIONS = False
 
             # cache
-            self.CACHE_TYPE = 'NullCache'
+            self.CACHE_TYPE = "NullCache"
 
         # OAuth
-        self.OAUTH_NYU_CONSUMER_KEY = os.environ.get("OAUTH_NYU_CONSUMER_KEY", default="DEBUG")
-        self.OAUTH_NYU_CONSUMER_SECRET = os.environ.get("OAUTH_NYU_CONSUMER_SECRET", default="DEBUG")
+        self.OAUTH_NYU_CONSUMER_KEY = os.environ.get(
+            "OAUTH_NYU_CONSUMER_KEY", default="DEBUG"
+        )
+        self.OAUTH_NYU_CONSUMER_SECRET = os.environ.get(
+            "OAUTH_NYU_CONSUMER_SECRET", default="DEBUG"
+        )
 
         # Github OAuth
-        self.OAUTH_GITHUB_CONSUMER_KEY = os.environ.get("OAUTH_GITHUB_CONSUMER_KEY", default="DEBUG")
-        self.OAUTH_GITHUB_CONSUMER_SECRET = os.environ.get("OAUTH_GITHUB_CONSUMER_SECRET", default="DEBUG")
+        self.OAUTH_GITHUB_CONSUMER_KEY = os.environ.get(
+            "OAUTH_GITHUB_CONSUMER_KEY", default="DEBUG"
+        )
+        self.OAUTH_GITHUB_CONSUMER_SECRET = os.environ.get(
+            "OAUTH_GITHUB_CONSUMER_SECRET", default="DEBUG"
+        )
 
         # Logger
         self.LOGGER_NAME = os.environ.get("LOGGER_NAME", default="anubis-api")

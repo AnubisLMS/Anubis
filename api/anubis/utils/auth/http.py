@@ -69,18 +69,18 @@ def require_admin(unless_debug=False):
             # in the current request context, and
             # that use is an admin.
             if user is None:
-                raise AuthenticationError('Request is anonymous')
+                raise AuthenticationError("Request is anonymous")
 
             if user.is_superuser:
                 return func(*args, **kwargs)
 
-            ta = TAForCourse.query.filter(
-                TAForCourse.owner_id == user.id).first()
+            ta = TAForCourse.query.filter(TAForCourse.owner_id == user.id).first()
             prof = ProfessorForCourse.query.filter(
-                ProfessorForCourse.owner_id == user.id).first()
+                ProfessorForCourse.owner_id == user.id
+            ).first()
 
             if ta is None and prof is None:
-                raise AuthenticationError('User is not ta or professor')
+                raise AuthenticationError("User is not ta or professor")
 
             # Pass the parameters to the
             # decorated function.

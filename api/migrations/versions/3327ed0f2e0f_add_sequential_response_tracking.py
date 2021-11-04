@@ -23,16 +23,28 @@ def move_responses_up():
     conn = op.get_bind()
     with conn.begin():
         responses = conn.execute(
-            'select owner_id, id, response, created, last_updated from assigned_student_question;'
+            "select owner_id, id, response, created, last_updated from assigned_student_question;"
         ).fetchall()
 
         block = urandom(32)
-        for owner_id, assigned_question_id, response, created, last_updated in responses:
-            print(f'moving response {owner_id} {assigned_question_id}')
+        for (
+            owner_id,
+            assigned_question_id,
+            response,
+            created,
+            last_updated,
+        ) in responses:
+            print(f"moving response {owner_id} {assigned_question_id}")
             block = sha256(block).digest()
             conn.execute(
-                'insert into assigned_student_response values (%s, %s, %s, %s, %s);',
-                (sha256(block).hexdigest()[:32], assigned_question_id, response, created, last_updated),
+                "insert into assigned_student_response values (%s, %s, %s, %s, %s);",
+                (
+                    sha256(block).hexdigest()[:32],
+                    assigned_question_id,
+                    response,
+                    created,
+                    last_updated,
+                ),
             )
 
 
@@ -40,19 +52,19 @@ def move_responses_down():
     conn = op.get_bind()
     with conn.begin():
         responses = conn.execute(
-            'select id, assigned_question_id, response, last_updated from assigned_student_response;'
+            "select id, assigned_question_id, response, last_updated from assigned_student_response;"
         ).fetchall()
 
         block = urandom(32)
         for response_id, assigned_question_id, response, last_updated in responses:
-            print(f'moving response {assigned_question_id}')
+            print(f"moving response {assigned_question_id}")
             block = sha256(block).digest()
             conn.execute(
-                'update assigned_student_question set response = %s, last_updated = %s  where id = %s;',
+                "update assigned_student_question set response = %s, last_updated = %s  where id = %s;",
                 (response, last_updated, assigned_question_id),
             )
             conn.execute(
-                'delete from asigned_student_response where id = %s;', (response_id,)
+                "delete from asigned_student_response where id = %s;", (response_id,)
             )
 
 
@@ -61,9 +73,7 @@ def upgrade():
     op.create_table(
         "assigned_student_response",
         sa.Column("id", sa.String(length=128), nullable=False),
-        sa.Column(
-            "assigned_question_id", sa.String(length=128), nullable=False
-        ),
+        sa.Column("assigned_question_id", sa.String(length=128), nullable=False),
         sa.Column("response", sa.TEXT(), nullable=False),
         sa.Column("created", sa.DateTime(), nullable=True),
         sa.Column("last_updated", sa.DateTime(), nullable=True),

@@ -64,11 +64,13 @@ def public_webhook():
     # Verify some expected headers
     req_assert(
         content_type == "application/json" and x_github_event == "push",
-        message='Unable to verify webhook'
+        message="Unable to verify webhook",
     )
 
     # Load the basics from the webhook
-    repo_url, repo_name, pusher_username, commit, before, ref = parse_webhook(request.json)
+    repo_url, repo_name, pusher_username, commit, before, ref = parse_webhook(
+        request.json
+    )
 
     # Attempt to find records for the relevant models
     assignment = Assignment.query.filter(
@@ -76,7 +78,7 @@ def public_webhook():
     ).first()
 
     # Verify that we can match this push to an assignment
-    req_assert(assignment is not None, message='assignment not found', status_code=406)
+    req_assert(assignment is not None, message="assignment not found", status_code=406)
 
     # Get github username from the repository name
     user, github_username_guess = guess_github_username(assignment, repo_name)
@@ -105,14 +107,16 @@ def public_webhook():
         return success_response("initial commit")
 
     repo = (
-        AssignmentRepo.query
-            .join(Assignment).join(Course).join(InCourse).join(User)
-            .filter(
+        AssignmentRepo.query.join(Assignment)
+        .join(Course)
+        .join(InCourse)
+        .join(User)
+        .filter(
             User.github_username == github_username_guess,
             Assignment.unique_code == assignment.unique_code,
             AssignmentRepo.repo_url == repo_url,
         )
-            .first()
+        .first()
     )
 
     logger.debug(
@@ -126,10 +130,10 @@ def public_webhook():
     )
 
     org_name = assignment.course.github_org
-    if not is_debug() and org_name is not None and org_name != '':
+    if not is_debug() and org_name is not None and org_name != "":
         # Make sure that the repo we're about to process actually belongs to
         # a github organization that matches the course.
-        if not repo_url.startswith(f'https://github.com/{org_name}'):
+        if not repo_url.startswith(f"https://github.com/{org_name}"):
             logger.error(
                 "Invalid github organization in webhook.",
                 extra={
@@ -145,8 +149,8 @@ def public_webhook():
         repo = check_repo(assignment, repo_url, github_username_guess, user)
 
     req_assert(
-        ref == 'refs/heads/master' or ref == 'refs/heads/main',
-        message='not a push to master or main',
+        ref == "refs/heads/master" or ref == "refs/heads/main",
+        message="not a push to master or main",
     )
 
     # Try to find a submission matching the commit
@@ -168,26 +172,28 @@ def public_webhook():
     # If the submission did already exist, then we can just pass
     # back that status
     elif submission.created < datetime.now() - timedelta(minutes=3):
-        return success_response({'status': 'already created'})
+        return success_response({"status": "already created"})
 
     # Create the related submission models
     init_submission(submission)
 
     # If a user has not given us their github username
     # the submission will stay in a "dangling" state
-    req_assert(user is not None, message='dangling submission')
+    req_assert(user is not None, message="dangling submission")
 
     # If the github username is not found, create a dangling submission
     if assignment.autograde_enabled:
 
         # Check that the current assignment is still accepting submissions
-        if not assignment.accept_late and datetime.now() < get_assignment_due_date(user, assignment, grace=True):
+        if not assignment.accept_late and datetime.now() < get_assignment_due_date(
+            user, assignment, grace=True
+        ):
             reject_late_submission(submission)
 
     else:
         submission.processed = True
         submission.accepted = False
-        submission.state = 'autograde disabled for this assignment'
+        submission.state = "autograde disabled for this assignment"
 
     db.session.commit()
 
@@ -198,6 +204,8 @@ def public_webhook():
     # Delete cached submissions
     cache.delete_memoized(get_submissions, user.netid)
     cache.delete_memoized(get_submissions, user.netid, assignment.course_id)
-    cache.delete_memoized(get_submissions, user.netid, assignment.course_id, assignment.id)
+    cache.delete_memoized(
+        get_submissions, user.netid, assignment.course_id, assignment.id
+    )
 
     return success_response("submission accepted")

@@ -2,7 +2,15 @@ import traceback
 from typing import List
 from parse import parse
 
-from anubis.models import User, Assignment, AssignmentRepo, db, Submission, SubmissionBuild, SubmissionTestResult
+from anubis.models import (
+    User,
+    Assignment,
+    AssignmentRepo,
+    db,
+    Submission,
+    SubmissionBuild,
+    SubmissionTestResult,
+)
 from anubis.utils.github.api import github_graphql, github_rest
 from anubis.utils.logging import logger
 
@@ -20,14 +28,17 @@ def get_github_template_ids(template_repo: str, github_org: str):
     }
         """
 
-    p = parse('{}/{}', template_repo)
+    p = parse("{}/{}", template_repo)
     github_template_owner, github_template_name = p
 
-    return github_graphql(id_query, {
-        'orgName': github_org,
-        'templateName': github_template_name,
-        'templateOwner': github_template_owner,
-    })
+    return github_graphql(
+        id_query,
+        {
+            "orgName": github_org,
+            "templateName": github_template_name,
+            "templateOwner": github_template_owner,
+        },
+    )
 
 
 def create_repo_from_template(owner_id: str, template_repo_id: str, new_repo_name: str):
@@ -47,25 +58,32 @@ def create_repo_from_template(owner_id: str, template_repo_id: str, new_repo_nam
     }    
         """
 
-    return github_graphql(create_query, {
-        'ownerId': owner_id,
-        'templateRepoId': template_repo_id,
-        'newName': new_repo_name,
-    })
+    return github_graphql(
+        create_query,
+        {
+            "ownerId": owner_id,
+            "templateRepoId": template_repo_id,
+            "newName": new_repo_name,
+        },
+    )
 
 
 def add_collaborator(github_org: str, new_repo_name: str, github_username: str):
-    return github_rest(f'/repos/{github_org}/{new_repo_name}/collaborators/{github_username}', {
-        'permission': 'push',
-    }, method='put')
+    return github_rest(
+        f"/repos/{github_org}/{new_repo_name}/collaborators/{github_username}",
+        {
+            "permission": "push",
+        },
+        method="put",
+    )
 
 
 def assignment_repo_name(user: User, assignment: Assignment) -> str:
     # Get assignment name (lowercase and spaces removed)
-    assignment_name = assignment.name.lower().replace(' ', '-')
+    assignment_name = assignment.name.lower().replace(" ", "-")
 
     # Create a repo name from assignment name, unique code and github username
-    new_repo_name = f'{assignment_name}-{assignment.unique_code}-{user.github_username}'
+    new_repo_name = f"{assignment_name}-{assignment.unique_code}-{user.github_username}"
 
     return new_repo_name
 
@@ -75,7 +93,7 @@ def assignment_repo_url(user: User, assignment: Assignment) -> str:
     new_repo_name = assignment_repo_name(user, assignment)
 
     github_org = assignment.course.github_org
-    new_repo_url = f'https://github.com/{github_org}/{new_repo_name}'
+    new_repo_url = f"https://github.com/{github_org}/{new_repo_name}"
 
     return new_repo_url
 
@@ -118,7 +136,7 @@ def delete_assignment_repo(user: User, assignment: Assignment):
         ).delete()
 
         # Parse out github org and repo_name from url before deletion
-        github_org, repo_name = parse('https://github.com/{}/{}', repo.repo_url)
+        github_org, repo_name = parse("https://github.com/{}/{}", repo.repo_url)
 
         # Delete the repo
         AssignmentRepo.query.filter(AssignmentRepo.id == repo.id).delete()
@@ -128,12 +146,12 @@ def delete_assignment_repo(user: User, assignment: Assignment):
 
     try:
         # Make the github api call to delete the repo on github
-        r = github_rest(f'/repos/{github_org}/{repo_name}', method='delete')
+        r = github_rest(f"/repos/{github_org}/{repo_name}", method="delete")
         logger.error(r)
     except Exception as e:
         logger.error(traceback.format_exc())
-        logger.error(f'Failed to delete repo {e}')
-        logger.error(f'continuing')
+        logger.error(f"Failed to delete repo {e}")
+        logger.error(f"continuing")
 
 
 def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo:
@@ -176,12 +194,12 @@ def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo
 
             # If the response was None, the api request failed. Also check that
             # some expected values are present in the json data response.
-            if data is None and 'repository' in data and 'id' in data['repository']:
+            if data is None and "repository" in data and "id" in data["repository"]:
                 return repo
 
             # Get organization and template repo IDs
-            owner_id = data['organization']['id']
-            template_repo_id = data['repository']['id']
+            owner_id = data["organization"]["id"]
+            template_repo_id = data["repository"]["id"]
 
             # Try to create the student's assignment repo from the template
             # using the github graphql api.
@@ -189,7 +207,7 @@ def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo
 
             # If the response was None, the api request failed
             if data is None:
-                logger.error('Create repo failed')
+                logger.error("Create repo failed")
                 return repo
 
             # Mark the repo as created
@@ -197,8 +215,8 @@ def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo
             db.session.commit()
     except Exception as e:
         logger.error(traceback.format_exc())
-        logger.error(f'Failed to create repo {e}')
-        logger.error(f'continuing')
+        logger.error(f"Failed to create repo {e}")
+        logger.error(f"continuing")
 
     try:
         # If repo has not been configured
@@ -212,12 +230,12 @@ def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo
             # the repo. The message in the response will be Not Found in this situation.
             # We can have it try again to fix.
             if data.get("message", None) == "Not Found":
-                logger.error('Failed to add collaborator (Not Found). Trying again.')
+                logger.error("Failed to add collaborator (Not Found). Trying again.")
                 data = add_collaborator(github_org, new_repo_name, user.github_username)
 
             # If the response was None, the api request failed
             if data is None or data.get("message", None) == "Not Found":
-                logger.error('Failed to add collaborator')
+                logger.error("Failed to add collaborator")
                 return repo
 
             # Mark the repo as collaborator configured
@@ -225,7 +243,7 @@ def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo
             db.session.commit()
     except Exception as e:
         logger.error(traceback.format_exc())
-        logger.error(f'Failed to configure collaborators {e}')
-        logger.error(f'continuing')
+        logger.error(f"Failed to configure collaborators {e}")
+        logger.error(f"continuing")
 
     return repo

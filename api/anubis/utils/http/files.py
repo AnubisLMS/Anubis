@@ -51,8 +51,8 @@ def make_blob_response(file: StaticFile) -> Response:
 
     # If the image is an svg, then we need to make sure that it has
     # the +xml or it will not be rendered correctly in browser.
-    if file.content_type == 'image/svg':
-        response.headers["Content-Type"] = 'imag/svg+xml'
+    if file.content_type == "image/svg":
+        response.headers["Content-Type"] = "imag/svg+xml"
 
     # Hand the flask response back
     return response
@@ -66,13 +66,13 @@ def process_file_upload() -> StaticFile:
     stream, filename = get_request_file_stream(with_filename=True)
 
     # Make sure we got a file
-    req_assert(stream is not None, message='No file uploaded')
+    req_assert(stream is not None, message="No file uploaded")
 
     # Figure out content type
     mime_type = get_mime_type(stream)
 
-    if mime_type == 'image/svg':
-        mime_type = 'image/svg+xml'
+    if mime_type == "image/svg":
+        mime_type = "image/svg+xml"
 
     # Check to see if blob path already exists
     blob = StaticFile.query.filter(StaticFile.path == path).first()

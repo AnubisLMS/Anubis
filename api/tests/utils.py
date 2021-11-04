@@ -8,7 +8,15 @@ import traceback
 import requests
 
 from anubis.app import create_app
-from anubis.models import db, User, Course, InCourse, TAForCourse, ProfessorForCourse, AssignmentRepo
+from anubis.models import (
+    db,
+    User,
+    Course,
+    InCourse,
+    TAForCourse,
+    ProfessorForCourse,
+    AssignmentRepo,
+)
 from anubis.utils.data import with_context
 from anubis.utils.testing.seed import create_name, create_netid
 
@@ -19,10 +27,10 @@ os.environ["CACHE_REDIS_HOST"] = "127.0.0.1"
 
 
 def initialize_env():
-    os.environ['DB_HOST'] = '127.0.0.1'
-    os.environ['REDIS_HOST'] = '127.0.0.1'
-    os.environ['DISABLE_ELK'] = '1'
-    os.environ['DEBUG'] = '1'
+    os.environ["DB_HOST"] = "127.0.0.1"
+    os.environ["REDIS_HOST"] = "127.0.0.1"
+    os.environ["DISABLE_ELK"] = "1"
+    os.environ["DEBUG"] = "1"
 
     test_root = os.path.dirname(__file__)
     api_root = os.path.dirname(test_root)
@@ -71,8 +79,8 @@ def print_full_error(e, r):
 
 
 @with_context
-def create_user(permission: str = 'superuser', add_to_os: bool = True):
-    assert permission in ['superuser', 'professor', 'ta', 'student']
+def create_user(permission: str = "superuser", add_to_os: bool = True):
+    assert permission in ["superuser", "professor", "ta", "student"]
 
     name = create_name()
     netid = create_netid(name)
@@ -82,33 +90,41 @@ def create_user(permission: str = 'superuser', add_to_os: bool = True):
         netid=netid,
         name=name,
         github_username=netid,
-        is_superuser=permission == 'superuser',
+        is_superuser=permission == "superuser",
     )
     db.session.add(user)
 
-    course = Course.query.filter(Course.name == 'Intro to OS').first()
+    course = Course.query.filter(Course.name == "Intro to OS").first()
 
     if add_to_os:
-        db.session.add(InCourse(
-            owner=user,
-            course=course,
-        ))
-    if permission == 'ta':
-        db.session.add(TAForCourse(
-            course=course,
-            owner=user,
-        ))
-    if permission == 'professor':
-        db.session.add(ProfessorForCourse(
-            course=course,
-            owner=user,
-        ))
+        db.session.add(
+            InCourse(
+                owner=user,
+                course=course,
+            )
+        )
+    if permission == "ta":
+        db.session.add(
+            TAForCourse(
+                course=course,
+                owner=user,
+            )
+        )
+    if permission == "professor":
+        db.session.add(
+            ProfessorForCourse(
+                course=course,
+                owner=user,
+            )
+        )
     db.session.commit()
 
     return netid
 
 
-def _create_user_session(url: str, netid: str = 'superuser', new: bool = False, add_to_os: bool = True):
+def _create_user_session(
+    url: str, netid: str = "superuser", new: bool = False, add_to_os: bool = True
+):
     """
     Create a new user on the backend
 
@@ -121,7 +137,7 @@ def _create_user_session(url: str, netid: str = 'superuser', new: bool = False, 
     if new:
         netid = create_user(netid, add_to_os)
 
-    session.get(url + f'/admin/auth/token/{netid}')
+    session.get(url + f"/admin/auth/token/{netid}")
     r = session.get(url + "/public/auth/whoami")
 
     try:
@@ -131,10 +147,12 @@ def _create_user_session(url: str, netid: str = 'superuser', new: bool = False, 
         assert data["data"] is not None
         assert data["error"] is None
         data = copy.deepcopy(data)
-        admin_for = data['data']['user']['admin_for']
+        admin_for = data["data"]["user"]["admin_for"]
         for i in admin_for:
-            if i['name'] == 'Intro to OS':
-                session.cookies['course'] = base64.urlsafe_b64encode(json.dumps(i).encode()).decode()
+            if i["name"] == "Intro to OS":
+                session.cookies["course"] = base64.urlsafe_b64encode(
+                    json.dumps(i).encode()
+                ).decode()
     except AssertionError as e:
         print_full_error(e, r)
     return session, netid
@@ -152,8 +170,12 @@ class Session(object):
     """
 
     def __init__(
-            self, permission: str = 'superuser', new: bool = False, add_to_os: bool = True,
-            domain: str = "localhost", port: int = 5000,
+        self,
+        permission: str = "superuser",
+        new: bool = False,
+        add_to_os: bool = True,
+        domain: str = "localhost",
+        port: int = 5000,
     ):
         self.url = f"http://{domain}:{port}"
         self.timings = []
@@ -197,14 +219,14 @@ class Session(object):
         return response
 
     def _make_request(
-            self,
-            path,
-            request_func,
-            return_request,
-            should_succeed,
-            should_fail,
-            skip_verify,
-            **kwargs,
+        self,
+        path,
+        request_func,
+        return_request,
+        should_succeed,
+        should_fail,
+        skip_verify,
+        **kwargs,
     ):
         # Make the request
         r = request_func(self.url + path, **kwargs)
@@ -222,13 +244,13 @@ class Session(object):
         return response
 
     def get(
-            self,
-            path,
-            return_request=False,
-            should_succeed=True,
-            should_fail=False,
-            skip_verify=False,
-            **kwargs,
+        self,
+        path,
+        return_request=False,
+        should_succeed=True,
+        should_fail=False,
+        skip_verify=False,
+        **kwargs,
     ):
         return self._make_request(
             path,
@@ -241,17 +263,33 @@ class Session(object):
         )
 
     def post(
-            self, path, return_request=False, should_succeed=True,
-            should_fail=False, skip_verify=False, **kwargs,
+        self,
+        path,
+        return_request=False,
+        should_succeed=True,
+        should_fail=False,
+        skip_verify=False,
+        **kwargs,
     ):
         return self._make_request(
-            path, self._session.post, return_request, should_succeed,
-            should_fail, skip_verify, **kwargs,
+            path,
+            self._session.post,
+            return_request,
+            should_succeed,
+            should_fail,
+            skip_verify,
+            **kwargs,
         )
 
     def post_json(
-            self, path, json, return_request=False, should_succeed=True,
-            should_fail=False, skip_verify=False, **kwargs,
+        self,
+        path,
+        json,
+        return_request=False,
+        should_succeed=True,
+        should_fail=False,
+        skip_verify=False,
+        **kwargs,
     ):
         kwargs["json"] = json
         if "headers" not in kwargs:
@@ -283,39 +321,44 @@ def run_main(func):
 def create_repo(s: Session, assignment_id: str = None):
     from anubis.utils.cache import cache
     from anubis.lms.repos import get_repos
+
     if assignment_id is None:
-        assignments = s.get('/public/assignments/list')['assignments']
-        assignment_id = assignments[0]['id']
+        assignments = s.get("/public/assignments/list")["assignments"]
+        assignment_id = assignments[0]["id"]
     user = User.query.filter(User.netid == s.netid).first()
-    db.session.add(AssignmentRepo(
-        owner=user,
-        assignment_id=assignment_id,
-        github_username=s.netid,
-        repo_url='https://github.com/wabscale/xv6-public',
-    ))
+    db.session.add(
+        AssignmentRepo(
+            owner=user,
+            assignment_id=assignment_id,
+            github_username=s.netid,
+            repo_url="https://github.com/wabscale/xv6-public",
+        )
+    )
     db.session.commit()
     cache.delete_memoized(get_repos)
 
 
 @with_context
 def get_student_id():
-    student = User.query.filter(User.netid == 'student').first()
+    student = User.query.filter(User.netid == "student").first()
     return student.id
 
 
-def permission_test(path, fail_for: list = None, method='get', after: callable = None, **kwargs):
+def permission_test(
+    path, fail_for: list = None, method="get", after: callable = None, **kwargs
+):
     def _test_permission(_path, _fail_for, _method, _after, **_kwargs):
         sessions = {
-            'student': Session('student'),
-            'ta': Session('ta'),
-            'professor': Session('professor'),
-            'superuser': Session('superuser'),
+            "student": Session("student"),
+            "ta": Session("ta"),
+            "professor": Session("professor"),
+            "superuser": Session("superuser"),
         }
 
         for permission, session in sessions.items():
-            if _method == 'get':
+            if _method == "get":
                 request_func = session.get
-            elif _method == 'post':
+            elif _method == "post":
                 request_func = session.post_json
             else:
                 request_func = session.get
@@ -325,15 +368,15 @@ def permission_test(path, fail_for: list = None, method='get', after: callable =
                 _after()
 
     if fail_for is None:
-        fail_for = ['student']
+        fail_for = ["student"]
 
     return _test_permission(path, fail_for, method, after, **kwargs)
 
 
 if __name__ == "__main__":
+
     def test_this_file():
         ts = Session()
         ts.get("/public/auth/whoami")
-
 
     run_main(test_this_file)

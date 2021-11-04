@@ -11,10 +11,12 @@ from anubis.utils.http import error_response, success_response
 from anubis.lms.courses import assert_course_context
 from anubis.lms.submissions import recalculate_late_submissions
 
-late_exceptions_ = Blueprint('admin-late-exceptions', __name__, url_prefix='/admin/late-exceptions')
+late_exceptions_ = Blueprint(
+    "admin-late-exceptions", __name__, url_prefix="/admin/late-exceptions"
+)
 
 
-@late_exceptions_.route('/list/<string:assignment_id>')
+@late_exceptions_.route("/list/<string:assignment_id>")
 @require_admin()
 @json_response
 def admin_late_exception_list(assignment_id: str):
@@ -31,7 +33,7 @@ def admin_late_exception_list(assignment_id: str):
     ).first()
 
     # Make sure it exists
-    req_assert(assignment is not None, message='assignment does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
 
     # Assert the course context
     assert_course_context(assignment)
@@ -42,16 +44,22 @@ def admin_late_exception_list(assignment_id: str):
     ).all()
 
     # Break down for response
-    return success_response({'assignment': assignment.full_data, 'late_exceptions': [
-        late_exception.data
-        for late_exception in late_exceptions
-    ]})
+    return success_response(
+        {
+            "assignment": assignment.full_data,
+            "late_exceptions": [
+                late_exception.data for late_exception in late_exceptions
+            ],
+        }
+    )
 
 
-@late_exceptions_.post('/update')
+@late_exceptions_.post("/update")
 @require_admin()
-@json_endpoint([('assignment_id', str), ('user_id', str), ('due_date', str)])
-def admin_late_exception_update(assignment_id: str = None, user_id: str = None, due_date: str = None):
+@json_endpoint([("assignment_id", str), ("user_id", str), ("due_date", str)])
+def admin_late_exception_update(
+    assignment_id: str = None, user_id: str = None, due_date: str = None
+):
     """
     Add or update a late exception
 
@@ -68,8 +76,8 @@ def admin_late_exception_update(assignment_id: str = None, user_id: str = None, 
     student = User.query.filter(User.id == user_id).first()
 
     # Make sure assignment and user exist
-    req_assert(assignment is not None, message='assignment does not exist')
-    req_assert(student is not None, message='student does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
+    req_assert(student is not None, message="student does not exist")
 
     assert_course_context(assignment, student)
 
@@ -92,11 +100,11 @@ def admin_late_exception_update(assignment_id: str = None, user_id: str = None, 
     try:
         due_date = date_parse(due_date)
     except ParserError:
-        return error_response('datetime could not be parsed')
+        return error_response("datetime could not be parsed")
 
     # Double check that the new due data is not before the actual deadline
     if due_date <= assignment.due_date:
-        return error_response('Exception cannot be before assignment due date')
+        return error_response("Exception cannot be before assignment due date")
 
     # Update the due date
     late_exception.due_date = due_date
@@ -107,12 +115,10 @@ def admin_late_exception_update(assignment_id: str = None, user_id: str = None, 
     recalculate_late_submissions(student, assignment)
 
     # Break down for response
-    return success_response({
-        'status': 'Late exceptions updated'
-    })
+    return success_response({"status": "Late exceptions updated"})
 
 
-@late_exceptions_.route('/remove/<string:assignment_id>/<string:user_id>')
+@late_exceptions_.route("/remove/<string:assignment_id>/<string:user_id>")
 @require_admin()
 @json_response
 def admin_late_exception_remove(assignment_id: str = None, user_id: str = None):
@@ -131,8 +137,8 @@ def admin_late_exception_remove(assignment_id: str = None, user_id: str = None):
     student = User.query.filter(User.id == user_id).first()
 
     # Make sure assignment and user exist
-    req_assert(assignment is not None, message='assignment does not exist')
-    req_assert(student is not None, message='student does not exist')
+    req_assert(assignment is not None, message="assignment does not exist")
+    req_assert(student is not None, message="student does not exist")
 
     assert_course_context(assignment, student)
 
@@ -148,7 +154,9 @@ def admin_late_exception_remove(assignment_id: str = None, user_id: str = None):
     db.session.commit()
 
     # Break down for response
-    return success_response({
-        'status': 'Late exception deleted',
-        'variant': 'warning',
-    })
+    return success_response(
+        {
+            "status": "Late exception deleted",
+            "variant": "warning",
+        }
+    )

@@ -24,7 +24,7 @@ def upgrade():
     )
     conn = op.get_bind()
     with conn.begin():
-        conn.execute('update `assignment` set questions_assigned=1;')
+        conn.execute("update `assignment` set questions_assigned=1;")
     # ### end Alembic commands ###
 
 

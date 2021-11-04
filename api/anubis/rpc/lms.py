@@ -10,22 +10,27 @@ def assign_missing_questions(user_id: str):
     from anubis.models import User, Course, InCourse, Assignment
 
     # Log RPC job start
-    logger.info(f'RPC::assign_missing_questions user_id={user_id}')
+    logger.info(f"RPC::assign_missing_questions user_id={user_id}")
 
     # Query for user in db
-    user: User = User.query.filter(
-        User.id == user_id
-    ).first()
+    user: User = User.query.filter(User.id == user_id).first()
 
     # Verify they exist
     if user is None:
-        logger.error(f'RPC::assign_missing_questions user does not exist user_id={user_id}')
+        logger.error(
+            f"RPC::assign_missing_questions user does not exist user_id={user_id}"
+        )
         return
 
     # Get all the courses that the user belongs to
-    courses: List[Course] = Course.query.join(InCourse).join(User).filter(
-        User.id == user.id,
-    ).all()
+    courses: List[Course] = (
+        Course.query.join(InCourse)
+        .join(User)
+        .filter(
+            User.id == user.id,
+        )
+        .all()
+    )
 
     # Iterate over each course the student is in
     for course in courses:
@@ -43,4 +48,3 @@ def assign_missing_questions(user_id: str):
 
             # Run missing question fix for each assignment
             fix_missing_question_assignments(assignment)
-

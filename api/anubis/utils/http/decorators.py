@@ -78,8 +78,8 @@ def json_response(func):
 
 
 def json_endpoint(
-        required_fields: Union[List[str], List[Tuple], None] = None,
-        only_required: bool = False,
+    required_fields: Union[List[str], List[Tuple], None] = None,
+    only_required: bool = False,
 ):
     """
     Wrap a route so that it always converts data response to proper
@@ -125,7 +125,10 @@ def json_endpoint(
             if not content_type.startswith("application/json"):
                 # If the content-type was not set properly, then we
                 # should hand back a 406 not acceptable error code.
-                return error_response("Content-Type header is not application/json"), 406
+                return (
+                    error_response("Content-Type header is not application/json"),
+                    406,
+                )
 
             # After verifying that the content type header was set,
             # then we can access the request json body
@@ -164,7 +167,12 @@ def json_endpoint(
                     if field not in json_body:
                         # field missing, return error
                         # Not Acceptable
-                        return error_response(f"Malformed requests. Missing field {field}."), 406
+                        return (
+                            error_response(
+                                f"Malformed requests. Missing field {field}."
+                            ),
+                            406,
+                        )
 
                     # If a type was specified, verify it
                     if required_type is not None:
@@ -172,7 +180,12 @@ def json_endpoint(
                         # Do a type check on the json body field
                         if not isinstance(json_body[field], required_type):
                             # Not Acceptable
-                            return error_response("Malformed requests. Invalid field type."), 406
+                            return (
+                                error_response(
+                                    "Malformed requests. Invalid field type."
+                                ),
+                                406,
+                            )
 
             # Give the positional args first,
             # then the json data (in the order of

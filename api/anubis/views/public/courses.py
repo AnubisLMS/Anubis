@@ -35,9 +35,7 @@ def public_courses_list():
     # Give back the courses that the
     # student is in. This information
     # is possibly cached.
-    return success_response({
-        "courses": courses
-    })
+    return success_response({"courses": courses})
 
 
 @courses_.route("/join/<string:join_code>")
@@ -52,15 +50,13 @@ def public_courses_join(join_code):
 
     # Validate that the join code contains valid characters
     if not valid_join_code(join_code):
-        return error_response('Please give a valid join code')
+        return error_response("Please give a valid join code")
 
     # Search courses for matching join code
-    course = Course.query.filter(
-        Course.join_code == join_code
-    ).first()
+    course = Course.query.filter(Course.join_code == join_code).first()
 
     # If course not found, then we can hand back an error
-    req_assert(course is not None, message='join code is not valid :(')
+    req_assert(course is not None, message="join code is not valid :(")
 
     # Check to see if student is already in course
     in_course = InCourse.query.filter(
@@ -70,10 +66,12 @@ def public_courses_join(join_code):
 
     # If they are already in the course, then we can give them a warning
     if in_course is not None:
-        return success_response({
-            "status": "You are already in that class!",
-            "variant": "warning",
-        })
+        return success_response(
+            {
+                "status": "You are already in that class!",
+                "variant": "warning",
+            }
+        )
 
     # Create the new in-course
     in_course = InCourse(
@@ -93,9 +91,7 @@ def public_courses_join(join_code):
     # Enqueue fixing missing questions job
     enqueue_assign_missing_questions(current_user.id)
 
-    return success_response({
-        "status": f"Joined {course.course_code}"
-    })
+    return success_response({"status": f"Joined {course.course_code}"})
 
 
 @courses_.get("/visuals-list")
@@ -116,6 +112,4 @@ def public_courses_visuals_list():
     courses_data: List[Dict[str, Any]] = get_courses_with_visuals()
 
     # Pass back the cached response
-    return success_response({
-        'courses': courses_data
-    })
+    return success_response({"courses": courses_data})

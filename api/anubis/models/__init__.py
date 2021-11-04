@@ -38,8 +38,8 @@ class Config(db.Model):
     @property
     def data(self):
         return {
-            'key': self.key,
-            'value': self.value,
+            "key": self.key,
+            "value": self.value,
         }
 
 
@@ -59,14 +59,26 @@ class User(db.Model):
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    ta_for_course = db.relationship('TAForCourse', cascade='all,delete', backref='owner')
-    professor_for_course = db.relationship('ProfessorForCourse', cascade='all,delete', backref='owner')
-    in_course = db.relationship('InCourse', cascade='all,delete', backref='owner')
-    assignment_repos = db.relationship('AssignmentRepo', cascade='all,delete', backref='owner')
-    assigned_student_questions = db.relationship('AssignedStudentQuestion', cascade='all,delete', backref='owner')
-    submissions = db.relationship('Submission', cascade='all,delete', backref='owner')
-    theia_sessions = db.relationship('TheiaSession', cascade='all,delete', backref='owner')
-    late_exceptions = db.relationship('LateException', cascade='all,delete', backref='user')
+    ta_for_course = db.relationship(
+        "TAForCourse", cascade="all,delete", backref="owner"
+    )
+    professor_for_course = db.relationship(
+        "ProfessorForCourse", cascade="all,delete", backref="owner"
+    )
+    in_course = db.relationship("InCourse", cascade="all,delete", backref="owner")
+    assignment_repos = db.relationship(
+        "AssignmentRepo", cascade="all,delete", backref="owner"
+    )
+    assigned_student_questions = db.relationship(
+        "AssignedStudentQuestion", cascade="all,delete", backref="owner"
+    )
+    submissions = db.relationship("Submission", cascade="all,delete", backref="owner")
+    theia_sessions = db.relationship(
+        "TheiaSession", cascade="all,delete", backref="owner"
+    )
+    late_exceptions = db.relationship(
+        "LateException", cascade="all,delete", backref="user"
+    )
 
     @property
     def data(self):
@@ -77,14 +89,14 @@ class User(db.Model):
             "netid": self.netid,
             "github_username": self.github_username,
             "name": self.name,
-            **get_user_permissions(self)
+            **get_user_permissions(self),
         }
 
     def __repr__(self):
         return self.__str__()
 
     def __str__(self):
-        return f'<User {self.netid} {self.github_username}>'
+        return f"<User {self.netid} {self.github_username}>"
 
 
 class Course(db.Model):
@@ -99,22 +111,37 @@ class Course(db.Model):
     semester = db.Column(db.TEXT, nullable=True)
     section = db.Column(db.TEXT, nullable=True)
     professor_display_name = db.Column(db.TEXT)
-    autograde_tests_repo = db.Column(db.TEXT, nullable=False,
-                                     default='https://github.com/os3224/anubis-assignment-tests')
+    autograde_tests_repo = db.Column(
+        db.TEXT,
+        nullable=False,
+        default="https://github.com/os3224/anubis-assignment-tests",
+    )
     github_repo_required = db.Column(db.Boolean, default=True)
-    theia_default_image = db.Column(db.TEXT, nullable=False, default='registry.digitalocean.com/anubis/theia-xv6')
-    theia_default_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
-    github_org = db.Column(db.TEXT, default='os3224')
+    theia_default_image = db.Column(
+        db.TEXT, nullable=False, default="registry.digitalocean.com/anubis/theia-xv6"
+    )
+    theia_default_options = db.Column(
+        MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS)
+    )
+    github_org = db.Column(db.TEXT, default="os3224")
     join_code = db.Column(db.String(256), unique=True)
     display_visuals = db.Column(db.Boolean, default=True)
 
-    assignments = db.relationship('Assignment', cascade='all,delete', backref='course')
-    ta_for_course = db.relationship('TAForCourse', cascade='all,delete', backref='course')
-    professor_for_course = db.relationship('ProfessorForCourse', cascade='all,delete', backref='course')
-    in_course = db.relationship('InCourse', cascade='all,delete', backref='course')
-    lecture_notes = db.relationship('LectureNotes', cascade='all,delete', backref='course')
-    static_files = db.relationship('StaticFile', cascade='all,delete', backref='course')
-    theia_sessions = db.relationship('TheiaSession', cascade='all,delete', backref='course')
+    assignments = db.relationship("Assignment", cascade="all,delete", backref="course")
+    ta_for_course = db.relationship(
+        "TAForCourse", cascade="all,delete", backref="course"
+    )
+    professor_for_course = db.relationship(
+        "ProfessorForCourse", cascade="all,delete", backref="course"
+    )
+    in_course = db.relationship("InCourse", cascade="all,delete", backref="course")
+    lecture_notes = db.relationship(
+        "LectureNotes", cascade="all,delete", backref="course"
+    )
+    static_files = db.relationship("StaticFile", cascade="all,delete", backref="course")
+    theia_sessions = db.relationship(
+        "TheiaSession", cascade="all,delete", backref="course"
+    )
 
     @property
     def total_assignments(self):
@@ -153,8 +180,8 @@ class TAForCourse(db.Model):
     @property
     def data(self):
         return {
-            'id': self.course.id,
-            'name': self.course.name,
+            "id": self.course.id,
+            "name": self.course.name,
         }
 
 
@@ -168,8 +195,8 @@ class ProfessorForCourse(db.Model):
     @property
     def data(self):
         return {
-            'id': self.course.id,
-            'name': self.course.name,
+            "id": self.course.id,
+            "name": self.course.name,
         }
 
 
@@ -212,10 +239,12 @@ class Assignment(db.Model):
     theia_image = db.Column(
         db.TEXT, default="registry.digitalocean.com/anubis/theia-xv6"
     )
-    theia_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
+    theia_options = db.Column(
+        MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS)
+    )
 
     # Github
-    github_template = db.Column(db.TEXT, nullable=True, default='')
+    github_template = db.Column(db.TEXT, nullable=True, default="")
     github_repo_required = db.Column(db.Boolean, default=False)
 
     # Dates
@@ -223,13 +252,27 @@ class Assignment(db.Model):
     due_date = db.Column(db.DateTime, nullable=False)
     grace_date = db.Column(db.DateTime, nullable=True)
 
-    assignment_questions = db.relationship('AssignmentQuestion', cascade="all,delete", backref='assignment')
-    assigned_student_questions = db.relationship('AssignedStudentQuestion', cascade="all,delete", backref='assignment')
-    submissions = db.relationship('Submission', cascade="all,delete", backref='assignment')
-    theia_sessions = db.relationship('TheiaSession', cascade="all,delete", backref='assignment')
-    late_exceptions = db.relationship('LateException', cascade="all,delete", backref='assignment')
-    tests = db.relationship("AssignmentTest", cascade="all,delete", backref='assignment')
-    repos = db.relationship("AssignmentRepo", cascade="all,delete", backref='assignment')
+    assignment_questions = db.relationship(
+        "AssignmentQuestion", cascade="all,delete", backref="assignment"
+    )
+    assigned_student_questions = db.relationship(
+        "AssignedStudentQuestion", cascade="all,delete", backref="assignment"
+    )
+    submissions = db.relationship(
+        "Submission", cascade="all,delete", backref="assignment"
+    )
+    theia_sessions = db.relationship(
+        "TheiaSession", cascade="all,delete", backref="assignment"
+    )
+    late_exceptions = db.relationship(
+        "LateException", cascade="all,delete", backref="assignment"
+    )
+    tests = db.relationship(
+        "AssignmentTest", cascade="all,delete", backref="assignment"
+    )
+    repos = db.relationship(
+        "AssignmentRepo", cascade="all,delete", backref="assignment"
+    )
 
     @property
     def data(self):
@@ -244,15 +287,14 @@ class Assignment(db.Model):
             "hide_due_date": self.hide_due_date,
             "course": self.course.data,
             "description": self.description,
-            "visible_to_students": not self.hidden and (datetime.now() > self.release_date),
+            "visible_to_students": not self.hidden
+            and (datetime.now() > self.release_date),
             "ide_active": self.due_date + timedelta(days=3 * 7) > datetime.now(),
             "tests": [t.data for t in self.tests if t.hidden is False],
-
             # IDE
             "ide_enabled": self.ide_enabled,
-            "autosave": self.theia_options.get('autosave', True),
-            "persistent_storage": self.theia_options.get('persistent_storage', False),
-
+            "autosave": self.theia_options.get("autosave", True),
+            "persistent_storage": self.theia_options.get("persistent_storage", False),
             # Github
             "github_repo_required": self.github_repo_required,
         }
@@ -260,7 +302,7 @@ class Assignment(db.Model):
     @property
     def full_data(self):
         data = self.data
-        data['tests'] = [t.data for t in self.tests]
+        data["tests"] = [t.data for t in self.tests]
         return data
 
 
@@ -316,11 +358,7 @@ class AssignmentTest(db.Model):
 
     @property
     def data(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "hidden": self.hidden
-        }
+        return {"id": self.id, "name": self.name, "hidden": self.hidden}
 
 
 class AssignmentQuestion(db.Model):
@@ -337,7 +375,7 @@ class AssignmentQuestion(db.Model):
     solution = db.Column(db.Text, nullable=True)
     pool = db.Column(db.Integer, index=True, nullable=False)
     code_question = db.Column(db.Boolean, default=False)
-    code_language = db.Column(db.TEXT, nullable=True, default='')
+    code_language = db.Column(db.TEXT, nullable=True, default="")
     placeholder = db.Column(db.Text, nullable=True, default="")
 
     # Timestamps
@@ -389,7 +427,9 @@ class AssignedStudentQuestion(db.Model):
 
     # Relationships
     question = db.relationship(AssignmentQuestion)
-    responses = db.relationship('AssignedQuestionResponse', cascade='all,delete', backref='question')
+    responses = db.relationship(
+        "AssignedQuestionResponse", cascade="all,delete", backref="question"
+    )
 
     @property
     def data(self):
@@ -399,11 +439,19 @@ class AssignedStudentQuestion(db.Model):
         :return:
         """
 
-        response: AssignedQuestionResponse = AssignedQuestionResponse.query.filter(
-            AssignedQuestionResponse.assigned_question_id == self.id,
-        ).order_by(AssignedQuestionResponse.created.desc()).first()
+        response: AssignedQuestionResponse = (
+            AssignedQuestionResponse.query.filter(
+                AssignedQuestionResponse.assigned_question_id == self.id,
+            )
+            .order_by(AssignedQuestionResponse.created.desc())
+            .first()
+        )
 
-        response_data = {'submitted': None, 'late': True, 'text': self.question.placeholder}
+        response_data = {
+            "submitted": None,
+            "late": True,
+            "text": self.question.placeholder,
+        }
         if response is not None:
             response_data = response.data
 
@@ -416,7 +464,7 @@ class AssignedStudentQuestion(db.Model):
     @property
     def full_data(self):
         data = self.data
-        data['question'] = self.question.full_data
+        data["question"] = self.question.full_data
         return data
 
 
@@ -428,11 +476,14 @@ class AssignedQuestionResponse(db.Model):
 
     # Foreign Keys
     assigned_question_id = db.Column(
-        db.String(128), db.ForeignKey(AssignedStudentQuestion.id), index=True, nullable=False
+        db.String(128),
+        db.ForeignKey(AssignedStudentQuestion.id),
+        index=True,
+        nullable=False,
     )
 
     # Fields
-    response = db.Column(db.TEXT, default='', nullable=False)
+    response = db.Column(db.TEXT, default="", nullable=False)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
@@ -443,9 +494,12 @@ class AssignedQuestionResponse(db.Model):
         from anubis.lms.assignments import get_assignment_due_date
 
         return {
-            'submitted': str(self.created),
-            'late': get_assignment_due_date(self.question.owner.id, self.question.assignment.id) < self.created,
-            'text': self.response,
+            "submitted": str(self.created),
+            "late": get_assignment_due_date(
+                self.question.owner.id, self.question.assignment.id
+            )
+            < self.created,
+            "text": self.response,
         }
 
 
@@ -481,9 +535,17 @@ class Submission(db.Model):
     accepted = db.Column(db.Boolean, default=True)
 
     # Relationships
-    build = db.relationship("SubmissionBuild", cascade="all,delete", uselist=False, backref='submission', lazy=False)
-    test_results = db.relationship("SubmissionTestResult", cascade="all,delete", backref='submission', lazy=False)
-    repo = db.relationship(AssignmentRepo, backref='submissions')
+    build = db.relationship(
+        "SubmissionBuild",
+        cascade="all,delete",
+        uselist=False,
+        backref="submission",
+        lazy=False,
+    )
+    test_results = db.relationship(
+        "SubmissionTestResult", cascade="all,delete", backref="submission", lazy=False
+    )
+    repo = db.relationship(AssignmentRepo, backref="submissions")
 
     @property
     def visible_tests(self):
@@ -495,10 +557,14 @@ class Submission(db.Model):
         """
 
         # Query for matching AssignmentTests, and TestResults
-        tests = SubmissionTestResult.query.join(AssignmentTest).filter(
-            SubmissionTestResult.submission_id == self.id,
-            AssignmentTest.hidden == False,
-        ).all()
+        tests = (
+            SubmissionTestResult.query.join(AssignmentTest)
+            .filter(
+                SubmissionTestResult.submission_id == self.id,
+                AssignmentTest.hidden == False,
+            )
+            .all()
+        )
 
         # Convert to dictionary data
         return [
@@ -516,9 +582,13 @@ class Submission(db.Model):
         """
 
         # Query for matching AssignmentTests, and TestResults
-        tests = SubmissionTestResult.query.join(AssignmentTest).filter(
-            SubmissionTestResult.submission_id == self.id,
-        ).all()
+        tests = (
+            SubmissionTestResult.query.join(AssignmentTest)
+            .filter(
+                SubmissionTestResult.submission_id == self.id,
+            )
+            .all()
+        )
 
         # Convert to dictionary data
         return [
@@ -652,7 +722,9 @@ class TheiaSession(db.Model):
 
     # id
     id = default_id(32)
-    course_id = db.Column(db.String(128), db.ForeignKey(Course.id), nullable=False, index=True)
+    course_id = db.Column(
+        db.String(128), db.ForeignKey(Course.id), nullable=False, index=True
+    )
 
     # Foreign keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
@@ -665,9 +737,7 @@ class TheiaSession(db.Model):
     active = db.Column(db.Boolean, default=True)
     state = db.Column(db.TEXT)
     cluster_address = db.Column(db.TEXT, nullable=True, default=None)
-    image = db.Column(
-        db.TEXT, default="registry.digitalocean.com/anubis/theia-xv6"
-    )
+    image = db.Column(db.TEXT, default="registry.digitalocean.com/anubis/theia-xv6")
 
     resources = db.Column(MutableJson, default=lambda: {})
     network_policy = db.Column(db.String(128), default="os-student")
@@ -706,7 +776,6 @@ class TheiaSession(db.Model):
             "ended": str(self.ended),
             "last_proxy": str(self.last_proxy),
             "last_updated": str(self.last_updated),
-
             "autosave": self.autosave,
             "persistent_storage": self.persistent_storage,
         }
@@ -714,13 +783,13 @@ class TheiaSession(db.Model):
     @property
     def settings(self):
         return {
-            'image': self.image,
-            'repo_url': self.repo_url,
-            'autosave': self.autosave,
-            'privileged': self.privileged,
-            'credentials': self.credentials,
-            'network_locked': self.network_locked,
-            'persistent_storage': self.persistent_storage,
+            "image": self.image,
+            "repo_url": self.repo_url,
+            "autosave": self.autosave,
+            "privileged": self.privileged,
+            "credentials": self.credentials,
+            "network_locked": self.network_locked,
+            "persistent_storage": self.persistent_storage,
         }
 
 
@@ -728,7 +797,9 @@ class StaticFile(db.Model):
     __tablename__ = "static_file"
 
     id = default_id()
-    course_id = db.Column(db.String(128), db.ForeignKey(Course.id), nullable=False, index=True)
+    course_id = db.Column(
+        db.String(128), db.ForeignKey(Course.id), nullable=False, index=True
+    )
 
     # Fields
     filename = db.Column(db.TEXT)
@@ -741,7 +812,9 @@ class StaticFile(db.Model):
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    lecture_notes = db.relationship('LectureNotes', cascade='all,delete', backref='static_file')
+    lecture_notes = db.relationship(
+        "LectureNotes", cascade="all,delete", backref="static_file"
+    )
 
     @property
     def data(self):
@@ -751,7 +824,7 @@ class StaticFile(db.Model):
             "filename": self.filename,
             "path": self.path,
             "hidden": self.hidden,
-            "uploaded": str(self.created)
+            "uploaded": str(self.created),
         }
 
 
@@ -759,7 +832,9 @@ class LateException(db.Model):
     __tablename__ = "late_exception"
 
     user_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
-    assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), primary_key=True)
+    assignment_id = db.Column(
+        db.String(128), db.ForeignKey(Assignment.id), primary_key=True
+    )
 
     # New Due Date
     due_date = db.Column(db.DateTime, nullable=False)
@@ -771,11 +846,11 @@ class LateException(db.Model):
     @property
     def data(self):
         return {
-            'user_id': self.user_id,
-            'user_name': self.user.name,
-            'user_netid': self.user.netid,
-            'assignment_id': self.assignment_id,
-            'due_date': str(self.due_date)
+            "user_id": self.user_id,
+            "user_name": self.user.name,
+            "user_netid": self.user.netid,
+            "assignment_id": self.assignment_id,
+            "due_date": str(self.due_date),
         }
 
 
@@ -785,13 +860,17 @@ class LectureNotes(db.Model):
     id = default_id()
 
     # Foreign keys
-    static_file_id = db.Column(db.String(128), db.ForeignKey(StaticFile.id), nullable=False, index=True)
-    course_id = db.Column(db.String(128), db.ForeignKey(Course.id), nullable=False, index=True)
+    static_file_id = db.Column(
+        db.String(128), db.ForeignKey(StaticFile.id), nullable=False, index=True
+    )
+    course_id = db.Column(
+        db.String(128), db.ForeignKey(Course.id), nullable=False, index=True
+    )
 
     # Meta fields
     post_time = db.Column(db.DateTime, nullable=True, default=datetime.now)
-    title = db.Column(db.TEXT, default='')
-    description = db.Column(db.TEXT, default='')
+    title = db.Column(db.TEXT, default="")
+    description = db.Column(db.TEXT, default="")
     hidden = db.Column(db.Boolean, default=False)
 
     # Timestamps
@@ -801,13 +880,13 @@ class LectureNotes(db.Model):
     @property
     def data(self):
         return {
-            'id': self.id,
-            'static_file': self.static_file.data,
-            'course': self.course.course_code,
-            'title': self.title,
-            'description': self.description,
-            'hidden': self.hidden,
-            'post_time': str(self.post_time),
-            'created': str(self.created),
-            'last_updated': str(self.last_updated),
+            "id": self.id,
+            "static_file": self.static_file.data,
+            "course": self.course.course_code,
+            "title": self.title,
+            "description": self.description,
+            "hidden": self.hidden,
+            "post_time": str(self.post_time),
+            "created": str(self.created),
+            "last_updated": str(self.last_updated),
         }

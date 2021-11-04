@@ -12,7 +12,7 @@ from anubis.lms.courses import course_context, assert_course_context
 static = Blueprint("admin-static", __name__, url_prefix="/admin/static")
 
 
-@static.route('/delete/<string:static_id>')
+@static.route("/delete/<string:static_id>")
 @require_admin()
 @json_response
 def admin_static_delete_static_id(static_id: str):
@@ -24,12 +24,10 @@ def admin_static_delete_static_id(static_id: str):
     """
 
     # Get the static file object
-    static_file = StaticFile.query.filter(
-        StaticFile.id == static_id
-    ).first()
+    static_file = StaticFile.query.filter(StaticFile.id == static_id).first()
 
     # Verify that static file exists
-    req_assert(static_file is not None, message='static file does not exist')
+    req_assert(static_file is not None, message="static file does not exist")
 
     # Assert that the static file is within the current course context
     assert_course_context(static_file)
@@ -41,10 +39,12 @@ def admin_static_delete_static_id(static_id: str):
     db.session.commit()
 
     # Pass back the status
-    return success_response({
-        'status': 'File deleted',
-        'variant': 'warning',
-    })
+    return success_response(
+        {
+            "status": "File deleted",
+            "variant": "warning",
+        }
+    )
 
 
 @static.route("/list")
@@ -62,18 +62,19 @@ def admin_static_list():
 
     # Build Query. Defer the blob field so
     # it is not loaded.
-    query = StaticFile.query \
-        .filter(StaticFile.course_id == course_context.id) \
-        .order_by(StaticFile.created.desc()) \
+    query = (
+        StaticFile.query.filter(StaticFile.course_id == course_context.id)
+        .order_by(StaticFile.created.desc())
         .options(defer(StaticFile.blob))
+    )
 
     # Get all public static files within this course
     public_files = query.all()
 
     # Pass back the list of files
-    return success_response({
-        "files": [public_file.data for public_file in public_files]
-    })
+    return success_response(
+        {"files": [public_file.data for public_file in public_files]}
+    )
 
 
 @static.route("/upload", methods=["POST"])
@@ -93,7 +94,9 @@ def admin_static_file_upload():
     blob = process_file_upload()
 
     # Pass back the status
-    return success_response({
-        "status": f"{blob.filename} uploaded",
-        "blob": blob.data,
-    })
+    return success_response(
+        {
+            "status": f"{blob.filename} uploaded",
+            "blob": blob.data,
+        }
+    )

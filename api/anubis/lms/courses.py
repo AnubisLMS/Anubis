@@ -64,7 +64,7 @@ def get_course_context(full_stop: bool = True) -> Union[None, Course]:
         """
 
         # Get the raw course cookie string
-        course_raw = request.cookies.get('course', default=None)
+        course_raw = request.cookies.get("course", default=None)
 
         # If there is no cookie set, then return None
         if course_raw is None:
@@ -74,9 +74,9 @@ def get_course_context(full_stop: bool = True) -> Union[None, Course]:
         # the raw cookie. There is a lot that can go wrong here, so
         # just handle any exceptions.
         try:
-            course_data = json.loads(base64.urlsafe_b64decode(
-                urllib.parse.unquote(course_raw).encode()
-            ))
+            course_data = json.loads(
+                base64.urlsafe_b64decode(urllib.parse.unquote(course_raw).encode())
+            )
         except Exception as e:
             # Print the exception traceback
             logger.error(traceback.format_exc())
@@ -84,7 +84,7 @@ def get_course_context(full_stop: bool = True) -> Union[None, Course]:
             return None
 
         # Get the course id from the loaded course data
-        course_id = course_data.get('id', None)
+        course_id = course_data.get("id", None)
 
         # If there was no id in the course data, then return None
         if course_id is None:
@@ -106,7 +106,7 @@ def get_course_context(full_stop: bool = True) -> Union[None, Course]:
         return course
 
     # Get the current course context
-    if 'course_context' not in g:
+    if "course_context" not in g:
         _course_context = _get_course_context()
         g.course_context = _course_context
 
@@ -206,7 +206,7 @@ def assert_course_admin(course_id: str = None):
     :return:
     """
     if not is_course_admin(course_id):
-        raise LackCourseContext('Requires course TA permissions')
+        raise LackCourseContext("Requires course TA permissions")
 
 
 def assert_course_superuser(course_id: str = None):
@@ -223,7 +223,7 @@ def assert_course_superuser(course_id: str = None):
     :return:
     """
     if not is_course_superuser(course_id):
-        raise LackCourseContext('Requires course Professor permissions')
+        raise LackCourseContext("Requires course Professor permissions")
 
 
 def assert_course_context(*models: Tuple[Any]):
@@ -262,11 +262,15 @@ def assert_course_context(*models: Tuple[Any]):
 
             # Check that the current user is an admin for the course object
             if not is_course_admin(model.id):
-                raise LackCourseContext('You cannot edit resources in this course context')
+                raise LackCourseContext(
+                    "You cannot edit resources in this course context"
+                )
 
             # Verify that the course object is the same as the set context
             if model.id != context.id:
-                raise LackCourseContext('Cannot view or edit resource outside course context')
+                raise LackCourseContext(
+                    "Cannot view or edit resource outside course context"
+                )
 
         # Group together all the models that have an
         # assignment backref or relationship
@@ -308,7 +312,7 @@ def assert_course_context(*models: Tuple[Any]):
 
             # Verify that they are in the course
             if in_course is None:
-                raise LackCourseContext('Student is not within this course context')
+                raise LackCourseContext("Student is not within this course context")
 
 
 def valid_join_code(join_code: str) -> bool:
@@ -355,7 +359,7 @@ def get_student_course_ids(user: User, default: str = None) -> List[str]:
     Get the course ids for the courses that the user is in.
 
     :param user:
-    :param default: 
+    :param default:
     :return:
     """
 
@@ -370,9 +374,13 @@ def get_student_course_ids(user: User, default: str = None) -> List[str]:
     # Regular User
     else:
         # Get all the courses the user is in
-        in_courses = InCourse.query.join(Course).filter(
-            InCourse.owner_id == user.id,
-        ).all()
+        in_courses = (
+            InCourse.query.join(Course)
+            .filter(
+                InCourse.owner_id == user.id,
+            )
+            .all()
+        )
 
         # Build a list of course ids. If the user
         # specified a specific course, make a list
@@ -398,8 +406,7 @@ def get_user_permissions(user: User) -> Dict[str, Any]:
     # If the user is superuser, return all the permissions for every course
     if user.is_superuser:
         super_for = [
-            {'id': course.id, 'name': course.name}
-            for course in Course.query.all()
+            {"id": course.id, "name": course.name} for course in Course.query.all()
         ]
         return {
             "is_superuser": True,
@@ -441,17 +448,15 @@ def get_courses_with_visuals() -> List[Dict[str, Any]]:
     """
 
     # Query for courses with display_visuals on
-    query = Course.query.filter(
-        Course.display_visuals == True
-    ).order_by(Course.course_code.desc())
+    query = Course.query.filter(Course.display_visuals == True).order_by(
+        Course.course_code.desc()
+    )
 
     # Get the list of courses
     courses: List[Course] = query.all()
 
     # Break down course db objects into dictionary
-    return [
-        course.data for course in courses
-    ]
+    return [course.data for course in courses]
 
 
 @cache.memoize(timeout=60, unless=is_debug, source_check=True)
@@ -505,9 +510,7 @@ def get_course_admin_ids(course_id: str) -> List[str]:
     """
 
     # Query for the course
-    course: Course = Course.query.filter(
-        Course.id == course_id
-    ).first()
+    course: Course = Course.query.filter(Course.id == course_id).first()
 
     # If the course does not exist, then soft fail
     if course is None:
@@ -524,7 +527,9 @@ def get_course_admin_ids(course_id: str) -> List[str]:
     ).all()
 
     # Generate list from the owner_id values from each list of users
-    return list(map(lambda x: x.owner_id, tas)) + list(map(lambda x: x.owner_id, professors))
+    return list(map(lambda x: x.owner_id, tas)) + list(
+        map(lambda x: x.owner_id, professors)
+    )
 
 
 def get_course_users(course: Course) -> List[User]:
@@ -538,10 +543,9 @@ def get_course_users(course: Course) -> List[User]:
     :return:
     """
     return (
-        User.query
-            .join(InCourse, InCourse.owner_id == User.id)
-            .filter(Course.id == course.id)
-            .all()
+        User.query.join(InCourse, InCourse.owner_id == User.id)
+        .filter(Course.id == course.id)
+        .all()
     )
 
 
@@ -555,10 +559,9 @@ def get_course_tas(course: Course) -> List[User]:
     :return:
     """
     return (
-        User.query
-            .join(TAForCourse, TAForCourse.owner_id == User.id)
-            .filter(Course.id == course.id)
-            .all()
+        User.query.join(TAForCourse, TAForCourse.owner_id == User.id)
+        .filter(Course.id == course.id)
+        .all()
     )
 
 
@@ -572,10 +575,9 @@ def get_course_professors(course: Course) -> List[User]:
     :return:
     """
     return (
-        User.query
-            .join(ProfessorForCourse, ProfessorForCourse.owner_id == User.id)
-            .filter(Course.id == course.id)
-            .all()
+        User.query.join(ProfessorForCourse, ProfessorForCourse.owner_id == User.id)
+        .filter(Course.id == course.id)
+        .all()
     )
 
 

@@ -25,9 +25,11 @@ def admin_courses_list():
     """
 
     # Return the course context broken down
-    return success_response({
-        "course": row2dict(course_context),
-    })
+    return success_response(
+        {
+            "course": row2dict(course_context),
+        }
+    )
 
 
 @courses_.route("/new")
@@ -59,10 +61,12 @@ def admin_courses_new():
     db.session.commit()
 
     # Return the status
-    return success_response({
-        "course": course.data,
-        "status": "Created new course",
-    })
+    return success_response(
+        {
+            "course": course.data,
+            "status": "Created new course",
+        }
+    )
 
 
 @courses_.route("/save", methods=["POST"])
@@ -83,15 +87,15 @@ def admin_courses_save_id(course: dict):
     db_course: Course = Course.query.filter(Course.id == course_id).first()
 
     # Make sure we got a course
-    req_assert(db_course is not None, message='course not found')
+    req_assert(db_course is not None, message="course not found")
 
     # Assert that the current user is a professor or a superuser
     assert_course_superuser(course_id)
 
     # Check that the join code is valid
     req_assert(
-        valid_join_code(course['join_code']),
-        message='Invalid join code. Lowercase letters and numbers only.'
+        valid_join_code(course["join_code"]),
+        message="Invalid join code. Lowercase letters and numbers only.",
     )
 
     # Update all the items in the course with the posted data
@@ -113,7 +117,7 @@ def admin_courses_save_id(course: dict):
     return success_response({"course": db_course.data, "status": "Changes saved."})
 
 
-@courses_.route('/list/students')
+@courses_.route("/list/students")
 @require_admin()
 @json_response
 def admin_course_list_students():
@@ -124,21 +128,31 @@ def admin_course_list_students():
     """
 
     # Get all the students in the current course context
-    students = User.query.join(InCourse).filter(
-        InCourse.course_id == course_context.id,
-    ).all()
+    students = (
+        User.query.join(InCourse)
+        .filter(
+            InCourse.course_id == course_context.id,
+        )
+        .all()
+    )
 
     # Return the list of basic user information about the tas
-    return success_response({'users': [
+    return success_response(
         {
-            'id': user.id, 'netid': user.netid,
-            'name': user.name, 'github_username': user.github_username
+            "users": [
+                {
+                    "id": user.id,
+                    "netid": user.netid,
+                    "name": user.name,
+                    "github_username": user.github_username,
+                }
+                for user in students
+            ]
         }
-        for user in students
-    ]})
+    )
 
 
-@courses_.route('/list/tas')
+@courses_.route("/list/tas")
 @require_admin()
 @json_response
 def admin_course_list_tas():
@@ -149,21 +163,31 @@ def admin_course_list_tas():
     """
 
     # Get all the TAs in the current course context
-    tas = User.query.join(TAForCourse).filter(
-        TAForCourse.course_id == course_context.id,
-    ).all()
+    tas = (
+        User.query.join(TAForCourse)
+        .filter(
+            TAForCourse.course_id == course_context.id,
+        )
+        .all()
+    )
 
     # Return the list of basic user information about the tas
-    return success_response({'users': [
+    return success_response(
         {
-            'id': user.id, 'netid': user.netid,
-            'name': user.name, 'github_username': user.github_username
+            "users": [
+                {
+                    "id": user.id,
+                    "netid": user.netid,
+                    "name": user.name,
+                    "github_username": user.github_username,
+                }
+                for user in tas
+            ]
         }
-        for user in tas
-    ]})
+    )
 
 
-@courses_.route('/list/professors')
+@courses_.route("/list/professors")
 @require_admin()
 @json_response
 def admin_course_list_professors():
@@ -174,21 +198,31 @@ def admin_course_list_professors():
     """
 
     # Get all the professors within the current course context
-    professors = User.query.join(ProfessorForCourse).filter(
-        ProfessorForCourse.course_id == course_context.id,
-    ).all()
+    professors = (
+        User.query.join(ProfessorForCourse)
+        .filter(
+            ProfessorForCourse.course_id == course_context.id,
+        )
+        .all()
+    )
 
     # Return the list of basic user information about the professors
-    return success_response({'users': [
+    return success_response(
         {
-            'id': user.id, 'netid': user.netid,
-            'name': user.name, 'github_username': user.github_username,
+            "users": [
+                {
+                    "id": user.id,
+                    "netid": user.netid,
+                    "name": user.name,
+                    "github_username": user.github_username,
+                }
+                for user in professors
+            ]
         }
-        for user in professors
-    ]})
+    )
 
 
-@courses_.route('/make/student/<string:user_id>')
+@courses_.route("/make/student/<string:user_id>")
 @require_admin()
 @json_response
 def admin_course_make_student_id(user_id: str):
@@ -203,7 +237,7 @@ def admin_course_make_student_id(user_id: str):
     other = User.query.filter(User.id == user_id).first()
 
     # Make sure they exist
-    req_assert(other is not None, message='user does not exist')
+    req_assert(other is not None, message="user does not exist")
 
     # Check to see if the other user is already a professor
     # for this course
@@ -213,7 +247,7 @@ def admin_course_make_student_id(user_id: str):
     ).first()
 
     # If they are already a professor, then stop
-    req_assert(student is None, message='they are already a student')
+    req_assert(student is None, message="they are already a student")
 
     # Create a new professor
     student = InCourse(
@@ -226,12 +260,10 @@ def admin_course_make_student_id(user_id: str):
     db.session.commit()
 
     # Return the status
-    return success_response({
-        'status': 'Student added to course'
-    })
+    return success_response({"status": "Student added to course"})
 
 
-@courses_.route('/remove/student/<string:user_id>')
+@courses_.route("/remove/student/<string:user_id>")
 @require_admin()
 @json_response
 def admin_course_remove_student_id(user_id: str):
@@ -246,7 +278,7 @@ def admin_course_remove_student_id(user_id: str):
     other = User.query.filter(User.id == user_id).first()
 
     # Make sure the other user exists
-    req_assert(other is not None, message='user does not exist')
+    req_assert(other is not None, message="user does not exist")
 
     # Delete the professor
     InCourse.query.filter(
@@ -258,13 +290,15 @@ def admin_course_remove_student_id(user_id: str):
     db.session.commit()
 
     # Return the status
-    return success_response({
-        'status': 'Student removed from course',
-        'variant': 'warning',
-    })
+    return success_response(
+        {
+            "status": "Student removed from course",
+            "variant": "warning",
+        }
+    )
 
 
-@courses_.route('/make/ta/<string:user_id>')
+@courses_.route("/make/ta/<string:user_id>")
 @require_admin()
 @json_response
 def admin_course_make_ta_id(user_id: str):
@@ -279,7 +313,7 @@ def admin_course_make_ta_id(user_id: str):
     other = User.query.filter(User.id == user_id).first()
 
     # Check that the user exists
-    req_assert(other is not None, message='user does not exist')
+    req_assert(other is not None, message="user does not exist")
 
     # Check to see if the user is already a ta
     ta = TAForCourse.query.filter(
@@ -288,7 +322,7 @@ def admin_course_make_ta_id(user_id: str):
     ).first()
 
     # Check that they are not already a TA
-    req_assert(ta is None, message='they are already a TA')
+    req_assert(ta is None, message="they are already a TA")
 
     # Make the user a TA if they are not already
     ta = TAForCourse(
@@ -310,12 +344,10 @@ def admin_course_make_ta_id(user_id: str):
     db.session.commit()
 
     # Return the status
-    return success_response({
-        'status': 'TA added to course'
-    })
+    return success_response({"status": "TA added to course"})
 
 
-@courses_.route('/remove/ta/<string:user_id>')
+@courses_.route("/remove/ta/<string:user_id>")
 @require_admin()
 @json_response
 def admin_course_remove_ta_id(user_id: str):
@@ -333,11 +365,11 @@ def admin_course_remove_ta_id(user_id: str):
     other = User.query.filter(User.id == user_id).first()
 
     # Make sure that the other user exists
-    req_assert(other is not None, message='user does not exist')
+    req_assert(other is not None, message="user does not exist")
 
     # If the other user is the current user, then stop
     if not current_user.is_superuser:
-        req_assert(other.id != current_user.id, message='cannot remove yourself')
+        req_assert(other.id != current_user.id, message="cannot remove yourself")
 
     # Delete the TA
     TAForCourse.query.filter(
@@ -349,13 +381,15 @@ def admin_course_remove_ta_id(user_id: str):
     db.session.commit()
 
     # Return the status
-    return success_response({
-        'status': 'TA removed from course',
-        'variant': 'warning',
-    })
+    return success_response(
+        {
+            "status": "TA removed from course",
+            "variant": "warning",
+        }
+    )
 
 
-@courses_.route('/make/professor/<string:user_id>')
+@courses_.route("/make/professor/<string:user_id>")
 @require_superuser()
 @json_response
 def admin_course_make_professor_id(user_id: str):
@@ -370,7 +404,7 @@ def admin_course_make_professor_id(user_id: str):
     other = User.query.filter(User.id == user_id).first()
 
     # Make sure they exist
-    req_assert(other is not None, message='user does not exist')
+    req_assert(other is not None, message="user does not exist")
 
     # Check to see if the other user is already a professor
     # for this course
@@ -380,7 +414,7 @@ def admin_course_make_professor_id(user_id: str):
     ).first()
 
     # If they are already a professor, then stop
-    req_assert(prof is None, message='they are already a professor')
+    req_assert(prof is None, message="they are already a professor")
 
     # Create a new professor
     prof = ProfessorForCourse(
@@ -402,12 +436,10 @@ def admin_course_make_professor_id(user_id: str):
     db.session.commit()
 
     # Return the status
-    return success_response({
-        'status': 'Professor added to course'
-    })
+    return success_response({"status": "Professor added to course"})
 
 
-@courses_.route('/remove/professor/<string:user_id>')
+@courses_.route("/remove/professor/<string:user_id>")
 @require_superuser()
 @json_response
 def admin_course_remove_professor_id(user_id: str):
@@ -422,7 +454,7 @@ def admin_course_remove_professor_id(user_id: str):
     other = User.query.filter(User.id == user_id).first()
 
     # Make sure the other user exists
-    req_assert(other is not None, message='user does not exist')
+    req_assert(other is not None, message="user does not exist")
 
     # Delete the professor
     ProfessorForCourse.query.filter(
@@ -434,7 +466,9 @@ def admin_course_remove_professor_id(user_id: str):
     db.session.commit()
 
     # Return the status
-    return success_response({
-        'status': 'Professor removed from course',
-        'variant': 'warning',
-    })
+    return success_response(
+        {
+            "status": "Professor removed from course",
+            "variant": "warning",
+        }
+    )

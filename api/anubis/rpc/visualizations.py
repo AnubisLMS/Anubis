@@ -29,7 +29,9 @@ def create_visuals(*_, **__):
         # and always cached when run in the visuals cronjob.
         get_usage_plot(course.id)
 
-    autograde_recalculate_days = get_config_int('AUTOGRADE_RECALCULATE_DAYS', default=60)
+    autograde_recalculate_days = get_config_int(
+        "AUTOGRADE_RECALCULATE_DAYS", default=60
+    )
     autograde_recalculate_duration = timedelta(days=autograde_recalculate_days)
 
     # For recent assignments

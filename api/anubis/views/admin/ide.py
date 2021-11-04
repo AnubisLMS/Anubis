@@ -22,25 +22,28 @@ ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 @require_admin()
 @json_response
 def admin_ide_admin_settings():
-    return success_response({'settings': {
-        "image": "registry.digitalocean.com/anubis/theia-admin",
-        "repo_url": course_context.autograde_tests_repo,
-
-        # Options
-        "privileged": True,
-        "network_locked": False,
-        "network_policy": "admin",
-        "resources": '{"limits": {"cpu": "2", "memory": "2Gi"}, "requests": {"cpu": "1", "memory": "500Mi"}}',
-        "autosave": True,
-        "credentials": True,
-        "persistent_storage": False,
-    }})
+    return success_response(
+        {
+            "settings": {
+                "image": "registry.digitalocean.com/anubis/theia-admin",
+                "repo_url": course_context.autograde_tests_repo,
+                # Options
+                "privileged": True,
+                "network_locked": False,
+                "network_policy": "admin",
+                "resources": '{"limits": {"cpu": "2", "memory": "2Gi"}, "requests": {"cpu": "1", "memory": "500Mi"}}',
+                "autosave": True,
+                "credentials": True,
+                "persistent_storage": False,
+            }
+        }
+    )
 
 
 @ide.route("/initialize", methods=["POST"])
 @ide.route("/initialize-custom", methods=["POST"])
 @require_admin()
-@json_endpoint([('settings', dict)])
+@json_endpoint([("settings", dict)])
 def admin_ide_initialize_custom(settings: dict, **_):
     """
     Initialize a new management ide with options.
@@ -64,32 +67,34 @@ def admin_ide_initialize_custom(settings: dict, **_):
         return success_response({"session": session.data})
 
     # Read the options out of the posted data
-    image = settings.get('image', 'registry.digitalocean.com/anubis/theia-admin')
-    repo_url = settings.get('repo_url', 'https://github.com/os3224/anubis-assignment-tests')
-    resources_str = settings.get('resources', '{"limits":{"cpu":"4","memory":"4Gi"}}')
-    network_locked = settings.get('network_locked', False)
-    network_policy = settings.get('network_policy', 'admin')
-    autosave = settings.get('autosave', True)
-    credentials = settings.get('credentials', True)
-    privileged = settings.get('privileged', True)
-    persistent_storage = settings.get('persistent_storage', False)
+    image = settings.get("image", "registry.digitalocean.com/anubis/theia-admin")
+    repo_url = settings.get(
+        "repo_url", "https://github.com/os3224/anubis-assignment-tests"
+    )
+    resources_str = settings.get("resources", '{"limits":{"cpu":"4","memory":"4Gi"}}')
+    network_locked = settings.get("network_locked", False)
+    network_policy = settings.get("network_policy", "admin")
+    autosave = settings.get("autosave", True)
+    credentials = settings.get("credentials", True)
+    privileged = settings.get("privileged", True)
+    persistent_storage = settings.get("persistent_storage", False)
 
     # Attempt to load the options_str into a dict object
     try:
         resources = json.loads(resources_str)
     except json.JSONDecodeError:
-        return error_response('Can not parse JSON options')
+        return error_response("Can not parse JSON options")
 
     # Get the config value for if ide starts are allowed.
-    theia_starts_enabled = get_config_int('THEIA_STARTS_ENABLED', default=1) == 1
+    theia_starts_enabled = get_config_int("THEIA_STARTS_ENABLED", default=1) == 1
 
     # Assert that new ide starts are allowed. If they are not, then
     # we return a status message to the user saying they are not able
     # to start a new ide.
     req_assert(
         theia_starts_enabled,
-        message='Starting new IDEs is currently disabled by an Anubis administrator. '
-                'Please try again later.',
+        message="Starting new IDEs is currently disabled by an Anubis administrator. "
+        "Please try again later.",
     )
 
     # Create a new session
@@ -101,7 +106,6 @@ def admin_ide_initialize_custom(settings: dict, **_):
         repo_url=repo_url,
         active=True,
         state="Initializing",
-
         # Options
         network_locked=network_locked,
         network_policy=network_policy,
@@ -117,11 +121,13 @@ def admin_ide_initialize_custom(settings: dict, **_):
     # Send kube resource initialization rpc job
     enqueue_ide_initialize(session.id)
 
-    return success_response({
-        "session": session.data,
-        "settings": session.settings,
-        "status": "Admin IDE Initialized."
-    })
+    return success_response(
+        {
+            "session": session.data,
+            "settings": session.settings,
+            "status": "Admin IDE Initialized.",
+        }
+    )
 
 
 @ide.route("/active")
@@ -148,10 +154,12 @@ def admin_ide_active():
         return success_response({"session": None})
 
     # Return the active session information
-    return success_response({
-        "session": session.data,
-        "settings": session.settings,
-    })
+    return success_response(
+        {
+            "session": session.data,
+            "settings": session.settings,
+        }
+    )
 
 
 @ide.route("/list")
@@ -191,7 +199,7 @@ def admin_ide_stop_id(id: str):
     ).first()
 
     # Verify it exists
-    req_assert(session is not None, message='session does not exist')
+    req_assert(session is not None, message="session does not exist")
 
     # Set all the things as stopped
     session.active = False
@@ -221,9 +229,9 @@ def private_ide_reap_all():
     """
 
     # Send reap job to rpc cluster
-    rpc_enqueue(reap_theia_sessions_in_course, 'theia', args=(course_context.id,))
+    rpc_enqueue(reap_theia_sessions_in_course, "theia", args=(course_context.id,))
 
     # Hand back status
-    return success_response({
-        "status": "Reap job enqueued. Session cleanup will take a minute."
-    })
+    return success_response(
+        {"status": "Reap job enqueued. Session cleanup will take a minute."}
+    )

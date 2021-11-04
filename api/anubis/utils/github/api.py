@@ -10,32 +10,32 @@ from anubis.utils.logging import logger
 def get_github_token() -> Optional[str]:
 
     # Get GITHUB token from environment
-    token = os.environ.get('GITHUB_TOKEN', None)
+    token = os.environ.get("GITHUB_TOKEN", None)
 
     # If we could not get the token, log and return None
     if token is None:
-        logger.error('MISSING GITHUB_TOKEN')
+        logger.error("MISSING GITHUB_TOKEN")
         return None
 
     return token
 
 
-def github_rest(url, body=None, method: str = 'get'):
+def github_rest(url, body=None, method: str = "get"):
 
     # Get the github api token
     token = get_github_token()
 
-    url = 'https://api.github.com' + url
+    url = "https://api.github.com" + url
     headers = {
-        'Accept': 'application/vnd.github.v3+json',
-        'Authorization': 'token %s' % token,
+        "Accept": "application/vnd.github.v3+json",
+        "Authorization": "token %s" % token,
     }
 
     req_function = {
-        'put': requests.put,
-        'get': requests.get,
-        'del': requests.delete,
-        'delete': requests.delete,
+        "put": requests.put,
+        "get": requests.get,
+        "del": requests.delete,
+        "delete": requests.delete,
     }[method.lower()]
 
     r = None
@@ -52,11 +52,13 @@ def github_rest(url, body=None, method: str = 'get'):
             logger.error(str(r))
             logger.error(r.content)
         logger.error(traceback.format_exc())
-        logger.error(f'Request to github api Failed {e}')
+        logger.error(f"Request to github api Failed {e}")
         return None
 
 
-def github_graphql(query: str, variables: Dict[str, Any] = None) -> Optional[Dict[str, Any]]:
+def github_graphql(
+    query: str, variables: Dict[str, Any] = None
+) -> Optional[Dict[str, Any]]:
 
     # Default values for variables
     if variables is None:
@@ -65,19 +67,19 @@ def github_graphql(query: str, variables: Dict[str, Any] = None) -> Optional[Dic
     token = get_github_token()
 
     # Set up request options
-    url = 'https://api.github.com/graphql'
-    json = {'query': query, 'variables': variables}
-    headers = {'Authorization': 'token %s' % token}
+    url = "https://api.github.com/graphql"
+    json = {"query": query, "variables": variables}
+    headers = {"Authorization": "token %s" % token}
 
     # Make the graph request over http
     try:
         r = requests.post(url=url, json=json, headers=headers)
-        return r.json()['data']
+        return r.json()["data"]
     except KeyError as e:
         logger.error(traceback.format_exc())
         logger.error(r.content)
         return None
     except Exception as e:
         logger.error(traceback.format_exc())
-        logger.error(f'Request to github api Failed {e}')
+        logger.error(f"Request to github api Failed {e}")
         return None

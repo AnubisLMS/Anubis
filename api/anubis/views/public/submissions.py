@@ -37,8 +37,8 @@ def public_submissions():
     assignment_id = request.args.get("assignmentId", default=None)
 
     # Get the limit and offset for submissions query
-    limit: int = get_number_arg('limit', default_value=10)
-    offset: int = get_number_arg('offset', default_value=0)
+    limit: int = get_number_arg("limit", default_value=10)
+    offset: int = get_number_arg("offset", default_value=0)
 
     # Load current user
     perspective_of = current_user
@@ -50,7 +50,7 @@ def public_submissions():
     # course context.
     req_assert(
         not (perspective_of_id is not None and not is_course_admin(course_id)),
-        message='Bad Request',
+        message="Bad Request",
         status_code=400,
     )
 
@@ -64,14 +64,12 @@ def public_submissions():
     )
 
     # If the submissions query returned None, something went wrong
-    req_assert(submissions is not None, message='Bad Request', status_code=400)
+    req_assert(submissions is not None, message="Bad Request", status_code=400)
 
     # Get submissions through cached function
-    return success_response({
-        "submissions": submissions,
-        "total": total,
-        "user": perspective_of.data
-    })
+    return success_response(
+        {"submissions": submissions, "total": total, "user": perspective_of.data}
+    )
 
 
 @submissions_.route("/get/<string:commit>")
@@ -86,16 +84,13 @@ def public_submission(commit: str):
     """
 
     # Build submission query
-    query = (
-        Submission.query
-            .filter(Submission.commit == commit)
-    )
+    query = Submission.query.filter(Submission.commit == commit)
 
     # Do query
     submission: Submission = query.first()
 
     # Make sure we caught one
-    req_assert(submission is not None, message='submission does not exist')
+    req_assert(submission is not None, message="submission does not exist")
 
     # Make sure the user is allowed to see the submission if it does not belong to them
     if not submission.owner_id == current_user.id:
@@ -105,7 +100,10 @@ def public_submission(commit: str):
 
         # Assert that the current user is a admin for the course (TA, Professor, Superuser).
         # If they are not, then pass back that submissions does not exist message.
-        req_assert(is_course_admin(course_id, current_user.id), message='submission does not exist')
+        req_assert(
+            is_course_admin(course_id, current_user.id),
+            message="submission does not exist",
+        )
 
     # Hand back submission
     return success_response({"submission": submission.full_data})
@@ -122,10 +120,7 @@ def public_regrade_commit(commit: str):
     """
 
     # Build submission query
-    query = (
-        Submission.query
-            .filter(Submission.commit == commit)
-    )
+    query = Submission.query.filter(Submission.commit == commit)
 
     # If the current user is not a superuser, then add a filter
     # to make sure the submission is owned by the current user.
@@ -136,7 +131,7 @@ def public_regrade_commit(commit: str):
     submission = query.first()
 
     # Verify Ownership
-    req_assert(submission is not None, message='submission does not exist')
+    req_assert(submission is not None, message="submission does not exist")
 
     # Check that the owner matches the user
     if submission.owner_id != current_user.id:
@@ -144,10 +139,13 @@ def public_regrade_commit(commit: str):
         assert_course_context(submission)
 
     # Check that autograde is enabled for the assignment
-    req_assert(submission.assignment.autograde_enabled, message='Autograde is disabled for this assignment')
+    req_assert(
+        submission.assignment.autograde_enabled,
+        message="Autograde is disabled for this assignment",
+    )
 
     # Check that the submission is allowed to be accepted
-    req_assert(submission.accepted, message='Submission was rejected for being late')
+    req_assert(submission.accepted, message="Submission was rejected for being late")
 
     # Regrade
     return regrade_submission(submission)

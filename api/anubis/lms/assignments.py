@@ -27,18 +27,24 @@ from anubis.utils.config import get_config_int
 
 @cache.memoize(timeout=30, unless=is_debug)
 def get_assignment_grace(assignment_id: str) -> datetime:
-    assignment: Assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
+    assignment: Assignment = Assignment.query.filter(
+        Assignment.id == assignment_id
+    ).first()
     return assignment.grace_date
 
 
 @cache.memoize(timeout=30, unless=is_debug)
 def get_assignment_due(assignment_id: str) -> datetime:
-    assignment: Assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
+    assignment: Assignment = Assignment.query.filter(
+        Assignment.id == assignment_id
+    ).first()
     return assignment.due_date
 
 
 @cache.memoize(timeout=30)
-def get_assignment_due_date(user_id: str, assignment_id: str, grace: bool = False) -> datetime:
+def get_assignment_due_date(
+    user_id: str, assignment_id: str, grace: bool = False
+) -> datetime:
     """
     Get the due date for an assignment for a specific user. We check to
     see if there is a late exception for this user, and return that if
@@ -80,7 +86,9 @@ def get_assignment_due_date(user_id: str, assignment_id: str, grace: bool = Fals
 
 @cache.memoize(timeout=30, unless=is_debug)
 def get_assignment_data(user_id: str, assignment_id: str) -> Dict[str, Any]:
-    assignment: Assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
+    assignment: Assignment = Assignment.query.filter(
+        Assignment.id == assignment_id
+    ).first()
 
     assignment_data = assignment.data
     fill_user_assignment_data(user_id, assignment_data)
@@ -88,22 +96,32 @@ def get_assignment_data(user_id: str, assignment_id: str) -> Dict[str, Any]:
     return assignment_data
 
 
-def get_all_assignments(course_ids: Set[str], admin_course_ids: Set[str]) -> List[Assignment]:
+def get_all_assignments(
+    course_ids: Set[str], admin_course_ids: Set[str]
+) -> List[Assignment]:
     # Build a list of all the assignments visible
     # to this user for each of the specified courses.
     assignments: List[Assignment] = []
 
     # Get the assignment objects that should be visible to this user.
-    regular_course_assignments = Assignment.query.join(Course).filter(
-        Course.id.in_(list(course_ids.difference(admin_course_ids))),
-        Assignment.release_date <= datetime.now(),
-        Assignment.hidden == False,
-    ).all()
+    regular_course_assignments = (
+        Assignment.query.join(Course)
+        .filter(
+            Course.id.in_(list(course_ids.difference(admin_course_ids))),
+            Assignment.release_date <= datetime.now(),
+            Assignment.hidden == False,
+        )
+        .all()
+    )
 
     # Get the assignment objects that should be visible to this user.
-    admin_course_assignments = Assignment.query.join(Course).filter(
-        Course.id.in_(list(admin_course_ids)),
-    ).all()
+    admin_course_assignments = (
+        Assignment.query.join(Course)
+        .filter(
+            Course.id.in_(list(admin_course_ids)),
+        )
+        .all()
+    )
 
     # Add all the assignment objects to the running list
     assignments.extend(admin_course_assignments)
@@ -146,11 +164,14 @@ def get_assignments(netid: str, course_id=None) -> Optional[List[Dict[str, Any]]
     # Take all the sqlalchemy assignment objects,
     # and break them into data dictionaries.
     # Sort them by due_date.
-    response = [_a.data for _a in sorted(
-        assignments,
-        reverse=True,
-        key=lambda assignment: assignment.due_date,
-    )]
+    response = [
+        _a.data
+        for _a in sorted(
+            assignments,
+            reverse=True,
+            key=lambda assignment: assignment.due_date,
+        )
+    ]
 
     # Add submission and repo information to the assignments
     for assignment_data in response:
@@ -175,7 +196,9 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     ).first()
 
     # Attempt to find the class
-    course_name = assignment_data.get('class', None) or assignment_data.get('course', None)
+    course_name = assignment_data.get("class", None) or assignment_data.get(
+        "course", None
+    )
     course: Course = Course.query.filter(
         or_(
             Course.name == course_name,
@@ -216,8 +239,8 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     # Go through assignment tests, and delete those that are now
     # not in the assignment data.
     for assignment_test in AssignmentTest.query.filter(
-            AssignmentTest.assignment_id == assignment.id,
-            AssignmentTest.name.notin_(assignment_data["tests"]),
+        AssignmentTest.assignment_id == assignment.id,
+        AssignmentTest.name.notin_(assignment_data["tests"]),
     ).all():
         # Delete any and all submission test results that are still outstanding
         # for an assignment test that will be deleted.
@@ -235,10 +258,14 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     for test_name in assignment_data["tests"]:
 
         # Find if the assignment test exists
-        assignment_test = AssignmentTest.query.join(Assignment).filter(
-            Assignment.id == assignment.id,
-            AssignmentTest.name == test_name,
-        ).first()
+        assignment_test = (
+            AssignmentTest.query.join(Assignment)
+            .filter(
+                Assignment.id == assignment.id,
+                AssignmentTest.name == test_name,
+            )
+            .first()
+        )
 
         # Create the assignment test if it did not already exist
         if assignment_test is None:
@@ -247,11 +274,17 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
 
     # Sync the questions in the assignment data
     question_message = None
-    if 'questions' in assignment_data and isinstance(assignment_data['questions'], list):
+    if "questions" in assignment_data and isinstance(
+        assignment_data["questions"], list
+    ):
         accepted, ignored, rejected = ingest_questions(
             assignment_data["questions"], assignment
         )
-        question_message = {"accepted": accepted, "ignored": ignored, "rejected": rejected}
+        question_message = {
+            "accepted": accepted,
+            "ignored": ignored,
+            "rejected": rejected,
+        }
 
     # Commit changes
     db.session.commit()
@@ -260,14 +293,15 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
 
 
 def fill_user_assignment_data(user_id: str, assignment_data: Dict[str, Any]):
-    assignment_id: str = assignment_data['id']
+    assignment_id: str = assignment_data["id"]
 
     # If the current user has a submission for this assignment, then mark it
     assignment_data["has_submission"] = (
-            Submission.query.filter(
-                Submission.assignment_id == assignment_id,
-                Submission.owner_id == user_id,
-            ).count() > 0
+        Submission.query.filter(
+            Submission.assignment_id == assignment_id,
+            Submission.owner_id == user_id,
+        ).count()
+        > 0
     )
 
     repo = AssignmentRepo.query.filter(
@@ -278,17 +312,13 @@ def fill_user_assignment_data(user_id: str, assignment_data: Dict[str, Any]):
     ).first()
 
     # If the current user has a repo for this assignment, then mark it
-    assignment_data["has_repo"] = (
-            repo is not None
-    )
+    assignment_data["has_repo"] = repo is not None
     # If the current user has a repo for this assignment, then mark it
-    assignment_data["repo_url"] = (
-        repo.repo_url if repo is not None else None
-    )
+    assignment_data["repo_url"] = repo.repo_url if repo is not None else None
 
     due_date = get_assignment_due_date(user_id, assignment_id)
-    assignment_data['past_due'] = due_date < datetime.now()
-    assignment_data['due_date'] = str(due_date)
+    assignment_data["past_due"] = due_date < datetime.now()
+    assignment_data["due_date"] = str(due_date)
 
 
 def get_recent_assignments() -> List[Assignment]:
@@ -298,7 +328,9 @@ def get_recent_assignments() -> List[Assignment]:
 
     :return:
     """
-    autograde_recalculate_days = get_config_int('AUTOGRADE_RECALCULATE_DAYS', default=60)
+    autograde_recalculate_days = get_config_int(
+        "AUTOGRADE_RECALCULATE_DAYS", default=60
+    )
     autograde_recalculate_duration = timedelta(days=autograde_recalculate_days)
 
     recent_assignments = Assignment.query.filter(

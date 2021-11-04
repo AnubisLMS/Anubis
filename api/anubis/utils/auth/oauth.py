@@ -20,9 +20,7 @@ OAUTH_REMOTE_APP_GITHUB = oauth.remote_app(
     base_url="https://github.com/login/oauth/",
     authorize_url="https://github.com/login/oauth/authorize",
     request_token_url=None,
-    request_token_params={
-        "scope": "read:user"
-    },
+    request_token_params={"scope": "read:user"},
     access_token_url="https://github.com/login/oauth/access_token",
     access_token_params={
         "client_id": config.OAUTH_GITHUB_CONSUMER_KEY,

@@ -7,10 +7,10 @@ from anubis.utils.cache import cache
 from anubis.utils.http import req_assert
 from anubis.utils.visuals.usage import get_usage_plot, get_raw_submissions
 
-visuals = Blueprint('public-visuals', __name__, url_prefix='/public/visuals')
+visuals = Blueprint("public-visuals", __name__, url_prefix="/public/visuals")
 
 
-@visuals.route('/usage/<string:course_id>')
+@visuals.route("/usage/<string:course_id>")
 @cache.cached(timeout=360, unless=is_debug)
 def public_visuals_usage(course_id: str):
     """
@@ -38,7 +38,7 @@ def public_visuals_usage(course_id: str):
     response = make_response(blob)
 
     # Set the response content type
-    response.headers['Content-Type'] = 'image/png'
+    response.headers["Content-Type"] = "image/png"
 
     # Pass back the image response
     return response

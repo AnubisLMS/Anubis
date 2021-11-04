@@ -16,14 +16,17 @@ def get_recent_sessions(user_id: str, limit: int = 10, offset: int = 10) -> List
         User.id == user_id,
     ).first()
 
-    sessions: List[TheiaSession] = TheiaSession.query.filter(
-        TheiaSession.owner_id == student.id,
-    ).order_by(TheiaSession.created.desc()).limit(limit).offset(offset).all()
+    sessions: List[TheiaSession] = (
+        TheiaSession.query.filter(
+            TheiaSession.owner_id == student.id,
+        )
+        .order_by(TheiaSession.created.desc())
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
 
-    return [
-        session.data
-        for session in sessions
-    ]
+    return [session.data for session in sessions]
 
 
 @cache.memoize(timeout=5, unless=is_debug)
@@ -33,7 +36,7 @@ def get_n_available_sessions() -> Tuple[int, int]:
 
     :return:
     """
-    max_ides = get_config_int('MAX_THEIA_SESSIONS', default=50)
+    max_ides = get_config_int("MAX_THEIA_SESSIONS", default=50)
     active_ide_count: int = TheiaSession.query.filter(TheiaSession.active).count()
 
     return active_ide_count, max_ides
@@ -80,9 +83,9 @@ def theia_list_all(user_id: str, limit: int = 10):
         TheiaSession.query.filter(
             TheiaSession.owner_id == user_id,
         )
-            .order_by(TheiaSession.created.desc())
-            .limit(limit)
-            .all()
+        .order_by(TheiaSession.created.desc())
+        .limit(limit)
+        .all()
     )
 
     return [theia_session.data for theia_session in theia_sessions]

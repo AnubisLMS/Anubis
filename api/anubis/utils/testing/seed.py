@@ -7,9 +7,15 @@ from datetime import datetime, timedelta
 from anubis.models import (
     db,
     THEIA_DEFAULT_OPTIONS,
-    Assignment, AssignmentQuestion, AssignmentTest,
-    AssignmentRepo, Submission, User, Course,
-    InCourse, TheiaSession
+    Assignment,
+    AssignmentQuestion,
+    AssignmentTest,
+    AssignmentRepo,
+    Submission,
+    User,
+    Course,
+    InCourse,
+    TheiaSession,
 )
 from anubis.utils.data import rand
 from anubis.lms.theia import mark_session_ended
@@ -22,30 +28,258 @@ consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
 Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 """
 
-names = ["Joette", "Anabelle", "Fred", "Woodrow", "Neoma", "Dorian", "Treasure", "Tami", "Berdie", "Jordi", "Frances",
-         "Gerhardt", "Kristina", "Carmelita", "Sim", "Hideo", "Arland", "Wirt", "Robt", "Narcissus", "Steve", "Monique",
-         "Kellen", "Jessenia", "Nathalia", "Lissie", "Loriann", "Theresa", "Pranav", "Eppie", "Angelic", "Louvenia",
-         "Mathews", "Natalie", "Susan", "Cyril", "Vester", "Rakeem", "Duff", "Garret", "Agnes", "Carol", "Pairlee",
-         "Viridiana", "Keith", "Elinore", "Rico", "Demonte", "Imelda", "Jackeline", "Kenneth", "Adalynn", "Blair",
-         "Stetson", "Adamaris", "Zaniyah", "Heyward", "Austin", "Elden", "Gregory", "Lemuel", "Aaliyah", "Abby",
-         "Hassie", "Sanjuanita", "Takisha", "Orlo", "Geary", "Bettye", "Luciano", "Gretchen", "Chimere", "Melanie",
-         "Angele", "Michial", "Emmons", "Edmund", "Renae", "Letha", "Curtiss", "Boris", "Winter", "Nealy", "Renard",
-         "Taliyah", "Jaren", "Nilda", "Tiny", "Manila", "Mariann", "Dennis", "Autumn", "Aron", "Drew", "Shea", "Britt",
-         "Luvenia", "Doloris", "Bret", "Sammy", "Elmer", "Florencio", "Selah", "Simona", "Tatyana", "Beau", "Alvin",
-         "Leslie", "Kimberely", "Sydni", "Mitchel", "Belle", "Brain", "Marlin", "Vallie", "Colon", "Hoyt", "Destinee",
-         "Shamar", "Ezzard", "Sheilah", "Leisa", "Tennille", "Brandyn", "Yasmin", "Malaya", "Larry", "Mina", "Myrle",
-         "Blaine", "Gusta", "Beryl", "Abdul", "Cleda", "Lailah", "Alexandrea", "Unknown", "Gertrude", "Davon", "Minda",
-         "Gabe", "Myles", "Vonda", "Zandra", "Salome", "Minnie", "Merl", "Biddie", "Catina", "Cassidy", "Norman",
-         "Emilia", "Fanny", "Nancie", "Domingo", "Christa", "Severt", "Danita", "Jennie", "Anaya", "Michelle",
-         "Brittnie", "Althea", "Kimberlee", "Ursula", "Ballard", "Silvester", "Ilda", "Rock", "Tyler", "Hildegarde",
-         "Aurelio", "Lovell", "Neha", "Jeramiah", "Kristin", "Kelis", "Adolf", "Elwood", "Almus", "Geo", "Machelle",
-         "Arnulfo", "Love", "Lollie", "Bobbye", "Columbus", "Susie", "Reta", "Krysten", "Sunny", "Alzina", "Carolyne",
-         "Laurine", "Jayla", "Halbert", "Grayce", "Alvie", "Haylee", "Hosea", "Alvira", "Pallie", "Marylin", "Elise",
-         "Lidie", "Vita", "Jakob", "Elmira", "Oliver", "Arra", "Debbra", "Migdalia", "Lucas", "Verle", "Dellar",
-         "Madaline", "Iverson", "Lorin", "Easter", "Britta", "Kody", "Colie", "Chaz", "Glover", "Nickolas", "Francisca",
-         "Donavan", "Merlene", "Belia", "Laila", "Nikhil", "Burdette", "Mildred", "Malissa", "Del", "Reagan", "Loney",
-         "Lambert", "Ellen", "Sydell", "Juanita", "Alphonsus", "Gianna", "William", "Oneal", "Anya", "Luis", "Shad",
-         "Armin", "Marvin"]
+names = [
+    "Joette",
+    "Anabelle",
+    "Fred",
+    "Woodrow",
+    "Neoma",
+    "Dorian",
+    "Treasure",
+    "Tami",
+    "Berdie",
+    "Jordi",
+    "Frances",
+    "Gerhardt",
+    "Kristina",
+    "Carmelita",
+    "Sim",
+    "Hideo",
+    "Arland",
+    "Wirt",
+    "Robt",
+    "Narcissus",
+    "Steve",
+    "Monique",
+    "Kellen",
+    "Jessenia",
+    "Nathalia",
+    "Lissie",
+    "Loriann",
+    "Theresa",
+    "Pranav",
+    "Eppie",
+    "Angelic",
+    "Louvenia",
+    "Mathews",
+    "Natalie",
+    "Susan",
+    "Cyril",
+    "Vester",
+    "Rakeem",
+    "Duff",
+    "Garret",
+    "Agnes",
+    "Carol",
+    "Pairlee",
+    "Viridiana",
+    "Keith",
+    "Elinore",
+    "Rico",
+    "Demonte",
+    "Imelda",
+    "Jackeline",
+    "Kenneth",
+    "Adalynn",
+    "Blair",
+    "Stetson",
+    "Adamaris",
+    "Zaniyah",
+    "Heyward",
+    "Austin",
+    "Elden",
+    "Gregory",
+    "Lemuel",
+    "Aaliyah",
+    "Abby",
+    "Hassie",
+    "Sanjuanita",
+    "Takisha",
+    "Orlo",
+    "Geary",
+    "Bettye",
+    "Luciano",
+    "Gretchen",
+    "Chimere",
+    "Melanie",
+    "Angele",
+    "Michial",
+    "Emmons",
+    "Edmund",
+    "Renae",
+    "Letha",
+    "Curtiss",
+    "Boris",
+    "Winter",
+    "Nealy",
+    "Renard",
+    "Taliyah",
+    "Jaren",
+    "Nilda",
+    "Tiny",
+    "Manila",
+    "Mariann",
+    "Dennis",
+    "Autumn",
+    "Aron",
+    "Drew",
+    "Shea",
+    "Britt",
+    "Luvenia",
+    "Doloris",
+    "Bret",
+    "Sammy",
+    "Elmer",
+    "Florencio",
+    "Selah",
+    "Simona",
+    "Tatyana",
+    "Beau",
+    "Alvin",
+    "Leslie",
+    "Kimberely",
+    "Sydni",
+    "Mitchel",
+    "Belle",
+    "Brain",
+    "Marlin",
+    "Vallie",
+    "Colon",
+    "Hoyt",
+    "Destinee",
+    "Shamar",
+    "Ezzard",
+    "Sheilah",
+    "Leisa",
+    "Tennille",
+    "Brandyn",
+    "Yasmin",
+    "Malaya",
+    "Larry",
+    "Mina",
+    "Myrle",
+    "Blaine",
+    "Gusta",
+    "Beryl",
+    "Abdul",
+    "Cleda",
+    "Lailah",
+    "Alexandrea",
+    "Unknown",
+    "Gertrude",
+    "Davon",
+    "Minda",
+    "Gabe",
+    "Myles",
+    "Vonda",
+    "Zandra",
+    "Salome",
+    "Minnie",
+    "Merl",
+    "Biddie",
+    "Catina",
+    "Cassidy",
+    "Norman",
+    "Emilia",
+    "Fanny",
+    "Nancie",
+    "Domingo",
+    "Christa",
+    "Severt",
+    "Danita",
+    "Jennie",
+    "Anaya",
+    "Michelle",
+    "Brittnie",
+    "Althea",
+    "Kimberlee",
+    "Ursula",
+    "Ballard",
+    "Silvester",
+    "Ilda",
+    "Rock",
+    "Tyler",
+    "Hildegarde",
+    "Aurelio",
+    "Lovell",
+    "Neha",
+    "Jeramiah",
+    "Kristin",
+    "Kelis",
+    "Adolf",
+    "Elwood",
+    "Almus",
+    "Geo",
+    "Machelle",
+    "Arnulfo",
+    "Love",
+    "Lollie",
+    "Bobbye",
+    "Columbus",
+    "Susie",
+    "Reta",
+    "Krysten",
+    "Sunny",
+    "Alzina",
+    "Carolyne",
+    "Laurine",
+    "Jayla",
+    "Halbert",
+    "Grayce",
+    "Alvie",
+    "Haylee",
+    "Hosea",
+    "Alvira",
+    "Pallie",
+    "Marylin",
+    "Elise",
+    "Lidie",
+    "Vita",
+    "Jakob",
+    "Elmira",
+    "Oliver",
+    "Arra",
+    "Debbra",
+    "Migdalia",
+    "Lucas",
+    "Verle",
+    "Dellar",
+    "Madaline",
+    "Iverson",
+    "Lorin",
+    "Easter",
+    "Britta",
+    "Kody",
+    "Colie",
+    "Chaz",
+    "Glover",
+    "Nickolas",
+    "Francisca",
+    "Donavan",
+    "Merlene",
+    "Belia",
+    "Laila",
+    "Nikhil",
+    "Burdette",
+    "Mildred",
+    "Malissa",
+    "Del",
+    "Reagan",
+    "Loney",
+    "Lambert",
+    "Ellen",
+    "Sydell",
+    "Juanita",
+    "Alphonsus",
+    "Gianna",
+    "William",
+    "Oneal",
+    "Anya",
+    "Luis",
+    "Shad",
+    "Armin",
+    "Marvin",
+]
 
 
 def create_name() -> str:
@@ -86,26 +320,40 @@ def rand_commit(n=40) -> str:
     return rand(n)
 
 
-def create_assignment(course, users, i=0, do_submissions=True, do_repos=False, submission_count=30, **kwargs):
+def create_assignment(
+    course,
+    users,
+    i=0,
+    do_submissions=True,
+    do_repos=False,
+    submission_count=30,
+    **kwargs,
+):
     release = datetime.now() - timedelta(hours=2)
     due = datetime.now() + timedelta(hours=36) + timedelta(days=i)
     grace = due + timedelta(hours=1)
 
     # Assignment 1 uniq
     assignment = Assignment(
-        id=rand(), name=f"{course.course_code} Assignment {i}", unique_code=rand(8), hidden=False,
-        description=lorem, github_template='wabscale/xv6-public',
+        id=rand(),
+        name=f"{course.course_code} Assignment {i}",
+        unique_code=rand(8),
+        hidden=False,
+        description=lorem,
+        github_template="wabscale/xv6-public",
         pipeline_image=f"registry.digitalocean.com/anubis/assignment/{rand(8)}",
         release_date=release,
         due_date=due,
         grace_date=grace,
-        course_id=course.id, ide_enabled=True, autograde_enabled=False,
+        course_id=course.id,
+        ide_enabled=True,
+        autograde_enabled=False,
         theia_options=copy.deepcopy(THEIA_DEFAULT_OPTIONS),
         **kwargs,
     )
 
     if not do_submissions:
-        assignment.theia_options['persistent_storage'] = True
+        assignment.theia_options["persistent_storage"] = True
 
     for i in range(random.randint(2, 4)):
         b, c = random.randint(1, 5), random.randint(1, 5)
@@ -121,7 +369,9 @@ def create_assignment(course, users, i=0, do_submissions=True, do_repos=False, s
 
     tests = []
     for i in range(random.randint(3, 5)):
-        tests.append(AssignmentTest(id=rand(), name=f"test {i}", assignment_id=assignment.id))
+        tests.append(
+            AssignmentTest(id=rand(), name=f"test {i}", assignment_id=assignment.id)
+        )
 
     submissions = []
     repos = []
@@ -129,22 +379,28 @@ def create_assignment(course, users, i=0, do_submissions=True, do_repos=False, s
     if do_submissions:
         for user in users:
             repo_name = assignment_repo_name(user, assignment)
-            repo_url = f'https://github.com/os3224/{repo_name}'
+            repo_url = f"https://github.com/os3224/{repo_name}"
             if do_repos:
-                repo_url = 'https://github.com/wabscale/xv6-public'
+                repo_url = "https://github.com/wabscale/xv6-public"
             repos.append(
                 AssignmentRepo(
-                    id=rand(), owner=user, assignment_id=assignment.id,
+                    id=rand(),
+                    owner=user,
+                    assignment_id=assignment.id,
                     repo_url=repo_url,
                     github_username=user.github_username,
-                    repo_created=True, collaborator_configured=True,
+                    repo_created=True,
+                    collaborator_configured=True,
                 )
             )
 
             for _ in range(3):
                 theia_session = TheiaSession(
-                    owner=user, assignment=assignment, course=course,
-                    repo_url=repos[-1].repo_url, cluster_address="127.0.0.1",
+                    owner=user,
+                    assignment=assignment,
+                    course=course,
+                    repo_url=repos[-1].repo_url,
+                    cluster_address="127.0.0.1",
                 )
                 mark_session_ended(theia_session)
                 theia_sessions.append(theia_session)
@@ -157,7 +413,7 @@ def create_assignment(course, users, i=0, do_submissions=True, do_repos=False, s
                         state="Waiting for resources...",
                         owner=user,
                         assignment_id=assignment.id,
-                        created=grace - timedelta(hours=math.sqrt(i+1)),
+                        created=grace - timedelta(hours=math.sqrt(i + 1)),
                     )
                     submission.repo = repos[-1]
                     submissions.append(submission)
@@ -212,12 +468,12 @@ def init_submissions(submissions):
 
         build_pass = random.randint(0, 2) != 0
         submission.build.passed = build_pass
-        submission.build.stdout = 'blah blah blah build'
+        submission.build.stdout = "blah blah blah build"
 
         if build_pass:
             for test_result in submission.test_results:
                 test_passed = random.randint(0, 3) != 0
                 test_result.passed = test_passed
 
-                test_result.message = 'Test passed' if test_passed else 'Test failed'
-                test_result.stdout = 'blah blah blah test output'
+                test_result.message = "Test passed" if test_passed else "Test failed"
+                test_result.stdout = "blah blah blah test output"

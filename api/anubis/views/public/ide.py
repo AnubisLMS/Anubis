@@ -34,33 +34,38 @@ def public_ide_initialize(assignment: Assignment):
     """
 
     # verify that ides are enabled for this assignment
-    req_assert(assignment.ide_enabled, message='IDEs are not enabled for this assignment')
+    req_assert(
+        assignment.ide_enabled, message="IDEs are not enabled for this assignment"
+    )
 
     # Check for existing active session
-    active_session = TheiaSession.query.join(Assignment).filter(
-        TheiaSession.owner_id == current_user.id,
-        TheiaSession.assignment_id == assignment.id,
-        TheiaSession.active,
-    ).first()
+    active_session = (
+        TheiaSession.query.join(Assignment)
+        .filter(
+            TheiaSession.owner_id == current_user.id,
+            TheiaSession.assignment_id == assignment.id,
+            TheiaSession.active,
+        )
+        .first()
+    )
 
     # If there was an existing session for this assignment found, skip
     # the initialization, and return the active session information.
     if active_session is not None:
-        return success_response({
-            "active": active_session.active,
-            "session": active_session.data
-        })
+        return success_response(
+            {"active": active_session.active, "session": active_session.data}
+        )
 
     # Get the config value for if ide starts are allowed.
-    theia_starts_enabled = get_config_int('THEIA_STARTS_ENABLED', default=1) == 1
+    theia_starts_enabled = get_config_int("THEIA_STARTS_ENABLED", default=1) == 1
 
     # Assert that new ide starts are allowed. If they are not, then
     # we return a status message to the user saying they are not able
     # to start a new ide.
     req_assert(
         theia_starts_enabled,
-        message='Starting new IDEs is currently disabled by an Anubis administrator. '
-                'Please try again later.',
+        message="Starting new IDEs is currently disabled by an Anubis administrator. "
+        "Please try again later.",
     )
 
     # If it is a student (not a ta) requesting the ide, then we will need to
@@ -68,7 +73,10 @@ def public_ide_initialize(assignment: Assignment):
     if not is_course_admin(assignment.course_id):
 
         # If the assignment has been released, then we cannot allocate a session to a student
-        req_assert(assignment.release_date < datetime.now(), message="Assignment has not been released")
+        req_assert(
+            assignment.release_date < datetime.now(),
+            message="Assignment has not been released",
+        )
 
         # If 3 weeks has passed since the assignment has been due, then we should not allow
         # new sessions to be created
@@ -77,10 +85,13 @@ def public_ide_initialize(assignment: Assignment):
 
     # If github repos are enabled for this assignment, then we will
     # need to get the repo url.
-    repo_url: str = ''
+    repo_url: str = ""
     if assignment.github_repo_required:
         # Make sure github username is set
-        req_assert(current_user.github_username is not None, message='Please set github username')
+        req_assert(
+            current_user.github_username is not None,
+            message="Please set github username",
+        )
 
         # Make sure we have a repo we can use
         repo: AssignmentRepo = AssignmentRepo.query.filter(
@@ -91,8 +102,8 @@ def public_ide_initialize(assignment: Assignment):
         # Verify that the repo exists
         req_assert(
             repo is not None,
-            message='Anubis can not find your assignment repo. '
-                    'Please make sure your github username is set and is correct.'
+            message="Anubis can not find your assignment repo. "
+            "Please make sure your github username is set and is correct.",
         )
         # Update the repo url
         repo_url = repo.repo_url
@@ -101,18 +112,21 @@ def public_ide_initialize(assignment: Assignment):
     options = copy.deepcopy(assignment.theia_options)
 
     # Figure out options from user values
-    autosave = request.args.get('autosave', 'true') == 'true'
-    persistent_storage = request.args.get('persistent_storage', 'true') == 'true'
+    autosave = request.args.get("autosave", "true") == "true"
+    persistent_storage = request.args.get("persistent_storage", "true") == "true"
 
     # Figure out options from assignment
     privileged = False
     credentials = False
     network_locked = True
-    network_policy = options.get('network_policy', 'os-student')
-    resources = options.get('resources', {
-        'requests': {"cpu": "250m", "memory": "100Mi"},
-        'limits': {"cpu": "2", "memory": "500Mi"},
-    })
+    network_policy = options.get("network_policy", "os-student")
+    resources = options.get(
+        "resources",
+        {
+            "requests": {"cpu": "250m", "memory": "100Mi"},
+            "limits": {"cpu": "2", "memory": "500Mi"},
+        },
+    )
 
     # Create a new session
     session = TheiaSession(
@@ -120,11 +134,9 @@ def public_ide_initialize(assignment: Assignment):
         assignment_id=assignment.id,
         course_id=assignment.course.id,
         image=assignment.theia_image,
-
         repo_url=repo_url,
         active=True,
         state="Initializing",
-
         # Options
         network_locked=network_locked,
         network_policy=network_policy,
@@ -141,11 +153,13 @@ def public_ide_initialize(assignment: Assignment):
     enqueue_ide_initialize(session.id)
 
     # Redirect to proxy
-    return success_response({
-        "active": session.active,
-        "session": session.data,
-        "status": "Session created",
-    })
+    return success_response(
+        {
+            "active": session.active,
+            "session": session.data,
+            "status": "Session created",
+        }
+    )
 
 
 @ide.route("/available")
@@ -165,9 +179,11 @@ def public_ide_available():
     session_available: bool = active_count < max_count
 
     # pass back if sessions are available
-    return success_response({
-        "session_available": session_available,
-    })
+    return success_response(
+        {
+            "session_available": session_available,
+        }
+    )
 
 
 @ide.route("/active/<string:assignment_id>")
@@ -192,10 +208,12 @@ def public_ide_active(assignment_id):
         return success_response({"active": False})
 
     # If they do have a session, then pass back True
-    return success_response({
-        "active": True,
-        "session": session.data,
-    })
+    return success_response(
+        {
+            "active": True,
+            "session": session.data,
+        }
+    )
 
 
 @ide.route("/stop/<string:theia_session_id>")
@@ -217,7 +235,7 @@ def public_ide_stop(theia_session_id: str) -> Dict[str, str]:
     ).first()
 
     # Verify that the session exists
-    req_assert(theia_session is not None, message='session does not exist')
+    req_assert(theia_session is not None, message="session does not exist")
 
     # Mark the session as stopped.
     theia_session.active = False
@@ -231,10 +249,12 @@ def public_ide_stop(theia_session_id: str) -> Dict[str, str]:
     enqueue_ide_stop(theia_session.id)
 
     # Pass back the status
-    return success_response({
-        "status": "Session stopped.",
-        "variant": "warning",
-    })
+    return success_response(
+        {
+            "status": "Session stopped.",
+            "variant": "warning",
+        }
+    )
 
 
 @ide.route("/poll/<string:theia_session_id>")
@@ -252,7 +272,7 @@ def public_ide_poll(theia_session_id: str) -> Dict[str, str]:
     session_data = theia_poll_ide(theia_session_id, current_user.id)
 
     # Assert that the session exists
-    req_assert(session_data is not None, message='session does not exist')
+    req_assert(session_data is not None, message="session does not exist")
 
     # Check to see if it is still initializing
     session_state = session_data["state"]
@@ -267,12 +287,14 @@ def public_ide_poll(theia_session_id: str) -> Dict[str, str]:
     }.get(session_state, (None, None))
 
     # Pass back the status and data
-    return success_response({
-        "loading": loading,
-        "session": session_data,
-        "status": status,
-        "variant": variant,
-    })
+    return success_response(
+        {
+            "loading": loading,
+            "session": session_data,
+            "status": status,
+            "variant": variant,
+        }
+    )
 
 
 @ide.route("/redirect-url/<string:theia_session_id>")
@@ -293,9 +315,9 @@ def public_ide_redirect_url(theia_session_id: str) -> Dict[str, str]:
     ).first()
 
     # Verify that the session exists
-    req_assert(theia_session is not None, message='session does not exist')
+    req_assert(theia_session is not None, message="session does not exist")
 
     # Pass back redirect link
-    return success_response({
-        "redirect": theia_redirect_url(theia_session.id, current_user.netid)
-    })
+    return success_response(
+        {"redirect": theia_redirect_url(theia_session.id, current_user.netid)}
+    )

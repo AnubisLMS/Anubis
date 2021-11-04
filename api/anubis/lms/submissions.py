@@ -34,13 +34,15 @@ def bulk_regrade_submissions(submissions: List[Submission]) -> List[dict]:
 
     # enqueue regrade jobs for each submissions
     for submission in submissions:
-        response.append(regrade_submission(submission, queue='regrade'))
+        response.append(regrade_submission(submission, queue="regrade"))
 
     # Pass back a list of all the regrade return dictionaries
     return response
 
 
-def regrade_submission(submission: Union[Submission, str], queue: str = 'default') -> dict:
+def regrade_submission(
+    submission: Union[Submission, str], queue: str = "default"
+) -> dict:
     """
     Regrade a submission
 
@@ -76,9 +78,7 @@ def regrade_submission(submission: Union[Submission, str], queue: str = 'default
     # Enqueue the submission job
     enqueue_autograde_pipeline(submission.id, queue=queue)
 
-    return success_response({
-        "message": "regrade started"
-    })
+    return success_response({"message": "regrade started"})
 
 
 def fix_dangling():
@@ -107,7 +107,9 @@ def fix_dangling():
     # Iterate over all dangling repos
     for dangling_repo in dangling_repos:
         # Attempt to find an owner
-        owner = User.query.filter(User.github_username == dangling_repo.github_username).first()
+        owner = User.query.filter(
+            User.github_username == dangling_repo.github_username
+        ).first()
 
         # If an owner was found, then fix it
         if owner is not None:
@@ -128,10 +130,15 @@ def fix_dangling():
                 fixed.append(submission.data)
 
                 # Get the due date
-                due_date = get_assignment_due_date(owner.id, dangling_repo.assignment.id)
+                due_date = get_assignment_due_date(
+                    owner.id, dangling_repo.assignment.id
+                )
 
                 # Check if the submission should be accepted
-                if dangling_repo.assignment.accept_late and submission.created < due_date:
+                if (
+                    dangling_repo.assignment.accept_late
+                    and submission.created < due_date
+                ):
                     # Enqueue a autograde job for the submission
                     enqueue_autograde_pipeline(submission.id)
 
@@ -150,7 +157,9 @@ def fix_dangling():
         ).first()
 
         # Try to find an owner student
-        owner = User.query.filter(User.github_username == dangling_repo.github_username).first()
+        owner = User.query.filter(
+            User.github_username == dangling_repo.github_username
+        ).first()
 
         # If an owner was found, then fix and regrade all relevant
         if owner is not None:
@@ -184,7 +193,11 @@ def fix_dangling():
 
 @cache.memoize(timeout=5, unless=is_debug, source_check=True)
 def get_submissions(
-        user_id=None, course_id=None, assignment_id=None, limit=None, offset=None,
+    user_id=None,
+    course_id=None,
+    assignment_id=None,
+    limit=None,
+    offset=None,
 ) -> Optional[Tuple[List[Dict[str, str]], int]]:
     """
     Get all submissions for a given netid. Cache the results. Optionally specify
@@ -216,12 +229,11 @@ def get_submissions(
 
     query = (
         Submission.query.join(Assignment)
-            .join(Course)
-            .join(InCourse)
-            .join(User)
-            .filter(Submission.owner_id == owner.id, *filters)
-
-            .order_by(Submission.created.desc())
+        .join(Course)
+        .join(InCourse)
+        .join(User)
+        .filter(Submission.owner_id == owner.id, *filters)
+        .order_by(Submission.created.desc())
     )
 
     all_total = query.count()
@@ -264,7 +276,7 @@ def recalculate_late_submissions(student: User, assignment: Assignment):
     # Go through, and reset and enqueue regrade
     s_accept_ids = list(map(lambda x: x.id, s_accept))
     for chunk in split_chunks(s_accept_ids, 32):
-        rpc_enqueue(rpc_bulk_regrade, 'regrade', args=[chunk])
+        rpc_enqueue(rpc_bulk_regrade, "regrade", args=[chunk])
 
     # Reject the submissions that need to be updated
     for submission in s_reject:
@@ -288,13 +300,13 @@ def reject_late_submission(submission: Submission):
     for test_result in submission.test_results:
         test_result: SubmissionTestResult
         test_result.passed = False
-        test_result.message = 'Late submissions not accepted'
-        test_result.stdout = ''
+        test_result.message = "Late submissions not accepted"
+        test_result.stdout = ""
         db.session.add(test_result)
 
     # Go through build results, and set them to rejected
     submission.build.passed = False
-    submission.build.stdout = 'Late submissions not accepted'
+    submission.build.stdout = "Late submissions not accepted"
     db.session.add(submission.build)
 
     # Set the fields on self to be rejected
@@ -329,7 +341,9 @@ def init_submission(submission: Submission, commit: bool = True):
     logger.debug("found tests: {}".format(list(map(lambda x: x.data, tests))))
 
     for test in tests:
-        tr = SubmissionTestResult(submission_id=submission.id, assignment_test_id=test.id)
+        tr = SubmissionTestResult(
+            submission_id=submission.id, assignment_test_id=test.id
+        )
         db.session.add(tr)
     sb = SubmissionBuild(submission_id=submission.id)
     db.session.add(sb)

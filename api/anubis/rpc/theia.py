@@ -47,14 +47,17 @@ def initialize_theia_session(theia_session_id: str):
     )
 
     # Calculate the maximum IDEs that are allowed to exist at any given time
-    max_ides = get_config_int('MAX_THEIA_SESSIONS', default=50)
+    max_ides = get_config_int("MAX_THEIA_SESSIONS", default=50)
 
     # Check to ses how many theia sessions are marked as active in the database. If that
     # count exceeds the artificial limit of IDEs, then we need to re-enqueue this job.
-    if TheiaSession.query.filter(
+    if (
+        TheiaSession.query.filter(
             TheiaSession.active == True,
-            TheiaSession.state != 'Initializing',
-    ).count() >= max_ides:
+            TheiaSession.state != "Initializing",
+        ).count()
+        >= max_ides
+    ):
         from anubis.utils.rpc import enqueue_ide_initialize
 
         # If there are too many active pods, recycle the job through the queue.
@@ -101,7 +104,9 @@ def initialize_theia_session(theia_session_id: str):
         try:
             # This function will throw a 404 client.exceptions.ApiException
             # if the pvc does not exist
-            v1.read_namespaced_persistent_volume_claim(namespace="anubis", name=pvc.metadata.name)
+            v1.read_namespaced_persistent_volume_claim(
+                namespace="anubis", name=pvc.metadata.name
+            )
             logger.info(f"PVC for user already exists: {pvc.metadata.name}")
 
         # Catch the exception thrown if the pvc does not exist

@@ -67,7 +67,9 @@ def success_response(data: Union[dict, str, None]) -> dict:
     }
 
 
-def get_number_arg(arg_name: str = "number", default_value: int = 10, reject_negative: bool = True) -> int:
+def get_number_arg(
+    arg_name: str = "number", default_value: int = 10, reject_negative: bool = True
+) -> int:
     """
     Quick function for getting a number http query argument. If the
     argument is not found, or cannot be converted to an int
@@ -104,8 +106,9 @@ def get_number_arg(arg_name: str = "number", default_value: int = 10, reject_neg
         return default_value
 
 
-def get_request_file_stream(with_filename=False, fail_ok=False) -> Union[
-    bytes, None, Tuple[bytes, str], Tuple[None, None]]:
+def get_request_file_stream(
+    with_filename=False, fail_ok=False
+) -> Union[bytes, None, Tuple[bytes, str], Tuple[None, None]]:
     """
     Get first file uploaded in the request. Will return None if
     there is no file uploaded.
@@ -117,7 +120,7 @@ def get_request_file_stream(with_filename=False, fail_ok=False) -> Union[
     if len(request.files) == 0:
         # If failing is not allowed, call assert false to abort request
         if not fail_ok:
-            req_assert(False, message='No file uploaded')
+            req_assert(False, message="No file uploaded")
 
         # If failing is ok, then we can pass back None
         return None, None if with_filename else None

@@ -19,11 +19,7 @@ from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_GITHUB as github_provider
 
 auth_ = Blueprint("public-auth", __name__, url_prefix="/public/auth")
 nyu_oauth_ = Blueprint("public-oauth", __name__, url_prefix="/public")
-github_oauth_ = Blueprint(
-    "public-github-oauth",
-    __name__,
-    url_prefix="/public/github"
-)
+github_oauth_ = Blueprint("public-github-oauth", __name__, url_prefix="/public/github")
 
 
 @auth_.route("/login")
@@ -65,13 +61,15 @@ def public_oauth():
 
     # This is the data we get from NYU's oauth. It has basic information
     # on who is logging in
-    user_data = nyu_provider.get("userinfo?schema=openid", token=(resp["access_token"],))
+    user_data = nyu_provider.get(
+        "userinfo?schema=openid", token=(resp["access_token"],)
+    )
 
     # Load the netid name from the response
     netid = user_data.data["netid"]
     firstname = user_data.data["firstname"]
     lastname = user_data.data["lastname"]
-    name = f'{firstname} {lastname}'.strip()
+    name = f"{firstname} {lastname}".strip()
 
     # Check to see if user already exists
     user = User.query.filter(User.netid == netid).first()
@@ -119,11 +117,11 @@ def public_github_oauth():
     resp = github_provider.authorized_response()
     if resp is None or "access_token" not in resp:
         return "Access Denied"
-    
+
     # Setup headers and url
     github_api_headers = {
         "authorization": "bearer " + resp["access_token"],
-        "accept": "application/vnd.github.v3+json"
+        "accept": "application/vnd.github.v3+json",
     }
     github_api_url = "https://api.github.com/user"
 
@@ -138,7 +136,7 @@ def public_github_oauth():
         current_user.github_username = github_user_info["login"]
         db.session.add(current_user)
         db.session.commit()
-        
+
         # Notify them with status
         return success_response({"status": "github username updated"})
     except:
@@ -156,10 +154,12 @@ def public_whoami():
     # When the current_user is None (ie no one is logged in)
     # just pass back Nones.
     if get_current_user() is None:
-        return success_response({
-            'user': None,
-            'context': None,
-        })
+        return success_response(
+            {
+                "user": None,
+                "context": None,
+            }
+        )
 
     # If their github username is not set, then we want to send
     # a warning telling the user they need to set it in their
@@ -176,12 +176,14 @@ def public_whoami():
             "name": context.name,
         }
 
-    return success_response({
-        "user": current_user.data,
-        "context": course_context,
-        "status": status,
-        "variant": "warning",
-    })
+    return success_response(
+        {
+            "user": current_user.data,
+            "context": course_context,
+            "status": status,
+            "variant": "warning",
+        }
+    )
 
 
 @auth_.route("/set-github-username", methods=["POST"])
@@ -204,7 +206,7 @@ def public_auth_set_github_username(github_username):
     ).first()
 
     # Assert that there is not a duplicate github username
-    req_assert(other is None, message='github username is already taken')
+    req_assert(other is None, message="github username is already taken")
 
     # Set github username and commit
     current_user.github_username = github_username
@@ -219,7 +221,7 @@ def public_auth_set_github_username(github_username):
     return success_response({"status": "github username updated"})
 
 
-@auth_.route('/cli')
+@auth_.route("/cli")
 @require_admin()
 def public_cli_auth():
     """
@@ -231,35 +233,37 @@ def public_cli_auth():
     """
 
     # Create a token with 30 days to expire
-    token = create_token(current_user.netid, exp_kwargs={'days': 30})
+    token = create_token(current_user.netid, exp_kwargs={"days": 30})
 
     # Grab the docker config out of the environ if it is there
-    docker_token = os.environ.get('DOCKER_TOKEN', None)
-    docker_registry = os.environ.get('DOCKER_REGISTRY', None)
+    docker_token = os.environ.get("DOCKER_TOKEN", None)
+    docker_registry = os.environ.get("DOCKER_REGISTRY", None)
     docker_config = {
-        'registry': docker_registry,
-        'token': docker_token,
+        "registry": docker_registry,
+        "token": docker_token,
     }
     if docker_token is None or docker_registry is None:
         docker_config = None
 
     # Construct the data response
-    data = json.dumps({
-        'token': token,
-        'docker_config': docker_config,
-    })
+    data = json.dumps(
+        {
+            "token": token,
+            "docker_config": docker_config,
+        }
+    )
 
     # Base64 encode the response
     b64_encoded_data = base64.b64encode(data.encode()).decode()
 
     # Construct message to be splayed on the browser
-    message = f'Please copy this into the cli console:\n{b64_encoded_data}'
+    message = f"Please copy this into the cli console:\n{b64_encoded_data}"
 
     # Create the response
     response = make_response(message)
 
     # Set the content type to text/plain so that there is no additional
     # formatting added to the browser display
-    response.headers['Content-Type'] = 'text/plain'
+    response.headers["Content-Type"] = "text/plain"
 
     return response

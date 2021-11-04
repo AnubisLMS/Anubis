@@ -21,12 +21,10 @@ def admin_seed():
     """
 
     # Only allow seed to run if in debug mode
-    req_assert(is_debug(), message='seed only enabled in debug mode')
+    req_assert(is_debug(), message="seed only enabled in debug mode")
 
     # Enqueue a seed job
     enqueue_seed()
 
     # Return the status
-    return success_response({
-        'status': 'enqueued seed'
-    })
+    return success_response({"status": "enqueued seed"})

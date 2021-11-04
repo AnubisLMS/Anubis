@@ -20,7 +20,7 @@ from anubis.utils.logging import logger
 
 
 def get_question_pool_mapping(
-        questions: List[AssignmentQuestion],
+    questions: List[AssignmentQuestion],
 ) -> Dict[int, List[AssignmentQuestion]]:
     """
     Get mapping of sequence to question mapping from list of questions
@@ -64,7 +64,9 @@ def reset_question_assignments(assignment: Assignment, commit: bool = True):
     ).all()
 
     # Break them down into ids
-    assigned_student_question_ids = list(map(lambda x: x.id, assigned_student_questions))
+    assigned_student_question_ids = list(
+        map(lambda x: x.id, assigned_student_questions)
+    )
 
     # Delete all responses for the assignment
     AssignedQuestionResponse.query.filter(
@@ -139,8 +141,8 @@ def assign_questions(assignment: Assignment):
     assigned_questions = []
     students = (
         User.query.join(InCourse)
-            .filter(InCourse.course_id == assignment.course_id)
-            .all()
+        .filter(InCourse.course_id == assignment.course_id)
+        .all()
     )
     for student in students:
         for sequence, qs in questions.items():
@@ -294,10 +296,15 @@ def get_assigned_questions(assignment_id: str, user_id: str, full: bool = False)
     """
 
     # Get assigned questions
-    assigned_questions = AssignedStudentQuestion.query.join(AssignmentQuestion).filter(
-        AssignedStudentQuestion.assignment_id == assignment_id,
-        AssignedStudentQuestion.owner_id == user_id,
-    ).order_by(AssignmentQuestion.pool).all()
+    assigned_questions = (
+        AssignedStudentQuestion.query.join(AssignmentQuestion)
+        .filter(
+            AssignedStudentQuestion.assignment_id == assignment_id,
+            AssignedStudentQuestion.owner_id == user_id,
+        )
+        .order_by(AssignmentQuestion.pool)
+        .all()
+    )
 
     if not full:
         return [assigned_question.data for assigned_question in assigned_questions]
@@ -319,10 +326,12 @@ def get_question_assignments(assignment: Assignment):
     students = get_students(assignment.course_id)
 
     for student in students:
-        assignments[student['netid']] = {
-            'name': student['name'],
-            'netid': student['netid'],
-            'questions': get_assigned_questions(assignment.id, student['id'], full=True),
+        assignments[student["netid"]] = {
+            "name": student["name"],
+            "netid": student["netid"],
+            "questions": get_assigned_questions(
+                assignment.id, student["id"], full=True
+            ),
         }
 
     return assignments
@@ -362,41 +371,46 @@ def export_assignment_questions(assignment_id: str) -> Optional[bytes]:
         for netid, data in question_assignments.items():
 
             # Get the name of the student
-            name = data['name']
+            name = data["name"]
 
             # List of responses for this student
             responses = []
 
             # Iterate through each question assigned to the student
-            for student_question_data in data['questions']:
+            for student_question_data in data["questions"]:
 
                 # Pull fields from the question_data
-                response_text = student_question_data['response']['text']
-                response_late = student_question_data['response']['late']
-                response_time = student_question_data['response']['submitted']
-                pool = student_question_data['question']['pool']
-                question = student_question_data['question']['question']
-                solution = student_question_data['question']['solution']
+                response_text = student_question_data["response"]["text"]
+                response_late = student_question_data["response"]["late"]
+                response_time = student_question_data["response"]["submitted"]
+                pool = student_question_data["question"]["pool"]
+                question = student_question_data["question"]["question"]
+                solution = student_question_data["question"]["solution"]
 
                 # Write files to zip archive
-                zip_file.writestr(f'{netid}/q{pool}/question.md', question)
-                zip_file.writestr(f'{netid}/q{pool}/solution.md', solution)
-                zip_file.writestr(f'{netid}/q{pool}/response.txt', response_text)
+                zip_file.writestr(f"{netid}/q{pool}/question.md", question)
+                zip_file.writestr(f"{netid}/q{pool}/solution.md", solution)
+                zip_file.writestr(f"{netid}/q{pool}/response.txt", response_text)
 
                 # Append the responses
-                responses.append({'pool': pool, 'late': response_late, 'time': response_time})
+                responses.append(
+                    {"pool": pool, "late": response_late, "time": response_time}
+                )
 
             # Create the student meta data
-            student_data = {'netid': netid, 'name': name, 'responses': responses}
+            student_data = {"netid": netid, "name": name, "responses": responses}
 
             # Append the student meta data to the global value
             student_metas.append(student_data)
 
             # Write this students meta data to their directory
-            zip_file.writestr(f'{netid}/meta.yaml', yaml.safe_dump(student_data))
+            zip_file.writestr(f"{netid}/meta.yaml", yaml.safe_dump(student_data))
 
             # Write a global assignment and student meta data file
-        zip_file.writestr('assignment.yaml', yaml.safe_dump({'assignment': assignment.data, 'students': student_metas}))
+        zip_file.writestr(
+            "assignment.yaml",
+            yaml.safe_dump({"assignment": assignment.data, "students": student_metas}),
+        )
 
     # Pass back the buffer in bytes
     return zip_buffer.getvalue()
@@ -413,11 +427,13 @@ def fix_missing_question_assignments(assignment: Assignment):
     """
 
     if not assignment.questions_assigned:
-        logger.info('fix_missing_question_assignments skipping, questions not assigned yet')
+        logger.info(
+            "fix_missing_question_assignments skipping, questions not assigned yet"
+        )
 
     # Get set of student ids
     students = get_students_in_class(assignment.course_id)
-    student_ids = set(map(lambda u: u['id'], students))
+    student_ids = set(map(lambda u: u["id"], students))
 
     # Get all assignment questions for this assignment
     assignment_questions: List[AssignmentQuestion] = AssignmentQuestion.query.filter(
@@ -438,7 +454,9 @@ def fix_missing_question_assignments(assignment: Assignment):
     for student_id in student_ids:
 
         # Get the question assignments for this student on this assignment
-        student_questions: List[AssignedStudentQuestion] = AssignedStudentQuestion.query.filter(
+        student_questions: List[
+            AssignedStudentQuestion
+        ] = AssignedStudentQuestion.query.filter(
             AssignedStudentQuestion.assignment_id == assignment.id,
             AssignedStudentQuestion.owner_id == student_id,
         ).all()
@@ -447,14 +465,18 @@ def fix_missing_question_assignments(assignment: Assignment):
         student_question_pools = set(map(lambda q: q.question.pool, student_questions))
 
         # Calculate which question pools have no questions assigned for this student
-        missing_student_question_pools = question_pools.difference(student_question_pools)
+        missing_student_question_pools = question_pools.difference(
+            student_question_pools
+        )
 
         # Iterate over missing question pools
         for pool in missing_student_question_pools:
-            logger.info(f'FIXING missing question '
-                        f'pool={pool} '
-                        f'student={student_id} '
-                        f'assignment={assignment.id}')
+            logger.info(
+                f"FIXING missing question "
+                f"pool={pool} "
+                f"student={student_id} "
+                f"assignment={assignment.id}"
+            )
 
             # Get list of questions for this pool
             qs = question_mapping[pool]
@@ -471,9 +493,3 @@ def fix_missing_question_assignments(assignment: Assignment):
             db.session.add(assigned_question)
 
     db.session.commit()
-
-
-
-
-
-

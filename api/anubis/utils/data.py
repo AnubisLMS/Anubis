@@ -226,7 +226,7 @@ def split_chunks(lst, n):
     """
     _chunks = []
     for i in range(0, len(lst), n):
-        _chunks.append(lst[i: i + n])
+        _chunks.append(lst[i : i + n])
     return _chunks
 
 
@@ -334,7 +334,7 @@ def with_context(function):
     return wrapper
 
 
-def req_assert(*expressions, message: str = 'invalid', status_code: int = 200):
+def req_assert(*expressions, message: str = "invalid", status_code: int = 200):
     """
     Call this at any point to check if an expression is True. If any
     of the expressions provided are False, then an anubis.utils.exceptions.AssertError

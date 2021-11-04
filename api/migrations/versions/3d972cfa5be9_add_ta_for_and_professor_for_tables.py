@@ -67,9 +67,7 @@ def upgrade():
         existing_type=mysql.MEDIUMTEXT(),
         nullable=False,
     )
-    op.alter_column(
-        "course", "name", existing_type=mysql.MEDIUMTEXT(), nullable=False
-    )
+    op.alter_column("course", "name", existing_type=mysql.MEDIUMTEXT(), nullable=False)
     op.alter_column(
         "course", "professor", existing_type=mysql.MEDIUMTEXT(), nullable=False
     )
@@ -91,9 +89,7 @@ def downgrade():
     op.alter_column(
         "course", "professor", existing_type=mysql.MEDIUMTEXT(), nullable=True
     )
-    op.alter_column(
-        "course", "name", existing_type=mysql.MEDIUMTEXT(), nullable=True
-    )
+    op.alter_column("course", "name", existing_type=mysql.MEDIUMTEXT(), nullable=True)
     op.alter_column(
         "course",
         "course_code",

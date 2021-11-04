@@ -27,7 +27,7 @@ from anubis.utils.logging import logger
 assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
 
 
-@assignments.route('/repos/<string:id>')
+@assignments.route("/repos/<string:id>")
 @require_admin()
 @load_from_id(Assignment, verify_owner=False)
 @json_response
@@ -45,22 +45,27 @@ def admin_assignments_repos_id(assignment: Assignment):
     ).all()
 
     def get_ssh_url(url):
-        r = parse.parse('https://github.com/{}', url)
+        r = parse.parse("https://github.com/{}", url)
         path = r[0]
-        path = path.removesuffix('.git')
-        return f'git@github.com:{path}.git'
+        path = path.removesuffix(".git")
+        return f"git@github.com:{path}.git"
 
-    return success_response({'assignment': assignment.full_data, 'repos': [
+    return success_response(
         {
-            'id': repo.id,
-            'url': repo.repo_url,
-            'ssh': get_ssh_url(repo.repo_url),
-            'github_username': repo.github_username,
-            'name': repo.owner.name if repo.owner_id is not None else 'N/A',
-            'netid': repo.owner.netid if repo.owner_id is not None else 'N/A',
+            "assignment": assignment.full_data,
+            "repos": [
+                {
+                    "id": repo.id,
+                    "url": repo.repo_url,
+                    "ssh": get_ssh_url(repo.repo_url),
+                    "github_username": repo.github_username,
+                    "name": repo.owner.name if repo.owner_id is not None else "N/A",
+                    "netid": repo.owner.netid if repo.owner_id is not None else "N/A",
+                }
+                for repo in repos
+            ],
         }
-        for repo in repos
-    ]})
+    )
 
 
 @assignments.route("/assignment/<string:id>/questions/get/<string:netid>")
@@ -79,7 +84,7 @@ def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str
 
     # Verify that the user exists, and that the assignment
     # is within the course context of the current user.
-    req_assert(user is not None, message='user not found')
+    req_assert(user is not None, message="user not found")
     assert_course_context(assignment)
 
     return success_response(
@@ -108,10 +113,12 @@ def admin_assignments_get_id(assignment: Assignment):
     assert_course_context(assignment)
 
     # Pass back the full data
-    return success_response({
-        "assignment": row2dict(assignment),
-        "tests": [test.data for test in assignment.tests],
-    })
+    return success_response(
+        {
+            "assignment": row2dict(assignment),
+            "tests": [test.data for test in assignment.tests],
+        }
+    )
 
 
 @assignments.route("/list")
@@ -128,17 +135,19 @@ def admin_assignments_list():
 
     # Get all the assignment objects within the course context,
     # sorted by the due date.
-    all_assignments = Assignment.query.filter(
-        Assignment.course_id == course_context.id
-    ).order_by(Assignment.due_date.desc()).all()
+    all_assignments = (
+        Assignment.query.filter(Assignment.course_id == course_context.id)
+        .order_by(Assignment.due_date.desc())
+        .all()
+    )
 
     # Pass back the row2dict of each assignment object
-    return success_response({
-        "assignments": [row2dict(assignment) for assignment in all_assignments]
-    })
+    return success_response(
+        {"assignments": [row2dict(assignment) for assignment in all_assignments]}
+    )
 
 
-@assignments.route('/tests/toggle-hide/<string:assignment_test_id>')
+@assignments.route("/tests/toggle-hide/<string:assignment_test_id>")
 @require_admin()
 @json_response
 def admin_assignment_tests_toggle_hide_assignment_test_id(assignment_test_id: str):
@@ -155,7 +164,7 @@ def admin_assignment_tests_toggle_hide_assignment_test_id(assignment_test_id: st
     ).first()
 
     # Make sure the assignment test exists
-    req_assert(assignment_test is not None, message='test not found')
+    req_assert(assignment_test is not None, message="test not found")
 
     # Verify that course the assignment test is apart of and
     # the course context match
@@ -167,13 +176,12 @@ def admin_assignment_tests_toggle_hide_assignment_test_id(assignment_test_id: st
     # Commit the change
     db.session.commit()
 
-    return success_response({
-        'status': 'test updated',
-        'assignment_test': assignment_test.data
-    })
+    return success_response(
+        {"status": "test updated", "assignment_test": assignment_test.data}
+    )
 
 
-@assignments.route('/tests/delete/<string:assignment_test_id>')
+@assignments.route("/tests/delete/<string:assignment_test_id>")
 @require_admin()
 @json_response
 def admin_assignment_tests_delete_assignment_test_id(assignment_test_id: str):
@@ -190,7 +198,7 @@ def admin_assignment_tests_delete_assignment_test_id(assignment_test_id: str):
     ).first()
 
     # Make sure the assignment test exists
-    req_assert(assignment_test is not None, message='test not found')
+    req_assert(assignment_test is not None, message="test not found")
 
     # Verify that course the assignment test is apart of and
     # the course context match
@@ -214,20 +222,22 @@ def admin_assignment_tests_delete_assignment_test_id(assignment_test_id: str):
     db.session.commit()
 
     # Pass back the status
-    return success_response({
-        'status': f'{test_name} deleted',
-        'variant': 'warning',
-    })
+    return success_response(
+        {
+            "status": f"{test_name} deleted",
+            "variant": "warning",
+        }
+    )
 
 
-@assignments.post('/add')
+@assignments.post("/add")
 @require_admin()
 @json_response
 def admin_assignments_add():
     new_assignment = Assignment(
         course_id=course_context.id,
-        name='New Assignment',
-        description='',
+        name="New Assignment",
+        description="",
         hidden=True,
         autograde_enabled=False,
         github_repo_required=course_context.github_repo_required,
@@ -241,10 +251,12 @@ def admin_assignments_add():
     db.session.add(new_assignment)
     db.session.commit()
 
-    return success_response({
-        'status': 'New assignment created.',
-        'assignment': new_assignment.data,
-    })
+    return success_response(
+        {
+            "status": "New assignment created.",
+            "assignment": new_assignment.data,
+        }
+    )
 
 
 @assignments.post("/save")
@@ -274,8 +286,8 @@ def admin_assignments_save(assignment: dict):
 
     # Update all it's fields
     for key, value in assignment.items():
-        if 'date' in key and isinstance(value, str):
-            value = dateparse(value.replace('T', ' ').replace('Z', ''))
+        if "date" in key and isinstance(value, str):
+            value = dateparse(value.replace("T", " ").replace("Z", ""))
         setattr(db_assignment, key, value)
 
     # Attempt to commit
