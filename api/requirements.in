@@ -25,3 +25,4 @@ numpy
 click==7.1.2
 discord.py
 aiohttp>=3.7.4
+tabulate
