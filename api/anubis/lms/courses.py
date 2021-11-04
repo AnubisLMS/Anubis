@@ -354,6 +354,48 @@ def get_courses(netid: str):
 
 
 @cache.memoize(timeout=60, unless=is_debug)
+def get_course_data(netid: str, course_id: str) -> Dict[str, Any]:
+    """
+    Get course data and tas for course
+
+    :param netid:
+    :param course_id:
+    :return:
+    """
+
+    # Get User
+    user = User.query.filter(User.netid == netid).first()
+
+    # Get course ids
+    course_ids = get_student_course_ids(user)
+
+    # Query for course with id if it belongs to user
+    course: Course = Course.query.filter(
+       Course.id == course_id, Course.id.in_(course_ids)
+    ).first()
+
+    course_data = course.data
+
+    # Query for tas in course
+    tas = (
+        User.query.join(TAForCourse)
+        .filter(
+        TAForCourse.course_id == course_id,
+        )
+        .all()
+    )
+
+    # Return course and ta data
+    return {**course_data, "tas": [
+        {
+            "name": ta.name,
+            "netid": ta.id,
+        }
+        for ta in tas
+    ]}
+
+
+@cache.memoize(timeout=60, unless=is_debug)
 def get_student_course_ids(user: User, default: str = None) -> List[str]:
     """
     Get the course ids for the courses that the user is in.

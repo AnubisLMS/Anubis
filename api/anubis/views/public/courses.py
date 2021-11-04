@@ -9,7 +9,7 @@ from anubis.utils.data import req_assert
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http import error_response, success_response
 from anubis.lms.assignments import get_assignments
-from anubis.lms.courses import valid_join_code, get_courses, get_courses_with_visuals
+from anubis.lms.courses import valid_join_code, get_courses, get_courses_with_visuals, get_course_data
 from anubis.utils.cache import cache
 from anubis.utils.rpc import enqueue_assign_missing_questions
 
@@ -36,6 +36,20 @@ def public_courses_list():
     # student is in. This information
     # is possibly cached.
     return success_response({"courses": courses})
+
+
+@courses_.route("/get/<string:course_id>")
+@require_user()
+@json_response
+def public_courses_get(course_id):
+    """
+    Get course information by course id with tas
+    This required authentication.
+
+    :return:
+    """
+
+    return success_response({"course": get_course_data(current_user.netid, course_id)})
 
 
 @courses_.route("/join/<string:join_code>")
