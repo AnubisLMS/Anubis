@@ -130,8 +130,6 @@ export default function Submissions() {
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [pageSize, page]);
 
-  console.log(rows);
-
   if (redirect !== null) {
     return <Redirect to={redirect}/>;
   }
@@ -149,7 +147,11 @@ export default function Submissions() {
 
         {/* Table */}
         {rows.map((row, index) => (
-          <SubmissionRow {... row} key={`${row.commit}-${index}`} />
+          <>
+            {row?.tests && row?.commit &&
+                <SubmissionRow {...row} key={`${row.commit}-${index}`}/>
+            }
+          </>
         ))}
       </Grid>
     </StandardLayout>

@@ -58,6 +58,8 @@ const Courses = () => {
     reset, setReset,
   };
 
+  console.log(courses);
+
   return (
     <StandardLayout title={'Anubis'} description={'Courses'}>
       <Dialog

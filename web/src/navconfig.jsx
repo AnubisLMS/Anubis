@@ -172,11 +172,11 @@ export const not_shown_nav = [
     path: '/submission',
     Page: Submission,
   },
-  // {
-  //   id: 'Assignment',
-  //   path: '/courses/assignment',
-  //   page: Assignment,
-  // },
+  {
+    id: 'Assignment',
+    path: '/courses/assignment',
+    Page: Assignment,
+  },
   {
     id: 'User',
     path: '/admin/user',
