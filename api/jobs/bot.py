@@ -122,7 +122,6 @@ bot = commands.Bot(
     command_prefix="!",
     case_insensitive=True,
     help_command=None,
-    owner_id=448648593314807809,
 )
 
 
@@ -143,9 +142,11 @@ async def contribute(ctx, *args):
 
     :return:
     """
+    desc = "Thanks for your interest in contributing to Anubis! We're always looking for new people to help "
+    desc += "make Anubis even better. Please head to [our GitHub repo](https://github.com/anubislms/Anubis)."
     emb = discord.Embed(
         title="Contributing to Anubis",
-        description="Thanks for your interest in contributing to Anubis! We're always looking for new people to help make Anubis even better. Please head to [our GitHub repo](https://github.com/anubislms/Anubis).",
+        description=desc,
     ).set_thumbnail(url=bot.user.avatar_url)
     await ctx.send(embed=emb)
 
