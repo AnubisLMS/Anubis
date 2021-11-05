@@ -10,7 +10,6 @@ import {useStyles} from './AssignmentItem.styles';
 const AssignmentItem = ({
   name,
   course,
-  repoUrl,
   id,
   submitted,
   dueDate,
