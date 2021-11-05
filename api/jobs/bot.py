@@ -24,8 +24,7 @@ def get_active_users_this_semester() -> int:
     """
     Count the number of users registered for at least one course this semester
 
-    :return: The number of users registers for at least one course this
-                                                                    semester
+    :return: The number of users registered for at least one course this semester
     """
     return (
         User.query.join(InCourse, User.id == InCourse.owner_id)
@@ -80,11 +79,11 @@ def get_course_theia_session_count(course) -> int:
 def generate_report() -> str:
     """
     Generate a report of the statuses of Anubis. The statuses are:
-                                    Course names and code
-                                    Number of active users this semester
-                                    Number of IDEs opened this semester
-                                    Number of students for each course
-                                    Number of IDES opened for each course
+                Course names and code
+                Number of active users this semester
+                Number of IDEs opened this semester
+                Number of students for each course
+                Number of IDES opened for each course
 
     :return: The text of the report
     """
