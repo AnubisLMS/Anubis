@@ -16,6 +16,9 @@ import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import {useStyles} from './Dashboard.styles';
 import useQuery from '../../../hooks/useQuery';
 
+import CourseItem from '../../../Components/Public/CourseItem/CourseItem';
+import AssignmentItem from '../../../Components/Public/AssignmentItem/AssignmentItem';
+
 const Dashboard = () => {
   const query = useQuery();
   const classes = useStyles();
@@ -69,6 +72,28 @@ const Dashboard = () => {
 
   return (
     <StandardLayout>
+      {courses.map((course, index) => (
+        <CourseItem
+          key={index}
+          name={course.name}
+          instructor={course.professor_display_name}
+          assignments={course.total_assignments}
+          section={course.section}
+          id={course.id}
+        />
+      ))}
+      {console.log(activeAssignments)}
+      {activeAssignments.map((assignment, index) => (
+        <AssignmentItem
+          key={index}
+          name={assignment.name}
+          course={assignment.course}
+          repoUrl={assignment.repo_url}
+          id={assignment.id}
+          submitted={assignment.has_submission}
+          dueDate={assignment.due_date}
+        />
+      ))}
       <SectionContainer title={'Courses'} link={'/courses'} linkTitle={'View All Courses'}>
         <Grid container spacing={6} className={classes.container}>
           {courses.length > 0 && courses ? courses.map((course, pos) => (
