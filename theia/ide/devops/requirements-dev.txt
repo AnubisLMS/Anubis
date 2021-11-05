@@ -7,3 +7,5 @@ nose
 urllib3
 PyGithub
 pyinstrument
+black
+pre-commit
