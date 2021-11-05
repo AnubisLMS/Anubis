@@ -2,17 +2,15 @@ from datetime import datetime
 
 from flask import Blueprint
 
+from anubis.lms.courses import is_course_admin
+from anubis.lms.repos import get_repos
 from anubis.models import Assignment, AssignmentRepo
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
-from anubis.utils.http.decorators import json_response
-from anubis.utils.http import req_assert
-from anubis.utils.http import error_response, success_response
-from anubis.lms.repos import get_repos
-from anubis.utils.github.repos import delete_assignment_repo
-from anubis.lms.courses import is_course_admin
-from anubis.utils.github.repos import create_assignment_repo
 from anubis.utils.cache import cache
+from anubis.utils.github.repos import create_assignment_repo, delete_assignment_repo
+from anubis.utils.http import error_response, req_assert, success_response
+from anubis.utils.http.decorators import json_response
 
 repos_ = Blueprint("public-repos", __name__, url_prefix="/public/repos")
 

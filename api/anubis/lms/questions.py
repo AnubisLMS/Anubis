@@ -1,21 +1,22 @@
 import io
 import random
 import zipfile
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
 import yaml
 
+from anubis.lms.students import get_students, get_students_in_class
 from anubis.models import (
-    db,
+    AssignedQuestionResponse,
+    AssignedStudentQuestion,
     Assignment,
     AssignmentQuestion,
-    AssignedStudentQuestion,
-    AssignedQuestionResponse,
-    User,
     InCourse,
+    User,
+    db,
 )
-from anubis.utils.data import _verify_data_shape, is_debug
-from anubis.lms.students import get_students, get_students_in_class
 from anubis.utils.cache import cache
+from anubis.utils.data import _verify_data_shape, is_debug
 from anubis.utils.logging import logger
 
 
@@ -64,21 +65,15 @@ def reset_question_assignments(assignment: Assignment, commit: bool = True):
     ).all()
 
     # Break them down into ids
-    assigned_student_question_ids = list(
-        map(lambda x: x.id, assigned_student_questions)
-    )
+    assigned_student_question_ids = list(map(lambda x: x.id, assigned_student_questions))
 
     # Delete all responses for the assignment
     AssignedQuestionResponse.query.filter(
-        AssignedQuestionResponse.assigned_question_id.in_(
-            assigned_student_question_ids
-        ),
+        AssignedQuestionResponse.assigned_question_id.in_(assigned_student_question_ids),
     ).delete()
 
     # Delete the question assignments
-    AssignedStudentQuestion.query.filter(
-        AssignedStudentQuestion.assignment_id == assignment.id
-    ).delete()
+    AssignedStudentQuestion.query.filter(AssignedStudentQuestion.assignment_id == assignment.id).delete()
 
     # Mark the assignment as questions not assigned
     assignment.questions_assigned = False
@@ -103,9 +98,7 @@ def hard_reset_questions(assignment: Assignment, commit: bool = True):
     reset_question_assignments(assignment, commit=False)
 
     # Delete the questions themselves
-    AssignmentQuestion.query.filter(
-        AssignmentQuestion.assignment_id == assignment.id
-    ).delete()
+    AssignmentQuestion.query.filter(AssignmentQuestion.assignment_id == assignment.id).delete()
 
     # Mark the assignment as questions not assigned
     assignment.questions_assigned = False
@@ -126,9 +119,7 @@ def assign_questions(assignment: Assignment):
     """
 
     # Delete any existing question assignments
-    AssignedStudentQuestion.query.filter(
-        AssignedStudentQuestion.assignment_id == assignment.id
-    ).delete()
+    AssignedStudentQuestion.query.filter(AssignedStudentQuestion.assignment_id == assignment.id).delete()
 
     # Find the questions that have been created for this assignment
     raw_questions = AssignmentQuestion.query.filter(
@@ -139,11 +130,7 @@ def assign_questions(assignment: Assignment):
 
     # Go through students in the class and assign them questions
     assigned_questions = []
-    students = (
-        User.query.join(InCourse)
-        .filter(InCourse.course_id == assignment.course_id)
-        .all()
-    )
+    students = User.query.join(InCourse).filter(InCourse.course_id == assignment.course_id).all()
     for student in students:
         for sequence, qs in questions.items():
             # Get a random question from the pool at this sequence
@@ -260,9 +247,7 @@ def get_all_questions(assignment: Assignment) -> List[Dict[str, str]]:
     """
 
     # Get all questions
-    questions = AssignmentQuestion.query.filter(
-        AssignmentQuestion.assignment_id == assignment.id
-    ).all()
+    questions = AssignmentQuestion.query.filter(AssignmentQuestion.assignment_id == assignment.id).all()
 
     # Get sequence to question mapping
     pools_to_questions = get_question_pool_mapping(questions)
@@ -329,9 +314,7 @@ def get_question_assignments(assignment: Assignment):
         assignments[student["netid"]] = {
             "name": student["name"],
             "netid": student["netid"],
-            "questions": get_assigned_questions(
-                assignment.id, student["id"], full=True
-            ),
+            "questions": get_assigned_questions(assignment.id, student["id"], full=True),
         }
 
     return assignments
@@ -393,9 +376,7 @@ def export_assignment_questions(assignment_id: str) -> Optional[bytes]:
                 zip_file.writestr(f"{netid}/q{pool}/response.txt", response_text)
 
                 # Append the responses
-                responses.append(
-                    {"pool": pool, "late": response_late, "time": response_time}
-                )
+                responses.append({"pool": pool, "late": response_late, "time": response_time})
 
             # Create the student meta data
             student_data = {"netid": netid, "name": name, "responses": responses}
@@ -427,9 +408,7 @@ def fix_missing_question_assignments(assignment: Assignment):
     """
 
     if not assignment.questions_assigned:
-        logger.info(
-            "fix_missing_question_assignments skipping, questions not assigned yet"
-        )
+        logger.info("fix_missing_question_assignments skipping, questions not assigned yet")
 
     # Get set of student ids
     students = get_students_in_class(assignment.course_id)
@@ -454,9 +433,7 @@ def fix_missing_question_assignments(assignment: Assignment):
     for student_id in student_ids:
 
         # Get the question assignments for this student on this assignment
-        student_questions: List[
-            AssignedStudentQuestion
-        ] = AssignedStudentQuestion.query.filter(
+        student_questions: List[AssignedStudentQuestion] = AssignedStudentQuestion.query.filter(
             AssignedStudentQuestion.assignment_id == assignment.id,
             AssignedStudentQuestion.owner_id == student_id,
         ).all()
@@ -465,17 +442,12 @@ def fix_missing_question_assignments(assignment: Assignment):
         student_question_pools = set(map(lambda q: q.question.pool, student_questions))
 
         # Calculate which question pools have no questions assigned for this student
-        missing_student_question_pools = question_pools.difference(
-            student_question_pools
-        )
+        missing_student_question_pools = question_pools.difference(student_question_pools)
 
         # Iterate over missing question pools
         for pool in missing_student_question_pools:
             logger.info(
-                f"FIXING missing question "
-                f"pool={pool} "
-                f"student={student_id} "
-                f"assignment={assignment.id}"
+                f"FIXING missing question " f"pool={pool} " f"student={student_id} " f"assignment={assignment.id}"
             )
 
             # Get list of questions for this pool

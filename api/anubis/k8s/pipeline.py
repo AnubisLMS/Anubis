@@ -47,9 +47,7 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
             client.V1EnvVar(
                 name="GIT_CRED",
                 value_from=client.V1EnvVarSource(
-                    secret_key_ref=client.V1SecretKeySelector(
-                        name="git", key="credentials"
-                    )
+                    secret_key_ref=client.V1SecretKeySelector(name="git", key="credentials")
                 ),
             ),
         ],
@@ -74,17 +72,13 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
     )
 
     # Create the specification of deployment
-    spec = client.V1JobSpec(
-        template=template, backoff_limit=3, ttl_seconds_after_finished=30
-    )
+    spec = client.V1JobSpec(template=template, backoff_limit=3, ttl_seconds_after_finished=30)
 
     # Instantiate the job object
     job = client.V1Job(
         api_version="batch/v1",
         kind="Job",
-        metadata=client.V1ObjectMeta(
-            name="submission-pipeline-{}-{}".format(submission.id, int(time.time()))
-        ),
+        metadata=client.V1ObjectMeta(name="submission-pipeline-{}-{}".format(submission.id, int(time.time()))),
         spec=spec,
     )
 
@@ -123,9 +117,7 @@ def reap_pipeline_jobs() -> int:
     )
 
     # Get the autograde pipeline timeout from config
-    autograde_pipeline_timeout_minutes = get_config_int(
-        "AUTOGRADE_PIPELINE_TIMEOUT_MINUTES", default=5
-    )
+    autograde_pipeline_timeout_minutes = get_config_int("AUTOGRADE_PIPELINE_TIMEOUT_MINUTES", default=5)
 
     # Count the number of active jobs
     active_count = 0
@@ -138,9 +130,7 @@ def reap_pipeline_jobs() -> int:
         job_created = job.metadata.creation_timestamp.replace(tzinfo=None)
 
         # Delete the job if it is older than a few minutes
-        if datetime.utcnow() - job_created > timedelta(
-            minutes=autograde_pipeline_timeout_minutes
-        ):
+        if datetime.utcnow() - job_created > timedelta(minutes=autograde_pipeline_timeout_minutes):
 
             # Attempt to delete the k8s job
             delete_pipeline_job(batch_v1, job)

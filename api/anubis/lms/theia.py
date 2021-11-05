@@ -1,13 +1,13 @@
 from datetime import datetime
-from typing import List, Tuple, Union, Dict
+from typing import Dict, List, Tuple, Union
 
 from werkzeug.utils import redirect
 
-from anubis.models import TheiaSession, User, Config
+from anubis.models import Config, TheiaSession, User
 from anubis.utils.auth.token import create_token
-from anubis.utils.data import is_debug
 from anubis.utils.cache import cache
 from anubis.utils.config import get_config_int
+from anubis.utils.data import is_debug
 
 
 @cache.memoize(timeout=5, source_check=True)

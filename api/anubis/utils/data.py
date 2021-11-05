@@ -5,7 +5,7 @@ from hashlib import sha512
 from json import dumps
 from os import environ, urandom
 from smtplib import SMTP
-from typing import Union, Tuple
+from typing import Tuple, Union
 
 from flask import Response, has_app_context, has_request_context
 
@@ -194,9 +194,7 @@ def _verify_data_shape(data, shape, path=None) -> Tuple[bool, Union[str, None]]:
 
                         for item in data[s_key]:
                             # Recurse on list item
-                            r, e = _verify_data_shape(
-                                item, s_value, path + ".[" + s_key + "]"
-                            )
+                            r, e = _verify_data_shape(item, s_value, path + ".[" + s_key + "]")
 
                             if r is False:
                                 return r, e
@@ -210,9 +208,7 @@ def _verify_data_shape(data, shape, path=None) -> Tuple[bool, Union[str, None]]:
                     return True, None
                 return (
                     False,
-                    path + ".[" + s_key + "]"
-                    if s_value is list
-                    else path + "." + s_key + "",
+                    path + ".[" + s_key + "]" if s_value is list else path + "." + s_key + "",
                 )
 
     return True, None

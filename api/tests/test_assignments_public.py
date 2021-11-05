@@ -1,8 +1,7 @@
 import copy
-
-from utils import Session
 from datetime import datetime, timedelta
 
+from utils import Session
 
 sample_sync = {
     "name": "CS-UY 3224 TEST PUBLIC HIDDEN 1",
@@ -41,30 +40,18 @@ def test_assignment_public():
     s.get("/public/assignments")
     r = s.get("/public/assignments/list")
     assert all(map(lambda a: a["name"].startswith("CS-UY 3224"), r["assignments"]))
-    assert any(
-        map(lambda a: a["name"] != "CS-UY 3224 TEST PUBLIC HIDDEN 1", r["assignments"])
-    )
-    assert any(
-        map(lambda a: a["name"] != "CS-UY 3224 TEST PUBLIC HIDDEN 2", r["assignments"])
-    )
+    assert any(map(lambda a: a["name"] != "CS-UY 3224 TEST PUBLIC HIDDEN 1", r["assignments"]))
+    assert any(map(lambda a: a["name"] != "CS-UY 3224 TEST PUBLIC HIDDEN 2", r["assignments"]))
 
     s = Session("ta")
     r = s.get("/public/assignments")
     assert all(map(lambda a: a["name"].startswith("CS-UY 3224"), r["assignments"]))
-    assert any(
-        map(lambda a: a["name"] == "CS-UY 3224 TEST PUBLIC HIDDEN 1", r["assignments"])
-    )
-    assert any(
-        map(lambda a: a["name"] == "CS-UY 3224 TEST PUBLIC HIDDEN 2", r["assignments"])
-    )
+    assert any(map(lambda a: a["name"] == "CS-UY 3224 TEST PUBLIC HIDDEN 1", r["assignments"]))
+    assert any(map(lambda a: a["name"] == "CS-UY 3224 TEST PUBLIC HIDDEN 2", r["assignments"]))
 
     s = Session("superuser")
     r = s.get("/public/assignments")
     assert any(map(lambda a: a["name"].startswith("CS-UY 3224"), r["assignments"]))
     assert any(map(lambda a: a["name"].startswith("CS-UY 3843"), r["assignments"]))
-    assert any(
-        map(lambda a: a["name"] == "CS-UY 3224 TEST PUBLIC HIDDEN 1", r["assignments"])
-    )
-    assert any(
-        map(lambda a: a["name"] == "CS-UY 3224 TEST PUBLIC HIDDEN 2", r["assignments"])
-    )
+    assert any(map(lambda a: a["name"] == "CS-UY 3224 TEST PUBLIC HIDDEN 1", r["assignments"]))
+    assert any(map(lambda a: a["name"] == "CS-UY 3224 TEST PUBLIC HIDDEN 2", r["assignments"]))

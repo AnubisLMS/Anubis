@@ -1,15 +1,14 @@
 from datetime import datetime
 from io import BytesIO
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
 
-from anubis.models import Assignment, Submission, TheiaSession, Course
-from anubis.utils.data import is_job
+from anubis.models import Assignment, Course, Submission, TheiaSession
 from anubis.utils.cache import cache
+from anubis.utils.data import is_debug, is_job
 from anubis.utils.logging import logger
-from anubis.utils.data import is_debug
 
 
 def get_submissions(course_id: str) -> pd.DataFrame:
@@ -43,9 +42,7 @@ def get_submissions(course_id: str) -> pd.DataFrame:
     )
 
     # Round the submission timestamps to the nearest hour
-    submissions["created"] = submissions["created"].apply(
-        lambda date: pd.to_datetime(date).round("H")
-    )
+    submissions["created"] = submissions["created"].apply(lambda date: pd.to_datetime(date).round("H"))
 
     return submissions
 
@@ -58,11 +55,7 @@ def get_theia_sessions(course_id: str) -> pd.DataFrame:
     """
 
     # Get all the theia session sqlalchemy objects
-    raw_theia_sessions = (
-        TheiaSession.query.join(Assignment)
-        .filter(Assignment.course_id == course_id)
-        .all()
-    )
+    raw_theia_sessions = TheiaSession.query.join(Assignment).filter(Assignment.course_id == course_id).all()
 
     # Specify which columns we want
     columns = ["id", "owner_id", "assignment_id", "created", "ended"]
@@ -79,12 +72,8 @@ def get_theia_sessions(course_id: str) -> pd.DataFrame:
     )
 
     # Round the timestamps to the nearest hour
-    theia_sessions["created"] = theia_sessions["created"].apply(
-        lambda date: pd.to_datetime(date).round("H")
-    )
-    theia_sessions["ended"] = theia_sessions["ended"].apply(
-        lambda date: pd.to_datetime(date).round("H")
-    )
+    theia_sessions["created"] = theia_sessions["created"].apply(lambda date: pd.to_datetime(date).round("H"))
+    theia_sessions["ended"] = theia_sessions["ended"].apply(lambda date: pd.to_datetime(date).round("H"))
 
     # Add a duration column
     if len(theia_sessions) > 0:
@@ -99,8 +88,7 @@ def get_theia_sessions(course_id: str) -> pd.DataFrame:
 
     # Drop outliers based on duration
     theia_sessions = theia_sessions[
-        np.abs(theia_sessions.duration - theia_sessions.duration.mean())
-        <= (3 * theia_sessions.duration.std())
+        np.abs(theia_sessions.duration - theia_sessions.duration.mean()) <= (3 * theia_sessions.duration.std())
     ]
 
     return theia_sessions
@@ -144,8 +132,8 @@ def get_raw_submissions() -> List[Dict[str, Any]]:
 
 @cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
 def get_usage_plot(course_id: Optional[str]) -> Optional[bytes]:
-    import matplotlib.pyplot as plt
     import matplotlib.colors as mcolors
+    import matplotlib.pyplot as plt
 
     logger.info("GENERATING USAGE PLOT PNG")
 
@@ -168,22 +156,14 @@ def get_usage_plot(course_id: Optional[str]) -> Optional[bytes]:
     legend_handles1 = []
 
     # submissions over hour line
-    submissions.groupby(["assignment_id", "created"])[
-        "id"
-    ].count().reset_index().rename(columns={"id": "count"}).groupby(
-        "assignment_id"
-    ).plot(
-        x="created", label=None, ax=axs[0]
-    )
+    submissions.groupby(["assignment_id", "created"])["id"].count().reset_index().rename(
+        columns={"id": "count"}
+    ).groupby("assignment_id").plot(x="created", label=None, ax=axs[0])
 
     # ides over hour line
-    theia_sessions.groupby(["assignment_id", "created"])[
-        "id"
-    ].count().reset_index().rename(columns={"id": "count"}).groupby(
-        "assignment_id"
-    ).plot(
-        x="created", label=None, ax=axs[1]
-    )
+    theia_sessions.groupby(["assignment_id", "created"])["id"].count().reset_index().rename(
+        columns={"id": "count"}
+    ).groupby("assignment_id").plot(x="created", label=None, ax=axs[1])
 
     # assignment release line
     for color, assignment in zip(mcolors.TABLEAU_COLORS, assignments):

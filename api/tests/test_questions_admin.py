@@ -41,9 +41,7 @@ def test_questions_admin():
     superuser.get(f"/admin/questions/reset-assignments/{assignment_id}")
     permission_test(
         f"/admin/questions/assign/{assignment_id}",
-        after=lambda: superuser.get(
-            f"/admin/questions/reset-assignments/{assignment_id}"
-        ),
+        after=lambda: superuser.get(f"/admin/questions/reset-assignments/{assignment_id}"),
     )
 
     superuser.get(f"/admin/questions/reset-assignments/{assignment_id}")
@@ -51,6 +49,4 @@ def test_questions_admin():
         f"/admin/questions/reset-assignments/{assignment_id}",
         fail_for=["student", "ta"],
     )
-    permission_test(
-        f"/admin/questions/hard-reset/{assignment_id}", fail_for=["student", "ta"]
-    )
+    permission_test(f"/admin/questions/hard-reset/{assignment_id}", fail_for=["student", "ta"])

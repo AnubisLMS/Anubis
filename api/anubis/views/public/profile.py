@@ -6,8 +6,8 @@ from anubis.models import User, db
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
-from anubis.utils.http.decorators import json_response
 from anubis.utils.http import success_response
+from anubis.utils.http.decorators import json_response
 
 profile = Blueprint("public-profile", __name__, url_prefix="/public/profile")
 
@@ -35,14 +35,10 @@ def public_set_github_username():
     github_username = github_username.strip()
 
     # Make sure it is not an empty string
-    req_assert(
-        len(github_username) > 0, message="Please provide at least one character"
-    )
+    req_assert(len(github_username) > 0, message="Please provide at least one character")
 
     # Make sure it is not too long
-    req_assert(
-        len(github_username) < 512, message="Please provide less than 512 characters"
-    )
+    req_assert(len(github_username) < 512, message="Please provide less than 512 characters")
 
     # Check to see if there is any whitespace in the username
     req_assert(
@@ -59,9 +55,7 @@ def public_set_github_username():
     # all the allowed rules that github puts on their
     # username.
     req_assert(
-        all(
-            i in (string.ascii_letters + string.digits + "-_") for i in github_username
-        ),
+        all(i in (string.ascii_letters + string.digits + "-_") for i in github_username),
         not github_username.startswith("-"),
         not github_username.endswith("-"),
         message="Github usernames may only contain alphanumeric characters "
@@ -70,9 +64,7 @@ def public_set_github_username():
 
     # Check to see if the github username they gave us belongs to
     # someone else in the system.
-    other = User.query.filter(
-        User.id != current_user.id, User.github_username == github_username
-    ).first()
+    other = User.query.filter(User.id != current_user.id, User.github_username == github_username).first()
 
     # If there is someone else in anubis that has that username,
     # then we should give back an error

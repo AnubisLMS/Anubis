@@ -10,9 +10,7 @@ def test_questions_public():
 
     for index, question in enumerate(questions):
         question_id = question["id"]
-        s.post_json(
-            f"/public/questions/save/{question_id}", json={"response": "test123"}
-        )
+        s.post_json(f"/public/questions/save/{question_id}", json={"response": "test123"})
         s.post_json(
             f"/public/questions/save/{question_id}",
             json={"response": 1},

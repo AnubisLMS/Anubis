@@ -1,19 +1,18 @@
 from typing import Optional
 
-from dateutil.parser import parse as date_parse, ParserError
+from dateutil.parser import ParserError
+from dateutil.parser import parse as date_parse
 from flask import Blueprint
 
-from anubis.models import db, LateException, Assignment, User
-from anubis.utils.auth.http import require_admin
-from anubis.utils.data import req_assert
-from anubis.utils.http.decorators import json_response, json_endpoint
-from anubis.utils.http import error_response, success_response
 from anubis.lms.courses import assert_course_context
 from anubis.lms.submissions import recalculate_late_submissions
+from anubis.models import Assignment, LateException, User, db
+from anubis.utils.auth.http import require_admin
+from anubis.utils.data import req_assert
+from anubis.utils.http import error_response, success_response
+from anubis.utils.http.decorators import json_endpoint, json_response
 
-late_exceptions_ = Blueprint(
-    "admin-late-exceptions", __name__, url_prefix="/admin/late-exceptions"
-)
+late_exceptions_ = Blueprint("admin-late-exceptions", __name__, url_prefix="/admin/late-exceptions")
 
 
 @late_exceptions_.route("/list/<string:assignment_id>")
@@ -39,17 +38,13 @@ def admin_late_exception_list(assignment_id: str):
     assert_course_context(assignment)
 
     # Get late exceptions
-    late_exceptions = LateException.query.filter(
-        LateException.assignment_id == assignment.id
-    ).all()
+    late_exceptions = LateException.query.filter(LateException.assignment_id == assignment.id).all()
 
     # Break down for response
     return success_response(
         {
             "assignment": assignment.full_data,
-            "late_exceptions": [
-                late_exception.data for late_exception in late_exceptions
-            ],
+            "late_exceptions": [late_exception.data for late_exception in late_exceptions],
         }
     )
 
@@ -57,9 +52,7 @@ def admin_late_exception_list(assignment_id: str):
 @late_exceptions_.post("/update")
 @require_admin()
 @json_endpoint([("assignment_id", str), ("user_id", str), ("due_date", str)])
-def admin_late_exception_update(
-    assignment_id: str = None, user_id: str = None, due_date: str = None
-):
+def admin_late_exception_update(assignment_id: str = None, user_id: str = None, due_date: str = None):
     """
     Add or update a late exception
 

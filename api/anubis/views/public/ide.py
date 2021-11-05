@@ -5,19 +5,15 @@ from typing import Dict
 from flask import Blueprint, request
 
 from anubis.lms.courses import is_course_admin
-from anubis.lms.theia import (
-    theia_redirect_url,
-    get_n_available_sessions,
-    theia_poll_ide,
-)
-from anubis.models import TheiaSession, db, Assignment, AssignmentRepo
+from anubis.lms.theia import get_n_available_sessions, theia_poll_ide, theia_redirect_url
+from anubis.models import Assignment, AssignmentRepo, TheiaSession, db
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.config import get_config_int
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_response, load_from_id
-from anubis.utils.rpc import enqueue_ide_stop, enqueue_ide_initialize
+from anubis.utils.rpc import enqueue_ide_initialize, enqueue_ide_stop
 
 ide = Blueprint("public-ide", __name__, url_prefix="/public/ide")
 
@@ -34,9 +30,7 @@ def public_ide_initialize(assignment: Assignment):
     """
 
     # verify that ides are enabled for this assignment
-    req_assert(
-        assignment.ide_enabled, message="IDEs are not enabled for this assignment"
-    )
+    req_assert(assignment.ide_enabled, message="IDEs are not enabled for this assignment")
 
     # Check for existing active session
     active_session = (
@@ -52,9 +46,7 @@ def public_ide_initialize(assignment: Assignment):
     # If there was an existing session for this assignment found, skip
     # the initialization, and return the active session information.
     if active_session is not None:
-        return success_response(
-            {"active": active_session.active, "session": active_session.data}
-        )
+        return success_response({"active": active_session.active, "session": active_session.data})
 
     # Get the config value for if ide starts are allowed.
     theia_starts_enabled = get_config_int("THEIA_STARTS_ENABLED", default=1) == 1
@@ -64,8 +56,7 @@ def public_ide_initialize(assignment: Assignment):
     # to start a new ide.
     req_assert(
         theia_starts_enabled,
-        message="Starting new IDEs is currently disabled by an Anubis administrator. "
-        "Please try again later.",
+        message="Starting new IDEs is currently disabled by an Anubis administrator. " "Please try again later.",
     )
 
     # If it is a student (not a ta) requesting the ide, then we will need to
@@ -318,6 +309,4 @@ def public_ide_redirect_url(theia_session_id: str) -> Dict[str, str]:
     req_assert(theia_session is not None, message="session does not exist")
 
     # Pass back redirect link
-    return success_response(
-        {"redirect": theia_redirect_url(theia_session.id, current_user.netid)}
-    )
+    return success_response({"redirect": theia_redirect_url(theia_session.id, current_user.netid)})

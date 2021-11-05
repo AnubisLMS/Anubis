@@ -4,7 +4,7 @@ import os
 
 import requests
 
-from anubis.models import db, User, Assignment, InCourse, Course
+from anubis.models import Assignment, Course, InCourse, User, db
 from anubis.utils.data import with_context
 
 
@@ -12,9 +12,7 @@ def pp(data: dict):
     print(json.dumps(data, indent=2))
 
 
-def gen_webhook(
-    name, code, username, after=None, before=None, ref="refs/heads/master", org="os3224"
-):
+def gen_webhook(name, code, username, after=None, before=None, ref="refs/heads/master", org="os3224"):
     if after is None:
         after = gen_rand(40)
 
@@ -60,9 +58,7 @@ def create_user(github_username: str):
 @with_context
 def do_webhook_tests_user(github_username):
     user = User.query.filter_by(github_username=github_username).first()
-    assignment = (
-        Assignment.query.join(Course).filter(Course.name == "Intro to OS").first()
-    )
+    assignment = Assignment.query.join(Course).filter(Course.name == "Intro to OS").first()
 
     assignment_id = assignment.id
     assignment_name = assignment.name
@@ -92,9 +88,7 @@ def do_webhook_tests_user(github_username):
     )
     assert response.fetchone()[0] == 1
 
-    r = post_webhook(
-        gen_webhook(assignment_name, assignment_unique_code, user_github_username)
-    ).json()
+    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, user_github_username)).json()
     db.session.expire_all()
     assert r["data"] != "initial commit"
     response = db.engine.execute(
@@ -104,29 +98,17 @@ def do_webhook_tests_user(github_username):
     )
     assert response.fetchone()[0] == 1
 
-    r = post_webhook(
-        gen_webhook(
-            assignment_name, assignment_unique_code + "abc", user_github_username
-        )
-    ).json()
+    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code + "abc", user_github_username)).json()
     assert r["data"] is None
     assert r["error"] == "assignment not found"
 
-    r = post_webhook(
-        gen_webhook(
-            assignment_name, assignment_unique_code, user_github_username, ref="abc123"
-        )
-    ).json()
+    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, user_github_username, ref="abc123")).json()
     assert r["error"] == "not a push to master or main"
 
-    r = post_webhook(
-        gen_webhook(assignment_name, assignment_unique_code, gen_rand(6))
-    ).json()
+    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, gen_rand(6))).json()
     assert r["error"] == "dangling submission"
 
-    r = post_webhook(
-        gen_webhook(assignment_name, assignment_unique_code, user_github_username)
-    ).json()
+    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, user_github_username)).json()
     assert r["data"] == "submission accepted"
 
 

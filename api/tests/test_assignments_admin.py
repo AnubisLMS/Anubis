@@ -41,13 +41,7 @@ def test_assignment_admin():
     assignment_test_id = _tests[0]["id"]
 
     permission_test(f"/admin/assignments/get/{assignment_id}")
-    permission_test(
-        f"/admin/assignments/assignment/{assignment_id}/questions/get/student"
-    )
+    permission_test(f"/admin/assignments/assignment/{assignment_id}/questions/get/student")
     permission_test(f"/admin/assignments/tests/toggle-hide/{assignment_test_id}")
-    permission_test(
-        f"/admin/assignments/save", method="post", json={"assignment": assignment}
-    )
-    permission_test(
-        f"/admin/assignments/sync", method="post", json={"assignment": sample_sync}
-    )
+    permission_test(f"/admin/assignments/save", method="post", json={"assignment": assignment})
+    permission_test(f"/admin/assignments/sync", method="post", json={"assignment": sample_sync})

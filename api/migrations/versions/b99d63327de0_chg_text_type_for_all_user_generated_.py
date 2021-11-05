@@ -39,9 +39,7 @@ def upgrade():
 
     # Assignment test
     op.alter_column("assignment_test", "name", type_=sa.TEXT(length=2 ** 16))
-    op.alter_column(
-        "assignment_question", "code_language", type_=sa.TEXT(length=2 ** 16)
-    )
+    op.alter_column("assignment_question", "code_language", type_=sa.TEXT(length=2 ** 16))
 
     # Submission
     op.alter_column("submission", "state", type_=sa.TEXT(length=2 ** 16))

@@ -4,23 +4,20 @@ from datetime import datetime
 import sqlalchemy.exc
 from flask import Blueprint, send_file
 
-from anubis.models import db, Assignment, AssignmentQuestion, AssignedStudentQuestion
+from anubis.lms.courses import assert_course_context, assert_course_superuser
+from anubis.lms.questions import (
+    assign_questions,
+    export_assignment_questions,
+    get_all_questions,
+    get_question_assignments,
+    hard_reset_questions,
+    reset_question_assignments,
+)
+from anubis.models import AssignedStudentQuestion, Assignment, AssignmentQuestion, db
 from anubis.utils.auth.http import require_admin
 from anubis.utils.data import req_assert
-from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.utils.http import error_response, success_response
-from anubis.lms.courses import (
-    assert_course_superuser,
-    assert_course_context,
-)
-from anubis.lms.questions import (
-    hard_reset_questions,
-    get_all_questions,
-    assign_questions,
-    reset_question_assignments,
-    get_question_assignments,
-    export_assignment_questions,
-)
+from anubis.utils.http.decorators import json_endpoint, json_response
 
 questions = Blueprint("admin-questions", __name__, url_prefix="/admin/questions")
 
@@ -37,9 +34,7 @@ def admin_questions_add_unique_code(assignment_id: str):
     """
 
     # Try to find assignment
-    assignment: Assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment: Assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     # If the assignment does not exist, then stop
     req_assert(assignment is not None, message="assignment does not exist")
@@ -106,9 +101,7 @@ def admin_questions_delete_question_id(assignment_question_id: str):
         db.session.rollback()
 
         # If this commit fails, then it is assigned to students
-        return error_response(
-            "Question is already assigned to students. Reset assignments to delete."
-        )
+        return error_response("Question is already assigned to students. Reset assignments to delete.")
 
     # Return the status
     return success_response(
@@ -144,9 +137,7 @@ def private_questions_hard_reset_unique_code(assignment_id: str):
     """
 
     # Try to find assignment
-    assignment: Assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment: Assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     # If the assignment does not exist, then stop
     req_assert(assignment is not None, message="assignment does not exist")
@@ -194,9 +185,7 @@ def private_questions_reset_assignments_assignment_id(assignment_id: str):
     """
 
     # Try to find assignment
-    assignment: Assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment: Assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     # Verify that the assignment exists
     req_assert(assignment is not None, message="assignment does not exist")
@@ -268,9 +257,7 @@ def private_questions_get_assignments_unique_code(assignment_id: str):
     """
 
     # Try to find assignment
-    assignment: Assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment: Assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     # If the assignment does not exist, then stop
     req_assert(assignment is not None, message="assignment does not exist")
@@ -300,9 +287,7 @@ def private_questions_get_unique_code(assignment_id: str):
     """
 
     # Try to find assignment
-    assignment: Assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment: Assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     # Verify that the assignment exists
     req_assert(assignment is not None, message="assignment does not exist")
@@ -339,9 +324,7 @@ def private_questions_assign_unique_code(assignment_id: str):
     """
 
     # Try to find assignment
-    assignment: Assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment: Assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     # Verify that we got an assignment
     req_assert(assignment is not None, message="assignment does not exist")
@@ -353,9 +336,7 @@ def private_questions_assign_unique_code(assignment_id: str):
     assigned_questions = assign_questions(assignment)
 
     # Pass back the response
-    return success_response(
-        {"assigned": assigned_questions, "status": "Questions assigned"}
-    )
+    return success_response({"assigned": assigned_questions, "status": "Questions assigned"})
 
 
 @questions.get("/export/<string:assignment_id>")
@@ -387,6 +368,4 @@ def admin_assignments_export(assignment_id: str):
     filename = f"{assignment.name}-{str(now)}.zip".replace(" ", "_").replace(":", "")
 
     # Send the file back
-    return send_file(
-        io.BytesIO(zip_blob), attachment_filename=filename, as_attachment=True
-    )
+    return send_file(io.BytesIO(zip_blob), attachment_filename=filename, as_attachment=True)

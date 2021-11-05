@@ -5,9 +5,8 @@ Revises: c87807debbda
 Create Date: 2021-09-25 14:10:56.323603
 
 """
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "3150c9c06ea5"
@@ -34,8 +33,4 @@ def downgrade():
     conn = op.get_bind()
     with conn.begin():
         conn.execute("delete from anubis_config;")
-        conn.execute(
-            "insert into anubis_config (`key`, `value`) values "
-            "('MAX_IDES', '10'), "
-            "('MAX_JOBS', '10');"
-        )
+        conn.execute("insert into anubis_config (`key`, `value`) values " "('MAX_IDES', '10'), " "('MAX_JOBS', '10');")

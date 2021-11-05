@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Union, Tuple
+from typing import Tuple, Union
 
 from flask import request
 from werkzeug.utils import secure_filename
@@ -67,9 +67,7 @@ def success_response(data: Union[dict, str, None]) -> dict:
     }
 
 
-def get_number_arg(
-    arg_name: str = "number", default_value: int = 10, reject_negative: bool = True
-) -> int:
+def get_number_arg(arg_name: str = "number", default_value: int = 10, reject_negative: bool = True) -> int:
     """
     Quick function for getting a number http query argument. If the
     argument is not found, or cannot be converted to an int

@@ -1,24 +1,24 @@
+import copy
 import math
 import random
 import string
-import copy
 from datetime import datetime, timedelta
 
+from anubis.lms.theia import mark_session_ended
 from anubis.models import (
-    db,
     THEIA_DEFAULT_OPTIONS,
     Assignment,
     AssignmentQuestion,
-    AssignmentTest,
     AssignmentRepo,
-    Submission,
-    User,
+    AssignmentTest,
     Course,
     InCourse,
+    Submission,
     TheiaSession,
+    User,
+    db,
 )
 from anubis.utils.data import rand
-from anubis.lms.theia import mark_session_ended
 from anubis.utils.github.repos import assignment_repo_name
 
 lorem = """
@@ -369,9 +369,7 @@ def create_assignment(
 
     tests = []
     for i in range(random.randint(3, 5)):
-        tests.append(
-            AssignmentTest(id=rand(), name=f"test {i}", assignment_id=assignment.id)
-        )
+        tests.append(AssignmentTest(id=rand(), name=f"test {i}", assignment_id=assignment.id))
 
     submissions = []
     repos = []

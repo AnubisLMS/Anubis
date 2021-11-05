@@ -1,11 +1,11 @@
 from flask import Blueprint
 
+from anubis.lms.courses import assert_course_context
 from anubis.models import Assignment, User
 from anubis.utils.auth.http import require_admin
 from anubis.utils.data import req_assert
-from anubis.utils.http.decorators import json_response
 from anubis.utils.http import success_response
-from anubis.lms.courses import assert_course_context
+from anubis.utils.http.decorators import json_response
 from anubis.utils.visuals.assignments import (
     get_admin_assignment_visual_data,
     get_assignment_history,
@@ -39,9 +39,7 @@ def public_visuals_assignment_id(assignment_id: str):
     assert_course_context(assignment)
 
     # Generate and pass back the visual data
-    return success_response(
-        {"assignment_data": get_admin_assignment_visual_data(assignment_id)}
-    )
+    return success_response({"assignment_data": get_admin_assignment_visual_data(assignment_id)})
 
 
 @visuals_.route("/history/<string:assignment_id>/<string:netid>")

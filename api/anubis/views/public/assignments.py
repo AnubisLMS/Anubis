@@ -1,14 +1,12 @@
 from flask import Blueprint, request
 
+from anubis.lms.assignments import get_assignment_data, get_assignments
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
-from anubis.utils.http.decorators import json_response
 from anubis.utils.http import success_response
-from anubis.lms.assignments import get_assignments, get_assignment_data
+from anubis.utils.http.decorators import json_response
 
-assignments = Blueprint(
-    "public-assignments", __name__, url_prefix="/public/assignments"
-)
+assignments = Blueprint("public-assignments", __name__, url_prefix="/public/assignments")
 
 
 @assignments.route("")
@@ -46,6 +44,4 @@ def public_assignment_get(assignment_id: str):
     :return:
     """
 
-    return success_response(
-        {"assignment": get_assignment_data(current_user.id, assignment_id)}
-    )
+    return success_response({"assignment": get_assignment_data(current_user.id, assignment_id)})

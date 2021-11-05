@@ -2,20 +2,16 @@ from typing import List
 
 from flask import Blueprint
 
-from anubis.models import db, User, Course, InCourse, Submission, Assignment
-from anubis.utils.auth.http import require_admin, require_superuser
-from anubis.utils.auth.user import current_user
-from anubis.utils.data import req_assert
-from anubis.utils.http.decorators import json_response, json_endpoint
-from anubis.utils.http import success_response, get_number_arg
-from anubis.lms.courses import (
-    assert_course_superuser,
-    course_context,
-    assert_course_context,
-)
+from anubis.lms.courses import assert_course_context, assert_course_superuser, course_context
 from anubis.lms.repos import get_repos
 from anubis.lms.students import get_students
 from anubis.lms.theia import get_recent_sessions
+from anubis.models import Assignment, Course, InCourse, Submission, User, db
+from anubis.utils.auth.http import require_admin, require_superuser
+from anubis.utils.auth.user import current_user
+from anubis.utils.data import req_assert
+from anubis.utils.http import get_number_arg, success_response
+from anubis.utils.http.decorators import json_endpoint, json_response
 
 students_ = Blueprint("admin-students", __name__, url_prefix="/admin/students")
 
@@ -35,14 +31,7 @@ def admin_student_list_basic():
     students: List[User] = User.query.all()
 
     # Return their id and netid
-    return success_response(
-        {
-            "users": [
-                {"id": user.id, "netid": user.netid, "name": user.name}
-                for user in students
-            ]
-        }
-    )
+    return success_response({"users": [{"id": user.id, "netid": user.netid, "name": user.name} for user in students]})
 
 
 @students_.route("/list")
@@ -227,9 +216,7 @@ def admin_students_toggle_superuser(id: str):
     other = User.query.filter(User.id == id).first()
 
     # Double check that the current user is a superuser
-    req_assert(
-        current_user.is_superuser, message="only superusers can create superusers"
-    )
+    req_assert(current_user.is_superuser, message="only superusers can create superusers")
 
     # If the other user was not found, then stop
     req_assert(other is not None, message="user does not exist")
@@ -245,12 +232,8 @@ def admin_students_toggle_superuser(id: str):
 
     # Pass back the status based on if the other is now a superuser
     if other.is_superuser:
-        return success_response(
-            {"status": f"{other.name} is now a superuser", "variant": "warning"}
-        )
+        return success_response({"status": f"{other.name} is now a superuser", "variant": "warning"})
 
     # Pass back the status based on if the other user is now no longer a superuser
     else:
-        return success_response(
-            {"status": f"{other.name} is no longer a superuser", "variant": "success"}
-        )
+        return success_response({"status": f"{other.name} is no longer a superuser", "variant": "success"})

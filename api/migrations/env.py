@@ -5,8 +5,7 @@ from logging.config import fileConfig
 
 from alembic import context
 from dotenv import load_dotenv
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 if os.environ.get("DB_HOST", None) is None:
     os.environ["DB_HOST"] = "127.0.0.1"

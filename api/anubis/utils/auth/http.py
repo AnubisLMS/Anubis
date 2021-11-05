@@ -1,9 +1,9 @@
 from functools import wraps
 
-from anubis.models import TAForCourse, ProfessorForCourse
+from anubis.models import ProfessorForCourse, TAForCourse
 from anubis.utils.auth.user import get_current_user
 from anubis.utils.data import is_debug
-from anubis.utils.exceptions import AuthenticationError, AssertError
+from anubis.utils.exceptions import AssertError, AuthenticationError
 
 
 def require_user(unless_debug=False):
@@ -75,9 +75,7 @@ def require_admin(unless_debug=False):
                 return func(*args, **kwargs)
 
             ta = TAForCourse.query.filter(TAForCourse.owner_id == user.id).first()
-            prof = ProfessorForCourse.query.filter(
-                ProfessorForCourse.owner_id == user.id
-            ).first()
+            prof = ProfessorForCourse.query.filter(ProfessorForCourse.owner_id == user.id).first()
 
             if ta is None and prof is None:
                 raise AuthenticationError("User is not ta or professor")

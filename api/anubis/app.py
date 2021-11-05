@@ -8,10 +8,10 @@ def init_services(app):
     :param app: Flask app
     :return:
     """
-    from anubis.models import db, Config
+    from anubis.models import Config, db
     from anubis.utils.cache import cache, cache_health
-    from anubis.utils.migrate import migrate
     from anubis.utils.exceptions import add_app_exception_handlers
+    from anubis.utils.migrate import migrate
 
     # Init services
     db.init_app(app)
@@ -36,10 +36,10 @@ def create_app():
     :return: Flask app
     """
     from anubis.config import config
+    from anubis.views.admin import register_admin_views
 
     # Import views
     from anubis.views.public import register_public_views
-    from anubis.views.admin import register_admin_views
 
     # Create app
     app = Flask(__name__)

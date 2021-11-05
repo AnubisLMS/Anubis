@@ -4,17 +4,16 @@ from datetime import datetime, timedelta
 from flask import Blueprint
 from sqlalchemy import or_
 
-from anubis.models import Submission, Assignment, User
-from anubis.rpc.batch import rpc_bulk_regrade
-from anubis.utils.auth.http import require_admin
-from anubis.utils.data import split_chunks, req_assert
-from anubis.utils.http.decorators import json_response
-from anubis.utils.http.decorators import load_from_id
-from anubis.utils.http import success_response, get_number_arg
-from anubis.lms.autograde import bulk_autograde, autograde
+from anubis.lms.autograde import autograde, bulk_autograde
 from anubis.lms.courses import assert_course_context
 from anubis.lms.submissions import init_submission
+from anubis.models import Assignment, Submission, User
+from anubis.rpc.batch import rpc_bulk_regrade
+from anubis.utils.auth.http import require_admin
 from anubis.utils.cache import cache
+from anubis.utils.data import req_assert, split_chunks
+from anubis.utils.http import get_number_arg, success_response
+from anubis.utils.http.decorators import json_response, load_from_id
 from anubis.utils.rpc import enqueue_autograde_pipeline, rpc_enqueue
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
@@ -92,9 +91,7 @@ def admin_regrade_submission_commit(commit: str):
     enqueue_autograde_pipeline(submission.id)
 
     # Return status
-    return success_response(
-        {"submission": submission.data, "user": submission.owner.data}
-    )
+    return success_response({"submission": submission.data, "user": submission.owner.data})
 
 
 @regrade.route("/student/<string:assignment_id>/<string:netid>")
@@ -203,9 +200,7 @@ def private_regrade_assignment(assignment_id):
         filters.append(Submission.state == "Reaped after timeout")
 
     # Find the assignment
-    assignment = Assignment.query.filter(
-        or_(Assignment.id == assignment_id, Assignment.name == assignment_id)
-    ).first()
+    assignment = Assignment.query.filter(or_(Assignment.id == assignment_id, Assignment.name == assignment_id)).first()
 
     # Verify that the assignment exists
     req_assert(assignment is not None, message="assignment does not exist")

@@ -3,17 +3,16 @@ from datetime import datetime
 
 from flask import Blueprint
 
-from anubis.models import db, TheiaSession
+from anubis.lms.courses import course_context
+from anubis.models import TheiaSession, db
 from anubis.rpc.theia import reap_theia_sessions_in_course
 from anubis.utils.auth.http import require_admin
 from anubis.utils.auth.user import current_user
-from anubis.utils.data import req_assert
-from anubis.utils.http.decorators import json_response, json_endpoint
-from anubis.utils.http import error_response, success_response
-from anubis.lms.courses import course_context
-from anubis.utils.rpc import enqueue_ide_initialize
-from anubis.utils.rpc import rpc_enqueue, enqueue_ide_stop
 from anubis.utils.config import get_config_int
+from anubis.utils.data import req_assert
+from anubis.utils.http import error_response, success_response
+from anubis.utils.http.decorators import json_endpoint, json_response
+from anubis.utils.rpc import enqueue_ide_initialize, enqueue_ide_stop, rpc_enqueue
 
 ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 
@@ -68,9 +67,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
 
     # Read the options out of the posted data
     image = settings.get("image", "registry.digitalocean.com/anubis/theia-admin")
-    repo_url = settings.get(
-        "repo_url", "https://github.com/os3224/anubis-assignment-tests"
-    )
+    repo_url = settings.get("repo_url", "https://github.com/os3224/anubis-assignment-tests")
     resources_str = settings.get("resources", '{"limits":{"cpu":"4","memory":"4Gi"}}')
     network_locked = settings.get("network_locked", False)
     network_policy = settings.get("network_policy", "admin")
@@ -93,8 +90,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
     # to start a new ide.
     req_assert(
         theia_starts_enabled,
-        message="Starting new IDEs is currently disabled by an Anubis administrator. "
-        "Please try again later.",
+        message="Starting new IDEs is currently disabled by an Anubis administrator. " "Please try again later.",
     )
 
     # Create a new session
@@ -232,6 +228,4 @@ def private_ide_reap_all():
     rpc_enqueue(reap_theia_sessions_in_course, "theia", args=(course_context.id,))
 
     # Hand back status
-    return success_response(
-        {"status": "Reap job enqueued. Session cleanup will take a minute."}
-    )
+    return success_response({"status": "Reap job enqueued. Session cleanup will take a minute."})

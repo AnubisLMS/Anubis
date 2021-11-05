@@ -1,32 +1,27 @@
+from anubis.lms.questions import assign_questions
 from anubis.models import (
-    db,
-    SubmissionTestResult,
-    SubmissionBuild,
-    Submission,
+    AssignedQuestionResponse,
+    AssignedStudentQuestion,
+    Assignment,
+    AssignmentQuestion,
     AssignmentRepo,
     AssignmentTest,
-    InCourse,
-    Assignment,
     Course,
-    User,
-    TheiaSession,
-    AssignmentQuestion,
-    AssignedStudentQuestion,
-    AssignedQuestionResponse,
-    TAForCourse,
-    ProfessorForCourse,
-    StaticFile,
+    InCourse,
     LateException,
     LectureNotes,
+    ProfessorForCourse,
+    StaticFile,
+    Submission,
+    SubmissionBuild,
+    SubmissionTestResult,
+    TAForCourse,
+    TheiaSession,
+    User,
+    db,
 )
 from anubis.utils.data import with_context
-from anubis.lms.questions import assign_questions
-from anubis.utils.testing.seed import (
-    create_assignment,
-    create_students,
-    create_course,
-    init_submissions,
-)
+from anubis.utils.testing.seed import create_assignment, create_course, create_students, init_submissions
 
 
 @with_context
@@ -53,13 +48,9 @@ def seed():
     db.session.commit()
 
     # Create
-    superuser = User(
-        netid="superuser", github_username="superuser", name="super", is_superuser=True
-    )
+    superuser = User(netid="superuser", github_username="superuser", name="super", is_superuser=True)
     ta_user = User(netid="ta", github_username="ta", name="T A")
-    professor_user = User(
-        netid="professor", github_username="professor", name="professor"
-    )
+    professor_user = User(netid="professor", github_username="professor", name="professor")
     student_user = User(netid="student", github_username="student", name="student")
     db.session.add_all([superuser, professor_user, ta_user, student_user])
 
@@ -131,9 +122,7 @@ def seed():
         autograde_tests_repo="https://github.com/os3224/anubis-assignment-tests",
         github_org="os3224",
     )
-    mmds_assignment, _, mmds_submissions, _ = create_assignment(
-        mmds_course, mmds_students
-    )
+    mmds_assignment, _, mmds_submissions, _ = create_assignment(mmds_course, mmds_students)
     init_submissions(mmds_submissions)
     assign_questions(mmds_assignment)
 
