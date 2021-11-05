@@ -4,6 +4,7 @@
 
 # Code linters/formatters
 black
+isort
 
 # pip command line tools
 pip-tools

@@ -102,6 +102,8 @@ idna==3.3
     #   yarl
 iniconfig==1.1.1
     # via pytest
+isort==5.10.0
+    # via -r requirements/dev.in
 itsdangerous==2.0.1
     # via
     #   -r requirements/common.txt
