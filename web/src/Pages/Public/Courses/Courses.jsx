@@ -2,8 +2,6 @@ import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
-import Grid from '@material-ui/core/Grid';
-import Grow from '@material-ui/core/Grow';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -11,14 +9,15 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
+import Box from '@material-ui/core/Box';
 
 import {useStyles} from './Courses.styles';
 import StandardLayout from '../../../Components/Layouts/StandardLayout';
-import CourseCard from '../../../Components/Public/Courses/CourseCard/CourseCard';
-import EmptyCourseCard from '../../../Components/Public/Courses/EmptyCourseCard/EmptyCourseCard';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
-
+import SectionHeader from '../../../Components/Public/Shared/SectionHeader/SectionHeader';
+import JoinCourseItem from '../../../Components/Public/JoinCourseItem/JoinCourseItem';
+import CourseItem from '../../../Components/Public/CourseItem/CourseItem';
 
 const joinCourse = (state, enqueueSnackbar) => () => {
   const {joinCode, setReset} = state;
@@ -61,7 +60,7 @@ const Courses = () => {
   console.log(courses);
 
   return (
-    <StandardLayout title={'Anubis'} description={'Courses'}>
+    <StandardLayout>
       <Dialog
         open={joinOpen}
         onClose={() => setJoinOpen(false)}
@@ -92,16 +91,19 @@ const Courses = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      <Grid container spacing={6}>
-        {courses.map((course, index) => (
-          <Grid item key={`${course.courseCode}-${index}` }>
-            <CourseCard {... course}/>
-          </Grid>
-        ))}
-        <Grid item>
-          <EmptyCourseCard callback={() => setJoinOpen(true)}/>
-        </Grid>
-      </Grid>
+      <SectionHeader title={'Courses'} isPage />
+      <Box className={classes.divider} />
+      {courses && courses.map((course, index) => (
+        <CourseItem
+          key={`${course.name}-${index}`}
+          name={course.name}
+          section={course.section}
+          instructor={course.professor_display_name}
+          assignments={course.total_assignments}
+          id={course.id}
+        />
+      ))}
+      <JoinCourseItem callback={() => setJoinOpen(true)} />
     </StandardLayout>
   );
 };
