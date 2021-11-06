@@ -1,26 +1,35 @@
 import React, {useState, useEffect} from 'react';
-
-import Grid from '@material-ui/core/Grid';
-import Grow from '@material-ui/core/Grow';
-import useQuery from '../../hooks/useQuery';
-
-import AssignmentCardV2 from '../../Components/Public/Assignments/AssignmentCardV2/AssignmentCardV2';
 import axios from 'axios';
-import standardErrorHandler from '../../Utils/standardErrorHandler';
 import {useSnackbar} from 'notistack';
+
+import Box from '@material-ui/core/Box';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+
+import useQuery from '../../hooks/useQuery';
+import AssignmentItem from '../../Components/Public/AssignmentItem/AssignmentItem';
+import standardErrorHandler from '../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import IDEDialog from '../../Components/Public/IDE/IDEDialog';
 import StandardLayout from '../../Components/Layouts/StandardLayout';
+import SectionHeader from '../../Components/Public/Shared/SectionHeader/SectionHeader';
 
+const useStyles = makeStyles((theme) => ({
+  divider: {
+    width: '100%',
+    borderTop: `1px solid ${theme.palette.dark.blue['200']}`,
+    marginTop: theme.spacing(2),
+    height: '1px',
+  },
+}));
 
 const Assignments = () => {
+  const classes = useStyles();
   const query = useQuery();
   const {enqueueSnackbar} = useSnackbar();
   const [assignments, setAssignments] = useState([]);
   const [selectedTheia, setSelectedTheia] = useState(null);
   const [runAssignmentPolling, setRunAssignmentPolling] = useState(false);
   const [pollingAssignmentId, setPollingAssignmentId] = useState(null);
-  console.log(assignments);
 
   useEffect(() => {
     axios.get('/api/public/assignments', {params: {courseId: query.get('courseId')}}).then((response) => {
@@ -64,18 +73,20 @@ const Assignments = () => {
   }, [runAssignmentPolling, setRunAssignmentPolling, pollingAssignmentId]);
 
   return (
-    <StandardLayout
-      title={'Anubis'}
-      description={'Assignments'}
-    >
+    <StandardLayout>
       <IDEDialog selectedTheia={selectedTheia} setSelectedTheia={setSelectedTheia}/>
-      <Grid container spacing={6}>
-        {assignments.map((assignment, pos) => (
-          <Grid item key={assignment.id}>
-            <AssignmentCardV2 {... assignment}/>
-          </Grid>
-        ))}
-      </Grid>
+      <SectionHeader isPage title='Assignments' />
+      <Box className={classes.divider}/>
+      {assignments && assignments.map((assignment, index) => (
+        <AssignmentItem
+          key={`${assignment.name}-${index}`}
+          name={assignment.name}
+          dueDate={assignment.due_date}
+          id={assignment.id}
+          course={assignment.course}
+          submitted={assignment.has_submission}
+        />
+      ))}
     </StandardLayout>
   );
 };

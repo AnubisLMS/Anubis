@@ -3,27 +3,26 @@ import {useSnackbar} from 'notistack';
 import {Redirect} from 'react-router-dom';
 import axios from 'axios';
 
-import {DataGrid} from '@material-ui/data-grid';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
-
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
 import green from '@material-ui/core/colors/green';
 import red from '@material-ui/core/colors/red';
+import Box from '@material-ui/core/Box';
 
-import SubmissionRow from './SubmissionRow/SubmissionRow';
+import SectionHeader from '../../../Components/Public/Shared/SectionHeader/SectionHeader';
+import SubmissionItem from '../../../Components/Public/SubmissionItem/SubmissionItem';
 import useQuery from '../../../hooks/useQuery';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
-import Questions from '../../../Components/Public/Questions/Questions';
 import StandardLayout from '../../../Components/Layouts/StandardLayout';
 
 const useStyles = makeStyles((theme) => ({
-  paper: {
-    height: 700,
-    padding: theme.spacing(1),
+  divider: {
+    width: '100%',
+    borderTop: `1px solid ${theme.palette.dark.blue['200']}`,
+    marginTop: theme.spacing(2),
+    height: '1px',
   },
 }));
 
@@ -35,50 +34,9 @@ function translateSubmission({id, assignment_name, assignment_due, commit, proce
   };
 }
 
-
-const useColumns = () => ([
-  {field: 'id', hide: true},
-  {field: 'assignment_name', headerName: 'Assignment Name', width: 200},
-  {
-    field: 'commit', headerName: 'Commit Hash', width: 150, renderCell: ({row}) => (
-      row?.commit && row.commit.substring(0, 10)
-    ),
-  },
-  {
-    field: 'tests_passed', headerName: 'Tests Passed', width: 150, renderCell: ({row}) => (
-      row?.tests && `${row.tests.filter((test) => test.result.passed).length}/${row.tests.length}`
-    ),
-  },
-  {
-    field: 'processed', headerName: 'Processed', width: 150, renderCell: ({row}) => (
-      <React.Fragment>
-        {row.processed ?
-          <CheckCircleIcon style={{color: green[500]}}/> :
-          <CancelIcon style={{color: red[500]}}/>}
-      </React.Fragment>
-    ),
-  },
-  {
-    field: 'on_time', headerName: 'On Time', width: 150, renderCell: ({row}) => (
-      <React.Fragment>
-        {(row?.timeStamp && row.timeStamp <= row.assignmentDue) ?
-          <CheckCircleIcon style={{color: green[500]}}/> :
-          <CancelIcon style={{color: red[500]}}/>}
-      </React.Fragment>
-    ),
-  },
-  {
-    field: 'timeStamp', headerName: 'Timestamp', width: 250, renderCell: ({row}) => (
-      row.created
-    ),
-  },
-]);
-
-
 export default function Submissions() {
   const classes = useStyles();
   const query = useQuery();
-  const columns = useColumns();
   const {enqueueSnackbar} = useSnackbar();
   const [rows, setRows] = useState([]);
   const [user, setUser] = useState(null);
@@ -135,25 +93,23 @@ export default function Submissions() {
   }
 
   return (
-    <StandardLayout title={`Submissions`}>
-      <Grid container spacing={4}>
-
-        {/* Questions */}
-        {!!assignmentId ? (
-          <Grid item xs={12}>
-            <Questions assignment_id={assignmentId}/>
-          </Grid>
-        ) : null}
-
-        {/* Table */}
-        {rows.map((row, index) => (
-          <>
-            {row?.tests && row?.commit &&
-                <SubmissionRow {...row} key={`${row.commit}-${index}`}/>
-            }
-          </>
-        ))}
-      </Grid>
+    <StandardLayout>
+      <SectionHeader title='Submissions' isPage />
+      <Box className={classes.divider} />
+      {rows.map((row, index) => (
+        <>
+          {row?.tests && row?.commit &&
+            <SubmissionItem
+              assignmentDue={row.assignmentDue}
+              assignmentName={row.assignment_name}
+              commit={row.commit}
+              processed={row.processed}
+              tests={row.tests}
+              timeStamp={row.timeStamp}
+            />
+          }
+        </>
+      ))}
     </StandardLayout>
 
   );
