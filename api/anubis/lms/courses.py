@@ -4,7 +4,7 @@ import json
 import string
 import traceback
 import urllib.parse
-from typing import Any, Dict, List, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from flask import g, request
 from werkzeug.local import LocalProxy
@@ -348,7 +348,7 @@ def get_courses(netid: str):
 
 
 @cache.memoize(timeout=60, unless=is_debug)
-def get_course_data(netid: str, course_id: str) -> Dict[str, Any]:
+def get_course_data(netid: str, course_id: str) -> Optional[Dict[str, Any]]:
     """
     Get course data and tas for course
 
@@ -365,7 +365,7 @@ def get_course_data(netid: str, course_id: str) -> Dict[str, Any]:
 
     # Course doesnt exist
     if course_id not in course_ids:
-        return {}
+        return None
 
     # Query for course with id
     course: Course = Course.query.filter(
