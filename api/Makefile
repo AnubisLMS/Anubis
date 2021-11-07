@@ -38,6 +38,7 @@ migrations: venv
 lint: venv
 	@echo 'black to stylize'
 	./venv/bin/black $(LINT_FILES)
+	./venv/bin/lint $(LINT_FILES)
 
 .PHONY: check
 check: venv				 # Run static checks without modifying files
