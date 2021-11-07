@@ -37,7 +37,7 @@ export default function Nav({classes, open, handleDrawerClose}) {
             className={classes.githubButton}
             startIcon={<GitHubIcon size="small"/>}
             component="a"
-            href="https://github.com/GusSand/Anubis"
+            href="https://github.com/AnubisLMS/Anubis"
             target="_blank"
             rel="noreferrer"
             size="small"
