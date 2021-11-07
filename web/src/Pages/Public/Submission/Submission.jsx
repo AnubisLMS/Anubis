@@ -128,10 +128,7 @@ export default function Submission() {
   };
 
   return (
-    <StandardLayout title={'Anubis Submission'} description={[
-      `Assignment: ${submission.assignment_name}`,
-      submission.commit,
-    ]}>
+    <StandardLayout >
       {modalTest && isExpanded &&
         <Box className={classes.backDrop} />
       }
