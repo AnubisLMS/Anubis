@@ -387,7 +387,7 @@ def get_course_data(netid: str, course_id: str) -> Optional[Dict[str, Any]]:
     return {**course_data, "tas": [
         {
             "name": ta.name,
-            "netid": ta.id,
+            "netid": ta.netid,
         }
         for ta in tas
     ]}
