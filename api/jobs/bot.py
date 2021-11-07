@@ -79,27 +79,17 @@ def get_course_theia_session_count(course) -> int:
 def generate_report() -> str:
     """
     Generate a report of the statuses of Anubis. The statuses are:
-                Course names and code
-                Number of active users this semester
-                Number of IDEs opened this semester
-                Number of students for each course
-                Number of IDES opened for each course
+        Course names and code
+        Number of students for each course
+        Number of IDES opened for each course
+        Number of active users this semester
+        Number of IDEs opened this semester
 
     :return: The text of the report
     """
 
     # Course List
     courses = get_courses()
-    data = [[course.name, course.course_code] for course in courses]
-    report = tabulate(data, headers=["Course Name", "Course Code"])
-
-    # Number of users enrolled in at least on class this semester
-    report += "\n\nTotal users enrolled in at least one course this semester\n"
-    report += f"{get_active_users_this_semester()}\n"
-
-    # Number of IDEs opened this semester
-    report += "\nTotal IDEs opened this semseter\n"
-    report += f"{get_ides_opened_this_semester()}\n\n"
 
     # Number of students, IDEs for each course
     data = [
@@ -111,9 +101,18 @@ def generate_report() -> str:
         ]
         for course in courses
     ]
-    report += tabulate(
-        data, headers=["Course Name", "Course Code", "Users enrolled", "IDES opened"]
+
+    report = tabulate(
+        data, headers=["Course Name", "Course Code", "Users", "IDEs opened"]
     )
+
+    # Number of users enrolled in at least one class this semester
+    report += "\n\nTotal users enrolled in at least one course this semester\n"
+    report += f"{get_active_users_this_semester()}"
+
+    # Number of IDEs opened this semester
+    report += "\n\nTotal IDEs opened this semseter\n"
+    report += f"{get_ides_opened_this_semester()}"
 
     return report
 
@@ -142,8 +141,8 @@ async def contribute(ctx, *args):
 
     :return:
     """
-    desc = "Thanks for your interest in contributing to Anubis! We're always looking for new people to help "
-    desc += "make Anubis even better. Please head to [our GitHub repo](https://github.com/anubislms/Anubis)."
+    desc = "Thanks for your interest in contributing to Anubis! We're always looking for new people to help"
+    desc += " make Anubis even better. Please head to [our GitHub repo](https://github.com/anubislms/Anubis)."
     emb = discord.Embed(
         title="Contributing to Anubis",
         description=desc,
@@ -158,9 +157,13 @@ async def helpCommand(ctx, *args):
 
     :return:
     """
-    emb = discord.Embed(title="Anubis Bot Help", description="")
+    emb = discord.Embed(title="Anubis Bot Help", description="").set_thumbnail(
+        url=bot.user.avatar_url
+    )
     for command in bot.commands:
-        emb.add_field(name=command.name, value=command.help, inline=True)
+        emb.add_field(
+            name=bot.command_prefix + command.name, value=command.help, inline=True
+        )
     await ctx.send(embed=emb)
 
 
