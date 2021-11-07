@@ -8,15 +8,7 @@ import traceback
 import requests
 
 from anubis.app import create_app
-from anubis.models import (
-    db,
-    User,
-    Course,
-    InCourse,
-    TAForCourse,
-    ProfessorForCourse,
-    AssignmentRepo,
-)
+from anubis.models import AssignmentRepo, Course, InCourse, ProfessorForCourse, TAForCourse, User, db
 from anubis.utils.data import with_context
 from anubis.utils.testing.seed import create_name, create_netid
 
@@ -46,9 +38,7 @@ def format_exception(e: Exception):
     exception_list = traceback.format_stack()
     exception_list = exception_list[:-2]
     exception_list.extend(traceback.format_tb(sys.exc_info()[2]))
-    exception_list.extend(
-        traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])
-    )
+    exception_list.extend(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1]))
 
     exception_str = "Traceback (most recent call last):\n"
     exception_str += "".join(exception_list)
@@ -61,13 +51,7 @@ def format_exception(e: Exception):
 
 def print_full_error(e, r):
     print("Printing only the traceback above the current stack frame")
-    print(
-        "".join(
-            traceback.format_exception(
-                sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
-            )
-        )
-    )
+    print("".join(traceback.format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])))
     print()
     print("Printing the full traceback as if we had not caught it here...")
     print()
@@ -122,9 +106,7 @@ def create_user(permission: str = "superuser", add_to_os: bool = True):
     return netid
 
 
-def _create_user_session(
-    url: str, netid: str = "superuser", new: bool = False, add_to_os: bool = True
-):
+def _create_user_session(url: str, netid: str = "superuser", new: bool = False, add_to_os: bool = True):
     """
     Create a new user on the backend
 
@@ -150,9 +132,7 @@ def _create_user_session(
         admin_for = data["data"]["user"]["admin_for"]
         for i in admin_for:
             if i["name"] == "Intro to OS":
-                session.cookies["course"] = base64.urlsafe_b64encode(
-                    json.dumps(i).encode()
-                ).decode()
+                session.cookies["course"] = base64.urlsafe_b64encode(json.dumps(i).encode()).decode()
     except AssertionError as e:
         print_full_error(e, r)
     return session, netid
@@ -179,9 +159,7 @@ class Session(object):
     ):
         self.url = f"http://{domain}:{port}"
         self.timings = []
-        self._session, self.netid = _create_user_session(
-            self.url, permission, new=new, add_to_os=add_to_os
-        )
+        self._session, self.netid = _create_user_session(self.url, permission, new=new, add_to_os=add_to_os)
 
     @staticmethod
     def _verify_success(r):
@@ -319,8 +297,8 @@ def run_main(func):
 
 @with_context
 def create_repo(s: Session, assignment_id: str = None):
-    from anubis.utils.cache import cache
     from anubis.lms.repos import get_repos
+    from anubis.utils.cache import cache
 
     if assignment_id is None:
         assignments = s.get("/public/assignments/list")["assignments"]
@@ -344,9 +322,7 @@ def get_student_id():
     return student.id
 
 
-def permission_test(
-    path, fail_for: list = None, method="get", after: callable = None, **kwargs
-):
+def permission_test(path, fail_for: list = None, method="get", after: callable = None, **kwargs):
     def _test_permission(_path, _fail_for, _method, _after, **_kwargs):
         sessions = {
             "student": Session("student"),

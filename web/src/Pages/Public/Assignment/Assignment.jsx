@@ -13,8 +13,8 @@ import Divider from '@material-ui/core/Divider';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
 
+import SubmissionItem from '../../../Components/Public/SubmissionItem/SubmissionItem';
 import SubmissionRow from '../Submissions/SubmissionRow/SubmissionRow';
-import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import StandardLayout from '../../../Components/Layouts/StandardLayout';
 import {useStyles} from './Assignment.styles';
@@ -35,10 +35,6 @@ const Assignment = () => {
   const assignmentId = query.get('assignmentId');
   const courseId = query.get('courseId');
   const userId = query.get('userId');
-
-  const handleTabChange = (event, newValue) => {
-    setTab(newValue);
-  };
 
   useEffect(() => {
     axios.get(`/api/public/submissions/`, {
@@ -69,7 +65,7 @@ const Assignment = () => {
     <StandardLayout>
       {assignment && (
         <Box className={classes.root}>
-          <Box position="sticky" top={52} className={classes.header}>
+          <Box position="sticky" top={42} className={classes.header}>
             <Box className={classes.headerLeft}>
               <Box className={classes.iconOuterCircle}>
                 <Box className={classes.iconInnerCircle}>
@@ -171,7 +167,16 @@ const Assignment = () => {
                 </Box>
               }
               {submissions && submissions.map((submission, index) => (
-                <SubmissionRow key={`${submission.commit}-${index}`} {...submission} />
+                <SubmissionItem
+                  key={`${submission.submission_name}-${index}`}
+                  assignmentDue={submission.assignmentDue}
+                  assignmentName={submission.assignment_name}
+                  commit={submission.commit}
+                  processed={submission.processed}
+                  tests={submission.tests}
+                  timeStamp={submission.timeStamp}
+                />
+
               ))}
             </Box>
           </Box>

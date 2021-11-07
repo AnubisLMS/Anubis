@@ -3,23 +3,14 @@ from typing import Union
 
 from flask import Blueprint, request
 
-from anubis.models import (
-    Assignment,
-    User,
-    AssignmentRepo,
-    db,
-    Course,
-    InCourse,
-    Submission,
-)
-from anubis.utils.data import is_debug, req_assert
-from anubis.utils.http.decorators import json_response
-from anubis.utils.http import error_response, success_response
 from anubis.lms.assignments import get_assignment_due_date
-from anubis.lms.submissions import get_submissions
-from anubis.lms.submissions import reject_late_submission, init_submission
-from anubis.lms.webhook import parse_webhook, guess_github_username, check_repo
+from anubis.lms.submissions import get_submissions, init_submission, reject_late_submission
+from anubis.lms.webhook import check_repo, guess_github_username, parse_webhook
+from anubis.models import Assignment, AssignmentRepo, Course, InCourse, Submission, User, db
 from anubis.utils.cache import cache
+from anubis.utils.data import is_debug, req_assert
+from anubis.utils.http import error_response, success_response
+from anubis.utils.http.decorators import json_response
 from anubis.utils.logging import logger
 from anubis.utils.rpc import enqueue_autograde_pipeline
 
@@ -68,14 +59,10 @@ def public_webhook():
     )
 
     # Load the basics from the webhook
-    repo_url, repo_name, pusher_username, commit, before, ref = parse_webhook(
-        request.json
-    )
+    repo_url, repo_name, pusher_username, commit, before, ref = parse_webhook(request.json)
 
     # Attempt to find records for the relevant models
-    assignment = Assignment.query.filter(
-        Assignment.unique_code.in_(repo_name.split("-"))
-    ).first()
+    assignment = Assignment.query.filter(Assignment.unique_code.in_(repo_name.split("-"))).first()
 
     # Verify that we can match this push to an assignment
     req_assert(assignment is not None, message="assignment not found", status_code=406)
@@ -185,9 +172,7 @@ def public_webhook():
     if assignment.autograde_enabled:
 
         # Check that the current assignment is still accepting submissions
-        if not assignment.accept_late and datetime.now() < get_assignment_due_date(
-            user, assignment, grace=True
-        ):
+        if not assignment.accept_late and datetime.now() < get_assignment_due_date(user, assignment, grace=True):
             reject_late_submission(submission)
 
     else:
@@ -204,8 +189,6 @@ def public_webhook():
     # Delete cached submissions
     cache.delete_memoized(get_submissions, user.netid)
     cache.delete_memoized(get_submissions, user.netid, assignment.course_id)
-    cache.delete_memoized(
-        get_submissions, user.netid, assignment.course_id, assignment.id
-    )
+    cache.delete_memoized(get_submissions, user.netid, assignment.course_id, assignment.id)
 
     return success_response("submission accepted")

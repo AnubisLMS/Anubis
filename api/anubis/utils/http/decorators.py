@@ -1,10 +1,10 @@
 from functools import wraps
-from typing import Union, List, Tuple
+from typing import List, Tuple, Union
 
 from flask import request
 
 from anubis.utils.auth.user import current_user
-from anubis.utils.data import jsonify, _verify_data_shape
+from anubis.utils.data import _verify_data_shape, jsonify
 from anubis.utils.exceptions import AuthenticationError
 from anubis.utils.http import error_response
 
@@ -168,9 +168,7 @@ def json_endpoint(
                         # field missing, return error
                         # Not Acceptable
                         return (
-                            error_response(
-                                f"Malformed requests. Missing field {field}."
-                            ),
+                            error_response(f"Malformed requests. Missing field {field}."),
                             406,
                         )
 
@@ -181,9 +179,7 @@ def json_endpoint(
                         if not isinstance(json_body[field], required_type):
                             # Not Acceptable
                             return (
-                                error_response(
-                                    "Malformed requests. Invalid field type."
-                                ),
+                                error_response("Malformed requests. Invalid field type."),
                                 406,
                             )
 

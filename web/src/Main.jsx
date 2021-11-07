@@ -29,7 +29,7 @@ export default function Main({user}) {
         </Route>
       ))}
       <Route exact path={'/'}>
-        <Redirect to={'/about'}/>
+        <Redirect to={'/visuals'}/>
       </Route>
       <Route>
         <NotFound/>

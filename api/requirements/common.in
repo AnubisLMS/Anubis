@@ -1,3 +1,5 @@
+# Requirements for running the flask api server
+
 alembic
 cryptography
 docker

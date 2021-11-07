@@ -4,6 +4,7 @@
 2. [Commit Message Guidelines](#commit-message-guidelines)
 3. [Issues](#issues)
 4. [Pull Requests](#pull-requests)
+5. [Code Style](#code-style)
 
 ## Descriptive Suffixes
 
@@ -50,6 +51,14 @@ Please make sure that your changes are clearly described in the description of t
 
 Please make sure your PR title starts with an all caps descriptive suffix from above.
 
+
+## Code Style
+
+We use several lint tools to keep our code style consistent.
+
+For the frontend, we use [eslint](https://eslint.org/), yet we are not super strict about that.
+
+For the backend, we use [black](https://black.readthedocs.io/en/stable/index.html) and [isort](https://pycqa.github.io/isort/). Please make sure that you run `make lint` in the `/api` directory before committing your changes.
 
 ## Developer's Certificate of Origin 1.1
 

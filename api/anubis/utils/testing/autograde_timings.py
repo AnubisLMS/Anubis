@@ -1,35 +1,31 @@
 import time
+
+from anubis.lms.autograde import bulk_autograde
+from anubis.lms.questions import assign_questions
 from anubis.models import (
-    db,
-    SubmissionTestResult,
-    SubmissionBuild,
-    Submission,
+    AssignedQuestionResponse,
+    AssignedStudentQuestion,
+    Assignment,
+    AssignmentQuestion,
     AssignmentRepo,
     AssignmentTest,
-    InCourse,
-    Assignment,
     Course,
-    User,
-    TheiaSession,
-    AssignmentQuestion,
-    AssignedStudentQuestion,
-    AssignedQuestionResponse,
-    TAForCourse,
-    ProfessorForCourse,
-    StaticFile,
+    InCourse,
     LateException,
     LectureNotes,
+    ProfessorForCourse,
+    StaticFile,
+    Submission,
+    SubmissionBuild,
+    SubmissionTestResult,
+    TAForCourse,
+    TheiaSession,
+    User,
+    db,
 )
 from anubis.utils.data import with_context
-from anubis.lms.questions import assign_questions
-from anubis.utils.testing.seed import (
-    create_assignment,
-    create_students,
-    create_course,
-    init_submissions,
-)
 from anubis.utils.logging import logger
-from anubis.lms.autograde import bulk_autograde
+from anubis.utils.testing.seed import create_assignment, create_course, create_students, init_submissions
 
 
 def do_seed() -> str:
@@ -89,9 +85,7 @@ def main():
 
     n = 10
     timings = []
-    print(
-        f"Running bulk autograde on assignment {n} times [ 5K submissions, across 50 students ]"
-    )
+    print(f"Running bulk autograde on assignment {n} times [ 5K submissions, across 50 students ]")
     for i in range(n):
         print(f"autograde pass {i+1}/{n} ", end="", flush=True)
         db.session.expunge_all()

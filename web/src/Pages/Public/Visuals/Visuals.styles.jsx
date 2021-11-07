@@ -12,4 +12,13 @@ export const useStyles = makeStyles((theme) => ({
   button: {
     margin: theme.spacing(2, 1),
   },
+  autocomplete: {
+    paddingBottom: theme.spacing(1),
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
+  },
+  paper: {
+    flex: 1,
+    padding: theme.spacing(1),
+  },
 }));

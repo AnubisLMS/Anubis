@@ -33,9 +33,7 @@ def test_courses_admin():
             return_request=True,
         ),
     )
-    superuser.get(
-        f"/admin/courses/make/ta/{student_id}", skip_verify=True, return_request=True
-    )
+    superuser.get(f"/admin/courses/make/ta/{student_id}", skip_verify=True, return_request=True)
     permission_test(
         f"/admin/courses/remove/ta/{student_id}",
         after=lambda: superuser.get(

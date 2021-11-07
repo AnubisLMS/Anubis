@@ -5,16 +5,9 @@ from rq import Queue
 
 from anubis.config import config
 from anubis.rpc.lms import assign_missing_questions
-from anubis.rpc.pipeline import (
-    create_submission_pipeline,
-    reap_stale_submission_pipelines,
-)
+from anubis.rpc.pipeline import create_submission_pipeline, reap_stale_submission_pipelines
 from anubis.rpc.seed import seed
-from anubis.rpc.theia import (
-    initialize_theia_session,
-    reap_theia_session_by_id,
-    reap_stale_theia_sessions,
-)
+from anubis.rpc.theia import initialize_theia_session, reap_stale_theia_sessions, reap_theia_session_by_id
 from anubis.rpc.visualizations import create_visuals as create_visuals_
 
 
@@ -42,9 +35,7 @@ def rpc_enqueue(func, queue=None, args=None):
             print(traceback.format_exc())
             return
 
-    with Redis(
-        host=config.CACHE_REDIS_HOST, password=config.CACHE_REDIS_PASSWORD
-    ) as conn:
+    with Redis(host=config.CACHE_REDIS_HOST, password=config.CACHE_REDIS_PASSWORD) as conn:
         q = Queue(name=queue, connection=conn)
         q.enqueue(func, *args)
         conn.close()

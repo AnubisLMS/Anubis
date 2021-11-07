@@ -1,17 +1,17 @@
-from typing import List, Any, Dict
+from typing import Any, Dict, List
 
 import numpy as np
 import pandas as pd
 
-from anubis.models import db, AssignmentTest, Assignment, User, TheiaSession, Submission
-from anubis.utils.data import is_debug, is_job
 from anubis.lms.autograde import bulk_autograde
+from anubis.models import Assignment, AssignmentTest, Submission, TheiaSession, User, db
 from anubis.utils.cache import cache
+from anubis.utils.data import is_debug, is_job
 from anubis.utils.visuals.queries import (
-    time_to_pass_test_sql,
-    assignment_test_fail_nosub_sql,
     assignment_test_fail_count_sql,
+    assignment_test_fail_nosub_sql,
     assignment_test_pass_count_sql,
+    time_to_pass_test_sql,
 )
 
 
@@ -26,9 +26,7 @@ def get_admin_assignment_visual_data(assignment_id: str) -> List[Dict[str, Any]]
     """
 
     # Get all the assignment tests for the specified assignment
-    assignment_tests = AssignmentTest.query.filter(
-        AssignmentTest.assignment_id == assignment_id
-    ).all()
+    assignment_tests = AssignmentTest.query.filter(AssignmentTest.assignment_id == assignment_id).all()
 
     # Build a list of visual data for each assignment test
     response = []
@@ -71,11 +69,7 @@ def get_assignment_tests_pass_times(assignment_test: AssignmentTest):
     )
 
     # Drop outlier values (> 3 sigma)
-    df = (
-        df[np.abs(df.duration - df.duration.mean()) <= (3 * df.duration.std())]
-        .value_counts()
-        .to_dict()
-    )
+    df = df[np.abs(df.duration - df.duration.mean()) <= (3 * df.duration.std())].value_counts().to_dict()
 
     # Return the x and y plot data for the scatter visual
     return [{"x": np.abs(x[0]), "y": y, "size": 3} for x, y in df.items()]
@@ -289,15 +283,11 @@ def get_assignment_sundial(assignment_id):
 
                 # If this student passed this test, then increment the tests passed value
                 if test_name in tests_passed:
-                    sundial["children"][0]["children"][index]["children"][0][
-                        "value"
-                    ] += 1
+                    sundial["children"][0]["children"][index]["children"][0]["value"] += 1
 
                 # If this student failed this test, then increment the tests failed value
                 else:
-                    sundial["children"][0]["children"][index]["children"][1][
-                        "value"
-                    ] += 1
+                    sundial["children"][0]["children"][index]["children"][1]["value"] += 1
 
             continue
 

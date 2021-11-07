@@ -63,9 +63,7 @@ def move_responses_down():
                 "update assigned_student_question set response = %s, last_updated = %s  where id = %s;",
                 (response, last_updated, assigned_question_id),
             )
-            conn.execute(
-                "delete from asigned_student_response where id = %s;", (response_id,)
-            )
+            conn.execute("delete from asigned_student_response where id = %s;", (response_id,))
 
 
 def upgrade():

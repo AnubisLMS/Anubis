@@ -10,9 +10,7 @@ settings_sample = {
 
 
 def test_ide_admin():
-    permission_test(
-        "/admin/ide/initialize", method="post", json={"settings": settings_sample}
-    )
+    permission_test("/admin/ide/initialize", method="post", json={"settings": settings_sample})
     permission_test("/admin/ide/active")
     permission_test("/admin/ide/list")
     permission_test("/admin/ide/reap-all")

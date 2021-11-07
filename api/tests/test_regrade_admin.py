@@ -1,5 +1,6 @@
-from anubis.models import Submission
 from utils import Session, permission_test, with_context
+
+from anubis.models import Submission
 
 
 @with_context

@@ -3,13 +3,13 @@ from datetime import datetime
 from dateutil.parser import parse as date_parse
 from flask import Blueprint, request
 
-from anubis.models import db, LectureNotes
+from anubis.lms.courses import assert_course_context, course_context
+from anubis.models import LectureNotes, db
 from anubis.utils.auth.http import require_admin
 from anubis.utils.data import req_assert
+from anubis.utils.http import get_request_file_stream, success_response
 from anubis.utils.http.decorators import json_response
-from anubis.utils.http.files import process_file_upload, get_mime_type
-from anubis.utils.http import success_response, get_request_file_stream
-from anubis.lms.courses import course_context, assert_course_context
+from anubis.utils.http.files import get_mime_type, process_file_upload
 
 lectures_ = Blueprint("admin-lectures", __name__, url_prefix="/admin/lectures")
 
@@ -28,9 +28,9 @@ def admin_static_lectures_list():
 
     # Build Query. Defer the blob field so
     # it is not loaded.
-    query = LectureNotes.query.filter(
-        LectureNotes.course_id == course_context.id
-    ).order_by(LectureNotes.post_time.desc())
+    query = LectureNotes.query.filter(LectureNotes.course_id == course_context.id).order_by(
+        LectureNotes.post_time.desc()
+    )
 
     # Get all public static files within this course
     lectures = query.all()

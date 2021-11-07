@@ -46,9 +46,7 @@ def upgrade():
         ),
         sa.PrimaryKeyConstraint("owner_id", "course_id"),
     )
-    op.alter_column(
-        "assignment", "name", existing_type=mysql.MEDIUMTEXT(), nullable=False
-    )
+    op.alter_column("assignment", "name", existing_type=mysql.MEDIUMTEXT(), nullable=False)
     op.alter_column(
         "assignment_repo",
         "github_username",
@@ -68,9 +66,7 @@ def upgrade():
         nullable=False,
     )
     op.alter_column("course", "name", existing_type=mysql.MEDIUMTEXT(), nullable=False)
-    op.alter_column(
-        "course", "professor", existing_type=mysql.MEDIUMTEXT(), nullable=False
-    )
+    op.alter_column("course", "professor", existing_type=mysql.MEDIUMTEXT(), nullable=False)
     op.drop_column("user", "is_admin")
     # ### end Alembic commands ###
 
@@ -86,9 +82,7 @@ def downgrade():
             nullable=False,
         ),
     )
-    op.alter_column(
-        "course", "professor", existing_type=mysql.MEDIUMTEXT(), nullable=True
-    )
+    op.alter_column("course", "professor", existing_type=mysql.MEDIUMTEXT(), nullable=True)
     op.alter_column("course", "name", existing_type=mysql.MEDIUMTEXT(), nullable=True)
     op.alter_column(
         "course",
@@ -108,9 +102,7 @@ def downgrade():
         existing_type=mysql.MEDIUMTEXT(),
         nullable=True,
     )
-    op.alter_column(
-        "assignment", "name", existing_type=mysql.MEDIUMTEXT(), nullable=True
-    )
+    op.alter_column("assignment", "name", existing_type=mysql.MEDIUMTEXT(), nullable=True)
     op.drop_table("ta_for_course")
     op.drop_table("professor_for_course")
     # ### end Alembic commands ###

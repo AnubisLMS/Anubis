@@ -1,25 +1,25 @@
 from datetime import datetime
-from typing import List, Union, Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
+from anubis.lms.assignments import get_assignment_due_date
 from anubis.models import (
-    db,
-    User,
-    Course,
-    Submission,
-    AssignmentRepo,
-    SubmissionTestResult,
-    AssignmentTest,
-    SubmissionBuild,
     Assignment,
+    AssignmentRepo,
+    AssignmentTest,
+    Course,
     InCourse,
+    Submission,
+    SubmissionBuild,
+    SubmissionTestResult,
+    User,
+    db,
 )
 from anubis.rpc.batch import rpc_bulk_regrade
+from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, split_chunks
 from anubis.utils.http import error_response, success_response
-from anubis.lms.assignments import get_assignment_due_date
-from anubis.utils.cache import cache
 from anubis.utils.logging import logger
-from anubis.utils.rpc import rpc_enqueue, enqueue_autograde_pipeline
+from anubis.utils.rpc import enqueue_autograde_pipeline, rpc_enqueue
 
 
 def bulk_regrade_submissions(submissions: List[Submission]) -> List[dict]:
@@ -40,9 +40,7 @@ def bulk_regrade_submissions(submissions: List[Submission]) -> List[dict]:
     return response
 
 
-def regrade_submission(
-    submission: Union[Submission, str], queue: str = "default"
-) -> dict:
+def regrade_submission(submission: Union[Submission, str], queue: str = "default") -> dict:
     """
     Regrade a submission
 
@@ -107,9 +105,7 @@ def fix_dangling():
     # Iterate over all dangling repos
     for dangling_repo in dangling_repos:
         # Attempt to find an owner
-        owner = User.query.filter(
-            User.github_username == dangling_repo.github_username
-        ).first()
+        owner = User.query.filter(User.github_username == dangling_repo.github_username).first()
 
         # If an owner was found, then fix it
         if owner is not None:
@@ -130,15 +126,10 @@ def fix_dangling():
                 fixed.append(submission.data)
 
                 # Get the due date
-                due_date = get_assignment_due_date(
-                    owner.id, dangling_repo.assignment.id
-                )
+                due_date = get_assignment_due_date(owner.id, dangling_repo.assignment.id)
 
                 # Check if the submission should be accepted
-                if (
-                    dangling_repo.assignment.accept_late
-                    and submission.created < due_date
-                ):
+                if dangling_repo.assignment.accept_late and submission.created < due_date:
                     # Enqueue a autograde job for the submission
                     enqueue_autograde_pipeline(submission.id)
 
@@ -152,14 +143,10 @@ def fix_dangling():
     # Iterate through all submissions lacking an owner
     for submission in dangling_submissions:
         # Try to find a repo to match
-        dangling_repo = AssignmentRepo.query.filter(
-            AssignmentRepo.id == submission.assignment_repo_id
-        ).first()
+        dangling_repo = AssignmentRepo.query.filter(AssignmentRepo.id == submission.assignment_repo_id).first()
 
         # Try to find an owner student
-        owner = User.query.filter(
-            User.github_username == dangling_repo.github_username
-        ).first()
+        owner = User.query.filter(User.github_username == dangling_repo.github_username).first()
 
         # If an owner was found, then fix and regrade all relevant
         if owner is not None:
@@ -341,9 +328,7 @@ def init_submission(submission: Submission, commit: bool = True):
     logger.debug("found tests: {}".format(list(map(lambda x: x.data, tests))))
 
     for test in tests:
-        tr = SubmissionTestResult(
-            submission_id=submission.id, assignment_test_id=test.id
-        )
+        tr = SubmissionTestResult(submission_id=submission.id, assignment_test_id=test.id)
         db.session.add(tr)
     sb = SubmissionBuild(submission_id=submission.id)
     db.session.add(sb)

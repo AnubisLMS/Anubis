@@ -1,4 +1,4 @@
-from utils import Session, permission_test, get_student_id
+from utils import Session, get_student_id, permission_test
 
 
 def test_autograde_admin():

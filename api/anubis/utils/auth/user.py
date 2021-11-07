@@ -1,5 +1,5 @@
 import traceback
-from typing import Union, Callable, Optional, Any
+from typing import Any, Callable, Optional, Union
 
 import jwt
 from flask import g

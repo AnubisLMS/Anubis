@@ -3,13 +3,7 @@ from typing import List
 
 from sqlalchemy.sql import or_
 
-from anubis.models import (
-    db,
-    User,
-    Assignment,
-    Submission,
-    AssignmentRepo,
-)
+from anubis.models import Assignment, AssignmentRepo, Submission, User, db
 from anubis.utils.github.api import github_graphql
 from anubis.utils.github.repos import create_assignment_repo
 from anubis.utils.logging import logger
@@ -36,9 +30,7 @@ def fix_github_broken_repos():
         assignment: Assignment = repo.assignment
 
         # Log fix event
-        logger.info(
-            f"Attempting to fix broken repo netid={student.netid} assignment={assignment.unique_code}"
-        )
+        logger.info(f"Attempting to fix broken repo netid={student.netid} assignment={assignment.unique_code}")
 
         # The create assignment repo function will attempt
         # to fix missing steps.
@@ -99,9 +91,7 @@ def fix_github_missing_submissions(org_name: str):
 
         # If not in the map, then try to get from the database
         if assignment is None:
-            assignment = Assignment.query.filter(
-                Assignment.unique_code.in_(repo_name.split("-"))
-            ).first()
+            assignment = Assignment.query.filter(Assignment.unique_code.in_(repo_name.split("-"))).first()
 
             if assignment is not None:
                 assignments[assignment.unique_code] = assignment
@@ -120,9 +110,7 @@ def fix_github_missing_submissions(org_name: str):
 
         # Check for broken submissions
         submissions = []
-        for submission in Submission.query.filter(
-            Submission.assignment_repo_id == repo.id
-        ).all():
+        for submission in Submission.query.filter(Submission.assignment_repo_id == repo.id).all():
             if submission is None:
                 continue
             if submission.owner_id != user.id:
@@ -134,9 +122,7 @@ def fix_github_missing_submissions(org_name: str):
             enqueue_autograde_pipeline(sid)
 
         # Check for missing submissions
-        for commit in map(
-            lambda x: x["node"]["oid"], ref["target"]["history"]["edges"]
-        ):
+        for commit in map(lambda x: x["node"]["oid"], ref["target"]["history"]["edges"]):
             submission = Submission.query.filter(Submission.commit == commit).first()
             if submission is None:
                 print(f"found missing submission {github_username} {commit}")
@@ -158,9 +144,7 @@ def fix_github_missing_submissions(org_name: str):
                 print(f"fixing broken repo owner {r.id}")
                 r.owner_id = user.id
                 submissions = []
-                for submission in Submission.query.filter(
-                    Submission.assignment_repo_id == r.id
-                ).all():
+                for submission in Submission.query.filter(Submission.assignment_repo_id == r.id).all():
                     submission.owner_id = user.id
                     submissions.append(submission.id)
 

@@ -14,7 +14,6 @@ export const useStyles = makeStyles((theme) => ({
     width: '100%',
     display: 'flex',
     flexDirection: 'row',
-    backgroundColor: theme.palette.dark.blue['200'],
     borderBottom: `1px solid ${theme.palette.dark.blue['200']}`,
     borderRadius: `${theme.spacing(1)}px ${theme.spacing(1)}px 0px 0px`,
     alignItems: 'center',

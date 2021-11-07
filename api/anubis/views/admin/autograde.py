@@ -1,19 +1,15 @@
 from flask import Blueprint, request
 from sqlalchemy.sql import or_
 
-from anubis.models import Submission, Assignment, User, InCourse
-from anubis.utils.auth.http import require_admin
-from anubis.utils.data import req_assert
-from anubis.utils.http.decorators import json_response
-from anubis.utils.http import success_response, get_number_arg
-from anubis.lms.autograde import (
-    bulk_autograde,
-    autograde,
-    autograde_submission_result_wrapper,
-)
+from anubis.lms.autograde import autograde, autograde_submission_result_wrapper, bulk_autograde
 from anubis.lms.courses import assert_course_context
 from anubis.lms.questions import get_assigned_questions
+from anubis.models import Assignment, InCourse, Submission, User
+from anubis.utils.auth.http import require_admin
 from anubis.utils.cache import cache
+from anubis.utils.data import req_assert
+from anubis.utils.http import get_number_arg, success_response
+from anubis.utils.http.decorators import json_response
 from anubis.utils.visuals.assignments import (
     get_admin_assignment_visual_data,
     get_assignment_history,
@@ -116,9 +112,7 @@ def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
     force = request.args.get("force", default="no") != "no"
 
     # Pull the assignment object
-    assignment = Assignment.query.filter(
-        or_(Assignment.id == assignment_id, Assignment.name == assignment_id)
-    ).first()
+    assignment = Assignment.query.filter(or_(Assignment.id == assignment_id, Assignment.name == assignment_id)).first()
 
     # Verify that we got an assignment
     req_assert(assignment is not None, "assignment does not exist")

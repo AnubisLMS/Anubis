@@ -3,7 +3,7 @@ import {makeStyles} from '@material-ui/core/styles';
 export const useStyles = makeStyles((theme) => ({
   root: {},
   header: {
-    paddingTop: theme.spacing(1),
+    paddingTop: theme.spacing(2),
     backgroundColor: theme.palette.dark.black,
     borderBottom: `1px solid ${theme.palette.gray['200']}`,
     display: 'flex',
