@@ -56,5 +56,5 @@ autograde-timings: venv
 
 .PHONY: requirements
 requirements: venv
-	pip-compile --quiet --allow-unsafe requirements/common.in
-	pip-compile --quiet --allow-unsafe requirements/dev.in
+	pip-compile --quiet requirements/common.in
+	pip-compile --quiet requirements/dev.in
