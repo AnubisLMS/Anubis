@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 from flask import Blueprint
 
 from anubis.lms.assignments import get_assignments
-from anubis.lms.courses import get_courses, get_courses_with_visuals, valid_join_code
+from anubis.lms.courses import get_courses, get_courses_with_visuals, valid_join_code, get_course_data
 from anubis.models import Course, InCourse, db
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
@@ -36,6 +36,24 @@ def public_courses_list():
     # student is in. This information
     # is possibly cached.
     return success_response({"courses": courses})
+
+
+@courses_.route("/get/<string:course_id>")
+@require_user()
+@json_response
+def public_courses_get(course_id):
+    """
+    Get course information by course id with tas
+    This required authentication.
+
+    :return:
+    """
+    course_data = get_course_data(current_user.netid, course_id)
+
+    if not course_data:
+        return error_response('Course does not exist')
+
+    return success_response({"course": course_data})
 
 
 @courses_.route("/join/<string:join_code>")
