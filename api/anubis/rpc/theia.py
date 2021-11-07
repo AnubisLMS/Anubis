@@ -1,16 +1,16 @@
-from kubernetes import config, client
+from kubernetes import client, config
 
-from anubis.models import db, TheiaSession
-from anubis.utils.config import get_config_int
-from anubis.utils.data import with_context
 from anubis.k8s.theia import (
-    update_theia_pod_cluster_addresses,
-    fix_stale_theia_resources,
     create_theia_k8s_pod_pvc,
+    fix_stale_theia_resources,
+    list_theia_pods,
     reap_old_theia_sessions,
     reap_theia_session,
-    list_theia_pods,
+    update_theia_pod_cluster_addresses,
 )
+from anubis.models import TheiaSession, db
+from anubis.utils.config import get_config_int
+from anubis.utils.data import with_context
 from anubis.utils.logging import logger
 
 
@@ -62,9 +62,7 @@ def initialize_theia_session(theia_session_id: str):
 
         # If there are too many active pods, recycle the job through the queue.
         logger.info(
-            "Maximum IDEs currently running. Re-enqueuing session_id={} initialized request".format(
-                theia_session_id
-            )
+            "Maximum IDEs currently running. Re-enqueuing session_id={} initialized request".format(theia_session_id)
         )
 
         # Re-enqueue this initialization job, then return
@@ -104,9 +102,7 @@ def initialize_theia_session(theia_session_id: str):
         try:
             # This function will throw a 404 client.exceptions.ApiException
             # if the pvc does not exist
-            v1.read_namespaced_persistent_volume_claim(
-                namespace="anubis", name=pvc.metadata.name
-            )
+            v1.read_namespaced_persistent_volume_claim(namespace="anubis", name=pvc.metadata.name)
             logger.info(f"PVC for user already exists: {pvc.metadata.name}")
 
         # Catch the exception thrown if the pvc does not exist
@@ -152,11 +148,7 @@ def reap_theia_session_by_id(theia_session_id: str):
 
     # Make sure that we have a record for this session
     if theia_session is None:
-        logger.error(
-            "Could not find theia session {} when attempting to delete".format(
-                theia_session_id
-            )
-        )
+        logger.error("Could not find theia session {} when attempting to delete".format(theia_session_id))
         return
 
     # Reap the session

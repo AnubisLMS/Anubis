@@ -1,6 +1,6 @@
 import os
 import traceback
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 import requests
 
@@ -56,9 +56,7 @@ def github_rest(url, body=None, method: str = "get"):
         return None
 
 
-def github_graphql(
-    query: str, variables: Dict[str, Any] = None
-) -> Optional[Dict[str, Any]]:
+def github_graphql(query: str, variables: Dict[str, Any] = None) -> Optional[Dict[str, Any]]:
 
     # Default values for variables
     if variables is None:

@@ -1,18 +1,18 @@
 import base64
 import traceback
 from datetime import datetime, timedelta
-from typing import Tuple, Optional, List
+from typing import List, Optional, Tuple
 
-from kubernetes import config, client
+from kubernetes import client, config
 
-from anubis.models import db, TheiaSession, Course
-from anubis.utils.auth.token import create_token
-from anubis.lms.theia import get_theia_pod_name, mark_session_ended
 from anubis.lms.courses import get_course_admin_ids
-from anubis.utils.logging import logger
-from anubis.utils.github.parse import parse_github_repo_name
+from anubis.lms.theia import get_theia_pod_name, mark_session_ended
+from anubis.models import Course, TheiaSession, db
+from anubis.utils.auth.token import create_token
 from anubis.utils.config import get_config_int, get_config_str
 from anubis.utils.data import is_debug
+from anubis.utils.github.parse import parse_github_repo_name
+from anubis.utils.logging import logger
 
 
 def create_theia_k8s_pod_pvc(
@@ -52,9 +52,7 @@ def create_theia_k8s_pod_pvc(
 
     # Get the theia session options
     limits = theia_session.resources.get("limits", {"cpu": "2", "memory": "500Mi"})
-    requests = theia_session.resources.get(
-        "requests", {"cpu": "250m", "memory": "100Mi"}
-    )
+    requests = theia_session.resources.get("requests", {"cpu": "250m", "memory": "100Mi"})
     autosave = theia_session.autosave
     credentials = theia_session.credentials
     privileged = theia_session.privileged
@@ -86,9 +84,7 @@ def create_theia_k8s_pod_pvc(
             git_secret: client.V1Secret = v1.read_namespaced_secret("git", "anubis")
 
             # Decode git token
-            git_token = base64.b64decode(git_secret.data["token"].encode()).decode(
-                "utf-8", "ignore"
-            )
+            git_token = base64.b64decode(git_secret.data["token"].encode()).decode("utf-8", "ignore")
 
             # If git token is DEBUG, then we should not pass it to the init and sidecar
             if git_token == "DEBUG":
@@ -107,14 +103,12 @@ def create_theia_k8s_pod_pvc(
             # Attempt to read the anubis secret from the anubis namespace.
             # This will throw client.exceptions.ApiException(404) if
             # the secret is not available.
-            anubis_secret: client.V1Secret = v1.read_namespaced_secret(
-                "anubis", "anubis"
-            )
+            anubis_secret: client.V1Secret = v1.read_namespaced_secret("anubis", "anubis")
 
             # Decode git token
-            docker_config_json = base64.b64decode(
-                anubis_secret.data[".dockerconfigjson"].encode()
-            ).decode("utf-8", "ignore")
+            docker_config_json = base64.b64decode(anubis_secret.data[".dockerconfigjson"].encode()).decode(
+                "utf-8", "ignore"
+            )
 
             # If git token is DEBUG, then we should not pass it to the init and sidecar
             if docker_config_json == "DEBUG":
@@ -140,9 +134,7 @@ def create_theia_k8s_pod_pvc(
         # The storage class to be used on prod is probably going to be longhorn. Regardless,
         # we'll want to be able to set this on the fly from a config value. If we default
         # to None, then the cluster default storage class will be used.
-        theia_storage_class_name = get_config_str(
-            "THEIA_STORAGE_CLASS_NAME", default=None
-        )
+        theia_storage_class_name = get_config_str("THEIA_STORAGE_CLASS_NAME", default=None)
 
         # Create the persistent volume claim object. Since this is a
         # ReadWriteMany volume, the default storage class should
@@ -195,9 +187,7 @@ def create_theia_k8s_pod_pvc(
             client.V1EnvVar(
                 name="GIT_CRED",
                 value_from=client.V1EnvVarSource(
-                    secret_key_ref=client.V1SecretKeySelector(
-                        name="git", key="credentials"
-                    )
+                    secret_key_ref=client.V1SecretKeySelector(name="git", key="credentials")
                 ),
             ),
         )
@@ -210,9 +200,7 @@ def create_theia_k8s_pod_pvc(
             client.V1EnvVar(
                 name="GIT_CRED",
                 value_from=client.V1EnvVarSource(
-                    secret_key_ref=client.V1SecretKeySelector(
-                        name="git", key="credentials"
-                    )
+                    secret_key_ref=client.V1SecretKeySelector(name="git", key="credentials")
                 ),
             ),
         )
@@ -309,9 +297,7 @@ def create_theia_k8s_pod_pvc(
                 secret=client.V1SecretVolumeSource(
                     default_mode=0o644,
                     secret_name="anubis-registry",
-                    items=[
-                        client.V1KeyToPath(key=".dockerconfigjson", path="config.json")
-                    ],
+                    items=[client.V1KeyToPath(key=".dockerconfigjson", path="config.json")],
                 ),
             )
         )
@@ -343,14 +329,8 @@ def create_theia_k8s_pod_pvc(
         ports=[
             client.V1ContainerPort(container_port=5000),
             # Optional proxy ports
-            *(
-                client.V1ContainerPort(container_port=8000 + i, protocol="TCP")
-                for i in range(11)
-            ),
-            *(
-                client.V1ContainerPort(container_port=8000 + i, protocol="UDP")
-                for i in range(11)
-            ),
+            *(client.V1ContainerPort(container_port=8000 + i, protocol="TCP") for i in range(11)),
+            *(client.V1ContainerPort(container_port=8000 + i, protocol="UDP") for i in range(11)),
         ],
         # Use the theia image that was specified in the database. If this is
         # a student session, this should be the theia image that is default either
@@ -547,9 +527,7 @@ def update_theia_pod_cluster_addresses(theia_pods: client.V1PodList):
         session_id = pod.metadata.labels["session"]
 
         # Get the database entry for the theia session
-        theia_session: TheiaSession = TheiaSession.query.filter(
-            TheiaSession.id == session_id
-        ).first()
+        theia_session: TheiaSession = TheiaSession.query.filter(TheiaSession.id == session_id).first()
 
         # Make sure we have a session to work on
         if theia_session is None:
@@ -583,9 +561,7 @@ def reap_old_theia_sessions(theia_pods: client.V1PodList):
         session_id = pod.metadata.labels["session"]
 
         # Get the database entry for the theia session
-        theia_session: TheiaSession = TheiaSession.query.filter(
-            TheiaSession.id == session_id
-        ).first()
+        theia_session: TheiaSession = TheiaSession.query.filter(TheiaSession.id == session_id).first()
 
         # Make sure we have a session to work on
         if theia_session is None:
@@ -635,11 +611,7 @@ def fix_stale_theia_resources(theia_pods: client.V1PodList):
 
     # Iterate over all courses
     for course in courses:
-        print(
-            "filtering stale ides for course {} - {}".format(
-                course.name, course.course_code
-            )
-        )
+        print("filtering stale ides for course {} - {}".format(course.name, course.course_code))
 
         # Get a list of (heavily cached) admin id strings
         course_admin_ids = get_course_admin_ids(course.id)
@@ -662,8 +634,7 @@ def fix_stale_theia_resources(theia_pods: client.V1PodList):
             # Filter out admin users (only students in the course)
             ~TheiaSession.owner_id.in_(course_admin_ids),
             # Filter for sessions that have had a proxy in the last 10 minutes
-            TheiaSession.last_proxy
-            >= datetime.now() - timedelta(minutes=standard_theia_timeout),
+            TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=standard_theia_timeout),
         ).all()
 
         # Get a list of the admin (professor/ta) theia sessions that are active
@@ -671,8 +642,7 @@ def fix_stale_theia_resources(theia_pods: client.V1PodList):
             # Filter for admin users (only professors+tas)
             TheiaSession.owner_id.in_(course_admin_ids),
             # Filter for sessions that have had a proxy in the last 60 minutes
-            TheiaSession.last_proxy
-            >= datetime.now() - timedelta(minutes=admin_theia_timeout),
+            TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=admin_theia_timeout),
         ).all()
 
         # Build list of all the active theia ides (in the database)
@@ -692,8 +662,7 @@ def fix_stale_theia_resources(theia_pods: client.V1PodList):
         # Course-less theia session
         TheiaSession.course_id == None,
         # Filter for sessions that have had a proxy in the last 10 minutes
-        TheiaSession.last_proxy
-        >= datetime.now() - timedelta(minutes=standard_theia_timeout),
+        TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=standard_theia_timeout),
     ).all()
 
     # Print the course-less ides to the screen
@@ -721,15 +690,11 @@ def fix_stale_theia_resources(theia_pods: client.V1PodList):
 
     # Log which stale pods we need to clean up
     if len(stale_pods_ids) > 0:
-        logger.info(
-            "Found stale theia pods to reap: {}".format(str(list(stale_pods_ids)))
-        )
+        logger.info("Found stale theia pods to reap: {}".format(str(list(stale_pods_ids))))
 
     # Log the stale database entries we need to cleanup
     if len(stale_db_ids) > 0:
-        logger.info(
-            "Found stale theia database entries: {}".format(str(list(stale_db_ids)))
-        )
+        logger.info("Found stale theia database entries: {}".format(str(list(stale_db_ids))))
 
     # Reap theia sessions
     from anubis.rpc.theia import reap_theia_session_by_id

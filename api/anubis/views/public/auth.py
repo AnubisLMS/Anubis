@@ -1,21 +1,21 @@
 import base64
 import json
 import os
-import requests
 
+import requests
 from flask import Blueprint, make_response, redirect, request, url_for
 
+from anubis.lms.courses import get_course_context
+from anubis.lms.submissions import fix_dangling
 from anubis.models import User, db
-from anubis.utils.auth.http import require_user, require_admin
+from anubis.utils.auth.http import require_admin, require_user
+from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_GITHUB as github_provider
+from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_NYU as nyu_provider
 from anubis.utils.auth.token import create_token
 from anubis.utils.auth.user import current_user, get_current_user
 from anubis.utils.data import is_debug, req_assert
-from anubis.utils.http.decorators import json_endpoint
 from anubis.utils.http import error_response, success_response
-from anubis.lms.courses import get_course_context
-from anubis.lms.submissions import fix_dangling
-from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_NYU as nyu_provider
-from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_GITHUB as github_provider
+from anubis.utils.http.decorators import json_endpoint
 
 auth_ = Blueprint("public-auth", __name__, url_prefix="/public/auth")
 nyu_oauth_ = Blueprint("public-oauth", __name__, url_prefix="/public")
@@ -26,9 +26,7 @@ github_oauth_ = Blueprint("public-github-oauth", __name__, url_prefix="/public/g
 def public_login():
     if is_debug():
         return "AUTH"
-    return nyu_provider.authorize(
-        callback="https://anubis.osiris.services/api/public/oauth"
-    )
+    return nyu_provider.authorize(callback="https://anubis.osiris.services/api/public/oauth")
 
 
 @auth_.route("/logout")
@@ -61,9 +59,7 @@ def public_oauth():
 
     # This is the data we get from NYU's oauth. It has basic information
     # on who is logging in
-    user_data = nyu_provider.get(
-        "userinfo?schema=openid", token=(resp["access_token"],)
-    )
+    user_data = nyu_provider.get("userinfo?schema=openid", token=(resp["access_token"],))
 
     # Load the netid name from the response
     netid = user_data.data["netid"]
@@ -97,9 +93,7 @@ def public_oauth():
 @github_oauth_.route("/link")
 @require_user()
 def public_github_link():
-    return github_provider.authorize(
-        callback="https://anubis.osiris.services/api/public/github/oauth"
-    )
+    return github_provider.authorize(callback="https://anubis.osiris.services/api/public/github/oauth")
 
 
 @github_oauth_.route("/oauth")
@@ -201,9 +195,7 @@ def public_auth_set_github_username(github_username):
         return error_response("github username not specified")
 
     # Make sure the github username is not already being used
-    other: User = User.query.filter(
-        User.github_username == github_username, User.id != current_user.id
-    ).first()
+    other: User = User.query.filter(User.github_username == github_username, User.id != current_user.id).first()
 
     # Assert that there is not a duplicate github username
     req_assert(other is None, message="github username is already taken")

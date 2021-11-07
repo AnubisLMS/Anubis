@@ -1,17 +1,15 @@
 from flask import Blueprint, request
 
-from anubis.models import User, Submission
+from anubis.lms.courses import assert_course_context, is_course_admin
+from anubis.lms.submissions import get_submissions, regrade_submission
+from anubis.models import Submission, User
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
+from anubis.utils.http import get_number_arg, success_response
 from anubis.utils.http.decorators import json_response
-from anubis.utils.http import success_response, get_number_arg
-from anubis.lms.courses import is_course_admin, assert_course_context
-from anubis.lms.submissions import regrade_submission, get_submissions
 
-submissions_ = Blueprint(
-    "public-submissions", __name__, url_prefix="/public/submissions"
-)
+submissions_ = Blueprint("public-submissions", __name__, url_prefix="/public/submissions")
 
 
 @submissions_.route("/")
@@ -67,9 +65,7 @@ def public_submissions():
     req_assert(submissions is not None, message="Bad Request", status_code=400)
 
     # Get submissions through cached function
-    return success_response(
-        {"submissions": submissions, "total": total, "user": perspective_of.data}
-    )
+    return success_response({"submissions": submissions, "total": total, "user": perspective_of.data})
 
 
 @submissions_.route("/get/<string:commit>")

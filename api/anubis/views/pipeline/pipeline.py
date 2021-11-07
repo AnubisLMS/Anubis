@@ -1,13 +1,12 @@
 import json
 from typing import Union
 
-from flask import request, Blueprint
+from flask import Blueprint, request
 from parse import parse
 
-from anubis.models import Submission, SubmissionTestResult, AssignmentTest
-from anubis.models import db
-from anubis.utils.http.decorators import json_response, json_endpoint
+from anubis.models import AssignmentTest, Submission, SubmissionTestResult, db
 from anubis.utils.http import success_response
+from anubis.utils.http.decorators import json_endpoint, json_response
 from anubis.utils.logging import logger
 from anubis.utils.pipeline.decorators import check_submission_token
 
@@ -50,9 +49,7 @@ def pipeline_report_panic(submission: Submission):
 
     # Set the submission state
     submission.processed = True
-    submission.state = (
-        "Whoops! There was an error on our end. The error has been logged."
-    )
+    submission.state = "Whoops! There was an error on our end. The error has been logged."
     submission.errors = {"panic": request.json}
 
     # commit the changes to the session
@@ -114,12 +111,8 @@ def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **_
 
 @pipeline.route("/report/test/<string:submission_id>", methods=["POST"])
 @check_submission_token
-@json_endpoint(
-    [("test_name", str), ("passed", bool), ("message", str), ("stdout", str)]
-)
-def pipeline_report_test(
-    submission: Submission, test_name: str, passed: bool, message: str, stdout: str, **_
-):
+@json_endpoint([("test_name", str), ("passed", bool), ("message", str), ("stdout", str)])
+def pipeline_report_test(submission: Submission, test_name: str, passed: bool, message: str, stdout: str, **_):
     """
     Submission pipelines will hit this endpoint when there
     is a test result to report.
@@ -167,9 +160,7 @@ def pipeline_report_test(
 
     # Verify we got a match
     if submission_test_result is None:
-        logger.error(
-            "Invalid submission test result reported", extra={"request": request.json}
-        )
+        logger.error("Invalid submission test result reported", extra={"request": request.json})
         return success_response({"status": "invalid test name"})
 
     # Update the fields

@@ -1,0 +1,13 @@
+# Requirements for testing and development
+
+-r common.txt
+
+# Code linters/formatters
+black
+isort
+
+# pip command line tools
+pip-tools
+
+# Python testing framework
+pytest

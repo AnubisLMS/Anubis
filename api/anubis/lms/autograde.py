@@ -3,7 +3,7 @@ from datetime import datetime
 from parse import parse
 
 from anubis.lms.students import get_students_in_class
-from anubis.models import Submission, Assignment, AssignmentTest
+from anubis.models import Assignment, AssignmentTest, Submission
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, is_job
 from anubis.utils.http import error_response
@@ -67,9 +67,7 @@ def autograde(student_id, assignment_id, max_time: datetime = None):
     ):
 
         # Calculate the number of tests that passed in this submission
-        correct_count = sum(
-            map(lambda result: 1 if result.passed else 0, submission.test_results)
-        )
+        correct_count = sum(map(lambda result: 1 if result.passed else 0, submission.test_results))
 
         # If the number of passed tests in this assignment is as good
         # or better as the best seen so far, update the running best.
@@ -135,24 +133,14 @@ def autograde_submission_result_wrapper(
             "netid": netid,
             "name": name,
             "submission": submission.admin_data,
-            "build_passed": submission.build.passed
-            if submission.build is not None
-            else False,
+            "build_passed": submission.build.passed if submission.build is not None else False,
             "tests_passed": best_count,
             "total_tests": len(submission.test_results),
-            "tests_passed_names": [
-                test.assignment_test.name
-                for test in submission.test_results
-                if test.passed
-            ],
-            "full_stats": "https://anubis.osiris.services/api/private/submission/{}".format(
-                submission.id
-            ),
+            "tests_passed_names": [test.assignment_test.name for test in submission.test_results if test.passed],
+            "full_stats": "https://anubis.osiris.services/api/private/submission/{}".format(submission.id),
             "master": "https://github.com/{}".format(repo_path),
             "commits": "https://github.com/{}/commits/master".format(repo_path),
-            "commit_tree": "https://github.com/{}/tree/{}".format(
-                repo_path, submission.commit
-            ),
+            "commit_tree": "https://github.com/{}/tree/{}".format(repo_path, submission.commit),
             "late": late,
         }
 
@@ -180,8 +168,7 @@ def bulk_autograde(assignment_id, netids=None, offset=0, limit=20):
 
     # Find the assignment object
     assignment = (
-        Assignment.query.filter_by(name=assignment_id).first()
-        or Assignment.query.filter_by(id=assignment_id).first()
+        Assignment.query.filter_by(name=assignment_id).first() or Assignment.query.filter_by(id=assignment_id).first()
     )
     if assignment is None:
         return error_response("assignment does not exist")

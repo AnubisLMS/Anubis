@@ -1,14 +1,12 @@
-from typing import List, Dict
+from typing import Dict, List
 
-from anubis.models import User, InCourse, Course
-from anubis.utils.data import is_debug
+from anubis.models import Course, InCourse, User
 from anubis.utils.cache import cache
+from anubis.utils.data import is_debug
 
 
 @cache.memoize(timeout=60, unless=is_debug)
-def get_students(
-    course_id: str = None, course_code: str = None
-) -> List[Dict[str, dict]]:
+def get_students(course_id: str = None, course_code: str = None) -> List[Dict[str, dict]]:
     """
     Get students by course code. If no course code is specified,
     then all courses will be considered.
@@ -31,9 +29,7 @@ def get_students(
         filters.append(Course.id == course_id)
 
     # Get all users, and break them into their data props
-    return [
-        s.data for s in User.query.join(InCourse).join(Course).filter(*filters).all()
-    ]
+    return [s.data for s in User.query.join(InCourse).join(Course).filter(*filters).all()]
 
 
 @cache.memoize(timeout=60, unless=is_debug)

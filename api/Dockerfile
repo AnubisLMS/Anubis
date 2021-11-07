@@ -8,7 +8,7 @@ ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1
 
 WORKDIR /opt/app
 
-COPY requirements.txt requirements.txt
+COPY requirements/common.txt requirements.txt
 
 RUN apt update \
   && apt install -y mariadb-client git tzdata gcc g++ libmagic-dev \

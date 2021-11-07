@@ -1,50 +1,44 @@
 import traceback
 from datetime import datetime, timedelta
-from typing import Union, List, Dict, Tuple, Optional, Any, Set
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-from dateutil.parser import parse as date_parse, ParserError
+from dateutil.parser import ParserError
+from dateutil.parser import parse as date_parse
 from sqlalchemy import or_
 
-from anubis.lms.courses import assert_course_admin
-from anubis.lms.courses import is_course_admin, get_user_course_ids
+from anubis.lms.courses import assert_course_admin, get_user_course_ids, is_course_admin
 from anubis.lms.questions import ingest_questions
 from anubis.models import (
-    db,
-    Course,
-    User,
     Assignment,
-    Submission,
-    AssignmentTest,
     AssignmentRepo,
-    SubmissionTestResult,
+    AssignmentTest,
+    Course,
     LateException,
+    Submission,
+    SubmissionTestResult,
+    User,
+    db,
 )
 from anubis.utils.cache import cache
+from anubis.utils.config import get_config_int
 from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
-from anubis.utils.config import get_config_int
 
 
 @cache.memoize(timeout=30, unless=is_debug)
 def get_assignment_grace(assignment_id: str) -> datetime:
-    assignment: Assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment: Assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
     return assignment.grace_date
 
 
 @cache.memoize(timeout=30, unless=is_debug)
 def get_assignment_due(assignment_id: str) -> datetime:
-    assignment: Assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment: Assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
     return assignment.due_date
 
 
 @cache.memoize(timeout=30)
-def get_assignment_due_date(
-    user_id: str, assignment_id: str, grace: bool = False
-) -> datetime:
+def get_assignment_due_date(user_id: str, assignment_id: str, grace: bool = False) -> datetime:
     """
     Get the due date for an assignment for a specific user. We check to
     see if there is a late exception for this user, and return that if
@@ -86,9 +80,7 @@ def get_assignment_due_date(
 
 @cache.memoize(timeout=30, unless=is_debug)
 def get_assignment_data(user_id: str, assignment_id: str) -> Dict[str, Any]:
-    assignment: Assignment = Assignment.query.filter(
-        Assignment.id == assignment_id
-    ).first()
+    assignment: Assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     assignment_data = assignment.data
     fill_user_assignment_data(user_id, assignment_data)
@@ -96,9 +88,7 @@ def get_assignment_data(user_id: str, assignment_id: str) -> Dict[str, Any]:
     return assignment_data
 
 
-def get_all_assignments(
-    course_ids: Set[str], admin_course_ids: Set[str]
-) -> List[Assignment]:
+def get_all_assignments(course_ids: Set[str], admin_course_ids: Set[str]) -> List[Assignment]:
     # Build a list of all the assignments visible
     # to this user for each of the specified courses.
     assignments: List[Assignment] = []
@@ -191,14 +181,10 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     :param assignment_data:
     :return:
     """
-    assignment = Assignment.query.filter(
-        Assignment.unique_code == assignment_data["unique_code"]
-    ).first()
+    assignment = Assignment.query.filter(Assignment.unique_code == assignment_data["unique_code"]).first()
 
     # Attempt to find the class
-    course_name = assignment_data.get("class", None) or assignment_data.get(
-        "course", None
-    )
+    course_name = assignment_data.get("class", None) or assignment_data.get("course", None)
     course: Course = Course.query.filter(
         or_(
             Course.name == course_name,
@@ -274,12 +260,8 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
 
     # Sync the questions in the assignment data
     question_message = None
-    if "questions" in assignment_data and isinstance(
-        assignment_data["questions"], list
-    ):
-        accepted, ignored, rejected = ingest_questions(
-            assignment_data["questions"], assignment
-        )
+    if "questions" in assignment_data and isinstance(assignment_data["questions"], list):
+        accepted, ignored, rejected = ingest_questions(assignment_data["questions"], assignment)
         question_message = {
             "accepted": accepted,
             "ignored": ignored,
@@ -328,9 +310,7 @@ def get_recent_assignments() -> List[Assignment]:
 
     :return:
     """
-    autograde_recalculate_days = get_config_int(
-        "AUTOGRADE_RECALCULATE_DAYS", default=60
-    )
+    autograde_recalculate_days = get_config_int("AUTOGRADE_RECALCULATE_DAYS", default=60)
     autograde_recalculate_duration = timedelta(days=autograde_recalculate_days)
 
     recent_assignments = Assignment.query.filter(

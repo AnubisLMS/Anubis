@@ -6,22 +6,14 @@ from dateutil.parser import parse as dateparse
 from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
 
-from anubis.models import (
-    db,
-    Assignment,
-    AssignmentRepo,
-    User,
-    AssignmentTest,
-    SubmissionTestResult,
-)
-from anubis.utils.auth.http import require_admin
-from anubis.utils.data import rand
-from anubis.utils.data import row2dict, req_assert
-from anubis.utils.http.decorators import load_from_id, json_response, json_endpoint
-from anubis.utils.http import error_response, success_response
 from anubis.lms.assignments import assignment_sync
-from anubis.lms.courses import course_context, assert_course_context
+from anubis.lms.courses import assert_course_context, course_context
 from anubis.lms.questions import get_assigned_questions
+from anubis.models import Assignment, AssignmentRepo, AssignmentTest, SubmissionTestResult, User, db
+from anubis.utils.auth.http import require_admin
+from anubis.utils.data import rand, req_assert, row2dict
+from anubis.utils.http import error_response, success_response
+from anubis.utils.http.decorators import json_endpoint, json_response, load_from_id
 from anubis.utils.logging import logger
 
 assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
@@ -136,15 +128,11 @@ def admin_assignments_list():
     # Get all the assignment objects within the course context,
     # sorted by the due date.
     all_assignments = (
-        Assignment.query.filter(Assignment.course_id == course_context.id)
-        .order_by(Assignment.due_date.desc())
-        .all()
+        Assignment.query.filter(Assignment.course_id == course_context.id).order_by(Assignment.due_date.desc()).all()
     )
 
     # Pass back the row2dict of each assignment object
-    return success_response(
-        {"assignments": [row2dict(assignment) for assignment in all_assignments]}
-    )
+    return success_response({"assignments": [row2dict(assignment) for assignment in all_assignments]})
 
 
 @assignments.route("/tests/toggle-hide/<string:assignment_test_id>")
@@ -176,9 +164,7 @@ def admin_assignment_tests_toggle_hide_assignment_test_id(assignment_test_id: st
     # Commit the change
     db.session.commit()
 
-    return success_response(
-        {"status": "test updated", "assignment_test": assignment_test.data}
-    )
+    return success_response({"status": "test updated", "assignment_test": assignment_test.data})
 
 
 @assignments.route("/tests/delete/<string:assignment_test_id>")

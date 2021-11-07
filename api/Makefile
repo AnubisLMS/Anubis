@@ -13,8 +13,7 @@ run: venv
 
 venv:
 	virtualenv -p `which python3` venv
-	./venv/bin/pip install -r ./requirements.txt
-	./venv/bin/pip install -U black pytest
+	./venv/bin/pip install -r ./requirements/dev.txt
 
 debug:
 	make -C .. debug
@@ -54,3 +53,8 @@ pydoc: venv
 autograde-timings: venv
 	env DB_HOST=127.0.0.1 DEBUG=1 \
 		venv/bin/python3 -c "import anubis.utils.testing.autograde_timings; anubis.utils.testing.autograde_timings.main()"
+
+.PHONY: requirements
+requirements: venv
+	pip-compile --quiet --allow-unsafe requirements/common.in
+	pip-compile --quiet --allow-unsafe requirements/dev.in

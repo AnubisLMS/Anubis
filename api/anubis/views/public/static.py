@@ -3,8 +3,8 @@ from sqlalchemy.orm import undefer
 from sqlalchemy.sql import or_
 
 from anubis.models import StaticFile
-from anubis.utils.http.files import make_blob_response
 from anubis.utils.cache import cache
+from anubis.utils.http.files import make_blob_response
 
 static = Blueprint("public-static", __name__, url_prefix="/public/static")
 
@@ -23,9 +23,7 @@ def public_static(path: str, filename: str = None):
     :return:
     """
 
-    query = StaticFile.query.options(
-        undefer(StaticFile.blob)
-    ).filter(  # undefer blob attr to avoid followup query
+    query = StaticFile.query.options(undefer(StaticFile.blob)).filter(  # undefer blob attr to avoid followup query
         or_(StaticFile.path == path, StaticFile.path == "/" + path)
     )
 

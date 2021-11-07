@@ -1,16 +1,16 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 from flask import Blueprint
 
-from anubis.models import db, InCourse, Course
+from anubis.lms.assignments import get_assignments
+from anubis.lms.courses import get_courses, get_courses_with_visuals, valid_join_code
+from anubis.models import Course, InCourse, db
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
-from anubis.utils.data import req_assert
-from anubis.utils.http.decorators import json_response
-from anubis.utils.http import error_response, success_response
-from anubis.lms.assignments import get_assignments
-from anubis.lms.courses import valid_join_code, get_courses, get_courses_with_visuals
 from anubis.utils.cache import cache
+from anubis.utils.data import req_assert
+from anubis.utils.http import error_response, success_response
+from anubis.utils.http.decorators import json_response
 from anubis.utils.rpc import enqueue_assign_missing_questions
 
 courses_ = Blueprint("public-courses", __name__, url_prefix="/public/courses")

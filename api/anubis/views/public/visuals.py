@@ -1,11 +1,10 @@
 from flask import Blueprint, make_response
 
 from anubis.models import Course
-from anubis.utils.data import is_debug
-from anubis.utils.http import success_response
 from anubis.utils.cache import cache
-from anubis.utils.http import req_assert
-from anubis.utils.visuals.usage import get_usage_plot, get_raw_submissions
+from anubis.utils.data import is_debug
+from anubis.utils.http import req_assert, success_response
+from anubis.utils.visuals.usage import get_raw_submissions, get_usage_plot
 
 visuals = Blueprint("public-visuals", __name__, url_prefix="/public/visuals")
 

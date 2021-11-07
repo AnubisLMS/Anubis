@@ -1,13 +1,12 @@
-from typing import List
-
 from datetime import datetime, timedelta
+from typing import List
 
 from anubis.config import config
 from anubis.models import Assignment, Course
+from anubis.utils.config import get_config_int
 from anubis.utils.data import with_context
 from anubis.utils.visuals.assignments import get_assignment_sundial
 from anubis.utils.visuals.usage import get_usage_plot
-from anubis.utils.config import get_config_int
 
 
 @with_context
@@ -29,9 +28,7 @@ def create_visuals(*_, **__):
         # and always cached when run in the visuals cronjob.
         get_usage_plot(course.id)
 
-    autograde_recalculate_days = get_config_int(
-        "AUTOGRADE_RECALCULATE_DAYS", default=60
-    )
+    autograde_recalculate_days = get_config_int("AUTOGRADE_RECALCULATE_DAYS", default=60)
     autograde_recalculate_duration = timedelta(days=autograde_recalculate_days)
 
     # For recent assignments

@@ -1,13 +1,13 @@
 from flask import Blueprint
 from sqlalchemy.orm import defer
 
-from anubis.models import db, StaticFile
+from anubis.lms.courses import assert_course_context, course_context
+from anubis.models import StaticFile, db
 from anubis.utils.auth.http import require_admin
 from anubis.utils.data import req_assert
+from anubis.utils.http import success_response
 from anubis.utils.http.decorators import json_response
 from anubis.utils.http.files import process_file_upload
-from anubis.utils.http import success_response
-from anubis.lms.courses import course_context, assert_course_context
 
 static = Blueprint("admin-static", __name__, url_prefix="/admin/static")
 
@@ -72,9 +72,7 @@ def admin_static_list():
     public_files = query.all()
 
     # Pass back the list of files
-    return success_response(
-        {"files": [public_file.data for public_file in public_files]}
-    )
+    return success_response({"files": [public_file.data for public_file in public_files]})
 
 
 @static.route("/upload", methods=["POST"])

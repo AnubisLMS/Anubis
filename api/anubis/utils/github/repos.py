@@ -1,16 +1,9 @@
 import traceback
 from typing import List
+
 from parse import parse
 
-from anubis.models import (
-    User,
-    Assignment,
-    AssignmentRepo,
-    db,
-    Submission,
-    SubmissionBuild,
-    SubmissionTestResult,
-)
+from anubis.models import Assignment, AssignmentRepo, Submission, SubmissionBuild, SubmissionTestResult, User, db
 from anubis.utils.github.api import github_graphql, github_rest
 from anubis.utils.logging import logger
 
@@ -123,12 +116,8 @@ def delete_assignment_repo(user: User, assignment: Assignment):
 
         # Go through all the submissions, deleting builds
         # and tests as we go
-        SubmissionBuild.query.filter(
-            SubmissionBuild.submission_id.in_(submission_ids)
-        ).delete()
-        SubmissionTestResult.query.filter(
-            SubmissionTestResult.submission_id.in_(submission_ids)
-        ).delete()
+        SubmissionBuild.query.filter(SubmissionBuild.submission_id.in_(submission_ids)).delete()
+        SubmissionTestResult.query.filter(SubmissionTestResult.submission_id.in_(submission_ids)).delete()
 
         # Delete submissions themselves
         Submission.query.filter(
