@@ -19,6 +19,7 @@ import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import StandardLayout from '../../../Components/Layouts/StandardLayout';
 import {useStyles} from './Assignment.styles';
 import useQuery from '../../../hooks/useQuery';
+import IDEDialog from '../../../Components/Public/IDE/IDEDialog';
 
 
 const Assignment = () => {
@@ -26,11 +27,11 @@ const Assignment = () => {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
 
-  const [tab, setTab] = useState(0);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [assignment, setAssignment] = useState(null);
   const [submissions, setSubmissions] = useState([]);
+  const [selectedTheia, setSelectedTheia] = useState(null);
 
   const assignmentId = query.get('assignmentId');
   const courseId = query.get('courseId');
@@ -63,6 +64,7 @@ const Assignment = () => {
 
   return (
     <StandardLayout>
+      <IDEDialog selectedTheia={selectedTheia} setSelectedTheia={setSelectedTheia}/>
       {assignment && (
         <Box className={classes.root}>
           <Box position="sticky" top={42} className={classes.header}>
@@ -88,7 +90,10 @@ const Assignment = () => {
               </Box>
             </Box>
             <Box className={classes.headerRight}>
-              <Button className={classes.ideButton}>
+              <Button
+                className={classes.ideButton}
+                onClick={() => setSelectedTheia(assignment)}
+              >
                 <LaunchIcon className={classes.launchIcon}/>
                 Open Anubis Cloud IDE
               </Button>
