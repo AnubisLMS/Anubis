@@ -364,7 +364,7 @@ def get_course_data(netid: str, course_id: str) -> Optional[Dict[str, Any]]:
     course_ids = get_student_course_ids(user)
 
     # Course doesnt exist
-    if course_id not in course_ids:
+    if not user.is_superuser and course_id not in course_ids:
         return None
 
     # Query for course with id
