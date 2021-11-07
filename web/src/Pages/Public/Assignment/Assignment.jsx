@@ -77,7 +77,13 @@ const Assignment = () => {
                   {assignment.name}
                 </Typography>
                 <Typography className={classes.headerCourseName}>
-                  from <a className={classes.headerCourseLink}>{assignment.course.name} </a>
+                  from{' '}
+                  <a
+                    className={classes.headerCourseLink}
+                    href={`/course?courseId=${assignment.course.id}`}
+                  >
+                    {assignment.course.name}
+                  </a>
                 </Typography>
               </Box>
             </Box>

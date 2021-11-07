@@ -23,7 +23,7 @@ const CourseItem = ({
       title={name}
       subTitle={`Course Section ${section}`}
       titleIcon={<SchoolIcon/>}
-      link={`/courses/assignments?courseId=${id}`}
+      link={`/course?courseId=${id}`}
     >
       <Typography className={classes.instructorText}>{instructor}</Typography>
       <Typography className={classes.assignmentsText}>{assignments} Assignments</Typography>

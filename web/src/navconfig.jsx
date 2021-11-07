@@ -29,6 +29,7 @@ import Visuals from './Pages/Public/Visuals/Visuals';
 import Lectures from './Pages/Public/Lectures/Lectures';
 
 import Assignment from './Pages/Public/Assignment/Assignment';
+import Course from './Pages/Public/Course/Course';
 import AdminUsers from './Pages/Admin/Users';
 import AdminUser from './Pages/Admin/User';
 import AdminCourse from './Pages/Admin/Course';
@@ -176,6 +177,11 @@ export const not_shown_nav = [
     id: 'Assignment',
     path: '/courses/assignment',
     Page: Assignment,
+  },
+  {
+    id: 'Course',
+    path: '/course',
+    Page: Course,
   },
   {
     id: 'User',
