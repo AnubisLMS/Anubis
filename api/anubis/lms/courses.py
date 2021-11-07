@@ -363,9 +363,13 @@ def get_course_data(netid: str, course_id: str) -> Dict[str, Any]:
     # Get course ids
     course_ids = get_student_course_ids(user)
 
-    # Query for course with id if it belongs to user
+    # Course doesnt exist
+    if course_id not in course_ids:
+        return {}
+
+    # Query for course with id
     course: Course = Course.query.filter(
-       Course.id == course_id, Course.id.in_(course_ids)
+       Course.id == course_id
     ).first()
 
     course_data = course.data

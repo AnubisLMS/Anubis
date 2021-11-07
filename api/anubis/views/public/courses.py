@@ -3,16 +3,13 @@ from typing import Any, Dict, List
 from flask import Blueprint
 
 from anubis.lms.assignments import get_assignments
-from anubis.lms.courses import get_courses, get_courses_with_visuals, valid_join_code
+from anubis.lms.courses import get_courses, get_courses_with_visuals, valid_join_code, get_course_data
 from anubis.models import Course, InCourse, db
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.cache import cache
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
-from anubis.lms.assignments import get_assignments
-from anubis.lms.courses import valid_join_code, get_courses, get_courses_with_visuals, get_course_data
-from anubis.utils.cache import cache
 from anubis.utils.http.decorators import json_response
 from anubis.utils.rpc import enqueue_assign_missing_questions
 
@@ -51,8 +48,12 @@ def public_courses_get(course_id):
 
     :return:
     """
+    course_data = get_course_data(current_user.netid, course_id)
 
-    return success_response({"course": get_course_data(current_user.netid, course_id)})
+    if not course_data:
+        return error_response('Course does not exist')
+
+    return success_response({"course": course_data})
 
 
 @courses_.route("/join/<string:join_code>")
