@@ -17,14 +17,12 @@ pymysql
 python-dateutil
 python-dotenv
 python-magic==0.4.18
-pytz
 redis
 rq
 sqlalchemy-json
 pandas
 matplotlib
 numpy
-click==7.1.2
 discord.py
 aiohttp>=3.7.4
 tabulate
