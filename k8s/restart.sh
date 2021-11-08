@@ -10,4 +10,5 @@ kubectl rollout restart -n anubis deploy \
         anubis-rpc-default \
         anubis-rpc-theia \
         anubis-rpc-regrade \
-        anubis-theia-poller
+        anubis-theia-poller \
+        anubis-discord-bot
