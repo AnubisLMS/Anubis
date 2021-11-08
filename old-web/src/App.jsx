@@ -169,7 +169,9 @@ export default function App() {
                           <Error show={showError} onDelete={() => setShowError(false)}/>
                           <div className={classes.main}>
                             <Main user={user}/>
-                            <TryNewUI/>
+                            {user?.is_superuser && (
+                              <TryNewUI/>
+                            )}
                           </div>
                           <Footer/>
                         </main>
