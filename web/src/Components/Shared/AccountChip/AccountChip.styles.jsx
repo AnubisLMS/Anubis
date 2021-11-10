@@ -58,6 +58,7 @@ export const useStyles = makeStyles((theme) => ({
     color: theme.palette.gray['200'],
     display: 'flex',
     flexDirection: 'row',
+    textDecoration: 'none',
     width: '100%',
     '&:hover': {
       color: theme.palette.white,
@@ -65,6 +66,7 @@ export const useStyles = makeStyles((theme) => ({
   },
   profileActionText: {
     fontSize: '16px',
+    textDecoration: 'none',
   },
   selectedCourse: {
     cursor: 'pointer',

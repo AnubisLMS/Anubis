@@ -1,9 +1,10 @@
 import React, {useState} from 'react';
+import {Link} from 'react-router-dom';
 
+import {useStyles} from './AccountChip.styles';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
-import {useStyles} from './AccountChip.styles';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
@@ -44,17 +45,17 @@ const AccountChip = ({user, netid, onContextChange, course}) => {
               <Divider />
             </Box>
           }
-          <Box mt='10px'className={classes.profileAction}>
+          <Box mt='10px' className={classes.profileAction}>
             <Typography className={classes.profileActionText}>
               View Profile
             </Typography>
           </Box>
-          <Box className={classes.profileAction}>
+          <Box className={classes.profileAction} component={'a'} href={'/api/public/auth/login'}>
             <Typography className={classes.profileActionText}>
               Log In
             </Typography>
           </Box>
-          <Box className={classes.profileAction}>
+          <Box className={classes.profileAction} component={'a'} href={'/api/public/auth/logout'}>
             <Typography className={classes.profileActionText}>
               Log Out
             </Typography>

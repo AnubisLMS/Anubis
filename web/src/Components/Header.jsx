@@ -7,11 +7,8 @@ import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Toolbar from '@material-ui/core/Toolbar';
-import Chip from '@material-ui/core/Chip';
 import Button from '@material-ui/core/Button';
 import AppBar from '@material-ui/core/AppBar';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import TextField from '@material-ui/core/TextField';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import {Hidden} from '@material-ui/core';
 
@@ -47,20 +44,9 @@ export default function Header({classes, open, onDrawerToggle, user}) {
     cookie.remove('course', {path: '/'});
     if (!!course) {
       cookie.set('course', btoa(JSON.stringify(course)), {path: '/'});
-      enqueueSnackbar('You may need to reload the page', {
-        variant: 'warning',
-        action: (
-          <Button
-            size="small"
-            startIcon={<RefreshIcon/>}
-            color={'primary'}
-            variant={'contained'}
-            onClick={() => window.location.reload(true)}
-          >
-            Reload
-          </Button>
-        ),
-      });
+      setTimeout(() => {
+        window.location.reload(0);
+      }, 100);
     }
     setCourse(course);
   };
@@ -86,7 +72,7 @@ export default function Header({classes, open, onDrawerToggle, user}) {
                 <MenuIcon/>
               </IconButton>
             </Grid>
-            <Hidden smDown>
+            <Hidden xsDown>
               <Grid item xs/>
             </Hidden>
             <Grid item>
