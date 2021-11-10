@@ -6,6 +6,8 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import {useTheme} from '@material-ui/core/styles';
 
@@ -13,6 +15,7 @@ import {useTheme} from '@material-ui/core/styles';
 export default function TryNewUI() {
   const cookies = new Cookies();
   const [open, setOpen] = React.useState(false);
+  const [checked, setChecked] = React.useState(false);
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -37,19 +40,30 @@ export default function TryNewUI() {
             trying a beta version of the website. If you would like to report any bugs,
             you can do so on the issues page of the github repo.
           </DialogContentText>
+          <FormControlLabel
+            checked={checked}
+            onChange={() => setChecked(!checked)}
+            control={<Checkbox color="primary"/>}
+            label={<i>I agree to participate in the beta.</i>}
+          />
         </DialogContent>
         <DialogActions>
           <Button autoFocus onClick={() => setOpen(false)} color="primary" variant={'contained'}>
             Cancel
           </Button>
-          <Button onClick={() => {
-            cookies.set('web', 'new', {path: '/'});
-            setTimeout(() => {
-              window.history.pushState('Anubis', 'Anubis', '/dashboard');
-              window.location.reload(0);
-            }, 500);
-            setOpen(false);
-          }} color="secondary" variant={'contained'}>
+          <Button
+            disabled={!checked}
+            color="primary"
+            variant={'contained'}
+            onClick={() => {
+              cookies.set('web', 'new', {path: '/'});
+              setTimeout(() => {
+                window.history.pushState('Anubis', 'Anubis', '/dashboard');
+                window.location.reload(0);
+              }, 500);
+              setOpen(false);
+            }}
+          >
             Try Beta UI
           </Button>
         </DialogActions>
