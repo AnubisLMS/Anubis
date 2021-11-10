@@ -326,7 +326,7 @@ def valid_join_code(join_code: str) -> bool:
 
 
 @cache.memoize(timeout=60, unless=is_debug)
-def get_courses(netid: str):
+def get_courses(netid: str) -> List[Dict[str, Any]]:
     """
     Get all classes a given netid is in
 
@@ -613,6 +613,28 @@ def user_to_user_id_set(users: List[User]) -> Set[str]:
     :return:
     """
     return set(map(lambda user: user.id, users))
+
+
+@cache.memoize(timeout=60, source_check=True, unless=is_debug)
+def get_beta_ui_enabled(netid: str):
+    """
+    Calculate if the current student should have the
+    beta UI available to them to test.
+
+    :param netid:
+    :return:
+    """
+
+    # Get (cached) course data for this student
+    courses_data = get_courses(netid)
+
+    # If any course in the courses this student is in
+    # have the Beta UI enabled, then this will return
+    # True
+    return any(
+        course.get('beta_ui_enabled', False)
+        for course in courses_data
+    )
 
 
 course_context: Course = LocalProxy(get_course_context)

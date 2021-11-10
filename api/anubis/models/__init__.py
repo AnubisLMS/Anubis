@@ -68,13 +68,14 @@ class User(db.Model):
 
     @property
     def data(self):
-        from anubis.lms.courses import get_user_permissions
+        from anubis.lms.courses import get_user_permissions, get_beta_ui_enabled
 
         return {
             "id": self.id,
             "netid": self.netid,
             "github_username": self.github_username,
             "name": self.name,
+            "beta_ui_enabled": get_beta_ui_enabled(self.netid),
             **get_user_permissions(self),
         }
 
@@ -108,6 +109,7 @@ class Course(db.Model):
     github_org = db.Column(db.TEXT, default="os3224")
     join_code = db.Column(db.String(256), unique=True)
     display_visuals = db.Column(db.Boolean, default=True)
+    beta_ui_enabled = db.Column(db.Boolean, default=False)
 
     assignments = db.relationship("Assignment", cascade="all,delete", backref="course")
     ta_for_course = db.relationship("TAForCourse", cascade="all,delete", backref="course")
@@ -141,6 +143,7 @@ class Course(db.Model):
             "total_assignments": self.total_assignments,
             "open_assignment": self.open_assignments,
             "join_code": self.id[:6],
+            "beta_ui_enabled": self.beta_ui_enabled,
         }
 
 
