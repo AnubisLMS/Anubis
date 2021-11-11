@@ -40,9 +40,12 @@
   "proxy": "http://localhost:5000/",
   "scripts": {
     "start": "react-scripts start",
+    "lint": "yarn eslint --fix --ext .jsx .",
+    "dev": "yarn run lint && yarn run start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "prepare": "cd .. && husky install web/.husky"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -67,6 +70,19 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-react": "^7.22.0"
+    "eslint-plugin-react": "^7.22.0",
+    "husky": "^7.0.0",
+    "lint-staged": "^11.2.6"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx}": [
+      "eslint . --fix",
+      "git add"
+    ]
   }
 }
