@@ -132,7 +132,7 @@ export default function App() {
         >
           <SnackbarProvider maxSnack={5}>
             <DeviceWarning/>
-            <Router>
+                <Router>
               <AuthWrapper>
                 <AuthContext.Consumer>
                   {(user) => (
