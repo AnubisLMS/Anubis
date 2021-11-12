@@ -68,6 +68,7 @@ mindebug:
 	@echo 'auth: http://localhost:3000/api/admin/auth/token/ta'
 	@echo 'auth: http://localhost:3000/api/admin/auth/token/student'
 	@echo 'site: http://localhost:3000/'
+	yarn
 	make -j2 apirun webrun
 
 apirun:
