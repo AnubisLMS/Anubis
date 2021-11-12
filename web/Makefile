@@ -1,5 +1,4 @@
 node_modules:
 	yarn
 run: node_modules
-	yarn run lint
-	yarn run start
+	yarn run start & yarn run lint
