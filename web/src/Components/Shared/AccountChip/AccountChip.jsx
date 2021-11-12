@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Link} from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 
 import {useStyles} from './AccountChip.styles';
 import Box from '@material-ui/core/Box';
@@ -10,10 +10,9 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 const AccountChip = ({user, netid, onContextChange, course}) => {
   const classes = useStyles();
+  const history = useHistory();
 
   const [open, setOpen] = useState(false);
-  console.log(user);
-  console.log(course);
 
   return (
     <Box className={classes.root}>
@@ -45,7 +44,14 @@ const AccountChip = ({user, netid, onContextChange, course}) => {
               <Divider />
             </Box>
           }
-          <Box mt='10px' className={classes.profileAction}>
+          <Box
+            mt='10px'
+            onClick={() => {
+              history.push('/profile');
+              setOpen(false);
+            }}
+            className={classes.profileAction}
+          >
             <Typography className={classes.profileActionText}>
               View Profile
             </Typography>
