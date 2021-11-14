@@ -1,15 +1,11 @@
 import React from 'react';
-import {mount, shallow} from 'enzyme';
+import {shallow} from 'enzyme';
 import App from './App';
 
-const wrapper = shallow(<App/>);
-const shallowWrapper = shallow(<App/>);
 
-describe('Shallow and Mount Test of App', () => {
-  it('should render the App correctly', () => {
+describe('Shallow Mount Test of App', () => {
+  it('Shallow render App Component', () => {
+    const wrapper = shallow(<App/>);
     expect(wrapper).toMatchSnapshot();
-  });
-  it('should render the App correctly', () => {
-    expect(shallowWrapper).toMatchSnapshot();
   });
 });
