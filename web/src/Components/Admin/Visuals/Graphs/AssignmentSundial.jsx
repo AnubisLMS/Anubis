@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {LabelSeries, Sunburst} from 'react-vis';
-import {EXTENDED_DISCRETE_COLOR_RANGE} from 'react-vis/es/theme';
 import {useSnackbar} from 'notistack';
 
 import makeStyles from '@material-ui/core/styles/makeStyles';
@@ -46,13 +45,14 @@ function getKeyPath(node) {
  * @returns {Object} Updated tree structure
  */
 function updateData(data, keyPath) {
+  console.log(colorRange.EXTENDED_DISCRETE_COLOR_RANGE[5]);
   if (data.children) {
     data.children.map((child) => updateData(child, keyPath));
   }
   // add a fill to all the uncolored cells
   if (!data.hex) {
     data.style = {
-      fill: EXTENDED_DISCRETE_COLOR_RANGE[5],
+      fill: '#223F9A',
     };
   }
   data.style = {
@@ -80,7 +80,7 @@ export default function AssignmentSundial({sundialData}) {
   return (
     <div className="basic-sunburst-example-wrapper">
       <Typography gutterBottom className={classes.title}>
-        Anubis Autograde Sundial
+          Anubis Autograde Sundial
       </Typography>
       <Sunburst
         animation
