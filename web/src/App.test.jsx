@@ -2,7 +2,7 @@ import React from 'react';
 import {mount, shallow} from 'enzyme';
 import App from './App';
 
-const wrapper = mount(<App/>);
+const wrapper = shallow(<App/>);
 const shallowWrapper = shallow(<App/>);
 
 describe('Shallow and Mount Test of App', () => {
