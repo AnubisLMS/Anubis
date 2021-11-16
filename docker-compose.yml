@@ -204,9 +204,5 @@ services:
     image: registry.digitalocean.com/anubis/theia-sidecar:latest
     build: ./theia/sidecar
 
-  puller:
-    image: registry.digitalocean.com/anubis/puller:latest
-    build: ./puller
-
 volumes:
   db_data:

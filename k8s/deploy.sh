@@ -7,7 +7,6 @@ BUILD=(
     api
     web
     old-web
-    puller
     theia-proxy
     theia-init
     theia-sidecar
