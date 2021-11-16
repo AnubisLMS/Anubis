@@ -40,7 +40,7 @@
   "proxy": "http://localhost:5000/",
   "scripts": {
     "start": "react-scripts start",
-    "lint": "yarn esw -w --fix --ext .jsx .",
+    "lint": "yarn eslint --ext .jsx,.js .",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -68,7 +68,6 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-react": "^7.22.0",
-    "eslint-watch": "^8.0.0"
+    "eslint-plugin-react": "^7.22.0"
   }
 }

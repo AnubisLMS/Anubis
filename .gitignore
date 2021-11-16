@@ -8,7 +8,6 @@ os-dump-*.sql
 .backups
 .backups.*
 .ipynb_checkpoints
-/node_modules
 
 api/seed.ipynb
 
