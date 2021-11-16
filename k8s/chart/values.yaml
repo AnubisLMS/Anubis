@@ -46,7 +46,7 @@ theia:
 
   # theia-proxy deployment
   proxy:
-    replicas: 2
+    replicas: 3
     image: "registry.digitalocean.com/anubis/theia-proxy"
     tag: "latest"
 
