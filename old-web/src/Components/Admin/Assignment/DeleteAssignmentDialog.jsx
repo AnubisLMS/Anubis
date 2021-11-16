@@ -16,7 +16,7 @@ import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 
 
-export default function DeleteAssignmentDialog({assignmentId}) {
+export default function DeleteAssignmentDialog({assignmentId, setRedirect}) {
   const [open, setOpen] = React.useState(false);
   const [confirm, setConfirm] = React.useState(false);
   const {enqueueSnackbar} = useSnackbar();
@@ -35,7 +35,7 @@ export default function DeleteAssignmentDialog({assignmentId}) {
       handleClose();
       setConfirm(false);
       if (data) {
-        window.location = '/admin/assignments';
+        setRedirect(`/admin/assignments`);
       }
     }).catch(standardErrorHandler);
   };

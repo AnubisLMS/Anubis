@@ -7,6 +7,7 @@ from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
 
 from anubis.lms.assignments import assignment_sync, delete_assignment
+from anubis.utils.github.repos import delete_assignment_repo
 from anubis.lms.courses import assert_course_context, course_context, is_course_superuser
 from anubis.lms.questions import get_assigned_questions
 from anubis.models import Assignment, AssignmentRepo, AssignmentTest, SubmissionTestResult, User, db
@@ -59,6 +60,29 @@ def admin_assignments_repos_id(assignment: Assignment):
             ],
         }
     )
+
+
+@assignments.delete("/repo/<string:id>")
+@require_admin()
+@load_from_id(AssignmentRepo, verify_owner=False)
+@json_response
+def admin_assignments_repo_delete_id(assignment_repo: AssignmentRepo):
+    """
+
+    :param assignment_repo:
+    :return:
+    """
+
+    # Get user
+    user: User = assignment_repo.owner
+
+    # Delete the assignment user
+    delete_assignment_repo(user, assignment_repo.assignment)
+
+    return success_response({
+        "status": "Assignment repo deleted",
+        "variant": "warning"
+    })
 
 
 @assignments.route("/assignment/<string:id>/questions/get/<string:netid>")
@@ -139,7 +163,7 @@ def admin_assignments_delete_id(assignment: Assignment):
     # Pass back the full data
     return success_response({
         "status": "Assignment deleted",
-        "variant": "warn",
+        "variant": "warning",
     })
 
 

@@ -36,6 +36,7 @@ export default function Repos() {
   const {enqueueSnackbar} = useSnackbar();
   const [repos, setRepos] = useState([]);
   const [assignment, setAssignment] = useState({});
+  const [reset, setReset] = useState(0);
 
   const assignmentId = match?.assignmentId;
 
@@ -49,7 +50,7 @@ export default function Repos() {
         setAssignment(data?.assignment);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
-  }, []);
+  }, [reset]);
 
   return (
     <Grid container spacing={2} justify={'center'} alignItems={'center'}>
@@ -79,7 +80,7 @@ export default function Repos() {
         />
       </Grid>
       <Grid item xs={12} md={10}>
-        <AssignmentReposTable repos={repos}/>
+        <AssignmentReposTable repos={repos} setReset={setReset}/>
       </Grid>
     </Grid>
   );
