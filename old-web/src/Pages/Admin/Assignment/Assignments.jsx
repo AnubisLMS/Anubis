@@ -20,6 +20,7 @@ import grey from '@material-ui/core/colors/grey';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import ManagementIDEDialog from '../../../Components/Admin/IDE/ManagementIDEDialog';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
+import DeleteAssignmentDialog from '../../../Components/Admin/Assignment/DeleteAssignmentDialog';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -75,24 +76,37 @@ export default function Assignments() {
       <Grid item xs={12}>
         <ManagementIDEDialog/>
       </Grid>
-      <Grid item xs={8}>
+      <Grid item md={10} sx={12}>
         <Paper className={classes.paper}>
-          <DataGrid columns={[
-            {field: 'name', headerName: 'Assignment Name', width: 200},
-            {field: 'hidden', headerName: 'Visibility', width: 110, renderCell: ({row}) => (
-              <Tooltip title={
-                !row.hidden ? 'Visible to students' : 'Hidden to students'
-              }>
-                {
-                  !row.hidden ?
-                    <VisibilityIcon style={{color: green[500]}}/> :
-                    <VisibilityOffIcon style={{color: grey[500]}}/>
-                }
-              </Tooltip>
-            )},
-            {field: 'release_date', headerName: 'Release Date', width: 170},
-            {field: 'due_date', headerName: 'Due Date', width: 170},
-          ]} rows={assignments} onRowClick={({row}) => setRedirect(`/admin/assignment/edit/${row.id}`)}/>
+          <DataGrid
+            columns={[
+              {field: 'name', headerName: 'Assignment Name', width: 200},
+              {
+                field: 'hidden', headerName: 'Visibility', width: 110, renderCell: ({row}) => (
+                  <Tooltip title={
+                    !row.hidden ? 'Visible to students' : 'Hidden to students'
+                  }>
+                    {
+                      !row.hidden ?
+                        <VisibilityIcon style={{color: green[500]}}/> :
+                        <VisibilityOffIcon style={{color: grey[500]}}/>
+                    }
+                  </Tooltip>
+                ),
+              },
+              {field: 'release_date', headerName: 'Release Date', width: 170},
+              {field: 'due_date', headerName: 'Due Date', width: 170},
+              {
+                field: 'delete', headerName: 'Delete', width: 170, renderCell: ({row}) => (
+                  ''
+                ),
+              },
+            ]}
+            rows={assignments}
+            onRowClick={(param, event) => {
+              setRedirect(`/admin/assignment/edit/${param.row.id}`);
+            }}
+          />
         </Paper>
       </Grid>
     </Grid>

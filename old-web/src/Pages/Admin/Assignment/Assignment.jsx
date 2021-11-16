@@ -1,16 +1,18 @@
 import React, {useState, useEffect} from 'react';
+import axios from 'axios';
+import {useParams} from 'react-router-dom';
+import {useSnackbar} from 'notistack';
+
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
-import {useSnackbar} from 'notistack';
 import Typography from '@material-ui/core/Typography';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import DeleteAssignmentDialog from '../../../Components/Admin/Assignment/DeleteAssignmentDialog';
 import ManagementIDEDialog from '../../../Components/Admin/IDE/ManagementIDEDialog';
 import AssignmentCard from '../../../Components/Admin/Assignment/AssignmentCard';
-import axios from 'axios';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import {nonStupidDatetimeFormat} from '../../../Utils/datetime';
-import useQuery from '../../../hooks/useQuery';
-import {useParams} from 'react-router-dom';
-import {CircularProgress} from '@material-ui/core';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -109,7 +111,12 @@ export default function Assignment() {
       <Grid item xs={12}>
         <ManagementIDEDialog/>
       </Grid>
-      <Grid item xs={12} sm={10} md={8} key={assignment.id}>
+      <Grid item xs={12}>
+        <DeleteAssignmentDialog
+          assignmentId={assignmentId}
+        />
+      </Grid>
+      <Grid item xs={12} md={10} key={assignment.id}>
         <AssignmentCard
           assignment={assignment}
           saveAssignment={saveAssignment}

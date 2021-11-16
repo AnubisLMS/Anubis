@@ -9,6 +9,10 @@ from sqlalchemy import or_
 from anubis.lms.courses import assert_course_admin, get_user_course_ids, is_course_admin
 from anubis.lms.questions import ingest_questions
 from anubis.models import (
+    TheiaSession,
+    AssignmentQuestion,
+    AssignedStudentQuestion,
+    AssignedQuestionResponse,
     Assignment,
     AssignmentRepo,
     AssignmentTest,
@@ -16,6 +20,7 @@ from anubis.models import (
     LateException,
     Submission,
     SubmissionTestResult,
+    SubmissionBuild,
     User,
     db,
 )
@@ -319,3 +324,84 @@ def get_recent_assignments() -> List[Assignment]:
     ).all()
 
     return recent_assignments
+
+
+def delete_assignment(assignment: Assignment) -> None:
+    """
+    Delete an Anubis assignment. This function is unbelievably destructive.
+
+    :param assignment:
+    :return:
+    """
+    submission_ids = db.session.query(Submission.id).filter(
+        Submission.assignment_id == assignment.id
+    )
+
+    assigned_question_ids = db.session.query(AssignmentQuestion.id).filter(
+        AssignmentQuestion.assignment_id == assignment.id
+    )
+
+    ##########################################
+    # Delete Submissions & subtables
+    SubmissionTestResult.query.filter(
+        SubmissionTestResult.submission_id.in_(
+            submission_ids.subquery()
+        )
+    ).delete(synchronize_session=False)
+
+    SubmissionBuild.query.filter(
+        SubmissionBuild.submission_id.in_(
+            submission_ids.subquery()
+        )
+    ).delete(synchronize_session=False)
+
+    Submission.query.filter(
+        Submission.assignment_id == assignment.id,
+    ).delete(synchronize_session=False)
+    ##########################################
+
+    ##########################################
+    # Delete assignment tests & repos
+    AssignmentTest.query.filter(
+        AssignmentTest.assignment_id == assignment.id
+    ).delete(synchronize_session=False)
+
+    AssignmentRepo.query.filter(
+        AssignmentRepo.assignment_id == assignment.id
+    ).delete(synchronize_session=False)
+    ##########################################
+
+    ##########################################
+    # Delete assignment questions & subtables
+    AssignedQuestionResponse.query.filter(
+        AssignedQuestionResponse.assigned_question_id.in_(
+            assigned_question_ids.subquery()
+        )
+    ).delete(synchronize_session=False)
+
+    AssignedStudentQuestion.query.filter(
+        AssignedStudentQuestion.assignment_id == assignment.id
+    ).delete(synchronize_session=False)
+
+    AssignmentQuestion.query.filter(
+        AssignmentQuestion.assignment_id == assignment.id
+    ).delete(synchronize_session=False)
+    ##########################################
+
+    ##########################################
+    # Delete theia sessions
+    TheiaSession.query.filter(
+        TheiaSession.assignment_id == assignment.id
+    ).delete(synchronize_session=False)
+    ##########################################
+
+    ##########################################
+    # Delete assignment
+    Assignment.query.filter(
+        Assignment.id == assignment.id
+    ).delete(synchronize_session=False)
+    ##########################################
+
+    db.session.commit()
+
+

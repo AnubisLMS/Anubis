@@ -6,11 +6,12 @@ from dateutil.parser import parse as dateparse
 from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
 
-from anubis.lms.assignments import assignment_sync
-from anubis.lms.courses import assert_course_context, course_context
+from anubis.lms.assignments import assignment_sync, delete_assignment
+from anubis.lms.courses import assert_course_context, course_context, is_course_superuser
 from anubis.lms.questions import get_assigned_questions
 from anubis.models import Assignment, AssignmentRepo, AssignmentTest, SubmissionTestResult, User, db
 from anubis.utils.auth.http import require_admin
+from anubis.utils.auth.user import current_user
 from anubis.utils.data import rand, req_assert, row2dict
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_endpoint, json_response, load_from_id
@@ -105,12 +106,41 @@ def admin_assignments_get_id(assignment: Assignment):
     assert_course_context(assignment)
 
     # Pass back the full data
-    return success_response(
-        {
-            "assignment": row2dict(assignment),
-            "tests": [test.data for test in assignment.tests],
-        }
-    )
+    return success_response({
+        "assignment": row2dict(assignment),
+        "tests": [test.data for test in assignment.tests],
+    })
+
+
+@assignments.delete("/delete/<string:id>")
+@require_admin()
+@load_from_id(Assignment, verify_owner=False)
+@json_response
+def admin_assignments_delete_id(assignment: Assignment):
+    """
+    Get the full data for an assignment id. The course context
+    must be set, and will be checked.
+
+    :param assignment:
+    :return:
+    """
+
+    # Confirm that the assignment they are asking for is part
+    # of this course
+    assert_course_context(assignment)
+
+    # Make sure they are allowed to delete this assignment
+    if not is_course_superuser(course_context.id, current_user.id):
+        return error_response('You must be a professor or a superuser to delete this assignment')
+
+    # Delete the assignment
+    delete_assignment(assignment)
+
+    # Pass back the full data
+    return success_response({
+        "status": "Assignment deleted",
+        "variant": "warn",
+    })
 
 
 @assignments.route("/list")
