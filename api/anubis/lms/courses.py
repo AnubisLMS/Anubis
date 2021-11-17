@@ -25,6 +25,7 @@ from anubis.models import (
     TAForCourse,
     TheiaSession,
     User,
+    db,
 )
 from anubis.utils.auth.user import current_user
 from anubis.utils.cache import cache
@@ -635,6 +636,46 @@ def get_beta_ui_enabled(netid: str):
         course.get('beta_ui_enabled', False)
         for course in courses_data
     )
+
+
+def add_all_users_to_course(users: List[User], course: Course) -> int:
+    """
+    Add all users in the list to the specified course. If they are already in the course,
+    then no operation will be made for that student.
+
+    :param users:
+    :param course:
+    :return: number of students added to the course (if any)
+    """
+
+    # Get list of all user ids
+    user_ids: List[str] = [user.id for user in users]
+
+    # Get all the in_course rows
+    in_courses: List[InCourse] = InCourse.query.filter(
+        InCourse.owner_id.in_(user_ids),
+        InCourse.course_id == course.id,
+    ).all()
+
+    # Figure out the set of all user ids that are already in the course
+    all_in_course_ids: Set[str] = {ic.owner_id for ic in in_courses}
+
+    # Build a list of all users not already in the course
+    all_not_in_course: List[User] = [user for user in users if user.id not in all_in_course_ids]
+
+    # If there are users that are not in course, then we can add them
+    if len(all_not_in_course) > 0:
+
+        # Iterate over each student, adding them to the course as we go
+        for user in all_not_in_course:
+            ic = InCourse(owner_id=user.id, course_id=course)
+            db.session.add(ic)
+
+        # commit additions
+        db.session.commit()
+
+    # Return the number of students that were added
+    return len(all_not_in_course)
 
 
 course_context: Course = LocalProxy(get_course_context)

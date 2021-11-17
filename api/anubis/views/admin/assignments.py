@@ -1,4 +1,5 @@
 import json
+from typing import List, Any
 from datetime import datetime, timedelta
 
 import parse
@@ -6,7 +7,7 @@ from dateutil.parser import parse as dateparse
 from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
 
-from anubis.lms.assignments import assignment_sync, delete_assignment
+from anubis.lms.assignments import assignment_sync, delete_assignment, make_shared_assignment
 from anubis.utils.github.repos import delete_assignment_repo
 from anubis.lms.courses import assert_course_context, course_context, is_course_superuser
 from anubis.lms.questions import get_assigned_questions
@@ -19,6 +20,34 @@ from anubis.utils.http.decorators import json_endpoint, json_response, load_from
 from anubis.utils.logging import logger
 
 assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
+
+
+@assignments.post("/shared/<string:id>")
+@require_admin()
+@load_from_id(Assignment, verify_owner=False)
+@json_endpoint([('groups', list)])
+def admin_assignments_shared_id(assignment: Assignment, groups: List[List[str]], **__):
+    """
+    Make a shared assignment
+
+    groups = [
+      [netid1, netid2],
+      [netid3],
+      [netid4, netid5]
+    ]
+
+    :param assignment:
+    :param groups:
+    :return:
+    """
+
+    assert_course_context(assignment)
+
+    e = make_shared_assignment(assignment, groups)
+
+    return success_response({
+        "assignment": assignment.full_data,
+    })
 
 
 @assignments.route("/repos/<string:id>")

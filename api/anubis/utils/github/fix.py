@@ -5,7 +5,7 @@ from sqlalchemy.sql import or_
 
 from anubis.models import Assignment, AssignmentRepo, Submission, User, db
 from anubis.utils.github.api import github_graphql
-from anubis.utils.github.repos import create_assignment_repo
+from anubis.utils.github.repos import create_assignment_student_repo
 from anubis.utils.logging import logger
 
 
@@ -34,7 +34,7 @@ def fix_github_broken_repos():
 
         # The create assignment repo function will attempt
         # to fix missing steps.
-        create_assignment_repo(student, assignment)
+        create_assignment_student_repo(student, assignment)
 
 
 def fix_github_missing_submissions(org_name: str):

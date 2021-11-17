@@ -19,7 +19,7 @@ from anubis.models import (
     db,
 )
 from anubis.utils.data import rand
-from anubis.utils.github.repos import assignment_repo_name
+from anubis.utils.github.repos import get_student_assignment_repo_name
 
 lorem = """
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore 
@@ -376,7 +376,7 @@ def create_assignment(
     theia_sessions = []
     if do_submissions:
         for user in users:
-            repo_name = assignment_repo_name(user, assignment)
+            repo_name = get_student_assignment_repo_name(user, assignment)
             repo_url = f"https://github.com/os3224/{repo_name}"
             if do_repos:
                 repo_url = "https://github.com/wabscale/xv6-public"

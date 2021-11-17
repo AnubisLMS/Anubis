@@ -8,7 +8,7 @@ from anubis.models import Assignment, AssignmentRepo
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.cache import cache
-from anubis.utils.github.repos import create_assignment_repo, delete_assignment_repo
+from anubis.utils.github.repos import create_assignment_student_repo, delete_assignment_repo
 from anubis.utils.http import error_response, req_assert, success_response
 from anubis.utils.http.decorators import json_response
 
@@ -96,7 +96,7 @@ def public_repos_create(assignment_id: str):
             message="Assignment does not exist",
         )
 
-    repo = create_assignment_repo(current_user, assignment)
+    repo = create_assignment_student_repo(current_user, assignment)
 
     req_assert(repo.repo_created, message="Repo could not be created")
     req_assert(

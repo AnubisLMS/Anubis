@@ -1,5 +1,5 @@
 import traceback
-from typing import List
+from typing import List, Union, Optional
 
 from parse import parse
 
@@ -71,7 +71,7 @@ def add_collaborator(github_org: str, new_repo_name: str, github_username: str):
     )
 
 
-def assignment_repo_name(user: User, assignment: Assignment) -> str:
+def get_student_assignment_repo_name(user: User, assignment: Assignment) -> str:
     # Get assignment name (lowercase and spaces removed)
     assignment_name = assignment.name.lower().replace(" ", "-")
 
@@ -81,9 +81,31 @@ def assignment_repo_name(user: User, assignment: Assignment) -> str:
     return new_repo_name
 
 
-def assignment_repo_url(user: User, assignment: Assignment) -> str:
+def get_group_assignment_repo_name(users: List[User], assignment: Assignment) -> str:
+    # Get assignment name (lowercase and spaces removed)
+    assignment_name = assignment.name.lower().replace(" ", "-")
+
+    github_usernames = '-'.join(user.github_username for user in users)
+
+    # Create a repo name from assignment name, unique code and github username
+    new_repo_name = f"{assignment_name}-{assignment.unique_code}-{github_usernames}"
+
+    return new_repo_name
+
+
+def get_student_assignment_repo_url(user: User, assignment: Assignment) -> str:
     # Create a repo url from assignment name, unique code and github username
-    new_repo_name = assignment_repo_name(user, assignment)
+    new_repo_name = get_student_assignment_repo_name(user, assignment)
+
+    github_org = assignment.course.github_org
+    new_repo_url = f"https://github.com/{github_org}/{new_repo_name}"
+
+    return new_repo_url
+
+
+def get_group_assignment_repo_url(users: List[User], assignment: Assignment) -> str:
+    # Create a repo url from assignment name, unique code and github username
+    new_repo_name = get_group_assignment_repo_name(users, assignment)
 
     github_org = assignment.course.github_org
     new_repo_url = f"https://github.com/{github_org}/{new_repo_name}"
@@ -96,7 +118,7 @@ def delete_assignment_repo(user: User, assignment: Assignment):
     github_org = assignment.course.github_org
 
     # Get a generated assignment repo name
-    new_repo_name = assignment_repo_name(user, assignment)
+    new_repo_name = get_student_assignment_repo_name(user, assignment)
 
     # Try to get the assignment repo from the database
     repo: AssignmentRepo = AssignmentRepo.query.filter(
@@ -143,15 +165,7 @@ def delete_assignment_repo(user: User, assignment: Assignment):
         logger.error(f"continuing")
 
 
-def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo:
-    # Get template information
-    template_repo_path = assignment.github_template
-    github_org = assignment.course.github_org
-
-    # Get a generated assignment repo name
-    new_repo_name = assignment_repo_name(user, assignment)
-    new_repo_url = assignment_repo_url(user, assignment)
-
+def _create_assignment_repo_obj(user: User, assignment: Assignment, new_repo_url: str) -> AssignmentRepo:
     # Try to get the assignment repo from the database
     repo: AssignmentRepo = AssignmentRepo.query.filter(
         AssignmentRepo.assignment_id == assignment.id,
@@ -173,9 +187,79 @@ def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo
         repo.repo_url = new_repo_url
         db.session.commit()
 
+    return repo
+
+
+def create_assignment_group_repo(users: List[User], assignment: Assignment) -> List[AssignmentRepo]:
+    """
+    This function takes a list of users and an assignment, and creates a single
+    assignment repo for the group. This will create an AssignmentRepo entry for
+    each student, but only one will be returned.
+
+    :param users:
+    :param assignment:
+    :return:
+    """
+
+    # Get a generated assignment repo name
+    new_repo_name = get_group_assignment_repo_name(users, assignment)
+    new_repo_url = get_group_assignment_repo_url(users, assignment)
+
+    # Create the assignment repo row in the db
+    repos: List[AssignmentRepo] = []
+    for user in users:
+        repos.append(_create_assignment_repo_obj(user, assignment, new_repo_url))
+
+    # Create the assignment repo
+    repos = _create_assignment_github_repo(
+        repos[0],
+        assignment.github_template,
+        assignment.course.github_org,
+        new_repo_name,
+    )
+
+    return repos
+
+
+def create_assignment_student_repo(user: User, assignment: Assignment) -> AssignmentRepo:
+    # Get a generated assignment repo name
+    new_repo_name = get_student_assignment_repo_name(user, assignment)
+    new_repo_url = get_student_assignment_repo_url(user, assignment)
+
+    # Create the assignment repo row in the db
+    repo = _create_assignment_repo_obj(user, assignment, new_repo_url)
+
+    repos = _create_assignment_github_repo(
+        [repo],
+        assignment.github_template,
+        assignment.course.github_org,
+        new_repo_name,
+    )
+
+    return repos[0]
+
+
+def _create_assignment_github_repo(
+    repos: List[AssignmentRepo],
+    template_repo_path: str,
+    github_org: str,
+    new_repo_name: str,
+) -> List[AssignmentRepo]:
+    """
+    Creates an assignment repo and adds collaborators.
+
+    :param repos: AssignmentRepo object
+    :param template_repo_path: "wabscale/xv6-public"
+    :param github_org: "os3224"
+    :param new_repo_name: ""
+    :return:
+    """
+
+    repo_created = any(repo.repo_created for repo in repos)
+
     try:
         # If repo has not been created yet
-        if not repo.repo_created:
+        if not repo_created:
 
             # We need to use some of github's internal ID values
             # for creating a repo from the template.
@@ -184,7 +268,10 @@ def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo
             # If the response was None, the api request failed. Also check that
             # some expected values are present in the json data response.
             if data is None and "repository" in data and "id" in data["repository"]:
-                return repo
+                for repo in repos:
+                    repo.repo_created = False
+                db.session.commit()
+                return repos
 
             # Get organization and template repo IDs
             owner_id = data["organization"]["id"]
@@ -197,10 +284,11 @@ def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo
             # If the response was None, the api request failed
             if data is None:
                 logger.error("Create repo failed")
-                return repo
+                return repos
 
             # Mark the repo as created
-            repo.repo_created = True
+            for repo in repos:
+                repo.repo_created = True
             db.session.commit()
     except Exception as e:
         logger.error(traceback.format_exc())
@@ -208,28 +296,34 @@ def create_assignment_repo(user: User, assignment: Assignment) -> AssignmentRepo
         logger.error(f"continuing")
 
     try:
-        # If repo has not been configured
-        if not repo.collaborator_configured:
 
-            # Use github REST api to to add the student as a collaborator
-            # to the repo.
-            data = add_collaborator(github_org, new_repo_name, user.github_username)
+        for repo in repos:
 
-            # Sometimes it takes a moment before we are able to add collaborators to
-            # the repo. The message in the response will be Not Found in this situation.
-            # We can have it try again to fix.
-            if data.get("message", None) == "Not Found":
-                logger.error("Failed to add collaborator (Not Found). Trying again.")
-                data = add_collaborator(github_org, new_repo_name, user.github_username)
+            # If repo has not been configured
+            if not repo.collaborator_configured:
 
-            # If the response was None, the api request failed
-            if data is None or data.get("message", None) == "Not Found":
-                logger.error("Failed to add collaborator")
-                return repo
+                # Get user github username
+                collaborator = repo.owner.github_username
 
-            # Mark the repo as collaborator configured
-            repo.collaborator_configured = True
-            db.session.commit()
+                # Use github REST api to to add the student as a collaborator
+                # to the repo.
+                data = add_collaborator(github_org, new_repo_name, collaborator)
+
+                # Sometimes it takes a moment before we are able to add collaborators to
+                # the repo. The message in the response will be Not Found in this situation.
+                # We can have it try again to fix.
+                if data.get("message", None) == "Not Found":
+                    logger.error("Failed to add collaborator (Not Found). Trying again.")
+                    data = add_collaborator(github_org, new_repo_name, collaborator)
+
+                # If the response was None, the api request failed
+                if data is None or data.get("message", None) == "Not Found":
+                    logger.error("Failed to add collaborator")
+                    continue
+
+                # Mark the repo as collaborator configured
+                repo.collaborator_configured = True
+                db.session.commit()
     except Exception as e:
         logger.error(traceback.format_exc())
         logger.error(f"Failed to configure collaborators {e}")

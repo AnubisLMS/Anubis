@@ -6,7 +6,7 @@ from dateutil.parser import ParserError
 from dateutil.parser import parse as date_parse
 from sqlalchemy import or_
 
-from anubis.lms.courses import assert_course_admin, get_user_course_ids, is_course_admin
+from anubis.lms.courses import assert_course_admin, get_user_course_ids, is_course_admin, add_all_users_to_course
 from anubis.lms.questions import ingest_questions
 from anubis.models import (
     TheiaSession,
@@ -28,6 +28,9 @@ from anubis.utils.cache import cache
 from anubis.utils.config import get_config_int
 from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
+from anubis.utils.auth.user import verify_users
+from anubis.utils.data import req_assert
+from anubis.utils.github.repos import create_assignment_group_repo
 
 
 @cache.memoize(timeout=30, unless=is_debug)
@@ -405,3 +408,87 @@ def delete_assignment(assignment: Assignment) -> None:
     db.session.commit()
 
 
+def convert_group_netids_to_group_users(group_netids: List[List[str]]) -> Tuple[List[User], List[List[User]]]:
+    """
+
+    :param group_netids:
+    :return:
+    """
+
+    # Flatten groups into a single list of netids
+    all_netids: List[str] = [netid for group in group_netids for netid in group]
+
+    # Get a list of the found users, and set of not found netids
+    users, not_found_netids = verify_users(all_netids)
+
+    # Assert that all the netids are known. If they are not, eject from the request
+    req_assert(
+        len(not_found_netids) == 0,
+        message="Action not complete. Netids are not known to Anubis: " + str(not_found_netids)
+    )
+
+    # netid -> User
+    user_map = {user.netid: user for user in users}
+
+    # Build groups of User objects from original groups of netids
+    groups = []
+    for netids in group_netids:
+        group = []
+        for netid in netids:
+            group.append(user_map[netid])
+        groups.append(group)
+
+    return users, groups
+
+
+def make_shared_assignment(assignment: Assignment, group_netids: List[List[str]]) -> dict:
+    """
+
+    group_netids = [
+      [netid1, netid2],
+      [netid3]
+    ]
+
+    :param assignment:
+    :param group_netids:
+    :return:
+    """
+
+    # Get users and groups
+    users, groups = convert_group_netids_to_group_users(group_netids)
+
+    # Make sure all users specified are in the course (add them if they are not)
+    add_all_users_to_course(users, assignment.course)
+
+    failed_to_create = []
+    failed_to_configure = []
+
+    all_repos = []
+    for group in groups:
+        if len(group) == 0:
+            continue
+
+        repos = create_assignment_group_repo(group, assignment)
+        all_repos.extend(repos)
+        repo0 = repos[0]
+
+        if not repo0.repo_created:
+            failed_to_create.append(','.join(user.netid for user in group))
+
+        for repo in repos:
+            if not repo.collaborator_configured:
+                failed_to_configure.append(repo.owner.netid)
+
+    req_assert(
+        len(failed_to_configure) == 0 and len(failed_to_create) == 0,
+        message=f"Failed to configure: {str(failed_to_configure)} \n"
+                f"Failed to create: {str(failed_to_create)} \n"
+    )
+
+    return {
+        'groups': [
+            [user.netid for user in group]
+            for group in groups
+        ],
+        'repos': [repo.data for repo in all_repos],
+    }

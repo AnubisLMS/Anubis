@@ -1,5 +1,5 @@
 import traceback
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional, Union, List, Set, Tuple
 
 import jwt
 from flask import g
@@ -44,6 +44,21 @@ def get_current_user() -> Union[User, None]:
     g.user = user
 
     return user
+
+
+def verify_users(netids: List[str]) -> Tuple[List[User], Set[str]]:
+    """
+    Takes a list of netids, and returns a list of the users that
+    were found, and a set of netids that were not found
+
+    :param netids:
+    :return:
+    """
+    found_users: List[User] = User.quer.filter(User.netid.in_(netids)).all()
+    found_netids = set(user.netid for user in found_users)
+    not_found_netids = set(netids).difference(found_netids)
+
+    return found_users, not_found_netids
 
 
 def _create_get_current_user_field(field: str) -> Callable:
