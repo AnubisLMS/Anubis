@@ -209,7 +209,13 @@ def create_assignment_group_repo(users: List[User], assignment: Assignment) -> L
     # Create the assignment repo row in the db
     repos: List[AssignmentRepo] = []
     for user in users:
-        repos.append(_create_assignment_repo_obj(user, assignment, new_repo_url))
+        # Create repo db entry
+        repo = _create_assignment_repo_obj(user, assignment, new_repo_url)
+
+        # Mark repo as shared
+        repo.shared = True
+
+        repos.append(repo)
 
     # Create the assignment repo
     repos = _create_assignment_github_repo(

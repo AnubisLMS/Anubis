@@ -124,11 +124,23 @@ def admin_assignments_repo_delete_id(assignment_repo: AssignmentRepo):
     :return:
     """
 
-    # Get user
-    user: User = assignment_repo.owner
+    # List of repos to delete
+    repos: List[AssignmentRepo] = [assignment_repo]
 
-    # Delete the assignment user
-    delete_assignment_repo(user, assignment_repo.assignment)
+    # If the assignment repo is shared
+    if assignment_repo.shared:
+
+        # Then we need to collect all the other repos, and delete those too
+        repos = AssignmentRepo.query.filter(
+            AssignmentRepo.repo_url == assignment_repo.repo_url,
+        ).all()
+
+    for repo in repos:
+        # Get user
+        user: User = repo.owner
+
+        # Delete the assignment user
+        delete_assignment_repo(user, repo.assignment)
 
     return success_response({
         "status": "Assignment repo deleted",

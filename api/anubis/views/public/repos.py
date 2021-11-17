@@ -135,8 +135,22 @@ def public_repos_delete(assignment_id: str):
             message="Assignment does not exist",
         )
 
+    # Get the repo from db
+    repo: AssignmentRepo = AssignmentRepo.query.filter(
+        AssignmentRepo.assignment_id == assignment.id,
+        AssignmentRepo.owner_id == current_user.id,
+    ).first()
+
+    # Make sure the repo exists
+    req_assert(repo is not None, message='Repo does not exist')
+
+    # If the repo is shared, then student can not delete
+    req_assert(not repo.shared, message='Repo is shared. Please reach out to Anubis support to delete/reset this repo.')
+
+    # Delete the repo
     delete_assignment_repo(current_user, assignment)
 
+    # Delete cache entry
     cache.delete_memoized(get_repos, current_user.id)
 
     # Pass them back
