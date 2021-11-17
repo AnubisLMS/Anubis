@@ -113,7 +113,7 @@ def get_group_assignment_repo_url(users: List[User], assignment: Assignment) -> 
     return new_repo_url
 
 
-def delete_assignment_repo(user: User, assignment: Assignment):
+def delete_assignment_repo(user: User, assignment: Assignment, commit: bool = True):
     # Get template information
     github_org = assignment.course.github_org
 
@@ -150,10 +150,11 @@ def delete_assignment_repo(user: User, assignment: Assignment):
         github_org, repo_name = parse("https://github.com/{}/{}", repo.repo_url)
 
         # Delete the repo
-        AssignmentRepo.query.filter(AssignmentRepo.id == repo.id).delete()
+        AssignmentRepo.query.filter(AssignmentRepo.id == repo.id).delete(synchronize_session=False)
 
-        # Commit the deletes
-        db.session.commit()
+        if commit:
+            # Commit the deletes
+            db.session.commit()
 
     try:
         # Make the github api call to delete the repo on github
@@ -212,7 +213,7 @@ def create_assignment_group_repo(users: List[User], assignment: Assignment) -> L
 
     # Create the assignment repo
     repos = _create_assignment_github_repo(
-        repos[0],
+        repos,
         assignment.github_template,
         assignment.course.github_org,
         new_repo_name,
@@ -329,4 +330,4 @@ def _create_assignment_github_repo(
         logger.error(f"Failed to configure collaborators {e}")
         logger.error(f"continuing")
 
-    return repo
+    return repos

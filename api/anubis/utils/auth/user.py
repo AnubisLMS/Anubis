@@ -54,7 +54,7 @@ def verify_users(netids: List[str]) -> Tuple[List[User], Set[str]]:
     :param netids:
     :return:
     """
-    found_users: List[User] = User.quer.filter(User.netid.in_(netids)).all()
+    found_users: List[User] = User.query.filter(User.netid.in_(netids)).all()
     found_netids = set(user.netid for user in found_users)
     not_found_netids = set(netids).difference(found_netids)
 

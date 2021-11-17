@@ -7,7 +7,7 @@ from dateutil.parser import parse as dateparse
 from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
 
-from anubis.lms.assignments import assignment_sync, delete_assignment, make_shared_assignment
+from anubis.lms.assignments import assignment_sync, delete_assignment, make_shared_assignment, delete_assignment_repos
 from anubis.utils.github.repos import delete_assignment_repo
 from anubis.lms.courses import assert_course_context, course_context, is_course_superuser
 from anubis.lms.questions import get_assigned_questions
@@ -43,7 +43,29 @@ def admin_assignments_shared_id(assignment: Assignment, groups: List[List[str]],
 
     assert_course_context(assignment)
 
-    e = make_shared_assignment(assignment, groups)
+    r = make_shared_assignment(assignment, groups)
+
+    return success_response({
+        **r,
+        "assignment": assignment.full_data,
+    })
+
+
+@assignments.delete("/reset-repos/<string:id>")
+@require_admin()
+@load_from_id(Assignment, verify_owner=False)
+def admin_assignments_reset_repos_id(assignment: Assignment):
+    """
+    Fully reset an assignment. Delete all repos, submissions, etc...
+
+    :param assignment:
+    :return:
+    """
+
+    assert_course_context(assignment)
+
+    delete_assignment_repos(assignment)
+    db.session.commit()
 
     return success_response({
         "assignment": assignment.full_data,

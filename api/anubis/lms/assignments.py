@@ -30,7 +30,7 @@ from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
 from anubis.utils.auth.user import verify_users
 from anubis.utils.data import req_assert
-from anubis.utils.github.repos import create_assignment_group_repo
+from anubis.utils.github.repos import create_assignment_group_repo, delete_assignment_repo
 
 
 @cache.memoize(timeout=30, unless=is_debug)
@@ -329,9 +329,9 @@ def get_recent_assignments() -> List[Assignment]:
     return recent_assignments
 
 
-def delete_assignment(assignment: Assignment) -> None:
+def delete_assignment_submissions(assignment: Assignment):
     """
-    Delete an Anubis assignment. This function is unbelievably destructive.
+    Delete Submissions & subtables
 
     :param assignment:
     :return:
@@ -339,13 +339,6 @@ def delete_assignment(assignment: Assignment) -> None:
     submission_ids = db.session.query(Submission.id).filter(
         Submission.assignment_id == assignment.id
     )
-
-    assigned_question_ids = db.session.query(AssignmentQuestion.id).filter(
-        AssignmentQuestion.assignment_id == assignment.id
-    )
-
-    ##########################################
-    # Delete Submissions & subtables
     SubmissionTestResult.query.filter(
         SubmissionTestResult.submission_id.in_(
             submission_ids.subquery()
@@ -361,49 +354,65 @@ def delete_assignment(assignment: Assignment) -> None:
     Submission.query.filter(
         Submission.assignment_id == assignment.id,
     ).delete(synchronize_session=False)
-    ##########################################
 
-    ##########################################
-    # Delete assignment tests & repos
-    AssignmentTest.query.filter(
-        AssignmentTest.assignment_id == assignment.id
-    ).delete(synchronize_session=False)
 
-    AssignmentRepo.query.filter(
-        AssignmentRepo.assignment_id == assignment.id
-    ).delete(synchronize_session=False)
-    ##########################################
+def delete_assignment_questions(assignment: Assignment):
+    """
+    Delete assignment questions & subtables
 
-    ##########################################
-    # Delete assignment questions & subtables
+    :param assignment:
+    :return:
+    """
+    assigned_question_ids = db.session.query(AssignmentQuestion.id).filter(
+        AssignmentQuestion.assignment_id == assignment.id
+    )
     AssignedQuestionResponse.query.filter(
         AssignedQuestionResponse.assigned_question_id.in_(
             assigned_question_ids.subquery()
         )
     ).delete(synchronize_session=False)
-
     AssignedStudentQuestion.query.filter(
         AssignedStudentQuestion.assignment_id == assignment.id
     ).delete(synchronize_session=False)
-
     AssignmentQuestion.query.filter(
         AssignmentQuestion.assignment_id == assignment.id
     ).delete(synchronize_session=False)
-    ##########################################
 
-    ##########################################
+
+def delete_assignment_repos(assignment: Assignment):
+    repos: List[AssignmentRepo] = AssignmentRepo.query.filter(
+        AssignmentRepo.assignment_id == assignment.id
+    ).all()
+
+    for repo in repos:
+        delete_assignment_repo(repo.owner, assignment, commit=False)
+
+
+def delete_assignment(assignment: Assignment) -> None:
+    """
+    Delete an Anubis assignment. This function is unbelievably destructive.
+
+    :param assignment:
+    :return:
+    """
+    delete_assignment_submissions(assignment)
+    delete_assignment_questions(assignment)
+    delete_assignment_repos(assignment)
+
+    # Delete assignment tests
+    AssignmentTest.query.filter(
+        AssignmentTest.assignment_id == assignment.id
+    ).delete(synchronize_session=False)
+
     # Delete theia sessions
     TheiaSession.query.filter(
         TheiaSession.assignment_id == assignment.id
     ).delete(synchronize_session=False)
-    ##########################################
 
-    ##########################################
     # Delete assignment
     Assignment.query.filter(
         Assignment.id == assignment.id
     ).delete(synchronize_session=False)
-    ##########################################
 
     db.session.commit()
 
@@ -468,13 +477,17 @@ def make_shared_assignment(assignment: Assignment, group_netids: List[List[str]]
         if len(group) == 0:
             continue
 
+        # Create the repo for the group
         repos = create_assignment_group_repo(group, assignment)
-        all_repos.extend(repos)
-        repo0 = repos[0]
 
-        if not repo0.repo_created:
+        # Track group
+        all_repos.extend(repos)
+
+        # Track repos that failed to create
+        if not all(repo.repo_created for repo in repos):
             failed_to_create.append(','.join(user.netid for user in group))
 
+        # Track repos that failed to have collaborators configured
         for repo in repos:
             if not repo.collaborator_configured:
                 failed_to_configure.append(repo.owner.netid)
