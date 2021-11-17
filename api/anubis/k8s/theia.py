@@ -246,6 +246,11 @@ def create_theia_k8s_pod_pvc(
                 name="AUTOSAVE",
                 value="ON" if autosave else "OFF",
             ),
+            # Set netid for commit messages
+            client.V1EnvVar(
+                name="NETID",
+                value=netid,
+            ),
             *sidecar_extra_env,
         ],
         # Add a security context to disable privilege escalation
