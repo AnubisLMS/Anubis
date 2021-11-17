@@ -277,6 +277,7 @@ class AssignmentRepo(db.Model):
     # Fields
     github_username = db.Column(db.TEXT, nullable=False)
     repo_url = db.Column(db.String(512), nullable=False)
+    shared = db.Column(db.Boolean, default=False)
 
     # State booleans
     repo_created = db.Column(db.Boolean, default=False)
@@ -293,6 +294,7 @@ class AssignmentRepo(db.Model):
             "github_username": self.github_username,
             "assignment_id": self.assignment_id,
             "assignment_name": self.assignment.name,
+            "shared": self.shared,
             "ready": self.repo_created and self.collaborator_configured,
             "course_code": self.assignment.course.course_code,
             "repo_url": self.repo_url,
