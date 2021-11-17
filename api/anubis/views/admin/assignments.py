@@ -377,8 +377,15 @@ def admin_assignments_save(assignment: dict):
 
     # Update all it's fields
     for key, value in assignment.items():
+
+        # If the key is a date, then convert to datetime
         if "date" in key and isinstance(value, str):
             value = dateparse(value.replace("T", " ").replace("Z", ""))
+
+        # If github.com is in what the user gave, remove it
+        if key == "github_template" and value.startswith('https://github.com/'):
+            value = value[len('https://github.com/'):]
+
         setattr(db_assignment, key, value)
 
     # Attempt to commit
