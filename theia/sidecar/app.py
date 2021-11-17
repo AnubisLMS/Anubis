@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 
-import os.path
+import os
 import subprocess
 
 from flask import Flask, request, make_response
 
 app = Flask(__name__)
+netid = os.environ.get('NETID', default=None)
 
 
 @app.route('/', methods=['POST'])
@@ -17,6 +18,10 @@ def index():
     # Default commit message if empty
     if message == '':
         message = 'Anubis Cloud IDE Autosave'
+
+    # Add netid to commit message
+    if netid is not None:
+        message += ' netid=' + netid
 
     # Make sure that the repo given exists and is a git repo
     if repo is None or not os.path.isdir(os.path.join(repo, '.git')):

@@ -12,7 +12,7 @@ for i in $(find . -maxdepth 2 -name '.git' -type d); do
     pushd $(dirname $i)
     git push --no-verify
     git add .
-    git commit --no-verify -m "Anubis Cloud IDE Autosave"
+    git commit --no-verify -m "Anubis Cloud IDE Autosave for ${NETID}"
     git push --no-verify
     popd
 done
