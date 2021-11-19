@@ -102,7 +102,7 @@ export default function GroupAssignment() {
           Anubis
         </Typography>
         <Typography variant={'subtitle1'} color={'textSecondary'}>
-          Late Exceptions for {assignment.name}
+          Assignment Groups for {assignment.name}
         </Typography>
       </Grid>
       <Grid item xs={12}>
