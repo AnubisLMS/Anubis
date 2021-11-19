@@ -25,6 +25,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import PeopleIcon from '@material-ui/icons/People';
 
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
@@ -246,7 +247,7 @@ export default function AssignmentCard({assignment, editableFields, updateField,
             className={classes.button}
             component={Link}
             to={`/admin/assignment/groups/${assignment.id}`}
-            startIcon={<AccessTimeIcon/>}
+            startIcon={<PeopleIcon/>}
           >
             Groups
           </Button>
