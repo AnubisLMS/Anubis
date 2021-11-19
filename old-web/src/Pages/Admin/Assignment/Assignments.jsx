@@ -20,7 +20,6 @@ import grey from '@material-ui/core/colors/grey';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import ManagementIDEDialog from '../../../Components/Admin/IDE/ManagementIDEDialog';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
-import DeleteAssignmentDialog from '../../../Components/Admin/Assignment/DeleteAssignmentDialog';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -96,11 +95,6 @@ export default function Assignments() {
               },
               {field: 'release_date', headerName: 'Release Date', width: 170},
               {field: 'due_date', headerName: 'Due Date', width: 170},
-              {
-                field: 'delete', headerName: 'Delete', width: 170, renderCell: ({row}) => (
-                  <DeleteAssignmentDialog assignmentId={row} setRedirect={setRedirect}/>
-                ),
-              },
             ]}
             rows={assignments}
             onRowClick={(param, event) => {

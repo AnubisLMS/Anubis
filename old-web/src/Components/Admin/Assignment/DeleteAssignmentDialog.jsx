@@ -42,7 +42,7 @@ export default function DeleteAssignmentDialog({assignmentId, setRedirect}) {
 
   return (
     <div>
-      <Button variant="contained" size="small" color="secondary" onClick={handleClickOpen} startIcon={<Delete/>}>
+      <Button variant="contained" color="secondary" onClick={handleClickOpen} startIcon={<Delete/>}>
         Delete
       </Button>
       <Dialog
