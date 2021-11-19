@@ -7,6 +7,7 @@ from anubis.models import (
 )
 from anubis.utils.config import get_config_int
 from anubis.utils.data import with_context
+from anubis.utils.visuals.assignments import get_assignment_sundial
 
 
 def autograde_recalculate():
@@ -30,6 +31,7 @@ def autograde_recalculate():
 
     for assignment in recent_assignments:
         bulk_autograde(assignment.id)
+        get_assignment_sundial(assignment.id)
 
 
 @with_context
