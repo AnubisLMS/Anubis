@@ -98,7 +98,7 @@ export default function Assignments() {
               {field: 'due_date', headerName: 'Due Date', width: 170},
               {
                 field: 'delete', headerName: 'Delete', width: 170, renderCell: ({row}) => (
-                  ''
+                  <DeleteAssignmentDialog assignmentId={row} setRedirect={setRedirect}/>
                 ),
               },
             ]}
