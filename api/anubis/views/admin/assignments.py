@@ -18,6 +18,7 @@ from anubis.utils.data import rand, req_assert, row2dict
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_endpoint, json_response, load_from_id
 from anubis.utils.logging import logger
+from anubis.utils.rpc import enqueue_make_shared_assignment
 
 assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
 
@@ -43,12 +44,11 @@ def admin_assignments_shared_id(assignment: Assignment, groups: List[List[str]],
 
     assert_course_context(assignment)
 
-    r = make_shared_assignment(assignment, groups)
+    enqueue_make_shared_assignment(assignment.id, groups)
 
     return success_response({
-        **r,
         "assignment": assignment.full_data,
-        'status': 'Groups assigned',
+        'status': 'Group assignments enqueued',
     })
 
 

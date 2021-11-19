@@ -166,7 +166,7 @@ def delete_assignment_repo(user: User, assignment: Assignment, commit: bool = Tr
         logger.error(f"continuing")
 
 
-def _create_assignment_repo_obj(user: User, assignment: Assignment, new_repo_url: str) -> AssignmentRepo:
+def _create_assignment_repo_obj(user: User, assignment: Assignment, new_repo_url: str, commit: bool = True) -> AssignmentRepo:
     # Try to get the assignment repo from the database
     repo: AssignmentRepo = AssignmentRepo.query.filter(
         AssignmentRepo.assignment_id == assignment.id,
@@ -182,11 +182,13 @@ def _create_assignment_repo_obj(user: User, assignment: Assignment, new_repo_url
             repo_url=new_repo_url,
         )
         db.session.add(repo)
-        db.session.commit()
+        if commit:
+            db.session.commit()
 
     if repo.repo_url != new_repo_url:
         repo.repo_url = new_repo_url
-        db.session.commit()
+        if commit:
+            db.session.commit()
 
     return repo
 
@@ -210,15 +212,17 @@ def create_assignment_group_repo(users: List[User], assignment: Assignment) -> L
     repos: List[AssignmentRepo] = []
     for user in users:
         # Create repo db entry
-        repo = _create_assignment_repo_obj(user, assignment, new_repo_url)
+        repo = _create_assignment_repo_obj(user, assignment, new_repo_url, commit=False)
 
         # Mark repo as shared
         repo.shared = True
 
         repos.append(repo)
 
+    db.session.commit()
+
     # Create the assignment repo
-    repos = _create_assignment_github_repo(
+    repos = create_assignment_github_repo(
         repos,
         assignment.github_template,
         assignment.course.github_org,
@@ -236,7 +240,7 @@ def create_assignment_student_repo(user: User, assignment: Assignment) -> Assign
     # Create the assignment repo row in the db
     repo = _create_assignment_repo_obj(user, assignment, new_repo_url)
 
-    repos = _create_assignment_github_repo(
+    repos = create_assignment_github_repo(
         [repo],
         assignment.github_template,
         assignment.course.github_org,
@@ -246,7 +250,7 @@ def create_assignment_student_repo(user: User, assignment: Assignment) -> Assign
     return repos[0]
 
 
-def _create_assignment_github_repo(
+def create_assignment_github_repo(
     repos: List[AssignmentRepo],
     template_repo_path: str,
     github_org: str,

@@ -9,6 +9,7 @@ from anubis.rpc.pipeline import create_submission_pipeline, reap_stale_submissio
 from anubis.rpc.seed import seed
 from anubis.rpc.theia import initialize_theia_session, reap_stale_theia_sessions, reap_theia_session_by_id
 from anubis.rpc.visualizations import create_visuals as create_visuals_
+from anubis.rpc.assignments import make_shared_assignment
 
 
 def rpc_enqueue(func, queue=None, args=None):
@@ -79,3 +80,8 @@ def enqueue_create_visuals(*_):
 def enqueue_assign_missing_questions(*args):
     """Enqueue assign missing questions"""
     rpc_enqueue(assign_missing_questions, queue="default", args=args)
+
+
+def enqueue_make_shared_assignment(*args):
+    """Enqueue make shared assignment"""
+    rpc_enqueue(make_shared_assignment, queue='default', args=args)

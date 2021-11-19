@@ -450,7 +450,7 @@ def convert_group_netids_to_group_users(group_netids: List[List[str]]) -> Tuple[
     return users, groups
 
 
-def make_shared_assignment(assignment: Assignment, group_netids: List[List[str]]) -> dict:
+def make_shared_assignment(assignment_id: str, group_netids: List[List[str]]) -> dict:
     """
 
     group_netids = [
@@ -458,10 +458,14 @@ def make_shared_assignment(assignment: Assignment, group_netids: List[List[str]]
       [netid3]
     ]
 
-    :param assignment:
+    :param assignment_id:
     :param group_netids:
     :return:
     """
+
+    assignment = Assignment.query.filter(
+        Assignment.id == assignment_id,
+    ).first()
 
     # Get users and groups
     users, groups = convert_group_netids_to_group_users(group_netids)
