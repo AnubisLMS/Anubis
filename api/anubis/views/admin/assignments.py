@@ -48,6 +48,7 @@ def admin_assignments_shared_id(assignment: Assignment, groups: List[List[str]],
     return success_response({
         **r,
         "assignment": assignment.full_data,
+        'status': 'Groups assigned',
     })
 
 
@@ -69,6 +70,8 @@ def admin_assignments_reset_repos_id(assignment: Assignment):
 
     return success_response({
         "assignment": assignment.full_data,
+        "status": 'Repos reset',
+        "variant": 'warning',
     })
 
 

@@ -42,6 +42,7 @@ import AdminAssignmentAssignment from './Pages/Admin/Assignment/Assignment';
 import AdminAssignmentQuestions from './Pages/Admin/Assignment/Questions';
 import AdminAssignmentTests from './Pages/Admin/Assignment/Tests';
 import AdminAssignmentRepos from './Pages/Admin/Assignment/Repos';
+import AdminAssignmentGroups from './Pages/Admin/Assignment/AssignmentGroups';
 
 export const footer_nav = [
   {
@@ -209,6 +210,11 @@ export const not_shown_nav = [
     id: '',
     path: '/admin/assignment/late-exceptions/:assignmentId',
     Page: AdminAssignmentLateExceptions,
+  },
+  {
+    id: '',
+    path: '/admin/assignment/groups/:assignmentId',
+    Page: AdminAssignmentGroups,
   },
 ];
 

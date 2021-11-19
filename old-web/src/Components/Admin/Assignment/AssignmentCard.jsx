@@ -245,6 +245,17 @@ export default function AssignmentCard({assignment, editableFields, updateField,
             variant={'contained'}
             className={classes.button}
             component={Link}
+            to={`/admin/assignment/groups/${assignment.id}`}
+            startIcon={<AccessTimeIcon/>}
+          >
+            Groups
+          </Button>
+          <Button
+            size={'small'}
+            color={'primary'}
+            variant={'contained'}
+            className={classes.button}
+            component={Link}
             to={`/admin/assignment/repos/${assignment.id}`}
             startIcon={<VisibilityIcon/>}
           >
