@@ -311,19 +311,26 @@ def fill_user_assignment_data(user_id: str, assignment_data: Dict[str, Any]):
     assignment_data["due_date"] = str(due_date)
 
 
-def get_recent_assignments() -> List[Assignment]:
+def get_recent_assignments(autograde_enabled: bool = None) -> List[Assignment]:
     """
     Get recent assignments. Recent assignments based off of
     AUTOGRADE_RECALCULATE_DAYS config item value.
 
     :return:
     """
+
+    filters = []
+
+    if autograde_enabled:
+        filters.append(Assignment.autograde_enabled == autograde_enabled)
+
     autograde_recalculate_days = get_config_int("AUTOGRADE_RECALCULATE_DAYS", default=60)
     autograde_recalculate_duration = timedelta(days=autograde_recalculate_days)
 
     recent_assignments = Assignment.query.filter(
         Assignment.release_date > datetime.now() - autograde_recalculate_duration,
         Assignment.due_date < datetime.now() + autograde_recalculate_duration,
+        *filters,
     ).all()
 
     return recent_assignments
