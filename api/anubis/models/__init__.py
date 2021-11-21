@@ -650,8 +650,8 @@ class TheiaImage(db.Model):
     __tablename__ = "theia_image"
 
     id = default_id(32)
-    image = db.Column(db.String(1024), nullable=False)
-    label = db.Column(db.String(1024), nullable=False)
+    image = db.Column(db.String(1024), nullable=False, default='registry.digitalocean.com/anubis/xv6')
+    label = db.Column(db.String(1024), nullable=False, default='')
     public = db.Column(db.Boolean, nullable=False, default=False)
 
     assignments = db.relationship('Assignment', backref='theia_image')

@@ -323,6 +323,7 @@ def rand_commit(n=40) -> str:
 def create_assignment(
     course,
     users,
+    xv6_image,
     i=0,
     do_submissions=True,
     do_repos=False,
@@ -349,6 +350,7 @@ def create_assignment(
         ide_enabled=True,
         autograde_enabled=False,
         theia_options=copy.deepcopy(THEIA_DEFAULT_OPTIONS),
+        theia_image_id=xv6_image.id,
         **kwargs,
     )
 

@@ -17,6 +17,7 @@ from anubis.models import (
     SubmissionTestResult,
     TAForCourse,
     TheiaSession,
+    TheiaImage,
     User,
     db,
 )
@@ -44,6 +45,7 @@ def seed():
     LectureNotes.query.delete()
     StaticFile.query.delete()
     Course.query.delete()
+    TheiaImage.query.delete()
     User.query.delete()
     db.session.commit()
 
@@ -53,6 +55,13 @@ def seed():
     professor_user = User(netid="professor", github_username="professor", name="professor")
     student_user = User(netid="student", github_username="student", name="student")
     db.session.add_all([superuser, professor_user, ta_user, student_user])
+
+    xv6_image = TheiaImage(
+        image="registry.digitalocean.com/anubis/theia-xv6"
+    )
+    db.session.add(xv6_image)
+
+    db.session.commit()
 
     # OS test course
     intro_to_os_students = create_students(50) + [
@@ -74,12 +83,14 @@ def seed():
     os_assignment0, _, os_submissions0, _ = create_assignment(
         intro_to_os_course,
         intro_to_os_students,
+        xv6_image,
         i=0,
         github_repo_required=True,
     )
     os_assignment1, _, os_submissions1, _ = create_assignment(
         intro_to_os_course,
         intro_to_os_students,
+        xv6_image,
         i=1,
         do_submissions=False,
         github_repo_required=True,
@@ -87,6 +98,7 @@ def seed():
     os_assignment2, _, os_submissions2, _ = create_assignment(
         intro_to_os_course,
         intro_to_os_students,
+        xv6_image,
         i=2,
         do_submissions=False,
         github_repo_required=False,
@@ -94,6 +106,7 @@ def seed():
     os_assignment3, _, os_submissions3, _ = create_assignment(
         intro_to_os_course,
         intro_to_os_students,
+        xv6_image,
         i=3,
         do_submissions=True,
         do_repos=True,
@@ -122,7 +135,7 @@ def seed():
         autograde_tests_repo="https://github.com/os3224/anubis-assignment-tests",
         github_org="os3224",
     )
-    mmds_assignment, _, mmds_submissions, _ = create_assignment(mmds_course, mmds_students)
+    mmds_assignment, _, mmds_submissions, _ = create_assignment(mmds_course, mmds_students, xv6_image)
     init_submissions(mmds_submissions)
     assign_questions(mmds_assignment)
 
