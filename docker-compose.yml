@@ -168,29 +168,43 @@ services:
     labels:
       - "traefik.enable=false"
 
-  theia-devops:
-    image: registry.digitalocean.com/anubis/theia-devops:latest
-    build: ./theia/ide/devops
+  theia-base-397:
+    image: registry.digitalocean.com/anubis/theia-base:python-3.9.7
+    build:
+      context: ./theia/ide/theia-base
+      args:
+        PY_VERSION: '3.9.7'
 
-  theia-jepst:
-    image: registry.digitalocean.com/anubis/theia-jepst:latest
-    build: ./theia/ide/jepst
+  theia-base-3100:
+    image: registry.digitalocean.com/anubis/theia-base:python-3.10.0
+    build:
+      context: ./theia/ide/theia-base
+      args:
+        PY_VERSION: '3.10.0'
+
+  theia-golang:
+    image: registry.digitalocean.com/anubis/theia-golang:latest
+    build: ./theia/ide/theia-golang
 
   theia-xv6:
     image: registry.digitalocean.com/anubis/theia-xv6:latest
-    build: ./theia/ide/xv6
-
-  theia-distributed-systems:
-    image: registry.digitalocean.com/anubis/theia-distributed-systems:latest
-    build: ./theia/ide/distributed-systems
-
-  theia-software-engineering:
-    image: registry.digitalocean.com/anubis/theia-software-engineering:latest
-    build: ./theia/ide/software-engineering
+    build: ./theia/ide/theia-xv6
 
   theia-admin:
     image: registry.digitalocean.com/anubis/theia-admin:latest
-    build: ./theia/ide/admin
+    build: ./theia/ide/theia-admin
+
+  theia-devops:
+    image: registry.digitalocean.com/anubis/theia-devops:latest
+    build: ./theia/ide/theia-devops
+
+  theia-software-engineering:
+    image: registry.digitalocean.com/anubis/theia-software-engineering:latest
+    build: ./theia/ide/theia-software-engineering
+
+  theia-jepst:
+    image: registry.digitalocean.com/anubis/theia-jepst:latest
+    build: ./theia/ide/theia-jepst
 
   theia-proxy:
     image: registry.digitalocean.com/anubis/theia-proxy:latest

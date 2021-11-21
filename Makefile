@@ -1,6 +1,7 @@
 PERSISTENT_SERVICES := db traefik redis-master
 RESTART_ALWAYS_SERVICES := api web-dev old-web-dev rpc-default rpc-theia rpc-regrade
 PUSH_SERVICES := api web old-web theia-init theia-proxy
+THEIA_BASE_IDE := theia-base-397 theia-base-3100
 THEIA_IDES := theia-xv6 theia-admin theia-devops theia-jepst theia-distributed-systems theia-software-engineering
 
 
@@ -12,7 +13,7 @@ help:
 
 startup-links:
 	@echo ''
-	@echo 'seed: http://localhost/api/admin/seed/'
+	@echo 'seed: http://localhost/api/admin/seed'
 	@echo 'auth: http://localhost/api/admin/auth/token/superuser'
 	@echo 'auth: http://localhost/api/admin/auth/token/professor'
 	@echo 'auth: http://localhost/api/admin/auth/token/ta'
@@ -20,34 +21,42 @@ startup-links:
 	@echo 'site: http://localhost/'
 
 
-.PHONY: deploy       # Deploy Anubis to cluster
+.PHONY: deploy         # Deploy Anubis to cluster
 deploy:
 	./k8s/deploy.sh
 	./k8s/restart.sh
 
-.PHONY: build        # Build all docker images
+.PHONY: build          # Build all docker images
 build:
 	docker-compose build --parallel --pull
 
-.PHONY: push         # Push images to registry.digitalocean.com (requires vpn)
+.PHONY: push           # Push images to registry.digitalocean.com (requires vpn)
 push:
 	docker-compose build --parallel --pull $(PUSH_SERVICES)
 	docker-compose push $(PUSH_SERVICES)
 
-.PHONY: build-ides   # Build all ide docker images
+.PHONY: build-ides     # Build all ide docker images
 build-ides:
-	docker-compose build --parallel --pull $(THEIA_IDES)
+	@echo 'building base images'
+	docker-compose build --parallel --pull $(THEIA_BASE_IDE)
 
-.PHONY: push-ides    # Push ide images to registry.digitalocean.com (requires vpn)
+	@echo 'building ide image'
+	docker-compose build --parallel $(THEIA_IDES)
+
+.PHONY: push-base-ides # Push base ide images to registry.digitalocean.com
+push-base-ides:
+	docker-compose push $(THEIA_BASE_IDE)
+
+.PHONY: push-ides      # Push ide images to registry.digitalocean.com
 push-ides:
 	docker-compose push $(THEIA_IDES)
 
-.PHONY: prop-ides    # Create theia-prop daemonset to propigate latest ide images
+.PHONY: prop-ides      # Create theia-prop daemonset to propagate latest ide images
 prop-ides:
 	kubectl apply -f theia/ide/theia-prop.yaml
 	kubectl rollout restart ds theia-prop
 
-.PHONY: debug        # Start the cluster in debug mode
+.PHONY: debug          # Start the cluster in debug mode
 debug:
 	docker-compose up -d $(PERSISTENT_SERVICES)
 	docker-compose up \
@@ -59,10 +68,10 @@ debug:
 	docker-compose exec api alembic upgrade head
 	make startup-links
 
-.PHONY: mindebug     # Setup mindebug environment
+.PHONY: mindebug       # Setup mindebug environment
 mindebug:
 	@echo ''
-	@echo 'seed: http://localhost:3000/api/admin/seed/'
+	@echo 'seed: http://localhost:3000/api/admin/seed'
 	@echo 'auth: http://localhost:3000/api/admin/auth/token/superuser'
 	@echo 'auth: http://localhost:3000/api/admin/auth/token/professor'
 	@echo 'auth: http://localhost:3000/api/admin/auth/token/ta'
@@ -76,11 +85,11 @@ apirun:
 webrun:
 	make -C web run
 
-.PHONY: mkdebug     # Start minikube debug
+.PHONY: mkdebug        # Start minikube debug
 mkdebug:
 	./k8s/debug/provision.sh
 
-.PHONY: restart-mk   # Restart minikube debug
+.PHONY: restart-mk     # Restart minikube debug
 restart-mk:
 	./k8s/debug/restart.sh
 	make startup-links
