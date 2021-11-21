@@ -1,5 +1,5 @@
 #
-# Use this to propigate new ide images to the kubernetes cluster 
+# Use this to propagate new ide images to the kubernetes cluster
 #   kubectl apply -f theia-prop.yaml
 #
 
@@ -27,13 +27,23 @@ spec:
         imagePullPolicy: Always
         command: ['bash', '-c', 'while true; do sleep 60; done']
 
+      - name: theia-base-397
+        image: registry.digitalocean.com/anubis/theia-base:python-3.9.7
+        imagePullPolicy: Always
+        command: ['bash', '-c', 'while true; do sleep 60; done']
+
+      - name: theia-base-3100
+        image: registry.digitalocean.com/anubis/theia-base:python-3.10.0
+        imagePullPolicy: Always
+        command: ['bash', '-c', 'while true; do sleep 60; done']
+
       - name: theia-xv6
         image: registry.digitalocean.com/anubis/theia-xv6:latest
         imagePullPolicy: Always
         command: ['bash', '-c', 'while true; do sleep 60; done']
 
-      - name: theia-distributed-systems
-        image: registry.digitalocean.com/anubis/theia-distributed-systems:latest
+      - name: theia-golang
+        image: registry.digitalocean.com/anubis/theia-golang:latest
         imagePullPolicy: Always
         command: ['bash', '-c', 'while true; do sleep 60; done']
 
