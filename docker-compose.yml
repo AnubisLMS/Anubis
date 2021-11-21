@@ -35,7 +35,6 @@ services:
       - "MINDEBUG=0"
       - "DEBUG=1"
       - "DB_HOST=db"
-      - "MIGRATE=1"
       - "GITHUB_TOKEN"
     volumes:
       - "./api:/opt/app"
