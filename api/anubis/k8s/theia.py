@@ -340,7 +340,7 @@ def create_theia_k8s_pod_pvc(
         # Use the theia image that was specified in the database. If this is
         # a student session, this should be the theia image that is default either
         # for the course, or for the specific assignment.
-        image=theia_session.image,
+        image=theia_session.image.image,
         # Add environment
         env=[
             # Set the AUTOSAVE environment variable to ON or OFF

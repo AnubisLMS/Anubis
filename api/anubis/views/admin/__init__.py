@@ -2,7 +2,6 @@ def register_admin_views(app):
     from anubis.views.admin.assignments import assignments
     from anubis.views.admin.auth import auth
     from anubis.views.admin.autograde import autograde_
-    from anubis.views.admin.config import config_
     from anubis.views.admin.courses import courses_
     from anubis.views.admin.dangling import dangling
     from anubis.views.admin.ide import ide
@@ -26,7 +25,6 @@ def register_admin_views(app):
         static,
         students_,
         courses_,
-        config_,
         visuals_,
         dangling,
         late_exceptions_,

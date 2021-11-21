@@ -213,7 +213,7 @@ class Assignment(db.Model):
 
     # IDE
     ide_enabled = db.Column(db.Boolean, default=True)
-    theia_image = db.Column(db.TEXT, default="registry.digitalocean.com/anubis/theia-xv6")
+    theia_image_id = db.Column(db.String(128), db.ForeignKey('theia_image.id'))
     theia_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
 
     # Github
@@ -646,6 +646,27 @@ class SubmissionBuild(db.Model):
         return data
 
 
+class TheiaImage(db.Model):
+    __tablename__ = "theia_image"
+
+    id = default_id(32)
+    image = db.Column(db.String(1024), nullable=False)
+    label = db.Column(db.String(1024), nullable=False)
+    public = db.Column(db.Boolean, nullable=False, default=False)
+
+    assignments = db.relationship('Assignment', backref='theia_image')
+    sessions = db.relationship('TheiaSession', backref='image')
+
+    @property
+    def data(self):
+        return {
+            'id': self.id,
+            'image': self.image,
+            'label': self.label,
+            'public': self.public,
+        }
+
+
 class TheiaSession(db.Model):
     __tablename__ = "theia_session"
 
@@ -656,13 +677,13 @@ class TheiaSession(db.Model):
     # Foreign keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
     assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), nullable=True)
-    repo_url = db.Column(db.String(128), nullable=True)
+    image_id = db.Column(db.String(128), db.ForeignKey(TheiaImage.id), nullable=True)
 
     # Fields
+    repo_url = db.Column(db.String(128), nullable=True)
     active = db.Column(db.Boolean, default=True)
     state = db.Column(db.TEXT)
     cluster_address = db.Column(db.TEXT, nullable=True, default=None)
-    image = db.Column(db.TEXT, default="registry.digitalocean.com/anubis/theia-xv6")
 
     resources = db.Column(MutableJson, default=lambda: {})
     network_policy = db.Column(db.String(128), default="os-student")
@@ -704,7 +725,7 @@ class TheiaSession(db.Model):
     @property
     def settings(self):
         return {
-            "image": self.image,
+            "image": self.image.data,
             "repo_url": self.repo_url,
             "autosave": self.autosave,
             "privileged": self.privileged,

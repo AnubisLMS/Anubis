@@ -36,10 +36,11 @@ def create_app():
     :return: Flask app
     """
     from anubis.config import config
-    from anubis.views.admin import register_admin_views
 
     # Import views
+    from anubis.views.admin import register_admin_views
     from anubis.views.public import register_public_views
+    from anubis.views.super import register_super_views
 
     # Create app
     app = Flask(__name__)
@@ -50,6 +51,7 @@ def create_app():
 
     register_public_views(app)
     register_admin_views(app)
+    register_super_views(app)
 
     return app
 

@@ -1,5 +1,6 @@
 from os import environ
 
+MIGRATE = environ.get('MIGRATE', default=None)
 MINDEBUG = environ.get('MINDEBUG', default=None)
 if MINDEBUG is None:
     environ['MINDEBUG'] = '1'
@@ -16,9 +17,10 @@ if __name__ == "__main__":
     from flask_migrate import upgrade
 
     app = create_app()
-    with app.app_context():
-        if MINDEBUG == '1':
-            db.create_all()
-        else:
-            upgrade()
+    if MIGRATE is not None:
+        with app.app_context():
+            if MINDEBUG == '1':
+                db.create_all()
+            else:
+                upgrade()
     app.run('0.0.0.0', 5000, debug=True)

@@ -1,15 +1,15 @@
 from flask import Blueprint
 
 from anubis.models import Config, db
-from anubis.utils.auth.http import require_admin, require_superuser
+from anubis.utils.auth.http import require_superuser
 from anubis.utils.http import success_response
 from anubis.utils.http.decorators import json_endpoint, json_response
 
-config_ = Blueprint("config", __name__, url_prefix="/admin/config")
+config_ = Blueprint("config", __name__, url_prefix="/super/config")
 
 
 @config_.route("/list")
-@require_admin()
+@require_superuser()
 @json_response
 def config_list():
     """
