@@ -1,20 +1,20 @@
 import json
-from typing import List, Any
 from datetime import datetime, timedelta
+from typing import List
 
 import parse
 from dateutil.parser import parse as dateparse
 from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
 
-from anubis.lms.assignments import assignment_sync, delete_assignment, make_shared_assignment, delete_assignment_repos
-from anubis.utils.github.repos import delete_assignment_repo
+from anubis.lms.assignments import assignment_sync, delete_assignment, delete_assignment_repos
 from anubis.lms.courses import assert_course_context, course_context, is_course_superuser
 from anubis.lms.questions import get_assigned_questions
-from anubis.models import Assignment, AssignmentRepo, AssignmentTest, SubmissionTestResult, User, db
+from anubis.models import Assignment, TheiaImage, AssignmentRepo, AssignmentTest, SubmissionTestResult, User, db
 from anubis.utils.auth.http import require_admin
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import rand, req_assert, row2dict
+from anubis.utils.github.repos import delete_assignment_repo
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_endpoint, json_response, load_from_id
 from anubis.utils.logging import logger
@@ -195,9 +195,16 @@ def admin_assignments_get_id(assignment: Assignment):
     # of this course
     assert_course_context(assignment)
 
+    assignment_data = row2dict(assignment)
+
+    if assignment.theia_image_id is not None:
+        assignment_data['theia_image'] = assignment.theia_image.data
+    else:
+        assignment_data['theia_image'] = None
+
     # Pass back the full data
     return success_response({
-        "assignment": row2dict(assignment),
+        "assignment": assignment_data,
         "tests": [test.data for test in assignment.tests],
     })
 
@@ -400,6 +407,13 @@ def admin_assignments_save(assignment: dict):
         # If github.com is in what the user gave, remove it
         if key == "github_template" and value.startswith('https://github.com/'):
             value = value[len('https://github.com/'):]
+
+        if key == 'theia_image':
+            if value is not None:
+                db_assignment.theia_image_id = value['id']
+            else:
+                db_assignment.theia_image_id = None
+            continue
 
         setattr(db_assignment, key, value)
 

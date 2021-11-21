@@ -19,6 +19,7 @@ import yellow from '@material-ui/core/colors/yellow';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import Tooltip from '@material-ui/core/Tooltip';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 import SaveIcon from '@material-ui/icons/Save';
 import EditIcon from '@material-ui/icons/Edit';
@@ -66,6 +67,7 @@ const regradeAssignment = (id, enqueueSnackbar, setReset) => (params = {}) => {
 export default function AssignmentCard({assignment, editableFields, updateField, saveAssignment}) {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
+  const [images, setImages] = useState([]);
   const [progress, setProgress] = useState('');
   const [reset, setReset] = useState(0);
   const [warningOpen, setWarningOpen] = useState(false);
@@ -74,6 +76,15 @@ export default function AssignmentCard({assignment, editableFields, updateField,
       [field]: JSON.stringify(assignment[field]),
     })),
   );
+
+  React.useEffect(() => {
+    axios.get(`/api/admin/ide/images/list`).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data.images) {
+        setImages(data.images);
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  }, [reset]);
 
   React.useEffect(() => {
     axios.get(`/api/admin/regrade/status/${assignment.id}`).then((response) => {
@@ -96,6 +107,24 @@ export default function AssignmentCard({assignment, editableFields, updateField,
         <CardContent>
           <Grid container spacing={2}>
             {editableFields.map(({field, label, disabled = false, type = 'string'}) => {
+              // Based on Label
+              switch (field) {
+              case 'theia_image':
+                return (
+                  <Grid item xs={12} lg={6}>
+                    <Autocomplete
+                      fullWidth
+                      value={assignment[field]}
+                      onChange={(_, v) => updateField(assignment.id, field, false, false, true)(v)}
+                      options={images}
+                      getOptionLabel={(option) => option.label}
+                      renderInput={(params) => <TextField {...params} label={label} variant="outlined" />}
+                    />
+                  </Grid>
+                );
+              }
+
+              // Based on type
               switch (type) {
               case 'string':
                 return (

@@ -1,10 +1,11 @@
 import json
+from typing import List
 from datetime import datetime
 
 from flask import Blueprint
 
 from anubis.lms.courses import course_context
-from anubis.models import TheiaSession, db
+from anubis.models import TheiaSession, TheiaImage, db
 from anubis.rpc.theia import reap_theia_sessions_in_course
 from anubis.utils.auth.http import require_admin
 from anubis.utils.auth.user import current_user
@@ -229,3 +230,14 @@ def private_ide_reap_all():
 
     # Hand back status
     return success_response({"status": "Reap job enqueued. Session cleanup will take a minute."})
+
+
+@ide.get('/images/list')
+@require_admin()
+@json_response
+def admin_ide_images_list():
+    images: List[TheiaImage] = TheiaImage.query.all()
+
+    return success_response({
+        'images': [image.data for image in images]
+    })

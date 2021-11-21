@@ -61,10 +61,6 @@ export default function Assignment() {
   }, [reset]);
 
   const updateField = (id, field, toggle = false, datetime = false, json = false) => (e) => {
-    if (!e) {
-      return;
-    }
-
     if (toggle) {
       assignment[field] = !assignment[field];
     } else if (datetime) {
