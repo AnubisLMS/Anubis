@@ -22,8 +22,6 @@ popd
 
 ./debug/upgrade.sh
 
-# Restart the most common deployments
-./restart.sh
-
 cd ..
+make restart
 make startup-links

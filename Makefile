@@ -23,7 +23,7 @@ help:
 
 startup-links:
 	@echo ''
-	@echo 'seed: http://localhost/api/admin/seed'
+	@echo 'seed: http://localhost/api/admin/seed/'
 	@echo 'auth: http://localhost/api/admin/auth/token/superuser'
 	@echo 'auth: http://localhost/api/admin/auth/token/professor'
 	@echo 'auth: http://localhost/api/admin/auth/token/ta'
@@ -87,7 +87,7 @@ debug:
 .PHONY: mindebug       # Setup mindebug environment
 mindebug:
 	@echo ''
-	@echo 'seed: http://localhost:3000/api/admin/seed'
+	@echo 'seed: http://localhost:3000/api/admin/seed/'
 	@echo 'auth: http://localhost:3000/api/admin/auth/token/superuser'
 	@echo 'auth: http://localhost:3000/api/admin/auth/token/professor'
 	@echo 'auth: http://localhost:3000/api/admin/auth/token/ta'
