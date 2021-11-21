@@ -14,7 +14,6 @@ ENV PY_VERSION=$PY_VERSION \
     ANUBIS_IDE=1
 
 # Theia application
-
 WORKDIR /opt/theia
 
 RUN set -ex; \
@@ -108,4 +107,4 @@ COPY autosave /usr/local/bin/autosave
 
 USER anubis
 WORKDIR /opt/theia
-ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]
+ENTRYPOINT ["env", "-i", "supervisord", "--nodaemon", "-c", "/supervisord.conf"]
