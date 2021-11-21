@@ -12,7 +12,7 @@ K8S_RESTART_DEPLOYMENTS := \
 
 # Theia IDES
 THEIA_BASE_IDE := theia-base-397 theia-base-3100
-THEIA_IDES := theia-xv6 theia-admin theia-devops theia-jepst theia-distributed-systems theia-software-engineering
+THEIA_IDES := theia-xv6 theia-admin theia-devops theia-jepst theia-golang theia-software-engineering
 
 
 help:
