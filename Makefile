@@ -31,48 +31,51 @@ startup-links:
 	@echo 'site: http://localhost/'
 
 
-.PHONY: upgrade        # Helm upgrade Anubis k8s cluster
+.PHONY: upgrade         # Helm upgrade Anubis k8s cluster
 upgrade:
 	helm upgrade --install anubis ./k8s/chart -n anubis
 
-.PHONY: restart        # Restart Anubis k8s cluster
+.PHONY: restart         # Restart Anubis k8s cluster
 restart:
 	kubectl rollout restart -n anubis deploy \
 		$(K8S_RESTART_DEPLOYMENTS)
 
-.PHONY: deploy         # Deploy Anubis k8s cluster
+.PHONY: deploy          # Deploy Anubis k8s cluster
 deploy: build push upgrade restart
 
-.PHONY: build          # Build all docker images
+.PHONY: build           # Build all docker images
 build:
 	docker-compose build --parallel --pull $(DOCKER_COMPOSE_PUSH_SERVICES)
 
-.PHONY: push           # Push images to registry.digitalocean.com (requires vpn)
+.PHONY: push            # Push images to registry.digitalocean.com (requires vpn)
 push: build
 	docker-compose push $(DOCKER_COMPOSE_PUSH_SERVICES)
 
-.PHONY: build-ides     # Build all ide docker images
-build-ides:
+.PHONY: build-base-ides # Build base ide images
+build-base-ides:
 	@echo 'building base images'
 	docker-compose build --parallel --pull $(THEIA_BASE_IDE)
 
+
+.PHONY: build-ides      # Build all ide docker images
+build-ides:
 	@echo 'building ide image'
 	docker-compose build --parallel $(THEIA_IDES)
 
-.PHONY: push-base-ides # Push base ide images to registry.digitalocean.com
+.PHONY: push-base-ides  # Push base ide images to registry.digitalocean.com
 push-base-ides:
 	docker-compose push $(THEIA_BASE_IDE)
 
-.PHONY: push-ides      # Push ide images to registry.digitalocean.com
+.PHONY: push-ides       # Push ide images to registry.digitalocean.com
 push-ides:
 	docker-compose push $(THEIA_IDES)
 
-.PHONY: prop-ides      # Create theia-prop daemonset to propagate latest ide images
+.PHONY: prop-ides       # Create theia-prop daemonset to propagate latest ide images
 prop-ides:
 	kubectl apply -f theia/ide/theia-prop.yaml
 	kubectl rollout restart ds theia-prop
 
-.PHONY: debug          # Start the cluster in debug mode
+.PHONY: debug           # Start the cluster in debug mode
 debug:
 	docker-compose up -d $(DEBUG_PERSISTENT_SERVICES)
 	docker-compose up \
@@ -84,7 +87,7 @@ debug:
 	docker-compose exec api alembic upgrade head
 	make startup-links
 
-.PHONY: mindebug       # Setup mindebug environment
+.PHONY: mindebug        # Setup mindebug environment
 mindebug:
 	@echo ''
 	@echo 'seed: http://localhost:3000/api/admin/seed/'
@@ -95,7 +98,7 @@ mindebug:
 	@echo 'site: http://localhost:3000/'
 	make -j2 apirun webrun
 
-.PHONY: mkdebug        # Start minikube debug
+.PHONY: mkdebug         # Start minikube debug
 mkdebug:
 	./k8s/debug/provision.sh
 
