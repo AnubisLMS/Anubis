@@ -207,7 +207,7 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     # Check if it exists
     if assignment is None:
         assignment = Assignment(
-            theia_image=course.theia_default_image,
+            theia_image_id=course.theia_default_image_id,
             theia_options=course.theia_default_options,
             unique_code=assignment_data["unique_code"],
             course=course,

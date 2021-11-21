@@ -76,7 +76,23 @@ def upgrade():
         op.drop_column("theia_session", "image")
         op.create_foreign_key(
             None, "theia_session", "theia_image", ["image_id"], ["id"]
-    )
+        )
+
+        # Handle course table
+        op.add_column(
+            "course",
+            sa.Column("theia_default_image_id", sa.String(length=128), nullable=True),
+        )
+        for i in images:
+            conn.execute(
+                sa.text('update course set theia_default_image_id = :id where theia_default_image = :image;'),
+                id=i['id'], image=i['image'],
+            )
+        op.drop_column("course", "theia_default_image")
+        op.create_foreign_key(
+            None, "course", "theia_image", ["theia_default_image_id"], ["id"]
+        )
+
     # ### end Alembic commands ###
 
 

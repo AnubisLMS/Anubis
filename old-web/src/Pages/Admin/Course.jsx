@@ -65,15 +65,13 @@ export default function Course() {
   }, [reset]);
 
   const updateField = (id, field, toggle = false, datetime = false, json = false) => (e) => {
-    if (!e) {
-      return;
-    }
-
     if (course.id === id) {
       if (toggle) {
         course[field] = !course[field];
       } else if (datetime) {
         course[field] = format(e, 'yyyy-MM-dd HH:mm:ss');
+      } else if (json) {
+        course[field] = e;
       } else {
         course[field] = e.target.value.toString();
       }

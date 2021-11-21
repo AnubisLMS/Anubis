@@ -24,6 +24,9 @@ yeetdb:
 cleanyeetdb:
 	make -C .. cleanyeetdb
 
+test: venv
+	./tests/test.sh
+
 .PHONY: migrations       # Run alembic migrations
 migrations: venv
 	./venv/bin/alembic upgrade head

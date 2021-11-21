@@ -23,10 +23,16 @@ def admin_courses_list():
     :return:
     """
 
+    course_data = row2dict(course_context)
+    if course_context.theia_default_image_id is not None:
+        course_data['theia_default_image'] = course_context.theia_default_image.data
+    else:
+        course_data['theia_default_image'] = None
+
     # Return the course context broken down
     return success_response(
         {
-            "course": row2dict(course_context),
+            "course": course_data,
         }
     )
 
@@ -101,9 +107,19 @@ def admin_courses_save_id(course: dict):
     for column in Course.__table__.columns:
         if column.name in course:
             key, value = column.name, course[column.name]
+
             if isinstance(value, str):
                 value = value.strip()
+
+            if key == 'theia_default_image_id':
+                continue
+
             setattr(db_course, key, value)
+
+    if course['theia_default_image'] is not None:
+        db_course.theia_default_image_id = course['theia_default_image']['id']
+    else:
+        db_course.theia_default_image_id = None
 
     # Commit the changes
     try:

@@ -1,4 +1,6 @@
-import React from 'react';
+import React, {useState} from 'react';
+import axios from 'axios';
+import {useSnackbar} from 'notistack';
 import {Link} from 'react-router-dom';
 
 import Grid from '@material-ui/core/Grid';
@@ -11,9 +13,12 @@ import CardContent from '@material-ui/core/CardContent';
 import yellow from '@material-ui/core/colors/yellow';
 import EditIcon from '@material-ui/icons/Edit';
 import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 import AuthContext from '../../../Contexts/AuthContext';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+import standardStatusHandler from '../../../Utils/standardStatusHandler';
+import standardErrorHandler from '../../../Utils/standardErrorHandler';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -24,35 +29,72 @@ const useStyles = makeStyles((theme) => ({
 
 export default function CourseCard({course, _disabled, editableFields, updateField, saveCourse}) {
   const classes = useStyles();
+  const {enqueueSnackbar} = useSnackbar();
+  const [images, setImages] = useState([]);
+
+  React.useEffect(() => {
+    axios.get(`/api/admin/ide/images/list`).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data.images) {
+        setImages(data.images);
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  }, []);
 
   return (
     <Card>
       <CardContent>
         <Grid container spacing={2}>
-          {editableFields.map(({field, label, type = 'text', disabled = false}) => (
-            <Grid item xs={12} key={field}>
-              {type === 'text' && <TextField
-                fullWidth
-                disabled={disabled || _disabled}
-                variant={'outlined'}
-                label={label}
-                value={course[field]}
-                onChange={updateField(course.id, field)}
-              />}
-              {type === 'boolean' && <FormControlLabel
-                value={course[field]}
-                label={label}
-                labelPlacement="end"
-                control={
-                  <Switch
-                    checked={course[field]}
-                    color={'primary'}
-                    onClick={updateField(course.id, field, true)}
+          {editableFields.map(({field, label, type = 'text', disabled = false}) => {
+            switch (field) {
+            case 'theia_default_image':
+              return (
+                <Grid item xs={12} key={field}>
+                  <Autocomplete
+                    fullWidth
+                    value={course[field]}
+                    onChange={(_, v) => updateField(course.id, field, false, false, true)(v)}
+                    options={images}
+                    getOptionLabel={(option) => option.label}
+                    renderInput={(params) => <TextField {...params} label={label} variant="outlined" />}
                   />
-                }
-              />}
-            </Grid>
-          ))}
+                </Grid>
+              );
+            }
+            switch (type) {
+            case 'text':
+              return (
+                <Grid item xs={12} key={field}>
+                  <TextField
+                    fullWidth
+                    disabled={disabled || _disabled}
+                    variant={'outlined'}
+                    label={label}
+                    value={course[field]}
+                    onChange={updateField(course.id, field)}
+                  />
+                </Grid>
+              );
+            case 'boolean':
+              return (
+                <Grid item xs={12} key={field}>
+                  <FormControlLabel
+                    value={course[field]}
+                    label={label}
+                    labelPlacement="end"
+                    control={
+                      <Switch
+                        checked={course[field]}
+                        color={'primary'}
+                        onClick={updateField(course.id, field, true)}
+                      />
+                    }
+                  />
+                </Grid>
+              );
+            }
+            return null;
+          })}
         </Grid>
       </CardContent>
       {!_disabled ? (

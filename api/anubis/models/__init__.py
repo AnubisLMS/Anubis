@@ -104,7 +104,7 @@ class Course(db.Model):
         default="https://github.com/os3224/anubis-assignment-tests",
     )
     github_repo_required = db.Column(db.Boolean, default=True)
-    theia_default_image = db.Column(db.TEXT, nullable=False, default="registry.digitalocean.com/anubis/theia-xv6")
+    theia_default_image_id = db.Column(db.String(128), db.ForeignKey('theia_image.id'), nullable=True)
     theia_default_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
     github_org = db.Column(db.TEXT, default="os3224")
     join_code = db.Column(db.String(256), unique=True)
@@ -213,7 +213,7 @@ class Assignment(db.Model):
 
     # IDE
     ide_enabled = db.Column(db.Boolean, default=True)
-    theia_image_id = db.Column(db.String(128), db.ForeignKey('theia_image.id'))
+    theia_image_id = db.Column(db.String(128), db.ForeignKey('theia_image.id'), default=None)
     theia_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
 
     # Github
@@ -654,6 +654,7 @@ class TheiaImage(db.Model):
     label = db.Column(db.String(1024), nullable=False, default='')
     public = db.Column(db.Boolean, nullable=False, default=False)
 
+    courses = db.relationship('Course', backref='theia_default_image')
     assignments = db.relationship('Assignment', backref='theia_image')
     sessions = db.relationship('TheiaSession', backref='image')
 

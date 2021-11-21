@@ -94,12 +94,19 @@ def admin_ide_initialize_custom(settings: dict, **_):
         message="Starting new IDEs is currently disabled by an Anubis administrator. " "Please try again later.",
     )
 
+    image_db = TheiaImage.query.filter(
+        TheiaImage.image == image
+    ).first()
+
+    if image_db is None:
+        return error_response('Theia IDE Image is not yet registered')
+
     # Create a new session
     session = TheiaSession(
         owner_id=current_user.id,
         assignment_id=None,
         course_id=course_context.id,
-        image=image,
+        image_id=image_db.id,
         repo_url=repo_url,
         active=True,
         state="Initializing",

@@ -415,6 +415,9 @@ def admin_assignments_save(assignment: dict):
                 db_assignment.theia_image_id = None
             continue
 
+        if key == 'theia_image_id':
+            continue
+
         setattr(db_assignment, key, value)
 
     # Attempt to commit
