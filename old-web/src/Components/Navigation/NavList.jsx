@@ -11,7 +11,7 @@ import LaunchOutlinedIcon from '@material-ui/icons/LaunchOutlined';
 
 import AuthContext from '../../Contexts/AuthContext';
 import NavItem from './NavItem';
-import {admin_nav, footer_nav, public_nav} from '../../navconfig';
+import {public_nav, admin_nav, super_nav, footer_nav} from '../../navconfig';
 
 const useStyles = makeStyles((theme) => ({
   categoryHeader: {
@@ -85,7 +85,7 @@ export default function NavList({open, handleDrawerClose}) {
         <AuthContext.Consumer>
           {(user) => (
             <React.Fragment>
-              {user && user.is_admin ? (
+              {user?.is_admin && (
                 <React.Fragment>
                   <ListItem className={classes.categoryHeader}>
                     <ListItemText
@@ -108,7 +108,31 @@ export default function NavList({open, handleDrawerClose}) {
                   ))}
                   <Divider className={classes.divider}/>
                 </React.Fragment>
-              ) : null}
+              )}
+              {user?.is_superuser && (
+                <React.Fragment>
+                  <ListItem className={classes.categoryHeader}>
+                    <ListItemText
+                      classes={{
+                        primary: classes.categoryHeaderPrimary,
+                      }}
+                    >
+                      Super Admin
+                    </ListItemText>
+                  </ListItem>
+                  {super_nav.map(({id: childId, icon, path}) => (
+                    <NavItem
+                      key={childId}
+                      onClick={onClickWrap(() => setPathname(path))}
+                      childId={childId}
+                      icon={icon}
+                      path={path}
+                      pathname={pathname}
+                    />
+                  ))}
+                  <Divider className={classes.divider}/>
+                </React.Fragment>
+              )}
             </React.Fragment>
           )}
         </AuthContext.Consumer>

@@ -26,12 +26,12 @@ import Blog from './Pages/Public/Blog';
 import Visuals from './Pages/Public/Visuals';
 import Lectures from './Pages/Public/Lectures';
 
+// Admin
 import AdminUsers from './Pages/Admin/Users';
 import AdminUser from './Pages/Admin/User';
 import AdminCourse from './Pages/Admin/Course';
 import AdminTheia from './Pages/Admin/Theia';
 import AdminStatic from './Pages/Admin/Static';
-import AdminConfig from './Pages/Admin/Config';
 import AdminLectures from './Pages/Admin/Lectures';
 import AdminAutogradeAssignments from './Pages/Admin/Autograde/Assignments';
 import AdminAutogradeSubmission from './Pages/Admin/Autograde/Submission';
@@ -43,6 +43,10 @@ import AdminAssignmentQuestions from './Pages/Admin/Assignment/Questions';
 import AdminAssignmentTests from './Pages/Admin/Assignment/Tests';
 import AdminAssignmentRepos from './Pages/Admin/Assignment/Repos';
 import AdminAssignmentGroups from './Pages/Admin/Assignment/AssignmentGroups';
+
+// Super
+import SuperConfig from './Pages/Super/Config';
+import SuperIDEImages from './Pages/Super/IDEImages';
 
 export const footer_nav = [
   {
@@ -157,11 +161,20 @@ export const admin_nav = [
     path: '/admin/static',
     Page: AdminStatic,
   },
+];
+
+export const super_nav = [
+  {
+    id: 'IDE Images',
+    icon: <CodeOutlinedIcon/>,
+    path: '/super/ide-images',
+    Page: SuperIDEImages,
+  },
   {
     id: 'Config',
     icon: <SettingsIcon/>,
-    path: '/admin/config',
-    Page: AdminConfig,
+    path: '/super/config',
+    Page: SuperConfig,
   },
 ];
 

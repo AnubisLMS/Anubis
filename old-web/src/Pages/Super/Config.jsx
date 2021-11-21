@@ -3,11 +3,12 @@ import makeStyles from '@material-ui/core/styles/makeStyles';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
-import Grid from '@material-ui/core/Grid';
 import {DataGrid} from '@material-ui/data-grid/';
+import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
 
 import SaveIcon from '@material-ui/icons/Save';
 import EditIcon from '@material-ui/icons/Edit';
@@ -15,7 +16,6 @@ import AddIcon from '@material-ui/icons/Add';
 
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
-import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -106,7 +106,7 @@ export default function Config() {
   const columns = useColumns(config, setConfig, enqueueSnackbar);
 
   React.useEffect(() => {
-    axios.get('/api/admin/config/list').then((response) => {
+    axios.get('/api/super/config/list').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
         setConfig(data.config.map(
