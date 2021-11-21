@@ -34,7 +34,7 @@ jobs:
     - name: Background API
       run: |
         set -x
-        ./venv/bin/python3 dev.py &
+        env MIGRATE=1 ./venv/bin/python3 dev.py &
     - name: Test with pytest
       run: |
         ./tests/mintest.sh
