@@ -107,4 +107,4 @@ COPY autosave /usr/local/bin/autosave
 
 USER anubis
 WORKDIR /opt/theia
-ENTRYPOINT ["env", "-i", "supervisord", "--nodaemon", "-c", "/supervisord.conf"]
+ENTRYPOINT ["/usr/local/bin/supervisord", "--nodaemon", "-c", "/supervisord.conf"]
