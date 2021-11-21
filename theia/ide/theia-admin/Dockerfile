@@ -1,4 +1,4 @@
-FROM theia-base:latest as theia
+FROM registry.digitalocean.com/anubis/theia-base:python-3.10.0 as theia
 
 ENV DIND_COMMIT 42b1175eda071c0e9121e1d64345928384a93df1
 ENV DOCKER_LIB_COMMIT 8baa881aab85f8398d2edbbcc0da4bd1f556dd98
@@ -26,7 +26,14 @@ RUN set -ex; \
     pixz \
     uidmap \
     openssl \
-    fuse-overlayfs;
+    fuse-overlayfs; \
+  rm -rf /tmp/*; \
+  rm -rf /usr/share/doc; \
+  rm -rf /var/lib/apt/lists/*; \
+  rm -rf /home/node/*; \
+  find / -depth \
+    \( -name .cache -o -name __pycache__ -o -name '*.pyc' -o -name .git -o -name .github \) \
+    -exec 'rm' '-rf' '{}' '+';
 
 RUN set -eux; \
   addgroup --system dockremap; \
