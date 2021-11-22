@@ -45,7 +45,6 @@ function getKeyPath(node) {
  * @returns {Object} Updated tree structure
  */
 function updateData(data, keyPath) {
-  console.log(colorRange.EXTENDED_DISCRETE_COLOR_RANGE[5]);
   if (data.children) {
     data.children.map((child) => updateData(child, keyPath));
   }

@@ -48,10 +48,19 @@
     "extends": "react-app"
   },
   "jest": {
-    "snapshotSerializers": ["enzyme-to-json/serializer"],
-    "collectCoverageFrom": ["src/**/*.{js,jsx}", "!src/index.js"],
-    "coverageReporters": ["text"],
-    "coveragePathIgnorePatterns": ["/node_modules/"]
+    "snapshotSerializers": [
+      "enzyme-to-json/serializer"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx}",
+      "!src/index.js"
+    ],
+    "coverageReporters": [
+      "text"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
   },
   "browserslist": {
     "production": [
@@ -76,6 +85,7 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-react": "^7.22.0"
+    "eslint-plugin-react": "^7.22.0",
+    "react-test-renderer": "^17.0.2"
   }
 }
