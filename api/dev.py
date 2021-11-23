@@ -14,13 +14,8 @@ print('MINDEBUG', MINDEBUG)
 if __name__ == "__main__":
     from anubis.app import create_app
     from anubis.models import db
-    from flask_migrate import upgrade
 
     app = create_app()
-    if MIGRATE is not None:
-        with app.app_context():
-            if MINDEBUG == '1':
-                db.create_all()
-            else:
-                upgrade()
+    if MINDEBUG == '1' and MIGRATE == '1':
+        db.create_all()
     app.run('0.0.0.0', 5000, debug=True)

@@ -18,14 +18,24 @@ from anubis.utils.rpc import enqueue_ide_initialize, enqueue_ide_stop, rpc_enque
 ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 
 
+def default_admin_ide() -> TheiaImage:
+    image = TheiaImage.query.filter(
+        TheiaImage.image == "registry.digitalocean.com/anubis/theia-admin",
+    ).first()
+
+    return image
+
+
 @ide.route("/settings")
 @require_admin()
 @json_response
 def admin_ide_admin_settings():
+    image = default_admin_ide()
+
     return success_response(
         {
             "settings": {
-                "image": "registry.digitalocean.com/anubis/theia-admin",
+                "image": image.data,
                 "repo_url": course_context.autograde_tests_repo,
                 # Options
                 "privileged": True,
@@ -66,8 +76,10 @@ def admin_ide_initialize_custom(settings: dict, **_):
     if session is not None:
         return success_response({"session": session.data})
 
+    default_image = default_admin_ide()
+
     # Read the options out of the posted data
-    image = settings.get("image", "registry.digitalocean.com/anubis/theia-admin")
+    image = settings.get("image", None)
     repo_url = settings.get("repo_url", "https://github.com/os3224/anubis-assignment-tests")
     resources_str = settings.get("resources", '{"limits":{"cpu":"4","memory":"4Gi"}}')
     network_locked = settings.get("network_locked", False)
@@ -76,6 +88,12 @@ def admin_ide_initialize_custom(settings: dict, **_):
     credentials = settings.get("credentials", True)
     privileged = settings.get("privileged", True)
     persistent_storage = settings.get("persistent_storage", False)
+
+    image_id = image.get('id')
+    if image_id is not None:
+        image: TheiaImage = TheiaImage.query.filter(TheiaImage.id == image_id).first()
+    if image is None:
+        image: TheiaImage = default_image
 
     # Attempt to load the options_str into a dict object
     try:
@@ -94,19 +112,12 @@ def admin_ide_initialize_custom(settings: dict, **_):
         message="Starting new IDEs is currently disabled by an Anubis administrator. " "Please try again later.",
     )
 
-    image_db = TheiaImage.query.filter(
-        TheiaImage.image == image
-    ).first()
-
-    if image_db is None:
-        return error_response('Theia IDE Image is not yet registered')
-
     # Create a new session
     session = TheiaSession(
         owner_id=current_user.id,
         assignment_id=None,
         course_id=course_context.id,
-        image_id=image_db.id,
+        image_id=image.id,
         repo_url=repo_url,
         active=True,
         state="Initializing",

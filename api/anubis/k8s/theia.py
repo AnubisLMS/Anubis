@@ -103,7 +103,7 @@ def create_theia_k8s_pod_pvc(
             # Attempt to read the anubis secret from the anubis namespace.
             # This will throw client.exceptions.ApiException(404) if
             # the secret is not available.
-            anubis_secret: client.V1Secret = v1.read_namespaced_secret("anubis", "anubis")
+            anubis_secret: client.V1Secret = v1.read_namespaced_secret("anubis", "anubis-registry")
 
             # Decode git token
             docker_config_json = base64.b64decode(anubis_secret.data[".dockerconfigjson"].encode()).decode(
