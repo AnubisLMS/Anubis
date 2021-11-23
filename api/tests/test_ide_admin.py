@@ -3,7 +3,6 @@ from utils import permission_test
 settings_sample = {
     "network_locked": False,
     "privileged": True,
-    "image": "registry.digitalocean.com/anubis/theia-admin",
     "repo_url": "https://github.com/os3224/anubis-assignment-tests",
     "options": '{"limits": {"cpu": "4", "memory": "4Gi"}}',
 }

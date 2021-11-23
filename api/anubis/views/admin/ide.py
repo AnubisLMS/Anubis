@@ -79,7 +79,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
     default_image = default_admin_ide()
 
     # Read the options out of the posted data
-    image = settings.get("image", None)
+    image = settings.get("image", dict())
     repo_url = settings.get("repo_url", "https://github.com/os3224/anubis-assignment-tests")
     resources_str = settings.get("resources", '{"limits":{"cpu":"4","memory":"4Gi"}}')
     network_locked = settings.get("network_locked", False)
@@ -89,10 +89,10 @@ def admin_ide_initialize_custom(settings: dict, **_):
     privileged = settings.get("privileged", True)
     persistent_storage = settings.get("persistent_storage", False)
 
-    image_id = image.get('id')
+    image_id = image.get('id', None)
     if image_id is not None:
         image: TheiaImage = TheiaImage.query.filter(TheiaImage.id == image_id).first()
-    if image is None:
+    if image is None or image == dict():
         image: TheiaImage = default_image
 
     # Attempt to load the options_str into a dict object
