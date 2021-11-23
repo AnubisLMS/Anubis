@@ -21,6 +21,7 @@ import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
 import IDEHeader from '../../Public/IDE/IDEHeader';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -124,14 +125,26 @@ export default function ManagementIDEDialog() {
   const [open, setOpen] = useState(false);
   const [sessionsAvailable, setSessionsAvailable] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState([]);
   const [session, setSession] = useState(false);
   const [settings, setSettings] = useState({});
+
+  console.log(images);
 
   React.useEffect(() => {
     axios.get('/api/public/ide/available').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
         setSessionsAvailable(data.session_available);
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  }, []);
+
+  React.useEffect(() => {
+    axios.get(`/api/admin/ide/images/list`).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data?.images) {
+        setImages(data.images);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, []);
@@ -169,6 +182,8 @@ export default function ManagementIDEDialog() {
         prev[key] = e.target.value;
       } else if (typeof prev[key] === 'boolean') {
         prev[key] = !prev[key];
+      } else {
+        prev[key] = e;
       }
       return {...prev};
     });
@@ -218,9 +233,14 @@ export default function ManagementIDEDialog() {
               </Typography>
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                fullWidth label="Theia Image" variant="outlined"
-                value={settings.image} onChange={updateSetting('image')}
+              <Autocomplete
+                fullWidth
+                disableClearable
+                value={settings.image}
+                onChange={(_, v) => updateSetting('image')(v)}
+                options={images}
+                getOptionLabel={(option) => option?.label}
+                renderInput={(params) => <TextField {...params} label="IDE Image" variant="outlined" />}
               />
             </Grid>
             <Grid item xs={12}>

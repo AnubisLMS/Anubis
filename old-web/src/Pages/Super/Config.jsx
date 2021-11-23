@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 const saveConfig = (config, enqueueSnackbar) => {
-  axios.post('/api/admin/config/save', {config}).then((response) => {
+  axios.post('/api/super/config/save', {config}).then((response) => {
     standardStatusHandler(response, enqueueSnackbar);
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
