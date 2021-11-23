@@ -17,5 +17,6 @@ if __name__ == "__main__":
 
     app = create_app()
     if MINDEBUG == '1' and MIGRATE == '1':
-        db.create_all()
+        with app.app_context():
+            db.create_all()
     app.run('0.0.0.0', 5000, debug=True)
