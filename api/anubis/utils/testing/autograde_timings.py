@@ -1,7 +1,7 @@
 import time
 
 from anubis.lms.autograde import bulk_autograde
-from anubis.models import db
+from anubis.models import db, TheiaImage
 from anubis.utils.data import with_context
 from anubis.utils.testing.seed import create_assignment, create_course, create_students, init_submissions
 from anubis.utils.testing.db import clear_database
@@ -9,6 +9,11 @@ from anubis.utils.testing.db import clear_database
 
 def do_seed() -> str:
     clear_database()
+
+    xv6_image = TheiaImage(image="registry.digitalocean.com/anubis/theia-xv6")
+    db.session.add(xv6_image)
+
+    db.session.commit()
 
     # OS test course
     intro_to_os_students = create_students(100)
@@ -24,6 +29,7 @@ def do_seed() -> str:
     os_assignment0, _, os_submissions0, _ = create_assignment(
         intro_to_os_course,
         intro_to_os_students,
+        xv6_image,
         i=0,
         github_repo_required=True,
         submission_count=50,
