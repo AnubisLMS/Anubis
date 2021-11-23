@@ -49,4 +49,5 @@ RUN set -ex; \
   sed -i 's/"default": "goreturns"/"default": "goformat"/' \
     /opt/theia/plugins/vscode-go/extension/package.json
 
+COPY supervisord.conf /supervisord.conf
 USER anubis
