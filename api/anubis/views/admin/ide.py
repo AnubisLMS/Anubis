@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from flask import Blueprint
 
@@ -92,10 +92,11 @@ def admin_ide_initialize_custom(settings: dict, **_):
     persistent_storage = settings.get("persistent_storage", False)
 
     image_id = image.get('id', None)
+    image_db: Optional[TheiaImage] = None
     if image_id is not None:
-        image: TheiaImage = TheiaImage.query.filter(TheiaImage.id == image_id).first()
-    if image is None or image == dict():
-        image: TheiaImage = default_image
+        image_db = TheiaImage.query.filter(TheiaImage.id == image_id).first()
+    if image_db is None or image == dict():
+        image_db = default_image
 
     # Attempt to load the options_str into a dict object
     try:
@@ -115,7 +116,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
     )
 
     session = initialize_ide(
-        image_id=image.id,
+        image_id=image_db.id,
 
         assignment_id=None,
         course_id=course_context.id,
