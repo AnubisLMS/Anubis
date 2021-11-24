@@ -1,14 +1,17 @@
 name: Lint
 
+defaults:
+  run:
+    shell: bash
+    working-directory: web
+
 on:
   # Trigger the workflow on push or pull request,
   # but only for the master branch
   push:
-    branches:
-      - master
+    branches: [ master ]
   pull_request:
-    branches:
-      - master
+    branches: [ master ]
 
 jobs:
   run-linters:
@@ -23,6 +26,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12
+      - run: yarn
+      - run: yarn run run-linters
 
       # ESLint and Prettier must be in `package.json`
       - name: Install Node.js dependencies
@@ -32,4 +37,4 @@ jobs:
         uses: wearerequired/lint-action@v1
         with:
           eslint: true
-          prettier: true
+      # prettier: true
