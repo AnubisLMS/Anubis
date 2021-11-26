@@ -178,7 +178,6 @@ def create_theia_k8s_pod_pvc(
     # If the git secret should be included, then we add them to the
     # sidecar and init envs here.
     if include_git_secret:
-
         # Add git cred to sidecar
         sidecar_extra_env.append(
             # Add the git credentials secret to the container. The entrypoint

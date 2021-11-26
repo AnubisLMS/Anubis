@@ -20,7 +20,6 @@ def get_config_str(key: str, default: Optional[str] = None) -> Optional[str]:
 
     # Check that the config value exists
     if config_value is None:
-
         # Return default if entry was not found
         return default
 

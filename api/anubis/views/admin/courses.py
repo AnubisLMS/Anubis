@@ -145,10 +145,10 @@ def admin_course_list_students():
     # Get all the students in the current course context
     students = (
         User.query.join(InCourse)
-        .filter(
+            .filter(
             InCourse.course_id == course_context.id,
         )
-        .all()
+            .all()
     )
 
     # Return the list of basic user information about the tas
@@ -180,10 +180,10 @@ def admin_course_list_tas():
     # Get all the TAs in the current course context
     tas = (
         User.query.join(TAForCourse)
-        .filter(
+            .filter(
             TAForCourse.course_id == course_context.id,
         )
-        .all()
+            .all()
     )
 
     # Return the list of basic user information about the tas
@@ -215,10 +215,10 @@ def admin_course_list_professors():
     # Get all the professors within the current course context
     professors = (
         User.query.join(ProfessorForCourse)
-        .filter(
+            .filter(
             ProfessorForCourse.course_id == course_context.id,
         )
-        .all()
+            .all()
     )
 
     # Return the list of basic user information about the professors

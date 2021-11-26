@@ -90,7 +90,6 @@ def public_submission(commit: str):
 
     # Make sure the user is allowed to see the submission if it does not belong to them
     if not submission.owner_id == current_user.id:
-
         # Course that the submission belongs to
         course_id = submission.assignment.course_id
 

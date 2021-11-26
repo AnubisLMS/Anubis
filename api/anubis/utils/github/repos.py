@@ -1,5 +1,5 @@
 import traceback
-from typing import List, Union, Optional
+from typing import List
 
 from parse import parse
 
@@ -166,7 +166,24 @@ def delete_assignment_repo(user: User, assignment: Assignment, commit: bool = Tr
         logger.error(f"continuing")
 
 
-def _create_assignment_repo_obj(user: User, assignment: Assignment, new_repo_url: str, commit: bool = True) -> AssignmentRepo:
+def _create_assignment_repo_obj(
+    user: User, assignment: Assignment, new_repo_url: str, commit: bool = True
+) -> AssignmentRepo:
+    """
+    Create the database entry for a repo if it does not exist. This function
+    does not handle creating the actual github repo on github.
+
+    If the commit parameter is True, then any changes to the database will
+    be committed. db.session.commit() will not be called if there are no
+    changes though (if the repo already exists for example)
+
+    :param user: Owner of repo
+    :param assignment: Assignment for the repo
+    :param new_repo_url: generated github URL
+    :param commit: commit changes to db or not
+    :return: assignment repo object
+    """
+
     # Try to get the assignment repo from the database
     repo: AssignmentRepo = AssignmentRepo.query.filter(
         AssignmentRepo.assignment_id == assignment.id,
@@ -185,6 +202,8 @@ def _create_assignment_repo_obj(user: User, assignment: Assignment, new_repo_url
         if commit:
             db.session.commit()
 
+    # If the database entry already exists, but the
+    # repo url is different, then update it.
     if repo.repo_url != new_repo_url:
         repo.repo_url = new_repo_url
         if commit:

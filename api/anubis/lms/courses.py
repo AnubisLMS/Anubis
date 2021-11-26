@@ -370,7 +370,7 @@ def get_course_data(netid: str, course_id: str) -> Optional[Dict[str, Any]]:
 
     # Query for course with id
     course: Course = Course.query.filter(
-       Course.id == course_id
+        Course.id == course_id
     ).first()
 
     course_data = course.data
@@ -378,10 +378,10 @@ def get_course_data(netid: str, course_id: str) -> Optional[Dict[str, Any]]:
     # Query for tas in course
     tas = (
         User.query.join(TAForCourse)
-        .filter(
-        TAForCourse.course_id == course_id,
+            .filter(
+            TAForCourse.course_id == course_id,
         )
-        .all()
+            .all()
     )
 
     # Return course and ta data
@@ -417,10 +417,10 @@ def get_student_course_ids(user: User, default: str = None) -> List[str]:
         # Get all the courses the user is in
         in_courses = (
             InCourse.query.join(Course)
-            .filter(
+                .filter(
                 InCourse.owner_id == user.id,
             )
-            .all()
+                .all()
         )
 
         # Build a list of course ids. If the user

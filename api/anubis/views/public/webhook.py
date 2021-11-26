@@ -95,13 +95,13 @@ def public_webhook():
 
     repo = (
         AssignmentRepo.query.join(Assignment)
-        .join(Course)
-        .join(InCourse)
-        .join(User)
-        .filter(
+            .join(Course)
+            .join(InCourse)
+            .join(User)
+            .filter(
             AssignmentRepo.repo_url == repo_url,
         )
-        .first()
+            .first()
     )
 
     logger.debug(

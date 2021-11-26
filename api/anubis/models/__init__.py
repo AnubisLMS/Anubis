@@ -395,8 +395,8 @@ class AssignedStudentQuestion(db.Model):
             AssignedQuestionResponse.query.filter(
                 AssignedQuestionResponse.assigned_question_id == self.id,
             )
-            .order_by(AssignedQuestionResponse.created.desc())
-            .first()
+                .order_by(AssignedQuestionResponse.created.desc())
+                .first()
         )
 
         response_data = {
@@ -498,11 +498,11 @@ class Submission(db.Model):
         # Query for matching AssignmentTests, and TestResults
         tests = (
             SubmissionTestResult.query.join(AssignmentTest)
-            .filter(
+                .filter(
                 SubmissionTestResult.submission_id == self.id,
                 AssignmentTest.hidden == False,
             )
-            .all()
+                .all()
         )
 
         # Convert to dictionary data
@@ -520,10 +520,10 @@ class Submission(db.Model):
         # Query for matching AssignmentTests, and TestResults
         tests = (
             SubmissionTestResult.query.join(AssignmentTest)
-            .filter(
+                .filter(
                 SubmissionTestResult.submission_id == self.id,
             )
-            .all()
+                .all()
         )
 
         # Convert to dictionary data

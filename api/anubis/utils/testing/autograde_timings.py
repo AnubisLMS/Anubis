@@ -1,7 +1,6 @@
 import time
 
 from anubis.lms.autograde import bulk_autograde
-from anubis.lms.questions import assign_questions
 from anubis.models import (
     AssignedQuestionResponse,
     AssignedStudentQuestion,
@@ -24,7 +23,6 @@ from anubis.models import (
     db,
 )
 from anubis.utils.data import with_context
-from anubis.utils.logging import logger
 from anubis.utils.testing.seed import create_assignment, create_course, create_students, init_submissions
 
 
@@ -87,7 +85,7 @@ def main():
     timings = []
     print(f"Running bulk autograde on assignment {n} times [ 5K submissions, across 50 students ]")
     for i in range(n):
-        print(f"autograde pass {i+1}/{n} ", end="", flush=True)
+        print(f"autograde pass {i + 1}/{n} ", end="", flush=True)
         db.session.expunge_all()
         start = time.time()
         bulk_autograde(assignment_id, limit=100)

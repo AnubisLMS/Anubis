@@ -35,12 +35,12 @@ def public_ide_initialize(assignment: Assignment):
     # Check for existing active session
     active_session = (
         TheiaSession.query.join(Assignment)
-        .filter(
+            .filter(
             TheiaSession.owner_id == current_user.id,
             TheiaSession.assignment_id == assignment.id,
             TheiaSession.active,
         )
-        .first()
+            .first()
     )
 
     # If there was an existing session for this assignment found, skip
@@ -94,7 +94,7 @@ def public_ide_initialize(assignment: Assignment):
         req_assert(
             repo is not None,
             message="Anubis can not find your assignment repo. "
-            "Please make sure your github username is set and is correct.",
+                    "Please make sure your github username is set and is correct.",
         )
         # Update the repo url
         repo_url = repo.repo_url

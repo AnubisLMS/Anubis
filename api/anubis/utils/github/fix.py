@@ -24,7 +24,6 @@ def fix_github_broken_repos():
 
     # Iterate over broken repos, fixing as we go
     for repo in broken_repos:
-
         # Get student & assignment
         student: User = repo.owner
         assignment: Assignment = repo.assignment

@@ -13,7 +13,6 @@ def _get_logger(logger_name):
     :param logger_name:
     :return:
     """
-    from anubis.utils.data import is_debug
 
     # Initialize a logger for this app with the logger
     # name specified

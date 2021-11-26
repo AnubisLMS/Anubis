@@ -23,11 +23,11 @@ def assign_missing_questions(user_id: str):
     # Get all the courses that the user belongs to
     courses: List[Course] = (
         Course.query.join(InCourse)
-        .join(User)
-        .filter(
+            .join(User)
+            .filter(
             User.id == user.id,
         )
-        .all()
+            .all()
     )
 
     # Iterate over each course the student is in
@@ -43,6 +43,5 @@ def assign_missing_questions(user_id: str):
 
         # Iterate over assignments
         for assignment in assignments:
-
             # Run missing question fix for each assignment
             fix_missing_question_assignments(assignment)
