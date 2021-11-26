@@ -8,6 +8,7 @@ class Config:
         self.DEBUG = os.environ.get("DEBUG", default="0") == "1" or self.MINDEBUG
         self.JOB = os.environ.get("JOB", default="0") == "1"
         self.SECRET_KEY = os.environ.get("SECRET_KEY", default="DEBUG")
+        self.DB_HOST = os.environ.get("DB_HOST", "db")
 
         if not self.MINDEBUG:
             # sqlalchemy
@@ -17,7 +18,7 @@ class Config:
             self.SQLALCHEMY_TRACK_MODIFICATIONS = False
             self.SQLALCHEMY_DATABASE_URI = os.environ.get(
                 "DATABASE_URI",
-                default="mysql+pymysql://anubis:anubis@{}/anubis".format(os.environ.get("DB_HOST", "db")),
+                default="mysql+pymysql://anubis:anubis@{}/anubis".format(self.DB_HOST),
             )
 
             # cache

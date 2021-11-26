@@ -1,52 +1,14 @@
 import time
 
 from anubis.lms.autograde import bulk_autograde
-from anubis.models import (
-    AssignedQuestionResponse,
-    AssignedStudentQuestion,
-    Assignment,
-    AssignmentQuestion,
-    AssignmentRepo,
-    AssignmentTest,
-    Course,
-    InCourse,
-    LateException,
-    LectureNotes,
-    ProfessorForCourse,
-    StaticFile,
-    Submission,
-    SubmissionBuild,
-    SubmissionTestResult,
-    TAForCourse,
-    TheiaSession,
-    User,
-    db,
-)
+from anubis.models import db
 from anubis.utils.data import with_context
 from anubis.utils.testing.seed import create_assignment, create_course, create_students, init_submissions
+from anubis.utils.testing.db import clear_database
 
 
 def do_seed() -> str:
-    # Yeet
-    LateException.query.delete()
-    TheiaSession.query.delete()
-    AssignedQuestionResponse.query.delete()
-    AssignedStudentQuestion.query.delete()
-    AssignmentQuestion.query.delete()
-    SubmissionTestResult.query.delete()
-    SubmissionBuild.query.delete()
-    Submission.query.delete()
-    AssignmentRepo.query.delete()
-    AssignmentTest.query.delete()
-    InCourse.query.delete()
-    Assignment.query.delete()
-    TAForCourse.query.delete()
-    ProfessorForCourse.query.delete()
-    LectureNotes.query.delete()
-    StaticFile.query.delete()
-    Course.query.delete()
-    User.query.delete()
-    db.session.commit()
+    clear_database()
 
     # OS test course
     intro_to_os_students = create_students(100)
