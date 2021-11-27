@@ -1,4 +1,5 @@
 import base64
+import json
 import traceback
 from datetime import datetime, timedelta
 from typing import List, Optional, Tuple
@@ -53,6 +54,7 @@ def create_theia_k8s_pod_pvc(
     # Get the theia session options
     limits = theia_session.resources.get("limits", {"cpu": "2", "memory": "500Mi"})
     requests = theia_session.resources.get("requests", {"cpu": "250m", "memory": "100Mi"})
+    admin = theia_session.admin
     autosave = theia_session.autosave
     credentials = theia_session.credentials
     privileged = theia_session.privileged
@@ -103,7 +105,7 @@ def create_theia_k8s_pod_pvc(
             # Attempt to read the anubis secret from the anubis namespace.
             # This will throw client.exceptions.ApiException(404) if
             # the secret is not available.
-            anubis_secret: client.V1Secret = v1.read_namespaced_secret("anubis", "anubis-registry")
+            anubis_secret: client.V1Secret = v1.read_namespaced_secret("anubis-registry", "anubis")
 
             # Decode git token
             docker_config_json = base64.b64decode(anubis_secret.data[".dockerconfigjson"].encode()).decode(
@@ -204,6 +206,22 @@ def create_theia_k8s_pod_pvc(
             ),
         )
 
+    # If the theia_session is marked as an admin session, then we can turn on any
+    # admin features in the IDE by passing in the proper ADMIN environment variables.
+    if admin:
+        sidecar_extra_env.append(
+            client.V1EnvVar(
+                name='ADMIN',
+                value='ON'
+            )
+        )
+        theia_extra_env.append(
+            client.V1EnvVar(
+                name='ADMIN',
+                value='ON'
+            )
+        )
+
     ##################################################################################
     # INIT CONTAINER
 
@@ -288,10 +306,34 @@ def create_theia_k8s_pod_pvc(
             )
         )
 
+        # Include COURSE_CONTEXT environment variable as urlsafe_base64
+        # value. THis needs to be urlsafe because of the way the course
+        # context cookie is loaded from a request (see get_course_context
+        # function in anubis.lms.courses for more details)
+        theia_extra_env.append(
+            client.V1EnvVar(
+                name="COURSE_CONTEXT",
+                value=base64.urlsafe_b64encode(json.dumps({
+                    'id': theia_session.course.id,
+                    'name': theia_session.course.name,
+                    'course_code': theia_session.course.course_code,
+                }).encode()).decode(),
+            )
+        )
+
     # Figure out which uid to use
     theia_user_id = 1001
     if privileged:
         theia_user_id = 0
+
+    # Initialize theia volume mounts array with
+    # the project volume mount
+    theia_volume_mounts = [
+        client.V1VolumeMount(
+            mount_path="/home/anubis",
+            name=theia_volume_name,
+        )
+    ]
 
     # If privileged, add docker config file to pod as a volume
     if privileged and include_docker_secret:
@@ -305,19 +347,6 @@ def create_theia_k8s_pod_pvc(
                 ),
             )
         )
-
-    # Initialize theia volume mounts array with
-    # the project volume mount
-    theia_volume_mounts = [
-        client.V1VolumeMount(
-            mount_path="/home/anubis",
-            name=theia_volume_name,
-        )
-    ]
-
-    # If the pod is privileged, add the docker config values
-    # to the /etc/default in the theia pod
-    if privileged:
         theia_volume_mounts.append(
             client.V1VolumeMount(
                 mount_path="/docker",
