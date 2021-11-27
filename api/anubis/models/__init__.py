@@ -686,6 +686,7 @@ class TheiaSession(db.Model):
     state = db.Column(db.TEXT)
     cluster_address = db.Column(db.TEXT, nullable=True, default=None)
 
+    # IDE settings
     resources = db.Column(MutableJson, default=lambda: {})
     network_policy = db.Column(db.String(128), default="os-student")
     network_locked = db.Column(db.Boolean, default=True)
@@ -693,6 +694,8 @@ class TheiaSession(db.Model):
     autosave = db.Column(db.Boolean, default=True)
     credentials = db.Column(db.Boolean, default=False)
     persistent_storage = db.Column(db.Boolean, default=False)
+    admin = db.Column(db.Boolean, default=False)
+
     k8s_requested = db.Column(db.Boolean, default=False)
 
     # Timestamps
@@ -726,6 +729,7 @@ class TheiaSession(db.Model):
     @property
     def settings(self):
         return {
+            "admin": self.admin,
             "image": self.image.data,
             "repo_url": self.repo_url,
             "autosave": self.autosave,
