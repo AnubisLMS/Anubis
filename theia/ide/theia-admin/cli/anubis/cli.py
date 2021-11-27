@@ -132,35 +132,9 @@ def main(debug):
 def assignment():
     pass
 
-
-@main.command()
-def auth():
-    click.echo('open this in browser:')
-    click.echo('https://anubis.osiris.services/api/public/auth/login?next=/api/public/auth/cli')
-
-    conf = load_conf()
-
-    auth_data = prompt_auth_data()
-    if 'token' in auth_data:
-        conf['token'] = auth_data['token']
-    if 'docker_config' in auth_data and auth_data['docker_config'] is not None:
-        pass
-
-
 @main.group()
 def config():
     pass
-
-
-# @config.command()
-# @click.argument('key')
-# @click.argument('value')
-# def set(key, value):
-#     conf = load_conf()
-#     conf[key] = value
-#     set_conf(conf)
-#
-#     click.echo(json.dumps(conf, indent=2))
 
 
 @config.command()
@@ -182,8 +156,12 @@ def sync():
         return 1
     assignment_meta = yaml.safe_load(open('meta.yml').read())
     # click.echo(json.dumps(assignment_meta, indent=2))
-    import assignment
-    import utils
+    try:
+        import assignment
+        import utils
+    except ImportError:
+        click.echo('Not in an assignment directory')
+        return 1
     assignment_meta['assignment']['tests'] = list(utils.registered_tests.keys())
     r = post_json('/admin/assignments/sync', assignment_meta)
     click.echo(json.dumps(r.json(), indent=2))
@@ -239,16 +217,6 @@ def init(assignment_name):
     click.echo(click.style('cd {}'.format(safe_assignment_name), fg='blue'))
     click.echo(click.style('anubis assignment build --push', fg='blue'))
     click.echo(click.style('anubis assignment sync', fg='blue'))
-
-
-@main.command()
-@click.argument('assignment')
-@click.argument('netids', nargs=-1)
-def stats(assignment, netids):
-    params = {}
-    if len(netids) > 0:
-        params['netids'] = json.dumps(netids)
-    click.echo(get_json('/private/stats/{}'.format(assignment), params).text)
 
 
 @assignment.command()
