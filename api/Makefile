@@ -43,8 +43,7 @@ lint: venv
 clean:
 	rm -rf $$(find -name __pycache__) venv .data
 
-.PHONY: gen-seed            # Generate seed data
-gen-seed: venv
+$(SEED_FILE): venv
 	@echo 'GENERATING SEED'
 	env DB_HOST=127.0.0.1 DEBUG=1 \
 		venv/bin/python3 -c "import anubis.utils.testing.seed; anubis.utils.testing.seed.seed()"
@@ -52,9 +51,14 @@ gen-seed: venv
 	@mkdir -p .data
 	mysqldump -u anubis --password=anubis -h 127.0.0.1 anubis > $(SEED_FILE)
 
-$(SEED_FILE): gen-seed
+.PHONY: gen-seed            # Generate seed data
+gen-seed: $(SEED_FILE) venv
+
 .PHONY: rev-seed            # Revert database using generated seed-data
-rev-seed: $(SEED_FILE)
+rev-seed:
+	@if [ ! -f $(SEED_FILE) ]; then \
+		make $(SEED_FILE); \
+	fi
 	@echo 'RESETTING DEBUG DB'
 	@make -C .. yeetdb
 	@echo 'WAITING FOR DB TO START'
