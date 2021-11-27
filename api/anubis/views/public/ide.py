@@ -129,6 +129,7 @@ def public_ide_initialize(assignment: Assignment):
         active=True,
         state="Initializing",
         # Options
+        admin=False,
         network_locked=network_locked,
         network_policy=network_policy,
         privileged=privileged,
