@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import json
 import string
 import subprocess
 
@@ -8,7 +9,7 @@ from flask import Flask, Response, request, make_response
 
 app = Flask(__name__)
 NETID = os.environ.get('NETID', default=None)
-ADMIN = os.environ.get('ADMIN', default=None)
+ADMIN = os.environ.get('ADMIN', default=None) == 'ON'
 
 
 def text_response(message: str, status_code: int = 200) -> Response:
@@ -80,9 +81,9 @@ def index():
 if ADMIN:
     @app.route('/clone', methods=['POST'])
     def clone():
-        assignment_name = request.json['assignment_name']
-        repos = request.json['repos']
-        path = request.json['path']
+        assignment_name: str = request.json['assignment_name']
+        repos: list = request.json['repos']
+        path: str = request.json['path']
 
         if not path.startswith('/home/anubis/'):
             response = make_response(
@@ -91,18 +92,20 @@ if ADMIN:
             response.headers = {'Content-Type': 'text/plain'}
             return response
 
-        valid_charset = set(string.ascii_letters + string.digits)
-        assignment_name = assignment_name.replace(' ', '_')
+        valid_charset = set(string.ascii_letters + string.digits + '_')
+        assignment_name = assignment_name.replace(' ', '_').replace('-', '_').lower()
         assignment_name = ''.join(c for c in assignment_name if c in valid_charset)
 
         os.makedirs(os.path.join(path, assignment_name), exist_ok=True)
+        path = os.path.join(path, assignment_name)
 
         succeeded = []
         failed = []
 
         for repo in repos:
-            repo_url = repo['url']
-            netid = repo['netid']
+            repo_url: str = repo['url']
+            repo_base = repo_url.removeprefix('https://github.com/')
+            netid: str = repo['netid']
 
             r = subprocess.run(
                 ['git', 'clone', repo_url, netid],
@@ -112,10 +115,18 @@ if ADMIN:
                 stderr=subprocess.STDOUT,
             )
             if r.returncode != 0:
-                failed.append('Failed to clone {} for {}'.format(repo_url, netid))
+                failed.append('Failed to clone {} for {}'.format(repo_base, netid))
+                print(r.stdout)
                 continue
 
-            succeeded.append('{} :: {} -> {}/{}'.format(netid, repo_url, assignment_name, netid))
+            succeeded.append('{:<12} :: {:<32} -> {}/{}'.format(netid, repo_base, assignment_name, netid))
+
+        with open(os.path.join(path, 'manifest.json'), 'w') as f:
+            f.write(json.dumps({
+                'assignment': assignment_name,
+                'repos': repos,
+            }, indent=2))
+            f.close()
 
         return text_response(
             'Succeeded:' + '\n'.join(succeeded) + '\nFailed:\n' + '\n'.join(failed)
