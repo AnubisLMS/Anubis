@@ -75,7 +75,7 @@ def _make_request(path, request_func, **kwargs) -> requests.Response:
     r = request_func(
         API_URL + path,
         headers={'Content-Type': 'application/json'},
-        cookies={'token': get_conf('incluster')},
+        cookies={'token': get_conf('incluster'), 'course': get_conf('course_context')},
         **kwargs
     )
 
@@ -262,7 +262,7 @@ def clone(assignment_name):
 
     r = requests.post('http://localhost:5001/clone', json={
         'assignment_name': assignment_name,
-        'path': os.getcwd(),
+        'path': os.getcwd() + '/',
         'repos': repos,
     })
 
