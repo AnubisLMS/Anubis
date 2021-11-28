@@ -12,18 +12,14 @@ def init_services(app):
     from anubis.utils.cache import cache, cache_health
     from anubis.utils.exceptions import add_app_exception_handlers
     from anubis.utils.migrate import migrate
+    from anubis.utils.healthcheck import add_healthcheck
 
     # Init services
     db.init_app(app)
     cache.init_app(app)
     migrate.init_app(app, db)
     add_app_exception_handlers(app)
-
-    @app.route("/")
-    def index():
-        Config.query.all()
-        cache_health()
-        return "Healthy"
+    add_healthcheck(app)
 
 
 def create_app():
