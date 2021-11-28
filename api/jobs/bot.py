@@ -113,10 +113,11 @@ def generate_report() -> str:
     report += f"{get_active_users_this_semester()}"
 
     # Number of IDEs opened this semester
-    report += "\n\nTotal IDEs opened this semseter\n"
+    report += "\n\nTotal IDEs opened this semester\n"
     report += f"{get_ides_opened_this_semester()}"
 
     return report
+
 
 @with_context
 def generate_ide_report() -> str:
@@ -150,16 +151,11 @@ def generate_ide_report() -> str:
         [
             [
                 ide.id[:8],
-                ide.course.course_code,
-                str(ide.active),
-                str(ide.autosave),
-                str(ide.persistent_storage),
-                str(ide.admin),
                 str(ide.created),
                 str(ide.last_proxy),
             ]
             for ide in active_ides
-        ], headers=["ID", "Course Code", "Active", "Autosave", "Storage", "Admin", "Created", "Last Proxy"]
+        ], headers=["ID", "Created", "Last Proxy"]
     )
 
     report += '\n\nIDEs Active Today ({})\n'.format(len(all_ides_today))
@@ -167,20 +163,15 @@ def generate_ide_report() -> str:
         [
             [
                 ide.id[:8],
-                ide.course.course_code,
-                str(ide.active),
-                str(ide.autosave),
-                str(ide.persistent_storage),
-                str(ide.admin),
                 str(ide.created),
                 str(ide.last_proxy),
             ]
             for ide in all_ides_today
-        ], headers=["ID", "Course Code", "Active", "Autosave", "Storage", "Admin", "Created", "Last Proxy"]
+        ], headers=["ID", "Created", "Last Proxy"]
     )
 
     # Number of IDEs opened this semester
-    report += "\n\nTotal IDEs opened this semseter\n"
+    report += "\n\nTotal IDEs opened this semester\n"
     report += f"{get_ides_opened_this_semester()}"
 
     return report
