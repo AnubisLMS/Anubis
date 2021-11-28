@@ -8,8 +8,8 @@ def init_services(app):
     :param app: Flask app
     :return:
     """
-    from anubis.models import Config, db
-    from anubis.utils.cache import cache, cache_health
+    from anubis.models import db
+    from anubis.utils.cache import cache
     from anubis.utils.exceptions import add_app_exception_handlers
     from anubis.utils.migrate import migrate
     from anubis.utils.healthcheck import add_healthcheck
