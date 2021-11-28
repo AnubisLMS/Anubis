@@ -11,7 +11,6 @@ import Typography from '@material-ui/core/Typography';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
@@ -42,7 +41,7 @@ export default function IDEImages() {
   const [images, setImages] = useState([]);
   const {enqueueSnackbar} = useSnackbar();
 
-  const api = (method, url=`/api/super/ide/images/list`, config={}) => {
+  const api = (method, url = `/api/super/ide/images/list`, config = {}) => {
     method(url, config).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data?.images) {
@@ -83,17 +82,19 @@ export default function IDEImages() {
     {field: 'image', width: 300},
     {field: 'label', width: 300},
     {field: 'public', width: 100},
-    {field: 'edit', width: 100, renderCell: (params) => (
-      <Button
-        startIcon={<EditIcon/>}
-        variant={'contained'}
-        color={'primary'}
-        size={'small'}
-        onClick={() => setOpen(params.row)}
-      >
-        Edit
-      </Button>
-    )},
+    {
+      field: 'edit', width: 100, renderCell: (params) => (
+        <Button
+          startIcon={<EditIcon/>}
+          variant={'contained'}
+          color={'primary'}
+          size={'small'}
+          onClick={() => setOpen(params.row)}
+        >
+          Edit
+        </Button>
+      ),
+    },
   ];
 
   return (
