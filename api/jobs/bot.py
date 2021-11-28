@@ -131,7 +131,7 @@ def generate_ide_report() -> str:
     :return: The text of the report
     """
 
-    today = datetime.today()
+    today = datetime.now().replace(hour=0, minute=0)
     eod = today.replace(hour=23, minute=59)
 
     all_ides_today = TheiaSession.query.filter(
@@ -162,7 +162,7 @@ def generate_ide_report() -> str:
         ], headers=["ID", "Course Code", "Active", "Autosave", "Storage", "Admin", "Created", "Last Proxy"]
     )
 
-    report += 'IDEs Active Today ({})\n'.format(len(all_ides_today))
+    report += '\n\nIDEs Active Today ({})\n'.format(len(all_ides_today))
     report += tabulate(
         [
             [
