@@ -194,7 +194,7 @@ bot = commands.Bot(
 
 
 @bot.command(name="report", help="Anubis usage report")
-async def report(ctx, *args):
+async def report_(ctx, *args):
     """
     Respond to `!report` command with a report of the statuses of Anubis
 
@@ -204,17 +204,17 @@ async def report(ctx, *args):
 
 
 @bot.command(name="ide", help="Anubis ide usage report")
-async def ides(ctx, *args):
+async def ides_(ctx, *args):
     """
     Respond to `!report` command with a report of the statuses of Anubis
 
     :return:
     """
-    await ctx.send("```" + generate_report() + "```")
+    await ctx.send("```" + generate_ide_report() + "```")
 
 
 @bot.command(name="contribute", aliases=("github",), help="Contributing to Anubis")
-async def contribute(ctx, *args):
+async def contribute_(ctx, *args):
     """
     Respond to `!contribute` command with a link to the GitHub repo
 
@@ -230,7 +230,7 @@ async def contribute(ctx, *args):
 
 
 @bot.command(name="help", aliases=("commands",), help="Shows you this list")
-async def helpCommand(ctx, *args):
+async def help_(ctx, *args):
     """
     Respond to `!help` command with a list of valid commands and their descriptions
 
