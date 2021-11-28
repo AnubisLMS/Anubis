@@ -158,17 +158,6 @@ def generate_ide_report() -> str:
         ], headers=["ID", "Created", "Last Proxy"]
     )
 
-    # report += tabulate(
-    #     [
-    #         [
-    #             ide.id[:8],
-    #             str(ide.created),
-    #             str(ide.last_proxy),
-    #         ]
-    #         for ide in all_ides_today
-    #     ], headers=["ID", "Created", "Last Proxy"]
-    # )
-
     report += '\n\nIDEs Active Today\n'
     report += f"{all_ides_today}"
 
