@@ -138,7 +138,7 @@ def generate_ide_report() -> str:
     all_ides_today = TheiaSession.query.filter(
         TheiaSession.created >= today,
         TheiaSession.created <= eod,
-    ).all()
+    ).count()
 
     active_ides: List[TheiaSession] = TheiaSession.query.filter(
         TheiaSession.active == True
@@ -158,17 +158,19 @@ def generate_ide_report() -> str:
         ], headers=["ID", "Created", "Last Proxy"]
     )
 
-    report += '\n\nIDEs Active Today ({})\n'.format(len(all_ides_today))
-    report += tabulate(
-        [
-            [
-                ide.id[:8],
-                str(ide.created),
-                str(ide.last_proxy),
-            ]
-            for ide in all_ides_today
-        ], headers=["ID", "Created", "Last Proxy"]
-    )
+    # report += tabulate(
+    #     [
+    #         [
+    #             ide.id[:8],
+    #             str(ide.created),
+    #             str(ide.last_proxy),
+    #         ]
+    #         for ide in all_ides_today
+    #     ], headers=["ID", "Created", "Last Proxy"]
+    # )
+
+    report += '\n\nIDEs Active Today\n'
+    report += f"{all_ides_today}"
 
     # Number of IDEs opened this semester
     report += "\n\nTotal IDEs opened this semester\n"
