@@ -245,6 +245,18 @@ export default function ManagementIDEDialog() {
               <FormControlLabel
                 control={
                   <Switch
+                    checked={settings.admin} onChange={updateSetting('admin')}
+                    name="admin" color="primary"
+                  />
+                }
+                labelPlacement={'end'}
+                label="Admin"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch
                     checked={settings.privileged} onChange={updateSetting('privileged')}
                     name="privileged" color="primary"
                   />

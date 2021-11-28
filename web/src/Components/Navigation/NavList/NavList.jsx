@@ -2,15 +2,13 @@ import React, {useState} from 'react';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import ExitToAppOutlinedIcon from '@material-ui/icons/ExitToAppOutlined';
-import LaunchOutlinedIcon from '@material-ui/icons/LaunchOutlined';
+import Divider from '@material-ui/core/Divider';
 
 import {useStyles} from './NavList.styles';
 import AuthContext from '../../../Contexts/AuthContext';
 import NavItem from '../NavItem/NavItem';
-import {admin_nav, footer_nav, public_nav} from '../../../navconfig';
+import {admin_nav, footer_nav, public_nav, super_nav} from '../../../navconfig';
 
 const NavList = ({open, handleDrawerClose}) => {
   const classes = useStyles();
@@ -29,7 +27,7 @@ const NavList = ({open, handleDrawerClose}) => {
         {public_nav.map(({id, children}) => (
           <React.Fragment key={`${id}-thing`}>
             <ListItem className={classes.categoryHeader}>
-              <ListItemText classes ={{primary: classes.categoryHeaderText}}>
+              <ListItemText classes={{primary: classes.categoryHeaderText}}>
                 LEARNING
               </ListItemText>
             </ListItem>
@@ -48,10 +46,10 @@ const NavList = ({open, handleDrawerClose}) => {
         <AuthContext.Consumer>
           {(user) => (
             <React.Fragment>
-              {user && user.is_admin ? (
+              {user?.is_admin && (
                 <React.Fragment>
                   <ListItem className={classes.categoryHeader}>
-                    <ListItemText classes ={{primary: classes.categoryHeaderText}}>
+                    <ListItemText classes={{primary: classes.categoryHeaderText}}>
                       ADMIN
                     </ListItemText>
                   </ListItem>
@@ -66,7 +64,31 @@ const NavList = ({open, handleDrawerClose}) => {
                     />
                   ))}
                 </React.Fragment>
-              ) : null}
+              )}
+              {user?.is_superuser && (
+                <React.Fragment>
+                  <ListItem className={classes.categoryHeader}>
+                    <ListItemText
+                      classes={{
+                        primary: classes.categoryHeaderPrimary,
+                      }}
+                    >
+                      Super Admin
+                    </ListItemText>
+                  </ListItem>
+                  {super_nav.map(({id: childId, icon, path}) => (
+                    <NavItem
+                      key={childId}
+                      onClick={onClickWrap(() => setPathname(path))}
+                      childId={childId}
+                      icon={icon}
+                      path={path}
+                      pathname={pathname}
+                    />
+                  ))}
+                  <Divider className={classes.divider}/>
+                </React.Fragment>
+              )}
             </React.Fragment>
           )}
         </AuthContext.Consumer>
@@ -74,7 +96,7 @@ const NavList = ({open, handleDrawerClose}) => {
       <div className={classes.bottomPush}>
         <List>
           <ListItem className={classes.categoryHeader}>
-            <ListItemText classes ={{primary: classes.categoryHeaderText}}>
+            <ListItemText classes={{primary: classes.categoryHeaderText}}>
               OPTIONS
             </ListItemText>
           </ListItem>
