@@ -1,4 +1,6 @@
 import os
+from typing import List
+from datetime import datetime
 
 import flask_sqlalchemy
 from discord.ext import commands
@@ -117,6 +119,73 @@ def generate_report() -> str:
     return report
 
 
+def generate_ide_report() -> str:
+    """
+    Generate a report of the statuses of Anubis. The statuses are:
+        Course names and code
+        Number of students for each course
+        Number of IDES opened for each course
+        Number of active users this semester
+        Number of IDEs opened this semester
+
+    :return: The text of the report
+    """
+
+    today = datetime.today()
+    eod = today.replace(hour=23, minute=59)
+
+    all_ides_today = TheiaSession.query.filter(
+        TheiaSession.created >= today,
+        TheiaSession.created <= eod,
+    ).all()
+
+    active_ides: List[TheiaSession] = TheiaSession.query.filter(
+        TheiaSession.active == True
+    ).all()
+
+    report = ''
+
+    report += 'IDEs Currently Active ({})\n'.format(len(active_ides))
+    report += tabulate(
+        [
+            [
+                ide.id[:8],
+                ide.course.course_code,
+                str(ide.active),
+                str(ide.autosave),
+                str(ide.persistent_storage),
+                str(ide.admin),
+                str(ide.created),
+                str(ide.last_proxy),
+            ]
+            for ide in active_ides
+        ], headers=["ID", "Course Code", "Active", "Autosave", "Storage", "Admin", "Created", "Last Proxy"]
+    )
+
+    report += 'IDEs Active Today ({})\n'.format(len(all_ides_today))
+    report += tabulate(
+        [
+            [
+                ide.id[:8],
+                ide.course.course_code,
+                str(ide.active),
+                str(ide.autosave),
+                str(ide.persistent_storage),
+                str(ide.admin),
+                str(ide.created),
+                str(ide.last_proxy),
+            ]
+            for ide in all_ides_today
+        ], headers=["ID", "Course Code", "Active", "Autosave", "Storage", "Admin", "Created", "Last Proxy"]
+    )
+
+    # Number of IDEs opened this semester
+    report += "\n\nTotal IDEs opened this semseter\n"
+    report += f"{get_ides_opened_this_semester()}"
+
+    return report
+
+
 bot = commands.Bot(
     command_prefix="!",
     case_insensitive=True,
@@ -126,6 +195,16 @@ bot = commands.Bot(
 
 @bot.command(name="report", help="Anubis usage report")
 async def report(ctx, *args):
+    """
+    Respond to `!report` command with a report of the statuses of Anubis
+
+    :return:
+    """
+    await ctx.send("```" + generate_report() + "```")
+
+
+@bot.command(name="ide", help="Anubis ide usage report")
+async def ides(ctx, *args):
     """
     Respond to `!report` command with a report of the statuses of Anubis
 
