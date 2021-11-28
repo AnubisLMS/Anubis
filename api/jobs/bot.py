@@ -118,7 +118,7 @@ def generate_report() -> str:
 
     return report
 
-
+@with_context
 def generate_ide_report() -> str:
     """
     Generate a report of the statuses of Anubis. The statuses are:
