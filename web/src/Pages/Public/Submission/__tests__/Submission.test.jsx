@@ -1,21 +1,23 @@
 import React from 'react';
 import {shallow} from 'enzyme';
-import Courses from '../Courses';
+import Submission from '../Submission';
 import renderer from 'react-test-renderer';
 import theme from '../../../../Theme/Dark';
 import {ThemeProvider} from '@material-ui/core/styles';
+import {MuiThemeProvider} from '@material-ui/core';
+import StandardLayout from '../../../../Components/Layouts/StandardLayout';
 
 
-describe('Basic and Shallow Mount Test Courses Component', () => {
-  it('Basic Render Courses Component', ()=>{
+describe('Basic and Shallow Mount Test Submission Component', () => {
+  it('Basic Render Submission Component', ()=>{
     const wrapper = renderer.create(
       <ThemeProvider theme={theme}>
-        <Courses/>
+        <Submission/>
       </ThemeProvider>).toJSON();
     expect(wrapper).toMatchSnapshot();
   });
-  it('Shallow render Courses Component', () => {
-    const wrapper = shallow(<Courses/>);
+  it('Shallow render Submission Component', () => {
+    const wrapper = shallow(<Submission/>);
     expect(wrapper).toMatchSnapshot();
   });
 });

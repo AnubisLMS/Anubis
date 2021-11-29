@@ -8,7 +8,7 @@ import {MuiThemeProvider} from '@material-ui/core';
 import StandardLayout from '../../../../Components/Layouts/StandardLayout';
 
 
-describe('Basic and Shallow Mount Test of App', () => {
+describe('Basic and Shallow Mount Test Course Component', () => {
   it('Basic Render Course Component', ()=>{
     const wrapper = renderer.create(
       <ThemeProvider theme={theme}>
