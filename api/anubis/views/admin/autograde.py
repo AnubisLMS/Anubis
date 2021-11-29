@@ -86,10 +86,10 @@ def admin_autograde_assignment_assignment_id(assignment_id):
     bests = bulk_autograde(assignment_id, limit=limit, offset=offset)
     total = (
         User.query.join(InCourse)
-        .filter(
+            .filter(
             InCourse.course_id == assignment.course_id,
         )
-        .count()
+            .count()
     )
 
     # Pass back the results

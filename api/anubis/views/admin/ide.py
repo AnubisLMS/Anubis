@@ -1,6 +1,6 @@
 import json
-from typing import List
 from datetime import datetime
+from typing import List
 
 from flask import Blueprint
 
@@ -38,6 +38,7 @@ def admin_ide_admin_settings():
                 "image": image.data,
                 "repo_url": course_context.autograde_tests_repo,
                 # Options
+                "admin": True,
                 "privileged": True,
                 "network_locked": False,
                 "network_policy": "admin",
@@ -85,6 +86,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
     network_locked = settings.get("network_locked", False)
     network_policy = settings.get("network_policy", "admin")
     autosave = settings.get("autosave", True)
+    admin = settings.get("admin", True)
     credentials = settings.get("credentials", True)
     privileged = settings.get("privileged", True)
     persistent_storage = settings.get("persistent_storage", False)
@@ -122,6 +124,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
         active=True,
         state="Initializing",
         # Options
+        admin=admin,
         network_locked=network_locked,
         network_policy=network_policy,
         autosave=autosave,

@@ -25,7 +25,7 @@ RUN set -ex; \
     > /etc/apt/sources.list.d/llvm.list; \
   apt-get update; \
     apt-get install -y --no-install-recommends \
-    git curl wget build-essential clangd \
+    git curl wget build-essential tree clangd \
     libffi-dev libexpat1-dev \
     libgdbm-dev liblzma-dev zlib1g-dev \
     libsqlite3-dev libssl-dev openssl \

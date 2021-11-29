@@ -8,7 +8,6 @@ from anubis.utils.logging import logger
 
 
 def get_github_token() -> Optional[str]:
-
     # Get GITHUB token from environment
     token = os.environ.get("GITHUB_TOKEN", None)
 
@@ -21,7 +20,6 @@ def get_github_token() -> Optional[str]:
 
 
 def github_rest(url, body=None, method: str = "get"):
-
     # Get the github api token
     token = get_github_token()
 
@@ -57,7 +55,6 @@ def github_rest(url, body=None, method: str = "get"):
 
 
 def github_graphql(query: str, variables: Dict[str, Any] = None) -> Optional[Dict[str, Any]]:
-
     # Default values for variables
     if variables is None:
         variables = dict()

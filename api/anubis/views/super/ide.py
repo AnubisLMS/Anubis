@@ -1,4 +1,5 @@
 from typing import List
+
 from flask import Blueprint
 
 from anubis.models import TheiaImage, db
@@ -24,7 +25,6 @@ def super_ide_images_list():
 @require_superuser()
 @json_endpoint([('images', list)])
 def super_ide_images_save(images: list):
-
     for image in images:
         image_db: TheiaImage = TheiaImage.query.filter(
             TheiaImage.id == image['id'],
@@ -65,5 +65,3 @@ def super_ide_images_new():
         'images': [image.data for image in images],
         'status': 'Image reference created',
     })
-
-

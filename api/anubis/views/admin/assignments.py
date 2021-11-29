@@ -10,7 +10,7 @@ from sqlalchemy.exc import DataError, IntegrityError
 from anubis.lms.assignments import assignment_sync, delete_assignment, delete_assignment_repos
 from anubis.lms.courses import assert_course_context, course_context, is_course_superuser
 from anubis.lms.questions import get_assigned_questions
-from anubis.models import Assignment, TheiaImage, AssignmentRepo, AssignmentTest, SubmissionTestResult, User, db
+from anubis.models import Assignment, AssignmentRepo, AssignmentTest, SubmissionTestResult, User, db
 from anubis.utils.auth.http import require_admin
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import rand, req_assert, row2dict
@@ -132,7 +132,6 @@ def admin_assignments_repo_delete_id(assignment_repo: AssignmentRepo):
 
     # If the assignment repo is shared
     if assignment_repo.shared:
-
         # Then we need to collect all the other repos, and delete those too
         repos = AssignmentRepo.query.filter(
             AssignmentRepo.repo_url == assignment_repo.repo_url,

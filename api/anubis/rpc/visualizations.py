@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from typing import List
 
-from anubis.config import config
 from anubis.models import Assignment, Course
 from anubis.utils.config import get_config_int
 from anubis.utils.data import with_context
@@ -23,7 +22,6 @@ def create_visuals(*_, **__):
 
     # Iterate over courses with display visuals enabled
     for course in course_with_visuals:
-
         # Generate a usage graph for each course. This operation is always run
         # and always cached when run in the visuals cronjob.
         get_usage_plot(course.id)
@@ -39,6 +37,5 @@ def create_visuals(*_, **__):
 
     # Iterate over all recent assignments
     for assignment in recent_assignments:
-
         # Generate new sundial data
         get_assignment_sundial(assignment.id)

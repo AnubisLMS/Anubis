@@ -3,7 +3,9 @@ import math
 import random
 import string
 from datetime import datetime, timedelta
+from typing import List
 
+from anubis.lms.questions import assign_questions
 from anubis.lms.theia import mark_session_ended
 from anubis.models import (
     THEIA_DEFAULT_OPTIONS,
@@ -13,273 +15,20 @@ from anubis.models import (
     AssignmentTest,
     Course,
     InCourse,
+    ProfessorForCourse,
     Submission,
+    TAForCourse,
     TheiaSession,
+    TheiaImage,
     User,
     db,
 )
 from anubis.utils.data import rand
+from anubis.utils.data import with_context
 from anubis.utils.github.repos import get_student_assignment_repo_name
-
-lorem = """
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore 
-magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-"""
-
-names = [
-    "Joette",
-    "Anabelle",
-    "Fred",
-    "Woodrow",
-    "Neoma",
-    "Dorian",
-    "Treasure",
-    "Tami",
-    "Berdie",
-    "Jordi",
-    "Frances",
-    "Gerhardt",
-    "Kristina",
-    "Carmelita",
-    "Sim",
-    "Hideo",
-    "Arland",
-    "Wirt",
-    "Robt",
-    "Narcissus",
-    "Steve",
-    "Monique",
-    "Kellen",
-    "Jessenia",
-    "Nathalia",
-    "Lissie",
-    "Loriann",
-    "Theresa",
-    "Pranav",
-    "Eppie",
-    "Angelic",
-    "Louvenia",
-    "Mathews",
-    "Natalie",
-    "Susan",
-    "Cyril",
-    "Vester",
-    "Rakeem",
-    "Duff",
-    "Garret",
-    "Agnes",
-    "Carol",
-    "Pairlee",
-    "Viridiana",
-    "Keith",
-    "Elinore",
-    "Rico",
-    "Demonte",
-    "Imelda",
-    "Jackeline",
-    "Kenneth",
-    "Adalynn",
-    "Blair",
-    "Stetson",
-    "Adamaris",
-    "Zaniyah",
-    "Heyward",
-    "Austin",
-    "Elden",
-    "Gregory",
-    "Lemuel",
-    "Aaliyah",
-    "Abby",
-    "Hassie",
-    "Sanjuanita",
-    "Takisha",
-    "Orlo",
-    "Geary",
-    "Bettye",
-    "Luciano",
-    "Gretchen",
-    "Chimere",
-    "Melanie",
-    "Angele",
-    "Michial",
-    "Emmons",
-    "Edmund",
-    "Renae",
-    "Letha",
-    "Curtiss",
-    "Boris",
-    "Winter",
-    "Nealy",
-    "Renard",
-    "Taliyah",
-    "Jaren",
-    "Nilda",
-    "Tiny",
-    "Manila",
-    "Mariann",
-    "Dennis",
-    "Autumn",
-    "Aron",
-    "Drew",
-    "Shea",
-    "Britt",
-    "Luvenia",
-    "Doloris",
-    "Bret",
-    "Sammy",
-    "Elmer",
-    "Florencio",
-    "Selah",
-    "Simona",
-    "Tatyana",
-    "Beau",
-    "Alvin",
-    "Leslie",
-    "Kimberely",
-    "Sydni",
-    "Mitchel",
-    "Belle",
-    "Brain",
-    "Marlin",
-    "Vallie",
-    "Colon",
-    "Hoyt",
-    "Destinee",
-    "Shamar",
-    "Ezzard",
-    "Sheilah",
-    "Leisa",
-    "Tennille",
-    "Brandyn",
-    "Yasmin",
-    "Malaya",
-    "Larry",
-    "Mina",
-    "Myrle",
-    "Blaine",
-    "Gusta",
-    "Beryl",
-    "Abdul",
-    "Cleda",
-    "Lailah",
-    "Alexandrea",
-    "Unknown",
-    "Gertrude",
-    "Davon",
-    "Minda",
-    "Gabe",
-    "Myles",
-    "Vonda",
-    "Zandra",
-    "Salome",
-    "Minnie",
-    "Merl",
-    "Biddie",
-    "Catina",
-    "Cassidy",
-    "Norman",
-    "Emilia",
-    "Fanny",
-    "Nancie",
-    "Domingo",
-    "Christa",
-    "Severt",
-    "Danita",
-    "Jennie",
-    "Anaya",
-    "Michelle",
-    "Brittnie",
-    "Althea",
-    "Kimberlee",
-    "Ursula",
-    "Ballard",
-    "Silvester",
-    "Ilda",
-    "Rock",
-    "Tyler",
-    "Hildegarde",
-    "Aurelio",
-    "Lovell",
-    "Neha",
-    "Jeramiah",
-    "Kristin",
-    "Kelis",
-    "Adolf",
-    "Elwood",
-    "Almus",
-    "Geo",
-    "Machelle",
-    "Arnulfo",
-    "Love",
-    "Lollie",
-    "Bobbye",
-    "Columbus",
-    "Susie",
-    "Reta",
-    "Krysten",
-    "Sunny",
-    "Alzina",
-    "Carolyne",
-    "Laurine",
-    "Jayla",
-    "Halbert",
-    "Grayce",
-    "Alvie",
-    "Haylee",
-    "Hosea",
-    "Alvira",
-    "Pallie",
-    "Marylin",
-    "Elise",
-    "Lidie",
-    "Vita",
-    "Jakob",
-    "Elmira",
-    "Oliver",
-    "Arra",
-    "Debbra",
-    "Migdalia",
-    "Lucas",
-    "Verle",
-    "Dellar",
-    "Madaline",
-    "Iverson",
-    "Lorin",
-    "Easter",
-    "Britta",
-    "Kody",
-    "Colie",
-    "Chaz",
-    "Glover",
-    "Nickolas",
-    "Francisca",
-    "Donavan",
-    "Merlene",
-    "Belia",
-    "Laila",
-    "Nikhil",
-    "Burdette",
-    "Mildred",
-    "Malissa",
-    "Del",
-    "Reagan",
-    "Loney",
-    "Lambert",
-    "Ellen",
-    "Sydell",
-    "Juanita",
-    "Alphonsus",
-    "Gianna",
-    "William",
-    "Oneal",
-    "Anya",
-    "Luis",
-    "Shad",
-    "Armin",
-    "Marvin",
-]
+from anubis.utils.testing.db import clear_database
+from anubis.utils.testing.lorem import lorem
+from anubis.utils.testing.names import names
 
 
 def create_name() -> str:
@@ -427,11 +176,23 @@ def create_assignment(
     return assignment, tests, submissions, repos
 
 
-def create_students(n=10):
+def create_students(n=10) -> List[User]:
     students = []
-    for i in range(random.randint(n // 2, n)):
+    netids = set()
+    while len(students) < n:
+
+        # Make random name + netid
         name = create_name()
         netid = create_netid(name)
+
+        # If netid is already in list of students, then
+        # continue to make a new one. Netid's need to be
+        # unique or it causes problems
+        if netid in netids:
+            continue
+        netids.add(netid)
+
+        # Add student to list
         students.append(
             User(
                 name=name,
@@ -477,3 +238,99 @@ def init_submissions(submissions):
 
                 test_result.message = "Test passed" if test_passed else "Test failed"
                 test_result.stdout = "blah blah blah test output"
+
+
+@with_context
+def seed():
+    clear_database()
+
+    # Create
+    superuser = User(netid="superuser", github_username="superuser", name="super", is_superuser=True)
+    ta_user = User(netid="ta", github_username="ta", name="T A")
+    professor_user = User(netid="professor", github_username="professor", name="professor")
+    student_user = User(netid="student", github_username="student", name="student")
+    db.session.add_all([superuser, professor_user, ta_user, student_user])
+
+    xv6_image = TheiaImage(image="registry.digitalocean.com/anubis/theia-xv6", label="theia-xv6")
+    admin_image = TheiaImage(image="registry.digitalocean.com/anubis/theia-admin", label="theia-admin")
+    db.session.add_all([xv6_image, admin_image])
+
+    db.session.commit()
+
+    # OS test course
+    intro_to_os_students = create_students(50) + [
+        superuser,
+        professor_user,
+        ta_user,
+        student_user,
+    ]
+    intro_to_os_course = create_course(
+        intro_to_os_students,
+        name="Intro to OS",
+        course_code="CS-UY 3224",
+        section="A",
+        professor_display_name="Gustavo",
+        autograde_tests_repo="https://github.com/os3224/anubis-assignment-tests",
+        github_org="os3224",
+    )
+
+    os_assignment0, _, os_submissions0, _ = create_assignment(
+        intro_to_os_course,
+        intro_to_os_students,
+        xv6_image,
+        i=0,
+        github_repo_required=True,
+    )
+    os_assignment1, _, os_submissions1, _ = create_assignment(
+        intro_to_os_course,
+        intro_to_os_students,
+        xv6_image,
+        i=1,
+        do_submissions=False,
+        github_repo_required=True,
+    )
+    os_assignment2, _, os_submissions2, _ = create_assignment(
+        intro_to_os_course,
+        intro_to_os_students,
+        xv6_image,
+        i=2,
+        do_submissions=False,
+        github_repo_required=False,
+    )
+    os_assignment3, _, os_submissions3, _ = create_assignment(
+        intro_to_os_course,
+        intro_to_os_students,
+        xv6_image,
+        i=3,
+        do_submissions=True,
+        do_repos=True,
+        github_repo_required=True,
+    )
+    init_submissions(os_submissions0)
+    assign_questions(os_assignment0)
+    init_submissions(os_submissions1)
+    assign_questions(os_assignment1)
+    init_submissions(os_submissions2)
+    assign_questions(os_assignment2)
+    init_submissions(os_submissions3)
+    assign_questions(os_assignment3)
+    ta = TAForCourse(owner=ta_user, course=intro_to_os_course)
+    professor = ProfessorForCourse(owner=professor_user, course=intro_to_os_course)
+    db.session.add_all([professor, ta])
+
+    # MMDS test course
+    mmds_students = create_students(50)
+    mmds_course = create_course(
+        mmds_students,
+        name="Mining Massive Datasets",
+        course_code="CS-UY 3843",
+        section="A",
+        professor_display_name="Gustavo",
+        autograde_tests_repo="https://github.com/os3224/anubis-assignment-tests",
+        github_org="os3224",
+    )
+    mmds_assignment, _, mmds_submissions, _ = create_assignment(mmds_course, mmds_students, xv6_image)
+    init_submissions(mmds_submissions)
+    assign_questions(mmds_assignment)
+
+    db.session.commit()

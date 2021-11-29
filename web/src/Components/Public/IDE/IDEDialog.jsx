@@ -68,9 +68,11 @@ const checkSession = (id, state, enqueueSnackbar, after = null) => {
     setSessionState(data.session?.state ?? '');
     if (!data.loading) {
       if (data.session.state === 'Running') {
-        setSession(data.session);
-        setLoading(false);
-        setShowStop(true);
+        setTimeout(() => {
+          setSession(data.session);
+          setLoading(false);
+          setShowStop(true);
+        }, 1000);
       } else {
         setSession(null);
         setLoading(false);
@@ -121,16 +123,12 @@ const startSession = (state, enqueueSnackbar) => () => {
   setLoading(true);
   axios.get(`/api/public/ide/initialize/${selectedTheia.id}`, {params}).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
-    if (data?.session?.state === 'Running') {
-      setSession(data.session);
-      setTimeout(() => {
-        setShowStop(true);
-        setLoading(false);
-      }, 1000);
-    } else {
+    if (data?.session) {
       setShowStop(false);
       setSession(data.session);
       pollSession(data.session.id, state, enqueueSnackbar)();
+    } else {
+      setLoading(false);
     }
   }).catch(standardErrorHandler(enqueueSnackbar));
 };

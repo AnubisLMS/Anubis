@@ -2,62 +2,81 @@ LINT_DIRECTORIES := \
 	anubis \
 	tests \
 	migrations
-
 LINT_FILES := $(shell find $(LINT_DIRECTORIES) -name '*.py' | xargs)
 
-.PHONY: all
-all: venv
+COMMIT := $(shell git rev-parse HEAD)
 
+SEED_FILE ?= .data/seed.sql
+
+
+help:
+	@echo 'For convenience'
+	@echo
+	@echo 'Available make targets:'
+	@grep PHONY: Makefile | cut -d: -f2 | sed '1d;s/^/make/'
+
+.PHONY: run                 # Run dev.py in MINDEBUG mode
 run: venv
 	env MINDEBUG=1 DEBUG=1 ./venv/bin/python3 dev.py
 
+.PHONY: venv                # Create virtualenv
 venv:
-	virtualenv -p `which python3` venv
-	./venv/bin/pip install -r ./requirements/dev.txt
+	@if [ ! -d venv ]; then \
+		virtualenv -p `which python3` venv; \
+		./venv/bin/pip install -r ./requirements/dev.txt; \
+	fi
 
-debug:
-	make -C .. debug
-
-yeetdb:
-	make -C .. yeetdb
-
-cleanyeetdb:
-	make -C .. cleanyeetdb
-
+.PHONY: test                # Run tests
 test: venv
 	./tests/test.sh
 
-.PHONY: migrations       # Run alembic migrations
+.PHONY: migrations          # Run alembic migrations
 migrations: venv
 	./venv/bin/alembic upgrade head
 
-.PHONY: lint             # Run black on lint directories
+.PHONY: lint                # Run black on lint directories
 lint: venv
 	@echo 'black to stylize'
 	./venv/bin/black $(LINT_FILES)
 
-.PHONY: clean
+.PHONY: clean               # Clean directories
 clean:
 	rm -rf $$(find -name __pycache__) venv .data
 
-.PHONY: pydoc
-pydoc: venv
-	for i in $(find anubis -name '*.py'); do \
-		if [ "$(basename $i)" = "__init__.py" ]; then \
-			dirname $i; \
-		else \
-			echo $i; \
-		fi; \
-	done \
-		| sed 's/\//./g; s/.py$//' \
-		| sort \
-		| xargs ./venv/bin/python -m pydoc -w
+$(SEED_FILE): venv
+	@echo 'GENERATING SEED'
+	env DB_HOST=127.0.0.1 DEBUG=1 \
+		venv/bin/python3 -c "import anubis.utils.testing.seed; anubis.utils.testing.seed.seed()"
+	@echo 'DUMPING DB TO SEED FILE'
+	@mkdir -p .data
+	mysqldump -u anubis --password=anubis -h 127.0.0.1 anubis > $(SEED_FILE)
 
+.PHONY: gen-seed            # Generate seed data
+gen-seed: $(SEED_FILE) venv
+
+.PHONY: rev-seed            # Revert database using generated seed-data
+rev-seed:
+	@if [ ! -f $(SEED_FILE) ]; then \
+		make $(SEED_FILE); \
+	fi
+	@echo 'RESETTING DEBUG DB'
+	@make -C .. yeetdb
+	@echo 'WAITING FOR DB TO START'
+	@until mysqladmin -h 127.0.0.1 ping &> /dev/null; do sleep 1; done
+	@echo 'REVERTING TO LATEST SEED'
+	mysql -u anubis --password=anubis -h 127.0.0.1 anubis < $(SEED_FILE)
+
+.PHONY: autograde-timings   # Run autograde timings test
 autograde-timings: venv
 	env DB_HOST=127.0.0.1 DEBUG=1 \
 		venv/bin/python3 -c "import anubis.utils.testing.autograde_timings; anubis.utils.testing.autograde_timings.main()"
 
-.PHONY: requirements
+.PHONY: requirements        # pip-compile requirements
 requirements: venv
 	pip-compile --quiet requirements/common.in
 	pip-compile --quiet requirements/dev.in
+
+debug:
+	make -C .. debug
+yeetdb:
+	make -C .. yeetdb

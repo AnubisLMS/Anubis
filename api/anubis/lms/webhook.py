@@ -44,7 +44,7 @@ def guess_github_username(assignment, repo_name):
     """
     repo_name_split = repo_name.split("-")
     unique_code_index = repo_name_split.index(assignment.unique_code)
-    repo_name_split = repo_name_split[unique_code_index + 1 :]
+    repo_name_split = repo_name_split[unique_code_index + 1:]
     github_username1 = "-".join(repo_name_split)
     github_username2 = "-".join(repo_name_split[:-1])
     user = User.query.filter(

@@ -1,4 +1,6 @@
 import os
+from typing import List
+from datetime import datetime
 
 import flask_sqlalchemy
 from discord.ext import commands
@@ -111,7 +113,56 @@ def generate_report() -> str:
     report += f"{get_active_users_this_semester()}"
 
     # Number of IDEs opened this semester
-    report += "\n\nTotal IDEs opened this semseter\n"
+    report += "\n\nTotal IDEs opened this semester\n"
+    report += f"{get_ides_opened_this_semester()}"
+
+    return report
+
+
+@with_context
+def generate_ide_report() -> str:
+    """
+    Generate a report of the statuses of Anubis. The statuses are:
+        Course names and code
+        Number of students for each course
+        Number of IDES opened for each course
+        Number of active users this semester
+        Number of IDEs opened this semester
+
+    :return: The text of the report
+    """
+
+    today = datetime.now().replace(hour=0, minute=0)
+    eod = today.replace(hour=23, minute=59)
+
+    all_ides_today = TheiaSession.query.filter(
+        TheiaSession.created >= today,
+        TheiaSession.created <= eod,
+    ).count()
+
+    active_ides: List[TheiaSession] = TheiaSession.query.filter(
+        TheiaSession.active == True
+    ).all()
+
+    report = ''
+
+    report += 'IDEs Currently Active ({})\n'.format(len(active_ides))
+    report += tabulate(
+        [
+            [
+                ide.id[:8],
+                str(ide.created),
+                str(ide.last_proxy),
+            ]
+            for ide in active_ides
+        ], headers=["ID", "Created", "Last Proxy"]
+    )
+
+    report += '\n\nIDEs Active Today\n'
+    report += f"{all_ides_today}"
+
+    # Number of IDEs opened this semester
+    report += "\n\nTotal IDEs opened this semester\n"
     report += f"{get_ides_opened_this_semester()}"
 
     return report
@@ -125,7 +176,7 @@ bot = commands.Bot(
 
 
 @bot.command(name="report", help="Anubis usage report")
-async def report(ctx, *args):
+async def report_(ctx, *args):
     """
     Respond to `!report` command with a report of the statuses of Anubis
 
@@ -134,8 +185,18 @@ async def report(ctx, *args):
     await ctx.send("```" + generate_report() + "```")
 
 
+@bot.command(name="ide", help="Anubis ide usage report")
+async def ides_(ctx, *args):
+    """
+    Respond to `!report` command with a report of the statuses of Anubis
+
+    :return:
+    """
+    await ctx.send("```" + generate_ide_report() + "```")
+
+
 @bot.command(name="contribute", aliases=("github",), help="Contributing to Anubis")
-async def contribute(ctx, *args):
+async def contribute_(ctx, *args):
     """
     Respond to `!contribute` command with a link to the GitHub repo
 
@@ -151,7 +212,7 @@ async def contribute(ctx, *args):
 
 
 @bot.command(name="help", aliases=("commands",), help="Shows you this list")
-async def helpCommand(ctx, *args):
+async def help_(ctx, *args):
     """
     Respond to `!help` command with a list of valid commands and their descriptions
 

@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple, Union
 
 from werkzeug.utils import redirect
 
-from anubis.models import Config, TheiaSession, User
+from anubis.models import TheiaSession, User
 from anubis.utils.auth.token import create_token
 from anubis.utils.cache import cache
 from anubis.utils.config import get_config_int
@@ -20,10 +20,10 @@ def get_recent_sessions(user_id: str, limit: int = 10, offset: int = 10) -> List
         TheiaSession.query.filter(
             TheiaSession.owner_id == student.id,
         )
-        .order_by(TheiaSession.created.desc())
-        .limit(limit)
-        .offset(offset)
-        .all()
+            .order_by(TheiaSession.created.desc())
+            .limit(limit)
+            .offset(offset)
+            .all()
     )
 
     return [session.data for session in sessions]
@@ -83,9 +83,9 @@ def theia_list_all(user_id: str, limit: int = 10):
         TheiaSession.query.filter(
             TheiaSession.owner_id == user_id,
         )
-        .order_by(TheiaSession.created.desc())
-        .limit(limit)
-        .all()
+            .order_by(TheiaSession.created.desc())
+            .limit(limit)
+            .all()
     )
 
     return [theia_session.data for theia_session in theia_sessions]

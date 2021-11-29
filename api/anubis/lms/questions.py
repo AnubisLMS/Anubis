@@ -283,12 +283,12 @@ def get_assigned_questions(assignment_id: str, user_id: str, full: bool = False)
     # Get assigned questions
     assigned_questions = (
         AssignedStudentQuestion.query.join(AssignmentQuestion)
-        .filter(
+            .filter(
             AssignedStudentQuestion.assignment_id == assignment_id,
             AssignedStudentQuestion.owner_id == user_id,
         )
-        .order_by(AssignmentQuestion.pool)
-        .all()
+            .order_by(AssignmentQuestion.pool)
+            .all()
     )
 
     if not full:
@@ -361,7 +361,6 @@ def export_assignment_questions(assignment_id: str) -> Optional[bytes]:
 
             # Iterate through each question assigned to the student
             for student_question_data in data["questions"]:
-
                 # Pull fields from the question_data
                 response_text = student_question_data["response"]["text"]
                 response_late = student_question_data["response"]["late"]

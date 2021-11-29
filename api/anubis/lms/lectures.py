@@ -25,8 +25,8 @@ def get_lecture_notes(user_id: str, course_id: Optional[str] = None):
             LectureNotes.course_id.in_(course_ids),
             LectureNotes.hidden == False,
         )
-        .order_by(LectureNotes.post_time.desc())
-        .all()
+            .order_by(LectureNotes.post_time.desc())
+            .all()
     )
 
     # Pass back the raw data

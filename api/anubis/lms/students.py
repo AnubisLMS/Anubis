@@ -55,26 +55,26 @@ def get_students_in_class(course_id, offset=None, limit=None):
         return [
             u.data
             for u in User.query.join(InCourse)
-            .join(Course)
-            .filter(
+                .join(Course)
+                .filter(
                 Course.id == course_id,
                 InCourse.owner_id == User.id,
             )
-            .order_by(User.name.desc())
-            .limit(limit)
-            .offset(offset)
-            .all()
+                .order_by(User.name.desc())
+                .limit(limit)
+                .offset(offset)
+                .all()
         ]
 
     # Get the users, and break them into their data props
     return [
         u.data
         for u in User.query.join(InCourse)
-        .join(Course)
-        .filter(
+            .join(Course)
+            .filter(
             Course.id == course_id,
             InCourse.owner_id == User.id,
         )
-        .order_by(User.name.desc())
-        .all()
+            .order_by(User.name.desc())
+            .all()
     ]

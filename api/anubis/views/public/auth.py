@@ -3,7 +3,7 @@ import json
 import os
 
 import requests
-from flask import Blueprint, make_response, redirect, request, url_for
+from flask import Blueprint, make_response, redirect, request
 
 from anubis.lms.courses import get_course_context
 from anubis.lms.submissions import fix_dangling

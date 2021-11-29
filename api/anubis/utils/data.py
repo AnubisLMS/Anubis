@@ -222,7 +222,7 @@ def split_chunks(lst, n):
     """
     _chunks = []
     for i in range(0, len(lst), n):
-        _chunks.append(lst[i : i + n])
+        _chunks.append(lst[i: i + n])
     return _chunks
 
 

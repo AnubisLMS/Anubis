@@ -68,14 +68,14 @@ def init_conf():
         })
 
 
-def _make_request(path, request_func, **kwargs):
+def _make_request(path, request_func, **kwargs) -> requests.Response:
     if 'params' in kwargs and kwargs['params'] is None:
         kwargs['params'] = {}
 
     r = request_func(
         API_URL + path,
         headers={'Content-Type': 'application/json'},
-        cookies={'token': get_conf('incluster')},
+        cookies={'token': get_conf('incluster'), 'course': get_conf('course_context')},
         **kwargs
     )
 
@@ -88,7 +88,7 @@ def _make_request(path, request_func, **kwargs):
     return r
 
 
-def post_json(path: str, data: dict, params=None):
+def post_json(path: str, data: dict, params=None) -> requests.Response:
     """
     Do a POST request to the API with a json object.
 
@@ -98,7 +98,7 @@ def post_json(path: str, data: dict, params=None):
     return _make_request(path, requests.post, json=data, params=params)
 
 
-def get_json(path: str, params=None):
+def get_json(path: str, params=None) -> requests.Response:
     """
     GET something from the api, expecting a json response.
 
@@ -132,35 +132,9 @@ def main(debug):
 def assignment():
     pass
 
-
-@main.command()
-def auth():
-    click.echo('open this in browser:')
-    click.echo('https://anubis.osiris.services/api/public/auth/login?next=/api/public/auth/cli')
-
-    conf = load_conf()
-
-    auth_data = prompt_auth_data()
-    if 'token' in auth_data:
-        conf['token'] = auth_data['token']
-    if 'docker_config' in auth_data and auth_data['docker_config'] is not None:
-        pass
-
-
 @main.group()
 def config():
     pass
-
-
-# @config.command()
-# @click.argument('key')
-# @click.argument('value')
-# def set(key, value):
-#     conf = load_conf()
-#     conf[key] = value
-#     set_conf(conf)
-#
-#     click.echo(json.dumps(conf, indent=2))
 
 
 @config.command()
@@ -182,8 +156,12 @@ def sync():
         return 1
     assignment_meta = yaml.safe_load(open('meta.yml').read())
     # click.echo(json.dumps(assignment_meta, indent=2))
-    import assignment
-    import utils
+    try:
+        import assignment
+        import utils
+    except ImportError:
+        click.echo('Not in an assignment directory')
+        return 1
     assignment_meta['assignment']['tests'] = list(utils.registered_tests.keys())
     r = post_json('/admin/assignments/sync', assignment_meta)
     click.echo(json.dumps(r.json(), indent=2))
@@ -241,16 +219,6 @@ def init(assignment_name):
     click.echo(click.style('anubis assignment sync', fg='blue'))
 
 
-@main.command()
-@click.argument('assignment')
-@click.argument('netids', nargs=-1)
-def stats(assignment, netids):
-    params = {}
-    if len(netids) > 0:
-        params['netids'] = json.dumps(netids)
-    click.echo(get_json('/private/stats/{}'.format(assignment), params).text)
-
-
 @assignment.command()
 @click.argument('path', type=click.Path(exists=True), default='.')
 @click.option('--push/-p', default=False)
@@ -267,6 +235,39 @@ def build(path, push):
     if push:
         assert os.system('docker push {}'.format(
             assignment_meta['assignment']['pipeline_image'])) == 0
+
+
+@assignment.command()
+def ls():
+    assignments = get_json('/admin/assignments/list').json()['data'].get('assignments', [])
+    click.echo(json.dumps(assignments, indent=2))
+
+
+@assignment.command()
+@click.argument('assignment-name')
+def clone(assignment_name):
+    assignments = get_json('/admin/assignments/list').json()['data'].get('assignments', [])
+
+    for assignment_ in assignments:
+        if assignment_.get('name', None) == assignment_name:
+            assignment_id = assignment_['id']
+            break
+    else:
+        click.echo('Unable to find an assignment with that name.')
+        click.echo('List assignments with:')
+        click.echo('  $ anubis assignment ls')
+        return 1
+
+    repos = get_json('/admin/assignments/repos/{}'.format(assignment_id)).json()['data'].get('repos', [])
+
+    r = requests.post('http://localhost:5001/clone', json={
+        'assignment_name': assignment_name,
+        'path': os.getcwd() + '/',
+        'repos': repos,
+    })
+
+    click.echo(r.text)
+    return r.status_code == 200
 
 
 if __name__ == "__main__":

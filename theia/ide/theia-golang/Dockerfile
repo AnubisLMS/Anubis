@@ -43,6 +43,12 @@ RUN set -ex; \
   go get -u -v github.com/davidrjenni/reftools/cmd/fillstruct; \
   go get -u -v github.com/go-delve/delve/cmd/dlv; \
   go get -u -v github.com/stamblerre/gocode; \
+  go get -u -v github.com/golang/protobuf; \
+  go get -u -v google.golang.org/grpc; \
+  go get -u -v google.golang.org/protobuf; \
+  go get -u -v google.golang.org/genproto; \
+  go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26; \
+  go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1; \
   cp /opt/go-tools/bin/gocode /opt/go-tools/bin/gocode-gomod; \
   cp /opt/go-tools/bin/godef /opt/go-tools/bin/godef-gomod; \
   echo 'export GO111MODULE=on' >> .bashrc; \
