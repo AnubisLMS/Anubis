@@ -1,6 +1,6 @@
 # https://github.com/theia-ide/theia-apps/tree/master/theia-cpp-docker
 
-FROM registry.digitalocean.com/anubis/theia-base:python-3.10.0 as theia
+FROM registry.digitalocean.com/anubis/theia-base:python-3.10 as theia
 
 ENV GO_VERSION=1.17 \
   GOOS=linux \
