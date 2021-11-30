@@ -4,8 +4,6 @@ import Dashboard from '../Dashboard';
 import renderer from 'react-test-renderer';
 import theme from '../../../../Theme/Theme';
 import {ThemeProvider} from '@material-ui/core/styles';
-import {MuiThemeProvider} from '@material-ui/core';
-import StandardLayout from '../../../../Components/Layouts/StandardLayout';
 
 
 describe('Basic and Shallow Mount Test Dashboard Component', () => {
@@ -17,7 +15,10 @@ describe('Basic and Shallow Mount Test Dashboard Component', () => {
     expect(wrapper).toMatchSnapshot();
   });
   it('Shallow render Dashboard Component', () => {
-    const wrapper = shallow(<Dashboard/>);
+    const wrapper = shallow(
+      <ThemeProvider theme={theme}>
+        <Dashboard/>
+      </ThemeProvider>);
     expect(wrapper).toMatchSnapshot();
   });
 });

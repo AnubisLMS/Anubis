@@ -4,8 +4,6 @@ import Assignment from '../Assignment';
 import renderer from 'react-test-renderer';
 import theme from '../../../../Theme/Theme';
 import {ThemeProvider} from '@material-ui/core/styles';
-import {MuiThemeProvider} from '@material-ui/core';
-import StandardLayout from '../../../../Components/Layouts/StandardLayout';
 
 
 describe('Basic and Shallow Mount Test Assignment Component', () => {
@@ -17,7 +15,10 @@ describe('Basic and Shallow Mount Test Assignment Component', () => {
     expect(wrapper).toMatchSnapshot();
   });
   it('Shallow render Assignment Component', () => {
-    const wrapper = shallow(<Assignment/>);
+    const wrapper = shallow(
+      <ThemeProvider theme={theme}>
+        <Assignment/>
+      </ThemeProvider>);
     expect(wrapper).toMatchSnapshot();
   });
 });

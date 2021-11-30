@@ -4,8 +4,6 @@ import Submissions from '../Submissions';
 import renderer from 'react-test-renderer';
 import theme from '../../../../Theme/Theme';
 import {ThemeProvider} from '@material-ui/core/styles';
-import {MuiThemeProvider} from '@material-ui/core';
-import StandardLayout from '../../../../Components/Layouts/StandardLayout';
 
 
 describe('Basic and Shallow Mount Test Submissions Component', () => {
@@ -17,7 +15,6 @@ describe('Basic and Shallow Mount Test Submissions Component', () => {
     expect(wrapper).toMatchSnapshot();
   });
   it('Shallow render Submissions Component', () => {
-    // const wrapper = shallow(<Submissions/>);
     const wrapper = shallow(
       <ThemeProvider theme={theme}>
         <Submissions/>

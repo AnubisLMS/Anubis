@@ -15,7 +15,10 @@ describe('Basic and Shallow Mount Test Courses Component', () => {
     expect(wrapper).toMatchSnapshot();
   });
   it('Shallow render Courses Component', () => {
-    const wrapper = shallow(<Courses/>);
+    const wrapper = shallow(
+      <ThemeProvider theme={theme}>
+        <Courses/>
+      </ThemeProvider>);
     expect(wrapper).toMatchSnapshot();
   });
 });
