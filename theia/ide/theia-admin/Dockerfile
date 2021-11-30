@@ -1,4 +1,4 @@
-FROM registry.digitalocean.com/anubis/theia-base:python-3.10.0 as theia
+FROM registry.digitalocean.com/anubis/theia-base:python-3.10 as theia
 
 ENV DIND_COMMIT 42b1175eda071c0e9121e1d64345928384a93df1
 ENV DOCKER_LIB_COMMIT 8baa881aab85f8398d2edbbcc0da4bd1f556dd98

@@ -167,15 +167,22 @@ services:
     labels:
       - "traefik.enable=false"
 
-  theia-base-397:
-    image: registry.digitalocean.com/anubis/theia-base:python-3.9.7
+  theia-base-38:
+    image: registry.digitalocean.com/anubis/theia-base:python-3.8
     build:
       context: ./theia/ide/theia-base
       args:
-        PY_VERSION: '3.9.7'
+        PY_VERSION: '3.8.12'
 
-  theia-base-3100:
-    image: registry.digitalocean.com/anubis/theia-base:python-3.10.0
+  theia-base-39:
+    image: registry.digitalocean.com/anubis/theia-base:python-3.9
+    build:
+      context: ./theia/ide/theia-base
+      args:
+        PY_VERSION: '3.9.9'
+
+  theia-base-310:
+    image: registry.digitalocean.com/anubis/theia-base:python-3.10
     build:
       context: ./theia/ide/theia-base
       args:
