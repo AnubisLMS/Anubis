@@ -2,7 +2,7 @@ import React from 'react';
 import {shallow} from 'enzyme';
 import Course from '../Course';
 import renderer from 'react-test-renderer';
-import theme from '../../../../Theme/Dark';
+import theme from '../../../../Theme/Theme';
 import {ThemeProvider} from '@material-ui/core/styles';
 import {MuiThemeProvider} from '@material-ui/core';
 import StandardLayout from '../../../../Components/Layouts/StandardLayout';
