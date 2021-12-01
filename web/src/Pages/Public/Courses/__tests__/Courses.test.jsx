@@ -4,13 +4,16 @@ import Courses from '../Courses';
 import renderer from 'react-test-renderer';
 import theme from '../../../../Theme/Theme';
 import {ThemeProvider} from '@material-ui/core/styles';
+import {SnackbarProvider} from 'notistack';
 
 
 describe('Basic and Shallow Mount Test Courses Component', () => {
   it('Basic Render Courses Component', ()=>{
     const wrapper = renderer.create(
       <ThemeProvider theme={theme}>
-        <Courses/>
+        <SnackbarProvider>
+          <Courses/>
+        </SnackbarProvider>
       </ThemeProvider>).toJSON();
     expect(wrapper).toMatchSnapshot();
   });
