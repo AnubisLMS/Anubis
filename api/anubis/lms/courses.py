@@ -536,7 +536,7 @@ def get_user_course_ids(user: User) -> Tuple[Set[str], Set[str]]:
 
 
 @cache.memoize(timeout=3600, source_check=True, unless=is_debug)
-def get_course_admin_ids(course_id: str) -> List[str]:
+def get_course_admin_ids(course_id: str, include_superusers: bool = True) -> List[str]:
     """
     Get a list of course admin id values.
 
@@ -563,8 +563,27 @@ def get_course_admin_ids(course_id: str) -> List[str]:
         ProfessorForCourse.course_id == course.id,
     ).all()
 
+    # Calculate TA and Professor ids
+    ta_ids = set(map(lambda x: x.owner_id, tas))
+    professor_ids = set(map(lambda x: x.owner_id, professors))
+
+    # Compose set of all owner ids
+    course_owner_ids = ta_ids.union(professor_ids)
+
+    # Include all superusers if specified
+    if include_superusers:
+
+        # Get all superusers
+        superusers: List[User] = User.query.filter(User.is_superuser == True).all()
+
+        # Calculate superuser ids
+        superuser_ids = set(map(lambda x: x.id, superusers))
+
+        # Extend owner ids to include superuser ids
+        course_owner_ids = course_owner_ids.union(superuser_ids)
+
     # Generate list from the owner_id values from each list of users
-    return list(map(lambda x: x.owner_id, tas)) + list(map(lambda x: x.owner_id, professors))
+    return list(course_owner_ids)
 
 
 def get_course_users(course: Course) -> List[User]:
