@@ -4,13 +4,16 @@ import Dashboard from '../Dashboard';
 import renderer from 'react-test-renderer';
 import theme from '../../../../Theme/Theme';
 import {ThemeProvider} from '@material-ui/core/styles';
+import {SnackbarProvider} from 'notistack';
 
 
 describe('Basic and Shallow Mount Test Dashboard Component', () => {
   it('Basic Render Dashboard Component', ()=>{
     const wrapper = renderer.create(
       <ThemeProvider theme={theme}>
-        <Dashboard/>
+        <SnackbarProvider>
+          <Dashboard/>
+        </SnackbarProvider>
       </ThemeProvider>).toJSON();
     expect(wrapper).toMatchSnapshot();
   });
