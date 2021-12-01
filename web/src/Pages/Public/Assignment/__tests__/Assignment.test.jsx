@@ -4,13 +4,16 @@ import Assignment from '../Assignment';
 import renderer from 'react-test-renderer';
 import theme from '../../../../Theme/Theme';
 import {ThemeProvider} from '@material-ui/core/styles';
+import {SnackbarProvider} from 'notistack';
 
 
 describe('Basic and Shallow Mount Test Assignment Component', () => {
   it('Basic Render Assignment Component', ()=>{
     const wrapper = renderer.create(
       <ThemeProvider theme={theme}>
-        <Assignment/>
+        <SnackbarProvider>
+          <Assignment/>
+        </SnackbarProvider>
       </ThemeProvider>).toJSON();
     expect(wrapper).toMatchSnapshot();
   });
