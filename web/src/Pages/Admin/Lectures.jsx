@@ -26,8 +26,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const deleteFile = (id, state, enqueueSnackbar) => () => {
-  axios.get(`/api/admin/lecture/delete/${id}`).then((response) => {
+const deleteFile = ({id}, state, enqueueSnackbar) => () => {
+  axios.get(`/api/admin/lectures/delete/${id}`).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
     if (data) {
       state.setReset((prev) => ++prev);

@@ -9,7 +9,8 @@
         "applicationName": "Anubis IDE",
         "preferences": {
           "files.enableTrash": false,
-          "editor.autoSave": "on"
+          "editor.autoSave": "on",
+          "terminal.integrated.cursorBlinking": true
         }
       }
     }
