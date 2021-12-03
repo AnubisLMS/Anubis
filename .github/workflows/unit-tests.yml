@@ -1,0 +1,28 @@
+# Runs Unit tests
+
+
+name: Anubis Unit Tests
+
+defaults:
+  run:
+    shell: bash
+    working-directory: web
+
+on:
+  push:
+    branches: [ ADD-TESTS-REACT ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+      - run: yarn run test
