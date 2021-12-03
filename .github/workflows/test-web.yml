@@ -10,7 +10,7 @@ defaults:
 
 on:
   push:
-    branches: [ ADD-TESTS-REACT ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
