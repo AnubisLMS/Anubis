@@ -64,7 +64,7 @@ export default function Visuals() {
   return (
     <StandardLayout description={'Visuals'}>
       <Grid container spacing={4} justify={'center'}>
-        <Grid item xs>
+        <Grid item xs sm={10} lg={8} xl={8}>
           <Card>
             <CardHeader
               avatar={<Avatar src={'/logo512.png'}/>}
