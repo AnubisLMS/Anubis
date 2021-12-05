@@ -1,10 +1,12 @@
 import base64
 import copy
 import os
+import gzip
 from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import deferred
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_json import MutableJson
 
 from anubis.utils.data import rand
@@ -487,49 +489,6 @@ class Submission(db.Model):
     repo = db.relationship(AssignmentRepo, backref="submissions")
 
     @property
-    def visible_tests(self):
-        """
-        Get a list of dictionaries of the matching Test, and TestResult
-        for the current submission.
-
-        :return:
-        """
-
-        # Query for matching AssignmentTests, and TestResults
-        tests = (
-            SubmissionTestResult.query.join(AssignmentTest)
-                .filter(
-                SubmissionTestResult.submission_id == self.id,
-                AssignmentTest.hidden == False,
-            )
-                .all()
-        )
-
-        # Convert to dictionary data
-        return [{"test": result.assignment_test.data, "result": result.data} for result in tests]
-
-    @property
-    def all_tests(self):
-        """
-        Get a list of dictionaries of the matching Test, and TestResult
-        for the current submission.
-
-        :return:
-        """
-
-        # Query for matching AssignmentTests, and TestResults
-        tests = (
-            SubmissionTestResult.query.join(AssignmentTest)
-                .filter(
-                SubmissionTestResult.submission_id == self.id,
-            )
-                .all()
-        )
-
-        # Convert to dictionary data
-        return [{"test": result.assignment_test.data, "result": result.data} for result in tests]
-
-    @property
     def data(self):
         return {
             "id": self.id,
@@ -546,23 +505,22 @@ class Submission(db.Model):
 
     @property
     def full_data(self):
-        data = self.data
+        from anubis.lms.assignments import get_assignment_tests
 
         # Add connected models
+        data = self.data
         data["repo"] = self.repo.repo_url
-        data["tests"] = self.visible_tests
+        data["tests"] = get_assignment_tests(self, only_visible=True)
         data["build"] = self.build.data if self.build is not None else None
 
         return data
 
     @property
     def admin_data(self):
-        data = self.data
+        from anubis.lms.assignments import get_assignment_tests
 
-        # Add connected models
-        data["repo"] = self.repo.repo_url
-        data["tests"] = self.all_tests
-        data["build"] = self.build.data if self.build is not None else None
+        data = self.full_data
+        data["tests"] = get_assignment_tests(self, only_visible=False)
 
         return data
 
@@ -582,12 +540,20 @@ class SubmissionTestResult(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Fields
-    stdout = deferred(db.Column(db.Text))
+    _stdout = deferred(db.Column(db.LargeBinary(length=(2 ** 16) - 1)))
     message = deferred(db.Column(db.Text))
     passed = db.Column(db.Boolean)
 
     # Relationships
     assignment_test = db.relationship(AssignmentTest)
+
+    @hybrid_property
+    def stdout(self) -> str:
+        return gzip.decompress(self._stdout).decode('ascii')
+
+    @stdout.setter
+    def stdout(self, stdout):
+        self._stdout = gzip.compress(stdout)
 
     @property
     def data(self):
@@ -625,12 +591,20 @@ class SubmissionBuild(db.Model):
     submission_id = db.Column(db.String(128), db.ForeignKey(Submission.id), index=True)
 
     # Fields
-    stdout = deferred(db.Column(db.Text))
+    _stdout = deferred(db.Column(db.LargeBinary(length=(2 ** 16) - 1)))
     passed = db.Column(db.Boolean, default=None)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    @hybrid_property
+    def stdout(self):
+        return gzip.decompress(self._stdout).decode('ascii')
+
+    @stdout.setter
+    def stdout(self, stdout):
+        self._stdout = gzip.compress(stdout)
 
     @property
     def data(self):
@@ -750,7 +724,7 @@ class StaticFile(db.Model):
     filename = db.Column(db.TEXT)
     path = db.Column(db.TEXT)
     content_type = db.Column(db.TEXT)
-    blob = deferred(db.Column(db.LargeBinary(length=(2 ** 32) - 1)))
+    _blob = deferred(db.Column(db.LargeBinary(length=(2 ** 32) - 1)))
     hidden = db.Column(db.Boolean, default=False)
 
     # Timestamps
@@ -758,6 +732,14 @@ class StaticFile(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     lecture_notes = db.relationship("LectureNotes", cascade="all,delete", backref="static_file")
+
+    @hybrid_property
+    def blob(self):
+        return gzip.decompress(self._blob)
+
+    @blob.setter
+    def blob(self, stdout):
+        self._blob = gzip.compress(stdout)
 
     @property
     def data(self):
