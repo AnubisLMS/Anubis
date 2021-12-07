@@ -19,7 +19,7 @@ WORKDIR /opt/theia
 
 COPY latest.package.json package.json
 COPY motd.txt /etc/motd
-COPY gdbinit /home/anubis/.gdbinit
+COPY gdbinit /etc/skel/.gdbinit
 
 RUN set -ex; \
   apt-get update; \
