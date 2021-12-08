@@ -14,7 +14,7 @@ const DEBUG = process.env.DEBUG === '1';
  * in-memory cache of session id -> session ip address cuts down
  * on latency and round trips to the database.
  */
-const cache = new LRU(100);
+// const cache = new LRU(100);
 
 /**
  * Knex connection to the database.
@@ -52,12 +52,12 @@ const authenticate = token => {
 };
 
 const get_session_ip = session_id => {
-  const cached_ip = cache.get(session_id);
-  if (cached_ip) {
-    return new Promise((resolve) => {
-      resolve(cached_ip);
-    })
-  }
+  /* const cached_ip = cache.get(session_id);
+   * if (cached_ip) {
+   *   return new Promise((resolve) => {
+   *     resolve(cached_ip);
+   *   })
+   * } */
   return new Promise((resolve) => {
     knex
       .first('cluster_address')
@@ -66,8 +66,8 @@ const get_session_ip = session_id => {
       .then((row) => {
         console.log(`cluster_ip ${row.cluster_address}`)
         if (row.cluster_address) {
-          console.log(`caching cluster ip ${row.cluster_address}`)
-          cache.set(session_id, row.cluster_address);
+          // console.log(`caching cluster ip ${row.cluster_address}`)
+          // cache.set(session_id, row.cluster_address);
         }
         resolve(row.cluster_address);
       });
