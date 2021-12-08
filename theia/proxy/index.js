@@ -14,7 +14,7 @@ const DEBUG = process.env.DEBUG === '1';
  * in-memory cache of session id -> session ip address cuts down
  * on latency and round trips to the database.
  */
-// const cache = new LRU(100);
+// const cache = new LRU(10, {maxAge: 10});
 
 /**
  * Knex connection to the database.
@@ -51,25 +51,31 @@ const authenticate = token => {
   return null;
 };
 
-const get_session_ip = session_id => {
-  /* const cached_ip = cache.get(session_id);
-   * if (cached_ip) {
-   *   return new Promise((resolve) => {
-   *     resolve(cached_ip);
-   *   })
-   * } */
-  return new Promise((resolve) => {
+const get_session_ip = (token) => {
+  const {session_id, netid} = token;
+  // const cached_ip = cache.get({session_id, netid});
+  // if (cached_ip) {
+  //   return new Promise((resolve) => {
+  //     resolve(cached_ip);
+  //   })
+  // }
+  return new Promise((resolve, reject) => {
     knex
       .first('cluster_address')
       .from('theia_session')
-      .where('id', session_id)
+      .where({'id': session_id, 'active': 1})
       .then((row) => {
-        console.log(`cluster_ip ${row.cluster_address}`)
-        if (row.cluster_address) {
-          // console.log(`caching cluster ip ${row.cluster_address}`)
-          // cache.set(session_id, row.cluster_address);
+        console.log(`cluster_ip ${row?.cluster_address}`)
+        if (row?.cluster_address) {
+          console.log(`caching cluster ip ${row.cluster_address}`)
+          // cache.set({session_id, netid}, row.cluster_address);
+          resolve(row.cluster_address);
+        } else {
+          reject(null);
         }
-        resolve(row.cluster_address);
+      }).catch((e) => {
+        console.error(e)
+        reject(e);
       });
   })
 }
@@ -115,6 +121,7 @@ const initialize = (req, res, url, query) => {
 
   // Set cookie for ide session & redirect
   const signed_token = jwt.sign({
+    netid: query_token.netid,
     session_id: query_token.session_id,
   }, SECRET_KEY, {expiresIn: '6h'});
   res.writeHead(302, {
@@ -134,7 +141,7 @@ function changeTimezone(date, ianatz) {
   var diff = date.getTime() - invdate.getTime();
 
   // so 12:00 in Toronto is 17:00 UTC
-  return new Date(date.getTime() - diff); // needs to substract
+  return new Date(date.getTime() - diff); // needs to subtract
 
 }
 
@@ -167,7 +174,7 @@ var proxyServer = http.createServer(function (req, res) {
 
     default:
       if (token === null) {
-        res.writeHead(401);
+        res.writeHead(302, {location: '/'});
         res.end('Please start an ide at https://anubis.osiris.services and click go to ide.');
         return;
       }
@@ -178,10 +185,13 @@ var proxyServer = http.createServer(function (req, res) {
         return;
       }
 
-      get_session_ip(token.session_id).then((host) => {
+      get_session_ip(token).then((host) => {
         proxy.web(req, res, {
           target: {host, port}
         });
+      }).catch(() => {
+        res.writeHead(302, {location: '/'});
+        res.end('Please start an ide at https://anubis.osiris.services and click go to ide.');
       })
   }
 });
@@ -195,7 +205,7 @@ proxyServer.on("upgrade", function (req, socket) {
   }
 
   // updateProxyTime(token.session_id);
-  get_session_ip(token.session_id).then((host) => {
+  get_session_ip(token).then((host) => {
     proxy.ws(req, socket, {
       target: {host, port}
     });
