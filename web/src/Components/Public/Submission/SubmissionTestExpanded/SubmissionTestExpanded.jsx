@@ -11,8 +11,7 @@ export default function SubmissionTestExpanded({
   submissionID,
   assignmentName,
   testSuccess,
-  testExpectedOutput,
-  testActualOutput,
+  testResult,
   onClose,
 }) {
   const classes = useStyles();
@@ -24,7 +23,7 @@ export default function SubmissionTestExpanded({
           {testName}
         </Typography>
         <Typography className={classes.submissionIDTitle}>
-          Submission: <span className={classes.submissionID}>{submissionID}</span>
+          Submission: <span className={classes.submissionID}>{submissionID.substr(0, 10)}</span>
         </Typography>
         <Typography className={classes.assignmentNameTitle}>
           Assignment: <span className={classes.assignmentName}>{assignmentName}</span>
@@ -44,17 +43,8 @@ export default function SubmissionTestExpanded({
       </div>
       <Divider></Divider>
       <div className={classes.testBody}>
-        <Typography className={classes.testOutputTitle}>
-          Expected Result:
-        </Typography>
         <Typography className={classes.testOutput}>
-          {testExpectedOutput}
-        </Typography>
-        <Typography className={classes.testOutputTitle}>
-          Actual Result:
-        </Typography>
-        <Typography className={classes.testOutput}>
-          {testActualOutput}
+          {testResult}
         </Typography>
       </div>
     </div>

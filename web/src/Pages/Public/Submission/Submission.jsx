@@ -151,20 +151,23 @@ export default function Submission() {
               result: {
                 passed: submission.build.passed,
               },
-            }} />
+            }}
+            hasExpand={false}
+            />
             {submission?.tests && submission.tests.map((test, index) => (
               <SubmissionTest key={index} test={test} expandModal = {() => expandModal(test)}/>
             ))}
           </SubmissionContent>
 
         </Box>
-        {modalTest && isExpanded &&
+        {modalTest && modalTest.result.stdout && isExpanded &&
           <Box className={classes.expandedContainer}>
             <SubmissionTestExpanded
               testName={modalTest.result.test_name}
               submissionID={submission.commit}
               assignmentName={submission.assignment_name}
               testSuccess={modalTest.result.passed}
+              testResult={modalTest.result.stdout}
               onClose={() => closeModal()}
             />
           </Box>

@@ -6,6 +6,7 @@ export const useStyles = makeStyles((theme) => ({
     paddingTop: theme.spacing(2),
     backgroundColor: theme.palette.dark.black,
     borderBottom: `1px solid ${theme.palette.gray['200']}`,
+    zIndex: 99999,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',

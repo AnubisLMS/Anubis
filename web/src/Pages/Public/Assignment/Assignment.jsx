@@ -14,12 +14,14 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
 
 import SubmissionItem from '../../../Components/Public/SubmissionItem/SubmissionItem';
-import SubmissionRow from '../Submissions/SubmissionRow/SubmissionRow';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import StandardLayout from '../../../Components/Layouts/StandardLayout';
 import {useStyles} from './Assignment.styles';
 import useQuery from '../../../hooks/useQuery';
 import IDEDialog from '../../../Components/Public/IDE/IDEDialog';
+import {translateSubmission} from '../../../Utils/submission';
+import standardErrorHandler from '../../../Utils/standardErrorHandler';
+import {CircularProgress} from '@material-ui/core';
 
 
 const Assignment = () => {
@@ -32,6 +34,8 @@ const Assignment = () => {
   const [assignment, setAssignment] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [selectedTheia, setSelectedTheia] = useState(null);
+
+  const [runAssignmentPolling, setRunAssignmentPolling] = useState(false);
 
   const assignmentId = query.get('assignmentId');
   const courseId = query.get('courseId');
@@ -46,7 +50,7 @@ const Assignment = () => {
       },
     }).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      setSubmissions(data.submissions);
+      setSubmissions(data.submissions.map(translateSubmission));
     }).catch((error) => {
       console.log(error);
     });
@@ -56,11 +60,42 @@ const Assignment = () => {
     axios.get(`/api/public/assignments/get/${assignmentId}`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
-        console.log(data.assignment);
         setAssignment(data.assignment);
       }
     }).catch((error) => console.log(error));
   }, []);
+
+  useEffect(() => {
+    if (runAssignmentPolling) {
+      const endPollingTimeout = setTimeout(() => {
+        setRunAssignmentPolling(false);
+      }, 60_0000);
+
+      const runPollingInterval = setInterval(() => {
+        axios.get(`/api/public/repos/get${assignmentId}`)
+          .then((response) => {
+            const data = standardStatusHandler(response, enqueueSnackbar);
+            setRunAssignmentPolling(false);
+            setAssignment(data.assignment);
+          }).catch(standardErrorHandler(enqueueSnackbar));
+      }, 1_000);
+
+      return () => {
+        clearTimeout(endPollingTimeout);
+        clearInterval(runPollingInterval);
+      };
+    };
+  }, [runAssignmentPolling, setRunAssignmentPolling]);
+
+
+  const createAssignmentRepo = (assignment, enqueueSnackbar) => () => {
+    axios.post(`/api/public/repos/create${assignmentId}`)
+      .then((response) => {
+        standardStatusHandler(response, enqueueSnackbar);
+        setRunAssignmentPolling(true);
+      })
+      .catch(standardErrorHandler(enqueueSnackbar));
+  };
 
   return (
     <StandardLayout>
@@ -93,13 +128,23 @@ const Assignment = () => {
               <Button
                 className={classes.ideButton}
                 onClick={() => setSelectedTheia(assignment)}
+                disabled={!assignment.has_repo}
               >
                 <LaunchIcon className={classes.launchIcon}/>
                 Open Anubis Cloud IDE
               </Button>
-              <Button className={classes.repoButton}>
-                View Repo
-              </Button>
+              {assignment.has_repo ? (
+                <Button className={classes.repoButton}>
+                  View Repo
+                </Button>
+              ) : (
+                <Button onClick={() => createAssignmentRepo() }className={classes.repoButton}>
+                  {runAssignmentPolling ? (
+                    <CircularProgress size={24} />
+                  ): 'Create Repo'}
+                </Button>
+              )}
+
             </Box>
           </Box>
           <Divider />
@@ -180,12 +225,12 @@ const Assignment = () => {
               {submissions && submissions.map((submission, index) => (
                 <SubmissionItem
                   key={`${submission.submission_name}-${index}`}
-                  assignmentDue={submission.assignmentDue}
+                  assignmentDue={submission.assignment_due}
                   assignmentName={submission.assignment_name}
                   commit={submission.commit}
                   processed={submission.processed}
                   tests={submission.tests}
-                  timeStamp={submission.timeStamp}
+                  timeStamp={submission.last_updated}
                 />
 
               ))}

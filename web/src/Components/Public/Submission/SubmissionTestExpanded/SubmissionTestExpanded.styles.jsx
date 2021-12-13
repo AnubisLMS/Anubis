@@ -2,7 +2,7 @@ import {makeStyles} from '@material-ui/core/styles';
 
 export const useStyles = makeStyles((theme) => ({
   submissionTestExpandedContainer: {
-    width: '90%',
+    width: '100%',
     minHeight: '400px',
     color: theme.palette.white,
     backgroundColor: theme.palette.dark.blue['200'],

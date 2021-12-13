@@ -7,7 +7,7 @@ import clsx from 'clsx';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 
 
-const SubmissionTest = ({test, expandModal}) => {
+const SubmissionTest = ({test, expandModal, hasExpand = true}) => {
   const classes = useStyles();
   return (
     <Box className={classes.root}>
@@ -22,12 +22,15 @@ const SubmissionTest = ({test, expandModal}) => {
           {test.result.passed === true ? 'Successful' : 'Failed'}
         </Typography>
       </Box>
-      <Button
-        className={classes.expand}
-        onClick={() => expandModal()}
-      >
-        Expand
-      </Button>
+      {hasExpand &&
+        <Button
+          className={classes.expand}
+          onClick={() => expandModal()}
+        >
+          Expand
+        </Button>
+      }
+
     </Box>
   );
 };

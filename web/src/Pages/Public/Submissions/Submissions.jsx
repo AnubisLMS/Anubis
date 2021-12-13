@@ -4,10 +4,6 @@ import {Redirect} from 'react-router-dom';
 import axios from 'axios';
 
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import CancelIcon from '@material-ui/icons/Cancel';
-import green from '@material-ui/core/colors/green';
-import red from '@material-ui/core/colors/red';
 import Box from '@material-ui/core/Box';
 
 import SectionHeader from '../../../Components/Public/Shared/SectionHeader/SectionHeader';
