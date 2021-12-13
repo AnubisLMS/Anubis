@@ -518,7 +518,7 @@ def make_shared_assignment(assignment_id: str, group_netids: List[List[str]]) ->
     }
 
 
-def get_assignment_tests(assignment: Assignment, only_visible=False):
+def get_assignment_tests(submission: Submission, only_visible=False):
     """
     Get a list of dictionaries of the matching Test, and TestResult
     for the current submission.
@@ -528,7 +528,7 @@ def get_assignment_tests(assignment: Assignment, only_visible=False):
 
     # Construct query for
     query = SubmissionTestResult.query.join(AssignmentTest).filter(
-        SubmissionTestResult.submission_id == assignment.id,
+        SubmissionTestResult.submission_id == submission.id,
     )
 
     # If only get visible tests, apply extra filter

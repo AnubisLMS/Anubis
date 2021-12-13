@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import deferred
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_json import MutableJson
+from sqlalchemy.orm import InstrumentedAttribute
 
 from anubis.utils.data import rand
 
@@ -549,11 +550,18 @@ class SubmissionTestResult(db.Model):
 
     @hybrid_property
     def stdout(self) -> str:
+        if isinstance(self._stdout, InstrumentedAttribute):
+            return self._stdout
         return gzip.decompress(self._stdout).decode('ascii')
 
     @stdout.setter
     def stdout(self, stdout):
-        self._stdout = gzip.compress(stdout)
+        if isinstance(stdout, str):
+            self._stdout = gzip.compress(stdout.encode())
+        elif isinstance(stdout, bytes):
+            self._stdout = gzip.compress(stdout)
+        else:
+            self._stdout = gzip.compress(b'')
 
     @property
     def data(self):
@@ -600,11 +608,19 @@ class SubmissionBuild(db.Model):
 
     @hybrid_property
     def stdout(self):
+        if isinstance(self._stdout, InstrumentedAttribute):
+            return self._stdout
         return gzip.decompress(self._stdout).decode('ascii')
 
     @stdout.setter
-    def stdout(self, stdout):
-        self._stdout = gzip.compress(stdout)
+    def stdout(self, stdout: str):
+        if isinstance(stdout, str):
+            self._stdout = gzip.compress(stdout.encode())
+        elif isinstance(stdout, bytes):
+            self._stdout = gzip.compress(stdout)
+        else:
+            self._stdout = gzip.compress(b'')
+
 
     @property
     def data(self):
@@ -735,11 +751,18 @@ class StaticFile(db.Model):
 
     @hybrid_property
     def blob(self):
+        if isinstance(self._blob, InstrumentedAttribute):
+            return self._blob
         return gzip.decompress(self._blob)
 
     @blob.setter
-    def blob(self, stdout):
-        self._blob = gzip.compress(stdout)
+    def blob(self, blob):
+        if isinstance(blob, str):
+            self._blob = gzip.compress(blob.encode())
+        elif isinstance(blob, bytes):
+            self._blob = gzip.compress(blob)
+        else:
+            self._blob = gzip.compress(b'')
 
     @property
     def data(self):

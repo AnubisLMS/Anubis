@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 import numpy as np
 import pandas as pd
 
+from anubis.lms.assignments import get_assignment_tests
 from anubis.lms.autograde import bulk_autograde
 from anubis.models import Assignment, AssignmentTest, Submission, TheiaSession, User, db
 from anubis.utils.cache import cache
@@ -152,8 +153,8 @@ def get_assignment_history(assignment_id, netid):
             Submission.assignment_id == assignment.id,
             Submission.owner_id == other.id,
         )
-            .order_by(Submission.created.desc())
-            .all()
+        .order_by(Submission.created.desc())
+        .all()
     )
 
     test_count = len(assignment.full_data["tests"])
@@ -166,7 +167,7 @@ def get_assignment_history(assignment_id, netid):
         tests_passed = sum(
             map(
                 lambda test: (1 if test["result"]["passed"] else 0),
-                db_submission.all_tests,
+                get_assignment_tests(db_submission),
             )
         )
 
