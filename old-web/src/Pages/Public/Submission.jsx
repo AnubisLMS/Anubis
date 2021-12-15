@@ -50,7 +50,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const regrade = ({commit, submission, setSubmission, setStep, setErrorStop}, enqueueSnackbar) => () => {
+const regrade = (
+  {commit, submission, setSubmission, setStep, setErrorStop},
+  continueSubscribe,
+  enqueueSnackbar,
+) => () => {
   if (!submission.processed) {
     return enqueueSnackbar('Submission must first finish tests before regrading.', {variant: 'warning'});
   }
@@ -63,6 +67,7 @@ const regrade = ({commit, submission, setSubmission, setStep, setErrorStop}, enq
         setErrorStop(false);
         setStep(-1);
         setSubmission(null);
+        continueSubscribe();
         enqueueSnackbar('Regrading submission', {variant: 'success'});
       } else {
         enqueueSnackbar(`Unable to regrade`, {variant: 'error'});
@@ -159,7 +164,7 @@ export default function Submission() {
         <Grid item xs={12} md={4} key={'summary'}>
           <SubmissionSummary
             submission={submission}
-            regrade={regrade(pageState, enqueueSnackbar)}
+            regrade={regrade(pageState, continueSubscribe, enqueueSnackbar)}
             stop={errorStop}
           />
         </Grid>
