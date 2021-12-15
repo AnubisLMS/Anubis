@@ -336,6 +336,7 @@ def init_submission(submission: Submission, commit: bool = True):
     submission.accepted = True
     submission.processed = False
     submission.state = "Waiting for resources..."
+    submission.errors = None
     db.session.add(submission)
 
     if commit:
