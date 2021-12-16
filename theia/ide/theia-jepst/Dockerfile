@@ -35,6 +35,8 @@ RUN set -ex; \
     libffi-dev libexpat1-dev \
     libgdbm-dev liblzma-dev zlib1g-dev \
     clangd-12 \
+    ghc \
+    swi-prolog \
     qemu-system-i386 \
     libsecret-1-0 \
     iverilog \
