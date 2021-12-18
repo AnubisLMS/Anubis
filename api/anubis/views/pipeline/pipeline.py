@@ -6,6 +6,7 @@ from parse import parse
 
 from anubis.models import AssignmentTest, Submission, SubmissionTestResult, db
 from anubis.utils.http import success_response
+from anubis.utils.data import MYSQL_TEXT_MAX_LENGTH
 from anubis.utils.http.decorators import json_endpoint, json_response
 from anubis.utils.logging import logger
 from anubis.utils.pipeline.decorators import check_submission_token
@@ -77,6 +78,9 @@ def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **_
     :return:
     """
 
+    if len(stdout) > MYSQL_TEXT_MAX_LENGTH:
+        stdout = stdout[:MYSQL_TEXT_MAX_LENGTH]
+
     # Log the build being reported
     logger.info(
         "submission build reported",
@@ -133,6 +137,9 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
     :param stdout:
     :return:
     """
+
+    if len(stdout) > MYSQL_TEXT_MAX_LENGTH:
+        stdout = stdout[:MYSQL_TEXT_MAX_LENGTH]
 
     # Log the build
     logger.info(

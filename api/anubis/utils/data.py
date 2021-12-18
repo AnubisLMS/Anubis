@@ -14,6 +14,9 @@ from anubis.config import config
 from anubis.utils.exceptions import AssertError
 
 
+MYSQL_TEXT_MAX_LENGTH = 2**16 - 1
+
+
 def is_debug() -> bool:
     """
     Returns true if the app is running in debug mode
