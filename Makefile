@@ -114,3 +114,7 @@ yeetdb:
 	docker-compose rm -f
 	docker volume rm anubis_db_data
 	docker-compose up -d --force-recreate db
+
+theia-%:
+	docker-compose build $@
+
