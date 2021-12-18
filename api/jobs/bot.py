@@ -1,4 +1,5 @@
 import os
+import traceback
 from typing import List
 from datetime import datetime, timedelta
 
@@ -6,6 +7,7 @@ import flask_sqlalchemy
 from sqlalchemy.sql import func
 from discord.ext import commands
 from tabulate import tabulate
+from dateutil.parser import parse as date_parse, ParserError
 import discord
 
 from anubis.models import db, Course, User, TheiaSession, InCourse
@@ -135,7 +137,7 @@ def get_ide_seconds(*filters) -> timedelta:
 
 
 @with_context
-def generate_ide_report() -> discord.Embed:
+def generate_ide_report(day=None) -> discord.Embed:
     """
     Generate a report of the statuses of Anubis. The statuses are:
         Course names and code
@@ -146,20 +148,32 @@ def generate_ide_report() -> discord.Embed:
 
     :return: The text of the report
     """
+    today = None
 
-    today = datetime.now().replace(hour=0, minute=0)
+    try:
+        today = date_parse(day)
+    except (ParserError, TypeError):
+        print(traceback.format_exc())
+
+    if today is None:
+        today = datetime.now().replace(hour=0, minute=0, microsecond=0)
+
+    print('today', today)
+
+    eod = today.replace(hour=23, minute=59, second=59, microsecond=0)
     now = datetime.now().replace(microsecond=0)
 
-    total_ide_seconds = get_ide_seconds()
-    today_ide_seconds = get_ide_seconds(TheiaSession.created > today)
+    total_ide_seconds = get_ide_seconds(TheiaSession.created < eod)
+    today_ide_seconds = get_ide_seconds(TheiaSession.created < eod, TheiaSession.created > today)
 
     active_ides: List[TheiaSession] = TheiaSession.query.filter(
-        TheiaSession.active == True
+        TheiaSession.active == True,
+        TheiaSession.created < eod,
     ).all()
 
     report = ''
 
-    report += 'IDEs Currently Active ({})\n'.format(len(active_ides))
+    report += 'IDEs Active ({})\n'.format(len(active_ides))
     report += tabulate(
         [
             [
@@ -201,13 +215,13 @@ async def report_(ctx, *args):
 
 
 @bot.command(name="ide", help="Anubis ide usage report")
-async def ides_(ctx, *args):
+async def ides_(ctx, day=None, *args):
     """
     Respond to `!report` command with a report of the statuses of Anubis
 
     :return:
     """
-    await ctx.send(embed=generate_ide_report())
+    await ctx.send(embed=generate_ide_report(day))
 
 
 @bot.command(name="contribute", aliases=("github",), help="Contributing to Anubis")
