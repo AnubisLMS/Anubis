@@ -2,6 +2,7 @@ from typing import Any, Dict, List
 
 from flask import Blueprint
 
+from anubis.lms.students import get_students
 from anubis.lms.assignments import get_assignments
 from anubis.lms.courses import get_courses, get_courses_with_visuals, valid_join_code, get_course_data
 from anubis.models import Course, InCourse, db
@@ -105,6 +106,7 @@ def public_courses_join(join_code):
     cache.delete_memoized(get_courses, current_user.netid)
     cache.delete_memoized(get_assignments, current_user.netid)
     cache.delete_memoized(get_assignments, current_user.netid, course.id)
+    cache.delete_memoized(get_students, course.id)
 
     # Enqueue fixing missing questions job
     enqueue_assign_missing_questions(current_user.id)

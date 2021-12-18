@@ -14,6 +14,7 @@ from anubis.utils.data import with_context
 from anubis.utils.github.fix import fix_github_missing_submissions, fix_github_broken_repos
 from anubis.utils.logging import logger
 from anubis.utils.rpc import enqueue_ide_reap_stale, enqueue_pipeline_reap_stale, enqueue_autograde_pipeline
+from anubis.lms.students import get_students
 
 
 def reap_stale_submissions():
@@ -105,6 +106,22 @@ def reap_github():
     fix_github_broken_repos()
 
 
+def update_student_lists():
+    """
+    Iterate through all courses, updating the cached entry for
+    the student lists in each.
+
+    :return:
+    """
+
+    # Pull all courses
+    courses: List[Course] = Course.query.all()
+
+    # Iterate through courses, updating student list
+    for course in courses:
+        get_students(course.id)
+
+
 @with_context
 def reap():
     # Enqueue a job to reap stale ide k8s resources
@@ -121,6 +138,9 @@ def reap():
 
     # Reap broken submissions in recent assignments
     reap_recent_assignments()
+
+    # Update student lists
+    update_student_lists()
 
 
 if __name__ == "__main__":

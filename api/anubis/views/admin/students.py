@@ -45,7 +45,7 @@ def admin_students_list():
     """
 
     # Get all students within the current course context
-    students = get_students(course_id=course_context.id)
+    students = get_students(course_context.id)
 
     # Pass back the students
     return success_response({"students": students})

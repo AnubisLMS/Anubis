@@ -2,18 +2,17 @@ from typing import Dict, List
 
 from anubis.models import Course, InCourse, User
 from anubis.utils.cache import cache
-from anubis.utils.data import is_debug
+from anubis.utils.data import is_debug, is_job
 
 
-@cache.memoize(timeout=60, unless=is_debug)
-def get_students(course_id: str = None, course_code: str = None) -> List[Dict[str, dict]]:
+@cache.memoize(timeout=-1, forced_update=is_debug, unless=is_debug)
+def get_students(course_id: str = None) -> List[Dict[str, dict]]:
     """
     Get students by course code. If no course code is specified,
     then all courses will be considered.
 
     * This response is cached for up to 60 seconds *
 
-    :param course_code:
     :param course_id:
     :return:
     """
@@ -21,15 +20,11 @@ def get_students(course_id: str = None, course_code: str = None) -> List[Dict[st
     # List of sqlalchemy filters
     filters = []
 
-    # If a course code is specified, then add it to the filter
-    if course_code is not None:
-        filters.append(Course.course_code == course_code)
-
     if course_id is not None:
-        filters.append(Course.id == course_id)
+        filters.append(InCourse.course_id == course_id)
 
     # Get all users, and break them into their data props
-    return [s.data for s in User.query.join(InCourse).join(Course).filter(*filters).all()]
+    return [s.data for s in User.query.join(InCourse).filter(*filters).all()]
 
 
 @cache.memoize(timeout=60, unless=is_debug)
