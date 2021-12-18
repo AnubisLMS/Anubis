@@ -23,7 +23,7 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
     # Set some conservative resources requests and limits
     resource_requirements = {
         "limits": {"cpu": "2", "memory": "750Mi"},
-        "requests": {"cpu": "500m", "memory": "100Mi"},
+        "requests": {"cpu": "500m", "memory": "500Mi"},
     }
 
     # If we are running in debug mode (like in minikube) then
