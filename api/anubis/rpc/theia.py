@@ -47,7 +47,7 @@ def initialize_theia_session(theia_session_id: str):
     )
 
     # Calculate the maximum IDEs that are allowed to exist at any given time
-    max_ides = get_config_int("MAX_THEIA_SESSIONS", default=50)
+    max_ides = get_config_int("THEIA_MAX_SESSIONS", default=50)
 
     # Check to ses how many theia sessions are marked as active in the database. If that
     # count exceeds the artificial limit of IDEs, then we need to re-enqueue this job.

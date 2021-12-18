@@ -36,7 +36,7 @@ def get_n_available_sessions() -> Tuple[int, int]:
 
     :return:
     """
-    max_ides = get_config_int("MAX_THEIA_SESSIONS", default=50)
+    max_ides = get_config_int("THEIA_MAX_SESSIONS", default=50)
     active_ide_count: int = TheiaSession.query.filter(TheiaSession.active).count()
 
     return active_ide_count, max_ides
