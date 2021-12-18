@@ -1,11 +1,12 @@
 import functools
-from datetime import datetime
+from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from hashlib import sha512
 from json import dumps
 from os import environ, urandom
 from smtplib import SMTP
 from typing import Tuple, Union
+from collections import namedtuple
 
 from flask import Response, has_app_context, has_request_context
 
@@ -259,6 +260,38 @@ def human_readable_to_bytes(size: str) -> int:
     # ** is the "exponent" operator - you can use it instead of math.pow()
     factor = 1024 ** idx
     return num * factor
+
+
+def human_readable_datetime(delta: timedelta) -> str:
+    """
+    Take a timedelta and give a human-readable string
+    version.
+
+    >>> d = timedelta(days=2, hours=1, seconds=10)
+    >>> human_readable_datetime(d)
+    >>> '2d 1h 10s'
+
+    :param delta:
+    :return: string version of delta
+    """
+    years = delta.days // 365
+    weeks = (delta.days % 365) // 7
+    days = delta.days % 7
+    hours = delta.seconds // 3600
+    minutes = (delta.seconds % 3600) // 60
+    seconds = delta.seconds % 60
+    r = f'{seconds}s'
+    if minutes > 0:
+        r = f'{minutes}m ' + r
+    if hours > 0:
+        r = f'{hours}h ' + r
+    if days > 0:
+        r = f'{days}d ' + r
+    if weeks > 0:
+        r = f'{weeks}w ' + r
+    if years > 0:
+        r = f'{years}y ' + r
+    return r
 
 
 def row2dict(row) -> dict:
