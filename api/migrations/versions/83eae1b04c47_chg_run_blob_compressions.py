@@ -56,12 +56,12 @@ def process_compressed_column(conn, table, column, forward=True, batch_size=100)
 def upgrade():
     conn = op.get_bind()
     process_compressed_column(conn, 'static_file', 'blob', batch_size=1)
-    process_compressed_column(conn, 'submission_build', 'stdout', batch_size=300)
-    process_compressed_column(conn, 'submission_test_result', 'stdout', batch_size=300)
+    # process_compressed_column(conn, 'submission_build', 'stdout', batch_size=300)
+    # process_compressed_column(conn, 'submission_test_result', 'stdout', batch_size=300)
 
 
 def downgrade():
     conn = op.get_bind()
     process_compressed_column(conn, 'static_file', 'blob', forward=False, batch_size=1)
-    process_compressed_column(conn, 'submission_build', 'stdout', forward=False, batch_size=300)
-    process_compressed_column(conn, 'submission_test_result', 'stdout', forward=False, batch_size=300)
+    # process_compressed_column(conn, 'submission_build', 'stdout', forward=False, batch_size=300)
+    # process_compressed_column(conn, 'submission_test_result', 'stdout', forward=False, batch_size=300)

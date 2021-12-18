@@ -541,27 +541,12 @@ class SubmissionTestResult(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Fields
-    _stdout = deferred(db.Column(db.LargeBinary(length=(2 ** 16) - 1)))
+    stdout = deferred(db.Column(db.Text))
     message = deferred(db.Column(db.Text))
     passed = db.Column(db.Boolean)
 
     # Relationships
     assignment_test = db.relationship(AssignmentTest)
-
-    @hybrid_property
-    def stdout(self) -> str:
-        if isinstance(self._stdout, InstrumentedAttribute):
-            return self._stdout
-        return gzip.decompress(self._stdout).decode('ascii')
-
-    @stdout.setter
-    def stdout(self, stdout):
-        if isinstance(stdout, str):
-            self._stdout = gzip.compress(stdout.encode())
-        elif isinstance(stdout, bytes):
-            self._stdout = gzip.compress(stdout)
-        else:
-            self._stdout = gzip.compress(b'')
 
     @property
     def data(self):
@@ -599,28 +584,12 @@ class SubmissionBuild(db.Model):
     submission_id = db.Column(db.String(128), db.ForeignKey(Submission.id), index=True)
 
     # Fields
-    _stdout = deferred(db.Column(db.LargeBinary(length=(2 ** 16) - 1)))
+    stdout = deferred(db.Column(db.Text))
     passed = db.Column(db.Boolean, default=None)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
-
-    @hybrid_property
-    def stdout(self):
-        if isinstance(self._stdout, InstrumentedAttribute):
-            return self._stdout
-        return gzip.decompress(self._stdout).decode('ascii')
-
-    @stdout.setter
-    def stdout(self, stdout: str):
-        if isinstance(stdout, str):
-            self._stdout = gzip.compress(stdout.encode())
-        elif isinstance(stdout, bytes):
-            self._stdout = gzip.compress(stdout)
-        else:
-            self._stdout = gzip.compress(b'')
-
 
     @property
     def data(self):

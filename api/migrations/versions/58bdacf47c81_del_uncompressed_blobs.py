@@ -18,23 +18,23 @@ depends_on = None
 
 def upgrade():
     op.drop_column("static_file", "blob")
-    op.drop_column("submission_build", "stdout")
-    op.drop_column("submission_test_result", "stdout")
+    # op.drop_column("submission_build", "stdout")
+    # op.drop_column("submission_test_result", "stdout")
 
 
 def downgrade():
-    op.add_column(
-        "submission_test_result",
-        sa.Column(
-            "stdout", mysql.TEXT(collation="utf8mb4_unicode_ci"), nullable=True
-        ),
-    )
-    op.add_column(
-        "submission_build",
-        sa.Column(
-            "stdout", mysql.TEXT(collation="utf8mb4_unicode_ci"), nullable=True
-        ),
-    )
+    # op.add_column(
+    #     "submission_test_result",
+    #     sa.Column(
+    #         "stdout", mysql.TEXT(collation="utf8mb4_unicode_ci"), nullable=True
+    #     ),
+    # )
+    # op.add_column(
+    #     "submission_build",
+    #     sa.Column(
+    #         "stdout", mysql.TEXT(collation="utf8mb4_unicode_ci"), nullable=True
+    #     ),
+    # )
     op.add_column(
         "static_file", sa.Column("blob", mysql.LONGBLOB(), nullable=True)
     )
