@@ -186,7 +186,7 @@ services:
     build:
       context: ./theia/ide/theia-base
       args:
-        PY_VERSION: '3.10.0'
+        PY_VERSION: '3.10.1'
 
   theia-golang:
     image: registry.digitalocean.com/anubis/theia-golang:latest
