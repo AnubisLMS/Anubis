@@ -575,12 +575,6 @@ class SubmissionTestResult(db.Model):
             "last_updated": str(self.last_updated),
         }
 
-    @property
-    def stat_data(self):
-        data = self.data
-        del data["stdout"]
-        return data
-
     def __str__(self):
         return "testname: {}\nerrors: {}\npassed: {}\n".format(
             self.testname,
@@ -613,12 +607,6 @@ class SubmissionBuild(db.Model):
             "stdout": self.stdout,
             "passed": self.passed,
         }
-
-    @property
-    def stat_data(self):
-        data = self.data
-        del data["stdout"]
-        return data
 
 
 class TheiaImage(db.Model):
