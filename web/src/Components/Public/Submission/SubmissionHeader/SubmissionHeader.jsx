@@ -4,9 +4,11 @@ import {Box} from '@material-ui/core';
 import {Typography} from '@material-ui/core';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 import clsx from 'clsx';
 import {useStyles} from './SubmissionHeader.styles';
+import Button from '@material-ui/core/Button';
 
 
 const SubmissionHeader = ({
@@ -14,6 +16,8 @@ const SubmissionHeader = ({
   timestamp,
   commit,
   on_time,
+  processed,
+  regrade,
 })=> {
   const classes = useStyles();
   const DATE_OPTIONS = {weekday: 'long', year: 'numeric', month: 'short', day: 'numeric'};
@@ -30,10 +34,20 @@ const SubmissionHeader = ({
         </Typography>
       </Box>
       <Box className={classes.dataContainer}>
-        <Typography className={clsx(classes.circleIcon, on_time ? classes.sucess : classes.error)}>
+        <Button
+          variant={'contained'}
+          color={'primary'}
+          startIcon={<RefreshIcon/>}
+          className={clsx(classes.dataItem)}
+          disabled={!processed}
+          onClick={regrade}
+        >
+          Regrade
+        </Button>
+        <Typography className={clsx(classes.dataItem, classes.circleIcon, on_time ? classes.success : classes.error)}>
           { on_time ? <CheckCircleIcon/> : <CancelIcon/>}
         </Typography>
-        <Typography className={clsx(classes.submittedStatus, on_time ? classes.sucess : classes.error)}>
+        <Typography className={clsx(classes.submittedStatus, on_time ? classes.success : classes.error)}>
           { on_time ? 'Submitted On Time' : 'Submitted Late'}
         </Typography>
       </Box>

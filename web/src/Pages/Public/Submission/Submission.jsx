@@ -16,7 +16,11 @@ import SubmissionTest from '../../../Components/Public/Submission/SubmissionTest
 import SubmissionTestExpanded
   from '../../../Components/Public/Submission/SubmissionTestExpanded/SubmissionTestExpanded';
 
-const regrade = ({commit, submission, setSubmission, setStep, setErrorStop}, enqueueSnackbar) => () => {
+const regrade = (
+  {commit, submission, setSubmission, setStep, setErrorStop},
+  continueSubscribe,
+  enqueueSnackbar,
+) => () => {
   if (!submission.processed) {
     return enqueueSnackbar('Submission must first finish tests before regrading.', {variant: 'warning'});
   }
@@ -29,6 +33,7 @@ const regrade = ({commit, submission, setSubmission, setStep, setErrorStop}, enq
         setErrorStop(false);
         setStep(-1);
         setSubmission(null);
+        continueSubscribe();
         enqueueSnackbar('Regrading submission', {variant: 'success'});
       } else {
         enqueueSnackbar(`Unable to regrade`, {variant: 'error'});
@@ -49,6 +54,7 @@ export default function Submission() {
   const [errorStop, setErrorStop] = useState(false);
   const [modalTest, setModalTest] = useState(undefined);
   const [isExpanded, setIsExpanded] = useState(false);
+  const commit = query.get('commit');
 
   const continueSubscribe = () => setTimeout(() => {
     if (step < 300) {
@@ -58,7 +64,7 @@ export default function Submission() {
 
   React.useEffect(() => {
     axios.get(
-      `/api/public/submissions/get/${query.get('commit')}`,
+      `/api/public/submissions/get/${commit}`,
     ).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (!data) {
@@ -104,7 +110,6 @@ export default function Submission() {
       }
     }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
   }, []);
-  console.log(submission);
 
   if (!submission) {
     return null;
@@ -112,7 +117,7 @@ export default function Submission() {
 
   const {build, tests} = submission;
   const pageState = {
-    commit: query.get('commit'),
+    commit,
     step, setStep,
     submission, setSubmission,
     errorStop, setErrorStop,
@@ -137,19 +142,26 @@ export default function Submission() {
           modalTest && isExpanded ?
             clsx(classes.headerContainer, classes.blur) :
             classes.headerContainer}>
-          <SubmissionHeader {...submission} />
+          <SubmissionHeader
+            regrade={regrade(
+              {commit, submission, setSubmission, setStep, setErrorStop},
+              continueSubscribe,
+              enqueueSnackbar,
+            )}
+            {...submission}
+          />
         </Box>
         <Box className={
           modalTest && isExpanded ?
             clsx(classes.submissionContentContainer, classes.blur) :
             classes.submissionContentContainer}>
           <SubmissionContent submission={submission}>
-            <SubmissionTest test= {{
+            <SubmissionTest test={{
               test: {
                 name: 'Build',
               },
               result: {
-                passed: submission.build.passed,
+                passed: !!submission?.build?.passed,
               },
             }}
             hasExpand={false}

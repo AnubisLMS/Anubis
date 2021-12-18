@@ -25,6 +25,10 @@ export const useStyles = makeStyles((theme) => ({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  dataItem: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+  },
   textLabel: {
     fontWeight: 'Regular',
     fontSize: '13px',
@@ -47,7 +51,7 @@ export const useStyles = makeStyles((theme) => ({
     width: '25px',
     height: '20px',
   },
-  sucess: {
+  success: {
     color: theme.palette.color.green,
   },
   error: {
