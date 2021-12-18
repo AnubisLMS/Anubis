@@ -1,14 +1,15 @@
 import os
 from typing import List
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import flask_sqlalchemy
+from sqlalchemy.sql import func
 from discord.ext import commands
 from tabulate import tabulate
 import discord
 
-from anubis.models import Course, User, TheiaSession, InCourse
-from anubis.utils.data import with_context
+from anubis.models import db, Course, User, TheiaSession, InCourse
+from anubis.utils.data import with_context, human_readable_datetime
 
 
 @with_context
@@ -119,8 +120,22 @@ def generate_report() -> str:
     return report
 
 
+def get_ide_seconds(*filters) -> timedelta:
+    ide_hours_inactive = db.session.query(
+        func.sum(func.time_to_sec(func.timediff(TheiaSession.ended, TheiaSession.created)))
+    ).filter(TheiaSession.active == False, *filters).first()
+    ide_hours_active = db.session.query(
+        func.sum(func.time_to_sec(func.timediff(func.now(), TheiaSession.created)))
+    ).filter(TheiaSession.active == True, *filters).first()
+    ide_hours_inactive_s = int(ide_hours_inactive[0] or 0)
+    ide_hours_active_s = int(ide_hours_active[0] or 0)
+    print('ide_hours_inactive_s={}'.format(ide_hours_inactive_s))
+    print('ide_hours_active_s={}'.format(ide_hours_active_s))
+    return timedelta(seconds=ide_hours_active_s+ide_hours_inactive_s)
+
+
 @with_context
-def generate_ide_report() -> str:
+def generate_ide_report() -> discord.Embed:
     """
     Generate a report of the statuses of Anubis. The statuses are:
         Course names and code
@@ -133,12 +148,10 @@ def generate_ide_report() -> str:
     """
 
     today = datetime.now().replace(hour=0, minute=0)
-    eod = today.replace(hour=23, minute=59)
+    now = datetime.now().replace(microsecond=0)
 
-    all_ides_today = TheiaSession.query.filter(
-        TheiaSession.created >= today,
-        TheiaSession.created <= eod,
-    ).count()
+    total_ide_seconds = get_ide_seconds()
+    today_ide_seconds = get_ide_seconds(TheiaSession.created > today)
 
     active_ides: List[TheiaSession] = TheiaSession.query.filter(
         TheiaSession.active == True
@@ -150,22 +163,24 @@ def generate_ide_report() -> str:
     report += tabulate(
         [
             [
-                ide.id[:8],
-                str(ide.created),
-                str(ide.last_proxy),
+                str(index),
+                human_readable_datetime(now - ide.created),
+                human_readable_datetime(now - ide.last_proxy),
             ]
-            for ide in active_ides
-        ], headers=["ID", "Created", "Last Proxy"]
+            for index, ide in enumerate(active_ides)
+        ], headers=["ID", "Age", "Last Proxy"]
     )
+    report += '\n\n'
+    report += 'IDE Time Served Today: {}\n'.format(human_readable_datetime(today_ide_seconds))
+    report += 'IDE Time Served Total: {}\n'.format(human_readable_datetime(total_ide_seconds))
 
-    report += '\n\nIDEs Active Today\n'
-    report += f"{all_ides_today}"
+    print(report)
 
-    # Number of IDEs opened this semester
-    report += "\n\nTotal IDEs opened this semester\n"
-    report += f"{get_ides_opened_this_semester()}"
-
-    return report
+    return discord.Embed(
+        title='IDE report',
+        author='Anubis Bot',
+        description="```" + report + "```"
+    ).set_thumbnail(url=bot.user.avatar_url)
 
 
 bot = commands.Bot(
@@ -192,7 +207,7 @@ async def ides_(ctx, *args):
 
     :return:
     """
-    await ctx.send("```" + generate_ide_report() + "```")
+    await ctx.send(embed=generate_ide_report())
 
 
 @bot.command(name="contribute", aliases=("github",), help="Contributing to Anubis")
