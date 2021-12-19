@@ -196,6 +196,45 @@ def reap_theia_sessions_in_course(course_id: str):
 
 
 @with_context
+def reap_theia_playgrounds_all():
+    """
+    Reap all theia sessions within anubis playgrounds. This will
+    kick everyone off their IDEs.
+
+    There may be many database entries that this function updates
+    so we will batch commits to help speed things up, while
+    keeping things relatively consistent in the cluster.
+
+    :return:
+    """
+
+    # Load the incluster config
+    config.load_incluster_config()
+
+    # Lof the reap
+    logger.info(f"Clearing theia sessions playgrounds")
+
+    # Find all theia sessions in the database that are
+    # marked as active.
+    theia_sessions = TheiaSession.query.filter(
+        TheiaSession.active == True,
+        TheiaSession.playground == True,
+    ).all()
+
+    # Iterate through all active theia sessions in the database, deleting and
+    # updating as we go.
+    for n, theia_session in enumerate(theia_sessions):
+        # Reap the session
+        reap_theia_session(theia_session, commit=False)
+
+        # Batch commits in size of 5
+        if n % 5 == 0:
+            db.session.commit()
+
+    db.session.commit()
+
+
+@with_context
 def reap_stale_theia_sessions(*_):
     """
     Reap any and all stale sessions either in the database or
