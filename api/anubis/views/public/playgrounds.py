@@ -1,9 +1,9 @@
 from typing import List
 
-from flask import Blueprint
+from flask import Blueprint, request
 
 from anubis.lms.theia import initialize_ide, assert_theia_sessions_enabled
-from anubis.models import TheiaSession, TheiaImage
+from anubis.models import TheiaSession, TheiaImage, TheiaImageTag
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.http import success_response
@@ -24,6 +24,18 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
     :return:
     """
 
+    # Get the requested tag information
+    requested_tag = request.args.get('tag', 'latest')
+    image_tag_id = None
+    if requested_tag != 'latest':
+        image_tag: TheiaImageTag = TheiaImageTag.query.filter(
+            TheiaImageTag.id == requested_tag,
+            TheiaImageTag.image_id == theia_image.id,
+        ).first()
+        if image_tag is not None:
+            image_tag_id = image_tag.id
+
+    # Check if there is an active session
     active_session = TheiaSession.query.filter(
         TheiaSession.owner_id == current_user.id,
         TheiaSession.playground == True,
@@ -43,6 +55,7 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
     # Create IDE
     session: TheiaSession = initialize_ide(
         image_id=theia_image.id,
+        image_tag_id=image_tag_id,
 
         assignment_id=None,
         course_id=None,

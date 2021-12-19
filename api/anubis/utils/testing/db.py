@@ -17,6 +17,7 @@ from anubis.models import (
     TAForCourse,
     TheiaSession,
     TheiaImage,
+    TheiaImageTag,
     User,
     db,
 )
@@ -41,6 +42,7 @@ def clear_database():
     LectureNotes.query.delete()
     StaticFile.query.delete()
     Course.query.delete()
+    TheiaImageTag.query.delete()
     TheiaImage.query.delete()
     User.query.delete()
     db.session.commit()

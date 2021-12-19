@@ -653,7 +653,8 @@ class TheiaImageTag(db.Model):
         return {
             'id': self.id,
             'tag': self.tag,
-            'title': self.description,
+            'title': self.title,
+            'description': self.description,
         }
 
 
