@@ -1,3 +1,5 @@
+from typing import List
+
 from flask import Blueprint
 
 from anubis.lms.theia import initialize_ide, assert_theia_sessions_enabled
@@ -89,4 +91,23 @@ def public_playgrounds_active():
     return success_response({
         "active": True,
         "session": session.data,
+    })
+
+
+@playgrounds_.get('/images')
+@require_user()
+@json_response
+def public_playgrounds_images():
+    """
+    Get public images
+
+    :return:
+    """
+
+    images: List[TheiaImage] = TheiaImage.query.filter(
+        TheiaImage.public == True
+    ).all()
+
+    return success_response({
+        'images': [image.data for image in images]
     })
