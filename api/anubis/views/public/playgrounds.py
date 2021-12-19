@@ -27,6 +27,7 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
     active_session = TheiaSession.query.filter(
         TheiaSession.owner_id == current_user.id,
         TheiaSession.playground == True,
+        TheiaSession.active == True,
     ).first()
 
     # If there was an existing session for this assignment found, skip
@@ -51,7 +52,7 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
         network_policy='os-student',
         persistent_storage=True,
         autosave=False,
-        resources=None,
+        resources=dict(),
 
         admin=False,
         privileged=False,
@@ -78,7 +79,7 @@ def public_playgrounds_active():
 
     # Find if they have an active session for this assignment
     session = TheiaSession.query.filter(
-        TheiaSession.active,
+        TheiaSession.active == True,
         TheiaSession.owner_id == current_user.id,
         TheiaSession.playground == True,
     ).first()

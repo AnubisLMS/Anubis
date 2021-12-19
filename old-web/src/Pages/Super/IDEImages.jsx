@@ -80,7 +80,7 @@ export default function IDEImages() {
 
   const columns = [
     {field: 'image', width: 300},
-    {field: 'title', width: 300},
+    {field: 'title', width: 200},
     {field: 'public', width: 100},
     {
       field: 'edit', width: 100, renderCell: (params) => (

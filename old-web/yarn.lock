@@ -5232,6 +5232,11 @@ detect-port-alt@1.1.6:
     address "^1.0.1"
     debug "^2.6.0"
 
+devicon@^2.14.0:
+  version "2.14.0"
+  resolved "https://registry.yarnpkg.com/devicon/-/devicon-2.14.0.tgz#d54d7baad383ecd569318893b9f24081cfab5964"
+  integrity sha512-kfQtBO8kuFInbdAm4tPjrS5Jr7W1fmE1G6sUaEoftucMJYt5M0qps/wZ85GEPhh4A+UKxDUSSNmPmqvYrG0oVA==
+
 diff-match-patch@^1.0.4:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/diff-match-patch/-/diff-match-patch-1.0.5.tgz#abb584d5f10cd1196dfc55aa03701592ae3f7b37"
