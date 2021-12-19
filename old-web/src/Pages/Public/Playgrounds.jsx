@@ -14,6 +14,8 @@ import DialogActions from '@material-ui/core/DialogActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardHeader from '@material-ui/core/CardHeader';
 import Typography from '@material-ui/core/Typography';
+import Tooltip from '@material-ui/core/Tooltip';
+import InfoIcon from '@material-ui/icons/Info';
 
 import StandardLayout from '../../Components/Layouts/StandardLayout';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
@@ -31,6 +33,9 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(2),
   },
   image: {
+    'display': 'flex',
+    'alignItems': 'center',
+    'justifyContent': 'space-between',
     'paddingRight': theme.spacing(2),
     'paddingLeft': theme.spacing(2),
     'marginTop': theme.spacing(3),
@@ -91,6 +96,9 @@ const useStyles = makeStyles((theme) => ({
   icon: {
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(1),
+  },
+  tooltip: {
+    fontSize: '16px',
   },
 }));
 
@@ -252,6 +260,12 @@ export default function Playgrounds() {
           <i className={clsx(icon, classes.icon)} style={{fontSize: 24}}/>
           <h3>{title}</h3>
         </Box>
+        <Tooltip
+          title={description}
+          classes={{tooltip: classes.tooltip}}
+        >
+          <InfoIcon />
+        </Tooltip>
       </Box>
     );
   };
@@ -273,12 +287,14 @@ export default function Playgrounds() {
             <Grid container md={12} xs={12} spacing={3}>
               <React.Fragment>
                 {availableImages && selectedImage && availableImages.map((image, index) => (
-                  <Grid item key={index} xs={12} sm={6} onClick={() => setSelectedImage(image)}>
-                    <Image
-                      {...image}
-                      isSelected={selectedImage?.id === image.id}
-                    />
-                  </Grid>
+                  <Tooltip key={index} title={image.description}>
+                    <Grid item xs={12} sm={6} onClick={() => setSelectedImage(image)}>
+                      <Image
+                        {...image}
+                        isSelected={selectedImage?.id === image.id}
+                      />
+                    </Grid>
+                  </Tooltip>
                 ))}
               </React.Fragment>
               <Grid item xs={12}>
