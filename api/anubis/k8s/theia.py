@@ -306,20 +306,30 @@ def create_theia_k8s_pod_pvc(
             )
         )
 
-        # Include COURSE_CONTEXT environment variable as urlsafe_base64
-        # value. THis needs to be urlsafe because of the way the course
-        # context cookie is loaded from a request (see get_course_context
-        # function in anubis.lms.courses for more details)
-        theia_extra_env.append(
-            client.V1EnvVar(
-                name="COURSE_CONTEXT",
-                value=base64.urlsafe_b64encode(json.dumps({
-                    'id': theia_session.course.id,
-                    'name': theia_session.course.name,
-                    'course_code': theia_session.course.course_code,
-                }).encode()).decode(),
+        if theia_session.course_id is not None:
+            # Include COURSE_CONTEXT environment variable as urlsafe_base64
+            # value. THis needs to be urlsafe because of the way the course
+            # context cookie is loaded from a request (see get_course_context
+            # function in anubis.lms.courses for more details)
+            theia_extra_env.append(
+                client.V1EnvVar(
+                    name="COURSE_CONTEXT",
+                    value=base64.urlsafe_b64encode(json.dumps({
+                        'id': theia_session.course.id,
+                        'name': theia_session.course.name,
+                        'course_code': theia_session.course.course_code,
+                    }).encode()).decode(),
+                )
             )
-        )
+
+    # Only set course code env var if it is available for this session
+    if theia_session.course_id is not None:
+        # Set the course code to be the course code for the course
+        # that this theia session belongs to.
+        theia_extra_env.append(client.V1EnvVar(
+            name="COURSE_CODE",
+            value=theia_session.course.course_code,
+        ))
 
     # Figure out which uid to use
     theia_user_id = 1001
@@ -376,12 +386,6 @@ def create_theia_k8s_pod_pvc(
             client.V1EnvVar(
                 name="AUTOSAVE",
                 value="ON" if autosave else "OFF",
-            ),
-            # Set the course code to be the course code for the course
-            # that this theia session belongs to.
-            client.V1EnvVar(
-                name="COURSE_CODE",
-                value=theia_session.course.course_code,
             ),
             # Setting the repo name makes some of the initialization
             # a little easier.
