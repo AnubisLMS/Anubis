@@ -18,11 +18,11 @@ def test_ide_public():
     active = s.get(f"/public/ide/active/{assignment_id}")["active"]
     assert active is False
 
-    s.get(f"/public/ide/initialize/{assignment_id}", should_fail=True)
+    s.post(f"/public/ide/initialize/{assignment_id}", should_fail=True)
 
     create_repo(s, assignment_id)
 
-    resp = s.get(f"/public/ide/initialize/{assignment_id}")
+    resp = s.post(f"/public/ide/initialize/{assignment_id}")
     assert resp["session"] is not None
     assert resp["active"]
     session_id = resp["session"]["id"]
