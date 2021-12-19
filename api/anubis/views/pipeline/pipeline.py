@@ -115,8 +115,8 @@ def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **_
 
 @pipeline.route("/report/test/<string:submission_id>", methods=["POST"])
 @check_submission_token
-@json_endpoint([("test_name", str), ("passed", bool), ("message", str), ("stdout", str)])
-def pipeline_report_test(submission: Submission, test_name: str, passed: bool, message: str, stdout: str, **_):
+@json_endpoint([("test_name", str), ("passed", bool), ("message", str), ("stdout", str), ("diff", str)])
+def pipeline_report_test(submission: Submission, test_name: str, passed: bool, message: str, stdout: str, diff: str, **_):
     """
     Submission pipelines will hit this endpoint when there
     is a test result to report.
@@ -127,7 +127,8 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
       "test_name": "name of the test",
       "passed": True,
       "message": "This test worked",
-      "stdout": "Command logs..."
+      "stdout": "Command logs...",
+      "diff": "--- \n\n+++ \n\n@@ -1,3 +1,3 @@\n\n a\n-c\n+b\n d"
     }
 
     :param submission:
@@ -135,6 +136,7 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
     :param passed:
     :param message:
     :param stdout:
+    :param diff:
     :return:
     """
 
@@ -153,6 +155,7 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
             "test_message": message,
             "passed": passed,
             "stdout": stdout,
+            "diff": diff,
         },
     )
 
@@ -174,6 +177,7 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
     submission_test_result.passed = passed
     submission_test_result.message = message
     submission_test_result.stdout = stdout
+    submission_test_result.diff = diff
 
     # Add and commit
     db.session.add(submission_test_result)

@@ -127,7 +127,7 @@ def report_build_results(stdout: str, passed: bool):
     post('/pipeline/report/build/{}'.format(SUBMISSION_ID), data)
 
 
-def report_test_results(test_name: str, stdout: str, message: str, passed: bool):
+def report_test_results(test_name: str, stdout: str, message: str, passed: bool, diff: str):
     """
     Report a single test result to the pipeline API.
 
@@ -145,6 +145,7 @@ def report_test_results(test_name: str, stdout: str, message: str, passed: bool)
         'stdout': stdout,
         'message': message,
         'passed': passed,
+        'diff': diff,
     }
     logging.info('report_test_results {}'.format(json.dumps(data, indent=2)))
     post('/pipeline/report/test/{}'.format(SUBMISSION_ID), data)
@@ -231,7 +232,7 @@ def run_tests(assignment_data: dict):
         report_state('Running test: {}'.format(test_name))
         result = registered_tests[test_name]()
 
-        report_test_results(test_name, result.stdout, result.message, result.passed)
+        report_test_results(test_name, result.stdout, result.message, result.passed, result.diff)
 
 
 def main():

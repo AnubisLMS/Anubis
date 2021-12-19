@@ -10,7 +10,7 @@ import os
 
 DEBUG = os.environ.get('DEBUG', default='0') == '1'
 
-registered_tests = {}
+registered_tests: typing.Dict[str, typing.Callable[[], "TestResult"]] = {}
 build_function = None
 
 CompareFuncReturnT = typing.Tuple[bool, typing.List[str]]
@@ -304,7 +304,7 @@ def verify_expected(
     passed, diff = compare_func(stdout_lines, expected_lines, case_sensitive=case_sensitive)
     if not passed:
         if diff:
-            test_result.diff += diff
+            test_result.diff += '\n'.join(diff)
         else:
             # If diff is not available, fall back to the old way of displaying outputs
             test_result.stdout += 'your lines:\n' + '\n'.join(stdout_lines) + '\n\n' \
