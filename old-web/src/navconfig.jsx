@@ -47,6 +47,7 @@ import AdminAssignmentGroups from './Pages/Admin/Assignment/AssignmentGroups';
 // Super
 import SuperConfig from './Pages/Super/Config';
 import SuperIDEImages from './Pages/Super/IDEImages';
+import Playgrounds from './Pages/Public/Playgrounds';
 
 export const footer_nav = [
   {
@@ -105,6 +106,12 @@ export const public_nav = [
         icon: <GitHubIcon/>,
         path: '/repos',
         Page: Repos,
+      },
+      {
+        id: 'Playgrounds',
+        icon: <CodeOutlinedIcon />,
+        path: '/super/playgrounds',
+        Page: Playgrounds,
       },
       {
         id: 'Profile',
@@ -170,6 +177,7 @@ export const super_nav = [
     path: '/super/ide-images',
     Page: SuperIDEImages,
   },
+
   {
     id: 'Config',
     icon: <SettingsIcon/>,
