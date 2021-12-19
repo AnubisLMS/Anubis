@@ -9,7 +9,7 @@ from anubis.utils.auth.user import current_user
 from anubis.utils.http import success_response
 from anubis.utils.http.decorators import json_response, load_from_id
 
-playgrounds_ = Blueprint("public-playgrounds", __name__, url_prefix="/public/ide")
+playgrounds_ = Blueprint("public-playgrounds", __name__, url_prefix="/public/playgrounds")
 
 
 @playgrounds_.post("/initialize/<string:id>")
