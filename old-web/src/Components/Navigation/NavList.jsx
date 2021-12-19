@@ -8,6 +8,11 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ExitToAppOutlinedIcon from '@material-ui/icons/ExitToAppOutlined';
 import LaunchOutlinedIcon from '@material-ui/icons/LaunchOutlined';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
+import Typography from '@material-ui/core/Typography';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import AuthContext from '../../Contexts/AuthContext';
 import NavItem from './NavItem';
@@ -20,6 +25,9 @@ const useStyles = makeStyles((theme) => ({
   },
   categoryHeaderPrimary: {
     color: theme.palette.common.white,
+  },
+  accordionHeader: {
+    backgroundColor: 'rgb(24, 32, 44)',
   },
   item: {
     'color': 'rgba(255, 255, 255, 0.7)',
@@ -86,52 +94,60 @@ export default function NavList({open, handleDrawerClose}) {
           {(user) => (
             <React.Fragment>
               {user?.is_admin && (
-                <React.Fragment>
-                  <ListItem className={classes.categoryHeader}>
-                    <ListItemText
-                      classes={{
-                        primary: classes.categoryHeaderPrimary,
-                      }}
-                    >
+                <Accordion className={classes.accordionHeader}>
+                  <AccordionSummary
+                    classes={{
+                      primary: classes.categoryHeaderPrimary,
+                    }}
+                    expandIcon={<ExpandMoreIcon />}
+                  >
+                    <Typography component={'h6'}>
                       Admin
-                    </ListItemText>
-                  </ListItem>
-                  {admin_nav.map(({id: childId, icon, path}) => (
-                    <NavItem
-                      key={childId}
-                      onClick={onClickWrap(() => setPathname(path))}
-                      childId={childId}
-                      icon={icon}
-                      path={path}
-                      pathname={pathname}
-                    />
-                  ))}
-                  <Divider className={classes.divider}/>
-                </React.Fragment>
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <List>
+                      {admin_nav.map(({id: childId, icon, path}) => (
+                        <NavItem
+                          key={childId}
+                          onClick={onClickWrap(() => setPathname(path))}
+                          childId={childId}
+                          icon={icon}
+                          path={path}
+                          pathname={pathname}
+                        />
+                      ))}
+                    </List>
+                  </AccordionDetails>
+                </Accordion>
               )}
               {user?.is_superuser && (
-                <React.Fragment>
-                  <ListItem className={classes.categoryHeader}>
-                    <ListItemText
-                      classes={{
-                        primary: classes.categoryHeaderPrimary,
-                      }}
-                    >
+                <Accordion className={classes.accordionHeader}>
+                  <AccordionSummary
+                    classes={{
+                      primary: classes.categoryHeaderPrimary,
+                    }}
+                    expandIcon={<ExpandMoreIcon />}
+                  >
+                    <Typography component={'h6'}>
                       Super Admin
-                    </ListItemText>
-                  </ListItem>
-                  {super_nav.map(({id: childId, icon, path}) => (
-                    <NavItem
-                      key={childId}
-                      onClick={onClickWrap(() => setPathname(path))}
-                      childId={childId}
-                      icon={icon}
-                      path={path}
-                      pathname={pathname}
-                    />
-                  ))}
-                  <Divider className={classes.divider}/>
-                </React.Fragment>
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <List>
+                      {super_nav.map(({id: childId, icon, path}) => (
+                        <NavItem
+                          key={childId}
+                          onClick={onClickWrap(() => setPathname(path))}
+                          childId={childId}
+                          icon={icon}
+                          path={path}
+                          pathname={pathname}
+                        />
+                      ))}
+                    </List>
+                  </AccordionDetails>
+                </Accordion>
               )}
             </React.Fragment>
           )}
