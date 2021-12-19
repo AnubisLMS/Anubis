@@ -281,7 +281,7 @@ export default function IDEImages() {
                             variant={'outlined'}
                             label={'Tag'}
                             value={tag.tag}
-                            onChange={(e) => updateTagOpen(tagsOpen?.id, tag.id, 'tag', e.target.value)}
+                            onChange={(e) => updateTagOpen(tagsOpen.id, tag.id, 'tag', e.target.value)}
                           />
                         </Grid>
                         <Grid item xs>
@@ -290,7 +290,7 @@ export default function IDEImages() {
                             variant={'outlined'}
                             label={'Title'}
                             value={tag.title}
-                            onChange={(e) => updateTagOpen(tagsOpen?.id, tag.id, 'title', e.target.value)}
+                            onChange={(e) => updateTagOpen(tagsOpen.id, tag.id, 'title', e.target.value)}
                           />
                         </Grid>
                         <Grid item xs>
@@ -299,7 +299,7 @@ export default function IDEImages() {
                             variant={'outlined'}
                             label={'Description'}
                             value={tag.description}
-                            onChange={(e) => updateTagOpen(tagsOpen?.id, tag.id, 'description', e.target.value)}
+                            onChange={(e) => updateTagOpen(tagsOpen.id, tag.id, 'description', e.target.value)}
                           />
                         </Grid>
                         <Grid item xs={1}>

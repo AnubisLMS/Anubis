@@ -20,6 +20,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import StandardLayout from '../../Components/Layouts/StandardLayout';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
+import Divider from '@material-ui/core/Divider';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -38,8 +39,8 @@ const useStyles = makeStyles((theme) => ({
     'justifyContent': 'space-between',
     'paddingRight': theme.spacing(2),
     'paddingLeft': theme.spacing(2),
-    'marginTop': theme.spacing(3),
-    'marginBottom': theme.spacing(2),
+    'marginTop': theme.spacing(1),
+    'marginBottom': theme.spacing(1),
     'border': '2px solid gray',
     'borderRadius': '5px',
     'cursor': 'pointer',
@@ -174,7 +175,7 @@ const pollSession = (id, state, enqueueSnackbar, n = 0) => () => {
 };
 
 const startSession = (state, enqueueSnackbar) => () => {
-  const {setSession, session, selectedImage, setLoading, setShowStop} = state;
+  const {setSession, session, selectedImage, selectedTag, setLoading, setShowStop} = state;
   if (session) {
     const a = document.createElement('a');
     a.setAttribute('href', session.redirect_url);
@@ -186,7 +187,9 @@ const startSession = (state, enqueueSnackbar) => () => {
   }
 
   setLoading(true);
-  axios.post(`/api/public/playgrounds/initialize/${selectedImage.id}`).then((response) => {
+  axios.post(`/api/public/playgrounds/initialize/${selectedImage.id}`, null, {
+    params: {tag: selectedTag?.id ?? 'latest'},
+  }).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
     if (data?.session) {
       setShowStop(false);
@@ -208,10 +211,14 @@ export default function Playgrounds() {
   const [showStop, setShowStop] = useState(false);
   const [availableImages, setAvailableImages] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [availableTags, setAvailableTags] = useState([]);
+  const [selectedTag, setSelectedTag] = useState(null);
 
   const state = {
     selectedImage, setSelectedImage,
     sessionsAvailable, setSessionsAvailable,
+    availableTags, setAvailableTags,
+    selectedTag, setSelectedTag,
     loading, setLoading,
     session, setSession,
     sessionState, setSessionState,
@@ -251,6 +258,13 @@ export default function Playgrounds() {
         setShowStop(true);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
+    const defaultTags = [{title: 'latest', description: null}];
+    let tags = selectedImage?.tags ?? defaultTags;
+    if (tags.length === 0) {
+      tags = defaultTags;
+    }
+    setAvailableTags(tags);
+    setSelectedTag(tags[0]);
   }, [selectedImage]);
 
   const Image = ({title, description, icon, isSelected}) => {
@@ -260,15 +274,30 @@ export default function Playgrounds() {
           <i className={clsx(icon, classes.icon)} style={{fontSize: 24}}/>
           <h3>{title}</h3>
         </Box>
+        <br/>
         <Tooltip
           title={description}
-          classes={{tooltip: classes.tooltip}}
+          className={classes.tooltip}
         >
           <InfoIcon />
         </Tooltip>
       </Box>
     );
   };
+
+  const Tag = ({title, description, isSelected}) => (
+    <Box className={!isSelected ? classes.image : clsx(classes.image, classes.selectedImage)}>
+      <Box className={classes.imageHeader}>
+        <h3>{title}</h3>
+      </Box>
+      <br/>
+      <Typography variant={'body1'}>
+        {description}
+      </Typography>
+    </Box>
+  );
+
+  console.log(availableTags);
 
   return (
     <StandardLayout
@@ -281,20 +310,37 @@ export default function Playgrounds() {
             title={'Anubis Playgrounds'}
           />
           <CardContent>
-            <Typography>
-              Please select one of the below images to launch your session
-            </Typography>
-            <Grid container md={12} xs={12} spacing={3}>
+            <Grid container md={12} xs={12} spacing={2}>
+              <Grid item xs={12}>
+                <Typography>
+                  Please select one of the below images to launch your session
+                </Typography>
+              </Grid>
               <React.Fragment>
                 {availableImages && selectedImage && availableImages.map((image, index) => (
-                  <Tooltip key={index} title={image.description}>
-                    <Grid item xs={12} sm={6} onClick={() => setSelectedImage(image)}>
+                  <Grid item xs={12} sm={6} onClick={() => setSelectedImage(image)} key={index}>
+                    <Tooltip title={image.description}>
                       <Image
                         {...image}
                         isSelected={selectedImage?.id === image.id}
                       />
-                    </Grid>
-                  </Tooltip>
+                    </Tooltip>
+                  </Grid>
+                ))}
+              </React.Fragment>
+              <Grid item xs={12}>
+                <Divider variant={'middle'} style={{height: 2, backgroundColor: 'white'}}/>
+              </Grid>
+              <React.Fragment>
+                {availableTags && selectedTag && availableTags.map((tag, index) => (
+                  <Grid item xs={12} sm={6} onClick={() => setSelectedTag(tag)} key={index}>
+                    <Tooltip title={tag.description}>
+                      <Tag
+                        {...tag}
+                        isSelected={selectedTag?.id === tag.id}
+                      />
+                    </Tooltip>
+                  </Grid>
                 ))}
               </React.Fragment>
               <Grid item xs={12}>
