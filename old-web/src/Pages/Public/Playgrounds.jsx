@@ -243,7 +243,7 @@ export default function Playgrounds() {
     return (
       <Box className={!isSelected ? classes.image : clsx(classes.image, classes.selectedImage)}>
         <Box className={classes.imageHeader}>
-          <i className={clsx(icon, classes.icon)}/>
+          <i className={clsx(icon, classes.icon)} style={{fontSize: 24}}/>
           <h3>{title}</h3>
         </Box>
         <p className={classes.imageDescription}>{description}</p>
