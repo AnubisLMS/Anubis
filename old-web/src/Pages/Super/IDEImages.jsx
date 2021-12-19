@@ -80,7 +80,7 @@ export default function IDEImages() {
 
   const columns = [
     {field: 'image', width: 300},
-    {field: 'label', width: 300},
+    {field: 'title', width: 300},
     {field: 'public', width: 100},
     {
       field: 'edit', width: 100, renderCell: (params) => (
@@ -151,9 +151,29 @@ export default function IDEImages() {
                   <TextField
                     fullWidth
                     variant={'outlined'}
-                    label={'Label'}
-                    value={open?.label}
-                    onChange={(e) => updateOpen(open?.id, 'label', e.target.value)}
+                    label={'Title'}
+                    value={open?.title}
+                    onChange={(e) => updateOpen(open?.id, 'title', e.target.value)}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    variant={'outlined'}
+                    label={'Description'}
+                    value={open?.description}
+                    onChange={(e) => updateOpen(open?.id, 'description', e.target.value)}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    variant={'outlined'}
+                    label={'Icon'}
+                    value={open?.icon}
+                    onChange={(e) => updateOpen(open?.id, 'icon', e.target.value)}
                   />
                 </Grid>
 

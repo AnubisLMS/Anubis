@@ -610,7 +610,9 @@ class TheiaImage(db.Model):
 
     id = default_id(32)
     image = db.Column(db.String(1024), nullable=False, default='registry.digitalocean.com/anubis/xv6')
-    label = db.Column(db.String(1024), nullable=False, default='')
+    title = db.Column(db.String(1024), default='')
+    description = deferred(db.Column(db.Text, default=''))
+    icon = db.Column(db.String(1024), default='')
     public = db.Column(db.Boolean, nullable=False, default=False)
 
     courses = db.relationship('Course', backref='theia_default_image')
@@ -622,7 +624,9 @@ class TheiaImage(db.Model):
         return {
             'id': self.id,
             'image': self.image,
-            'label': self.label,
+            'title': self.title,
+            'description': self.description,
+            'icon': self.icon,
             'public': self.public,
         }
 
