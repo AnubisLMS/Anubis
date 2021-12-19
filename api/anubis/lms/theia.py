@@ -3,11 +3,12 @@ from typing import Dict, List, Tuple, Union
 
 from werkzeug.utils import redirect
 
-from anubis.models import TheiaSession, User
+from anubis.models import db, TheiaSession, User, AssignmentRepo, Assignment
 from anubis.utils.auth.token import create_token
 from anubis.utils.cache import cache
 from anubis.utils.config import get_config_int
-from anubis.utils.data import is_debug
+from anubis.utils.data import is_debug, req_assert
+from anubis.utils.auth.user import current_user
 
 
 @cache.memoize(timeout=5, source_check=True)
@@ -135,3 +136,73 @@ def mark_session_ended(theia_session: TheiaSession):
 
 def get_theia_pod_name(theia_session: TheiaSession) -> str:
     return f"theia-{theia_session.owner.netid}-{theia_session.id}"
+
+
+def initialize_ide(
+    # Required
+    image_id: str,
+
+    # Optional / Settings
+    assignment_id: str = None,
+    course_id: str = None,
+    repo_url: str = '',
+    playground: bool = False,
+    network_locked: bool = True,
+    network_policy: str = 'os-student',
+    autosave: bool = True,
+    persistent_storage: bool = True,
+    resources: dict = None,
+
+    # Admin fields
+    admin: bool = False,
+    privileged: bool = False,
+    credentials: bool = False,
+) -> TheiaSession:
+    from anubis.utils.rpc import enqueue_ide_initialize
+
+    # Create a new session
+    session = TheiaSession(
+        owner_id=current_user.id,
+        active=True,
+        state="Initializing",
+
+        # Required
+        image_id=image_id,
+
+        # Options / Settings
+        assignment_id=assignment_id,
+        course_id=course_id,
+        repo_url=repo_url,
+        playground=playground,
+        network_locked=network_locked,
+        network_policy=network_policy,
+        persistent_storage=persistent_storage,
+        autosave=autosave,
+        resources=resources,
+
+        # Admin Options
+        admin=admin,
+        privileged=privileged,
+        credentials=credentials,
+    )
+    db.session.add(session)
+    db.session.commit()
+
+    # Send kube resource initialization rpc job
+    enqueue_ide_initialize(session.id)
+
+    # Redirect to proxy
+    return session
+
+
+def assert_theia_sessions_enabled():
+    # Get the config value for if ide starts are allowed.
+    theia_starts_enabled = get_config_int("THEIA_STARTS_ENABLED", default=1) == 1
+
+    # Assert that new ide starts are allowed. If they are not, then
+    # we return a status message to the user saying they are not able
+    # to start a new ide.
+    req_assert(
+        theia_starts_enabled,
+        message="Starting new IDEs is currently disabled by an Anubis administrator. " "Please try again later.",
+    )

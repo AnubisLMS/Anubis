@@ -5,7 +5,7 @@ from typing import Dict
 from flask import Blueprint, request
 
 from anubis.lms.courses import is_course_admin
-from anubis.lms.theia import get_n_available_sessions, theia_poll_ide, theia_redirect_url
+from anubis.lms.theia import get_n_available_sessions, theia_poll_ide, theia_redirect_url, initialize_ide, assert_theia_sessions_enabled
 from anubis.models import Assignment, AssignmentRepo, TheiaSession, db
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
@@ -13,14 +13,15 @@ from anubis.utils.config import get_config_int
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_response, load_from_id
-from anubis.utils.rpc import enqueue_ide_initialize, enqueue_ide_stop
+from anubis.utils.rpc import enqueue_ide_stop
 
-ide = Blueprint("public-ide", __name__, url_prefix="/public/ide")
+ide_ = Blueprint("public-ide", __name__, url_prefix="/public/ide")
 
 
-@ide.route("/initialize/<string:id>")
+@ide_.post("/initialize/<string:id>")
 @require_user()
 @load_from_id(Assignment, verify_owner=False)
+@json_response
 def public_ide_initialize(assignment: Assignment):
     """
     Redirect to theia proxy.
@@ -48,16 +49,10 @@ def public_ide_initialize(assignment: Assignment):
     if active_session is not None:
         return success_response({"active": active_session.active, "session": active_session.data})
 
-    # Get the config value for if ide starts are allowed.
-    theia_starts_enabled = get_config_int("THEIA_STARTS_ENABLED", default=1) == 1
-
     # Assert that new ide starts are allowed. If they are not, then
     # we return a status message to the user saying they are not able
     # to start a new ide.
-    req_assert(
-        theia_starts_enabled,
-        message="Starting new IDEs is currently disabled by an Anubis administrator. " "Please try again later.",
-    )
+    assert_theia_sessions_enabled()
 
     # If it is a student (not a ta) requesting the ide, then we will need to
     # make sure that the assignment has actually been released.
@@ -107,9 +102,6 @@ def public_ide_initialize(assignment: Assignment):
     persistent_storage = request.args.get("persistent_storage", "true") == "true"
 
     # Figure out options from assignment
-    privileged = False
-    credentials = False
-    network_locked = True
     network_policy = options.get("network_policy", "os-student")
     resources = options.get(
         "resources",
@@ -119,30 +111,23 @@ def public_ide_initialize(assignment: Assignment):
         },
     )
 
-    # Create a new session
-    session = TheiaSession(
-        owner_id=current_user.id,
-        assignment_id=assignment.id,
-        course_id=assignment.course.id,
+    session: TheiaSession = initialize_ide(
         image_id=assignment.theia_image_id,
+
+        assignment_id=assignment.id,
+        course_id=assignment.course_id,
         repo_url=repo_url,
-        active=True,
-        state="Initializing",
-        # Options
-        admin=False,
-        network_locked=network_locked,
+        playground=False,
+        network_locked=True,
         network_policy=network_policy,
-        privileged=privileged,
+        persistent_storage=persistent_storage,
         autosave=autosave,
         resources=resources,
-        credentials=credentials,
-        persistent_storage=persistent_storage,
-    )
-    db.session.add(session)
-    db.session.commit()
 
-    # Send kube resource initialization rpc job
-    enqueue_ide_initialize(session.id)
+        admin=False,
+        privileged=False,
+        credentials=False,
+    )
 
     # Redirect to proxy
     return success_response(
@@ -154,7 +139,7 @@ def public_ide_initialize(assignment: Assignment):
     )
 
 
-@ide.route("/available")
+@ide_.route("/available")
 @require_user()
 @json_response
 def public_ide_available():
@@ -171,14 +156,12 @@ def public_ide_available():
     session_available: bool = active_count < max_count
 
     # pass back if sessions are available
-    return success_response(
-        {
-            "session_available": session_available,
-        }
-    )
+    return success_response({
+        "session_available": session_available,
+    })
 
 
-@ide.route("/active/<string:assignment_id>")
+@ide_.route("/active/<string:assignment_id>")
 @require_user()
 @json_response
 def public_ide_active(assignment_id):
@@ -200,15 +183,13 @@ def public_ide_active(assignment_id):
         return success_response({"active": False})
 
     # If they do have a session, then pass back True
-    return success_response(
-        {
-            "active": True,
-            "session": session.data,
-        }
-    )
+    return success_response({
+        "active": True,
+        "session": session.data,
+    })
 
 
-@ide.route("/stop/<string:theia_session_id>")
+@ide_.route("/stop/<string:theia_session_id>")
 @require_user()
 def public_ide_stop(theia_session_id: str) -> Dict[str, str]:
     """
@@ -249,7 +230,7 @@ def public_ide_stop(theia_session_id: str) -> Dict[str, str]:
     )
 
 
-@ide.route("/poll/<string:theia_session_id>")
+@ide_.route("/poll/<string:theia_session_id>")
 @require_user()
 @json_response
 def public_ide_poll(theia_session_id: str) -> Dict[str, str]:
@@ -289,7 +270,7 @@ def public_ide_poll(theia_session_id: str) -> Dict[str, str]:
     )
 
 
-@ide.route("/redirect-url/<string:theia_session_id>")
+@ide_.route("/redirect-url/<string:theia_session_id>")
 @require_user()
 @json_response
 def public_ide_redirect_url(theia_session_id: str) -> Dict[str, str]:

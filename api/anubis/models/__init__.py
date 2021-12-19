@@ -644,6 +644,7 @@ class TheiaSession(db.Model):
     image_id = db.Column(db.String(128), db.ForeignKey(TheiaImage.id), nullable=True)
 
     # Fields
+    playground = db.Column(db.Boolean, default=False)
     repo_url = db.Column(db.String(128), nullable=True)
     active = db.Column(db.Boolean, default=True)
     state = db.Column(db.TEXT)
@@ -676,6 +677,7 @@ class TheiaSession(db.Model):
             "assignment_id": self.assignment_id,
             "assignment_name": self.assignment.name if self.assignment_id is not None else None,
             "course_code": self.assignment.course.course_code if self.assignment_id is not None else None,
+            "playground": self.playground,
             "netid": self.owner.netid,
             "repo_url": self.repo_url,
             "redirect_url": theia_redirect_url(self.id, self.owner.netid),
