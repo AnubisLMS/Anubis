@@ -20,8 +20,14 @@ import standardStatusHandler from '../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
 
 const useStyles = makeStyles((theme) => ({
+  container: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+  },
   paper: {
     width: '100%',
+    maxWidth: '700px',
     padding: theme.spacing(2),
   },
   image: {
@@ -255,63 +261,66 @@ export default function Playgrounds() {
       title={'Anubis'}
       description={'Playground'}
     >
-      <Card className={classes.paper}>
-        <CardHeader
-          title={'Anubis Playgrounds'}
-        />
-        <CardContent>
-          <Typography>
-            Please select one of the below images to launch your session
-          </Typography>
-          <Grid container xs={12} spacing={3}>
-            <React.Fragment>
-              {availableImages && selectedImage && availableImages.map((image, index) => (
-                <Grid item key={index} xs={12} sm={6} onClick={() => setSelectedImage(image)}>
-                  <Image
-                    {...image}
-                    isSelected={selectedImage?.id === image.id}
-                  />
-                </Grid>
-              ))}
-            </React.Fragment>
-            <Grid item xs={12}>
-              <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-                <Typography>
-                  {sessionState || 'No Active IDE'}
-                </Typography>
-              </div>
+      <Box className={classes.container}>
+        <Card className={classes.paper}>
+          <CardHeader
+            title={'Anubis Playgrounds'}
+          />
+          <CardContent>
+            <Typography>
+              Please select one of the below images to launch your session
+            </Typography>
+            <Grid container md={12} xs={12} spacing={3}>
+              <React.Fragment>
+                {availableImages && selectedImage && availableImages.map((image, index) => (
+                  <Grid item key={index} xs={12} sm={6} onClick={() => setSelectedImage(image)}>
+                    <Image
+                      {...image}
+                      isSelected={selectedImage?.id === image.id}
+                    />
+                  </Grid>
+                ))}
+              </React.Fragment>
+              <Grid item xs={12}>
+                <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+                  <Typography>
+                    {sessionState || 'No Active IDE'}
+                  </Typography>
+                </div>
+              </Grid>
             </Grid>
-          </Grid>
-        </CardContent>
-        <DialogActions>
-          <div className={clsx(classes.wrapper, classes.left)} hidden={!showStop}>
-            <Button
-              onClick={stopSession(state, enqueueSnackbar)}
-              variant={'contained'}
-              color={'secondary'}
-              autoFocus
-            >
-              Stop Session
-            </Button>
-          </div>
+          </CardContent>
+          <DialogActions>
+            <div className={clsx(classes.wrapper, classes.left)} hidden={!showStop}>
+              <Button
+                onClick={stopSession(state, enqueueSnackbar)}
+                variant={'contained'}
+                color={'secondary'}
+                autoFocus
+              >
+                Stop Session
+              </Button>
+            </div>
 
-          <div className={classes.wrapper}>
-            <Button
-              className={clsx({
-                [classes.buttonSuccess]: session,
-              })}
-              disabled={loading || !sessionsAvailable}
-              onClick={startSession(state, enqueueSnackbar)}
-              variant={'contained'}
-              color={'primary'}
-              autoFocus
-            >
-              {!session ? 'Launch Session' : 'Go to IDE'}
-            </Button>
-            {loading && <CircularProgress size={24} className={classes.buttonProgress}/>}
-          </div>
-        </DialogActions>
-      </Card>
+            <div className={classes.wrapper}>
+              <Button
+                className={clsx({
+                  [classes.buttonSuccess]: session,
+                })}
+                disabled={loading || !sessionsAvailable}
+                onClick={startSession(state, enqueueSnackbar)}
+                variant={'contained'}
+                color={'primary'}
+                autoFocus
+              >
+                {!session ? 'Launch Session' : 'Go to IDE'}
+              </Button>
+              {loading && <CircularProgress size={24} className={classes.buttonProgress}/>}
+            </div>
+          </DialogActions>
+        </Card>
+      </Box>
+
     </StandardLayout>
   );
 }
