@@ -557,6 +557,7 @@ class SubmissionTestResult(db.Model):
 
     # Fields
     stdout = deferred(db.Column(db.Text))
+    diff = deferred(db.Column(db.Text))
     message = deferred(db.Column(db.Text))
     passed = db.Column(db.Boolean)
 
@@ -571,6 +572,7 @@ class SubmissionTestResult(db.Model):
             "passed": self.passed,
             "message": self.message,
             "stdout": self.stdout,
+            "diff": self.diff,
             "created": str(self.created),
             "last_updated": str(self.last_updated),
         }
