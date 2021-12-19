@@ -636,10 +636,10 @@ class TheiaSession(db.Model):
 
     # id
     id = default_id(32)
-    course_id = db.Column(db.String(128), db.ForeignKey(Course.id), nullable=False, index=True)
 
     # Foreign keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
+    course_id = db.Column(db.String(128), db.ForeignKey(Course.id), nullable=True, index=True)
     assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), nullable=True)
     image_id = db.Column(db.String(128), db.ForeignKey(TheiaImage.id), nullable=True)
 
