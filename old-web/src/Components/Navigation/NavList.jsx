@@ -105,8 +105,8 @@ export default function NavList({open, handleDrawerClose}) {
                       Admin
                     </Typography>
                   </AccordionSummary>
-                  <AccordionDetails>
-                    <List>
+                  <AccordionDetails style={{width: '100%', padding: 0}}>
+                    <List style={{width: '100%'}}>
                       {admin_nav.map(({id: childId, icon, path}) => (
                         <NavItem
                           key={childId}
@@ -133,8 +133,8 @@ export default function NavList({open, handleDrawerClose}) {
                       Super Admin
                     </Typography>
                   </AccordionSummary>
-                  <AccordionDetails>
-                    <List>
+                  <AccordionDetails style={{width: '100%', padding: 0}}>
+                    <List style={{width: '100%'}}>
                       {super_nav.map(({id: childId, icon, path}) => (
                         <NavItem
                           key={childId}
