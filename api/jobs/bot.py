@@ -192,9 +192,8 @@ def generate_ide_report(day=None) -> discord.Embed:
 
     return discord.Embed(
         title='IDE report',
-        author='Anubis Bot',
         description="```" + report + "```"
-    ).set_thumbnail(url=bot.user.avatar_url)
+    ).set_thumbnail(url=bot.user.avatar_url).set_author(name="Anubis Bot")
 
 
 bot = commands.Bot(
