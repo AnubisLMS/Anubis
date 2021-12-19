@@ -251,10 +251,13 @@ def seed():
     student_user = User(netid="student", github_username="student", name="student")
     db.session.add_all([superuser, professor_user, ta_user, student_user])
 
-    xv6_image = TheiaImage(image="registry.digitalocean.com/anubis/theia-xv6", title="theia-xv6", public=True,
-                           icon="cpp")
-    admin_image = TheiaImage(image="registry.digitalocean.com/anubis/theia-admin", title="theia-admin")
-    db.session.add_all([xv6_image, admin_image])
+    xv6_image = TheiaImage(image="registry.digitalocean.com/anubis/theia-xv6", title="C/C++ IDE",
+                           icon="devicon-cplusplus-plain", public=True)
+    base_image = TheiaImage(image="registry.digitalocean.com/anubis/theia-base:python-3.9", title="Python IDE",
+                            icon="devicon-python-plain", public=True)
+    admin_image = TheiaImage(image="registry.digitalocean.com/anubis/theia-admin", title="theia-admin",
+                             icon="devicon-python-plain", public=False)
+    db.session.add_all([xv6_image, base_image, admin_image])
 
     db.session.commit()
 
