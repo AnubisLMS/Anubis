@@ -217,6 +217,7 @@ class Assignment(db.Model):
     # IDE
     ide_enabled = db.Column(db.Boolean, default=True)
     theia_image_id = db.Column(db.String(128), db.ForeignKey('theia_image.id'), default=None)
+    theia_image_tag_id = db.Column(db.String(128), db.ForeignKey('theia_image_tag.id'), default=None)
     theia_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
 
     # Github
@@ -614,10 +615,13 @@ class TheiaImage(db.Model):
     description = deferred(db.Column(db.Text, default=''))
     icon = db.Column(db.String(1024), default='')
     public = db.Column(db.Boolean, nullable=False, default=False)
+    default_tag = db.Column(db.String(128), default='latest')
+    icon = db.Column(db.String(128))
 
-    courses = db.relationship('Course', backref='theia_default_image')
-    assignments = db.relationship('Assignment', backref='theia_image')
+    courses = db.relationship(Course, backref='theia_default_image')
+    assignments = db.relationship(Assignment, backref='theia_image')
     sessions = db.relationship('TheiaSession', backref='image')
+    tags = db.relationship('TheiaImageTag', backref='image')
 
     @property
     def data(self):
@@ -628,6 +632,28 @@ class TheiaImage(db.Model):
             'description': self.description,
             'icon': self.icon,
             'public': self.public,
+            'tags': [tag.data for tag in self.tags]
+        }
+
+
+class TheiaImageTag(db.Model):
+    __tablename__ = 'theia_image_tag'
+
+    id = default_id(32)
+    image_id = db.Column(db.String(128), db.ForeignKey(TheiaImage.id), nullable=False)
+    tag = db.Column(db.String(256), nullable=False, default='latest')
+    title = db.Column(db.String(1024), nullable=False, default='')
+    description = db.Column(db.String(1024), nullable=False, default='')
+
+    assignments = db.relationship(Assignment, backref='image_tag')
+    sessions = db.relationship('TheiaSession', backref='image_tag')
+
+    @property
+    def data(self):
+        return {
+            'id': self.id,
+            'tag': self.tag,
+            'title': self.description,
         }
 
 
@@ -642,6 +668,7 @@ class TheiaSession(db.Model):
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), nullable=True, index=True)
     assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), nullable=True)
     image_id = db.Column(db.String(128), db.ForeignKey(TheiaImage.id), nullable=True)
+    image_tag_id = db.Column(db.String(128), db.ForeignKey(TheiaImageTag.id), nullable=True)
 
     # Fields
     playground = db.Column(db.Boolean, default=False)

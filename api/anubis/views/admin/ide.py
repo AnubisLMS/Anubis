@@ -5,6 +5,7 @@ from typing import List
 from flask import Blueprint
 
 from anubis.lms.courses import course_context
+from anubis.lms.theia import initialize_ide
 from anubis.models import TheiaSession, TheiaImage, db
 from anubis.rpc.theia import reap_theia_sessions_in_course
 from anubis.utils.auth.http import require_admin
@@ -51,8 +52,7 @@ def admin_ide_admin_settings():
     )
 
 
-@ide.route("/initialize", methods=["POST"])
-@ide.route("/initialize-custom", methods=["POST"])
+@ide.post("/initialize")
 @require_admin()
 @json_endpoint([("settings", dict)])
 def admin_ide_initialize_custom(settings: dict, **_):
@@ -114,15 +114,15 @@ def admin_ide_initialize_custom(settings: dict, **_):
         message="Starting new IDEs is currently disabled by an Anubis administrator. " "Please try again later.",
     )
 
-    # Create a new session
-    session = TheiaSession(
-        owner_id=current_user.id,
+    session: TheiaSession = initialize_ide(
+        image_id=image.id,
+
         assignment_id=None,
         course_id=course_context.id,
-        image_id=image.id,
         repo_url=repo_url,
         active=True,
         state="Initializing",
+
         # Options
         admin=admin,
         network_locked=network_locked,
@@ -133,19 +133,12 @@ def admin_ide_initialize_custom(settings: dict, **_):
         privileged=privileged,
         persistent_storage=persistent_storage,
     )
-    db.session.add(session)
-    db.session.commit()
 
-    # Send kube resource initialization rpc job
-    enqueue_ide_initialize(session.id)
-
-    return success_response(
-        {
-            "session": session.data,
-            "settings": session.settings,
-            "status": "Admin IDE Initialized.",
-        }
-    )
+    return success_response({
+        "session": session.data,
+        "settings": session.settings,
+        "status": "Admin IDE Initialized.",
+    })
 
 
 @ide.route("/active")

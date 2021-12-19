@@ -364,6 +364,11 @@ def create_theia_k8s_pod_pvc(
             )
         )
 
+    theia_image = theia_session.image.image
+    theia_image_tag = theia_session.image.default_tag or 'latest'
+    if theia_session.image.image_tag is not None:
+        theia_image_tag = theia_session.image_tag.tag
+
     # Create the main theia container. This is where the theia server runs, and
     # where the student will have a shell on.
     theia_container = client.V1Container(
@@ -378,7 +383,7 @@ def create_theia_k8s_pod_pvc(
         # Use the theia image that was specified in the database. If this is
         # a student session, this should be the theia image that is default either
         # for the course, or for the specific assignment.
-        image=theia_session.image.image,
+        image=f'{theia_image}:{theia_image_tag}',
         # Add environment
         env=[
             # Set the AUTOSAVE environment variable to ON or OFF
