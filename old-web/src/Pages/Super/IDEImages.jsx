@@ -190,7 +190,10 @@ export default function IDEImages() {
               </Grid>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setOpen(false)} color="primary" variant="contained">
+              <Button onClick={() => {
+                setOpen(false);
+                saveImages();
+              }} color="primary" variant="contained">
                 Close
               </Button>
             </DialogActions>

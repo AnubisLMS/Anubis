@@ -3,7 +3,6 @@ import React from 'react';
 import SchoolIcon from '@material-ui/icons/School';
 import AssignmentOutlinedIcon from '@material-ui/icons/AssignmentOutlined';
 import AssessmentIcon from '@material-ui/icons/Assessment';
-import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import AccountCircleOutlinedIcon from '@material-ui/icons/AccountCircleOutlined';
 import PublicIcon from '@material-ui/icons/Public';
@@ -25,6 +24,7 @@ import Submission from './Pages/Public/Submission';
 import Blog from './Pages/Public/Blog';
 import Visuals from './Pages/Public/Visuals';
 import Lectures from './Pages/Public/Lectures';
+import Playgrounds from './Pages/Public/Playgrounds';
 
 // Admin
 import AdminUsers from './Pages/Admin/Users';
@@ -47,7 +47,7 @@ import AdminAssignmentGroups from './Pages/Admin/Assignment/AssignmentGroups';
 // Super
 import SuperConfig from './Pages/Super/Config';
 import SuperIDEImages from './Pages/Super/IDEImages';
-import Playgrounds from './Pages/Public/Playgrounds';
+import SuperPlaygrounds from './Pages/Super/Playgrounds';
 
 export const footer_nav = [
   {
@@ -56,6 +56,12 @@ export const footer_nav = [
     exact: true,
     path: '/about',
     Page: About,
+  },
+  {
+    id: 'Playgrounds',
+    icon: <i className="devicon-vscode-plain" style={{fontSize: 20}}/>,
+    path: '/playgrounds',
+    Page: Playgrounds,
   },
   {
     id: 'Visuals',
@@ -108,12 +114,6 @@ export const public_nav = [
         Page: Repos,
       },
       {
-        id: 'Playgrounds',
-        icon: <CodeOutlinedIcon />,
-        path: '/super/playgrounds',
-        Page: Playgrounds,
-      },
-      {
         id: 'Profile',
         icon: <AccountCircleOutlinedIcon/>,
         path: '/profile',
@@ -122,7 +122,6 @@ export const public_nav = [
     ],
   },
 ];
-
 
 export const admin_nav = [
   {
@@ -158,7 +157,7 @@ export const admin_nav = [
   },
   {
     id: 'Anubis Cloud IDE',
-    icon: <CodeOutlinedIcon/>,
+    icon: <i className="devicon-vscode-plain" style={{fontSize: 20}}/>,
     path: '/admin/ide',
     Page: AdminTheia,
   },
@@ -172,12 +171,17 @@ export const admin_nav = [
 
 export const super_nav = [
   {
+    id: 'Playgrounds',
+    icon: <i className="devicon-vscode-plain" style={{fontSize: 20}}/>,
+    path: '/super/playgrounds',
+    Page: SuperPlaygrounds,
+  },
+  {
     id: 'IDE Images',
-    icon: <CodeOutlinedIcon/>,
+    icon: <i className="devicon-docker-plain" style={{fontSize: 20}}/>,
     path: '/super/ide-images',
     Page: SuperIDEImages,
   },
-
   {
     id: 'Config',
     icon: <SettingsIcon/>,
