@@ -6,7 +6,7 @@ from anubis.lms.theia import initialize_ide, assert_theia_sessions_enabled
 from anubis.models import TheiaSession, TheiaImage, TheiaImageTag
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
-from anubis.utils.http import success_response
+from anubis.utils.http import success_response, req_assert
 from anubis.utils.http.decorators import json_response, load_from_id
 
 playgrounds_ = Blueprint("public-playgrounds", __name__, url_prefix="/public/playgrounds")
@@ -23,6 +23,9 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
     :param theia_image:
     :return:
     """
+
+    # Assert that the selected image is public
+    req_assert(theia_image.public, message="Unable to find", status_code=400)
 
     # Get the requested tag information
     requested_tag = request.args.get('tag', 'latest')
