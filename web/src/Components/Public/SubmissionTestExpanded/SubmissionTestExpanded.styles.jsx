@@ -77,5 +77,14 @@ export const useStyles = makeStyles((theme) => ({
     fontSize: '16px',
     paddingBottom: `${theme.spacing(3)}px`,
   },
+  testDiff: {
+    color: theme.palette.gray['100'],
+    borderRadius: '10px',
+  },
+  '@global': {
+    '.diff-code-delete, .diff-gutter-delete, .diff-code-insert, .diff-gutter-insert': {
+      color: 'black',
+    },
+  },
 }));
 
