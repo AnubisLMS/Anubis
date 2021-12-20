@@ -31,6 +31,7 @@ def default_id(max_len=None) -> db.Column:
 
 class Config(db.Model):
     __tablename__ = "anubis_config"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # Fields
     key = db.Column(db.String(128), primary_key=True)
@@ -46,6 +47,7 @@ class Config(db.Model):
 
 class User(db.Model):
     __tablename__ = "user"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # id
     id = default_id()
@@ -91,6 +93,7 @@ class User(db.Model):
 
 class Course(db.Model):
     __tablename__ = "course"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # id
     id = default_id()
@@ -152,6 +155,7 @@ class Course(db.Model):
 
 class TAForCourse(db.Model):
     __tablename__ = "ta_for_course"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # Foreign Keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
@@ -167,6 +171,7 @@ class TAForCourse(db.Model):
 
 class ProfessorForCourse(db.Model):
     __tablename__ = "professor_for_course"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # Foreign Keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
@@ -182,6 +187,7 @@ class ProfessorForCourse(db.Model):
 
 class InCourse(db.Model):
     __tablename__ = "in_course"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # Foreign Keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
@@ -190,6 +196,7 @@ class InCourse(db.Model):
 
 class Assignment(db.Model):
     __tablename__ = "assignment"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # id
     id = default_id()
@@ -270,6 +277,7 @@ class Assignment(db.Model):
 
 class AssignmentRepo(db.Model):
     __tablename__ = "assignment_repo"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # id
     id = default_id()
@@ -307,6 +315,7 @@ class AssignmentRepo(db.Model):
 
 class AssignmentTest(db.Model):
     __tablename__ = "assignment_test"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # id
     id = default_id()
@@ -325,6 +334,7 @@ class AssignmentTest(db.Model):
 
 class AssignmentQuestion(db.Model):
     __tablename__ = "assignment_question"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # id
     id = default_id()
@@ -370,6 +380,7 @@ class AssignmentQuestion(db.Model):
 
 class AssignedStudentQuestion(db.Model):
     __tablename__ = "assigned_student_question"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # id
     id = default_id()
@@ -426,6 +437,7 @@ class AssignedStudentQuestion(db.Model):
 
 class AssignedQuestionResponse(db.Model):
     __tablename__ = "assigned_student_response"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # id
     id = default_id()
@@ -458,6 +470,7 @@ class AssignedQuestionResponse(db.Model):
 
 class Submission(db.Model):
     __tablename__ = "submission"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # id
     id = default_id()
@@ -529,6 +542,7 @@ class Submission(db.Model):
 
 class SubmissionTestResult(db.Model):
     __tablename__ = "submission_test_result"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # id
     id = default_id()
@@ -577,6 +591,7 @@ class SubmissionTestResult(db.Model):
 
 class SubmissionBuild(db.Model):
     __tablename__ = "submission_build"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # id
     id = default_id()
@@ -608,6 +623,7 @@ class SubmissionBuild(db.Model):
 
 class TheiaImage(db.Model):
     __tablename__ = "theia_image"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     id = default_id(32)
     image = db.Column(db.String(1024), nullable=False, default='registry.digitalocean.com/anubis/xv6')
@@ -638,6 +654,7 @@ class TheiaImage(db.Model):
 
 class TheiaImageTag(db.Model):
     __tablename__ = 'theia_image_tag'
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     id = default_id(32)
     image_id = db.Column(db.String(128), db.ForeignKey(TheiaImage.id), nullable=False)
@@ -660,6 +677,7 @@ class TheiaImageTag(db.Model):
 
 class TheiaSession(db.Model):
     __tablename__ = "theia_session"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     # id
     id = default_id(32)
@@ -735,6 +753,7 @@ class TheiaSession(db.Model):
 
 class StaticFile(db.Model):
     __tablename__ = "static_file"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     id = default_id()
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), nullable=False, index=True)
@@ -781,6 +800,7 @@ class StaticFile(db.Model):
 
 class LateException(db.Model):
     __tablename__ = "late_exception"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     user_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
     assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), primary_key=True)
@@ -805,6 +825,7 @@ class LateException(db.Model):
 
 class LectureNotes(db.Model):
     __tablename__ = "lecture_notes"
+    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
 
     id = default_id()
 

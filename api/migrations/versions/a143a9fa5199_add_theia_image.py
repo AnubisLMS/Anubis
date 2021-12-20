@@ -30,6 +30,8 @@ def upgrade():
             ["theia_image.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
+        mysql_charset='utf8mb4',
+        mysql_collate='utf8mb4_general_ci',
     )
     op.add_column(
         "assignment",

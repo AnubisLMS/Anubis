@@ -33,6 +33,8 @@ def upgrade():
             sa.Column("label", sa.String(length=1024), nullable=False),
             sa.Column("public", sa.Boolean(), nullable=False),
             sa.PrimaryKeyConstraint("id"),
+            mysql_charset='utf8mb4',
+            mysql_collate='utf8mb4_general_ci',
         )
 
         images = conn.execute(sa.text('select distinct image from theia_session;'))
