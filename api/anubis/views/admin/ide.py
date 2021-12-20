@@ -120,8 +120,6 @@ def admin_ide_initialize_custom(settings: dict, **_):
         assignment_id=None,
         course_id=course_context.id,
         repo_url=repo_url,
-        active=True,
-        state="Initializing",
 
         # Options
         admin=admin,
