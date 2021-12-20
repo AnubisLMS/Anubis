@@ -94,7 +94,7 @@ export default function NavList({open, handleDrawerClose}) {
           {(user) => (
             <React.Fragment>
               {user?.is_admin && (
-                <Accordion className={classes.accordionHeader}>
+                <Accordion className={classes.accordionHeader} square>
                   <AccordionSummary
                     classes={{
                       primary: classes.categoryHeaderPrimary,
@@ -122,7 +122,7 @@ export default function NavList({open, handleDrawerClose}) {
                 </Accordion>
               )}
               {user?.is_superuser && (
-                <Accordion className={classes.accordionHeader}>
+                <Accordion className={classes.accordionHeader} square>
                   <AccordionSummary
                     classes={{
                       primary: classes.categoryHeaderPrimary,
