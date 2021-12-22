@@ -20,6 +20,8 @@ spec:
       template:
         spec:
           restartPolicy: Never
+          securityContext:
+            runAsUser: 1000
           containers:
           - name: backup
             image: {{ .Values.api.image }}:{{ .Values.api.tag }}

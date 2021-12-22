@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
-export BACKUP_FILE="anubis-$(date +%F_%H%M%S).sql.gz" \
-       HOME=/home/anubis
+export BACKUP_FILE="anubis-$(date +%F_%H%M%S).sql.gz"
+export HOME=/home/anubis
 
 cat /home/anubis/.ssh/config
 echo

@@ -15,7 +15,7 @@ def load_from_id(model, verify_owner=False):
     and uses it to pull the sqlalchemy object corresponding to that id
 
     >>> @app.route('/assignment/<string:id>')
-    >>> @require_user
+    >>> @require_user()
     >>> @load_from_id(Assignment)
     >>> def view_function(assignment: Assignment):
     >>>     pass

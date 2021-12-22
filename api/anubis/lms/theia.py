@@ -143,6 +143,7 @@ def initialize_ide(
     image_id: str,
 
     # Optional / Settings
+    image_tag_id: str = None,
     assignment_id: str = None,
     course_id: str = None,
     repo_url: str = '',
@@ -170,6 +171,7 @@ def initialize_ide(
         image_id=image_id,
 
         # Options / Settings
+        image_tag_id=image_tag_id,
         assignment_id=assignment_id,
         course_id=course_id,
         repo_url=repo_url,
