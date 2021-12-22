@@ -133,17 +133,18 @@ def generate_report(mobile: bool = False) -> str:
 def get_ide_seconds(*filters) -> timedelta:
     ide_hours_inactive = db.session.query(
         func.sum(func.time_to_sec(func.timediff(TheiaSession.ended, TheiaSession.created)))
-    ).filter(TheiaSession.active == False, *filters).first()
+    ).filter(TheiaSession.active is False, *filters).first()
 
     ide_hours_active = db.session.query(
         func.sum(func.time_to_sec(func.timediff(func.now(), TheiaSession.created)))
-    ).filter(TheiaSession.active == True, *filters).first()
+    ).filter(TheiaSession.active is True, *filters).first()
 
     ide_hours_inactive_s = int(ide_hours_inactive[0] or 0)
     ide_hours_active_s = int(ide_hours_active[0] or 0)
     print("ide_hours_inactive_s", ide_hours_inactive_s, sep="=")
     print("ide_hours_active_s", ide_hours_active_s, sep="=")
     return timedelta(seconds=ide_hours_active_s + ide_hours_inactive_s)
+
 
 def toIMG(report: str, desiredWidth: int = 0) -> Image:
     font = ImageFont.truetype(fontPath, 24)
@@ -161,6 +162,7 @@ def toBytesIO(img: Image) -> BytesIO:
     b = BytesIO()
     img.save(b, format="PNG")
     return BytesIO(b.getvalue())
+
 
 @with_context
 def generate_ide_report(day=None, mobile: bool = False) -> discord.Embed:
@@ -192,7 +194,7 @@ def generate_ide_report(day=None, mobile: bool = False) -> discord.Embed:
             TheiaSession.created < eod, TheiaSession.created > today
         )
         active_ides: List[TheiaSession] = TheiaSession.query.filter(
-            TheiaSession.active == True,
+            TheiaSession.active is True,
             TheiaSession.created < eod
         ).all()
     else:
@@ -234,9 +236,10 @@ def generate_ide_report(day=None, mobile: bool = False) -> discord.Embed:
             reportImg = toIMG(report)
         return reportImg
     return discord.Embed(
-        title='IDE report',
+        title="IDE report",
         description="```" + report + "```"
     ).set_thumbnail(url=bot.user.avatar_url).set_author(name="Anubis Bot")
+
 
 bot = commands.Bot(
     command_prefix="!",
