@@ -33,6 +33,8 @@ def upgrade():
             ["user.id"],
         ),
         sa.PrimaryKeyConstraint("user_id", "assignment_id"),
+        mysql_charset='utf8mb4',
+        mysql_collate='utf8mb4_general_ci',
     )
     # ### end Alembic commands ###
 

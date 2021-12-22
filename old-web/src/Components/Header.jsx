@@ -79,20 +79,9 @@ export default function Header({classes, open, onDrawerToggle, user}) {
                       cookie.remove('course', {path: '/'});
                       if (!!e) {
                         cookie.set('course', btoa(JSON.stringify(e)), {path: '/'});
-                        enqueueSnackbar('You may need to reload the page', {
-                          variant: 'warning',
-                          action: (
-                            <Button
-                              size="small"
-                              startIcon={<RefreshIcon/>}
-                              color={'primary'}
-                              variant={'contained'}
-                              onClick={() => window.location.reload(true)}
-                            >
-                              Reload
-                            </Button>
-                          ),
-                        });
+                        setTimeout(() => {
+                          window.location.reload(0);
+                        }, 100);
                       }
                       setCourse(e);
                     }}

@@ -37,6 +37,8 @@ def upgrade():
             ["static_file.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
+        mysql_charset='utf8mb4',
+        mysql_collate='utf8mb4_general_ci',
     )
     op.create_index(
         op.f("ix_lecture_notes_course_id"),
