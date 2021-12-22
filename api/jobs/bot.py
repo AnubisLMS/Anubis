@@ -233,7 +233,10 @@ def generate_ide_report(day=None, mobile: bool = False) -> discord.Embed:
         else:
             reportImg = toIMG(report)
         return reportImg
-    return report
+    return discord.Embed(
+        title='IDE report',
+        description="```" + report + "```"
+    ).set_thumbnail(url=bot.user.avatar_url).set_author(name="Anubis Bot")
 
 bot = commands.Bot(
     command_prefix="!",
@@ -279,7 +282,7 @@ async def ides_(ctx, platform="desktop", day=None, *args):
             )
         )
     else:
-        await ctx.send(f"```{generate_ide_report(day)}```")
+        await ctx.send(embed=generate_ide_report(day))
 
 
 @bot.command(name="contribute", aliases=("github",), help="Contributing to Anubis")
