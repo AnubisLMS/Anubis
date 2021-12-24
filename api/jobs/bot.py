@@ -119,11 +119,11 @@ def generate_report(mobile: bool = False) -> str:
 def get_ide_seconds(*filters) -> timedelta:
     ide_hours_inactive = db.session.query(
         func.sum(func.time_to_sec(func.timediff(TheiaSession.ended, TheiaSession.created)))
-    ).filter(TheiaSession.active is False, *filters).first()
+    ).filter(TheiaSession.active == False, *filters).first()
 
     ide_hours_active = db.session.query(
         func.sum(func.time_to_sec(func.timediff(func.now(), TheiaSession.created)))
-    ).filter(TheiaSession.active is True, *filters).first()
+    ).filter(TheiaSession.active == True, *filters).first()
 
     ide_hours_inactive_s = int(ide_hours_inactive[0] or 0)
     ide_hours_active_s = int(ide_hours_active[0] or 0)
@@ -179,7 +179,7 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
         TheiaSession.created < eod, TheiaSession.created > today
     )
     active_ides: List[TheiaSession] = TheiaSession.query.filter(
-        TheiaSession.active is True,
+        TheiaSession.active == True,
         TheiaSession.created < eod
     ).all()
 
