@@ -196,7 +196,7 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
     )
 
     report = (
-        "IDEs Active ({})\n{}\n\nIDE Time Served Today: {}\nTotal IDE Time Served Total: {}"
+        "IDEs Active ({})\n{}\n\nIDE Time Served Today: {}\nIDE Time Served Total: {}"
     ).format(
         len(active_ides),
         data,
