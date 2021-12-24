@@ -1,15 +1,18 @@
 import os
 import traceback
-from typing import List
 from datetime import datetime, timedelta
+from io import BytesIO
+from typing import List
 
-import flask_sqlalchemy
-from sqlalchemy.sql import func
-from discord.ext import commands
-from tabulate import tabulate
-from dateutil.parser import parse as date_parse, ParserError
 import discord
+import flask_sqlalchemy
+from dateutil.parser import parse as date_parse, ParserError
+from discord.ext import commands
+from PIL import Image, ImageDraw, ImageFont
+from sqlalchemy.sql import func
+from tabulate import tabulate
 
+import mockData
 from anubis.models import db, Course, User, TheiaSession, InCourse
 from anubis.utils.data import with_context, human_readable_datetime
 
@@ -81,7 +84,7 @@ def get_course_theia_session_count(course) -> int:
     )
 
 
-def generate_report() -> str:
+def generate_report(mobile: bool = False) -> str:
     """
     Generate a report of the statuses of Anubis. The statuses are:
         Course names and code
@@ -94,50 +97,75 @@ def generate_report() -> str:
     """
 
     # Course List
-    courses = get_courses()
-
-    # Number of students, IDEs for each course
-    data = [
-        [
-            course.name,
-            course.course_code,
-            get_course_user_count(course),
-            get_course_theia_session_count(course),
+    if dbConnected:
+        # Number of students, IDEs for each course
+        data = [
+            [
+                course.name,
+                course.course_code,
+                get_course_user_count(course),
+                get_course_theia_session_count(course)
+            ]
+            for course in get_courses()
         ]
-        for course in courses
-    ]
+        active_users = get_active_users_this_semester()
+        ides_opened = get_ides_opened_this_semester()
+    else:
+        data = [
+            [
+                course.name,
+                course.course_code,
+                mockData.mock_course_user_count(course),
+                mockData.mock_course_ides_opened(course)
+            ]
+            for course in mockData.mock_courses()
+        ]
+        active_users = sum((course[2] for course in data))
+        ides_opened = sum((course[3] for course in data))
 
-    report = tabulate(
-        data, headers=["Course Name", "Course Code", "Users", "IDEs opened"]
+    return (
+        tabulate(data, ("Course Name", "Course Code", "Users", "IDEs opened"))
+        + "\n\nTotal users enrolled in at least one course this semester\n"
+        + f"{active_users}\n\nTotal IDES opened this semester\n{ides_opened}"
     )
-
-    # Number of users enrolled in at least one class this semester
-    report += "\n\nTotal users enrolled in at least one course this semester\n"
-    report += f"{get_active_users_this_semester()}"
-
-    # Number of IDEs opened this semester
-    report += "\n\nTotal IDEs opened this semester\n"
-    report += f"{get_ides_opened_this_semester()}"
-
-    return report
 
 
 def get_ide_seconds(*filters) -> timedelta:
     ide_hours_inactive = db.session.query(
         func.sum(func.time_to_sec(func.timediff(TheiaSession.ended, TheiaSession.created)))
-    ).filter(TheiaSession.active == False, *filters).first()
+    ).filter(TheiaSession.active is False, *filters).first()
+
     ide_hours_active = db.session.query(
         func.sum(func.time_to_sec(func.timediff(func.now(), TheiaSession.created)))
-    ).filter(TheiaSession.active == True, *filters).first()
+    ).filter(TheiaSession.active is True, *filters).first()
+
     ide_hours_inactive_s = int(ide_hours_inactive[0] or 0)
     ide_hours_active_s = int(ide_hours_active[0] or 0)
-    print('ide_hours_inactive_s={}'.format(ide_hours_inactive_s))
-    print('ide_hours_active_s={}'.format(ide_hours_active_s))
-    return timedelta(seconds=ide_hours_active_s+ide_hours_inactive_s)
+    print("ide_hours_inactive_s", ide_hours_inactive_s, sep="=")
+    print("ide_hours_active_s", ide_hours_active_s, sep="=")
+    return timedelta(seconds=ide_hours_active_s + ide_hours_inactive_s)
+
+
+def toIMG(report: str, desiredWidth: int = 0) -> Image:
+    font = ImageFont.truetype(fontPath, 24)
+    width, height = font.getsize_multiline(report)
+    if desiredWidth:
+        width = desiredWidth
+    img = Image.new("RGB", (width + 8, height + 8))
+    draw = ImageDraw.Draw(img)
+    draw.multiline_text((2, 2), report, font=font)
+    return img
+
+
+def toBytesIO(img: Image) -> BytesIO:
+    # In order to send through discord, *must* wrap getvalue() in BytesIO()
+    b = BytesIO()
+    img.save(b, format="PNG")
+    return BytesIO(b.getvalue())
 
 
 @with_context
-def generate_ide_report(day=None) -> discord.Embed:
+def generate_ide_report(day=None, mobile: bool = False) -> discord.Embed:
     """
     Generate a report of the statuses of Anubis. The statuses are:
         Course names and code
@@ -148,50 +176,67 @@ def generate_ide_report(day=None) -> discord.Embed:
 
     :return: The text of the report
     """
-    today = None
 
     try:
         today = date_parse(day)
     except (ParserError, TypeError):
         print(traceback.format_exc())
-
-    if today is None:
         today = datetime.now().replace(hour=0, minute=0, microsecond=0)
 
-    print('today', today)
+    print("today", today)
 
     eod = today.replace(hour=23, minute=59, second=59, microsecond=0)
     now = datetime.now().replace(microsecond=0)
 
-    total_ide_seconds = get_ide_seconds(TheiaSession.created < eod)
-    today_ide_seconds = get_ide_seconds(TheiaSession.created < eod, TheiaSession.created > today)
+    if dbConnected:
+        total_ide_seconds = get_ide_seconds(TheiaSession.created < eod)
+        today_ide_seconds = get_ide_seconds(
+            TheiaSession.created < eod, TheiaSession.created > today
+        )
+        active_ides: List[TheiaSession] = TheiaSession.query.filter(
+            TheiaSession.active is True,
+            TheiaSession.created < eod
+        ).all()
+    else:
+        total_ide_seconds = timedelta(seconds=3600 * 20)
+        today_ide_seconds = timedelta(seconds=3600 * 23)
+        active_ides = mockData.mock_active_ides()
 
-    active_ides: List[TheiaSession] = TheiaSession.query.filter(
-        TheiaSession.active == True,
-        TheiaSession.created < eod,
-    ).all()
-
-    report = ''
-
-    report += 'IDEs Active ({})\n'.format(len(active_ides))
-    report += tabulate(
+    data = tabulate(
         [
             [
-                str(index),
+                index,
                 human_readable_datetime(now - ide.created),
                 human_readable_datetime(now - ide.last_proxy),
             ]
             for index, ide in enumerate(active_ides)
-        ], headers=["ID", "Age", "Last Proxy"]
+        ],
+        ("ID", "Age", "Last Proxy")
     )
-    report += '\n\n'
-    report += 'IDE Time Served Today: {}\n'.format(human_readable_datetime(today_ide_seconds))
-    report += 'IDE Time Served Total: {}\n'.format(human_readable_datetime(total_ide_seconds))
+
+    report = (
+        "IDEs Active ({})\n{}\n\nIDE Time Served Today: {}\nTotal IDE Time Served Total: {}"
+    ).format(
+        len(active_ides),
+        data,
+        human_readable_datetime(today_ide_seconds),
+        human_readable_datetime(total_ide_seconds)
+    )
 
     print(report)
-
+    if mobile:
+        if len(active_ides) > 20:
+            report = report.split("\n")
+            r1 = toIMG("\n".join(report[:len(report)//2]))
+            r2 = toIMG("\n".join(report[len(report)//2:]))
+            reportImg = Image.new("RGB", (r1.width + r2.width, max(r1.height, r2.height)))
+            reportImg.paste(r1, (0, 0))
+            reportImg.paste(r2, (r1.width, 0))
+        else:
+            reportImg = toIMG(report)
+        return reportImg
     return discord.Embed(
-        title='IDE report',
+        title="IDE report",
         description="```" + report + "```"
     ).set_thumbnail(url=bot.user.avatar_url).set_author(name="Anubis Bot")
 
@@ -203,24 +248,44 @@ bot = commands.Bot(
 )
 
 
-@bot.command(name="report", help="Anubis usage report")
-async def report_(ctx, *args):
+@bot.command(
+    name="report", help="Anubis usage report. Use !report mobile for mobile-friendly version"
+)
+async def report_(ctx, platform="desktop", *args):
     """
     Respond to `!report` command with a report of the statuses of Anubis
 
     :return:
     """
-    await ctx.send("```" + generate_report() + "```")
+    if ctx.author.is_on_mobile() or platform == "mobile":
+        await ctx.send(
+            file=discord.File(
+                toBytesIO(toIMG(generate_report(True))),
+                filename="report.png"
+            )
+        )
+    else:
+        await ctx.send(f"```{generate_report()}```")
 
 
-@bot.command(name="ide", help="Anubis ide usage report")
-async def ides_(ctx, day=None, *args):
+@bot.command(
+    name="ide", help="Anubis ide usage report. Use !ide mobile for mobile-friendly version"
+)
+async def ides_(ctx, platform="desktop", day=None, *args):
     """
     Respond to `!report` command with a report of the statuses of Anubis
 
     :return:
     """
-    await ctx.send(embed=generate_ide_report(day))
+    if ctx.author.is_on_mobile() or platform == "mobile":
+        await ctx.send(
+            file=discord.File(
+                toBytesIO(generate_ide_report(day, True)),
+                filename="ide.png"
+            )
+        )
+    else:
+        await ctx.send(embed=generate_ide_report(day))
 
 
 @bot.command(name="contribute", aliases=("github",), help="Contributing to Anubis")
@@ -230,8 +295,11 @@ async def contribute_(ctx, *args):
 
     :return:
     """
-    desc = "Thanks for your interest in contributing to Anubis! We're always looking for new people to help"
-    desc += " make Anubis even better. Please head to [our GitHub repo](https://github.com/anubislms/Anubis)."
+    desc = (
+        "Thanks for your interest in contributing to Anubis! We're always"
+        " looking for new people to help make Anubis even better. Please"
+        " head to [our GitHub repo](https://github.com/anubislms/Anubis)."
+    )
     emb = discord.Embed(
         title="Contributing to Anubis",
         description=desc,
@@ -246,15 +314,26 @@ async def help_(ctx, *args):
 
     :return:
     """
-    emb = discord.Embed(title="Anubis Bot Help", description="").set_thumbnail(
-        url=bot.user.avatar_url
-    )
+    emb = discord.Embed(
+        title="Anubis Bot Help", description=""
+    ).set_thumbnail(url=bot.user.avatar_url)
     for command in bot.commands:
-        emb.add_field(
-            name=bot.command_prefix + command.name, value=command.help, inline=True
-        )
+        emb.add_field(name=bot.command_prefix + command.name, value=command.help)
     await ctx.send(embed=emb)
 
 
 if __name__ == "__main__":
+    try:
+        get_course_theia_session_count(mockData.MockCourse())
+    except flask_sqlalchemy.sqlalchemy.exc.OperationalError:
+        print("Could not connect to DB, running with mocked data")
+        dbConnected = False
+    else:
+        dbConnected = True
+    for r, d, f in os.walk("../"):
+        for name in f:
+            if name == "RobotoMono-Regular.ttf":
+                fontPath = os.path.relpath(os.path.join(r, name))
+                break
+
     bot.run(os.environ.get("DISCORD_BOT_TOKEN", default="DEBUG"))
