@@ -258,15 +258,15 @@ async def ides_(ctx, day=None, *args):
 
     :return:
     """
-    await ctx.send(
-        file=discord.File(
-            images_to_bytes(generate_ide_report(day, True)),
-            filename="ide.png"
+    if ctx.author.is_on_mobile():
+        await ctx.send(
+            file=discord.File(
+                images_to_bytes(generate_ide_report(day, True)),
+                filename="ide.png"
+            )
         )
-    )
-    # if ctx.author.is_on_mobile() or platform == "mobile":
-    # else:
-    #     await ctx.send(embed=generate_ide_report(day))
+    else:
+        await ctx.send(embed=generate_ide_report(day))
 
 
 @bot.command(name="contribute", aliases=("github",), help="Contributing to Anubis")
