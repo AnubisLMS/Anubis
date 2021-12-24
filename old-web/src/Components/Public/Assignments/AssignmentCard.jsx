@@ -1,7 +1,10 @@
 import React, {useCallback, useState} from 'react';
 import axios from 'axios';
+import {useSnackbar} from 'notistack';
 import {Link} from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 
+import grey from '@material-ui/core/colors/grey';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
@@ -11,24 +14,21 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import AlarmIcon from '@material-ui/icons/Alarm';
-import EventNoteIcon from '@material-ui/icons/EventNote';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import red from '@material-ui/core/colors/red';
 import green from '@material-ui/core/colors/green';
-import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import Dialog from '@material-ui/core/Dialog';
-import ReactMarkdown from 'react-markdown';
+import Tooltip from '@material-ui/core/Tooltip';
 import Box from '@material-ui/core/Box';
+
+import EventNoteIcon from '@material-ui/icons/EventNote';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import DescriptionIcon from '@material-ui/icons/Description';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
-import grey from '@material-ui/core/colors/grey';
 
 import {nonStupidDatetimeFormat} from '../../../Utils/datetime';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
-import {useSnackbar} from 'notistack';
-import {Tooltip} from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -191,13 +191,13 @@ export default function AssignmentCard({
         </CardContent>
       </CardActionArea>
       <CardActions>
-        <Box display='flex' flexDirection="column" width={'100%'}>
+        <Box display="flex" flexDirection="column" width={'100%'}>
           <Button
-            size={'small'}
+            size={'medium'}
             variant={'contained'}
             color={'primary'}
             className={classes.button}
-            startIcon={<CodeOutlinedIcon/>}
+            startIcon={<i className="devicon-vscode-plain" />}
             disabled={!ideLinkEnabled}
             onClick={() => setSelectedTheia(assignment)}
           >
@@ -208,7 +208,7 @@ export default function AssignmentCard({
             <React.Fragment>
               {!has_repo && (
                 <Button
-                  size={'small'}
+                  size={'medium'}
                   variant={'contained'}
                   color={'primary'}
                   startIcon={<GitHubIcon/>}
@@ -222,7 +222,7 @@ export default function AssignmentCard({
 
               {has_repo && (
                 <Button
-                  size={'small'}
+                  size={'medium'}
                   variant={'contained'}
                   color={'primary'}
                   startIcon={<GitHubIcon/>}
@@ -241,6 +241,7 @@ export default function AssignmentCard({
             size='small'
             variant='contained'
             color='primary'
+            startIcon={<DescriptionIcon/>}
             className={classes.button}
             component='a'
             onClick={() => setIsOpen(true)}
