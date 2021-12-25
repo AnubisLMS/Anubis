@@ -13,7 +13,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
 
 import {useStyles} from './Visuals.styles';
-import StandardLayout from '../../../Components/Layouts/StandardLayout';
+import StandardLayout from '../../../Components/Shared/Layouts/StandardLayout';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 

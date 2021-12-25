@@ -5,7 +5,7 @@ import {useParams} from 'react-router-dom';
 
 import Paper from '@material-ui/core/Paper';
 
-import useQuery from '../../../hooks/useQuery';
+import useQuery from '../../../Hooks/useQuery';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import AssignmentSundial from './Graphs/AssignmentSundial';

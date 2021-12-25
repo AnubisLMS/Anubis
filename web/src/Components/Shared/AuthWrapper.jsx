@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
-import AuthContext from '../Contexts/AuthContext';
+import AuthContext from '../../Contexts/AuthContext';
 import axios from 'axios';
-import standardStatusHandler from '../Utils/standardStatusHandler';
+import standardStatusHandler from '../../Utils/standardStatusHandler';
 import {useSnackbar} from 'notistack';
 import Cookies from 'universal-cookie';
 

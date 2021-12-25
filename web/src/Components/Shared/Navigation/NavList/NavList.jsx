@@ -6,9 +6,9 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
 
 import {useStyles} from './NavList.styles';
-import AuthContext from '../../../Contexts/AuthContext';
+import AuthContext from '../../../../Contexts/AuthContext';
 import NavItem from '../NavItem/NavItem';
-import {admin_nav, footer_nav, public_nav, super_nav} from '../../../navconfig';
+import {admin_nav, footer_nav, public_nav, super_nav} from '../../../../navconfig';
 
 const NavList = ({open, handleDrawerClose}) => {
   const classes = useStyles();

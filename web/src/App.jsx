@@ -27,17 +27,17 @@ import {drawerWidth} from './navconfig';
 // Dark theme
 import theme from './Theme/Theme';
 
-import AuthWrapper from './Components/AuthWrapper';
+import AuthWrapper from './Components/Shared/AuthWrapper';
 import Main from './Main';
-import useQuery from './hooks/useQuery';
-import Nav from './Components/Navigation/Nav';
-import Error from './Components/Error';
-import Footer from './Components/Footer';
-import Header from './Components/Header';
-import DeviceWarning from './Components/DeviceWarning';
+import useQuery from './Hooks/useQuery';
+import Nav from './Components/Shared/Navigation/Nav';
+import Error from './Components/Shared/Error';
+import Footer from './Components/Shared/Footer';
+import Header from './Components/Shared/Header';
+import DeviceWarning from './Components/Shared/DeviceWarning';
 import Container from '@material-ui/core/Container';
 
-import TryNewUI from './Components/TryNewUI';
+import TryNewUI from './Components/Shared/TryNewUI';
 
 const useStyles = makeStyles(() => ({
   root: {

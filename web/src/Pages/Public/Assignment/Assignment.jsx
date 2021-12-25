@@ -17,9 +17,9 @@ import CancelIcon from '@material-ui/icons/Cancel';
 
 import SubmissionItem from '../../../Components/Public/SubmissionItem/SubmissionItem';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
-import StandardLayout from '../../../Components/Layouts/StandardLayout';
+import StandardLayout from '../../../Components/Shared/Layouts/StandardLayout';
 import {useStyles} from './Assignment.styles';
-import useQuery from '../../../hooks/useQuery';
+import useQuery from '../../../Hooks/useQuery';
 import IDEDialog from '../../../Components/Public/IDE/IDEDialog';
 import {translateSubmission} from '../../../Utils/submission';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';

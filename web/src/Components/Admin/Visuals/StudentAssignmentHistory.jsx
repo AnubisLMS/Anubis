@@ -4,7 +4,7 @@ import axios from 'axios';
 
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
-import useQuery from '../../../hooks/useQuery';
+import useQuery from '../../../Hooks/useQuery';
 import StudentHistory from './Graphs/StudentHistory';
 
 

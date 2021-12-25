@@ -6,15 +6,15 @@ import clsx from 'clsx';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import {useStyles} from './Submission.styles';
-import useQuery from '../../../hooks/useQuery';
+import useQuery from '../../../Hooks/useQuery';
 import {translateSubmission} from '../../../Utils/submission';
-import StandardLayout from '../../../Components/Layouts/StandardLayout';
+import StandardLayout from '../../../Components/Shared/Layouts/StandardLayout';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
-import SubmissionContent from '../../../Components/Public/Submission/SubmissionContent/SubmissionContent';
-import SubmissionHeader from '../../../Components/Public/Submission/SubmissionHeader/SubmissionHeader';
-import SubmissionTest from '../../../Components/Public/Submission/SubmissionTest/SubmissionTest';
+import SubmissionContent from '../../../Components/Public/SubmissionContent/SubmissionContent';
+import SubmissionHeader from '../../../Components/Public/SubmissionHeader/SubmissionHeader';
+import SubmissionTest from '../../../Components/Public/SubmissionTest/SubmissionTest';
 import SubmissionTestExpanded
-  from '../../../Components/Public/Submission/SubmissionTestExpanded/SubmissionTestExpanded';
+  from '../../../Components/Public/SubmissionTestExpanded/SubmissionTestExpanded';
 
 const regrade = (
   {commit, submission, setSubmission, setStep, setErrorStop},

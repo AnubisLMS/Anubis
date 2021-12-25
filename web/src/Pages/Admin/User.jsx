@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import Grid from '@material-ui/core/Grid';
 import {DataGrid} from '@material-ui/data-grid';
 
-import useQuery from '../../hooks/useQuery';
+import useQuery from '../../Hooks/useQuery';
 import UserCard from '../../Components/Admin/Users/UserCard';
 import CourseCard from '../../Components/Admin/Users/CourseCard';
 import axios from 'axios';

@@ -3,7 +3,7 @@ import React from 'react';
 import AssessmentIcon from '@material-ui/icons/Assessment';
 import Typography from '@material-ui/core/Typography';
 
-import Item from '../Shared/Item/Item';
+import Item from '../../Shared/Item/Item';
 import {useStyles} from './SubmissionItem.styles';
 
 const SubmissionItem = ({

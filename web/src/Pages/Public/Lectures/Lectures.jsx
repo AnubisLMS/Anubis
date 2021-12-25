@@ -7,8 +7,8 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 
 import {useStyles} from './Lectures.styles';
-import StandardLayout from '../../../Components/Layouts/StandardLayout';
-import useQuery from '../../../hooks/useQuery';
+import StandardLayout from '../../../Components/Shared/Layouts/StandardLayout';
+import useQuery from '../../../Hooks/useQuery';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import Typography from '@material-ui/core/Typography';

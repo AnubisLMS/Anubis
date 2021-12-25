@@ -1,5 +1,5 @@
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-import FiraSans from '../fonts/FiraSans-Regular.ttf';
+import FiraSans from '../Fonts/FiraSans-Regular.ttf';
 
 
 const fira = {

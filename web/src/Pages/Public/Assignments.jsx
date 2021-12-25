@@ -5,13 +5,13 @@ import {useSnackbar} from 'notistack';
 import Box from '@material-ui/core/Box';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 
-import useQuery from '../../hooks/useQuery';
+import useQuery from '../../Hooks/useQuery';
 import AssignmentItem from '../../Components/Public/AssignmentItem/AssignmentItem';
 import standardErrorHandler from '../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../Utils/standardStatusHandler';
 import IDEDialog from '../../Components/Public/IDE/IDEDialog';
-import StandardLayout from '../../Components/Layouts/StandardLayout';
-import SectionHeader from '../../Components/Public/Shared/SectionHeader/SectionHeader';
+import StandardLayout from '../../Components/Shared/Layouts/StandardLayout';
+import SectionHeader from '../../Components/Shared/SectionHeader/SectionHeader';
 
 const useStyles = makeStyles((theme) => ({
   divider: {

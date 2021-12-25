@@ -17,7 +17,6 @@ import ImportContactsIcon from '@material-ui/icons/ImportContacts';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 
 import Dashboard from './Pages/Public/Dashboard/Dashboard';
-import About from './Pages/Public/About';
 import Courses from './Pages/Public/Courses/Courses';
 import Assignments from './Pages/Public/Assignments';
 import Profile from './Pages/Public/Profile';

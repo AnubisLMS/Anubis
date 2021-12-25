@@ -12,7 +12,7 @@ import AppBar from '@material-ui/core/AppBar';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import {Hidden} from '@material-ui/core';
 
-import ProfileAvatar from './Shared/AccountChip/AccountChip';
+import ProfileAvatar from './AccountChip/AccountChip';
 
 export default function Header({classes, open, onDrawerToggle, user}) {
   const cookie = new Cookies();

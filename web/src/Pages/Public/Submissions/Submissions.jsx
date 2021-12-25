@@ -6,12 +6,12 @@ import axios from 'axios';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Box from '@material-ui/core/Box';
 
-import SectionHeader from '../../../Components/Public/Shared/SectionHeader/SectionHeader';
+import SectionHeader from '../../../Components/Shared/SectionHeader/SectionHeader';
 import SubmissionItem from '../../../Components/Public/SubmissionItem/SubmissionItem';
-import useQuery from '../../../hooks/useQuery';
+import useQuery from '../../../Hooks/useQuery';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
-import StandardLayout from '../../../Components/Layouts/StandardLayout';
+import StandardLayout from '../../../Components/Shared/Layouts/StandardLayout';
 
 const useStyles = makeStyles((theme) => ({
   divider: {

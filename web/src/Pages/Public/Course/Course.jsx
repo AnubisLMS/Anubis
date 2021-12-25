@@ -8,9 +8,9 @@ import SchoolIcon from '@material-ui/icons/School';
 import Divider from '@material-ui/core/Divider';
 
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
-import StandardLayout from '../../../Components/Layouts/StandardLayout';
+import StandardLayout from '../../../Components/Shared/Layouts/StandardLayout';
 import {useStyles} from './Course.styles';
-import useQuery from '../../../hooks/useQuery';
+import useQuery from '../../../Hooks/useQuery';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import AssignmentItem from '../../../Components/Public/AssignmentItem/AssignmentItem';
 

@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import Grid from '@material-ui/core/Grid';
 
 import ReposTable from '../../Components/Public/Repos/ReposTable';
-import StandardLayout from '../../Components/Layouts/StandardLayout';
+import StandardLayout from '../../Components/Shared/Layouts/StandardLayout';
 import AuthContext from '../../Contexts/AuthContext';
 import axios from 'axios';
 import standardStatusHandler from '../../Utils/standardStatusHandler';

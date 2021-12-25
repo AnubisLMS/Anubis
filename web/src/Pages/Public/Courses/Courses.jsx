@@ -12,10 +12,10 @@ import TextField from '@material-ui/core/TextField';
 import Box from '@material-ui/core/Box';
 
 import {useStyles} from './Courses.styles';
-import StandardLayout from '../../../Components/Layouts/StandardLayout';
+import StandardLayout from '../../../Components/Shared/Layouts/StandardLayout';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
-import SectionHeader from '../../../Components/Public/Shared/SectionHeader/SectionHeader';
+import SectionHeader from '../../../Components/Shared/SectionHeader/SectionHeader';
 import JoinCourseItem from '../../../Components/Public/JoinCourseItem/JoinCourseItem';
 import CourseItem from '../../../Components/Public/CourseItem/CourseItem';
 

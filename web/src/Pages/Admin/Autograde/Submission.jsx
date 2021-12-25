@@ -10,7 +10,7 @@ import {translateSubmission} from '../../../Utils/submission';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 
-import useQuery from '../../../hooks/useQuery';
+import useQuery from '../../../Hooks/useQuery';
 
 import StudentCard from '../../../Components/Admin/Stats/Submissions/StudentCard';
 import SubmissionSummary from '../../../Components/Public/Submission/SubmissionSummary';

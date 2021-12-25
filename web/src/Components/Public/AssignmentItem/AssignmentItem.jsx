@@ -4,7 +4,7 @@ import {useHistory} from 'react-router-dom';
 import AssignmentOutlinedIcon from '@material-ui/icons/AssignmentOutlined';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import Item from '../Shared/Item/Item';
+import Item from '../../Shared/Item/Item';
 import {useStyles} from './AssignmentItem.styles';
 
 const AssignmentItem = ({
