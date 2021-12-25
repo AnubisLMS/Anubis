@@ -21,11 +21,6 @@ export default function StandardLayout({title, description = '', children = null
             {title}
           </Typography>
         }
-        {/* {description.map((text, index) => (
-          <Typography variant={'subtitle1'} color={'textSecondary'} key={`desc-${title}-${index}`}>
-            {text}
-          </Typography>
-        ))} */}
       </Grid>
       <Grid item/>
       <Grid item xs={12} md={11}>
