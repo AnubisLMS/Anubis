@@ -10,10 +10,12 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 
 import StandardLayout from '../../../Components/Shared/Layouts/StandardLayout';
+import ListHeader from '../../../Components/Shared/ListHeader/ListHeader';
 import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import standardErrorHandler from '../../../Utils/standardErrorHandler';
 import SectionHeader from '../../../Components/Shared/SectionHeader/SectionHeader';
 import RepoItem from '../../../Components/Public/RepoItem/RepoItem';
+import Divider from '../../../Components/Shared/Divider/Divider';
 
 const Repos = () => {
   const [repos, setRepos] = useState(undefined);
@@ -71,7 +73,9 @@ const Repos = () => {
   return (
     <StandardLayout>
       <DeleteDialog />
-      <SectionHeader title='Repos' />
+      <SectionHeader isPage title='Repos' />
+      <Divider />
+      <ListHeader sections={['Assignment Name', 'Github Username', 'Status', 'Actions']} />
       {repos && repos.map((repo, index) => (
         <RepoItem
           key={`${repo.assignment_name}-${index}`}

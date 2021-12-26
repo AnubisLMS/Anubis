@@ -18,6 +18,8 @@ import standardStatusHandler from '../../../Utils/standardStatusHandler';
 import SectionHeader from '../../../Components/Shared/SectionHeader/SectionHeader';
 import JoinCourseItem from '../../../Components/Public/JoinCourseItem/JoinCourseItem';
 import CourseItem from '../../../Components/Public/CourseItem/CourseItem';
+import Divider from '../../../Components/Shared/Divider/Divider';
+import ListHeader from '../../../Components/Shared/ListHeader/ListHeader';
 
 const joinCourse = (state, enqueueSnackbar) => () => {
   const {joinCode, setReset} = state;
@@ -92,7 +94,8 @@ const Courses = () => {
         </DialogActions>
       </Dialog>
       <SectionHeader title={'Courses'} isPage />
-      <Box className={classes.divider} />
+      <Divider />
+      <ListHeader sections={['Course Name', 'Professor', 'Number of Assignments', 'Actions']} />
       {courses && courses.map((course, index) => (
         <CourseItem
           key={`${course.name}-${index}`}

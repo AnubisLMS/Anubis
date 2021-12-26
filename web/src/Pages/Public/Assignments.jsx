@@ -12,18 +12,11 @@ import standardStatusHandler from '../../Utils/standardStatusHandler';
 import IDEDialog from '../../Components/Public/IDE/IDEDialog';
 import StandardLayout from '../../Components/Shared/Layouts/StandardLayout';
 import SectionHeader from '../../Components/Shared/SectionHeader/SectionHeader';
+import ListHeader from '../../Components/Shared/ListHeader/ListHeader';
+import Divider from '../../Components/Shared/Divider/Divider';
 
-const useStyles = makeStyles((theme) => ({
-  divider: {
-    width: '100%',
-    borderTop: `1px solid ${theme.palette.dark.blue['200']}`,
-    marginTop: theme.spacing(2),
-    height: '1px',
-  },
-}));
 
 const Assignments = () => {
-  const classes = useStyles();
   const query = useQuery();
   const {enqueueSnackbar} = useSnackbar();
   const [assignments, setAssignments] = useState([]);
@@ -76,7 +69,8 @@ const Assignments = () => {
     <StandardLayout>
       <IDEDialog selectedTheia={selectedTheia} setSelectedTheia={setSelectedTheia}/>
       <SectionHeader isPage title='Assignments' />
-      <Box className={classes.divider}/>
+      <Divider />
+      <ListHeader sections={['Assignment Name', 'Submitted', 'Due Date', 'Actions']} />
       {assignments && assignments.map((assignment, index) => (
         <AssignmentItem
           key={`${assignment.name}-${index}`}
