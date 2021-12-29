@@ -27,13 +27,18 @@ spec:
         imagePullPolicy: Always
         command: ['bash', '-c', 'while true; do sleep 60; done']
 
-      - name: theia-base-397
-        image: registry.digitalocean.com/anubis/theia-base:python-3.9.7
+      - name: theia-base-38
+        image: registry.digitalocean.com/anubis/theia-base:python-3.8
         imagePullPolicy: Always
         command: ['bash', '-c', 'while true; do sleep 60; done']
 
-      - name: theia-base-3100
-        image: registry.digitalocean.com/anubis/theia-base:python-3.10.0
+      - name: theia-base-39
+        image: registry.digitalocean.com/anubis/theia-base:python-3.9
+        imagePullPolicy: Always
+        command: ['bash', '-c', 'while true; do sleep 60; done']
+
+      - name: theia-base-310
+        image: registry.digitalocean.com/anubis/theia-base:python-3.10
         imagePullPolicy: Always
         command: ['bash', '-c', 'while true; do sleep 60; done']
 
