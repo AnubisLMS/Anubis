@@ -47,15 +47,5 @@ RUN set -eux; \
 
 VOLUME /var/lib/docker
 
-COPY cli /cli
-RUN pip3 install --no-cache-dir /cli \
-  && rm -rf /cli \
-  && rm -rf /home/node \
-  && find /usr/local -depth \
-  \( \
-  \( -type d -a \( -name test -o -name tests -o -name idle_test -o -name __pycache__ \) \) \
-  -o \( -type f -a \( -name '*.pyc' -o -name '*.pyo' -o -name '*.a' \) \) \
-  \) -exec 'rm' '-rf' '{}' '+'
-
 COPY motd.txt /etc/motd
 COPY supervisord.conf initialize-incluster.py /
