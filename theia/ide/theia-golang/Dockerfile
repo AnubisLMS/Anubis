@@ -1,6 +1,19 @@
 # https://github.com/theia-ide/theia-apps/tree/master/theia-cpp-docker
 
 FROM registry.digitalocean.com/anubis/theia-base:python-3.10 as theia
+USER root
+
+# Step for downloading any new extensions
+COPY latest.package.json package.json
+RUN set -ex; \
+  yarn --pure-lockfile; \
+  yarn theia download:plugins; \
+  yarn --production; \
+  yarn autoclean --force; \
+  yarn cache clean; \
+  find / -depth \
+    \( -name .cache -o -name __pycache__ -o -name '*.pyc' -o -name .git -o -name .github \) \
+    -exec 'rm' '-rf' '{}' '+';
 
 ENV GO_VERSION=1.17 \
   GOOS=linux \
@@ -9,7 +22,6 @@ ENV GO_VERSION=1.17 \
   GOPATH=/opt/go-tools
 ENV PATH=$GOROOT/bin:$GOPATH/bin:$PATH
 
-USER root
 RUN set -ex; \
   cd /home/anubis; \
   mkdir -p $GOROOT; \
