@@ -475,6 +475,7 @@ def create_theia_k8s_pod_pvc(
             name=pod_name,
             labels={
                 "app.kubernetes.io/name": "theia",
+                "component": "theia-session",
                 "role": "theia-session",
                 "netid": netid,
                 "session": theia_session.id,
@@ -810,7 +811,33 @@ def update_theia_session(session: TheiaSession):
 
     # Update the session state from the pod status
     if pod.status.phase == "Pending":
-        session.state = "Waiting for IDE server to start..."
+
+        state_set = False
+
+        # If storage volume needs to be attached, we should check
+        # in the events for the pod if it has been attached.
+        if session.persistent_storage:
+            # Get event list for ide pod
+            events: client.CoreV1EventList = v1.list_namespaced_event(
+                "anubis",
+                field_selector=f'involvedObject.name={pod_name}'
+            )
+
+            # Iterate through events
+            for event in events.items:
+                event: client.CoreV1Event
+
+                # attachdetach-controller starts success messages like
+                # this when volume has attached
+                if 'AttachVolume.Attach succeeded' in event.message:
+
+                    # Set the session state
+                    session.state = "Waiting for home volume to attach..."
+                    state_set = True
+                    break
+
+        if not state_set:
+            session.state = "Waiting for IDE server to start..."
         db.session.commit()
 
     # If the pod has failed. There are more than a few ways that
