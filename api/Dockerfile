@@ -11,7 +11,7 @@ WORKDIR /opt/app
 COPY requirements/common.txt requirements.txt
 
 RUN apt update \
-    && apt install -y mariadb-client git tzdata gcc g++ libmagic-dev fonts-roboto \
+    && apt install -y make mariadb-client git tzdata gcc g++ libmagic-dev fonts-roboto \
   && pip3 install --no-cache-dir -r ./requirements.txt \
   && useradd -M anubis \
   && chown anubis:anubis -R /opt/app \
