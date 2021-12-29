@@ -8,9 +8,7 @@ RUN set -ex; \
   apt update; \
   apt install --no-install-recommends -y ca-certificates git bash; \
   rm -rf /var/cache/apt/*; \
-  rm -rf /var/lib/apt/lists/*; \
-  echo 'set auto-load safe-path /' > /etc/skel/.gdbinit; \
-  echo 'source /opt/pwndbg/gdbinit.py' >> /etc/skel/.gdbinit;
+  rm -rf /var/lib/apt/lists/*;
 
 # Copy entrypoint
 COPY entrypoint.sh /entrypoint.sh

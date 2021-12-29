@@ -10,14 +10,6 @@ fix_permissions() {
     chown -R 1001:1001 /out
 }
 
-# Copy things like .bashrc and .profile from /etc/skel if
-# they dont exist in the volume.
-for i in $(ls -A /etc/skel/); do
-    if [ ! -f /out/$i ]; then
-        cp /etc/skel/$i /out/$i
-    fi
-done
-
 # Add motd to bashrc if it is not there already
 if ! grep '/etc/motd' /out/.bashrc; then
     echo "adding motd to bashrc"
