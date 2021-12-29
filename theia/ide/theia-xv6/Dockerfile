@@ -21,6 +21,8 @@ RUN set -ex; \
   rm -rf /home/node/*; \
   find / -depth \
     \( -name .cache -o -name __pycache__ -o -name '*.pyc' -o -name .git -o -name .github \) \
-    -exec 'rm' '-rf' '{}' '+';
+    -exec 'rm' '-rf' '{}' '+'; \
+  echo 'set auto-load safe-path /' > /etc/skel/.gdbinit; \
+  echo 'source /opt/pwndbg/gdbinit.py' >> /etc/skel/.gdbinit;
 
 USER anubis
