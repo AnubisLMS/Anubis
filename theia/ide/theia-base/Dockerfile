@@ -2,7 +2,7 @@
 
 ARG NODE_VERSION=12.22.6
 
-FROM node:${NODE_VERSION}-buster-slim as base
+FROM node:${NODE_VERSION}-bullseye-slim as base
 
 ARG PY_VERSION=3.10.0
 ENV PY_VERSION=$PY_VERSION \
@@ -13,19 +13,19 @@ ENV PY_VERSION=$PY_VERSION \
     ANUBIS=1 \
     ANUBIS_IDE=1
 
-# Theia application
 WORKDIR /opt/theia
 
+# Setup high level dependencies (mainly python)
 RUN set -ex; \
   apt update; \
   apt-get install -y --no-install-recommends \
     wget gpg gnupg apt-transport-https ca-certificates apt-utils; \
   wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -; \
-  echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster main" \
+  echo "deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye main" \
     > /etc/apt/sources.list.d/llvm.list; \
   apt-get update; \
     apt-get install -y --no-install-recommends \
-    git curl wget build-essential tree clangd \
+    git curl wget build-essential tree clangd zsh exa \
     libffi-dev libexpat1-dev \
     libgdbm-dev liblzma-dev zlib1g-dev \
     libsqlite3-dev libssl-dev openssl \
@@ -77,8 +77,8 @@ RUN set -ex; \
     \( -name .cache -o -name __pycache__ -o -name '*.pyc' -o -name .git -o -name .github \) \
     -exec 'rm' '-rf' '{}' '+';
 
+# Build Theia Application
 COPY latest.package.json package.json
-
 RUN set -ex; \
   yarn --pure-lockfile; \
   NODE_OPTIONS="--max-old-space-size=4096" yarn theia build; \
@@ -101,9 +101,20 @@ RUN set -ex; \
     \( -name .cache -o -name __pycache__ -o -name '*.pyc' -o -name .git -o -name .github \) \
     -exec 'rm' '-rf' '{}' '+';
 
+# PRETTY SHELL NECESSARY
+RUN set -ex; \
+  chsh -s /usr/bin/zsh anubis; \
+  git clone https://github.com/robbyrussell/oh-my-zsh.git /opt/.oh-my-zsh; \
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git /opt/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting;
+COPY zshrc /etc/skel/.zshrc
+
+# Anubis CLI
+COPY cli /cli
+RUN pip3 install --no-cache-dir /cli \
+  && rm -rf /cli
+
 COPY motd.txt /etc/motd
-COPY supervisord.conf autosave-dump.sh /
-COPY autosave /usr/local/bin/autosave
+COPY supervisord.conf initialize-ide.py /
 
 USER anubis
 WORKDIR /opt/theia

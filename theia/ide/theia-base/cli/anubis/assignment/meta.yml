@@ -1,0 +1,24 @@
+assignment:
+  name: "{name}"
+  class: "{course_code}"
+  hidden: true
+
+  # Optionally specify the github template
+  # for students to get their repo.
+  github_repo_required: true
+  github_template: "wabscale/xv6-public"
+
+  # Don't change these!
+  unique_code: "{unique_code}"
+  pipeline_image: "registry.digitalocean.com/anubis/assignment/{unique_code}"
+
+  # Specify the important dates here
+  # * Remember! These are interpreted as America/New_York *
+  date:
+    release: "{now}"
+    due: "{week_from_now}"
+    grace: "{week_from_now}"
+
+  # This description will be shown to the user on the Anubis website.
+  description: |
+    This is a very long description that encompases the entire assignment
