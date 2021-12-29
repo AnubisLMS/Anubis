@@ -134,8 +134,8 @@ def main(debug):
     sys.path.append(os.getcwd())
 
 
-@click.command()
-@click.argument('message', nargs=-1, )
+@main.command()
+@main.argument('message', nargs=-1)
 def autosave(message):
     repo_root = shell('git rev-parse --show-toplevel').strip()
     if 'fatal: not a git repository' in repo_root:
