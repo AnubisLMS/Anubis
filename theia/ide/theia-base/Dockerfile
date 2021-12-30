@@ -18,6 +18,7 @@ WORKDIR /opt/theia
 # Setup high level dependencies (mainly python)
 RUN set -ex; \
   apt update; \
+  apt upgrade -y; \
   apt-get install -y --no-install-recommends \
     wget gpg gnupg apt-transport-https ca-certificates apt-utils; \
   wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -; \
