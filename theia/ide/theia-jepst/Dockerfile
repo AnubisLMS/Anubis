@@ -37,7 +37,8 @@ RUN set -ex; \
    cd /; \
    wget https://snapshot.debian.org/archive/debian/20211205T084953Z/pool/main/g/glibc/libc6_2.32-4_amd64.deb; \
    dpkg -i libc6_2.32-4_amd64.deb; \
-   rm libc6_2.32-4_amd64.deb
+  rm libc6_2.32-4_amd64.deb; \
+  ldconfig
 
 
 USER anubis
