@@ -812,7 +812,8 @@ def update_theia_session(session: TheiaSession):
     # Update the session state from the pod status
     if pod.status.phase == "Pending":
 
-        state_set = False
+        # Boolean to indicate if volume has attached
+        volume_attached: bool = False
 
         # If storage volume needs to be attached, we should check
         # in the events for the pod if it has been attached.
@@ -830,14 +831,18 @@ def update_theia_session(session: TheiaSession):
                 # attachdetach-controller starts success messages like
                 # this when volume has attached
                 if 'AttachVolume.Attach succeeded' in event.message:
-
-                    # Set the session state
-                    session.state = "Waiting for home volume to attach..."
-                    state_set = True
+                    volume_attached = True
                     break
 
-        if not state_set:
+        # If we are expecting a volume, but it has not been attached, then
+        # we should set the status message to state such
+        if session.persistent_storage and not volume_attached:
+            session.state = "Waiting for Persistent Volume to attach..."
+
+        # State that the ide server has not yet started
+        else:
             session.state = "Waiting for IDE server to start..."
+
         db.session.commit()
 
     # If the pod has failed. There are more than a few ways that
