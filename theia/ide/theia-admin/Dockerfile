@@ -19,8 +19,6 @@ RUN set -ex; \
     docker-ce-cli \
     containerd.io \
     iptables \
-    aufs-tools \
-    btrfs-progs \
     e2fsprogs \
     pigz \
     pixz \
@@ -48,4 +46,4 @@ RUN set -eux; \
 VOLUME /var/lib/docker
 
 COPY motd.txt /etc/motd
-COPY supervisord.conf initialize-incluster.py /
+COPY supervisord.conf /
