@@ -32,4 +32,12 @@ RUN set -ex; \
   mv haskell-language-server-Linux-9.0.1 /usr/local/bin/haskell-language-server; \
   rm -rf /var/lib/apt/lists/*;
 
+# Compile and install glibc 2.32 from source
+RUN set -ex; \
+   cd /; \
+   wget https://snapshot.debian.org/archive/debian/20211205T084953Z/pool/main/g/glibc/libc6_2.32-4_amd64.deb; \
+   dpkg -i libc6_2.32-4_amd64.deb; \
+   rm libc6_2.32-4_amd64.deb
+
+
 USER anubis
