@@ -43,6 +43,17 @@ class LackCourseContext(Exception):
     """
 
 
+class GoogleCredentialsException(Exception):
+    """
+    This is raised when the google credentials are
+    invalid in any way. This is not something that
+    will ever be raised in a request context. Because
+    the google apis are only used in rpc jobs, we only
+    need to worry about having exception handlers for
+    this exception there.
+    """
+
+
 def add_app_exception_handlers(app: Flask):
     """
     Add exception handlers to the flask app.

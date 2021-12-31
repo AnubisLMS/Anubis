@@ -49,52 +49,6 @@ def jsonify(data, status_code=200):
     return res
 
 
-def send_noreply_email(message: str, subject: str, recipient: str):
-    """
-    Use this function to send a noreply email to a user (ie student).
-
-    * This will only work on the computer that has the dns pointed to it (ie the server)
-
-    If you set up the dns with namecheap, you can really easily just set
-    the email dns setting to private email. Once that is set, it configures
-    all the spf stuff for you. Doing to MX and spf records by hand are super
-    annoying.
-
-    eg:
-    send_noreply_email('this is the message', 'this is the subject', 'netid@nyu.edu')
-
-    :msg str: email body or message to send
-    :subject str: subject for email
-    :to str: recipient of email (should be their nyu email)
-    """
-
-    if environ.get("DEBUG", False):
-        return print(message, subject, recipient, flush=True)
-
-    message = MIMEText(message, "plain")
-    message["Subject"] = subject
-
-    message["From"] = "noreply@anubis.osiris.services"
-    message["To"] = recipient
-
-    s = SMTP("smtp")
-    s.send_message(message)
-    s.quit()
-
-
-def notify(user, message: str, subject: str):
-    """
-    Send a noreply email to a user.
-
-    :param user:
-    :param message:
-    :param subject:
-    :return:
-    """
-    recipient = "{netid}@nyu.edu".format(netid=user.netid)
-    send_noreply_email(message, subject, recipient)
-
-
 def _verify_data_shape(data, shape, path=None) -> Tuple[bool, Union[str, None]]:
     """
     _verify_data_shape(
