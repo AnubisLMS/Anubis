@@ -9,7 +9,6 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
-import Box from '@material-ui/core/Box';
 
 import {useStyles} from './Courses.styles';
 import StandardLayout from '../../../Components/Shared/Layouts/StandardLayout';
@@ -57,7 +56,7 @@ const Courses = () => {
     joinOpen, setJoinOpen,
     reset, setReset,
   };
-  
+
   return (
     <StandardLayout>
       <Dialog
@@ -90,9 +89,9 @@ const Courses = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      <SectionHeader title={'Courses'} isPage />
-      <Divider />
-      <ListHeader sections={['Course Name', 'Professor', 'Number of Assignments', 'Actions']} />
+      <SectionHeader title={'Courses'} isPage/>
+      <Divider/>
+      <ListHeader sections={['Course Name', 'Professor', 'Number of Assignments', 'Actions']}/>
       {courses && courses.map((course, index) => (
         <CourseItem
           key={`${course.name}-${index}`}
@@ -103,7 +102,7 @@ const Courses = () => {
           id={course.id}
         />
       ))}
-      <JoinCourseItem callback={() => setJoinOpen(true)} />
+      <JoinCourseItem callback={() => setJoinOpen(true)}/>
     </StandardLayout>
   );
 };
