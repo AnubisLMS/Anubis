@@ -84,8 +84,6 @@ export default function QuestionsCard({questions}) {
     });
   };
 
-  console.log(responses);
-
   return (
     <div className={classes.root}>
       <Grid container justify={'center'} spacing={1}>

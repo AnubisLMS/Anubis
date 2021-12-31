@@ -45,7 +45,6 @@ const Courses = () => {
   React.useEffect(() => {
     axios.get('/api/public/courses/').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      console.log(data.courses);
       if (data) {
         setCourses(data.courses);
       }
@@ -58,9 +57,7 @@ const Courses = () => {
     joinOpen, setJoinOpen,
     reset, setReset,
   };
-
-  console.log(courses);
-
+  
   return (
     <StandardLayout>
       <Dialog

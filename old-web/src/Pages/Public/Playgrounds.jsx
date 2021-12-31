@@ -297,8 +297,6 @@ export default function Playgrounds() {
     </Box>
   );
 
-  console.log(availableTags);
-
   return (
     <StandardLayout
       title={'Anubis'}

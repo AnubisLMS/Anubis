@@ -48,7 +48,6 @@ export default function LateExceptionAddCard({assignment, setReset}) {
       enqueueSnackbar('No student selected', {variant: 'error'});
       return;
     }
-    console.log(date);
     axios.post(`/api/admin/late-exceptions/update`, {
       assignment_id: assignment.id,
       user_id: selected.id,

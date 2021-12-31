@@ -28,7 +28,6 @@ const Course = () => {
   React.useEffect(() => {
     axios.get(`/api/public/courses/get/${courseId}`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      console.log(data?.course);
       if (data) {
         setCourse(data.course);
       }

@@ -129,8 +129,6 @@ export default function ManagementIDEDialog() {
   const [session, setSession] = useState(false);
   const [settings, setSettings] = useState({});
 
-  console.log(images);
-
   React.useEffect(() => {
     axios.get('/api/public/ide/available').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);

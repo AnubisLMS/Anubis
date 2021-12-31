@@ -28,7 +28,6 @@ const Repos = () => {
     axios.get('/api/public/repos').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data?.repos) {
-        console.log(data.repos);
         setRepos(data.repos);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));

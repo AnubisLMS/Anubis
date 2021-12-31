@@ -52,9 +52,7 @@ const Assignment = () => {
     }).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       setSubmissions(data.submissions.map(translateSubmission));
-    }).catch((error) => {
-      console.log(error);
-    });
+    }).catch(standardErrorHandler(enqueueSnackbar));
   }, []);
 
   useEffect(() => {
@@ -63,7 +61,7 @@ const Assignment = () => {
       if (data) {
         setAssignment(data.assignment);
       }
-    }).catch((error) => console.log(error));
+    }).catch(standardErrorHandler(enqueueSnackbar));
   }, []);
 
   useEffect(() => {
