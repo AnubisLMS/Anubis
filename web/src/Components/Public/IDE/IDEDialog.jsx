@@ -134,7 +134,6 @@ const startSession = (state, enqueueSnackbar) => () => {
 };
 
 const stopSession = (state, enqueueSnackbar) => () => {
-  console.log('STOP');
   const {session, setAutosaveEnabled, setSession, setLoading, setSessionState, setShowStop} = state;
   if (!session) {
     return;
