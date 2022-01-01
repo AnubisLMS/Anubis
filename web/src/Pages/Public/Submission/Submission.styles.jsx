@@ -43,7 +43,7 @@ export const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     width: '100%',
     height: '100%',
   },
