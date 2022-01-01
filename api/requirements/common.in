@@ -21,7 +21,7 @@ redis
 rq
 sqlalchemy-json
 pandas
-matplotlib
+matplotlib>=3.5.1
 numpy
 discord.py
 aiohttp>=3.7.4
