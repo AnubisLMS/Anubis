@@ -30,6 +30,11 @@ venv:
 test: venv
 	./tests/test.sh
 
+.PHONY: coverage
+coverage:					# Run tests and generate a coverage report
+	env COVERAGE=1 ./tests/test.sh
+	./venv/bin/coverage report -m
+
 .PHONY: migrations          # Run alembic migrations
 migrations: venv
 	./venv/bin/alembic upgrade head

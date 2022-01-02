@@ -3,5 +3,6 @@ venv
 env
 .env
 .data
+.coverage
 
 .pytest_cache

@@ -5,3 +5,4 @@ __pycache__
 .idea
 tests
 .data
+.coverage
