@@ -30,8 +30,8 @@ venv:
 test: venv
 	./tests/test.sh
 
-.PHONY: coverage
-coverage:					# Run tests and generate a coverage report
+.PHONY: coverage            # Run tests and generate a coverage report
+coverage:
 	env COVERAGE=1 ./tests/test.sh
 	./venv/bin/coverage report -m
 
