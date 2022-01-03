@@ -55,6 +55,8 @@ click==7.1.2
     #   flask
     #   pip-tools
     #   rq
+coverage==6.2
+    # via -r requirements/dev.in
 cryptography==35.0.0
     # via -r requirements/common.txt
 cycler==0.11.0

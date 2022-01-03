@@ -6,6 +6,7 @@ cd $(dirname $0)
 
 TEST_ROOT="$(pwd)"
 API_ROOT="$(pwd)/.."
+SOURCE_DIRS="${API_ROOT}/anubis,${API_ROOT}/jobs"
 
 pushd ..
 make venv
@@ -20,5 +21,11 @@ if (( $# == 0 )); then
     python seed.py 1>/dev/null
 fi
 
-echo 'Running tests...'
-exec pytest -p no:warnings $@
+if (( COVERAGE == 1 )); then
+    echo 'Running tests with coverage...'
+    coverage run --source=${SOURCE_DIRS} -m pytest -p no:warnings $@
+    mv ${TEST_ROOT}/.coverage ${API_ROOT}
+else
+    echo 'Running tests...'
+    exec pytest -p no:warnings $@
+fi
