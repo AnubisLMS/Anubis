@@ -78,8 +78,8 @@ autograde-timings: venv
 
 .PHONY: requirements        # pip-compile requirements
 requirements: venv
-	pip-compile --quiet requirements/common.in
-	pip-compile --quiet requirements/dev.in
+	pip-compile --quiet --upgrade requirements/common.in
+	pip-compile --quiet --upgrade requirements/dev.in
 
 debug:
 	make -C .. debug
