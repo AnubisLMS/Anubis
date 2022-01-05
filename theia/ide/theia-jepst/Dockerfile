@@ -20,6 +20,7 @@ RUN set -ex; \
 RUN set -ex; \
   apt-get update; \
   apt-get install -y --no-install-recommends \
+    gdb \
     ghc \
     swi-prolog \
     iverilog \
