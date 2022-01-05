@@ -3,6 +3,7 @@ USER root
 
 # Copy file over for skel initialization
 COPY gdbinit /etc/skel/.gdbinit
+COPY motd.txt /etc/motd
 
 # Step for downloading any new extensions
 COPY latest.package.json package.json
@@ -40,6 +41,5 @@ RUN set -ex; \
    dpkg -i libc6_2.32-4_amd64.deb; \
   rm libc6_2.32-4_amd64.deb; \
   ldconfig
-
 
 USER anubis
