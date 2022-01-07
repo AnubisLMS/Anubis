@@ -26,6 +26,7 @@ import Submission from './Pages/Public/Submission/Submission';
 import Blog from './Pages/Public/Blog';
 import Visuals from './Pages/Public/Visuals/Visuals';
 import Lectures from './Pages/Public/Lectures/Lectures';
+import Playgrounds from './Pages/Public/Playgrounds/Playgrounds';
 
 import Assignment from './Pages/Public/Assignment/Assignment';
 import Course from './Pages/Public/Course/Course';
@@ -58,6 +59,12 @@ export const footer_nav = [
     exact: true,
     path: '/visuals',
     Page: Visuals,
+  },
+  {
+    id: 'Playgrounds',
+    icon: <i className="devicon-vscode-plain" style={{fontSize: 20}}/>,
+    path: '/playgrounds',
+    Page: Playgrounds,
   },
   {
     id: 'Blog',

@@ -38,6 +38,7 @@ import DeviceWarning from './Components/Shared/DeviceWarning';
 import Container from '@material-ui/core/Container';
 
 import TryNewUI from './Components/Shared/TryNewUI';
+import 'devicon/devicon.min.css';
 
 const useStyles = makeStyles(() => ({
   root: {
