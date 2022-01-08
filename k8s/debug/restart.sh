@@ -17,7 +17,7 @@ eval $(minikube docker-env)
 
 pushd ..
 # Build services in parallel to speed things up
-docker-compose build --parallel --pull api old-web web theia-proxy theia-init theia-sidecar
+docker-compose build --parallel --pull api web theia-proxy theia-init theia-sidecar
 popd
 
 ./debug/upgrade.sh

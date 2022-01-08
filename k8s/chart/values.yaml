@@ -25,12 +25,6 @@ web:
   image: "registry.digitalocean.com/anubis/web"
   tag: "latest"
 
-# Anubis old web static
-oldweb:
-  replicas: 2
-  image: "registry.digitalocean.com/anubis/old-web"
-  tag: "latest"
-
 # API for submission pipeline reporting
 pipeline_api:
   replicas: 1

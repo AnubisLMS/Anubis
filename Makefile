@@ -1,13 +1,13 @@
 # Debug
 DEBUG_PERSISTENT_SERVICES := db traefik redis-master
-DEBUG_RESTART_ALWAYS_SERVICES := api web-dev old-web-dev rpc-default rpc-theia rpc-regrade
+DEBUG_RESTART_ALWAYS_SERVICES := api web-dev rpc-default rpc-theia rpc-regrade
 
 # docker-compose settings
-DOCKER_COMPOSE_PUSH_SERVICES := api web old-web theia-init theia-proxy
+DOCKER_COMPOSE_PUSH_SERVICES := api web theia-init theia-proxy
 
 # K8S
 K8S_RESTART_DEPLOYMENTS := \
-	anubis-api anubis-web anubis-old-web anubis-pipeline-api anubis-theia-proxy anubis-rpc-default anubis-rpc-theia \
+	anubis-api anubis-web anubis-pipeline-api anubis-theia-proxy anubis-rpc-default anubis-rpc-theia \
   anubis-rpc-regrade anubis-theia-poller anubis-discord-bot
 
 # Theia IDES
