@@ -30,5 +30,15 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: ${{ matrix.node-version }}
-    - run: yarn
+    - uses: actions/cache@v2
+      id: yarn-cache
+      with:
+        path: |
+          **/node_modules
+          **/.eslintcache
+          ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+    - run: yarn install --frozen-lockfile
     - run: yarn run build
