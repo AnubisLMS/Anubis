@@ -186,7 +186,9 @@ export default function Playgrounds() {
     return (
       <Box className={!isSelected ? classes.image : clsx(classes.image, classes.selectedImage)}>
         <Box className={classes.imageHeader}>
-          <i className={clsx(icon, isSelected ? clsx(classes.icon, classes.opFull): clsx(classes.icon, classes.opLess))} style={{fontSize: 24}}/>
+          <i
+            className={clsx(icon, isSelected ? clsx(classes.icon, classes.opFull) : clsx(classes.icon, classes.opLess))}
+            style={{fontSize: 24}}/>
           <Typography className={isSelected ? classes.opFull : classes.opLess}>{title}</Typography>
         </Box>
         <br/>
@@ -194,7 +196,7 @@ export default function Playgrounds() {
           title={description}
           className={classes.tooltip}
         >
-          <InfoIcon className={isSelected? classes.opFull : classes.opLess} />
+          <InfoIcon className={isSelected ? classes.opFull : classes.opLess}/>
         </Tooltip>
       </Box>
     );
@@ -214,9 +216,9 @@ export default function Playgrounds() {
 
   return (
     <StandardLayout>
-      <SectionHeader isPage title={'Playgrounds'} />
-      <Box className={classes.divider} />
-      <ListHeader sections={['Your Playground', sessionState || 'No Active IDE']} />
+      <SectionHeader isPage title={'Playgrounds'}/>
+      <Box className={classes.divider}/>
+      <ListHeader sections={['Your Playground', sessionState || 'No Active IDE']}/>
       <Box className={classes.imageTagContainer}>
         <Grid container md={12} xs={12} spacing={2}>
           {availableImages && selectedImage && availableImages.map((image, index) => (
@@ -237,7 +239,7 @@ export default function Playgrounds() {
             </Grid>
           ))}
         </Grid>
-        <Box className={classes.divider} />
+        <Box className={classes.divider}/>
         <Grid container className={classes.tagListContainer} md={12} xs={12} spacing={2}>
           {availableTags && selectedTag && availableTags.map((tag, index) => (
             <Grid item xs={12} sm={6} md={3} onClick={() => setSelectedTag(tag)} key={index}>
@@ -254,7 +256,7 @@ export default function Playgrounds() {
 
       <Box className={classes.actionContainer}>
         <Grid container md={12} xs={12} spacing={2}>
-          <Grid item xs={12} sm={3} >
+          <Grid item xs={12} sm={3}>
             <Button
               className={clsx(classes.button, {
                 [classes.buttonSuccess]: session,
