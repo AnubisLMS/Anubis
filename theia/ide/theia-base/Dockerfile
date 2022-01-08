@@ -49,6 +49,9 @@ RUN set -ex; \
   make -j $(nproc) LDFLAGS="-Wl,--strip-all"; \
   make install; \
   ldconfig; \
+  ln -sf /usr/local/bin/python3 /usr/local/bin/python; \
+  ln -sf /usr/local/bin/python3 /usr/bin/python3; \
+  ln -sf /usr/local/bin/python3 /usr/bin/python; \
   cd ..; \
   rm -rf Python-$PY_VERSION; \
   rm Python-$PY_VERSION.tgz; \
