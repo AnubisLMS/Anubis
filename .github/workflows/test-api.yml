@@ -30,19 +30,19 @@ jobs:
       with:
         path: ./.venv/  # what we cache: the virtualenv
         # The cache key depends on requirements.txt
-        key: ${{ runner.os }}-venv-${{ hashFiles('requirements/dev.txt') }}
+        key: ${{ runner.os }}-venv-${{ hashFiles('requirements/dev.txt') }}-${{ hashFiles('../.github/workflows/test-api.yml') }}
         restore-keys: |
           ${{ runner.os }}-venv-
       # Build a virtualenv, but only if it doesn't already exist
     - name: Install dependencies
       run: |
-        set -x
+        set -ex
         python -m venv venv
         if [ -f requirements/dev.txt ]; then ./venv/bin/pip install -r requirements/dev.txt; fi
       if: steps.cache-venv.outputs.cache-hit != 'true'
     - name: Background API
       run: |
-        set -x
+        set -ex
         env MINDEBUG=1 MIGRATE=1 ./venv/bin/python3 dev.py &
     - name: Test with pytest
       run: |
