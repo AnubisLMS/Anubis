@@ -50,6 +50,7 @@ import AdminAssignmentGroups from './Pages/Admin/Assignment/AssignmentGroups';
 // Super
 import SuperConfig from './Pages/Super/Config';
 import SuperIDEImages from './Pages/Super/IDEImages';
+import SuperPlaygrounds from './Pages/Super/Playgrounds';
 
 
 export const footer_nav = [
@@ -160,7 +161,7 @@ export const admin_nav = [
   },
   {
     id: 'Anubis Cloud IDE',
-    icon: <CodeOutlinedIcon/>,
+    icon: <i className="devicon-vscode-plain" style={{fontSize: 20}}/>,
     path: '/admin/ide',
     Page: AdminTheia,
   },
@@ -174,8 +175,14 @@ export const admin_nav = [
 
 export const super_nav = [
   {
+    id: 'Playgrounds',
+    icon: <i className="devicon-vscode-plain" style={{fontSize: 20}}/>,
+    path: '/super/playgrounds',
+    Page: SuperPlaygrounds,
+  },
+  {
     id: 'IDE Images',
-    icon: <CodeOutlinedIcon/>,
+    icon: <i className="devicon-docker-plain" style={{fontSize: 20}}/>,
     path: '/super/ide-images',
     Page: SuperIDEImages,
   },
