@@ -34,14 +34,13 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-venv-
       # Build a virtualenv, but only if it doesn't already exist
-    - run: |
+    - name: Install dependencies
+      run: |
         set -x
         python -m pip install --upgrade pip virtualenv
         virtualenv -p $(which python3) venv
         if [ -f requirements/dev.txt ]; then ./venv/bin/pip install -r requirements/dev.txt; fi
       if: steps.cache-venv.outputs.cache-hit != 'true'
-    - run: . ./.venv/bin/activate
-    - name: Install dependencies
     - name: Background API
       run: |
         set -x
