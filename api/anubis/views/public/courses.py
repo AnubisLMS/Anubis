@@ -52,7 +52,7 @@ def public_courses_get(course_id):
     course_data = get_course_data(current_user.netid, course_id)
 
     if not course_data:
-        return error_response('Course does not exist')
+        return error_response("Course does not exist")
 
     return success_response({"course": course_data})
 

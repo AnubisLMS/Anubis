@@ -10,8 +10,8 @@ from alembic import op
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = '58bdacf47c81'
-down_revision = '83eae1b04c47'
+revision = "58bdacf47c81"
+down_revision = "83eae1b04c47"
 branch_labels = None
 depends_on = None
 
@@ -35,6 +35,4 @@ def downgrade():
     #         "stdout", mysql.TEXT(collation="utf8mb4_unicode_ci"), nullable=True
     #     ),
     # )
-    op.add_column(
-        "static_file", sa.Column("blob", mysql.LONGBLOB(), nullable=True)
-    )
+    op.add_column("static_file", sa.Column("blob", mysql.LONGBLOB(), nullable=True))

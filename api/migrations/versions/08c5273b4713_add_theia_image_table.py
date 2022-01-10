@@ -33,18 +33,18 @@ def upgrade():
             sa.Column("label", sa.String(length=1024), nullable=False),
             sa.Column("public", sa.Boolean(), nullable=False),
             sa.PrimaryKeyConstraint("id"),
-            mysql_charset='utf8mb4',
-            mysql_collate='utf8mb4_general_ci',
+            mysql_charset="utf8mb4",
+            mysql_collate="utf8mb4_general_ci",
         )
 
-        images = conn.execute(sa.text('select distinct image from theia_session;'))
+        images = conn.execute(sa.text("select distinct image from theia_session;"))
         images = [i[0] for i in images]
         images = [
             {
-                'id': get_id(),
-                'image': i,
-                'label': i,
-                'public': 0,
+                "id": get_id(),
+                "image": i,
+                "label": i,
+                "public": 0,
             }
             for i in images
         ]
@@ -55,13 +55,12 @@ def upgrade():
             "assignment",
             sa.Column("theia_image_id", sa.String(length=128), nullable=True),
         )
-        op.create_foreign_key(
-            None, "assignment", "theia_image", ["theia_image_id"], ["id"]
-        )
+        op.create_foreign_key(None, "assignment", "theia_image", ["theia_image_id"], ["id"])
         for i in images:
             conn.execute(
-                sa.text('update assignment set theia_image_id = :id where theia_image = :image;'),
-                id=i['id'], image=i['image'],
+                sa.text("update assignment set theia_image_id = :id where theia_image = :image;"),
+                id=i["id"],
+                image=i["image"],
             )
         op.drop_column("assignment", "theia_image")
 
@@ -72,13 +71,12 @@ def upgrade():
         )
         for i in images:
             conn.execute(
-                sa.text('update theia_session set image_id = :id where image = :image;'),
-                id=i['id'], image=i['image'],
+                sa.text("update theia_session set image_id = :id where image = :image;"),
+                id=i["id"],
+                image=i["image"],
             )
         op.drop_column("theia_session", "image")
-        op.create_foreign_key(
-            None, "theia_session", "theia_image", ["image_id"], ["id"]
-        )
+        op.create_foreign_key(None, "theia_session", "theia_image", ["image_id"], ["id"])
 
         # Handle course table
         op.add_column(
@@ -87,13 +85,12 @@ def upgrade():
         )
         for i in images:
             conn.execute(
-                sa.text('update course set theia_default_image_id = :id where theia_default_image = :image;'),
-                id=i['id'], image=i['image'],
+                sa.text("update course set theia_default_image_id = :id where theia_default_image = :image;"),
+                id=i["id"],
+                image=i["image"],
             )
         op.drop_column("course", "theia_default_image")
-        op.create_foreign_key(
-            None, "course", "theia_image", ["theia_default_image_id"], ["id"]
-        )
+        op.create_foreign_key(None, "course", "theia_image", ["theia_default_image_id"], ["id"])
 
     # ### end Alembic commands ###
 

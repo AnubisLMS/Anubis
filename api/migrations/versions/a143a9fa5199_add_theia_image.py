@@ -30,16 +30,14 @@ def upgrade():
             ["theia_image.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.add_column(
         "assignment",
         sa.Column("theia_image_tag_id", sa.String(length=128), nullable=True),
     )
-    op.create_foreign_key(
-        None, "assignment", "theia_image_tag", ["theia_image_tag_id"], ["id"]
-    )
+    op.create_foreign_key(None, "assignment", "theia_image_tag", ["theia_image_tag_id"], ["id"])
     op.add_column(
         "theia_image",
         sa.Column("default_tag", sa.String(length=128), nullable=True),
@@ -48,9 +46,7 @@ def upgrade():
         "theia_session",
         sa.Column("image_tag_id", sa.String(length=128), nullable=True),
     )
-    op.create_foreign_key(
-        None, "theia_session", "theia_image_tag", ["image_tag_id"], ["id"]
-    )
+    op.create_foreign_key(None, "theia_session", "theia_image_tag", ["image_tag_id"], ["id"])
     # ### end Alembic commands ###
 
 

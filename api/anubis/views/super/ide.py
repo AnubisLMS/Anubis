@@ -11,24 +11,22 @@ from anubis.utils.logging import logger
 ide_ = Blueprint("super-ide", __name__, url_prefix="/super/ide")
 
 
-@ide_.get('/images/list')
+@ide_.get("/images/list")
 @require_superuser()
 @json_response
 def super_ide_images_list():
     images: List[TheiaImage] = TheiaImage.query.all()
 
-    return success_response({
-        'images': [image.data for image in images]
-    })
+    return success_response({"images": [image.data for image in images]})
 
 
-@ide_.post('/images/save')
+@ide_.post("/images/save")
 @require_superuser()
-@json_endpoint([('images', list)])
+@json_endpoint([("images", list)])
 def super_ide_images_save(images: list):
     for image in images:
         image_db: TheiaImage = TheiaImage.query.filter(
-            TheiaImage.id == image['id'],
+            TheiaImage.id == image["id"],
         ).first()
 
         if image_db is None:
@@ -40,10 +38,8 @@ def super_ide_images_save(images: list):
                     value = value.strip()
                 setattr(image_db, field, value)
 
-        for tag in image['tags']:
-            theia_image_tag_db: TheiaImageTag = TheiaImageTag.query.filter(
-                TheiaImageTag.id == tag['id']
-            ).first()
+        for tag in image["tags"]:
+            theia_image_tag_db: TheiaImageTag = TheiaImageTag.query.filter(TheiaImageTag.id == tag["id"]).first()
             for field, value in tag.items():
                 if isinstance(value, str):
                     value = value.strip()
@@ -52,21 +48,23 @@ def super_ide_images_save(images: list):
     db.session.commit()
 
     images: List[TheiaImage] = TheiaImage.query.populate_existing().all()
-    return success_response({
-        'images': [image.data for image in images],
-        'status': 'Images saved',
-    })
+    return success_response(
+        {
+            "images": [image.data for image in images],
+            "status": "Images saved",
+        }
+    )
 
 
-@ide_.post('/images/new')
+@ide_.post("/images/new")
 @require_superuser()
 @json_response
 def super_ide_images_new():
     image_db = TheiaImage(
-        image='registry.digitalocean.com/anubis/theia-xv6',
-        title='theia-xv6',
-        description='theia-xv6',
-        icon='',
+        image="registry.digitalocean.com/anubis/theia-xv6",
+        title="theia-xv6",
+        description="theia-xv6",
+        icon="",
         public=False,
     )
 
@@ -74,35 +72,39 @@ def super_ide_images_new():
     db.session.commit()
 
     images: List[TheiaImage] = TheiaImage.query.all()
-    return success_response({
-        'images': [image.data for image in images],
-        'status': 'Image reference created',
-    })
+    return success_response(
+        {
+            "images": [image.data for image in images],
+            "status": "Image reference created",
+        }
+    )
 
 
-@ide_.post('/image-tags/new/<string:id>')
+@ide_.post("/image-tags/new/<string:id>")
 @require_superuser()
 @load_from_id(TheiaImage)
 @json_response
 def super_ide_image_tags_new(theia_image: TheiaImage):
     image_tag_db = TheiaImageTag(
         image_id=theia_image.id,
-        tag='latest',
-        title='latest',
-        description='',
+        tag="latest",
+        title="latest",
+        description="",
     )
 
     db.session.add(image_tag_db)
     db.session.commit()
 
     images: List[TheiaImage] = TheiaImage.query.all()
-    return success_response({
-        'images': [image.data for image in images],
-        'status': 'Image Tag reference created',
-    })
+    return success_response(
+        {
+            "images": [image.data for image in images],
+            "status": "Image Tag reference created",
+        }
+    )
 
 
-@ide_.delete('/image-tags/delete/<string:id>')
+@ide_.delete("/image-tags/delete/<string:id>")
 @require_superuser()
 @load_from_id(TheiaImageTag)
 @json_response
@@ -111,8 +113,6 @@ def super_ide_image_tags_delete(theia_image_tag: TheiaImageTag):
     db.session.commit()
 
     images: List[TheiaImage] = TheiaImage.query.all()
-    return success_response({
-        'images': [image.data for image in images],
-        'status': 'Image Tag reference deleted',
-        'variant': 'warning'
-    })
+    return success_response(
+        {"images": [image.data for image in images], "status": "Image Tag reference deleted", "variant": "warning"}
+    )

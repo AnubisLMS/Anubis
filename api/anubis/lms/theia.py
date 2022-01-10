@@ -21,10 +21,10 @@ def get_recent_sessions(user_id: str, limit: int = 10, offset: int = 10) -> List
         TheiaSession.query.filter(
             TheiaSession.owner_id == student.id,
         )
-            .order_by(TheiaSession.created.desc())
-            .limit(limit)
-            .offset(offset)
-            .all()
+        .order_by(TheiaSession.created.desc())
+        .limit(limit)
+        .offset(offset)
+        .all()
     )
 
     return [session.data for session in sessions]
@@ -84,9 +84,9 @@ def theia_list_all(user_id: str, limit: int = 10):
         TheiaSession.query.filter(
             TheiaSession.owner_id == user_id,
         )
-            .order_by(TheiaSession.created.desc())
-            .limit(limit)
-            .all()
+        .order_by(TheiaSession.created.desc())
+        .limit(limit)
+        .all()
     )
 
     return [theia_session.data for theia_session in theia_sessions]
@@ -141,19 +141,17 @@ def get_theia_pod_name(theia_session: TheiaSession) -> str:
 def initialize_ide(
     # Required
     image_id: str,
-
     # Optional / Settings
     image_tag_id: str = None,
     assignment_id: str = None,
     course_id: str = None,
-    repo_url: str = '',
+    repo_url: str = "",
     playground: bool = False,
     network_locked: bool = True,
-    network_policy: str = 'os-student',
+    network_policy: str = "os-student",
     autosave: bool = True,
     persistent_storage: bool = True,
     resources: dict = None,
-
     # Admin fields
     admin: bool = False,
     privileged: bool = False,
@@ -166,10 +164,8 @@ def initialize_ide(
         owner_id=current_user.id,
         active=True,
         state="Initializing",
-
         # Required
         image_id=image_id,
-
         # Options / Settings
         image_tag_id=image_tag_id,
         assignment_id=assignment_id,
@@ -181,7 +177,6 @@ def initialize_ide(
         persistent_storage=persistent_storage,
         autosave=autosave,
         resources=resources,
-
         # Admin Options
         admin=admin,
         privileged=privileged,

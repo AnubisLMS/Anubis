@@ -26,7 +26,7 @@ assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assign
 @assignments.post("/shared/<string:id>")
 @require_admin()
 @load_from_id(Assignment, verify_owner=False)
-@json_endpoint([('groups', list)])
+@json_endpoint([("groups", list)])
 def admin_assignments_shared_id(assignment: Assignment, groups: List[List[str]], **__):
     """
     Make a shared assignment
@@ -46,10 +46,12 @@ def admin_assignments_shared_id(assignment: Assignment, groups: List[List[str]],
 
     enqueue_make_shared_assignment(assignment.id, groups)
 
-    return success_response({
-        "assignment": assignment.full_data,
-        'status': 'Group assignments enqueued',
-    })
+    return success_response(
+        {
+            "assignment": assignment.full_data,
+            "status": "Group assignments enqueued",
+        }
+    )
 
 
 @assignments.delete("/reset-repos/<string:id>")
@@ -68,11 +70,13 @@ def admin_assignments_reset_repos_id(assignment: Assignment):
     delete_assignment_repos(assignment)
     db.session.commit()
 
-    return success_response({
-        "assignment": assignment.full_data,
-        "status": 'Repos reset',
-        "variant": 'warning',
-    })
+    return success_response(
+        {
+            "assignment": assignment.full_data,
+            "status": "Repos reset",
+            "variant": "warning",
+        }
+    )
 
 
 @assignments.route("/repos/<string:id>")
@@ -144,10 +148,7 @@ def admin_assignments_repo_delete_id(assignment_repo: AssignmentRepo):
         # Delete the assignment user
         delete_assignment_repo(user, repo.assignment)
 
-    return success_response({
-        "status": "Assignment repo deleted",
-        "variant": "warning"
-    })
+    return success_response({"status": "Assignment repo deleted", "variant": "warning"})
 
 
 @assignments.route("/assignment/<string:id>/questions/get/<string:netid>")
@@ -197,15 +198,17 @@ def admin_assignments_get_id(assignment: Assignment):
     assignment_data = row2dict(assignment)
 
     if assignment.theia_image_id is not None:
-        assignment_data['theia_image'] = assignment.theia_image.data
+        assignment_data["theia_image"] = assignment.theia_image.data
     else:
-        assignment_data['theia_image'] = None
+        assignment_data["theia_image"] = None
 
     # Pass back the full data
-    return success_response({
-        "assignment": assignment_data,
-        "tests": [test.data for test in assignment.tests],
-    })
+    return success_response(
+        {
+            "assignment": assignment_data,
+            "tests": [test.data for test in assignment.tests],
+        }
+    )
 
 
 @assignments.delete("/delete/<string:id>")
@@ -227,16 +230,18 @@ def admin_assignments_delete_id(assignment: Assignment):
 
     # Make sure they are allowed to delete this assignment
     if not is_course_superuser(course_context.id, current_user.id):
-        return error_response('You must be a professor or a superuser to delete this assignment')
+        return error_response("You must be a professor or a superuser to delete this assignment")
 
     # Delete the assignment
     delete_assignment(assignment)
 
     # Pass back the full data
-    return success_response({
-        "status": "Assignment deleted",
-        "variant": "warning",
-    })
+    return success_response(
+        {
+            "status": "Assignment deleted",
+            "variant": "warning",
+        }
+    )
 
 
 @assignments.route("/list")
@@ -404,17 +409,17 @@ def admin_assignments_save(assignment: dict):
             value = dateparse(value.replace("T", " ").replace("Z", ""))
 
         # If github.com is in what the user gave, remove it
-        if key == "github_template" and value.startswith('https://github.com/'):
-            value = value[len('https://github.com/'):]
+        if key == "github_template" and value.startswith("https://github.com/"):
+            value = value[len("https://github.com/") :]
 
-        if key == 'theia_image':
+        if key == "theia_image":
             if value is not None:
-                db_assignment.theia_image_id = value['id']
+                db_assignment.theia_image_id = value["id"]
             else:
                 db_assignment.theia_image_id = None
             continue
 
-        if key == 'theia_image_id':
+        if key == "theia_image_id":
             continue
 
         setattr(db_assignment, key, value)

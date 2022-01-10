@@ -216,11 +216,11 @@ def get_submissions(
 
     query = (
         Submission.query.join(Assignment)
-            .join(Course)
-            .join(InCourse)
-            .join(User)
-            .filter(Submission.owner_id == owner.id, *filters)
-            .order_by(Submission.created.desc())
+        .join(Course)
+        .join(InCourse)
+        .join(User)
+        .filter(Submission.owner_id == owner.id, *filters)
+        .order_by(Submission.created.desc())
     )
 
     all_total = query.count()

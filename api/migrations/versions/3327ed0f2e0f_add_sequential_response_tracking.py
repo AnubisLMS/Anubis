@@ -80,8 +80,8 @@ def upgrade():
             ["assigned_student_question.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.create_index(
         op.f("ix_assigned_student_response_assigned_question_id"),

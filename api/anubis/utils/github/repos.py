@@ -85,7 +85,7 @@ def get_group_assignment_repo_name(users: List[User], assignment: Assignment) ->
     # Get assignment name (lowercase and spaces removed)
     assignment_name = assignment.name.lower().replace(" ", "-")
 
-    github_usernames = '-'.join(user.github_username for user in users)
+    github_usernames = "-".join(user.github_username for user in users)
 
     # Create a repo name from assignment name, unique code and github username
     new_repo_name = f"{assignment_name}-{assignment.unique_code}-{github_usernames}"

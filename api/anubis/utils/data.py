@@ -14,7 +14,7 @@ from anubis.config import config
 from anubis.utils.exceptions import AssertError
 
 
-MYSQL_TEXT_MAX_LENGTH = 2**16 - 1
+MYSQL_TEXT_MAX_LENGTH = 2 ** 16 - 1
 
 
 def is_debug() -> bool:
@@ -180,7 +180,7 @@ def split_chunks(lst, n):
     """
     _chunks = []
     for i in range(0, len(lst), n):
-        _chunks.append(lst[i: i + n])
+        _chunks.append(lst[i : i + n])
     return _chunks
 
 
@@ -237,17 +237,17 @@ def human_readable_datetime(delta: timedelta) -> str:
     hours = delta.seconds // 3600
     minutes = (delta.seconds % 3600) // 60
     seconds = delta.seconds % 60
-    r = f'{seconds}s'
+    r = f"{seconds}s"
     if minutes > 0:
-        r = f'{minutes}m ' + r
+        r = f"{minutes}m " + r
     if hours > 0:
-        r = f'{hours}h ' + r
+        r = f"{hours}h " + r
     if days > 0:
-        r = f'{days}d ' + r
+        r = f"{days}d " + r
     if weeks > 0:
-        r = f'{weeks}w ' + r
+        r = f"{weeks}w " + r
     if years > 0:
-        r = f'{years}y ' + r
+        r = f"{years}y " + r
     return r
 
 

@@ -86,4 +86,3 @@ def super_playgrounds_stop_all():
 
     # Hand back status
     return success_response({"status": "Reap job enqueued. Session cleanup will take a minute."})
-

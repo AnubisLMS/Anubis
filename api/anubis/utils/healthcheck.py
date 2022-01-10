@@ -30,10 +30,10 @@ def add_healthcheck(app: Flask):
         # Construct basic status & status code
         status_code = 200
         status = {
-            'service': config.LOGGER_NAME,
-            'api': 'Healthy',
-            'db': 'Healthy',
-            'cache': 'Healthy',
+            "service": config.LOGGER_NAME,
+            "api": "Healthy",
+            "db": "Healthy",
+            "cache": "Healthy",
         }
 
         # Attempt to connect to db
@@ -43,7 +43,7 @@ def add_healthcheck(app: Flask):
         # If there is any issue, mark the db
         # connection as Unhealthy
         except:
-            status['db'] = 'Unhealthy'
+            status["db"] = "Unhealthy"
             status_code = 500
 
         # Attempt to connect to cache
@@ -53,7 +53,7 @@ def add_healthcheck(app: Flask):
         # If there is any issue, mark the cache
         # connection as Unhealthy
         except:
-            status['cache'] = 'Unhealthy'
+            status["cache"] = "Unhealthy"
             status_code = 500
 
         # Pass back status and status_code

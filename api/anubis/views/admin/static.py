@@ -64,8 +64,8 @@ def admin_static_list():
     # it is not loaded.
     query = (
         StaticFile.query.filter(StaticFile.course_id == course_context.id)
-            .order_by(StaticFile.created.desc())
-            .options(defer(StaticFile.blob))
+        .order_by(StaticFile.created.desc())
+        .options(defer(StaticFile.blob))
     )
 
     # Get all public static files within this course

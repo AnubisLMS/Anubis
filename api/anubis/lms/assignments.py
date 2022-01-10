@@ -104,21 +104,21 @@ def get_all_assignments(course_ids: Set[str], admin_course_ids: Set[str]) -> Lis
     # Get the assignment objects that should be visible to this user.
     regular_course_assignments = (
         Assignment.query.join(Course)
-            .filter(
+        .filter(
             Course.id.in_(list(course_ids.difference(admin_course_ids))),
             Assignment.release_date <= datetime.now(),
             Assignment.hidden == False,
         )
-            .all()
+        .all()
     )
 
     # Get the assignment objects that should be visible to this user.
     admin_course_assignments = (
         Assignment.query.join(Course)
-            .filter(
+        .filter(
             Course.id.in_(list(admin_course_ids)),
         )
-            .all()
+        .all()
     )
 
     # Add all the assignment objects to the running list
@@ -254,11 +254,11 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
         # Find if the assignment test exists
         assignment_test = (
             AssignmentTest.query.join(Assignment)
-                .filter(
+            .filter(
                 Assignment.id == assignment.id,
                 AssignmentTest.name == test_name,
             )
-                .first()
+            .first()
         )
 
         # Create the assignment test if it did not already exist
@@ -343,20 +343,14 @@ def delete_assignment_submissions(assignment: Assignment):
     :param assignment:
     :return:
     """
-    submission_ids = db.session.query(Submission.id).filter(
-        Submission.assignment_id == assignment.id
+    submission_ids = db.session.query(Submission.id).filter(Submission.assignment_id == assignment.id)
+    SubmissionTestResult.query.filter(SubmissionTestResult.submission_id.in_(submission_ids.subquery())).delete(
+        synchronize_session=False
     )
-    SubmissionTestResult.query.filter(
-        SubmissionTestResult.submission_id.in_(
-            submission_ids.subquery()
-        )
-    ).delete(synchronize_session=False)
 
-    SubmissionBuild.query.filter(
-        SubmissionBuild.submission_id.in_(
-            submission_ids.subquery()
-        )
-    ).delete(synchronize_session=False)
+    SubmissionBuild.query.filter(SubmissionBuild.submission_id.in_(submission_ids.subquery())).delete(
+        synchronize_session=False
+    )
 
     Submission.query.filter(
         Submission.assignment_id == assignment.id,
@@ -374,22 +368,16 @@ def delete_assignment_questions(assignment: Assignment):
         AssignmentQuestion.assignment_id == assignment.id
     )
     AssignedQuestionResponse.query.filter(
-        AssignedQuestionResponse.assigned_question_id.in_(
-            assigned_question_ids.subquery()
-        )
+        AssignedQuestionResponse.assigned_question_id.in_(assigned_question_ids.subquery())
     ).delete(synchronize_session=False)
-    AssignedStudentQuestion.query.filter(
-        AssignedStudentQuestion.assignment_id == assignment.id
-    ).delete(synchronize_session=False)
-    AssignmentQuestion.query.filter(
-        AssignmentQuestion.assignment_id == assignment.id
-    ).delete(synchronize_session=False)
+    AssignedStudentQuestion.query.filter(AssignedStudentQuestion.assignment_id == assignment.id).delete(
+        synchronize_session=False
+    )
+    AssignmentQuestion.query.filter(AssignmentQuestion.assignment_id == assignment.id).delete(synchronize_session=False)
 
 
 def delete_assignment_repos(assignment: Assignment):
-    repos: List[AssignmentRepo] = AssignmentRepo.query.filter(
-        AssignmentRepo.assignment_id == assignment.id
-    ).all()
+    repos: List[AssignmentRepo] = AssignmentRepo.query.filter(AssignmentRepo.assignment_id == assignment.id).all()
 
     for repo in repos:
         delete_assignment_repo(repo.owner, assignment, commit=False)
@@ -407,19 +395,13 @@ def delete_assignment(assignment: Assignment) -> None:
     delete_assignment_repos(assignment)
 
     # Delete assignment tests
-    AssignmentTest.query.filter(
-        AssignmentTest.assignment_id == assignment.id
-    ).delete(synchronize_session=False)
+    AssignmentTest.query.filter(AssignmentTest.assignment_id == assignment.id).delete(synchronize_session=False)
 
     # Delete theia sessions
-    TheiaSession.query.filter(
-        TheiaSession.assignment_id == assignment.id
-    ).delete(synchronize_session=False)
+    TheiaSession.query.filter(TheiaSession.assignment_id == assignment.id).delete(synchronize_session=False)
 
     # Delete assignment
-    Assignment.query.filter(
-        Assignment.id == assignment.id
-    ).delete(synchronize_session=False)
+    Assignment.query.filter(Assignment.id == assignment.id).delete(synchronize_session=False)
 
     db.session.commit()
 
@@ -440,7 +422,7 @@ def convert_group_netids_to_group_users(group_netids: List[List[str]]) -> Tuple[
     # Assert that all the netids are known. If they are not, eject from the request
     req_assert(
         len(not_found_netids) == 0,
-        message="Action not complete. Netids are not known to Anubis: " + str(not_found_netids)
+        message="Action not complete. Netids are not known to Anubis: " + str(not_found_netids),
     )
 
     # netid -> User
@@ -496,7 +478,7 @@ def make_shared_assignment(assignment_id: str, group_netids: List[List[str]]) ->
 
         # Track repos that failed to create
         if not all(repo.repo_created for repo in repos):
-            failed_to_create.append(','.join(user.netid for user in group))
+            failed_to_create.append(",".join(user.netid for user in group))
 
         # Track repos that failed to have collaborators configured
         for repo in repos:
@@ -505,16 +487,12 @@ def make_shared_assignment(assignment_id: str, group_netids: List[List[str]]) ->
 
     req_assert(
         len(failed_to_configure) == 0 and len(failed_to_create) == 0,
-        message=f"Failed to configure: {str(failed_to_configure)} \n"
-                f"Failed to create: {str(failed_to_create)} \n"
+        message=f"Failed to configure: {str(failed_to_configure)} \n" f"Failed to create: {str(failed_to_create)} \n",
     )
 
     return {
-        'groups': [
-            [user.netid for user in group]
-            for group in groups
-        ],
-        'repos': [repo.data for repo in all_repos],
+        "groups": [[user.netid for user in group] for group in groups],
+        "repos": [repo.data for repo in all_repos],
     }
 
 
@@ -539,12 +517,4 @@ def get_assignment_tests(submission: Submission, only_visible=False):
     tests = query.all()
 
     # Convert to dictionary data
-    return [
-        {
-            "test": result.assignment_test.data,
-            "result": result.data
-        }
-        for result in tests
-    ]
-
-
+    return [{"test": result.assignment_test.data, "result": result.data} for result in tests]

@@ -209,18 +209,8 @@ def create_theia_k8s_pod_pvc(
     # If the theia_session is marked as an admin session, then we can turn on any
     # admin features in the IDE by passing in the proper ADMIN environment variables.
     if admin:
-        sidecar_extra_env.append(
-            client.V1EnvVar(
-                name='ADMIN',
-                value='ON'
-            )
-        )
-        theia_extra_env.append(
-            client.V1EnvVar(
-                name='ADMIN',
-                value='ON'
-            )
-        )
+        sidecar_extra_env.append(client.V1EnvVar(name="ADMIN", value="ON"))
+        theia_extra_env.append(client.V1EnvVar(name="ADMIN", value="ON"))
 
     ##################################################################################
     # INIT CONTAINER
@@ -314,11 +304,15 @@ def create_theia_k8s_pod_pvc(
             theia_extra_env.append(
                 client.V1EnvVar(
                     name="COURSE_CONTEXT",
-                    value=base64.urlsafe_b64encode(json.dumps({
-                        'id': theia_session.course.id,
-                        'name': theia_session.course.name,
-                        'course_code': theia_session.course.course_code,
-                    }).encode()).decode(),
+                    value=base64.urlsafe_b64encode(
+                        json.dumps(
+                            {
+                                "id": theia_session.course.id,
+                                "name": theia_session.course.name,
+                                "course_code": theia_session.course.course_code,
+                            }
+                        ).encode()
+                    ).decode(),
                 )
             )
 
@@ -326,10 +320,12 @@ def create_theia_k8s_pod_pvc(
     if theia_session.course_id is not None:
         # Set the course code to be the course code for the course
         # that this theia session belongs to.
-        theia_extra_env.append(client.V1EnvVar(
-            name="COURSE_CODE",
-            value=theia_session.course.course_code,
-        ))
+        theia_extra_env.append(
+            client.V1EnvVar(
+                name="COURSE_CODE",
+                value=theia_session.course.course_code,
+            )
+        )
 
     # Figure out which uid to use
     theia_user_id = 1001
@@ -365,7 +361,7 @@ def create_theia_k8s_pod_pvc(
         )
 
     theia_image = theia_session.image.image
-    theia_image_tag = theia_session.image.default_tag or 'latest'
+    theia_image_tag = theia_session.image.default_tag or "latest"
     if theia_session.image_tag is not None:
         theia_image_tag = theia_session.image_tag.tag
 
@@ -383,7 +379,7 @@ def create_theia_k8s_pod_pvc(
         # Use the theia image that was specified in the database. If this is
         # a student session, this should be the theia image that is default either
         # for the course, or for the specific assignment.
-        image=f'{theia_image}:{theia_image_tag}',
+        image=f"{theia_image}:{theia_image_tag}",
         # Add environment
         env=[
             # Set the AUTOSAVE environment variable to ON or OFF
@@ -820,8 +816,7 @@ def update_theia_session(session: TheiaSession):
         if session.persistent_storage:
             # Get event list for ide pod
             events: client.CoreV1EventList = v1.list_namespaced_event(
-                "anubis",
-                field_selector=f'involvedObject.name={pod_name}'
+                "anubis", field_selector=f"involvedObject.name={pod_name}"
             )
 
             # Iterate through events
@@ -830,7 +825,7 @@ def update_theia_session(session: TheiaSession):
 
                 # attachdetach-controller starts success messages like
                 # this when volume has attached
-                if 'AttachVolume.Attach succeeded' in event.message:
+                if "AttachVolume.Attach succeeded" in event.message:
                     volume_attached = True
                     break
 

@@ -91,7 +91,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
     privileged = settings.get("privileged", True)
     persistent_storage = settings.get("persistent_storage", False)
 
-    image_id = image.get('id', None)
+    image_id = image.get("id", None)
     if image_id is not None:
         image: TheiaImage = TheiaImage.query.filter(TheiaImage.id == image_id).first()
     if image is None or image == dict():
@@ -116,11 +116,9 @@ def admin_ide_initialize_custom(settings: dict, **_):
 
     session: TheiaSession = initialize_ide(
         image_id=image.id,
-
         assignment_id=None,
         course_id=course_context.id,
         repo_url=repo_url,
-
         # Options
         admin=admin,
         network_locked=network_locked,
@@ -132,11 +130,13 @@ def admin_ide_initialize_custom(settings: dict, **_):
         persistent_storage=persistent_storage,
     )
 
-    return success_response({
-        "session": session.data,
-        "settings": session.settings,
-        "status": "Admin IDE Initialized.",
-    })
+    return success_response(
+        {
+            "session": session.data,
+            "settings": session.settings,
+            "status": "Admin IDE Initialized.",
+        }
+    )
 
 
 @ide.route("/active")
@@ -244,12 +244,10 @@ def private_ide_reap_all():
     return success_response({"status": "Reap job enqueued. Session cleanup will take a minute."})
 
 
-@ide.get('/images/list')
+@ide.get("/images/list")
 @require_admin()
 @json_response
 def admin_ide_images_list():
     images: List[TheiaImage] = TheiaImage.query.all()
 
-    return success_response({
-        'images': [image.data for image in images]
-    })
+    return success_response({"images": [image.data for image in images]})

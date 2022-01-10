@@ -16,12 +16,12 @@ def assert_google_credentials(google_credentials: google.oauth2.credentials.Cred
     # Exit with error if google_creds is None at this point. Exiting with 1 will
     # make the pod fail which we can set up alerts for later.
     if google_credentials is None:
-        raise GoogleCredentialsException('MISSING GOOGLE API CREDENTIALS')
+        raise GoogleCredentialsException("MISSING GOOGLE API CREDENTIALS")
 
     # The token can expire or be disabled. In these cases, then there is nothing
     # more we can do. Exit with an error.
     if not google_credentials.valid:
-        raise GoogleCredentialsException('GOOGLE API CREDENTIALS INVALID')
+        raise GoogleCredentialsException("GOOGLE API CREDENTIALS INVALID")
 
 
 def build_google_service(

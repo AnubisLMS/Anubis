@@ -5,7 +5,13 @@ from typing import Dict
 from flask import Blueprint, request
 
 from anubis.lms.courses import is_course_admin
-from anubis.lms.theia import get_n_available_sessions, theia_poll_ide, theia_redirect_url, initialize_ide, assert_theia_sessions_enabled
+from anubis.lms.theia import (
+    get_n_available_sessions,
+    theia_poll_ide,
+    theia_redirect_url,
+    initialize_ide,
+    assert_theia_sessions_enabled,
+)
 from anubis.models import Assignment, AssignmentRepo, TheiaSession, db
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
@@ -36,12 +42,12 @@ def public_ide_initialize(assignment: Assignment):
     # Check for existing active session
     active_session = (
         TheiaSession.query.join(Assignment)
-            .filter(
+        .filter(
             TheiaSession.owner_id == current_user.id,
             TheiaSession.assignment_id == assignment.id,
             TheiaSession.active,
         )
-            .first()
+        .first()
     )
 
     # If there was an existing session for this assignment found, skip
@@ -89,7 +95,7 @@ def public_ide_initialize(assignment: Assignment):
         req_assert(
             repo is not None,
             message="Anubis can not find your assignment repo. "
-                    "Please make sure your github username is set and is correct.",
+            "Please make sure your github username is set and is correct.",
         )
         # Update the repo url
         repo_url = repo.repo_url
@@ -113,7 +119,6 @@ def public_ide_initialize(assignment: Assignment):
 
     session: TheiaSession = initialize_ide(
         image_id=assignment.theia_image_id,
-
         assignment_id=assignment.id,
         course_id=assignment.course_id,
         repo_url=repo_url,
@@ -123,7 +128,6 @@ def public_ide_initialize(assignment: Assignment):
         persistent_storage=persistent_storage,
         autosave=autosave,
         resources=resources,
-
         admin=False,
         privileged=False,
         credentials=False,
@@ -156,9 +160,11 @@ def public_ide_available():
     session_available: bool = active_count < max_count
 
     # pass back if sessions are available
-    return success_response({
-        "session_available": session_available,
-    })
+    return success_response(
+        {
+            "session_available": session_available,
+        }
+    )
 
 
 @ide_.route("/active/<string:assignment_id>")
@@ -183,10 +189,12 @@ def public_ide_active(assignment_id):
         return success_response({"active": False})
 
     # If they do have a session, then pass back True
-    return success_response({
-        "active": True,
-        "session": session.data,
-    })
+    return success_response(
+        {
+            "active": True,
+            "session": session.data,
+        }
+    )
 
 
 @ide_.route("/stop/<string:theia_session_id>")

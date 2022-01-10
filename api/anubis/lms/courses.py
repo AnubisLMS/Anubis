@@ -369,29 +369,30 @@ def get_course_data(netid: str, course_id: str) -> Optional[Dict[str, Any]]:
         return None
 
     # Query for course with id
-    course: Course = Course.query.filter(
-        Course.id == course_id
-    ).first()
+    course: Course = Course.query.filter(Course.id == course_id).first()
 
     course_data = course.data
 
     # Query for tas in course
     tas = (
         User.query.join(TAForCourse)
-            .filter(
+        .filter(
             TAForCourse.course_id == course_id,
         )
-            .all()
+        .all()
     )
 
     # Return course and ta data
-    return {**course_data, "tas": [
-        {
-            "name": ta.name,
-            "netid": ta.netid,
-        }
-        for ta in tas
-    ]}
+    return {
+        **course_data,
+        "tas": [
+            {
+                "name": ta.name,
+                "netid": ta.netid,
+            }
+            for ta in tas
+        ],
+    }
 
 
 @cache.memoize(timeout=60, unless=is_debug)
@@ -417,10 +418,10 @@ def get_student_course_ids(user: User, default: str = None) -> List[str]:
         # Get all the courses the user is in
         in_courses = (
             InCourse.query.join(Course)
-                .filter(
+            .filter(
                 InCourse.owner_id == user.id,
             )
-                .all()
+            .all()
         )
 
         # Build a list of course ids. If the user
@@ -651,10 +652,7 @@ def get_beta_ui_enabled(netid: str):
     # If any course in the courses this student is in
     # have the Beta UI enabled, then this will return
     # True
-    return any(
-        course.get('beta_ui_enabled', False)
-        for course in courses_data
-    )
+    return any(course.get("beta_ui_enabled", False) for course in courses_data)
 
 
 def add_all_users_to_course(users: List[User], course: Course) -> int:

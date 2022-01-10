@@ -84,4 +84,4 @@ def enqueue_assign_missing_questions(*args):
 
 def enqueue_make_shared_assignment(*args):
     """Enqueue make shared assignment"""
-    rpc_enqueue(make_shared_assignment, queue='default', args=args)
+    rpc_enqueue(make_shared_assignment, queue="default", args=args)

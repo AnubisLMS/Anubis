@@ -59,7 +59,7 @@ def public_set_github_username():
         not github_username.startswith("-"),
         not github_username.endswith("-"),
         message="Github usernames may only contain alphanumeric characters "
-                "or single hyphens, and cannot begin or end with a hyphen.",
+        "or single hyphens, and cannot begin or end with a hyphen.",
     )
 
     # Check to see if the github username they gave us belongs to

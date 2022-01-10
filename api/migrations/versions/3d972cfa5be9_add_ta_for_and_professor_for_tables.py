@@ -31,8 +31,8 @@ def upgrade():
             ["user.id"],
         ),
         sa.PrimaryKeyConstraint("owner_id", "course_id"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.create_table(
         "ta_for_course",
@@ -47,8 +47,8 @@ def upgrade():
             ["user.id"],
         ),
         sa.PrimaryKeyConstraint("owner_id", "course_id"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.alter_column("assignment", "name", existing_type=mysql.MEDIUMTEXT(), nullable=False)
     op.alter_column(

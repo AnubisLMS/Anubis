@@ -15,9 +15,7 @@ from anubis.utils.http.files import get_mime_type
 from anubis.utils.logging import logger
 
 
-def create_message(
-    sender: str, to: str, subject: str, message_text: str
-) -> Dict[str, str]:
+def create_message(sender: str, to: str, subject: str, message_text: str) -> Dict[str, str]:
     """Create a message for an email.
 
     Args:
@@ -29,27 +27,32 @@ def create_message(
     Returns:
       An object containing a base64url encoded email object.
     """
-    message = MIMEMultipart('mixed')
-    message['to'] = to
-    message['from'] = sender
-    message['subject'] = subject
+    message = MIMEMultipart("mixed")
+    message["to"] = to
+    message["from"] = sender
+    message["subject"] = subject
 
-    alt = MIMEMultipart('alternative')
-    plain = MIMEText(message_text, 'plain')
+    alt = MIMEMultipart("alternative")
+    plain = MIMEText(message_text, "plain")
     alt.attach(plain)
 
-    rel = MIMEMultipart('related')
-    html = MIMEText(message_text, 'html')
+    rel = MIMEMultipart("related")
+    html = MIMEText(message_text, "html")
     rel.attach(html)
 
     alt.attach(rel)
 
     message.attach(alt)
-    return {'raw': base64.urlsafe_b64encode(message.as_string().encode()).decode()}
+    return {"raw": base64.urlsafe_b64encode(message.as_string().encode()).decode()}
 
 
 def create_message_with_attachment(
-    sender: str, to: str, subject: str, message_text: str, file: io.BytesIO, filename: str,
+    sender: str,
+    to: str,
+    subject: str,
+    message_text: str,
+    file: io.BytesIO,
+    filename: str,
 ) -> Dict[str, str]:
     """Create a message for an email.
 
@@ -65,9 +68,9 @@ def create_message_with_attachment(
       An object containing a base64url encoded email object.
     """
     message = MIMEMultipart()
-    message['to'] = to
-    message['from'] = sender
-    message['subject'] = subject
+    message["to"] = to
+    message["from"] = sender
+    message["subject"] = subject
 
     msg = MIMEText(message_text)
     message.attach(msg)
@@ -76,29 +79,29 @@ def create_message_with_attachment(
     file.seek(0)
 
     if content_type is None:
-        content_type = 'application/octet-stream'
+        content_type = "application/octet-stream"
 
-    main_type, sub_type = content_type.split('/', 1)
-    if main_type == 'text':
-        msg = MIMEText(file.read().decode('utf-8', errors='ignore'), _subtype=sub_type)
-    elif main_type == 'image':
+    main_type, sub_type = content_type.split("/", 1)
+    if main_type == "text":
+        msg = MIMEText(file.read().decode("utf-8", errors="ignore"), _subtype=sub_type)
+    elif main_type == "image":
         msg = MIMEImage(file.read(), _subtype=sub_type)
-    elif main_type == 'audio':
+    elif main_type == "audio":
         msg = MIMEAudio(file.read(), _subtype=sub_type)
     else:
         msg = MIMEBase(main_type, sub_type)
         msg.set_payload(file.read())
 
-    msg.add_header('Content-Disposition', 'attachment', filename=filename)
+    msg.add_header("Content-Disposition", "attachment", filename=filename)
     message.attach(msg)
 
-    return {'raw': base64.urlsafe_b64encode(message.as_string().encode()).decode()}
+    return {"raw": base64.urlsafe_b64encode(message.as_string().encode()).decode()}
 
 
 def send_message(
     service: googleapiclient.discovery.Resource,
     message: Dict[str, bytes],
-    user_id='me',
+    user_id="me",
     force: bool = False,
     raise_: bool = False,
 ):
@@ -114,14 +117,12 @@ def send_message(
       Sent Message.
     """
 
-    logger.info(f'SENDING EMAIL {json.dumps(message)}')
+    logger.info(f"SENDING EMAIL {json.dumps(message)}")
     if not force and is_debug():
         return
 
     try:
-        message = service.users().messages().send(
-            userId=user_id, body=message
-        ).execute()
+        message = service.users().messages().send(userId=user_id, body=message).execute()
         return message
     except Exception as e:
         if raise_:

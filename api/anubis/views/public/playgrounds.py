@@ -28,9 +28,9 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
     req_assert(theia_image.public, message="Unable to find", status_code=400)
 
     # Get the requested tag information
-    requested_tag = request.args.get('tag', 'latest')
+    requested_tag = request.args.get("tag", "latest")
     image_tag_id = None
-    if requested_tag != 'latest':
+    if requested_tag != "latest":
         image_tag: TheiaImageTag = TheiaImageTag.query.filter(
             TheiaImageTag.id == requested_tag,
             TheiaImageTag.image_id == theia_image.id,
@@ -59,28 +59,28 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
     session: TheiaSession = initialize_ide(
         image_id=theia_image.id,
         image_tag_id=image_tag_id,
-
         assignment_id=None,
         course_id=None,
-        repo_url='',
+        repo_url="",
         playground=True,
         network_locked=True,
-        network_policy='os-student',
+        network_policy="os-student",
         persistent_storage=True,
         autosave=False,
         resources=dict(),
-
         admin=False,
         privileged=False,
         credentials=False,
     )
 
     # Redirect to proxy
-    return success_response({
-        "active": session.active,
-        "session": session.data,
-        "status": "Session created",
-    })
+    return success_response(
+        {
+            "active": session.active,
+            "session": session.data,
+            "status": "Session created",
+        }
+    )
 
 
 @playgrounds_.route("/active")
@@ -105,13 +105,15 @@ def public_playgrounds_active():
         return success_response({"active": False})
 
     # If they do have a session, then pass back True
-    return success_response({
-        "active": True,
-        "session": session.data,
-    })
+    return success_response(
+        {
+            "active": True,
+            "session": session.data,
+        }
+    )
 
 
-@playgrounds_.get('/images')
+@playgrounds_.get("/images")
 @require_user()
 @json_response
 def public_playgrounds_images():
@@ -121,10 +123,6 @@ def public_playgrounds_images():
     :return:
     """
 
-    images: List[TheiaImage] = TheiaImage.query.filter(
-        TheiaImage.public == True
-    ).all()
+    images: List[TheiaImage] = TheiaImage.query.filter(TheiaImage.public == True).all()
 
-    return success_response({
-        'images': [image.data for image in images]
-    })
+    return success_response({"images": [image.data for image in images]})

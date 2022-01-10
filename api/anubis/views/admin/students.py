@@ -125,14 +125,14 @@ def admin_students_submissions_id(id: str):
     # Get n most recent submissions from the user
     submissions = (
         Submission.query.join(Assignment)
-            .filter(
+        .filter(
             Submission.owner_id == student.id,
             Assignment.course_id == course_context.id,
         )
-            .order_by(Submission.created.desc())
-            .limit(limit)
-            .offset(offset)
-            .all()
+        .order_by(Submission.created.desc())
+        .limit(limit)
+        .offset(offset)
+        .all()
     )
 
     # Pass back the student and submission information

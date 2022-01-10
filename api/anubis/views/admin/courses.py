@@ -25,9 +25,9 @@ def admin_courses_list():
 
     course_data = row2dict(course_context)
     if course_context.theia_default_image_id is not None:
-        course_data['theia_default_image'] = course_context.theia_default_image.data
+        course_data["theia_default_image"] = course_context.theia_default_image.data
     else:
-        course_data['theia_default_image'] = None
+        course_data["theia_default_image"] = None
 
     # Return the course context broken down
     return success_response(
@@ -111,13 +111,13 @@ def admin_courses_save_id(course: dict):
             if isinstance(value, str):
                 value = value.strip()
 
-            if key == 'theia_default_image_id':
+            if key == "theia_default_image_id":
                 continue
 
             setattr(db_course, key, value)
 
-    if course['theia_default_image'] is not None:
-        db_course.theia_default_image_id = course['theia_default_image']['id']
+    if course["theia_default_image"] is not None:
+        db_course.theia_default_image_id = course["theia_default_image"]["id"]
     else:
         db_course.theia_default_image_id = None
 
@@ -145,10 +145,10 @@ def admin_course_list_students():
     # Get all the students in the current course context
     students = (
         User.query.join(InCourse)
-            .filter(
+        .filter(
             InCourse.course_id == course_context.id,
         )
-            .all()
+        .all()
     )
 
     # Return the list of basic user information about the tas
@@ -180,10 +180,10 @@ def admin_course_list_tas():
     # Get all the TAs in the current course context
     tas = (
         User.query.join(TAForCourse)
-            .filter(
+        .filter(
             TAForCourse.course_id == course_context.id,
         )
-            .all()
+        .all()
     )
 
     # Return the list of basic user information about the tas
@@ -215,10 +215,10 @@ def admin_course_list_professors():
     # Get all the professors within the current course context
     professors = (
         User.query.join(ProfessorForCourse)
-            .filter(
+        .filter(
             ProfessorForCourse.course_id == course_context.id,
         )
-            .all()
+        .all()
     )
 
     # Return the list of basic user information about the professors

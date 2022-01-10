@@ -42,7 +42,7 @@ def create_token(netid: str, exp_kwargs=None, **extras) -> Union[str, None]:
     user: User = User.query.filter_by(netid=netid).first()
 
     # Get setting for number of hours that tokens should last.
-    token_exp_hours = get_config_int('AUTH_TOKEN_EXP_HOURS', default=6)
+    token_exp_hours = get_config_int("AUTH_TOKEN_EXP_HOURS", default=6)
 
     # Set the expire kwargs
     if exp_kwargs is None:

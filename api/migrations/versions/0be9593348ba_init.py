@@ -22,8 +22,8 @@ def upgrade():
         sa.Column("key", sa.String(length=128), nullable=False),
         sa.Column("value", sa.String(length=2048), nullable=True),
         sa.PrimaryKeyConstraint("key"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.create_table(
         "course",
@@ -34,8 +34,8 @@ def upgrade():
         sa.Column("section", sa.String(length=256), nullable=True),
         sa.Column("professor", sa.String(length=256), nullable=False),
         sa.PrimaryKeyConstraint("id"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.create_table(
         "static_file",
@@ -48,8 +48,8 @@ def upgrade():
         sa.Column("created", sa.DateTime(), nullable=True),
         sa.Column("last_updated", sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.create_table(
         "user",
@@ -62,8 +62,8 @@ def upgrade():
         sa.Column("created", sa.DateTime(), nullable=True),
         sa.Column("last_updated", sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint("id", "netid"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.create_index(op.f("ix_user_github_username"), "user", ["github_username"], unique=False)
     op.create_index(op.f("ix_user_netid"), "user", ["netid"], unique=True)
@@ -89,8 +89,8 @@ def upgrade():
         sa.UniqueConstraint("name"),
         sa.UniqueConstraint("pipeline_image"),
         sa.UniqueConstraint("unique_code"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.create_index(op.f("ix_assignment_course_id"), "assignment", ["course_id"], unique=False)
     op.create_table(
@@ -106,8 +106,8 @@ def upgrade():
             ["user.id"],
         ),
         sa.PrimaryKeyConstraint("owner_id", "course_id"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.create_table(
         "assignment_question",
@@ -124,8 +124,8 @@ def upgrade():
             ["assignment.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.create_index(
         op.f("ix_assignment_question_assignment_id"),
@@ -155,8 +155,8 @@ def upgrade():
             ["user.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.create_table(
         "assignment_test",
@@ -168,8 +168,8 @@ def upgrade():
             ["assignment.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.create_index(op.f("ix_assignment_test_name"), "assignment_test", ["name"], unique=False)
     op.create_table(
@@ -194,8 +194,8 @@ def upgrade():
             ["assignment_question.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.create_index(
         op.f("ix_assigned_student_question_assignment_id"),
@@ -235,8 +235,8 @@ def upgrade():
             ["user.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.create_index(
         op.f("ix_submission_assignment_id"),
@@ -273,8 +273,8 @@ def upgrade():
             ["assignment_repo.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.create_table(
         "submission_build",
@@ -289,8 +289,8 @@ def upgrade():
             ["submission.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     op.create_index(
         op.f("ix_submission_build_submission_id"),
@@ -317,8 +317,8 @@ def upgrade():
             ["submission.id"],
         ),
         sa.PrimaryKeyConstraint("id", "submission_id", "assignment_test_id"),
-        mysql_charset='utf8mb4',
-        mysql_collate='utf8mb4_general_ci',
+        mysql_charset="utf8mb4",
+        mysql_collate="utf8mb4_general_ci",
     )
     # ### end Alembic commands ###
 

@@ -17,7 +17,7 @@ def _get_logger(logger_name):
     # Initialize a logger for this app with the logger
     # name specified
     streamer = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     streamer.setFormatter(formatter)
     _logger = logging.getLogger(logger_name)
     _logger.setLevel(logging.NOTSET)

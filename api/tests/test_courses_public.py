@@ -18,4 +18,3 @@ def test_courses_public():
     sn.get("/public/courses/get/12345", should_fail=True)
     course = sn.get(f"/public/courses/get/{id}")["course"]
     assert course
-

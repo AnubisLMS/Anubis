@@ -31,7 +31,7 @@ def default_id(max_len=None) -> db.Column:
 
 class Config(db.Model):
     __tablename__ = "anubis_config"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # Fields
     key = db.Column(db.String(128), primary_key=True)
@@ -47,7 +47,7 @@ class Config(db.Model):
 
 class User(db.Model):
     __tablename__ = "user"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # id
     id = default_id()
@@ -93,7 +93,7 @@ class User(db.Model):
 
 class Course(db.Model):
     __tablename__ = "course"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # id
     id = default_id()
@@ -110,7 +110,7 @@ class Course(db.Model):
         default="https://github.com/os3224/anubis-assignment-tests",
     )
     github_repo_required = db.Column(db.Boolean, default=True)
-    theia_default_image_id = db.Column(db.String(128), db.ForeignKey('theia_image.id'), nullable=True)
+    theia_default_image_id = db.Column(db.String(128), db.ForeignKey("theia_image.id"), nullable=True)
     theia_default_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
     github_org = db.Column(db.TEXT, default="os3224")
     join_code = db.Column(db.String(256), unique=True)
@@ -155,7 +155,7 @@ class Course(db.Model):
 
 class TAForCourse(db.Model):
     __tablename__ = "ta_for_course"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # Foreign Keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
@@ -171,7 +171,7 @@ class TAForCourse(db.Model):
 
 class ProfessorForCourse(db.Model):
     __tablename__ = "professor_for_course"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # Foreign Keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
@@ -187,7 +187,7 @@ class ProfessorForCourse(db.Model):
 
 class InCourse(db.Model):
     __tablename__ = "in_course"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # Foreign Keys
     owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
@@ -196,7 +196,7 @@ class InCourse(db.Model):
 
 class Assignment(db.Model):
     __tablename__ = "assignment"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # id
     id = default_id()
@@ -223,8 +223,8 @@ class Assignment(db.Model):
 
     # IDE
     ide_enabled = db.Column(db.Boolean, default=True)
-    theia_image_id = db.Column(db.String(128), db.ForeignKey('theia_image.id'), default=None)
-    theia_image_tag_id = db.Column(db.String(128), db.ForeignKey('theia_image_tag.id'), default=None)
+    theia_image_id = db.Column(db.String(128), db.ForeignKey("theia_image.id"), default=None)
+    theia_image_tag_id = db.Column(db.String(128), db.ForeignKey("theia_image_tag.id"), default=None)
     theia_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
 
     # Github
@@ -277,7 +277,7 @@ class Assignment(db.Model):
 
 class AssignmentRepo(db.Model):
     __tablename__ = "assignment_repo"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # id
     id = default_id()
@@ -315,7 +315,7 @@ class AssignmentRepo(db.Model):
 
 class AssignmentTest(db.Model):
     __tablename__ = "assignment_test"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # id
     id = default_id()
@@ -334,7 +334,7 @@ class AssignmentTest(db.Model):
 
 class AssignmentQuestion(db.Model):
     __tablename__ = "assignment_question"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # id
     id = default_id()
@@ -380,7 +380,7 @@ class AssignmentQuestion(db.Model):
 
 class AssignedStudentQuestion(db.Model):
     __tablename__ = "assigned_student_question"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # id
     id = default_id()
@@ -410,8 +410,8 @@ class AssignedStudentQuestion(db.Model):
             AssignedQuestionResponse.query.filter(
                 AssignedQuestionResponse.assigned_question_id == self.id,
             )
-                .order_by(AssignedQuestionResponse.created.desc())
-                .first()
+            .order_by(AssignedQuestionResponse.created.desc())
+            .first()
         )
 
         response_data = {
@@ -437,7 +437,7 @@ class AssignedStudentQuestion(db.Model):
 
 class AssignedQuestionResponse(db.Model):
     __tablename__ = "assigned_student_response"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # id
     id = default_id()
@@ -470,7 +470,7 @@ class AssignedQuestionResponse(db.Model):
 
 class Submission(db.Model):
     __tablename__ = "submission"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # id
     id = default_id()
@@ -542,7 +542,7 @@ class Submission(db.Model):
 
 class SubmissionTestResult(db.Model):
     __tablename__ = "submission_test_result"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # id
     id = default_id()
@@ -591,7 +591,7 @@ class SubmissionTestResult(db.Model):
 
 class SubmissionBuild(db.Model):
     __tablename__ = "submission_build"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # id
     id = default_id()
@@ -623,61 +623,61 @@ class SubmissionBuild(db.Model):
 
 class TheiaImage(db.Model):
     __tablename__ = "theia_image"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     id = default_id(32)
-    image = db.Column(db.String(1024), nullable=False, default='registry.digitalocean.com/anubis/xv6')
-    title = db.Column(db.String(1024), default='')
-    description = deferred(db.Column(db.Text, default=''))
-    icon = db.Column(db.String(1024), default='')
+    image = db.Column(db.String(1024), nullable=False, default="registry.digitalocean.com/anubis/xv6")
+    title = db.Column(db.String(1024), default="")
+    description = deferred(db.Column(db.Text, default=""))
+    icon = db.Column(db.String(1024), default="")
     public = db.Column(db.Boolean, nullable=False, default=False)
-    default_tag = db.Column(db.String(128), default='latest')
+    default_tag = db.Column(db.String(128), default="latest")
     icon = db.Column(db.String(128))
 
-    courses = db.relationship(Course, backref='theia_default_image')
-    assignments = db.relationship(Assignment, backref='theia_image')
-    sessions = db.relationship('TheiaSession', backref='image')
-    tags = db.relationship('TheiaImageTag', backref='image')
+    courses = db.relationship(Course, backref="theia_default_image")
+    assignments = db.relationship(Assignment, backref="theia_image")
+    sessions = db.relationship("TheiaSession", backref="image")
+    tags = db.relationship("TheiaImageTag", backref="image")
 
     @property
     def data(self):
         return {
-            'id': self.id,
-            'image': self.image,
-            'title': self.title,
-            'description': self.description,
-            'icon': self.icon,
-            'public': self.public,
-            'tags': [tag.data for tag in self.tags]
+            "id": self.id,
+            "image": self.image,
+            "title": self.title,
+            "description": self.description,
+            "icon": self.icon,
+            "public": self.public,
+            "tags": [tag.data for tag in self.tags],
         }
 
 
 class TheiaImageTag(db.Model):
-    __tablename__ = 'theia_image_tag'
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __tablename__ = "theia_image_tag"
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     id = default_id(32)
     image_id = db.Column(db.String(128), db.ForeignKey(TheiaImage.id), nullable=False)
-    tag = db.Column(db.String(256), nullable=False, default='latest')
-    title = db.Column(db.String(1024), nullable=False, default='')
-    description = db.Column(db.String(1024), nullable=False, default='')
+    tag = db.Column(db.String(256), nullable=False, default="latest")
+    title = db.Column(db.String(1024), nullable=False, default="")
+    description = db.Column(db.String(1024), nullable=False, default="")
 
-    assignments = db.relationship(Assignment, backref='image_tag')
-    sessions = db.relationship('TheiaSession', backref='image_tag')
+    assignments = db.relationship(Assignment, backref="image_tag")
+    sessions = db.relationship("TheiaSession", backref="image_tag")
 
     @property
     def data(self):
         return {
-            'id': self.id,
-            'tag': self.tag,
-            'title': self.title,
-            'description': self.description,
+            "id": self.id,
+            "tag": self.tag,
+            "title": self.title,
+            "description": self.description,
         }
 
 
 class TheiaSession(db.Model):
     __tablename__ = "theia_session"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # id
     id = default_id(32)
@@ -753,7 +753,7 @@ class TheiaSession(db.Model):
 
 class StaticFile(db.Model):
     __tablename__ = "static_file"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     id = default_id()
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), nullable=False, index=True)
@@ -784,7 +784,7 @@ class StaticFile(db.Model):
         elif isinstance(blob, bytes):
             self._blob = gzip.compress(blob)
         else:
-            self._blob = gzip.compress(b'')
+            self._blob = gzip.compress(b"")
 
     @property
     def data(self):
@@ -800,7 +800,7 @@ class StaticFile(db.Model):
 
 class LateException(db.Model):
     __tablename__ = "late_exception"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     user_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
     assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), primary_key=True)
@@ -825,7 +825,7 @@ class LateException(db.Model):
 
 class LectureNotes(db.Model):
     __tablename__ = "lecture_notes"
-    __table_args__ =  {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_general_ci'}
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     id = default_id()
 

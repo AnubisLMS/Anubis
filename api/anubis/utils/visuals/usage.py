@@ -20,11 +20,11 @@ def get_submissions(course_id: str) -> pd.DataFrame:
     # Get the submission sqlalchemy objects
     raw_submissions = (
         Submission.query.join(Assignment)
-            .filter(
+        .filter(
             Assignment.hidden == False,
             Assignment.course_id == course_id,
         )
-            .all()
+        .all()
     )
 
     # Specify which columns we want
@@ -89,7 +89,7 @@ def get_theia_sessions(course_id: str) -> pd.DataFrame:
     # Drop outliers based on duration
     theia_sessions = theia_sessions[
         np.abs(theia_sessions.duration - theia_sessions.duration.mean()) <= (3 * theia_sessions.duration.std())
-        ]
+    ]
 
     return theia_sessions
 
@@ -99,10 +99,10 @@ def get_raw_submissions() -> List[Dict[str, Any]]:
     submissions_df = get_submissions()
     data = (
         submissions_df.groupby(["assignment_id", "created"])["id"]
-            .count()
-            .reset_index()
-            .rename(columns={"id": "count"})
-            .to_dict()
+        .count()
+        .reset_index()
+        .rename(columns={"id": "count"})
+        .to_dict()
     )
     data["created"] = {k: str(v) for k, v in data["created"].items()}
 

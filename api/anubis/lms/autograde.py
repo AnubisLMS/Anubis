@@ -62,8 +62,8 @@ def autograde(student_id, assignment_id, max_time: datetime = None):
             Submission.accepted == True,
             *submission_filters
         )
-            .order_by(Submission.created.desc())
-            .all()
+        .order_by(Submission.created.desc())
+        .all()
     ):
 
         # Calculate the number of tests that passed in this submission

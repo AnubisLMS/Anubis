@@ -22,17 +22,15 @@ def upgrade():
         "theia_image",
         sa.Column("title", sa.String(length=1024)),
     )
-    op.add_column(
-        "theia_image", sa.Column("description", sa.Text())
-    )
+    op.add_column("theia_image", sa.Column("description", sa.Text()))
     op.add_column(
         "theia_image",
         sa.Column("icon", sa.String(length=1024)),
     )
     conn = op.get_bind()
     with conn.begin():
-        conn.execute('UPDATE theia_image SET `title` = `label`;')
-        conn.execute('UPDATE theia_image SET `description` = `label`;')
+        conn.execute("UPDATE theia_image SET `title` = `label`;")
+        conn.execute("UPDATE theia_image SET `description` = `label`;")
     op.drop_column("theia_image", "label")
     # ### end Alembic commands ###
 
@@ -49,7 +47,7 @@ def downgrade():
     )
     conn = op.get_bind()
     with conn.begin():
-        conn.execute('UPDATE theia_image SET `label` = `title`;')
+        conn.execute("UPDATE theia_image SET `label` = `title`;")
     op.drop_column("theia_image", "icon")
     op.drop_column("theia_image", "description")
     op.drop_column("theia_image", "title")
