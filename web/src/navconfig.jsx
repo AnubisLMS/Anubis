@@ -19,7 +19,7 @@ import DashboardIcon from '@material-ui/icons/Dashboard';
 import Dashboard from './Pages/Public/Dashboard/Dashboard';
 import Courses from './Pages/Public/Courses/Courses';
 import Assignments from './Pages/Public/Assignments';
-import Profile from './Pages/Public/Profile';
+import Profile from './Pages/Public/Profile/Profile';
 import Repos from './Pages/Public/Repos/Repos';
 import Submissions from './Pages/Public/Submissions/Submissions';
 import Submission from './Pages/Public/Submission/Submission';
