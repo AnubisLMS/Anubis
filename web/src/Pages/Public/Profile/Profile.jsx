@@ -69,7 +69,7 @@ const Profile = () => {
               User Group:
               <span className={userGroup === 'Super User' ?
                 clsx(classes.userGroup, classes.super): userGroup === 'Admin' ?
-                clsx(classes.userGroup, classes.admin): classes.userGroup}
+                  clsx(classes.userGroup, classes.admin): classes.userGroup}
               >
                 {userGroup}
               </span>
