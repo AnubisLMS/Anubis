@@ -28,8 +28,7 @@ jobs:
     - uses: actions/cache@v2
       id: cache-venv  # name for referring later
       with:
-        path: venv  # what we cache: the virtualenv
-        # The cache key depends on requirements.txt
+        path: venv 
         key: ${{ runner.os }}-venv-${{ hashFiles('requirements/dev.txt') }}-${{ hashFiles('../.github/workflows/test-api.yml') }}
         restore-keys: |
           ${{ runner.os }}-venv-
