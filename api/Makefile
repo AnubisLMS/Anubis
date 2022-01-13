@@ -9,13 +9,6 @@ COMMIT := $(shell git rev-parse HEAD)
 SEED_FILE ?= .data/seed.sql
 
 PYTHON3 ?= $(shell which python3)
-VENV := $(shell \
-  if which virtualenv &>/dev/null; \
-	then \
-		echo 'virtualenv -p $(PYTHON3)'; \
-  else \
-		echo '$(PYTHON3) -m venv'; \
-	fi)
 
 help:
 	@echo 'For convenience'
@@ -30,7 +23,7 @@ run: venv
 .PHONY: venv                # Create virtualenv
 venv:
 	@if [ ! -d venv ]; then \
-		$(VENV) venv; \
+		python3 -m venv venv; \
 		./venv/bin/pip install -r ./requirements/dev.txt; \
 	fi
 
