@@ -1,6 +1,8 @@
+import collections
 import subprocess
 import functools
 import warnings
+import difflib
 import logging
 import typing
 import json
@@ -11,18 +13,22 @@ DEBUG = os.environ.get('DEBUG', default='0') == '1'
 registered_tests = {}
 build_function = None
 
+CompareFuncReturnT = typing.Tuple[bool, typing.List[str]]
+CompareFuncT = typing.Callable[[typing.List[str], typing.List[str], bool], CompareFuncReturnT]
 
 class TestResult(object):
     def __init__(self):
         self.stdout = None
         self.message = None
         self.passed = None
+        self.diff = None
 
     def __repr__(self):
-        return "<TestResult passed={} message={:5.5} stdout={:5.5}>".format(
+        return "<TestResult passed={} message={:5.5} stdout={:5.5} diff={:5.5}>".format(
             self.passed,
             self.message,
-            self.stdout
+            self.stdout,
+            self.diff
         )
 
 
@@ -160,16 +166,17 @@ def search_lines(
         stdout_lines: typing.List[str],
         expected_lines: typing.List[str],
         case_sensitive: bool = True
-) -> bool:
+) -> CompareFuncReturnT:
     """
     Search lines for expected lines. This will return true if all expected lines are in the
     student standard out lines in order. There can be interruptions in the student standard out.
     This function has the advantage of allowing students to still print out debugging lines
-    while their output is still accurately checked for  the expected result.
+    while their output is still accurately checked for  the expected result. The diff is not
+    available for this.
 
-    >>> search_lines(['a', 'b', 'c'], ['a', 'b', 'c']) -> True
-    >>> search_lines(['a', 'debugging', 'b', 'c'], ['a', 'b', 'c']) -> True
-    >>> search_lines(['a', 'b'],      ['a', 'b', 'c']) -> False
+    >>> search_lines(['a', 'b', 'c'], ['a', 'b', 'c']) -> (True, [])
+    >>> search_lines(['a', 'debugging', 'b', 'c'], ['a', 'b', 'c']) -> (True, [])
+    >>> search_lines(['a', 'b'],      ['a', 'b', 'c']) -> (False, [])
 
     * Optionally specify if the equality comparison should be case sensitive *
 
@@ -193,34 +200,80 @@ def search_lines(
         else:
             found.append(-1)
     if -1 in found:
-        return False
-    return list(sorted(found)) == found
+        return False, []
+    return list(sorted(found)) == found, []
 
 
 def test_lines(
         stdout_lines: typing.List[str],
         expected_lines: typing.List[str],
-        case_sensitive: bool = True
-) -> bool:
+        case_sensitive: bool = True,
+        context_length: int = 5,
+) -> CompareFuncReturnT:
     """
     Test lines for exact equality. Whitespace will be stripped off each line automatically.
 
     * Optionally specify if the equality comparison should be case sensitive *
 
-    >>> test_lines(['a', 'b', 'c'], ['a', 'b', 'c']) -> True
-    >>> test_lines(['a', 'debugging', 'b', 'c'], ['a', 'b', 'c']) -> False
-    >>> test_lines(['a', 'b'],      ['a', 'b', 'c']) -> False
+    >>> test_lines(['a', 'b', 'c'], ['a', 'b', 'c']) -> (True, [])
+    >>> test_lines(['a', 'debugging', 'b', 'c'], ['a', 'b', 'c']) -> (False, ['--- \n', '+++ \n', '@@ -1,3 +1,4 @@\n', ' a', '+debugging', ' b', ' c'])
+    >>> test_lines(['a', 'b'],      ['a', 'b', 'c']) -> (False, ['--- \n', '+++ \n', '@@ -1,3 +1,2 @@\n', ' a', ' b', '-c'])
 
     :param stdout_lines: students standard out lines as a list of strings
     :param expected_lines: expected lines as a list of strings
     :param case_sensitive: optional boolean to indicate if comparison should be case sensitive
-    :return: True if exact match was found, False otherwise
+    :param context_length: the length of the context of the generated diff (the smaller the faster)
+    :return: True and an empty list if exact match was found, False with the unified diff otherwise
     """
+    # A rolling deque containing the lines of context of the diff that occurs (if any)
+    context = collections.deque(maxlen=context_length)
+    # Record the first occurence of a mismatch
+    mismatch_index = -1
+    # The remaining offset until the first occurence of mismatch is centralized
+    # within the context
+    context_remaining_offset = context_length // 2
+    # A general preprocessor function for text
     if case_sensitive:
-        return len(stdout_lines) == len(expected_lines) \
-               and all(_a.strip() == _b.strip() for _a, _b in zip(stdout_lines, expected_lines))
-    return len(stdout_lines) == len(expected_lines) \
-           and all(_a.lower().strip() == _b.lower().strip() for _a, _b in zip(stdout_lines, expected_lines))
+        preprocess_func = lambda *texts: tuple(text.strip() for text in texts)
+    else:
+        preprocess_func = lambda *texts: tuple(text.strip().lower() for text in texts)
+
+    for index, (_a, _b) in enumerate(zip(expected_lines, stdout_lines)):
+        # We defer text preprocessing until we need the lines
+        _a, _b = preprocess_func(_a, _b)
+        context.append((_a, _b))
+
+        # When there is a mismatch already, we are only motivated to fill up
+        # the appropriate context lines
+        if mismatch_index != -1:
+            # Break when the context is full and the mismatched line is
+            # centralized
+            if len(context) == context_length and context_remaining_offset <= 0:
+                break
+            # Continue until we fill up the context
+            context_remaining_offset -= 1
+            continue
+        elif _a != _b:
+            mismatch_index = index
+
+    # unzip the context as tuples
+    expected_context, stdout_context = zip(*context)
+
+    if mismatch_index == -1:
+        if len(expected_lines) == len(stdout_lines):
+            return True, []
+
+        # When there is no mismatch and the length of the lines are different,
+        # we fill the context with the leading part of the lines that
+        # only present in the longer list of lines
+        start = min(len(expected_lines), len(stdout_lines))
+        end = start + context_length
+        if len(expected_lines) > len(stdout_lines):
+            expected_context += preprocess_func(*expected_lines[start:end])
+        else:
+            stdout_context += preprocess_func(*stdout_lines[start:end])
+
+    return False, list(difflib.unified_diff(expected_context, stdout_context))
 
 
 def verify_expected(
@@ -247,10 +300,15 @@ def verify_expected(
     :return:
     """
 
-    compare_func = search_lines if search else test_lines
-    if not compare_func(stdout_lines, expected_lines, case_sensitive=case_sensitive):
-        test_result.stdout += 'your lines:\n' + '\n'.join(stdout_lines) + '\n\n' \
-                              + 'we expected:\n' + '\n'.join(expected_lines)
+    compare_func: CompareFuncT = search_lines if search else test_lines
+    passed, diff = compare_func(stdout_lines, expected_lines, case_sensitive=case_sensitive)
+    if not passed:
+        if diff:
+            test_result.diff += diff
+        else:
+            # If diff is not available, fall back to the old way of displaying outputs
+            test_result.stdout += 'your lines:\n' + '\n'.join(stdout_lines) + '\n\n' \
+                                + 'we expected:\n' + '\n'.join(expected_lines)
         test_result.message = 'Did not receive expected output'
         test_result.passed = False
     else:
