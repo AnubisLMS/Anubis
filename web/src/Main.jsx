@@ -1,7 +1,7 @@
 import React from 'react';
 import {Redirect, Route, Switch} from 'react-router-dom';
 import {public_nav, admin_nav, super_nav, footer_nav, not_shown_nav} from './navconfig';
-import NotFound from './Components/Shared/NotFound';
+import NotFound from './components/shared/NotFound';
 
 export default function Main({user}) {
   return (

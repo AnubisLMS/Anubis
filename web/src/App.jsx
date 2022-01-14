@@ -19,22 +19,22 @@ import makeStyles from '@material-ui/core/styles/makeStyles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 // Auth Context
-import AuthContext from './Contexts/AuthContext';
+import AuthContext from './context/AuthContext';
 
 // Navconfig
 import {drawerWidth} from './navconfig';
 
 // Dark theme
-import theme from './Theme/Theme';
+import theme from './theme/Theme';
 
-import AuthWrapper from './Components/Shared/AuthWrapper';
+import AuthWrapper from './components/shared/AuthWrapper';
 import Main from './Main';
-import useQuery from './Hooks/useQuery';
-import Nav from './Components/Shared/Navigation/Nav';
-import Error from './Components/Shared/Error';
-import Footer from './Components/Shared/Footer';
-import Header from './Components/Shared/Header';
-import DeviceWarning from './Components/Shared/DeviceWarning';
+import useQuery from './hooks/useQuery';
+import Nav from './components/shared/Navigation/Nav';
+import Error from './components/shared/Error';
+import Footer from './components/shared/Footer';
+import Header from './components/shared/Header';
+import DeviceWarning from './components/shared/DeviceWarning';
 import Container from '@material-ui/core/Container';
 
 import 'devicon/devicon.min.css';

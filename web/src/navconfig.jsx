@@ -16,41 +16,41 @@ import TimelineIcon from '@material-ui/icons/Timeline';
 import ImportContactsIcon from '@material-ui/icons/ImportContacts';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 
-import Dashboard from './Pages/Public/Dashboard/Dashboard';
-import Courses from './Pages/Public/Courses/Courses';
-import Assignments from './Pages/Public/Assignments';
-import Profile from './Pages/Public/Profile/Profile';
-import Repos from './Pages/Public/Repos/Repos';
-import Submissions from './Pages/Public/Submissions/Submissions';
-import Submission from './Pages/Public/Submission/Submission';
-import Blog from './Pages/Public/Blog';
-import Visuals from './Pages/Public/Visuals/Visuals';
-import Lectures from './Pages/Public/Lectures/Lectures';
-import Playgrounds from './Pages/Public/Playgrounds/Playgrounds';
+import Dashboard from './pages/core/public/Dashboard/Dashboard';
+import Courses from './pages/core/public/Courses/Courses';
+import Assignments from './pages/core/public/Assignments';
+import Profile from './pages/core/public/Profile/Profile';
+import Repos from './pages/core/public/Repos/Repos';
+import Submissions from './pages/core/public/Submissions/Submissions';
+import Submission from './pages/core/public/Submission/Submission';
+import Blog from './pages/core/public/Blog';
+import Visuals from './pages/core/public/Visuals/Visuals';
+import Lectures from './pages/core/public/Lectures/Lectures';
+import Playgrounds from './pages/core/public/Playgrounds/Playgrounds';
 
-import Assignment from './Pages/Public/Assignment/Assignment';
-import Course from './Pages/Public/Course/Course';
-import AdminUsers from './Pages/Admin/Users';
-import AdminUser from './Pages/Admin/User';
-import AdminCourse from './Pages/Admin/Course';
-import AdminTheia from './Pages/Admin/Theia';
-import AdminStatic from './Pages/Admin/Static';
-import AdminLectures from './Pages/Admin/Lectures';
-import AdminAutogradeAssignments from './Pages/Admin/Autograde/Assignments';
-import AdminAutogradeSubmission from './Pages/Admin/Autograde/Submission';
-import AdminAutogradeResults from './Pages/Admin/Autograde/Results';
-import AdminAssignmentLateExceptions from './Pages/Admin/Assignment/LateExceptions';
-import AdminAssignmentAssignments from './Pages/Admin/Assignment/Assignments';
-import AdminAssignmentAssignment from './Pages/Admin/Assignment/Assignment';
-import AdminAssignmentQuestions from './Pages/Admin/Assignment/Questions';
-import AdminAssignmentTests from './Pages/Admin/Assignment/Tests';
-import AdminAssignmentRepos from './Pages/Admin/Assignment/Repos';
-import AdminAssignmentGroups from './Pages/Admin/Assignment/AssignmentGroups';
+import Assignment from './pages/core/public/Assignment/Assignment';
+import Course from './pages/core/public/Course/Course';
+import AdminUsers from './pages/core/admin/Users';
+import AdminUser from './pages/core/admin/User';
+import AdminCourse from './pages/core/admin/Course';
+import AdminTheia from './pages/core/admin/Theia';
+import AdminStatic from './pages/core/admin/Static';
+import AdminLectures from './pages/core/admin/Lectures';
+import AdminAutogradeAssignments from './pages/core/admin/Autograde/Assignments';
+import AdminAutogradeSubmission from './pages/core/admin/Autograde/Submission';
+import AdminAutogradeResults from './pages/core/admin/Autograde/Results';
+import AdminAssignmentLateExceptions from './pages/core/admin/Assignment/LateExceptions';
+import AdminAssignmentAssignments from './pages/core/admin/Assignment/Assignments';
+import AdminAssignmentAssignment from './pages/core/admin/Assignment/Assignment';
+import AdminAssignmentQuestions from './pages/core/admin/Assignment/Questions';
+import AdminAssignmentTests from './pages/core/admin/Assignment/Tests';
+import AdminAssignmentRepos from './pages/core/admin/Assignment/Repos';
+import AdminAssignmentGroups from './pages/core/admin/Assignment/AssignmentGroups';
 
-// Super
-import SuperConfig from './Pages/Super/Config';
-import SuperIDEImages from './Pages/Super/IDEImages';
-import SuperPlaygrounds from './Pages/Super/Playgrounds';
+// super
+import SuperConfig from './pages/core/super/Config';
+import SuperIDEImages from './pages/core/super/IDEImages';
+import SuperPlaygrounds from './pages/core/super/Playgrounds';
 
 
 export const footer_nav = [
@@ -160,7 +160,7 @@ export const admin_nav = [
     Page: AdminAutogradeAssignments,
   },
   {
-    id: 'Anubis Cloud IDE',
+    id: 'Anubis Cloud AdminIDE',
     icon: <i className="devicon-vscode-plain" style={{fontSize: 20}}/>,
     path: '/admin/ide',
     Page: AdminTheia,
@@ -181,7 +181,7 @@ export const super_nav = [
     Page: SuperPlaygrounds,
   },
   {
-    id: 'IDE Images',
+    id: 'AdminIDE images',
     icon: <i className="devicon-docker-plain" style={{fontSize: 20}}/>,
     path: '/super/ide-images',
     Page: SuperIDEImages,
