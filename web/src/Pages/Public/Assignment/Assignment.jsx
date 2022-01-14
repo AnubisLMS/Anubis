@@ -87,7 +87,7 @@ const Assignment = () => {
   }, [runAssignmentPolling, setRunAssignmentPolling]);
 
 
-  const createAssignmentRepo = (assignment, enqueueSnackbar) => () => {
+  const createAssignmentRepo = () => {
     axios.post(`/api/public/repos/create${assignmentId}`)
       .then((response) => {
         standardStatusHandler(response, enqueueSnackbar);
@@ -137,7 +137,7 @@ const Assignment = () => {
                   View Repo
                 </Button>
               ) : (
-                <Button onClick={() => createAssignmentRepo() }className={classes.repoButton}>
+                <Button onClick={createAssignmentRepo}className={classes.repoButton}>
                   {runAssignmentPolling ? (
                     <CircularProgress size={24} />
                   ): 'Create Repo'}
