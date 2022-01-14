@@ -37,7 +37,6 @@ import Header from './Components/Shared/Header';
 import DeviceWarning from './Components/Shared/DeviceWarning';
 import Container from '@material-ui/core/Container';
 
-import TryNewUI from './Components/Shared/TryNewUI';
 import 'devicon/devicon.min.css';
 
 const useStyles = makeStyles(() => ({
@@ -158,7 +157,6 @@ export default function App() {
                           <Error show={showError} onDelete={() => setShowError(false)}/>
                           <div className={classes.main}>
                             <Main user={user}/>
-                            <TryNewUI/>
                           </div>
                           <Footer/>
                         </main>
