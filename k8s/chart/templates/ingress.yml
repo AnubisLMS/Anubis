@@ -1,5 +1,3 @@
-
----
 # Strip prefix /api
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
@@ -15,6 +13,7 @@ spec:
     prefixes:
       - "/api"
 ---
+
 # Strip prefix /api
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
@@ -29,8 +28,8 @@ spec:
   stripPrefix:
     prefixes:
       - "/ide"
-
 ---
+
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
@@ -50,7 +49,7 @@ spec:
   {{- end }}
   routes:
   - kind: Rule
-    match: (Host(`{{ .Values.domain }}`) && PathPrefix(`/api/`)) || (Host(`{{ .Values.domain }}`) && PathPrefix(`/api/`) && HeadersRegexp(`web`, `new`))
+    match: Host(`{{ .Values.domain }}`) && PathPrefix(`/api/`)
     middlewares:
     - name: strip-api
       namespace: {{ .Release.Namespace }}
@@ -61,8 +60,8 @@ spec:
   tls:
     certResolver: le
   {{- end }}
-
 ---
+
 # Public Ingress Route /*
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
@@ -92,7 +91,6 @@ spec:
   tls:
     certResolver: le
   {{- end }}
-
 ---
 
 # Public Ingress Route anubis.osiris.services/ide/
@@ -116,7 +114,7 @@ spec:
   {{- end }}
   routes:
   - kind: Rule
-    match: (Host(`{{ .Values.domain }}`) && PathPrefix(`/ide/`)) || (Host(`{{ .Values.domain }}`) && PathPrefix(`/ide/`) && HeadersRegexp(`web`, `new`))
+    match: Host(`{{ .Values.domain }}`) && PathPrefix(`/ide/`)
     middlewares:
     - name: strip-ide
       namespace: {{ .Release.Namespace }}
@@ -132,4 +130,47 @@ spec:
   tls:
     certResolver: le
   {{- end }}
+---
 
+{{- if not .Values.debug }}
+# Redirect with domain replacement
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-to-new
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: anubis
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  redirectRegex:
+    regex: ^https://anubis.osiris.services/(.*)
+    replacement: https://anubis-lms.io/${1}
+---
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingress.route.redirect.public
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: theia
+    component: proxy
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - kind: Rule
+    match: Host(`anubis.osiris.services`)
+    middlewares:
+    - name: redirect-to-new
+      namespace: {{ .Release.Namespace }}
+    services:
+    - name: anubis-web
+      port: 3000
+  tls:
+    certResolver: le
+{{- end }}

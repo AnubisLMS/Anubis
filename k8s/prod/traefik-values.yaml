@@ -6,7 +6,7 @@ additionalArguments:
   - "--accesslog.format=json"
   - "--providers.kubernetescrd=true"
   - "--certificatesresolvers.le.acme.tlschallenge=true"
-  - "--certificatesresolvers.le.acme.email=osiris@osiris.cyber.nyu.edu"
+  - "--certificatesresolvers.le.acme.email=noreply@anubis-lms.io"
   - "--certificatesresolvers.le.acme.storage=/data/acme.json"
 
 # Use ingressClass. Ignored if Traefik version < 2.3 / kubernetes < 1.18.x
@@ -155,6 +155,10 @@ ports:
         sans:
           - ide.anubis.osiris.services
           - ide8000.anubis.osiris.services
+      - main: anubis-lms.io
+        sans:
+          - ide.anubis-lms.io
+          - ide8000.anubis-lms.io
 
 podSecurityContext: null
 securityContext: null

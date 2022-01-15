@@ -2,7 +2,7 @@
 debug: false
 rollingUpdates: true
 healthChecks: true
-domain: "anubis.osiris.services"
+domain: "anubis-lms.io"
 vpnOnly: false
 imagePullPolicy: "Always"
 imagePullSecret: "anubis"
