@@ -1,5 +1,5 @@
 from anubis.lms.repos import get_repos
-from anubis.models import AssignmentRepo, User, db
+from anubis.models import Assignment, AssignmentRepo, User, db
 from anubis.utils.cache import cache
 
 
@@ -29,7 +29,7 @@ def parse_webhook(webhook):
     )
 
 
-def guess_github_username(assignment, repo_name):
+def guess_github_repo_owner(assignment: Assignment, repo_name: str) -> User:
     """
     In order to match a webhook to a user, we need to know the github username
     that the repo in question was made for. The github username is in the name
@@ -45,24 +45,16 @@ def guess_github_username(assignment, repo_name):
     repo_name_split = repo_name.split("-")
     unique_code_index = repo_name_split.index(assignment.unique_code)
     repo_name_split = repo_name_split[unique_code_index + 1 :]
-    github_username1 = "-".join(repo_name_split)
-    github_username2 = "-".join(repo_name_split[:-1])
+    netid1 = "-".join(repo_name_split)
+    netid2 = "-".join(repo_name_split[:-1])
     user = User.query.filter(
-        User.github_username.in_([github_username1, github_username2]),
-        User.github_username != "",
+        User.netid.in_([netid1, netid2]),
+        User.netid != "",
     ).first()
-
-    github_username_guess = github_username1
-    if user is None:
-        if any(github_username_guess.endswith(i) for i in ["-1", "-2", "-3"]):
-            github_username_guess = github_username2
-    else:
-        github_username_guess = user.github_username
-
-    return user, github_username_guess
+    return user
 
 
-def check_repo(assignment, repo_url, github_username, user=None) -> AssignmentRepo:
+def check_repo(assignment, repo_url, user=None) -> AssignmentRepo:
     """
     While processing the webhook, we need to check to see if we have
     record of the repo. This function takes what it needs to create
@@ -70,7 +62,6 @@ def check_repo(assignment, repo_url, github_username, user=None) -> AssignmentRe
 
     :param assignment:
     :param repo_url:
-    :param github_username:
     :param user:
     :return:
     """
@@ -94,7 +85,7 @@ def check_repo(assignment, repo_url, github_username, user=None) -> AssignmentRe
             owner=user,
             assignment=assignment,
             repo_url=repo_url,
-            github_username=github_username,
+            github_username=user.github_username,
         )
         db.session.add(repo)
         db.session.commit()

@@ -38,7 +38,7 @@ def fix_github_broken_repos():
 
 def fix_github_missing_submissions(org_name: str):
     from anubis.lms.submissions import init_submission
-    from anubis.lms.webhook import check_repo, guess_github_username
+    from anubis.lms.webhook import check_repo, guess_github_repo_owner
     from anubis.utils.rpc import enqueue_autograde_pipeline
 
     # Do graphql nonsense
@@ -101,8 +101,8 @@ def fix_github_missing_submissions(org_name: str):
             continue
 
         # Guess github username, then create the repo if it doesn't yet exist
-        user, github_username = guess_github_username(assignment, repo_name)
-        repo = check_repo(assignment, repo_url, github_username, user)
+        user = guess_github_repo_owner(assignment, repo_name)
+        repo = check_repo(assignment, repo_url, user)
 
         if user is None:
             continue
@@ -124,7 +124,7 @@ def fix_github_missing_submissions(org_name: str):
         for commit in map(lambda x: x["node"]["oid"], ref["target"]["history"]["edges"]):
             submission = Submission.query.filter(Submission.commit == commit).first()
             if submission is None:
-                print(f"found missing submission {github_username} {commit}")
+                print(f"found missing submission {user.github_username} {commit}")
                 submission = Submission(
                     commit=commit,
                     owner=user,
@@ -152,4 +152,4 @@ def fix_github_missing_submissions(org_name: str):
                     enqueue_autograde_pipeline(sid)
 
         if repo:
-            print(f"checked repo: {repo_name} {github_username} {user} {repo.id}")
+            print(f"checked repo: {repo_name} {user.github_username} {user} {repo.id}")

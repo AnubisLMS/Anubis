@@ -5,7 +5,7 @@ from flask import Blueprint, request
 
 from anubis.lms.assignments import get_assignment_due_date
 from anubis.lms.submissions import get_submissions, init_submission, reject_late_submission
-from anubis.lms.webhook import check_repo, guess_github_username, parse_webhook
+from anubis.lms.webhook import check_repo, guess_github_repo_owner, parse_webhook
 from anubis.models import Assignment, AssignmentRepo, Course, InCourse, Submission, User, db
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, req_assert
@@ -68,7 +68,7 @@ def public_webhook():
     req_assert(assignment is not None, message="assignment not found", status_code=406)
 
     # Get github username from the repository name
-    user, github_username_guess = guess_github_username(assignment, repo_name)
+    user = guess_github_repo_owner(assignment, repo_name)
 
     # The before Hash will be all 0s on for the first hash.
     # We will want to ignore both this first push (the initialization of the repo)
@@ -80,13 +80,12 @@ def public_webhook():
             "new student repo ",
             extra={
                 "repo_url": repo_url,
-                "github_username": github_username_guess,
                 "pusher": pusher_username,
                 "commit": commit,
             },
         )
 
-        repo = check_repo(assignment, repo_url, github_username_guess, user)
+        repo = check_repo(assignment, repo_url, user)
 
         if repo.owner_id == None:
             return success_response("initial dangling")
@@ -131,7 +130,7 @@ def public_webhook():
 
     # if we dont have a record of the repo, then add it
     if repo is None:
-        repo = check_repo(assignment, repo_url, github_username_guess, user)
+        repo = check_repo(assignment, repo_url, user)
 
     req_assert(
         ref == "refs/heads/master" or ref == "refs/heads/main",
