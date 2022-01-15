@@ -70,6 +70,8 @@ class User(db.Model):
     submissions = db.relationship("Submission", cascade="all,delete", backref="owner")
     theia_sessions = db.relationship("TheiaSession", cascade="all,delete", backref="owner")
     late_exceptions = db.relationship("LateException", cascade="all,delete", backref="user")
+    posts = db.relationship("ForumPost", cascade="all,delete", backref="owner")
+    comments = db.relationship("ForumPostComment", cascade="all,delete", backref="owner")
 
     @property
     def data(self):
@@ -869,21 +871,38 @@ class ForumPost(db.Model):
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
+    comments = db.relationship('ForumPostComment', cascade='all,delete', backref='post')
+    in_categories = db.relationship('ForumPostInCategory', cascade='all,delete', backref='post')
+    views = db.relationship('ForumPostViewed', cascade='all,delete', backref='post')
+    upvotes = db.relationship('ForumPostUpvote', cascade='all,delete', backref='post')
+
     @property
-    def data(self):
+    def meta_data(self):
         return {
             'id': self.id,
             'anonymous': self.anonymous,
-            'owner_id': self.owner_id,
+            'display_name': 'Anonymous' if self.anonymous else self.owner.name,
             'course_id': self.course_id,
             'visible_to_students': self.visible_to_students,
             'pinned': self.pinned,
             'seen_count': self.seen_count,
-            'title': self.title,
-            'content': self.content,
             'created': self.created,
             'last_updated': self.last_updated,
         }
+
+    @property
+    def data(self):
+        data = self.meta_data
+        data['title'] = self.title
+        data['content'] = self.content
+        data['comments'] = [comment.data for comment in self.comments]
+        return data
+
+    @property
+    def admin_data(self):
+        data = self.data
+        data['display_name'] = self.owner.name
+        return data
 
 
 class ForumCategory(db.Model):
