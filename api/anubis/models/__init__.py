@@ -1,14 +1,14 @@
 import base64
 import copy
-import os
 import gzip
+import os
 from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import deferred
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy_json import MutableJson
 from sqlalchemy.orm import InstrumentedAttribute
+from sqlalchemy.orm import deferred
+from sqlalchemy_json import MutableJson
 
 from anubis.utils.data import rand
 
@@ -410,8 +410,8 @@ class AssignedStudentQuestion(db.Model):
             AssignedQuestionResponse.query.filter(
                 AssignedQuestionResponse.assigned_question_id == self.id,
             )
-            .order_by(AssignedQuestionResponse.created.desc())
-            .first()
+                .order_by(AssignedQuestionResponse.created.desc())
+                .first()
         )
 
         response_data = {
@@ -845,4 +845,166 @@ class LectureNotes(db.Model):
             "post_time": str(self.post_time),
             "created": str(self.created),
             "last_updated": str(self.last_updated),
+        }
+
+
+class ForumPost(db.Model):
+    __tablename__ = "forum_post"
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+
+    id = default_id()
+
+    display_name: str = db.Column(db.String(256), nullable=True, default=None)
+    owner_id: str = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
+    course_id: str = db.Column(db.String(128), db.ForeignKey(Course.id))
+    visible_to_students: bool = db.Column(db.Boolean, default=False)
+    pinned: bool = db.Column(db.Boolean, default=False)
+    seen_count: int = db.Column(db.Integer, default=0)
+
+    # Content
+    title = deferred(db.Column(db.TEXT(1024)))
+    content = deferred(db.Column(db.TEXT(2 ** 14)))
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    @property
+    def data(self):
+        return {
+            'id': self.id,
+            'display_name': self.display_name,
+            'owner_id': self.owner_id,
+            'course_id': self.course_id,
+            'visible_to_students': self.visible_to_students,
+            'pinned': self.pinned,
+            'seen_count': self.seen_count,
+            'title': self.title,
+            'content': self.content,
+            'created': self.created,
+            'last_updated': self.last_updated,
+        }
+
+
+class ForumCategory(db.Model):
+    __tablename__ = "forum_category"
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+
+    id = default_id()
+
+    name = db.Column(db.String(128))
+    course_id = db.Column(db.String(128), db.ForeignKey(Course.id))
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    @property
+    def data(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'course_id': self.course_id,
+            'created': self.created,
+            'last_updated': self.last_updated,
+        }
+
+
+class ForumPostInCategory(db.Model):
+    __tablename__ = "forum_post_in_category"
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+
+    post_id = db.Column(db.String(128), db.ForeignKey(ForumPost.id), primary_key=True)
+    category_id = db.Column(db.String(128), db.ForeignKey(ForumCategory.id), primary_key=True)
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    @property
+    def data(self):
+        return {
+            'post_id': self.post_id,
+            'category_id': self.category_id,
+            'created': self.created,
+            'last_updated': self.last_updated,
+        }
+
+
+class ForumPostViewed(db.Model):
+    __tablename__ = "forum_post_viewed"
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+
+    owner_id = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
+    post_id = db.Column(db.String(128), db.ForeignKey(ForumPost.id), primary_key=True)
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    @property
+    def data(self):
+        return {
+            'owner_id': self.owner_id,
+            'post_id': self.post_id,
+            'created': self.created,
+            'last_updated': self.last_updated,
+        }
+
+
+class ForumPostComment(db.Model):
+    __tablename__ = "forum_post_comment"
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+
+    id = default_id()
+
+    display_name: str = db.Column(db.String(256), nullable=True, default=None)
+    owner_id: str = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
+    post_id: str = db.Column(db.String(128), db.ForeignKey(ForumPost.id), nullable=False)
+    next_id: str = db.Column(db.String(128), db.ForeignKey('forum_post_comment.id'), nullable=True)
+    approved_by: str = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
+    thread_start: bool = db.Column(db.Boolean, default=False)
+
+    content: str = deferred(db.Column(db.TEXT(2 ** 12)))
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    @property
+    def data(self):
+        return {
+            'id': self.id,
+            'display_name': self.display_name,
+            'owner_id': self.owner_id,
+            'post_id': self.post_id,
+            'next_id': self.next_id,
+            'approved_by': self.approved_by,
+            'thread_start': self.thread_start,
+            'content': self.content,
+            'created': self.created,
+            'last_updated': self.last_updated,
+        }
+
+
+class ForumPostUpvote(db.Model):
+    __tablename__ = "forum_post_upvote"
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+
+    id = default_id()
+
+    owner_id: str = db.Column(db.String(128), db.ForeignKey(User.id), primary_key=True)
+    post_id: str = db.Column(db.String(128), db.ForeignKey(ForumPost.id), primary_key=True)
+
+    # Timestamps
+    created = db.Column(db.DateTime, default=datetime.now)
+    last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    @property
+    def data(self):
+        return {
+            'owner_id': self.owner_id,
+            'post_id': self.post_id,
+            'created': self.created,
+            'last_updated': self.last_updated,
         }
