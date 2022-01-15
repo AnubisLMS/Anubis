@@ -6,7 +6,7 @@ from flask import g
 from werkzeug.local import LocalProxy
 
 from anubis.config import config
-from anubis.models import User
+from anubis.models import User, Course
 from anubis.utils.auth.token import get_token
 from anubis.utils.logging import logger
 
@@ -82,3 +82,16 @@ def _create_get_current_user_field(field: str) -> Callable:
 
 
 current_user: User = LocalProxy(get_current_user)
+
+
+def verify_in_course(course_id: str) -> Course:
+    from anubis.utils.http import req_assert
+    from anubis.models import InCourse
+
+    course: Course = Course.query.join(InCourse, InCourse.course_id == Course.id).filter(
+        InCourse.course_id == course_id, InCourse.owner_id == current_user.id
+    ).first()
+    req_assert(course is not None, message='Course does not exist')
+
+    return course
+

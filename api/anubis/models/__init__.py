@@ -854,11 +854,11 @@ class ForumPost(db.Model):
 
     id = default_id()
 
-    display_name: str = db.Column(db.String(256), nullable=True, default=None)
     owner_id: str = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
     course_id: str = db.Column(db.String(128), db.ForeignKey(Course.id))
     visible_to_students: bool = db.Column(db.Boolean, default=False)
     pinned: bool = db.Column(db.Boolean, default=False)
+    anonymous: bool = db.Column(db.Boolean, default=False)
     seen_count: int = db.Column(db.Integer, default=0)
 
     # Content
@@ -873,7 +873,7 @@ class ForumPost(db.Model):
     def data(self):
         return {
             'id': self.id,
-            'display_name': self.display_name,
+            'anonymous': self.anonymous,
             'owner_id': self.owner_id,
             'course_id': self.course_id,
             'visible_to_students': self.visible_to_students,
@@ -958,11 +958,11 @@ class ForumPostComment(db.Model):
 
     id = default_id()
 
-    display_name: str = db.Column(db.String(256), nullable=True, default=None)
     owner_id: str = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
     post_id: str = db.Column(db.String(128), db.ForeignKey(ForumPost.id), nullable=False)
     next_id: str = db.Column(db.String(128), db.ForeignKey('forum_post_comment.id'), nullable=True)
     approved_by: str = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
+    anonymous: bool = db.Column(db.Boolean, default=False)
     thread_start: bool = db.Column(db.Boolean, default=False)
 
     content: str = deferred(db.Column(db.TEXT(2 ** 12)))
@@ -975,7 +975,7 @@ class ForumPostComment(db.Model):
     def data(self):
         return {
             'id': self.id,
-            'display_name': self.display_name,
+            'anonymous': self.anonymous,
             'owner_id': self.owner_id,
             'post_id': self.post_id,
             'next_id': self.next_id,
