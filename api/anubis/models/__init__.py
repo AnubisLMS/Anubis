@@ -289,7 +289,7 @@ class AssignmentRepo(db.Model):
     assignment_id = db.Column(db.String(128), db.ForeignKey(Assignment.id), nullable=False)
 
     # Fields
-    github_username = db.Column(db.TEXT, nullable=False)
+    netid = db.Column(db.String(128), nullable=False)
     repo_url = db.Column(db.String(512), nullable=False)
     shared = db.Column(db.Boolean, default=False)
 
@@ -305,7 +305,7 @@ class AssignmentRepo(db.Model):
     def data(self):
         return {
             "id": self.id,
-            "github_username": self.github_username,
+            "netid": self.netid,
             "assignment_id": self.assignment_id,
             "assignment_name": self.assignment.name,
             "shared": self.shared,

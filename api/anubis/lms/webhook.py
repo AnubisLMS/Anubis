@@ -1,6 +1,7 @@
 from anubis.lms.repos import get_repos
 from anubis.models import Assignment, AssignmentRepo, User, db
 from anubis.utils.cache import cache
+from typing import Tuple
 
 
 def parse_webhook(webhook):
@@ -29,7 +30,7 @@ def parse_webhook(webhook):
     )
 
 
-def guess_github_repo_owner(assignment: Assignment, repo_name: str) -> User:
+def guess_github_repo_owner(assignment: Assignment, repo_name: str) -> Tuple[User, str]:
     """
     In order to match a webhook to a user, we need to know the github username
     that the repo in question was made for. The github username is in the name
@@ -51,10 +52,10 @@ def guess_github_repo_owner(assignment: Assignment, repo_name: str) -> User:
         User.netid.in_([netid1, netid2]),
         User.netid != "",
     ).first()
-    return user
+    return user, netid1
 
 
-def check_repo(assignment, repo_url, user=None) -> AssignmentRepo:
+def check_repo(assignment: Assignment, repo_url: str, user=None, netid=None) -> AssignmentRepo:
     """
     While processing the webhook, we need to check to see if we have
     record of the repo. This function takes what it needs to create
@@ -63,6 +64,7 @@ def check_repo(assignment, repo_url, user=None) -> AssignmentRepo:
     :param assignment:
     :param repo_url:
     :param user:
+    :param netid:
     :return:
     """
 
@@ -85,7 +87,7 @@ def check_repo(assignment, repo_url, user=None) -> AssignmentRepo:
             owner=user,
             assignment=assignment,
             repo_url=repo_url,
-            github_username=user.github_username,
+            netid=netid,
         )
         db.session.add(repo)
         db.session.commit()

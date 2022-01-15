@@ -101,8 +101,8 @@ def fix_github_missing_submissions(org_name: str):
             continue
 
         # Guess github username, then create the repo if it doesn't yet exist
-        user = guess_github_repo_owner(assignment, repo_name)
-        repo = check_repo(assignment, repo_url, user)
+        user, netid = guess_github_repo_owner(assignment, repo_name)
+        repo = check_repo(assignment, repo_url, user, user.netid)
 
         if user is None:
             continue

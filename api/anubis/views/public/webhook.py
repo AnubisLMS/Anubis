@@ -68,7 +68,7 @@ def public_webhook():
     req_assert(assignment is not None, message="assignment not found", status_code=406)
 
     # Get github username from the repository name
-    user = guess_github_repo_owner(assignment, repo_name)
+    user, netid = guess_github_repo_owner(assignment, repo_name)
 
     # The before Hash will be all 0s on for the first hash.
     # We will want to ignore both this first push (the initialization of the repo)
@@ -85,7 +85,7 @@ def public_webhook():
             },
         )
 
-        repo = check_repo(assignment, repo_url, user)
+        repo = check_repo(assignment, repo_url, user, netid)
 
         if repo.owner_id == None:
             return success_response("initial dangling")
@@ -130,7 +130,7 @@ def public_webhook():
 
     # if we dont have a record of the repo, then add it
     if repo is None:
-        repo = check_repo(assignment, repo_url, user)
+        repo = check_repo(assignment, repo_url, user, netid)
 
     req_assert(
         ref == "refs/heads/master" or ref == "refs/heads/main",

@@ -46,25 +46,25 @@ def gen_rand(n: int = 40):
 
 
 @with_context
-def create_user(github_username: str):
-    u = User(netid=gen_rand(6), name=gen_rand(6), github_username=github_username)
+def create_user(netid: str):
+    u = User(netid=netid, name=gen_rand(6), github_username=gen_rand(6))
     c = Course.query.filter(Course.name == "Intro to OS").first()
     ic = InCourse(course=c, owner=u)
     db.session.add_all([u, ic])
     db.session.commit()
-    return u.github_username
+    return u.netid
 
 
 @with_context
-def do_webhook_tests_user(github_username):
-    user = User.query.filter_by(github_username=github_username).first()
+def do_webhook_tests_user(netid):
+    user = User.query.filter_by(netid=netid).first()
     assignment = Assignment.query.join(Course).filter(Course.name == "Intro to OS").first()
 
     assignment_id = assignment.id
     assignment_name = assignment.name
     assignment_unique_code = assignment.unique_code
     user_id = user.id
-    user_github_username = user.github_username
+    user_netid = user.netid
 
     print(db.engine)
     print(assignment_name, assignment_unique_code)
@@ -74,11 +74,15 @@ def do_webhook_tests_user(github_username):
         gen_webhook(
             assignment_name,
             assignment_unique_code,
-            user_github_username,
+            user_netid,
             "0" * 40,
             "0" * 40,
         )
-    ).json()
+    )
+    if r.headers['Content-Type'] != 'application/json':
+        print(r.text)
+        assert False
+    r = r.json()
     assert r["data"] == "initial commit"
     db.session.expire_all()
     response = db.engine.execute(
@@ -88,7 +92,7 @@ def do_webhook_tests_user(github_username):
     )
     assert response.fetchone()[0] == 1
 
-    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, user_github_username)).json()
+    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, user_netid)).json()
     db.session.expire_all()
     assert r["data"] != "initial commit"
     response = db.engine.execute(
@@ -98,26 +102,26 @@ def do_webhook_tests_user(github_username):
     )
     assert response.fetchone()[0] == 1
 
-    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code + "abc", user_github_username)).json()
+    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code + "abc", user_netid)).json()
     assert r["data"] is None
     assert r["error"] == "assignment not found"
 
-    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, user_github_username, ref="abc123")).json()
+    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, user_netid, ref="abc123")).json()
     assert r["error"] == "not a push to master or main"
 
     r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, gen_rand(6))).json()
     assert r["error"] == "dangling submission"
 
-    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, user_github_username)).json()
+    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, user_netid)).json()
     assert r["data"] == "submission accepted"
 
 
 def test_webhooks():
-    username1 = create_user(f"{gen_rand(3)}-{gen_rand(3)}")
-    username2 = create_user(f"{gen_rand(3)}-{gen_rand(3)}")
+    netid1 = create_user(f"{gen_rand(3)}-{gen_rand(3)}")
+    netid2 = create_user(f"{gen_rand(3)}-{gen_rand(3)}")
 
-    do_webhook_tests_user(username1)
-    do_webhook_tests_user(username2)
+    do_webhook_tests_user(netid1)
+    do_webhook_tests_user(netid2)
 
 
 if __name__ == "__main__":
