@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import traceback
+from typing import Tuple
 
 import requests
 
@@ -63,7 +64,7 @@ def print_full_error(e, r):
 
 
 @with_context
-def create_user(permission: str = "superuser", add_to_os: bool = True):
+def create_user(permission: str = "superuser", add_to_os: bool = True) -> Tuple[str, str]:
     assert permission in ["superuser", "professor", "ta", "student"]
 
     name = create_name()
@@ -103,9 +104,10 @@ def create_user(permission: str = "superuser", add_to_os: bool = True):
         )
     db.session.commit()
 
-    return netid
+    return netid, course.id
 
 
+@with_context
 def _create_user_session(url: str, netid: str = "superuser", new: bool = False, add_to_os: bool = True):
     """
     Create a new user on the backend
@@ -117,7 +119,10 @@ def _create_user_session(url: str, netid: str = "superuser", new: bool = False, 
     session = requests.session()
 
     if new:
-        netid = create_user(netid, add_to_os)
+        netid, course_id = create_user(netid, add_to_os)
+    else:
+        course = Course.query.filter(Course.name == "Intro to OS").first()
+        course_id = course.id
 
     session.get(url + f"/admin/auth/token/{netid}")
     r = session.get(url + "/public/auth/whoami")
@@ -135,7 +140,7 @@ def _create_user_session(url: str, netid: str = "superuser", new: bool = False, 
                 session.cookies["course"] = base64.urlsafe_b64encode(json.dumps(i).encode()).decode()
     except AssertionError as e:
         print_full_error(e, r)
-    return session, netid
+    return session, netid, course_id
 
 
 class Session(object):
@@ -159,7 +164,8 @@ class Session(object):
     ):
         self.url = f"http://{domain}:{port}"
         self.timings = []
-        self._session, self.netid = _create_user_session(self.url, permission, new=new, add_to_os=add_to_os)
+        self._session, self.netid, self.course_id = _create_user_session(self.url, permission, new=new,
+                                                                         add_to_os=add_to_os)
 
     @staticmethod
     def _verify_success(r):
@@ -259,6 +265,25 @@ class Session(object):
             **kwargs,
         )
 
+    def delete(
+        self,
+        path,
+        return_request=False,
+        should_succeed=True,
+        should_fail=False,
+        skip_verify=False,
+        **kwargs,
+    ):
+        return self._make_request(
+            path,
+            self._session.delete,
+            return_request,
+            should_succeed,
+            should_fail,
+            skip_verify,
+            **kwargs,
+        )
+
     def post_json(
         self,
         path,
@@ -277,6 +302,56 @@ class Session(object):
         return self._make_request(
             path,
             self._session.post,
+            return_request,
+            should_succeed,
+            should_fail,
+            skip_verify,
+            **kwargs,
+        )
+
+    def put_json(
+        self,
+        path,
+        json,
+        return_request=False,
+        should_succeed=True,
+        should_fail=False,
+        skip_verify=False,
+        **kwargs,
+    ):
+        kwargs["json"] = json
+        if "headers" not in kwargs:
+            kwargs["headers"] = dict()
+        kwargs["headers"]["Content-Type"] = "application/json"
+
+        return self._make_request(
+            path,
+            self._session.put,
+            return_request,
+            should_succeed,
+            should_fail,
+            skip_verify,
+            **kwargs,
+        )
+
+    def patch_json(
+        self,
+        path,
+        json,
+        return_request=False,
+        should_succeed=True,
+        should_fail=False,
+        skip_verify=False,
+        **kwargs,
+    ):
+        kwargs["json"] = json
+        if "headers" not in kwargs:
+            kwargs["headers"] = dict()
+        kwargs["headers"]["Content-Type"] = "application/json"
+
+        return self._make_request(
+            path,
+            self._session.patch,
             return_request,
             should_succeed,
             should_fail,
@@ -350,9 +425,9 @@ def permission_test(path, fail_for: list = None, method="get", after: callable =
 
 
 if __name__ == "__main__":
-
     def test_this_file():
         ts = Session()
         ts.get("/public/auth/whoami")
+
 
     run_main(test_this_file)

@@ -62,16 +62,16 @@ class User(db.Model):
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    ta_for_course = db.relationship("TAForCourse", cascade="all,delete", backref="owner")
-    professor_for_course = db.relationship("ProfessorForCourse", cascade="all,delete", backref="owner")
-    in_course = db.relationship("InCourse", cascade="all,delete", backref="owner")
-    assignment_repos = db.relationship("AssignmentRepo", cascade="all,delete", backref="owner")
-    assigned_student_questions = db.relationship("AssignedStudentQuestion", cascade="all,delete", backref="owner")
-    submissions = db.relationship("Submission", cascade="all,delete", backref="owner")
-    theia_sessions = db.relationship("TheiaSession", cascade="all,delete", backref="owner")
-    late_exceptions = db.relationship("LateException", cascade="all,delete", backref="user")
-    posts = db.relationship("ForumPost", cascade="all,delete", backref="owner")
-    comments = db.relationship("ForumPostComment", cascade="all,delete", backref="owner")
+    ta_for_course = db.relationship("TAForCourse", backref="owner")
+    professor_for_course = db.relationship("ProfessorForCourse", backref="owner")
+    in_course = db.relationship("InCourse", backref="owner")
+    assignment_repos = db.relationship("AssignmentRepo", backref="owner")
+    assigned_student_questions = db.relationship("AssignedStudentQuestion", backref="owner")
+    submissions = db.relationship("Submission", backref="owner")
+    theia_sessions = db.relationship("TheiaSession", backref="owner")
+    late_exceptions = db.relationship("LateException", backref="user")
+    posts = db.relationship("ForumPost", backref="owner")
+    comments = db.relationship("ForumPostComment", backref="owner", foreign_keys='ForumPostComment.owner_id')
 
     @property
     def data(self):
@@ -886,8 +886,8 @@ class ForumPost(db.Model):
             'visible_to_students': self.visible_to_students,
             'pinned': self.pinned,
             'seen_count': self.seen_count,
-            'created': self.created,
-            'last_updated': self.last_updated,
+            'created': str(self.created),
+            'last_updated': str(self.last_updated),
         }
 
     @property
@@ -924,8 +924,8 @@ class ForumCategory(db.Model):
             'id': self.id,
             'name': self.name,
             'course_id': self.course_id,
-            'created': self.created,
-            'last_updated': self.last_updated,
+            'created': str(self.created),
+            'last_updated': str(self.last_updated),
         }
 
 
@@ -945,8 +945,8 @@ class ForumPostInCategory(db.Model):
         return {
             'post_id': self.post_id,
             'category_id': self.category_id,
-            'created': self.created,
-            'last_updated': self.last_updated,
+            'created': str(self.created),
+            'last_updated': str(self.last_updated),
         }
 
 
@@ -966,8 +966,8 @@ class ForumPostViewed(db.Model):
         return {
             'owner_id': self.owner_id,
             'post_id': self.post_id,
-            'created': self.created,
-            'last_updated': self.last_updated,
+            'created': str(self.created),
+            'last_updated': str(self.last_updated),
         }
 
 
@@ -1001,8 +1001,8 @@ class ForumPostComment(db.Model):
             'approved_by': self.approved_by,
             'thread_start': self.thread_start,
             'content': self.content,
-            'created': self.created,
-            'last_updated': self.last_updated,
+            'created': str(self.created),
+            'last_updated': str(self.last_updated),
         }
 
 
@@ -1024,6 +1024,6 @@ class ForumPostUpvote(db.Model):
         return {
             'owner_id': self.owner_id,
             'post_id': self.post_id,
-            'created': self.created,
-            'last_updated': self.last_updated,
+            'created': str(self.created),
+            'last_updated': str(self.last_updated),
         }

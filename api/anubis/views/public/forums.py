@@ -74,7 +74,7 @@ def public_get_forum_post(post: ForumPost):
     })
 
 
-@forums_.put('/post')
+@forums_.post('/post')
 @require_user()
 @json_endpoint([
     ('course_id', str),
@@ -83,7 +83,7 @@ def public_get_forum_post(post: ForumPost):
     ('visible_to_students', bool),
     ('anonymous', bool),
 ])
-def public_put_forum_post(
+def public_post_forum_post(
     course_id: str,
     title: str,
     content: str,
@@ -107,7 +107,7 @@ def public_put_forum_post(
 
     return success_response({
         'post': post.data,
-        'status': 'Post created',
+        'status': 'Posted',
     })
 
 
@@ -166,15 +166,15 @@ def public_get_forum_comment(comment: ForumPostComment):
     return success_response({'comment': comment.data, 'post': comment.post.meta_data})
 
 
-@forums_.put('/post/<string:post_id>/comment')
-@forums_.put('/post/<string:post_id>/comment/<string:before_id>')
+@forums_.post('/post/<string:post_id>/comment')
+@forums_.post('/post/<string:post_id>/comment/<string:before_id>')
 @require_user()
 @json_endpoint([
     ('post_id', str),
     ('content', str),
     ('anonymous', bool),
 ])
-def public_put_forum_post_comment(
+def public_post_forum_post_comment(
     post_id: str,
     content: str,
     anonymous: bool,
