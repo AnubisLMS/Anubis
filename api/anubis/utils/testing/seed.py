@@ -26,7 +26,7 @@ from anubis.models import (
 )
 from anubis.utils.data import rand
 from anubis.utils.data import with_context
-from anubis.utils.github.repos import get_student_assignment_repo_name
+from anubis.github.repos import get_student_assignment_repo_name
 from anubis.utils.testing.db import clear_database
 from anubis.utils.testing.lorem import lorem
 from anubis.utils.testing.names import names

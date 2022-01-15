@@ -12,7 +12,7 @@ from anubis.models import Course, TheiaSession, db
 from anubis.utils.auth.token import create_token
 from anubis.utils.config import get_config_int, get_config_str
 from anubis.utils.data import is_debug
-from anubis.utils.github.parse import parse_github_repo_name
+from anubis.github.parse import parse_github_repo_name
 from anubis.utils.logging import logger
 
 

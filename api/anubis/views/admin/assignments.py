@@ -14,7 +14,7 @@ from anubis.models import Assignment, AssignmentRepo, AssignmentTest, Submission
 from anubis.utils.auth.http import require_admin
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import rand, req_assert, row2dict
-from anubis.utils.github.repos import delete_assignment_repo
+from anubis.github.repos import delete_assignment_repo
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_endpoint, json_response, load_from_id
 from anubis.utils.logging import logger

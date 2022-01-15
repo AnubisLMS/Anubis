@@ -11,7 +11,7 @@ from anubis.models import (
     Course,
 )
 from anubis.utils.data import with_context
-from anubis.utils.github.fix import fix_github_missing_submissions, fix_github_broken_repos
+from anubis.github.fix import fix_github_missing_submissions, fix_github_broken_repos
 from anubis.utils.logging import logger
 from anubis.utils.rpc import enqueue_ide_reap_stale, enqueue_pipeline_reap_stale, enqueue_autograde_pipeline
 from anubis.lms.students import get_students

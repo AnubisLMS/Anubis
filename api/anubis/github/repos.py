@@ -4,7 +4,7 @@ from typing import List
 from parse import parse
 
 from anubis.models import Assignment, AssignmentRepo, Submission, SubmissionBuild, SubmissionTestResult, User, db
-from anubis.utils.github.api import github_graphql, github_rest
+from anubis.github.api import github_graphql, github_rest
 from anubis.utils.logging import logger
 
 

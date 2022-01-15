@@ -29,7 +29,7 @@ from anubis.utils.cache import cache
 from anubis.utils.config import get_config_int
 from anubis.utils.data import is_debug
 from anubis.utils.data import req_assert
-from anubis.utils.github.repos import create_assignment_group_repo, delete_assignment_repo
+from anubis.github.repos import create_assignment_group_repo, delete_assignment_repo
 from anubis.utils.logging import logger
 
 
