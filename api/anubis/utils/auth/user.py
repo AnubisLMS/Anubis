@@ -9,6 +9,7 @@ from anubis.config import config
 from anubis.models import User, Course
 from anubis.utils.auth.token import get_token
 from anubis.utils.logging import logger
+from anubis.utils.data import req_assert
 
 
 def get_current_user() -> Union[User, None]:
@@ -39,6 +40,12 @@ def get_current_user() -> Union[User, None]:
     # Get the user from the decoded jwt
     netid = decoded["netid"]
     user = User.query.filter_by(netid=netid).first()
+
+    # Check if the user is disabled
+    req_assert(
+        not user.disabled, 
+        message='Your Anubis account has been disabled. Please reach out to support for more information.'
+    )
 
     # Cache the user in the request context
     g.user = user
