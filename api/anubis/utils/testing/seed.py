@@ -141,6 +141,7 @@ def create_assignment(
                     netid=user.netid,
                     repo_created=True,
                     collaborator_configured=True,
+                    ta_configured=True,
                 )
             )
 

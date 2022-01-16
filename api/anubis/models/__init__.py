@@ -116,7 +116,8 @@ class Course(db.Model):
     github_repo_required = db.Column(db.Boolean, default=True)
     theia_default_image_id = db.Column(db.String(128), db.ForeignKey("theia_image.id"), nullable=True)
     theia_default_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
-    github_org = db.Column(db.TEXT, default="os3224")
+    github_org = db.Column(db.String(256), default="os3224")
+    github_ta_team_slug = db.Column(db.String(256), default="tas")
     join_code = db.Column(db.String(256), unique=True)
     display_visuals = db.Column(db.Boolean, default=True)
     beta_ui_enabled = db.Column(db.Boolean, default=False)
@@ -298,6 +299,7 @@ class AssignmentRepo(db.Model):
     # State booleans
     repo_created = db.Column(db.Boolean, default=False)
     collaborator_configured = db.Column(db.Boolean, default=False)
+    ta_configured = db.Column(db.Boolean, default=False)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
@@ -311,7 +313,7 @@ class AssignmentRepo(db.Model):
             "assignment_id": self.assignment_id,
             "assignment_name": self.assignment.name,
             "shared": self.shared,
-            "ready": self.repo_created and self.collaborator_configured,
+            "ready": self.repo_created and self.collaborator_configured and self.ta_configured,
             "course_code": self.assignment.course.course_code,
             "repo_url": self.repo_url,
         }

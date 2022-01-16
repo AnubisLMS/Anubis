@@ -61,6 +61,16 @@ def create_repo_from_template(owner_id: str, template_repo_id: str, new_repo_nam
     )
 
 
+def add_team(github_org: str, new_repo_name: str, team_slug: str):
+    return github_rest(
+        f"/orgs/{github_org}/teams/{team_slug}/repos/{github_org}/{new_repo_name}",
+        {
+            "permission": "admin",
+        },
+        method="put",
+    )
+
+
 def add_collaborator(github_org: str, new_repo_name: str, github_username: str):
     return github_rest(
         f"/repos/{github_org}/{new_repo_name}/collaborators/{github_username}",
@@ -195,7 +205,7 @@ def _create_assignment_repo_obj(
         repo = AssignmentRepo(
             assignment_id=assignment.id,
             owner_id=user.id,
-            github_username=user.github_username,
+            netid=user.netid,
             repo_url=new_repo_url,
         )
         db.session.add(repo)
@@ -326,7 +336,6 @@ def create_assignment_github_repo(
         logger.error(f"continuing")
 
     try:
-
         for repo in repos:
 
             # If repo has not been configured
@@ -356,7 +365,38 @@ def create_assignment_github_repo(
                 db.session.commit()
     except Exception as e:
         logger.error(traceback.format_exc())
-        logger.error(f"Failed to configure collaborators {e}")
-        logger.error(f"continuing")
+        logger.error(f"Failed to configure collaborators {e}, continuing")
+
+    try:
+        for repo in repos:
+
+            # If repo has not been configured
+            if not repo.ta_configured:
+
+                # Get user github username
+                team_slug = repo.assignment.course.github_ta_team_slug
+
+                # Use github REST api to add the ta team as a collaborator
+                # to the repo.
+                data = add_team(github_org, new_repo_name, team_slug)
+
+                # Sometimes it takes a moment before we are able to add collaborators to
+                # the repo. The message in the response will be Not Found in this situation.
+                # We can have it try again to fix.
+                if data.get("message", None) == "Not Found":
+                    logger.error("Failed to add ta team (Not Found). Trying again.")
+                    data = add_team(github_org, new_repo_name, team_slug)
+
+                # If the response was None, the api request failed
+                if data is None or data.get("message", None) == "Not Found":
+                    logger.error("Failed to add ta team")
+                    continue
+
+                # Mark the repo as collaborator configured
+                repo.ta_configured = True
+                db.session.commit()
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        logger.error(f"Failed to configure ta team {e}, continuing")
 
     return repos
