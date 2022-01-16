@@ -579,7 +579,8 @@ class SubmissionTestResult(db.Model):
             "test_name": self.assignment_test.name,
             "passed": self.passed,
             "message": self.message,
-            "data": self.data,
+            "output_type": self.output_type,
+            "output": self.output,
             "created": str(self.created),
             "last_updated": str(self.last_updated),
         }
