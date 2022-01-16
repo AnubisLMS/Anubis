@@ -62,17 +62,17 @@ export const footer_nav = [
     Page: Visuals,
   },
   {
-    id: 'Playgrounds',
-    icon: <i className="devicon-vscode-plain" style={{fontSize: 20}}/>,
-    path: '/playgrounds',
-    Page: Playgrounds,
-  },
-  {
     id: 'Blog',
     icon: <BookIcon/>,
     exact: false,
     path: '/blog',
     Page: Blog,
+  },
+  {
+    id: 'Playgrounds',
+    icon: <i className="devicon-vscode-plain" style={{fontSize: 20}}/>,
+    path: '/playgrounds',
+    Page: Playgrounds,
   },
 ];
 

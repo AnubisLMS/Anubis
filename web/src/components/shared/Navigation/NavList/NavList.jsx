@@ -68,11 +68,7 @@ const NavList = ({open, handleDrawerClose}) => {
               {user?.is_superuser && (
                 <React.Fragment>
                   <ListItem className={classes.categoryHeader}>
-                    <ListItemText
-                      classes={{
-                        primary: classes.categoryHeaderPrimary,
-                      }}
-                    >
+                    <ListItemText classes={{primary: classes.categoryHeaderText}}>
                       SUPER
                     </ListItemText>
                   </ListItem>
@@ -97,7 +93,7 @@ const NavList = ({open, handleDrawerClose}) => {
         <List>
           <ListItem className={classes.categoryHeader}>
             <ListItemText classes={{primary: classes.categoryHeaderText}}>
-              OPTIONS
+              EXPLORE
             </ListItemText>
           </ListItem>
           {footer_nav.map(({id: childId, icon, path}) => (
