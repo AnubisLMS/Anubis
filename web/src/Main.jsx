@@ -38,9 +38,6 @@ export default function Main({user}) {
       <Route exact path={'/'}>
         <Redirect to={'/visuals'}/>
       </Route>
-      <Route>
-        <NotFound/>
-      </Route>
     </Switch>
   );
 }
