@@ -41,11 +41,12 @@ def get_current_user() -> Union[User, None]:
     netid = decoded["netid"]
     user = User.query.filter_by(netid=netid).first()
 
-    # Check if the user is disabled
-    req_assert(
-        not user.disabled, 
-        message='Your Anubis account has been disabled. Please reach out to support for more information.'
-    )
+    if user is not None:
+        # Check if the user is disabled
+        req_assert(
+            not user.disabled,
+            message='Your Anubis account has been disabled. Please reach out to support for more information.'
+        )
 
     # Cache the user in the request context
     g.user = user
