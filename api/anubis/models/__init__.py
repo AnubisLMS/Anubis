@@ -980,7 +980,7 @@ class ForumPostComment(db.Model):
 
     owner_id: str = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
     post_id: str = db.Column(db.String(128), db.ForeignKey(ForumPost.id), nullable=False)
-    next_id: str = db.Column(db.String(128), db.ForeignKey('forum_post_comment.id'), nullable=True)
+    next_id: str = db.Column(db.String(128), nullable=True)
     approved_by_id: str = db.Column(db.String(128), db.ForeignKey(User.id), nullable=True)
     anonymous: bool = db.Column(db.Boolean, default=False)
     thread_start: bool = db.Column(db.Boolean, default=False)

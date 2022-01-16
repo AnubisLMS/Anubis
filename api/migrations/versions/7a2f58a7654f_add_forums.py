@@ -75,10 +75,6 @@ def upgrade():
             ["user.id"],
         ),
         sa.ForeignKeyConstraint(
-            ["next_id"],
-            ["forum_post_comment.id"],
-        ),
-        sa.ForeignKeyConstraint(
             ["owner_id"],
             ["user.id"],
         ),

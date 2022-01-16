@@ -1,4 +1,10 @@
 from anubis.models import (
+    ForumPost,
+    ForumPostComment,
+    ForumCategory,
+    ForumPostInCategory,
+    ForumPostUpvote,
+    ForumPostViewed,
     AssignedQuestionResponse,
     AssignedStudentQuestion,
     Assignment,
@@ -25,6 +31,12 @@ from anubis.models import (
 
 def clear_database():
     # Yeet
+    ForumPostViewed.query.delete()
+    ForumPostUpvote.query.delete()
+    ForumPostInCategory.query.delete()
+    ForumCategory.query.delete()
+    ForumPostComment.query.delete()
+    ForumPost.query.delete()
     LateException.query.delete()
     TheiaSession.query.delete()
     AssignedQuestionResponse.query.delete()

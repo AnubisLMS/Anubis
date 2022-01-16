@@ -386,7 +386,7 @@ def create_repo(s: Session, assignment_id: str = None):
         AssignmentRepo(
             owner=user,
             assignment_id=assignment_id,
-            github_username=s.netid,
+            netid=s.netid,
             repo_url="https://github.com/wabscale/xv6-public",
         )
     )

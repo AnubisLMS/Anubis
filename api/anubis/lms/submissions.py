@@ -288,7 +288,8 @@ def reject_late_submission(submission: Submission):
         test_result: SubmissionTestResult
         test_result.passed = False
         test_result.message = "Late submissions not accepted"
-        test_result.stdout = ""
+        test_result.output = ""
+        test_result.output_type = "text"
         db.session.add(test_result)
 
     # Go through build results, and set them to rejected
