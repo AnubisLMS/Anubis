@@ -17,6 +17,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
 import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 import IDEHeader from '../IDE/IDEHeader';
 import standardStatusHandler from '../../../utils/standardStatusHandler';
@@ -124,6 +125,7 @@ export default function ManagementIDEDialog() {
   const [open, setOpen] = useState(false);
   const [sessionsAvailable, setSessionsAvailable] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState([]);
   const [session, setSession] = useState(false);
   const [settings, setSettings] = useState({});
 
@@ -132,6 +134,15 @@ export default function ManagementIDEDialog() {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
         setSessionsAvailable(data.session_available);
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  }, []);
+
+  React.useEffect(() => {
+    axios.get(`/api/admin/ide/images/list`).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data?.images) {
+        setImages(data.images);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, []);
@@ -169,6 +180,8 @@ export default function ManagementIDEDialog() {
         prev[key] = e.target.value;
       } else if (typeof prev[key] === 'boolean') {
         prev[key] = !prev[key];
+      } else {
+        prev[key] = e;
       }
       return {...prev};
     });
@@ -218,9 +231,14 @@ export default function ManagementIDEDialog() {
               </Typography>
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                fullWidth label="Theia Image" variant="outlined"
-                value={settings.image} onChange={updateSetting('image')}
+              <Autocomplete
+                fullWidth
+                disableClearable
+                value={settings.image}
+                onChange={(_, v) => updateSetting('image')(v)}
+                options={images}
+                getOptionLabel={(option) => option?.title}
+                renderInput={(params) => <TextField {...params} label="IDE Image" variant="outlined" />}
               />
             </Grid>
             <Grid item xs={12}>
@@ -250,7 +268,7 @@ export default function ManagementIDEDialog() {
                   />
                 }
                 labelPlacement={'end'}
-                label="Admin"
+                label="admin"
               />
             </Grid>
             <Grid item xs={12}>
@@ -313,7 +331,7 @@ export default function ManagementIDEDialog() {
               color={'primary'}
               autoFocus
             >
-              {!session ? 'Launch Session' : 'Go to AdminIDE'}
+              {!session ? 'Launch Session' : 'Go to IDE'}
             </Button>
             {loading && <CircularProgress size={24} className={classes.buttonProgress}/>}
           </div>

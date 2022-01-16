@@ -55,7 +55,7 @@ export default function CourseCard({course, _disabled, editableFields, updateFie
                     value={course[field]}
                     onChange={(_, v) => updateField(course.id, field, false, false, true)(v)}
                     options={images}
-                    getOptionLabel={(option) => option.label}
+                    getOptionLabel={(option) => option.title}
                     renderInput={(params) => <TextField {...params} label={label} variant="outlined" />}
                   />
                 </Grid>

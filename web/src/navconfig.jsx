@@ -160,7 +160,7 @@ export const admin_nav = [
     Page: AdminAutogradeAssignments,
   },
   {
-    id: 'Anubis Cloud AdminIDE',
+    id: 'Anubis Cloud IDE',
     icon: <i className="devicon-vscode-plain" style={{fontSize: 20}}/>,
     path: '/admin/ide',
     Page: AdminTheia,
