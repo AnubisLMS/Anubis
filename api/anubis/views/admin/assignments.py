@@ -79,7 +79,7 @@ def admin_assignments_reset_repos_id(assignment: Assignment):
     )
 
 
-@assignments.route("/repos/<string:id>")
+@assignments.get("/repos/<string:id>")
 @require_admin()
 @load_from_id(Assignment, verify_owner=False)
 @json_response
@@ -110,9 +110,8 @@ def admin_assignments_repos_id(assignment: Assignment):
                     "id": repo.id,
                     "url": repo.repo_url,
                     "ssh": get_ssh_url(repo.repo_url),
-                    "github_username": repo.github_username,
+                    "netid": repo.netid,
                     "name": repo.owner.name if repo.owner_id is not None else "N/A",
-                    "netid": repo.owner.netid if repo.owner_id is not None else "N/A",
                 }
                 for repo in repos
             ],
@@ -450,49 +449,13 @@ def private_assignment_sync(assignment: dict):
       "assignment": {
         "name": "{name}",
         "course": "CS-UY 3224",
-        "hidden": true,
         "unique_code": "{code}",
-        "pipeline_image": "registry.digitalocean.com/anubis/assignment/{code}",
-        "date": {
-          "release": "{now}",
-          "due": "{week_from_now}",
-          "grace": "{week_from_now}"
-        },
-        "description": "This is a very long description that encompasses the entire assignment\n",
-        "questions": [
-          {
-            "sequence": 1,
-            "questions": [
-              {
-                "q": "What is 3*4?",
-                "a": "12"
-              },
-              {
-                "q": "What is 3*2",
-                "a": "6"
-              }
-            ]
-          },
-          {
-            "sequence": 2,
-            "questions": [
-              {
-                "q": "What is sqrt(144)?",
-                "a": "12"
-              }
-            ]
-          }
-        ]
+        "pipeline_image": "registry.digitalocean.com/anubis/assignment/{code}"
       }
     }
 
     response = {
-      assignment : {}
-      questions: {
-        accepted: [ ... ]
-        ignored: [ ... ]
-        rejected: [ ... ]
-      }
+      assignment : {...},
     }
 
     :return:
