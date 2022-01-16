@@ -2,7 +2,7 @@ FROM registry.digitalocean.com/anubis/theia-base:python-3.9 as theia
 USER root
 
 # Copy file over for skel initialization
-COPY gdbinit /etc/skel/.gdbinit
+COPY gdbinit /etc/anubis/skel/.gdbinit
 COPY motd.txt /etc/motd
 
 # Step for downloading any new extensions
