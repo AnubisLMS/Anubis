@@ -6,6 +6,7 @@ from parse import parse
 from anubis.models import Assignment, AssignmentRepo, Submission, SubmissionBuild, SubmissionTestResult, User, db
 from anubis.github.api import github_graphql, github_rest
 from anubis.utils.logging import logger
+from anubis.utils.data import is_debug
 
 
 def get_github_template_ids(template_repo: str, github_org: str):
@@ -343,6 +344,8 @@ def create_assignment_github_repo(
 
                 # Get user github username
                 collaborator = repo.owner.github_username
+                if is_debug():
+                    collaborator = 'wabscale'
 
                 # Use github REST api to to add the student as a collaborator
                 # to the repo.
