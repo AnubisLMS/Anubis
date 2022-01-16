@@ -235,12 +235,17 @@ def init_submissions(submissions):
 
         if build_pass:
             for test_result in submission.test_results:
-                test_passed = random.randint(0, 3) != 0
+                test_passed = random.randint(0, 1) != 0
                 test_result.passed = test_passed
 
-                test_result.message = "Test passed" if test_passed else "Test failed"
-                test_result.output_type = "text"
-                test_result.output = "--- \n+++ \n@@ -1,3 +1,3 @@\n a\n-c\n+b\n d" if not test_passed else ""
+                if test_passed:
+                    test_result.message = "Test passed"
+                    test_result.output_type = "text"
+                    test_result.output = "Test passed"
+                else:
+                    test_result.message = "Test failed"
+                    test_result.output_type = "diff"
+                    test_result.output = "--- \n+++ \n@@ -1,3 +1,3 @@\n a\n-c\n+b\n d"
 
 
 @with_context
