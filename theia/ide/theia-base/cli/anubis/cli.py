@@ -1,28 +1,71 @@
 """Console script for anubis."""
 
-import base64
+import subprocess
+import functools
 import getpass
-import json
 import logging
-import os
 import shutil
 import string
-import subprocess
-import sys
+import base64
 import typing
+import json
+import git
+import sys
+import os
 from datetime import datetime, timedelta
 
-import click
 import requests
+import click
 import yaml
 
 INCLUSTER = True
 API_URL = 'http://anubis-api:5000'
+ANUBIS_ADMIN = os.environ.get('ANUBIS_ADMIN', 'OFF') == 'ON'
+ANUBIS_ASSIGNMENT_TESTS_REPO = os.environ.get('ANUBIS_ASSIGNMENT_TESTS_REPO', None)
 COURSE_ID = os.environ.get('COURSE_ID', None)
 COURSE_CODE = os.environ.get('COURSE_CODE', 'CS-UY 3224')
 conf_dir = os.path.join(os.environ.get("HOME"), ".anubis")
 conf_file = os.path.join(os.environ.get("HOME"), ".anubis/config.json")
 assignment_base = None
+
+
+def require_admin(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if not ANUBIS_ADMIN:
+            click.echo('This command requires an IDE with Admin permissions.', err=True)
+            click.echo('If you are a TA and are seeing this message '
+                       'check with your professor that you have TA permissions on Anubis.', err=True)
+            return 1
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def require_not_in_repo(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            git.Repo()
+            click.echo('This command cannot be run in a git repo. '
+                       'Please cd to somewhere else and try again.', err=True)
+            return 2
+        except git.exc.InvalidGitRepositoryError:
+            pass
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def require_in_repo(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            git.Repo()
+            return func(*args, **kwargs)
+        except git.exc.InvalidGitRepositoryError:
+            click.echo('This command can only be run in a git repo. '
+                       'Please cd to the repo you would like to operate on.', err=True)
+            return 2
+    return wrapper
 
 
 def shell(cmd: str) -> str:
@@ -114,9 +157,9 @@ def get_json(path: str, params=None) -> requests.Response:
 
 
 def relatively_safe_filename(filename: str) -> str:
-    filename = filename.lower().replace(' ', '-')
-    allowed = set(string.ascii_letters + string.digits + '_-')
-    filename = ''.join(i for i in filename if i in allowed)
+    valid_charset = set(string.ascii_letters + string.digits + '_')
+    filename = filename.replace(' ', '_').replace('-', '_').lower()
+    filename = ''.join(i for i in filename if i in valid_charset)
     return filename
 
 
@@ -136,6 +179,7 @@ def main(debug):
 
 @main.command()
 @click.argument('message', nargs=-1)
+@require_in_repo
 def autosave(message):
     repo_root = shell('git rev-parse --show-toplevel').strip()
     if 'fatal: not a git repository' in repo_root:
@@ -177,6 +221,7 @@ def whoami():
 
 
 @assignment.command()
+@require_admin
 def sync():
     if not os.path.exists('meta.yml'):
         click.echo('no meta.yml found!')
@@ -196,6 +241,7 @@ def sync():
 
 @assignment.command()
 @click.argument('assignment-name')
+@require_admin
 def init(assignment_name):
     safe_assignment_name = relatively_safe_filename(assignment_name)
 
@@ -249,9 +295,10 @@ def init(assignment_name):
 @assignment.command()
 @click.argument('path', type=click.Path(exists=True), default='.')
 @click.option('--push/-p', default=False)
+@require_admin
 def build(path, push):
     if not os.path.exists('meta.yml'):
-        click.echo('no meta.yml found!')
+        click.echo('No meta.yml found!', err=True)
         return 1
     assignment_meta = yaml.safe_load(open(os.path.join(path, 'meta.yml')).read())
 
@@ -265,6 +312,7 @@ def build(path, push):
 
 
 @assignment.command()
+@require_admin
 def ls():
     assignments = get_json('/admin/assignments/list').json()['data'].get('assignments', [])
     click.echo(json.dumps(assignments, indent=2))
@@ -272,6 +320,8 @@ def ls():
 
 @assignment.command()
 @click.argument('assignment-name')
+@require_admin
+@require_not_in_repo
 def clone(assignment_name):
     assignments = get_json('/admin/assignments/list').json()['data'].get('assignments', [])
 
@@ -287,13 +337,42 @@ def clone(assignment_name):
 
     repos = get_json('/admin/assignments/repos/{}'.format(assignment_id)).json()['data'].get('repos', [])
 
+    assignment_path = os.path.join(os.getcwd(), relatively_safe_filename(assignment_name))
+    os.makedirs(assignment_path, exist_ok=True)
+
+    click.echo('1/4 Cleaning existing files in destination path...')
+    for item in os.listdir(assignment_path):
+        to_del = os.path.join(assignment_path, item)
+        if os.path.isdir(to_del):
+            shutil.rmtree(os.path.join(assignment_path, item))
+        else:
+            os.remove(to_del)
+
+    click.echo('2/4 Writing manifest')
+    manifest_path = os.path.join(assignment_path, 'manifest.json')
+    with open(manifest_path, 'w') as manifest_json:
+        json.dump({
+            'assignment': {
+                'name': assignment_name,
+                'path': assignment_path,
+                'tests': os.path.join(assignment_path, 'assignment_tests'),
+            },
+            'repos': repos,
+        }, manifest_json)
+
+    if ANUBIS_ASSIGNMENT_TESTS_REPO is not None:
+        repos.append({'url': ANUBIS_ASSIGNMENT_TESTS_REPO, 'netid': 'assignment_tests'})
+
+    click.echo('3/4 Sending clone commands to sidecar... (this may take a bit)')
     r = requests.post('http://localhost:5001/clone', json={
         'assignment_name': assignment_name,
         'path': os.getcwd() + '/',
         'repos': repos,
     })
-
     click.echo(r.text)
+
+    click.echo('4/4 Finished!')
+
     return r.status_code == 200
 
 

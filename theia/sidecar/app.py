@@ -9,7 +9,7 @@ from flask import Flask, Response, request, make_response
 
 app = Flask(__name__)
 NETID = os.environ.get('NETID', default=None)
-ADMIN = os.environ.get('ADMIN', default=None) == 'ON'
+ADMIN = os.environ.get('ANUBIS_ADMIN', default=None) == 'ON'
 
 
 def text_response(message: str, status_code: int = 200) -> Response:
@@ -17,6 +17,13 @@ def text_response(message: str, status_code: int = 200) -> Response:
     r.status_code = status_code
     r.headers['Content-Type'] = 'application/json'
     return r
+
+
+def relatively_safe_filename(filename: str) -> str:
+    valid_charset = set(string.ascii_letters + string.digits + '_')
+    filename = filename.replace(' ', '_').replace('-', '_').lower()
+    filename = ''.join(i for i in filename if i in valid_charset)
+    return filename
 
 
 @app.route('/', methods=['POST'])
@@ -92,9 +99,7 @@ if ADMIN:
             response.headers = {'Content-Type': 'text/plain'}
             return response
 
-        valid_charset = set(string.ascii_letters + string.digits + '_')
-        assignment_name = assignment_name.replace(' ', '_').replace('-', '_').lower()
-        assignment_name = ''.join(c for c in assignment_name if c in valid_charset)
+        assignment_name = relatively_safe_filename(assignment_name)
 
         os.makedirs(os.path.join(path, assignment_name), exist_ok=True)
         path = os.path.join(path, assignment_name)

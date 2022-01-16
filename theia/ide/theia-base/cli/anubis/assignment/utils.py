@@ -18,9 +18,9 @@ CompareFuncT = typing.Callable[[typing.List[str], typing.List[str], bool], Compa
 class TestResult(object):
     def __init__(self):
         self.output_type = 'text'
-        self.output = None
-        self.message = None
-        self.passed = None
+        self.output = ""
+        self.message = ""
+        self.passed = True
 
     def __repr__(self):
         return "<TestResult\n  passed={}\n  message='{:5.5}'\n  output_type='{}'\n  output='{:5.5}'\n>".format(
@@ -33,8 +33,8 @@ class TestResult(object):
 
 class BuildResult(object):
     def __init__(self):
-        self.stdout = None
-        self.passed = None
+        self.stdout = ""
+        self.passed = True
 
     def __repr__(self):
         return "<BuildResult\n  passed={}\n  stdout='{:5.5}'>".format(

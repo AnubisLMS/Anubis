@@ -11,8 +11,6 @@ import yaml
 import argparse
 
 root_logger = logging.getLogger()
-root_logger.setLevel(logging.DEBUG)
-root_logger.addHandler(logging.StreamHandler())
 
 
 def post(path: str, data: dict, params=None):
@@ -22,7 +20,7 @@ def post(path: str, data: dict, params=None):
     params['token'] = TOKEN
 
     if DEBUG:
-        logging.info("post: {} data: {}".format(path, data))
+        root_logger.info("post: {} data: {}".format(path, data))
         return None
 
     # Attempt to contact the pipeline API
@@ -34,13 +32,13 @@ def post(path: str, data: dict, params=None):
             json=data,
         )
     except:
-        logging.error('UNABLE TO REPORT POST TO PIPELINE API')
+        root_logger.error('UNABLE TO REPORT POST TO PIPELINE API')
         exit(0)
 
     # If the call to the api failed we're in trouble,
     # and need to abort.
     if res.status_code != 200:
-        logging.error('UNABLE TO REPORT POST TO PIPELINE API')
+        root_logger.error('UNABLE TO REPORT POST TO PIPELINE API')
         exit(0)
 
     return res
@@ -61,7 +59,7 @@ def report_panic(message: str, traceback: str, ):
         'traceback': traceback,
     }
     print(traceback)
-    logging.info('report_error {}'.format(json.dumps(data, indent=2)))
+    root_logger.info('report_error {}'.format(json.dumps(data, indent=2)))
     post('/pipeline/report/panic/{}'.format(SUBMISSION_ID), data)
 
 
@@ -85,12 +83,13 @@ if git_creds is not None:
         f.write('\thelper = store\n')
         f.close()
 
-TOKEN = os.environ.get('TOKEN')
+TOKEN = os.environ.get('TOKEN', None)
 DEBUG = False
 COMMIT = None
 GIT_REPO = None
 SUBMISSION_ID = None
-del os.environ['TOKEN']
+if 'TOKEN' in os.environ:
+    del os.environ['TOKEN']
 
 
 def report_state(state: str, params=None):
@@ -106,7 +105,7 @@ def report_state(state: str, params=None):
         'commit': COMMIT,
         'state': state,
     }
-    logging.info('report_state {}'.format(json.dumps(data, indent=2)))
+    root_logger.debug('report_state {}'.format(json.dumps(data, indent=2)))
     post('/pipeline/report/state/{}'.format(SUBMISSION_ID), data, params=params)
 
 
@@ -121,11 +120,10 @@ def report_build_results(stdout: str, passed: bool):
     data = {
         'token': TOKEN,
         'commit': COMMIT,
-        # 'stdout': base64.b16encode(stdout).decode(),
         'stdout': stdout,
         'passed': passed,
     }
-    logging.info('report_build {}'.format(json.dumps(data, indent=2)))
+    root_logger.debug('report_build {}'.format(json.dumps(data, indent=2)))
     post('/pipeline/report/build/{}'.format(SUBMISSION_ID), data)
 
 
@@ -149,7 +147,7 @@ def report_test_results(test_name: str, output_type: str, output: str, message: 
         'message': message,
         'passed': passed,
     }
-    logging.info('report_test_results {}'.format(json.dumps(data, indent=2)))
+    root_logger.debug('report_test_results {}'.format(json.dumps(data, indent=2)))
     post('/pipeline/report/test/{}'.format(SUBMISSION_ID), data)
 
 
@@ -179,7 +177,7 @@ def get_assignment_data() -> dict:
         except yaml.YAMLError:
             report_panic('Unable to read assignment yaml', traceback.format_exc())
 
-    logging.info(assignment_data)
+    root_logger.debug(f'assignment_data: {assignment_data}')
 
     return assignment_data
 
@@ -194,9 +192,9 @@ def clone(args: argparse.Namespace):
     report_state('Cloning repo')
     # Clone
     try:
-        repo = git.Repo.clone_from(GIT_REPO, args.path)
-        if COMMIT.lower() != 'null':
-            repo.git.checkout(COMMIT)
+        repo = git.Repo.clone_from(args.repo, args.path)
+        if args.commit and args.commit.lower() not in ('', 'null'):
+            repo.git.checkout(args.commit)
     except git.exc.GitCommandError:
         report_panic('Git error', traceback.format_exc())
         exit(0)
@@ -219,6 +217,7 @@ def run_build():
     report_build_results(result.stdout, result.passed)
     if not result.passed:
         exit(0)
+    return result
 
 
 def run_tests():
@@ -229,19 +228,40 @@ def run_tests():
     :return:
     """
 
+    results = []
+
     # Tests
     for test_name in registered_tests:
         report_state('Running test: {}'.format(test_name))
         result = registered_tests[test_name]()
+        result.name = registered_tests[test_name].test['name']
+        results.append(result)
 
         report_test_results(test_name, result.output_type, result.output, result.message, result.passed)
+
+    return results
+
+
+def display_results(build, results):
+    root_logger.info(f'')
+    root_logger.info(f'Tests completed:')
+    root_logger.info(f'Build:')
+    root_logger.info(f' `- passed: {build.passed}')
+    root_logger.info(f'Tests:')
+    for test in results:
+        logging.info(f' `- {test.name} passed: {test.passed}')
 
 
 def main():
     args = parse_args()
+
+    if args.verbose:
+        root_logger.setLevel(logging.DEBUG)
+    else:
+        root_logger.setLevel(logging.INFO)
+    root_logger.addHandler(logging.StreamHandler())
+
     global COMMIT, GIT_REPO, SUBMISSION_ID, DEBUG
-    COMMIT = args.commit
-    GIT_REPO = args.git_repo
     SUBMISSION_ID = args.submission_id
     DEBUG = not args.prod
     try:
@@ -250,9 +270,10 @@ def main():
             clone(args)
         os.chdir(args.path)
 
-        run_build()
-        run_tests()
+        build = run_build()
+        results = run_tests()
         report_state('Finished!', params={'processed': '1'})
+        display_results(build, results)
     except Panic as e:
         report_panic(repr(e), traceback.format_exc())
     except Exception as e:
@@ -261,7 +282,9 @@ def main():
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument('--prod', dest='prod', action='store_true', help='turn on debug')
+    parser.add_argument('--prod', dest='prod', action='store_true',
+                        help='turn on production mode (for use in pipelines)')
+    parser.add_argument('--verbose', dest='verbose', action='store_true', help='turn on verbose logging')
     parser.add_argument('--netid', dest='netid', default=None, help='netid of student (only needed in prod)')
     parser.add_argument('--commit', dest='commit', default=None, help='commit from repo to use (only needed in prod)')
     parser.add_argument('--submission-id', dest='submission_id', default=None,

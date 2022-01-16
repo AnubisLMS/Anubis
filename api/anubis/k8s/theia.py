@@ -209,8 +209,8 @@ def create_theia_k8s_pod_pvc(
     # If the theia_session is marked as an admin session, then we can turn on any
     # admin features in the IDE by passing in the proper ADMIN environment variables.
     if admin:
-        sidecar_extra_env.append(client.V1EnvVar(name="ADMIN", value="ON"))
-        theia_extra_env.append(client.V1EnvVar(name="ADMIN", value="ON"))
+        sidecar_extra_env.append(client.V1EnvVar(name="ANUBIS_ADMIN", value="ON"))
+        theia_extra_env.append(client.V1EnvVar(name="ANUBIS_ADMIN", value="ON"))
 
     ##################################################################################
     # INIT CONTAINER

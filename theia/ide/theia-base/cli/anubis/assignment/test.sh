@@ -13,5 +13,5 @@ docker build -t registry.digitalocean.com/anubis/assignment/{unique_code} .
 docker run -it \
        -e DEBUG=1 \
        -v $(pwd)/student:/student \
-       registry.digitalocean.com/anubis/assignment/{unique_code} --repo ./student $@
+       registry.digitalocean.com/anubis/assignment/{unique_code} --repo /student --path ./student $@
 

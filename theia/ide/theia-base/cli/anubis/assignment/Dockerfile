@@ -8,7 +8,6 @@ RUN set -ex; \
   apt install -y  --no-install-recommends \
     gcc-multilib libc6-dev build-essential \
     git python3 python3-pip qemu-system-x86; \
-  apt reinstall libc6-dev libgcc-8-dev libgcc1 gcc-8 -y; \
   pip3 install --no-cache-dir setuptools ; \
   pip3 install --no-cache-dir pyyaml requests gitpython parse lorem; \
   apt autoremove -y; \
@@ -27,7 +26,7 @@ RUN set -ex; \
   chmod 770 /anubis/student; \
   sed -i 's/# auth       sufficient pam_wheel.so trust/auth       sufficient pam_wheel.so trust group=anubis/' /etc/pam.d/su
 
-ENV PATH=/bin:/sbin:/usr/bin:/usr/local/bin:/usr/lib/gcc/x86_64-linux-gnu/8
+ENV PATH=/bin:/sbin:/usr/bin:/usr/local/bin:/usr/lib/gcc/x86_64-linux-gnu/10
 ENV HOME=/home/anubis
 USER anubis
 WORKDIR /anubis
