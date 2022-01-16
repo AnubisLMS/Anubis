@@ -187,17 +187,12 @@ export default function Playgrounds() {
       <Box className={!isSelected ? classes.image : clsx(classes.image, classes.selectedImage)}>
         <Box className={classes.imageHeader}>
           <i
-            className={clsx(icon, isSelected ? clsx(classes.icon, classes.opFull) : clsx(classes.icon, classes.opLess))}
-            style={{fontSize: 24}}/>
+            className={clsx(icon, isSelected ?
+              clsx(classes.icon, classes.opFull) :
+              clsx(classes.icon, classes.opLess))}
+            style={{fontSize: 32}}/>
           <Typography className={isSelected ? classes.opFull : classes.opLess}>{title}</Typography>
         </Box>
-        <br/>
-        <Tooltip
-          title={description}
-          className={classes.tooltip}
-        >
-          <InfoIcon className={isSelected ? classes.opFull : classes.opLess}/>
-        </Tooltip>
       </Box>
     );
   };
@@ -207,10 +202,6 @@ export default function Playgrounds() {
       <Box className={classes.imageHeader}>
         <Typography>{title}</Typography>
       </Box>
-      <br/>
-      <Typography variant={'body1'}>
-        {description}
-      </Typography>
     </Box>
   );
 
@@ -220,21 +211,24 @@ export default function Playgrounds() {
       <Box className={classes.divider}/>
       <ListHeader sections={['Your Playground', sessionState || 'No Active IDE']}/>
       <Box className={classes.imageTagContainer}>
-        <Grid container md={12} xs={12} spacing={2}>
+        <Grid container xs={12} spacing={2}>
           {availableImages && selectedImage && availableImages.map((image, index) => (
             <Grid
               item
               xs={12}
               sm={6}
-              md={3}
+              md={4}
+              lg={3}
               className={classes.imageContainer}
               onClick={() => setSelectedImage(image)} key={index}
             >
               <Tooltip title={image.description}>
-                <Image
-                  {...image}
-                  isSelected={selectedImage?.id === image.id}
-                />
+                <Box>
+                  <Image
+                    {...image}
+                    isSelected={selectedImage?.id === image.id}
+                  />
+                </Box>
               </Tooltip>
             </Grid>
           ))}
@@ -242,12 +236,22 @@ export default function Playgrounds() {
         <Box className={classes.divider}/>
         <Grid container className={classes.tagListContainer} md={12} xs={12} spacing={2}>
           {availableTags && selectedTag && availableTags.map((tag, index) => (
-            <Grid item xs={12} sm={6} md={3} onClick={() => setSelectedTag(tag)} key={index}>
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              md={4}
+              lg={3}
+              onClick={() => setSelectedTag(tag)}
+              key={index}
+            >
               <Tooltip title={tag.description}>
-                <Tag
-                  {...tag}
-                  isSelected={selectedTag?.id === tag.id}
-                />
+                <Box>
+                  <Tag
+                    {...tag}
+                    isSelected={selectedTag?.id === tag.id}
+                  />
+                </Box>
               </Tooltip>
             </Grid>
           ))}
