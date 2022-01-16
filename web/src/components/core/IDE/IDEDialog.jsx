@@ -310,8 +310,8 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
                     </Typography>
                     <Tooltip title={persistentStorage ?
                       'Anubis will mount a persistent volume to your session. Everything in /home/anubis ' +
-                      'will be saved in your Cloud AdminIDE volume. We recommend still making sure valuble data is backed' +
-                      'up elsewhere.' :
+                      'will be saved in your Cloud AdminIDE volume. We recommend still making sure valuable ' +
+                      'data is backed up elsewhere.' :
                       'Anubis will not mount a persistent volume to your session. All work not saved elsewhere (like ' +
                       'github) will be deleted when the session ends.'}>
                       <IconButton>
