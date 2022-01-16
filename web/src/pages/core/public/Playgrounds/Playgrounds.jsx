@@ -197,7 +197,7 @@ export default function Playgrounds() {
     );
   };
 
-  const Tag = ({title, description, isSelected}) => (
+  const Tag = ({title, isSelected}) => (
     <Box className={!isSelected ? classes.image : clsx(classes.image, classes.selectedImage)}>
       <Box className={classes.imageHeader}>
         <Typography>{title}</Typography>
