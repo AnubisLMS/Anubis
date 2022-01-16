@@ -9,6 +9,7 @@ import string
 import base64
 import typing
 import json
+import glob
 import git
 import sys
 import os
@@ -357,8 +358,9 @@ def clone(assignment_name):
                 'path': assignment_path,
                 'tests': os.path.join(assignment_path, 'assignment_tests'),
             },
+            'course': {'code': COURSE_CODE},
             'repos': repos,
-        }, manifest_json)
+        }, manifest_json, indent=2)
 
     if ANUBIS_ASSIGNMENT_TESTS_REPO is not None:
         repos.append({'url': ANUBIS_ASSIGNMENT_TESTS_REPO, 'netid': 'assignment_tests'})
@@ -374,6 +376,61 @@ def clone(assignment_name):
     click.echo('4/4 Finished!')
 
     return r.status_code == 200
+
+
+@assignment.command()
+@click.option('--path', default='.', type=click.Path(exists=True), help='Path to repo to test')
+@click.option('--manifest', default=None, type=click.Path(), help='Manifest generated from clone')
+@click.option('--tests', default=None, type=click.Path(), help='Assignment tests')
+@require_admin
+@require_in_repo
+def test(path: str, manifest: str, tests: str):
+    click.echo(f'Entering {path}')
+    os.chdir(path)
+
+    click.echo('Searching for manifest')
+    if manifest is None:
+        manifest = os.path.join(os.getcwd(), '../manifest.json')
+    if not os.path.exists(manifest):
+        click.echo('Manifest file does not exist. '
+                   'Please clone student repo using the anubis assignment clone command.',
+                   err=True)
+        return 1
+    manifest_data = json.load(open(manifest, 'r'))
+    assignment_name = manifest_data['assignment']['name']
+    course_code = manifest_data['course']['code']
+    click.echo(f'Detected assignment :: {course_code} :: {assignment_name}')
+
+    click.echo('Searching for assignment tests')
+    if tests is None:
+        tests = manifest_data['assignment']['tests']
+    if not os.path.isdir(tests):
+        click.echo('Assignment tests could not be found. '
+                   'Please clone student repo using the anubis assignment clone command.',
+                   err=True)
+        return 2
+    for meta_yaml_path in glob.glob(tests + '/**/meta.yml', recursive=True):
+        click.echo(f'Seaching meta: {meta_yaml_path}')
+        meta_yaml = yaml.safe_load(open(meta_yaml_path))
+        if meta_yaml['assignment']['name'] == assignment_name and meta_yaml['assignment']['class'] == course_code:
+            click.echo('Found assignment tests for this assignment')
+            tests_root = os.path.dirname(meta_yaml_path)
+            break
+    else:
+        click.echo('Unable to find assignment tests for this assignment. '
+                   'Please clone student repo using the anubis assignment clone command.',
+                   err=True)
+        return 3
+
+    click.echo('Running assignment test')
+    r = subprocess.run([
+        '/usr/bin/python3',
+        os.path.join(tests_root, 'pipeline.py'),
+        f'--verbose',
+        f'--path={path}',
+    ], cwd=tests_root)
+
+    return r.returncode
 
 
 if __name__ == "__main__":
