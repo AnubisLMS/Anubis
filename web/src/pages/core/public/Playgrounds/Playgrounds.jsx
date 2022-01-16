@@ -182,7 +182,7 @@ export default function Playgrounds() {
     setSelectedTag(tags[0]);
   }, [selectedImage]);
 
-  const Image = ({title, description, icon, isSelected}) => {
+  const Image = ({title, icon, isSelected}) => {
     return (
       <Box className={!isSelected ? classes.image : clsx(classes.image, classes.selectedImage)}>
         <Box className={classes.imageHeader}>
