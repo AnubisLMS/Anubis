@@ -57,6 +57,7 @@ class User(db.Model):
     github_username = db.Column(db.TEXT, index=True)
     name = db.Column(db.TEXT)
     is_superuser = db.Column(db.Boolean, nullable=False, default=False)
+    disabled = db.Column(db.Boolean, nullable=False, default=False)
 
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
