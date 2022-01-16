@@ -138,7 +138,7 @@ def create_assignment(
                     owner=user,
                     assignment_id=assignment.id,
                     repo_url=repo_url,
-                    github_username=user.github_username,
+                    netid=user.netid,
                     repo_created=True,
                     collaborator_configured=True,
                 )

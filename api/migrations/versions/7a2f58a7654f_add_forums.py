@@ -64,14 +64,14 @@ def upgrade():
         sa.Column("owner_id", sa.String(length=128), nullable=False),
         sa.Column("post_id", sa.String(length=128), nullable=False),
         sa.Column("next_id", sa.String(length=128), nullable=True),
-        sa.Column("approved_by", sa.String(length=128), nullable=False),
+        sa.Column("approved_by_id", sa.String(length=128), nullable=True),
         sa.Column("anonymous", sa.Boolean(), nullable=True),
         sa.Column("thread_start", sa.Boolean(), nullable=True),
         sa.Column("content", sa.TEXT(length=4096), nullable=True),
         sa.Column("created", sa.DateTime(), nullable=True),
         sa.Column("last_updated", sa.DateTime(), nullable=True),
         sa.ForeignKeyConstraint(
-            ["approved_by"],
+            ["approved_by_id"],
             ["user.id"],
         ),
         sa.ForeignKeyConstraint(

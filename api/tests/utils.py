@@ -64,7 +64,7 @@ def print_full_error(e, r):
 
 
 @with_context
-def create_user(permission: str = "superuser", add_to_os: bool = True) -> Tuple[str, str]:
+def create_user(permission: str = "superuser", add_to_os: bool = True) -> Tuple[str, str, str]:
     assert permission in ["superuser", "professor", "ta", "student"]
 
     name = create_name()
@@ -104,7 +104,7 @@ def create_user(permission: str = "superuser", add_to_os: bool = True) -> Tuple[
         )
     db.session.commit()
 
-    return netid, course.id
+    return netid, name, course.id
 
 
 @with_context
@@ -119,10 +119,13 @@ def _create_user_session(url: str, netid: str = "superuser", new: bool = False, 
     session = requests.session()
 
     if new:
-        netid, course_id = create_user(netid, add_to_os)
+        netid, name, course_id = create_user(netid, add_to_os)
     else:
+        user = User.query.filter(User.netid == netid).first()
         course = Course.query.filter(Course.name == "Intro to OS").first()
         course_id = course.id
+        netid = user.netid
+        name = user.name
 
     session.get(url + f"/admin/auth/token/{netid}")
     r = session.get(url + "/public/auth/whoami")
@@ -140,7 +143,7 @@ def _create_user_session(url: str, netid: str = "superuser", new: bool = False, 
                 session.cookies["course"] = base64.urlsafe_b64encode(json.dumps(i).encode()).decode()
     except AssertionError as e:
         print_full_error(e, r)
-    return session, netid, course_id
+    return session, netid, name, course_id
 
 
 class Session(object):
@@ -164,8 +167,8 @@ class Session(object):
     ):
         self.url = f"http://{domain}:{port}"
         self.timings = []
-        self._session, self.netid, self.course_id = _create_user_session(self.url, permission, new=new,
-                                                                         add_to_os=add_to_os)
+        self._session, self.netid, self.name, self.course_id = \
+            _create_user_session(self.url, permission, new=new, add_to_os=add_to_os)
 
     @staticmethod
     def _verify_success(r):

@@ -69,9 +69,7 @@ def public_get_forum_post(post: ForumPost):
 
     db.session.commit()
 
-    return success_response({
-        'post': post.data,
-    })
+    return success_response({'post': post.data})
 
 
 @forums_.post('/post')
@@ -157,20 +155,22 @@ def public_delete_forum_post(post_id: str):
     })
 
 
-@forums_.get('/comment/<string:id>')
+@forums_.get('/post/comment/<string:id>')
 @require_user()
 @load_from_id(ForumPostComment)
 @json_response
 def public_get_forum_comment(comment: ForumPostComment):
     verify_in_course(comment.post.course_id)
-    return success_response({'comment': comment.data, 'post': comment.post.meta_data})
+    return success_response({
+        'comment': comment.data,
+        'post': comment.post.meta_data,
+    })
 
 
 @forums_.post('/post/<string:post_id>/comment')
 @forums_.post('/post/<string:post_id>/comment/<string:before_id>')
 @require_user()
 @json_endpoint([
-    ('post_id', str),
     ('content', str),
     ('anonymous', bool),
 ])
@@ -189,6 +189,7 @@ def public_post_forum_post_comment(
         next_id=None,
         anonymous=anonymous,
         content=content,
+        thread_start=before_id is None,
     )
     db.session.add(comment)
     db.session.commit()
@@ -241,7 +242,7 @@ def public_delete_forum_post_comment(comment_id: str):
 
     return success_response({
         'status': 'Comment deleted',
-        'variant': 'warning'
+        'variant': 'warning',
     })
 
 

@@ -72,6 +72,8 @@ class User(db.Model):
     late_exceptions = db.relationship("LateException", backref="user")
     posts = db.relationship("ForumPost", backref="owner")
     comments = db.relationship("ForumPostComment", backref="owner", foreign_keys='ForumPostComment.owner_id')
+    approved_comments = db.relationship("ForumPostComment", backref="approved_by",
+                                        foreign_keys='ForumPostComment.approved_by_id')
 
     @property
     def data(self):
@@ -980,7 +982,7 @@ class ForumPostComment(db.Model):
     owner_id: str = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
     post_id: str = db.Column(db.String(128), db.ForeignKey(ForumPost.id), nullable=False)
     next_id: str = db.Column(db.String(128), db.ForeignKey('forum_post_comment.id'), nullable=True)
-    approved_by: str = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
+    approved_by_id: str = db.Column(db.String(128), db.ForeignKey(User.id), nullable=True)
     anonymous: bool = db.Column(db.Boolean, default=False)
     thread_start: bool = db.Column(db.Boolean, default=False)
 
@@ -991,19 +993,30 @@ class ForumPostComment(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     @property
-    def data(self):
+    def meta_data(self):
         return {
             'id': self.id,
             'anonymous': self.anonymous,
-            'owner_id': self.owner_id,
+            'display_name': 'Anonymous' if self.anonymous else self.owner.name,
             'post_id': self.post_id,
             'next_id': self.next_id,
-            'approved_by': self.approved_by,
+            'approved_by': self.approved_by.name if self.approved_by_id is not None else None,
             'thread_start': self.thread_start,
-            'content': self.content,
             'created': str(self.created),
             'last_updated': str(self.last_updated),
         }
+
+    @property
+    def data(self):
+        data = self.meta_data
+        data['content'] = self.content
+        return data
+
+    @property
+    def admin_data(self):
+        data = self.data
+        data['display_name'] = self.owner.name
+        return data
 
 
 class ForumPostUpvote(db.Model):
