@@ -5,7 +5,7 @@ export const useStyles = makeStyles((theme) => ({
     width: '100%',
     minHeight: '400px',
     color: theme.palette.white,
-    backgroundColor: theme.palette.dark.blue['200'],
+    // backgroundColor: theme.palette.dark.blue['200'],
     borderRadius: `${theme.spacing(1.25)}px`,
   },
   testHeader: {
@@ -78,8 +78,12 @@ export const useStyles = makeStyles((theme) => ({
     paddingBottom: `${theme.spacing(3)}px`,
   },
   testDiff: {
-    color: theme.palette.gray['100'],
+    color: 'black',
     borderRadius: '10px',
+  },
+  diffBox: {
+    backgroundColor: 'white',
+    minHeight: '200px',
   },
   '@global': {
     '.diff-code-delete, .diff-gutter-delete, .diff-code-insert, .diff-gutter-insert': {

@@ -52,7 +52,7 @@ export default function Submission() {
   const [step, setStep] = useState(0);
   const [submission, setSubmission] = useState(null);
   const [errorStop, setErrorStop] = useState(false);
-  const [modalTest, setModalTest] = useState(undefined);
+  const [modalTest, setModalTest] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const commit = query.get('commit');
 
@@ -115,14 +115,6 @@ export default function Submission() {
     return null;
   }
 
-  const {build, tests} = submission;
-  const pageState = {
-    commit,
-    step, setStep,
-    submission, setSubmission,
-    errorStop, setErrorStop,
-  };
-
   const expandModal = (test) => {
     setModalTest(test);
     setIsExpanded(true);
@@ -130,18 +122,13 @@ export default function Submission() {
 
   const closeModal = () => {
     setIsExpanded(false);
+    setModalTest(null);
   };
 
   return (
     <StandardLayout >
-      {modalTest && isExpanded &&
-        <Box className={classes.backDrop} />
-      }
       <Grid container className={classes.root}>
-        <Box className={
-          modalTest && isExpanded ?
-            clsx(classes.headerContainer, classes.blur) :
-            classes.headerContainer}>
+        <Box className={classes.headerContainer}>
           <SubmissionHeader
             regrade={regrade(
               {commit, submission, setSubmission, setStep, setErrorStop},
@@ -151,10 +138,7 @@ export default function Submission() {
             {...submission}
           />
         </Box>
-        <Box className={
-          modalTest && isExpanded ?
-            clsx(classes.submissionContentContainer, classes.blur) :
-            classes.submissionContentContainer}>
+        <Box className={classes.submissionContentContainer}>
           <SubmissionContent submission={submission}>
             <SubmissionTest test={{
               test: {
@@ -170,20 +154,19 @@ export default function Submission() {
               <SubmissionTest key={index} test={test} expandModal = {() => expandModal(test)}/>
             ))}
           </SubmissionContent>
-
         </Box>
-        {modalTest && modalTest.result.stdout && isExpanded &&
-          <Box className={classes.expandedContainer}>
-            <SubmissionTestExpanded
-              testName={modalTest.result.test_name}
-              submissionID={submission.commit}
-              assignmentName={submission.assignment_name}
-              testSuccess={modalTest.result.passed}
-              testOutputType={modalTest.result.output_type}
-              testOutput={modalTest.result.output}
-              onClose={() => closeModal()}
-            />
-          </Box>
+        {modalTest &&
+          <SubmissionTestExpanded
+            open={isExpanded}
+            testName={modalTest.result.test_name}
+            submissionID={submission.commit}
+            assignmentName={submission.assignment_name}
+            testSuccess={modalTest.result.passed}
+            testOutputType={modalTest.result.output_type}
+            testOutput={modalTest.result.output}
+            testMessage={modalTest.result.message}
+            onClose={() => closeModal()}
+          />
         }
       </Grid>
     </StandardLayout>

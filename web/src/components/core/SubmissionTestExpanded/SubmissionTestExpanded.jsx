@@ -1,11 +1,20 @@
-import {Divider, Typography} from '@material-ui/core';
-import {Close} from '@material-ui/icons';
+import React, {useMemo} from 'react';
+
+import Divider from '@material-ui/core/Divider';
+import Typography from '@material-ui/core/Typography';
+import Close from '@material-ui/icons/Close';
 import Cancel from '@material-ui/icons/Cancel';
 import Button from '@material-ui/core/Button';
 import CheckCircle from '@material-ui/icons/CheckCircle';
+import Box from '@material-ui/core/Box';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
+
 import {Diff, Hunk, markEdits, parseDiff, tokenize} from 'react-diff-view';
-import React, {useMemo} from 'react';
 import 'react-diff-view/style/index.css';
+
 import {useStyles} from './SubmissionTestExpanded.styles';
 
 const renderToken = (token, defaultRender, i) => {
@@ -22,12 +31,14 @@ const renderToken = (token, defaultRender, i) => {
 };
 
 export default function SubmissionTestExpanded({
+  open,
   testName,
   submissionID,
   assignmentName,
   testSuccess,
   testOutputType,
   testOutput,
+  testMessage,
   onClose,
 }) {
   const classes = useStyles();
@@ -57,10 +68,13 @@ export default function SubmissionTestExpanded({
   );
 
   return (
-    <div className={classes.submissionTestExpandedContainer}>
+    <Dialog open={open} onClose={onClose} maxWidth={'lg'} className={classes.submissionTestExpandedContainer}>
       <div className={classes.testHeader}>
         <Typography className={classes.testName} variant={'h5'}>
           {testName}
+        </Typography>
+        <Typography className={classes.testName} variant={'h4'}>
+          {testMessage}
         </Typography>
         <Typography className={classes.submissionIDTitle}>
           Submission: <span className={classes.submissionID}>{submissionID.substr(0, 10)}</span>
@@ -71,10 +85,10 @@ export default function SubmissionTestExpanded({
         <Typography className={classes.testStatus}>
           {testSuccess ?
             <span className={classes.testStatusSuccess}>
-              <CheckCircle className={classes.testStatusIcon}/> Test Successfully Executed
+              <CheckCircle className={classes.testStatusIcon}/> Test Passed
             </span> :
             <span className={classes.testStatusFail}>
-              <Cancel className={classes.testStatusIcon}/> Test Execution Failed
+              <Cancel className={classes.testStatusIcon}/> Test Failed
             </span>}
         </Typography>
         <Button onClick={() => onClose()} className={classes.closeIconWrapper}>
@@ -90,12 +104,14 @@ export default function SubmissionTestExpanded({
         )}
         {testOutputType === 'diff' && (
           <React.Fragment>
-            <h2>Actual/Expected Output</h2>
-            {diffs && diffs.map((diff, index) => renderDiffs({...diff, tokens: tokens[index]}))}
+            <h2>Actual / Expected Output</h2>
+            <Box className={classes.diffBox}>
+              {diffs && diffs.map((diff, index) => renderDiffs({...diff, tokens: tokens[index]}))}
+            </Box>
           </React.Fragment>
         )}
       </div>
-    </div>
+    </Dialog>
   );
 };
 
