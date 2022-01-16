@@ -182,7 +182,7 @@ export const super_nav = [
   },
   {
     id: 'IDE images',
-    icon: <i className="devicon-docker-plain" style={{fontSize: 20}}/>,
+    icon: <i className="devicon-docker-plain" style={{fontSize: 24}}/>,
     path: '/super/ide-images',
     Page: SuperIDEImages,
   },
