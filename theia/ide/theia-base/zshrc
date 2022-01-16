@@ -6,13 +6,17 @@ if [ -f /etc/motd ]; then cat /etc/motd; fi
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH=/opt/.oh-my-zsh
+export ZSH=/opt/oh-my-zsh
+
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export LANGUAGE=en_US:en
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="gnzh"
+ZSH_THEME="anubis"
 
 DISABLE_AUTO_UPDATE="true"
 

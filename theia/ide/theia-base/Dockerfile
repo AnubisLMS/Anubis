@@ -10,6 +10,8 @@ ENV PY_VERSION=$PY_VERSION \
     TERM=xterm-256color \
     DEBIAN_FRONTEND=noninteractive \
     REPO_NAME="" \
+    ANUBIS_ASSIGNMENT_TESTS_REPO="" \
+    ANUBIS_ADMIN="OFF" \
     ANUBIS=1 \
     ANUBIS_IDE=1
 
@@ -61,6 +63,7 @@ RUN set -ex; \
   rm get-pip.py; \
   pip3 install --upgrade --no-cache-dir pip; \
   pip3 install --upgrade --no-cache-dir python-language-server supervisor setuptools; \
+  pip3 install --upgrade --no-cache-dir pyyaml requests gitpython parse lorem; \
   adduser --disabled-password --gecos '' --uid 1001 anubis; \
   chown -R 1001:1001 /home/anubis; \
   cd /home/anubis; \
@@ -107,10 +110,13 @@ RUN set -ex; \
 
 # PRETTY SHELL NECESSARY
 RUN set -ex; \
+  mkdir -p /etc/anubis/skel/; \
+  mkdir -p /etc/anubis/init.d/; \
   chsh -s /usr/bin/zsh anubis; \
-  git clone https://github.com/robbyrussell/oh-my-zsh.git /opt/.oh-my-zsh; \
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git /opt/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting;
-COPY zshrc /etc/skel/.zshrc
+  git clone https://github.com/robbyrussell/oh-my-zsh.git /opt/oh-my-zsh; \
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git /opt/oh-my-zsh/custom/plugins/zsh-syntax-highlighting;
+COPY zshrc /etc/anubis/skel/.zshrc
+COPY anubis.zsh-theme /opt/oh-my-zsh/custom/themes/anubis.zsh-theme
 
 # Anubis CLI
 COPY cli /cli

@@ -26,15 +26,23 @@ else:
     print('CANNOT SEE AUTOSAVE ENV')
 
 
-for item in os.listdir('/etc/skel'):
+for item in os.listdir('/etc/anubis/skel'):
     if not os.path.exists(os.path.join('/home/anubis', item)):
         if os.path.isdir(os.path.join('/home/anubis', item)):
             shutil.copytree(
-                os.path.join('/etc/skel', item),
+                os.path.join('/etc/anubis/skel', item),
                 os.path.join('/home/anubis', item),
             )
         else:
             shutil.copy(
-                os.path.join('/etc/skel', item),
+                os.path.join('/etc/anubis/skel', item),
                 os.path.join('/home/anubis', item),
             )
+
+
+for item in os.listdir('/etc/anubis/init.d'):
+    if item.endswith('.sh'):
+        os.system(f'bash /etc/anubis/init.d/{item}')
+    if item.endswith('.py'):
+        os.system(f'python3 /etc/anubis/init.d/{item}')
+
