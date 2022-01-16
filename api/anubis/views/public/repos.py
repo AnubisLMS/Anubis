@@ -4,7 +4,8 @@ from flask import Blueprint
 
 from anubis.lms.courses import is_course_admin
 from anubis.lms.repos import get_repos
-from anubis.models import Assignment, AssignmentRepo
+from anubis.lms.assignments import get_assignment_data
+from anubis.models import db, Assignment, AssignmentRepo
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.cache import cache
@@ -62,11 +63,23 @@ def public_repos_get(assignment_id: str):
         AssignmentRepo.assignment_id == assignment.id,
     ).first()
 
+    db.session.expire_all()
+
+    assignment: Assignment = Assignment.query.filter(
+        Assignment.id == assignment_id,
+    ).first()
+
     if repo is None:
-        return success_response({"repo": None})
+        return success_response({
+            "repo": None,
+            "assignment": get_assignment_data(current_user.id, assignment_id)
+        })
 
     # Pass them back
-    return success_response({"repo": repo.data})
+    return success_response({
+        "repo": repo.data,
+        "assignment": get_assignment_data(current_user.id, assignment_id)
+    })
 
 
 @repos_.post("/create/<string:assignment_id>")
