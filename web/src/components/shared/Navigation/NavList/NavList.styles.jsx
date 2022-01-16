@@ -26,6 +26,7 @@ export const useStyles = makeStyles((theme) => ({
   },
   bottomPush: {
     paddingLeft: theme.spacing(2),
+    marginBottom: theme.spacing(2),
   },
   firebase: {
     fontSize: 24,
