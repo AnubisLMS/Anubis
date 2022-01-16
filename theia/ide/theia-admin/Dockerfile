@@ -6,15 +6,13 @@ ENV DOCKER_LIB_COMMIT 8baa881aab85f8398d2edbbcc0da4bd1f556dd98
 USER root
 # https://github.com/docker-library/docker/blob/8baa881aab85f8398d2edbbcc0da4bd1f556dd98/20.10/dind/Dockerfile
 RUN set -ex; \
-  apt update; \
-  apt-get install -y --no-install-recommends \
-    apt-transport-https ca-certificates curl gnupg lsb-release cgroupfs-mount; \
   curl -fsSL https://download.docker.com/linux/debian/gpg \
     | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg; \
-  echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
+  echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian bullseye stable" \
     | tee /etc/apt/sources.list.d/docker.list > /dev/null; \
   apt update; \
-  apt install -y \
+  apt install -y --no-install-recommends \
+    cgroupfs-mount \
     docker-ce \
     docker-ce-cli \
     containerd.io \
