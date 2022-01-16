@@ -126,15 +126,8 @@ if ADMIN:
 
             succeeded.append('{:<12} :: {:<32} -> {}/{}'.format(netid, repo_base, assignment_name, netid))
 
-        with open(os.path.join(path, 'manifest.json'), 'w') as f:
-            f.write(json.dumps({
-                'assignment': assignment_name,
-                'repos': repos,
-            }, indent=2))
-            f.close()
-
         return text_response(
-            'Succeeded:' + '\n'.join(succeeded) + '\nFailed:\n' + '\n'.join(failed)
+            'Succeeded:\n' + '\n'.join(succeeded) + '\nFailed:\n' + '\n'.join(failed)
         )
 
 
