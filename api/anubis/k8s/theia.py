@@ -6,13 +6,13 @@ from typing import List, Optional, Tuple
 
 from kubernetes import client, config
 
+from anubis.github.parse import parse_github_repo_name
 from anubis.lms.courses import get_course_admin_ids
 from anubis.lms.theia import get_theia_pod_name, mark_session_ended
 from anubis.models import Course, TheiaSession, db
 from anubis.utils.auth.token import create_token
 from anubis.utils.config import get_config_int, get_config_str
 from anubis.utils.data import is_debug
-from anubis.github.parse import parse_github_repo_name
 from anubis.utils.logging import logger
 
 
@@ -209,8 +209,22 @@ def create_theia_k8s_pod_pvc(
     # If the theia_session is marked as an admin session, then we can turn on any
     # admin features in the IDE by passing in the proper ADMIN environment variables.
     if admin:
-        sidecar_extra_env.append(client.V1EnvVar(name="ANUBIS_ADMIN", value="ON"))
-        theia_extra_env.append(client.V1EnvVar(name="ANUBIS_ADMIN", value="ON"))
+
+        # Add ANUBIS_ADMIN=ON to theia container and sidecar container
+        anubis_admin_env = client.V1EnvVar(name="ANUBIS_ADMIN", value="ON")
+        sidecar_extra_env.append(anubis_admin_env)
+        theia_extra_env.append(anubis_admin_env)
+
+        # If this session belongs to a course, then add the assignment
+        # tests repo environment variable to both theia container and
+        # sidecar container
+        if theia_session.course_id:
+            anubis_assignment_tests_repo_env = client.V1EnvVar(
+                name="ANUBIS_ASSIGNMENT_TESTS_REPO",
+                value=theia_session.course.autograde_tests_repo,
+            )
+            theia_extra_env.append(anubis_assignment_tests_repo_env)
+            sidecar_extra_env.append(anubis_assignment_tests_repo_env)
 
     ##################################################################################
     # INIT CONTAINER
