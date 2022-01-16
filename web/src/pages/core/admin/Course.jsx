@@ -39,6 +39,7 @@ const editableFields = [
   {field: 'professor_display_name', label: 'Professor'},
   {field: 'autograde_tests_repo', label: 'Autograde Tests Repo'},
   {field: 'github_org', label: 'Github Org'},
+  {field: 'github_ta_team_slug', label: 'Github Org TA Team'},
   {field: 'join_code', label: 'Join Code'},
   {field: 'theia_default_image', label: 'AdminIDE Default Image'},
   {field: 'theia_default_options', label: 'AdminIDE Default Options'},
