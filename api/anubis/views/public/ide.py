@@ -15,7 +15,6 @@ from anubis.lms.theia import (
 from anubis.models import Assignment, AssignmentRepo, TheiaSession, db
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
-from anubis.utils.config import get_config_int
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_response, load_from_id
@@ -60,9 +59,13 @@ def public_ide_initialize(assignment: Assignment):
     # to start a new ide.
     assert_theia_sessions_enabled()
 
+    # If the user requesting this IDE is a course admin (ta/professor/superuser), then there
+    # are a few places we handle things differently.
+    admin = is_course_admin(assignment.course_id)
+
     # If it is a student (not a ta) requesting the ide, then we will need to
     # make sure that the assignment has actually been released.
-    if not is_course_admin(assignment.course_id):
+    if not admin:
 
         # If the assignment has been released, then we cannot allocate a session to a student
         req_assert(
@@ -117,6 +120,11 @@ def public_ide_initialize(assignment: Assignment):
         },
     )
 
+    # If course admin, then give admin network policy
+    if admin:
+        network_policy = 'admin'
+
+    # Create the theia session with the proper settings
     session: TheiaSession = initialize_ide(
         image_id=assignment.theia_image_id,
         assignment_id=assignment.id,
@@ -128,19 +136,16 @@ def public_ide_initialize(assignment: Assignment):
         persistent_storage=persistent_storage,
         autosave=autosave,
         resources=resources,
-        admin=False,
+        admin=admin,
         privileged=False,
         credentials=False,
     )
 
-    # Redirect to proxy
-    return success_response(
-        {
-            "active": session.active,
-            "session": session.data,
-            "status": "Session created",
-        }
-    )
+    return success_response({
+        "active": session.active,
+        "session": session.data,
+        "status": "Session created",
+    })
 
 
 @ide_.route("/available")
