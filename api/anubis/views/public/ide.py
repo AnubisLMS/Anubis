@@ -61,11 +61,11 @@ def public_ide_initialize(assignment: Assignment):
 
     # If the user requesting this IDE is a course admin (ta/professor/superuser), then there
     # are a few places we handle things differently.
-    admin = is_course_admin(assignment.course_id)
+    is_admin = is_course_admin(assignment.course_id)
 
     # If it is a student (not a ta) requesting the ide, then we will need to
     # make sure that the assignment has actually been released.
-    if not admin:
+    if not is_admin:
 
         # If the assignment has been released, then we cannot allocate a session to a student
         req_assert(
@@ -121,7 +121,7 @@ def public_ide_initialize(assignment: Assignment):
     )
 
     # If course admin, then give admin network policy
-    if admin:
+    if is_admin:
         network_policy = 'admin'
 
     # Create the theia session with the proper settings
@@ -131,14 +131,14 @@ def public_ide_initialize(assignment: Assignment):
         course_id=assignment.course_id,
         repo_url=repo_url,
         playground=False,
-        network_locked=True,
+        network_locked=not is_admin,
         network_policy=network_policy,
         persistent_storage=persistent_storage,
         autosave=autosave,
         resources=resources,
-        admin=admin,
         privileged=False,
-        credentials=False,
+        admin=is_admin,
+        credentials=is_admin,
     )
 
     return success_response({
