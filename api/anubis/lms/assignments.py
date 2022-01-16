@@ -226,9 +226,10 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
 
     # Go through assignment tests, and delete those that are now
     # not in the assignment data.
+    assignment_tests_names = [test['name'] for test in assignment_data["tests"]]
     for assignment_test in AssignmentTest.query.filter(
         AssignmentTest.assignment_id == assignment.id,
-        AssignmentTest.name.notin_(assignment_data["tests"]),
+        AssignmentTest.name.notin_(assignment_tests_names),
     ).all():
         # Delete any and all submission test results that are still outstanding
         # for an assignment test that will be deleted.
@@ -242,8 +243,11 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
             AssignmentTest.name == assignment_test.name,
         ).delete()
 
-    # Run though the tests in the assignment data
-    for test_name in assignment_data["tests"]:
+    # Run through the tests in the assignment data
+    for test in assignment_data["tests"]:
+        test_name = test['name']
+        test_hidden = test['hidden']
+        test_points = test['points']
 
         # Find if the assignment test exists
         assignment_test = (
@@ -260,6 +264,9 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
             assignment_test = AssignmentTest(assignment=assignment, name=test_name)
             db.session.add(assignment_test)
 
+        assignment_test.hidden = test_hidden
+        assignment_test.points = test_points
+
     # Sync the questions in the assignment data
     question_message = None
     if "questions" in assignment_data and isinstance(assignment_data["questions"], list):
@@ -273,7 +280,7 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     # Commit changes
     db.session.commit()
 
-    return {"assignment": assignment.data, "questions": question_message}, True
+    return {"assignment": assignment.full_data, "questions": question_message}, True
 
 
 def fill_user_assignment_data(user_id: str, assignment_data: Dict[str, Any]):

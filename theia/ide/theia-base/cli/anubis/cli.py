@@ -189,7 +189,7 @@ def sync():
     except ImportError:
         click.echo('Not in an assignment directory')
         return 1
-    assignment_meta['assignment']['tests'] = list(utils.registered_tests.keys())
+    assignment_meta['assignment']['tests'] = [test.test for test in utils.registered_tests.values()]
     r = post_json('/admin/assignments/sync', assignment_meta)
     click.echo(json.dumps(r.json(), indent=2))
 

@@ -87,7 +87,7 @@ const startSession = (state, enqueueSnackbar) => () => {
   }
 
   setLoading(true);
-  axios.post(`/api/admin/ide/initialize-custom`, {settings}).then((response) => {
+  axios.post(`/api/admin/ide/initialize`, {settings}).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
     if (data.settings) {
       setSettings(data.settings);

@@ -33,4 +33,4 @@ USER anubis
 WORKDIR /anubis
 COPY pipeline.py utils.py meta.yml assignment.py /anubis/
 
-CMD python3 pipeline.py
+ENTRYPOINT ["/usr/bin/python3", "pipeline.py"]

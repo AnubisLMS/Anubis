@@ -333,10 +333,11 @@ class AssignmentTest(db.Model):
     # Fields
     name = db.Column(db.TEXT, index=True)
     hidden = db.Column(db.Boolean, default=False)
+    points = db.Column(db.Integer, default=10)
 
     @property
     def data(self):
-        return {"id": self.id, "name": self.name, "hidden": self.hidden}
+        return {"id": self.id, "name": self.name, "hidden": self.hidden, "points": self.points}
 
 
 class AssignmentQuestion(db.Model):

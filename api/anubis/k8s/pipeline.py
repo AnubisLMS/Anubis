@@ -39,17 +39,20 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
         # Setup the environment to include everything necessary for the
         # pipeline to be able to clone, test and report to the pipeline api.
         env=[
-            client.V1EnvVar(name="NETID", value=submission.owner.netid),
             client.V1EnvVar(name="TOKEN", value=submission.token),
-            client.V1EnvVar(name="COMMIT", value=submission.commit),
-            client.V1EnvVar(name="GIT_REPO", value=submission.repo.repo_url),
-            client.V1EnvVar(name="SUBMISSION_ID", value=str(submission.id)),
             client.V1EnvVar(
                 name="GIT_CRED",
                 value_from=client.V1EnvVarSource(
                     secret_key_ref=client.V1SecretKeySelector(name="git", key="credentials")
                 ),
             ),
+        ],
+        args=[
+            f"--prod",
+            f"--netid={submission.owner.netid}",
+            f"--commit={submission.commit}",
+            f"--repo={submission.repo.repo_url}",
+            f"--submission-id={submission.id}",
         ],
         # Set the resource requirements
         resources=client.V1ResourceRequirements(**resource_requirements),

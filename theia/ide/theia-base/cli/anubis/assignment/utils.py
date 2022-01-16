@@ -8,8 +8,6 @@ import subprocess
 import typing
 import warnings
 
-DEBUG = os.environ.get('DEBUG', default='0') == '1'
-
 registered_tests: typing.Dict[str, typing.Callable[[], "TestResult"]] = {}
 build_function = None
 
@@ -105,7 +103,15 @@ def register_test(test_name):
             func(result)
             return result
 
-        func.test = {'name': test_name, 'hidden': False, 'points': 10}
+        if wrapper.__dict__.get('test', None) is None:
+            wrapper.test = {}
+
+        wrapper.test['name'] = test_name
+        if 'hidden' not in wrapper.test:
+            wrapper.test['hidden'] = False
+        if 'points' not in wrapper.test:
+            wrapper.test['points'] = 10
+
         registered_tests[test_name] = wrapper
 
         return wrapper
@@ -115,26 +121,22 @@ def register_test(test_name):
 
 def hide_test():
     def decorator(func):
+        if func.__dict__.get('test', None) is None:
+            func.test = {}
         func.test['hidden'] = True
 
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-
-        return wrapper
+        return func
 
     return decorator
 
 
 def points_test(points: int):
     def decorator(func):
+        if func.__dict__.get('test', None) is None:
+            func.test = {}
         func.test['points'] = points
 
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-
-        return wrapper
+        return func
 
     return decorator
 
@@ -244,8 +246,10 @@ def test_lines(
     * Optionally specify if the equality comparison should be case sensitive *
 
     >>> test_lines(['a', 'b', 'c'], ['a', 'b', 'c']) -> (True, [])
-    >>> test_lines(['a', 'debugging', 'b', 'c'], ['a', 'b', 'c']) -> (False, ['--- \n', '+++ \n', '@@ -1,3 +1,4 @@\n', ' a', '+debugging', ' b', ' c'])
-    >>> test_lines(['a', 'b'],      ['a', 'b', 'c']) -> (False, ['--- \n', '+++ \n', '@@ -1,3 +1,2 @@\n', ' a', ' b', '-c'])
+    >>> test_lines(['a', 'debugging', 'b', 'c'], ['a', 'b', 'c'])
+    # -> (False, ['--- \n', '+++ \n', '@@ -1,3 +1,4 @@\n', ' a', '+debugging', ' b', ' c'])
+    >>> test_lines(['a', 'b'],      ['a', 'b', 'c'])
+    # -> (False, ['--- \n', '+++ \n', '@@ -1,3 +1,2 @@\n', ' a', ' b', '-c'])
 
     :param stdout_lines: students standard out lines as a list of strings
     :param expected_lines: expected lines as a list of strings

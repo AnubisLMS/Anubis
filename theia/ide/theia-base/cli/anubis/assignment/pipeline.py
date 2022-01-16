@@ -8,6 +8,7 @@ import traceback
 import git
 import requests
 import yaml
+import argparse
 
 root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)
@@ -71,7 +72,7 @@ except ImportError:
     exit(0)
 
 from utils import registered_tests, build_function
-from utils import fix_permissions, Panic, DEBUG
+from utils import Panic
 
 git_creds = os.environ.get('GIT_CRED', default=None)
 if git_creds is not None:
@@ -85,9 +86,10 @@ if git_creds is not None:
         f.close()
 
 TOKEN = os.environ.get('TOKEN')
-COMMIT = os.environ.get('COMMIT')
-GIT_REPO = os.environ.get('GIT_REPO')
-SUBMISSION_ID = os.environ.get('SUBMISSION_ID')
+DEBUG = False
+COMMIT = None
+GIT_REPO = None
+SUBMISSION_ID = None
 del os.environ['TOKEN']
 
 
@@ -182,7 +184,7 @@ def get_assignment_data() -> dict:
     return assignment_data
 
 
-def clone():
+def clone(args: argparse.Namespace):
     """
     Clone the assigment repo into the student folder.
     File permissions will need to be updated.
@@ -192,16 +194,17 @@ def clone():
     report_state('Cloning repo')
     # Clone
     try:
-        repo = git.Repo.clone_from(GIT_REPO, './student')
+        repo = git.Repo.clone_from(GIT_REPO, args.path)
         if COMMIT.lower() != 'null':
             repo.git.checkout(COMMIT)
     except git.exc.GitCommandError:
         report_panic('Git error', traceback.format_exc())
         exit(0)
 
-    os.system('rm -rf ./student/.git')
-    os.system('rm -rf /home/anubis/.git-credentials')
-    os.system('rm -rf /home/anubis/.gitconfig')
+    if args.prod:
+        os.system(f'rm -rf {args.path}/.git')
+        os.system('rm -rf /home/anubis/.git-credentials')
+        os.system('rm -rf /home/anubis/.gitconfig')
 
 
 def run_build():
@@ -235,10 +238,17 @@ def run_tests():
 
 
 def main():
+    args = parse_args()
+    global COMMIT, GIT_REPO, SUBMISSION_ID, DEBUG
+    COMMIT = args.commit
+    GIT_REPO = args.git_repo
+    SUBMISSION_ID = args.submission_id
+    DEBUG = not args.prod
     try:
         # assignment_data = get_assignment_data()
-        clone()
-        os.chdir('./student')
+        if args.repo:
+            clone(args)
+        os.chdir(args.path)
 
         run_build()
         run_tests()
@@ -247,6 +257,18 @@ def main():
         report_panic(repr(e), traceback.format_exc())
     except Exception as e:
         report_panic(repr(e), traceback.format_exc())
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--prod', dest='prod', action='store_true', help='turn on debug')
+    parser.add_argument('--netid', dest='netid', default=None, help='netid of student (only needed in prod)')
+    parser.add_argument('--commit', dest='commit', default=None, help='commit from repo to use (only needed in prod)')
+    parser.add_argument('--submission-id', dest='submission_id', default=None,
+                        help='commit from repo to use (only needed in prod)')
+    parser.add_argument('--repo', dest='repo', default=None, help='repo url to clone')
+    parser.add_argument('--path', default='.', help='path to student repo')
+    return parser.parse_args()
 
 
 if __name__ == '__main__':

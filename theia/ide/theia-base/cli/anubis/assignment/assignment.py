@@ -1,15 +1,7 @@
-import os
-
 from utils import (
-    TestResult, BuildResult, Panic, DEBUG, xv6_run, did_xv6_crash, verify_expected,
+    TestResult, BuildResult, Panic, xv6_run, did_xv6_crash, verify_expected,
     register_test, register_build, hide_test, points_test, exec_as_student, search_lines, test_lines
 )
-
-if DEBUG:
-    os.environ['GIT_REPO'] = '/student'
-    os.environ['TOKEN'] = 'null'
-    os.environ['COMMIT'] = 'null'
-    os.environ['SUBMISSION_ID'] = 'null'
 
 
 @register_build
@@ -19,9 +11,9 @@ def build(build_result: BuildResult):
     build_result.stdout = stdout
     build_result.passed = retcode == 0
 
-    print(type(stdout), stdout)
     if 'this is a bad thing' in stdout:
-        raise Panic("This is a bad thing that just happened. We need to stop this pipeline right here and now")
+        raise Panic("This is a bad thing that just happened. "
+                    "We need to stop this pipeline right here and now")
 
 
 @register_test('Long file test')
