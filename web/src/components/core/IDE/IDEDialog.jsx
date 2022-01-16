@@ -310,7 +310,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
                     </Typography>
                     <Tooltip title={persistentStorage ?
                       'Anubis will mount a persistent volume to your session. Everything in /home/anubis ' +
-                      'will be saved in your Cloud AdminIDE volume. We recommend still making sure valuable ' +
+                      'will be saved in your Cloud IDE volume. We recommend still making sure valuable ' +
                       'data is backed up elsewhere.' :
                       'Anubis will not mount a persistent volume to your session. All work not saved elsewhere (like ' +
                       'github) will be deleted when the session ends.'}>
@@ -327,7 +327,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
           <Grid item xs={12}>
             <div style={{display: 'flex', justifyContent: 'flex-end'}}>
               <Typography>
-                {sessionState || 'No Active AdminIDE'}
+                {sessionState || 'No Active IDE'}
               </Typography>
             </div>
           </Grid>
@@ -356,7 +356,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
             color={'primary'}
             autoFocus
           >
-            {!session ? 'Launch Session' : 'Go to AdminIDE'}
+            {!session ? 'Launch Session' : 'Go to IDE'}
           </Button>
           {loading && <CircularProgress size={24} className={classes.buttonProgress}/>}
         </div>

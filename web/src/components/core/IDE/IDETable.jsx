@@ -89,7 +89,7 @@ export default function IDETable({rows}) {
                   <CancelIcon style={{color: red[500]}}/>}
               </TableCell>
               <TableCell>
-                <Tooltip title={'End AdminIDE Session'}>
+                <Tooltip title={'End IDE Session'}>
                   <IconButton component={'a'} href={`/api/public/ide/stop/${row.id}`} disabled={!row.active}>
                     <DeleteForeverOutlinedIcon style={{color: row.active ? red[500] : grey[500]}}/>
                   </IconButton>
@@ -98,7 +98,7 @@ export default function IDETable({rows}) {
               <TableCell>
                 {row.state === 'Initializing' ?
                   <CircularProgress/> :
-                  <Tooltip title={'Open Cloud AdminIDE session'}>
+                  <Tooltip title={'Open Cloud IDE Session'}>
                     <IconButton component={'a'} href={row.redirect_url} target="_blank" disabled={!row.active}>
                       <CodeOutlinedIcon style={{color: row.active ? blue[500] : grey[500]}}/>
                     </IconButton>

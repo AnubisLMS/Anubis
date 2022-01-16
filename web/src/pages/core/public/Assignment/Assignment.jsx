@@ -71,7 +71,7 @@ const Assignment = () => {
       }, 60_0000);
 
       const runPollingInterval = setInterval(() => {
-        axios.get(`/api/public/repos/get${assignmentId}`)
+        axios.get(`/api/public/repos/get/${assignmentId}`)
           .then((response) => {
             const data = standardStatusHandler(response, enqueueSnackbar);
             setRunAssignmentPolling(false);
@@ -84,11 +84,11 @@ const Assignment = () => {
         clearInterval(runPollingInterval);
       };
     };
-  }, [runAssignmentPolling, setRunAssignmentPolling]);
+  }, [runAssignmentPolling]);
 
 
   const createAssignmentRepo = () => {
-    axios.post(`/api/public/repos/create${assignmentId}`)
+    axios.post(`/api/public/repos/create/${assignmentId}`)
       .then((response) => {
         standardStatusHandler(response, enqueueSnackbar);
         setRunAssignmentPolling(true);
@@ -133,11 +133,17 @@ const Assignment = () => {
                 Open Anubis Cloud IDE
               </Button>
               {assignment.has_repo ? (
-                <Button className={classes.repoButton}>
+                <Button
+                  className={classes.repoButton}
+                  href={assignment.repo_url}
+                  component="a"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
                   View Repo
                 </Button>
               ) : (
-                <Button onClick={createAssignmentRepo}className={classes.repoButton}>
+                <Button onClick={createAssignmentRepo} className={classes.repoButton}>
                   {runAssignmentPolling ? (
                     <CircularProgress size={24} />
                   ): 'Create Repo'}

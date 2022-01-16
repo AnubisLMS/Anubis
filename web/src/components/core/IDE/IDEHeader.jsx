@@ -28,7 +28,7 @@ export default function IDEHeader({sessionsAvailable}) {
 
   return (
     <div className={classes.root}>
-      <Tooltip title={sessionsAvailable ? 'Anubis Cloud AdminIDE Available' : 'Anubis Cloud AdminIDE Not Available'}>
+      <Tooltip title={sessionsAvailable ? 'Anubis Cloud IDE Available' : 'Anubis Cloud IDE Not Available'}>
         <IconButton>
           {sessionsAvailable ?
             <CheckOutlinedIcon style={{color: green[500]}} fontSize={'small'}/> :
@@ -41,9 +41,9 @@ export default function IDEHeader({sessionsAvailable}) {
           'Session resources are not available'}
       </Typography>
       <Tooltip title={sessionsAvailable ?
-        'Anubis Cloud AdminIDE session resources are currently available for use. Go to the assignment ' +
-        'page to select which assignment you would like to launch an Anubis Cloud AdminIDE for.' :
-        'The maximum quota of Anubis Cloud AdminIDE sessions on our servers has been reached. ' +
+        'Anubis Cloud IDE session resources are currently available for use. Go to the assignment ' +
+        'page to select which assignment you would like to launch an Anubis Cloud IDEfor.' :
+        'The maximum quota of Anubis Cloud IDE sessions on our servers has been reached. ' +
         'At this time, we cannot allocate more sessions until others have ended.'}>
         <IconButton>
           <HelpOutlineOutlinedIcon fontSize={'small'}/>

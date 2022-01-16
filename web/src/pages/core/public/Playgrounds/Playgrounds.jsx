@@ -218,7 +218,7 @@ export default function Playgrounds() {
     <StandardLayout>
       <SectionHeader isPage title={'Playgrounds'}/>
       <Box className={classes.divider}/>
-      <ListHeader sections={['Your Playground', sessionState || 'No Active AdminIDE']}/>
+      <ListHeader sections={['Your Playground', sessionState || 'No Active IDE']}/>
       <Box className={classes.imageTagContainer}>
         <Grid container md={12} xs={12} spacing={2}>
           {availableImages && selectedImage && availableImages.map((image, index) => (
@@ -267,7 +267,7 @@ export default function Playgrounds() {
               color={'primary'}
               autoFocus
             >
-              {!session ? 'Launch Session' : 'Go to AdminIDE'}
+              {!session ? 'Launch Session' : 'Go to IDE'}
               {loading && <CircularProgress size={24} className={classes.buttonProgress}/>}
             </Button>
           </Grid>

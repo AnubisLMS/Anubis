@@ -23,8 +23,8 @@ const useStyles = makeStyles((theme) => ({
 const editableFields = [
   {field: 'name', label: 'Assignment Name'},
   {field: 'github_template', label: 'Github Template (ex: wabscale/xv6-public)'},
-  {field: 'theia_image', label: 'AdminIDE Docker Image'},
-  {field: 'theia_options', label: 'AdminIDE Options JSON', type: 'json'},
+  {field: 'theia_image', label: 'IDE Docker Image'},
+  {field: 'theia_options', label: 'IDE Options JSON', type: 'json'},
   {field: 'pipeline_image', label: 'Autograde Docker Image'},
   {field: 'unique_code', label: 'Unique Code'},
   {field: 'hidden', label: 'Hidden', type: 'boolean'},

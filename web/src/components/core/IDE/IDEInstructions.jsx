@@ -31,7 +31,7 @@ export default function IDEInstructions() {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">{'Anubis AdminIDE IDEInstructions'}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">{'Anubis IDE Instructions'}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             Please consider your cloud IDE sessions as temporary. The IDE server you are allocated is being

@@ -34,7 +34,7 @@ const Repos = () => {
   }, [refresh]);
 
   const deleteRepo = () => {
-    axios.delete(`/api/public/repos/delete/${selectedRepo.assignment_id}`).then((response) => {
+    axios.delete(`/api/public/repos/delete/${selectedRepo}`).then((response) => {
       standardStatusHandler(response, enqueueSnackbar);
       setRefresh((prev) => ++prev);
     }).catch(standardErrorHandler(enqueueSnackbar));
@@ -42,7 +42,7 @@ const Repos = () => {
 
   const handleDeleteRepo = () => {
     deleteRepo();
-    selectedRepo(null);
+    setSelectedRepo(null);
     setDialogOpen(false);
   };
 
@@ -78,11 +78,16 @@ const Repos = () => {
       {repos && repos.map((repo, index) => (
         <RepoItem
           key={`${repo.assignment_name}-${index}`}
+          assignmentId={repo.assignment_id}
           assignmentName={repo.assignment_name}
           courseCode={repo.course_code}
           githubUsername={repo.github_username}
           ready={repo.ready}
-          openDialog={() => setDialogOpen(true)}
+          repo_url={repo.repo_url}
+          openDialog={(id) => {
+            setDialogOpen(true);
+            setSelectedRepo(id);
+          }}
         />
       ))}
     </StandardLayout>

@@ -181,7 +181,7 @@ export const super_nav = [
     Page: SuperPlaygrounds,
   },
   {
-    id: 'AdminIDE images',
+    id: 'IDE images',
     icon: <i className="devicon-docker-plain" style={{fontSize: 20}}/>,
     path: '/super/ide-images',
     Page: SuperIDEImages,

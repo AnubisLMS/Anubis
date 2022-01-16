@@ -10,6 +10,7 @@ import {useStyles} from './RepoItem.styles';
 import Item from '../../shared/Item/Item';
 
 const RepoItem = ({
+  assignmentId,
   assignmentName,
   courseCode,
   githubUsername,
@@ -17,7 +18,6 @@ const RepoItem = ({
   repo_url,
   openDialog,
 }) => {
-  const history = useHistory();
   const classes = useStyles();
 
   return (
@@ -26,19 +26,25 @@ const RepoItem = ({
       title={assignmentName}
       subTitle={courseCode}
       titleIcon={<GitHubIcon />}
-      link={repo_url}
     >
       <Typography>{githubUsername}</Typography>
       <Typography>{ready ? 'Ready' : 'Processing'}</Typography>
       <Box className={classes.actionsContainer}>
         <Button
+          variant={'contained'}
+          color={'secondary'}
           className={classes.deleteButton}
-          onClick={openDialog}
+          onClick={() => openDialog(assignmentId)}
         >
           Delete Repo
         </Button>
         <Button
-          onClick={() => history.push(repo_url)}
+          component="a"
+          variant={'contained'}
+          color={'primary'}
+          href={repo_url}
+          target="_blank"
+          rel="noopener noreferrer"
         >
           View Repo
         </Button>

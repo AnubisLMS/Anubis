@@ -8,7 +8,6 @@ export const useStyles = makeStyles((theme) => ({
     color: theme.palette.color.red,
   },
   deleteButton: {
-    color: theme.palette.color.red,
     marginRight: theme.spacing(1),
   },
   actionsContainer: {

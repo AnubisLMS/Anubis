@@ -77,7 +77,7 @@ const useColumns = (state, enqueueSnackbar) => ([
     ),
   },
   {
-    field: 'redirect_url', headerName: 'Go To AdminIDE', width: 120, renderCell: ({row}) => (
+    field: 'redirect_url', headerName: 'Go To IDE', width: 120, renderCell: ({row}) => (
       <React.Fragment>
         {row.state === 'Running' && (
           <Button
