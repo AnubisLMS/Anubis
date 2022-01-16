@@ -211,22 +211,16 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
             theia_options=course.theia_default_options,
             unique_code=assignment_data["unique_code"],
             course=course,
+            hidden=True,
+            description='',
+            release_date=datetime.now() + timedelta(days=7),
+            due_date=datetime.now() + timedelta(days=14),
+            grace_date=datetime.now() + timedelta(days=14, hours=1),
         )
 
     # Update fields
     assignment.name = assignment_data["name"]
-    assignment.hidden = assignment_data["hidden"]
-    assignment.description = assignment_data["description"]
     assignment.pipeline_image = assignment_data["pipeline_image"]
-    assignment.github_template = assignment_data["github_template"]
-    assignment.github_repo_required = assignment_data["github_repo_required"]
-    try:
-        assignment.release_date = date_parse(assignment_data["date"]["release"])
-        assignment.due_date = date_parse(assignment_data["date"]["due"])
-        assignment.grace_date = date_parse(assignment_data["date"]["grace"])
-    except ParserError:
-        logger.error(traceback.format_exc())
-        return "Unable to parse datetime", 406
 
     db.session.add(assignment)
 

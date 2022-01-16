@@ -3,7 +3,7 @@ import {Close} from '@material-ui/icons';
 import Cancel from '@material-ui/icons/Cancel';
 import Button from '@material-ui/core/Button';
 import CheckCircle from '@material-ui/icons/CheckCircle';
-import {parseDiff, Diff, Hunk, tokenize, markEdits} from 'react-diff-view';
+import {Diff, Hunk, markEdits, parseDiff, tokenize} from 'react-diff-view';
 import React, {useMemo} from 'react';
 import 'react-diff-view/style/index.css';
 import {useStyles} from './SubmissionTestExpanded.styles';
@@ -26,14 +26,14 @@ export default function SubmissionTestExpanded({
   submissionID,
   assignmentName,
   testSuccess,
-  testResult,
-  testDiff,
+  testOutputType,
+  testOutput,
   onClose,
 }) {
   const classes = useStyles();
   const diffs = useMemo(() => {
-    return parseDiff(testDiff, {nearbySequences: 'zip'});
-  }, [testDiff]);
+    return parseDiff(testOutput, {nearbySequences: 'zip'});
+  }, [testOutput]);
   const tokens = useMemo(() => {
     if (!!!diffs) return undefined;
     return diffs.map((diff) => tokenize(diff.hunks, {
@@ -52,7 +52,7 @@ export default function SubmissionTestExpanded({
       tokens={tokens}
       renderToken={renderToken}
     >
-      {(hunks) => hunks.map((hunk) => <Hunk key={hunk.content} hunk={hunk} />)}
+      {(hunks) => hunks.map((hunk) => <Hunk key={hunk.content} hunk={hunk}/>)}
     </Diff>
   );
 
@@ -69,25 +69,31 @@ export default function SubmissionTestExpanded({
           Assignment: <span className={classes.assignmentName}>{assignmentName}</span>
         </Typography>
         <Typography className={classes.testStatus}>
-          {testSuccess?
+          {testSuccess ?
             <span className={classes.testStatusSuccess}>
-              <CheckCircle className={classes.testStatusIcon} /> Test Successfully Executed
-            </span>:
+              <CheckCircle className={classes.testStatusIcon}/> Test Successfully Executed
+            </span> :
             <span className={classes.testStatusFail}>
-              <Cancel className={classes.testStatusIcon} /> Test Execution Failed
+              <Cancel className={classes.testStatusIcon}/> Test Execution Failed
             </span>}
         </Typography>
-        <Button onClick = {() => onClose()} className={classes.closeIconWrapper} >
-          <Close />
+        <Button onClick={() => onClose()} className={classes.closeIconWrapper}>
+          <Close/>
         </Button>
       </div>
-      <Divider></Divider>
+      <Divider/>
       <div className={classes.testBody}>
-        <Typography className={classes.testOutput}>
-          {testResult}
-          <h2>Actual/Expected Output</h2>
-          {diffs && diffs.map((diff, index) => renderDiffs({...diff, tokens: tokens[index]}))}
-        </Typography>
+        {testOutputType === 'text' && (
+          <Typography className={classes.testOutput}>
+            {testOutput}
+          </Typography>
+        )}
+        {testOutputType === 'diff' && (
+          <React.Fragment>
+            <h2>Actual/Expected Output</h2>
+            {diffs && diffs.map((diff, index) => renderDiffs({...diff, tokens: tokens[index]}))}
+          </React.Fragment>
+        )}
       </div>
     </div>
   );

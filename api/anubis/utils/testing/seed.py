@@ -238,8 +238,8 @@ def init_submissions(submissions):
                 test_result.passed = test_passed
 
                 test_result.message = "Test passed" if test_passed else "Test failed"
-                test_result.stdout = "blah blah blah test output"
-                test_result.diff = "--- \n+++ \n@@ -1,3 +1,3 @@\n a\n-c\n+b\n d" if not test_passed else ""
+                test_result.output_type = "text"
+                test_result.output = "--- \n+++ \n@@ -1,3 +1,3 @@\n a\n-c\n+b\n d" if not test_passed else ""
 
 
 @with_context

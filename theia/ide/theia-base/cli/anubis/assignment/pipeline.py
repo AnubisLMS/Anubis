@@ -127,12 +127,13 @@ def report_build_results(stdout: str, passed: bool):
     post('/pipeline/report/build/{}'.format(SUBMISSION_ID), data)
 
 
-def report_test_results(test_name: str, stdout: str, message: str, passed: bool, diff: str):
+def report_test_results(test_name: str, output_type: str, output: str, message: str, passed: bool):
     """
     Report a single test result to the pipeline API.
 
     :param test_name:
-    :param stdout:
+    :param output_type:
+    :param output:
     :param message:
     :param passed:
     :return:
@@ -141,11 +142,10 @@ def report_test_results(test_name: str, stdout: str, message: str, passed: bool,
         'token': TOKEN,
         'commit': COMMIT,
         'test_name': test_name,
-        # 'stdout': base64.b16encode(stdout).decode(),
-        'stdout': stdout,
+        'output_type': output_type,
+        'output': output,
         'message': message,
         'passed': passed,
-        'diff': diff,
     }
     logging.info('report_test_results {}'.format(json.dumps(data, indent=2)))
     post('/pipeline/report/test/{}'.format(SUBMISSION_ID), data)
@@ -204,11 +204,10 @@ def clone():
     os.system('rm -rf /home/anubis/.gitconfig')
 
 
-def run_build(assignment_data: dict):
+def run_build():
     """
     Build the student repo.
 
-    :param assignment_data: assignment meta
     :return:
     """
     # build
@@ -219,7 +218,7 @@ def run_build(assignment_data: dict):
         exit(0)
 
 
-def run_tests(assignment_data: dict):
+def run_tests():
     """
     Run the assignment test scripts. Update submission state as you go.
 
@@ -232,17 +231,17 @@ def run_tests(assignment_data: dict):
         report_state('Running test: {}'.format(test_name))
         result = registered_tests[test_name]()
 
-        report_test_results(test_name, result.stdout, result.message, result.passed, result.diff)
+        report_test_results(test_name, result.output_type, result.output, result.message, result.passed)
 
 
 def main():
     try:
-        assignment_data = get_assignment_data()
+        # assignment_data = get_assignment_data()
         clone()
         os.chdir('./student')
 
-        run_build(assignment_data)
-        run_tests(assignment_data)
+        run_build()
+        run_tests()
         report_state('Finished!', params={'processed': '1'})
     except Panic as e:
         report_panic(repr(e), traceback.format_exc())

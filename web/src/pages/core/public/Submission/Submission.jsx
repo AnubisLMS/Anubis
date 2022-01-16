@@ -179,8 +179,8 @@ export default function Submission() {
               submissionID={submission.commit}
               assignmentName={submission.assignment_name}
               testSuccess={modalTest.result.passed}
-              testResult={modalTest.result.stdout}
-              testDiff={modalTest.result.diff}
+              testOutputType={modalTest.result.output_type}
+              testOutput={modalTest.result.output}
               onClose={() => closeModal()}
             />
           </Box>

@@ -2,7 +2,7 @@ import os
 
 from utils import (
     TestResult, BuildResult, Panic, DEBUG, xv6_run, did_xv6_crash, verify_expected,
-    register_test, register_build, exec_as_student, search_lines, test_lines
+    register_test, register_build, hide_test, points_test, exec_as_student, search_lines, test_lines
 )
 
 if DEBUG:
@@ -25,6 +25,7 @@ def build(build_result: BuildResult):
 
 
 @register_test('Long file test')
+@points_test(10)
 def test_1(test_result: TestResult):
     test_result.stdout = "Testing long lines\n"
 
@@ -44,6 +45,8 @@ def test_1(test_result: TestResult):
 
 
 @register_test('grep test')
+@hide_test()
+@points_test(10)
 def test_2(test_result: TestResult):
     test_result.stdout = "Testing long lines\n"
 

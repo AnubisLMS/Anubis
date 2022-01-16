@@ -115,8 +115,8 @@ def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **_
 
 @pipeline.route("/report/test/<string:submission_id>", methods=["POST"])
 @check_submission_token
-@json_endpoint([("test_name", str), ("passed", bool), ("message", str), ("stdout", str), ("diff", str)])
-def pipeline_report_test(submission: Submission, test_name: str, passed: bool, message: str, stdout: str, diff: str, **_):
+@json_endpoint([("test_name", str), ("passed", bool), ("message", str), ('output_type', str), ("output", str)])
+def pipeline_report_test(submission: Submission, test_name: str, passed: bool, message: str, output_type: str, output: str, **_):
     """
     Submission pipelines will hit this endpoint when there
     is a test result to report.
@@ -127,21 +127,21 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
       "test_name": "name of the test",
       "passed": True,
       "message": "This test worked",
-      "stdout": "Command logs...",
-      "diff": "--- \n\n+++ \n\n@@ -1,3 +1,3 @@\n\n a\n-c\n+b\n d"
+      "output_type": "diff",
+      "output": "--- \n\n+++ \n\n@@ -1,3 +1,3 @@\n\n a\n-c\n+b\n d"
     }
 
     :param submission:
     :param test_name:
     :param passed:
     :param message:
-    :param stdout:
-    :param diff:
+    :param output:
+    :param output_type:
     :return:
     """
 
-    if len(stdout) > MYSQL_TEXT_MAX_LENGTH:
-        stdout = stdout[:MYSQL_TEXT_MAX_LENGTH]
+    if len(output) > MYSQL_TEXT_MAX_LENGTH:
+        output = output[:MYSQL_TEXT_MAX_LENGTH]
 
     # Log the build
     logger.info(
@@ -154,8 +154,8 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
             "test_name": test_name,
             "test_message": message,
             "passed": passed,
-            "stdout": stdout,
-            "diff": diff,
+            "output_type": output_type,
+            "output": output,
         },
     )
 
@@ -176,8 +176,8 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
     # Update the fields
     submission_test_result.passed = passed
     submission_test_result.message = message
-    submission_test_result.stdout = stdout
-    submission_test_result.diff = diff
+    submission_test_result.output_type = output_type
+    submission_test_result.output = output
 
     # Add and commit
     db.session.add(submission_test_result)

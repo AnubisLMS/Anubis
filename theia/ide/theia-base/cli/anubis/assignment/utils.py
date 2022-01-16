@@ -1,12 +1,12 @@
 import collections
-import subprocess
-import functools
-import warnings
 import difflib
-import logging
-import typing
+import functools
 import json
+import logging
 import os
+import subprocess
+import typing
+import warnings
 
 DEBUG = os.environ.get('DEBUG', default='0') == '1'
 
@@ -16,19 +16,20 @@ build_function = None
 CompareFuncReturnT = typing.Tuple[bool, typing.List[str]]
 CompareFuncT = typing.Callable[[typing.List[str], typing.List[str], bool], CompareFuncReturnT]
 
+
 class TestResult(object):
     def __init__(self):
-        self.stdout = None
+        self.output_type = 'text'
+        self.output = None
         self.message = None
         self.passed = None
-        self.diff = None
 
     def __repr__(self):
-        return "<TestResult passed={} message={:5.5} stdout={:5.5} diff={:5.5}>".format(
+        return "<TestResult\n  passed={}\n  message='{:5.5}'\n  output_type='{}'\n  output='{:5.5}'\n>".format(
             self.passed,
             self.message,
-            self.stdout,
-            self.diff
+            self.output_type,
+            self.output,
         )
 
 
@@ -38,7 +39,7 @@ class BuildResult(object):
         self.passed = None
 
     def __repr__(self):
-        return "<BuildResult passed={} stdout={:5.5}>".format(
+        return "<BuildResult\n  passed={}\n  stdout='{:5.5}'>".format(
             self.passed,
             self.stdout
         )
@@ -104,7 +105,34 @@ def register_test(test_name):
             func(result)
             return result
 
+        func.test = {'name': test_name, 'hidden': False, 'points': 10}
         registered_tests[test_name] = wrapper
+
+        return wrapper
+
+    return decorator
+
+
+def hide_test():
+    def decorator(func):
+        func.test['hidden'] = True
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+def points_test(points: int):
+    def decorator(func):
+        func.test['points'] = points
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
 
         return wrapper
 
@@ -136,7 +164,7 @@ def trim(stdout: str) -> typing.List[str]:
     """
     stdout_lines = stdout.split('\n')
     try:
-        stdout_lines = stdout_lines[stdout_lines.index('init: starting sh')+1:]
+        stdout_lines = stdout_lines[stdout_lines.index('init: starting sh') + 1:]
     except ValueError or IndexError:
         return stdout_lines
 
@@ -163,9 +191,9 @@ def trim(stdout: str) -> typing.List[str]:
 
 
 def search_lines(
-        stdout_lines: typing.List[str],
-        expected_lines: typing.List[str],
-        case_sensitive: bool = True
+    stdout_lines: typing.List[str],
+    expected_lines: typing.List[str],
+    case_sensitive: bool = True
 ) -> CompareFuncReturnT:
     """
     Search lines for expected lines. This will return true if all expected lines are in the
@@ -205,10 +233,10 @@ def search_lines(
 
 
 def test_lines(
-        stdout_lines: typing.List[str],
-        expected_lines: typing.List[str],
-        case_sensitive: bool = True,
-        context_length: int = 5,
+    stdout_lines: typing.List[str],
+    expected_lines: typing.List[str],
+    case_sensitive: bool = True,
+    context_length: int = 5,
 ) -> CompareFuncReturnT:
     """
     Test lines for exact equality. Whitespace will be stripped off each line automatically.
@@ -304,15 +332,18 @@ def verify_expected(
     passed, diff = compare_func(stdout_lines, expected_lines, case_sensitive=case_sensitive)
     if not passed:
         if diff:
-            test_result.diff += '\n'.join(diff)
+            test_result.output_type = 'diff'
+            test_result.output += '\n'.join(diff)
         else:
             # If diff is not available, fall back to the old way of displaying outputs
-            test_result.stdout += 'your lines:\n' + '\n'.join(stdout_lines) + '\n\n' \
-                                + 'we expected:\n' + '\n'.join(expected_lines)
+            test_result.output_type = 'text'
+            test_result.output += 'your lines:\n' + '\n'.join(stdout_lines) + '\n\n' \
+                                  + 'we expected:\n' + '\n'.join(expected_lines)
         test_result.message = 'Did not receive expected output'
         test_result.passed = False
     else:
-        test_result.stdout += 'test passed, we received the expected output'
+        test_result.output_type = 'text'
+        test_result.output += 'test passed, we received the expected output'
         test_result.message = 'Expected output found'
         test_result.passed = True
 
@@ -338,7 +369,7 @@ def xv6_run(cmd: str, test_result: TestResult, timeout=5) -> typing.List[str]:
 
     with open('command', 'w') as f:
         f.write('\n' + cmd + '\n')
-    stdout, retcode = exec_as_student(command + ' < command', timeout=timeout+1)
+    stdout, retcode = exec_as_student(command + ' < command', timeout=timeout + 1)
     stdout = stdout.split('\n')
 
     boot_line = None
@@ -368,8 +399,9 @@ def did_xv6_crash(stdout_lines: typing.List[str], test_result: TestResult):
     :return:
     """
     if any('cpu0: panic' in line for line in stdout_lines):
-        test_result.stdout += 'xv6 did not boot\n\n' + '-'*20 \
-            + '\nstdout:\n' + '\n'.join(stdout_lines)
+        test_result.output_type = 'text'
+        test_result.output += 'xv6 did not boot\n\n' + '-' * 20 \
+                              + '\nstdout:\n' + '\n'.join(stdout_lines)
         test_result.passed = False
         test_result.message = 'xv6 does not boot!\n'
         return True
@@ -379,11 +411,11 @@ def did_xv6_crash(stdout_lines: typing.List[str], test_result: TestResult):
         passed = 'unexpected trap' not in line and passed
 
     if not passed:
-        test_result.stdout += 'trap error detected\n\n' + '-'*20 \
-            + '\nstdout:\n' + '\n'.join(stdout_lines)
+        test_result.output_type = 'text'
+        test_result.output += 'trap error detected\n\n' + '-' * 20 \
+                              + '\nstdout:\n' + '\n'.join(stdout_lines)
         test_result.passed = False
         test_result.message = 'xv6 does not boot!\n'
         return True
 
     return False
-

@@ -560,9 +560,9 @@ class SubmissionTestResult(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Fields
-    stdout = deferred(db.Column(db.Text))
-    diff = deferred(db.Column(db.Text))
-    message = deferred(db.Column(db.Text))
+    output_type = db.Column(db.String(128), default='text')
+    output = deferred(db.Column(db.Text(2**16)))
+    message = deferred(db.Column(db.Text(2**10)))
     passed = db.Column(db.Boolean)
 
     # Relationships
@@ -575,8 +575,7 @@ class SubmissionTestResult(db.Model):
             "test_name": self.assignment_test.name,
             "passed": self.passed,
             "message": self.message,
-            "stdout": self.stdout,
-            "diff": self.diff,
+            "data": self.data,
             "created": str(self.created),
             "last_updated": str(self.last_updated),
         }
