@@ -186,18 +186,13 @@ def public_post_forum_post_comment(
     comment = ForumPostComment(
         owner_id=current_user.id,
         post_id=post.id,
-        next_id=None,
+        parent_id=before_id,
         anonymous=anonymous,
         content=content,
         thread_start=before_id is None,
     )
     db.session.add(comment)
     db.session.commit()
-
-    if before_id is not None:
-        before_comment: ForumPostComment = verify_post_comment(before_id)
-        before_comment.next_id = comment.id
-        db.session.commit()
 
     return success_response({
         'post': post.data,
