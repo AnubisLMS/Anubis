@@ -27,6 +27,8 @@ RUN set -ex; \
     iverilog \
     nasm \
     hexedit \
+    yosys \
+    unzip \
     elixir; \
   wget https://github.com/haskell/haskell-language-server/releases/download/1.5.1/haskell-language-server-Linux-9.0.1.gz; \
   gzip -d haskell-language-server-Linux-9.0.1.gz; \
