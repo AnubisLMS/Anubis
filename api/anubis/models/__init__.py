@@ -890,6 +890,7 @@ class ForumPost(db.Model):
     def meta_data(self):
         return {
             'id': self.id,
+            'title': self.title,
             'anonymous': self.anonymous,
             'display_name': 'Anonymous' if self.anonymous else self.owner.name,
             'course_id': self.course_id,
