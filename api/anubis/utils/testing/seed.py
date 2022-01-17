@@ -10,6 +10,12 @@ from anubis.lms.questions import assign_questions
 from anubis.lms.theia import mark_session_ended
 from anubis.models import (
     THEIA_DEFAULT_OPTIONS,
+    ForumPost,
+    ForumPostComment,
+    ForumCategory,
+    ForumPostInCategory,
+    ForumPostViewed,
+    ForumPostUpvote,
     Assignment,
     AssignmentQuestion,
     AssignmentRepo,
@@ -30,6 +36,7 @@ from anubis.utils.data import with_context
 from anubis.utils.testing.db import clear_database
 from anubis.utils.testing.lorem import lorem
 from anubis.utils.testing.names import names
+from anubis.utils.logging import logger
 
 
 def create_name() -> str:
@@ -80,6 +87,7 @@ def create_assignment(
     submission_count=30,
     **kwargs,
 ):
+    logger.info(f'creating {course.name} assignment {i}')
     release = datetime.now() - timedelta(hours=2)
     due = datetime.now() + timedelta(hours=36) + timedelta(days=i)
     grace = due + timedelta(hours=1)
@@ -248,17 +256,72 @@ def init_submissions(submissions):
                     test_result.output = "--- \n+++ \n@@ -1,3 +1,3 @@\n a\n-c\n+b\n d"
 
 
+def init_forums(course: Course):
+    student1 = User.query.join(InCourse).join(Course).filter(Course.id == course.id).first()
+    student2 = User.query.join(InCourse).join(Course).filter(Course.id == course.id).offset(1).first()
+    for i in range(3):
+        post = ForumPost(
+            owner_id=student1.id,
+            course_id=course.id,
+            visible_to_students=True,
+            pinned=False,
+            anonymous=False,
+            title=f'post title {i}',
+            content=f'post content {i}',
+        )
+        db.session.add(post)
+
+        category = ForumCategory(
+            name=f"Category {i}",
+            course=course,
+        )
+        db.session.add(category)
+
+        in_category = ForumPostInCategory(
+            post=post,
+            category=category,
+        )
+        db.session.add(in_category)
+
+        upvote = ForumPostUpvote(owner=student2, post=post)
+        db.session.add(upvote)
+
+        viewed1 = ForumPostViewed(owner=student1, post=post)
+        viewed2 = ForumPostViewed(owner=student2, post=post)
+        db.session.add_all([viewed1, viewed2])
+
+        comments: List[ForumPostComment] = []
+        for k in range(3):
+            comment = ForumPostComment(
+                owner_id=student2.id,
+                post=post,
+                next_id=None,
+                approved_by_id=None,
+                anonymous=False,
+                thread_start=False,
+                content=f'comment content {k}'
+            )
+            comments.append(comment)
+        for index in range(len(comments)-1, 0, -1):
+            comments[index].next_if = comments[index-1].id
+        comments[0].thread_start = True
+        db.session.add_all(comments)
+
+
 @with_context
 def seed():
+    logger.info('clearing db')
     clear_database()
 
     # Create
+    logger.info('creating top level users')
     superuser = User(netid="superuser", github_username="superuser", name="super", is_superuser=True)
     ta_user = User(netid="ta", github_username="ta", name="T A")
     professor_user = User(netid="professor", github_username="professor", name="professor")
     student_user = User(netid="student", github_username="student", name="student")
     db.session.add_all([superuser, professor_user, ta_user, student_user])
 
+    logger.info('creating theia image + tags')
     base_image = TheiaImage(
         image="registry.digitalocean.com/anubis/theia-base",
         title="Python IDE",
@@ -305,12 +368,14 @@ def seed():
     db.session.commit()
 
     # OS test course
+    logger.info('creating os students')
     intro_to_os_students = create_students(50) + [
         superuser,
         professor_user,
         ta_user,
         student_user,
     ]
+    logger.info('creating os course')
     intro_to_os_course = create_course(
         intro_to_os_students,
         name="Intro to OS",
@@ -320,6 +385,9 @@ def seed():
         autograde_tests_repo="https://github.com/os3224/anubis-assignment-tests",
         github_org="os3224",
     )
+
+    logger.info('creating forum for os')
+    init_forums(intro_to_os_course)
 
     os_assignment0, _, os_submissions0, _ = create_assignment(
         intro_to_os_course,
@@ -353,20 +421,29 @@ def seed():
         do_repos=True,
         github_repo_required=True,
     )
+    logger.info('init submissions assignment 0')
     init_submissions(os_submissions0)
     assign_questions(os_assignment0)
+    logger.info('init submissions assignment 1')
     init_submissions(os_submissions1)
     assign_questions(os_assignment1)
+    logger.info('init submissions assignment 2')
     init_submissions(os_submissions2)
     assign_questions(os_assignment2)
+    logger.info('init submissions assignment 3')
     init_submissions(os_submissions3)
     assign_questions(os_assignment3)
+
+    logger.info('adding course tas + profs')
     ta = TAForCourse(owner=ta_user, course=intro_to_os_course)
     professor = ProfessorForCourse(owner=professor_user, course=intro_to_os_course)
     db.session.add_all([professor, ta])
 
     # MMDS test course
+    logger.info('creating mmds student')
     mmds_students = create_students(50)
+
+    logger.info('adding mmds course')
     mmds_course = create_course(
         mmds_students,
         name="Mining Massive Datasets",
@@ -377,7 +454,10 @@ def seed():
         github_org="os3224",
     )
     mmds_assignment, _, mmds_submissions, _ = create_assignment(mmds_course, mmds_students, xv6_image)
+
+    logger.info('init mmds submissions')
     init_submissions(mmds_submissions)
     assign_questions(mmds_assignment)
 
+    logger.info('committing')
     db.session.commit()

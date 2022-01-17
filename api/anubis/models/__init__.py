@@ -71,10 +71,12 @@ class User(db.Model):
     submissions = db.relationship("Submission", backref="owner")
     theia_sessions = db.relationship("TheiaSession", backref="owner")
     late_exceptions = db.relationship("LateException", backref="user")
-    posts = db.relationship("ForumPost", backref="owner")
-    comments = db.relationship("ForumPostComment", backref="owner", foreign_keys='ForumPostComment.owner_id')
-    approved_comments = db.relationship("ForumPostComment", backref="approved_by",
+    forum_posts = db.relationship("ForumPost", backref="owner")
+    forum_comments = db.relationship("ForumPostComment", backref="owner", foreign_keys='ForumPostComment.owner_id')
+    forum_approved_comments = db.relationship("ForumPostComment", backref="approved_by",
                                         foreign_keys='ForumPostComment.approved_by_id')
+    forum_upvotes = db.relationship("ForumPostUpvote", backref="owner")
+    forum_posts_viewed = db.relationship("ForumPostViewed", backref="owner")
 
     @property
     def data(self):
@@ -130,6 +132,8 @@ class Course(db.Model):
     lecture_notes = db.relationship("LectureNotes", cascade="all,delete", backref="course")
     static_files = db.relationship("StaticFile", cascade="all,delete", backref="course")
     theia_sessions = db.relationship("TheiaSession", cascade="all,delete", backref="course")
+    forum_posts = db.relationship("ForumPost", backref="course")
+    forum_categories = db.relationship("ForumCategory", backref="course")
 
     @property
     def total_assignments(self):
@@ -923,6 +927,8 @@ class ForumCategory(db.Model):
     # Timestamps
     created = db.Column(db.DateTime, default=datetime.now)
     last_updated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    in_category = db.relationship("ForumPostInCategory", cascade="all,delete", backref="category")
 
     @property
     def data(self):
