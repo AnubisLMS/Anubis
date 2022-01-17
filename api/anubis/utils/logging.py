@@ -1,6 +1,7 @@
 import logging
 
 from anubis.config import config
+from anubis.utils.data import is_debug
 
 
 def _get_logger(logger_name):
@@ -17,10 +18,10 @@ def _get_logger(logger_name):
     # Initialize a logger for this app with the logger
     # name specified
     streamer = logging.StreamHandler()
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter("%(asctime)s %(name)s %(filename)s %(levelname)s :: %(message)s")
     streamer.setFormatter(formatter)
     _logger = logging.getLogger(logger_name)
-    _logger.setLevel(logging.NOTSET)
+    _logger.setLevel(logging.INFO if is_debug() else logging.INFO)
     _logger.addHandler(streamer)
 
     return _logger
