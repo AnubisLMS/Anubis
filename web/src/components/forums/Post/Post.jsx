@@ -8,6 +8,7 @@ import CreateIcon from '@material-ui/icons/Create';
 
 import Divider from '../../shared/Divider/Divider';
 import Comment from '../../forums/Comment/Comment';
+import {toRelativeDate} from '../../../utils/datetime';
 
 import {useStyles} from './Post.styles';
 
@@ -35,7 +36,7 @@ export default function Post({
           {user}
         </Typography>
         <Typography className={classes.whenPosted}>
-          posted on {createdDate}
+          posted on {toRelativeDate(new Date(createdDate))}
         </Typography>
       </Box>
       <Typography className={classes.title}>
@@ -60,7 +61,7 @@ export default function Post({
         <Box className={classes.infoContainer}>
           <CreateIcon className={classes.icon} />
           <Typography>
-            {updatedDate}
+            {toRelativeDate(new Date(updatedDate))}
           </Typography>
         </Box>
       </Box>
@@ -68,6 +69,7 @@ export default function Post({
       <Box className={classes.commentListContainer}>
         {comments && comments.map((comment, index) => (
           <Comment
+            id={comment.id}
             key={`${comment.display_name}-${index}`}
             user={comment.display_name}
             content={comment.content}

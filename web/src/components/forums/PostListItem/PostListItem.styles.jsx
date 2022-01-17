@@ -8,7 +8,7 @@ export const useStyles = makeStyles((theme) => ({
     width: '100%',
     display: 'flex',
     alignItems: 'center',
-    gap: theme.spacing(2),
+    gap: theme.spacing(1.5),
     cursor: 'pointer',
     '&:hover': {
       backgroundColor: theme.palette.dark.blue['100'],
@@ -25,19 +25,31 @@ export const useStyles = makeStyles((theme) => ({
   },
   seenIcon: {
     color: theme.palette.primary.main,
-    width: '15px',
-    height: '15px',
+    width: '12px',
+    height: '12px',
   },
   content: {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    gap: '0px',
+    gap: '5px',
   },
   secondary: {
     display: 'flex',
     alignItems: 'center',
-    gap: '5px',
+    gap: '10px',
     opacity: '.8',
+  },
+  dotDivider: {
+    fontSize: '6px',
+    opacity: '.7',
+  },
+  infoContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '5px',
+  },
+  icon: {
+    fontSize: '14px',
   },
 }));

@@ -127,6 +127,7 @@ export default function Forum({user}) {
               category={post.category}
               user={post.display_name}
               date={post.created}
+              seenCount={post.seen_count}
               isSelected={Boolean(selectedPost === post)}
               handleSelect={() => setSelectedPost(post)}
             />

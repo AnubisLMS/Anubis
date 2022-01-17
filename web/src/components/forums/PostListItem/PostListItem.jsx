@@ -4,6 +4,11 @@ import clsx from 'clsx';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Box';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import QueryBuilderIcon from '@material-ui/icons/QueryBuilder';
+import PersonIcon from '@material-ui/icons/Person';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+
+import {toRelativeDate} from '../../../utils/datetime';
 
 import {useStyles} from './PostListItem.styles';
 
@@ -31,15 +36,19 @@ export default function PostListItem({
           {title}
         </Typography>
         <Box className={classes.secondary}>
-          <Typography>
-            {user}
-          </Typography>
-          <p>
-            -
-          </p>
-          <Typography>
-            {category}
-          </Typography>
+          <Box className={classes.infoContainer}>
+            <VisibilityIcon className={classes.icon} />
+            <Typography>
+              {seenCount}
+            </Typography>
+          </Box>
+          <FiberManualRecordIcon className={classes.dotDivider} />
+          <Box className={classes.infoContainer}>
+            <QueryBuilderIcon className={classes.icon} />
+            <Typography className={classes.date}>
+              {toRelativeDate(new Date(date))}
+            </Typography>
+          </Box>
         </Box>
       </Box>
     </Box>
