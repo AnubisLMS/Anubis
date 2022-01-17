@@ -9,6 +9,14 @@ export const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(2),
+    cursor: 'pointer',
+    '&:hover': {
+      backgroundColor: theme.palette.dark.blue['100'],
+    },
+  },
+  selected: {
+    border: `1px solid ${theme.palette.primary.main}`,
+    backgroundColor: theme.palette.dark.blue['200'],
   },
   title: {
     fontSize: '16px',

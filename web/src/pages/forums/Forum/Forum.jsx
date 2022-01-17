@@ -7,6 +7,8 @@ import SectionHeader from '../../../components/shared/SectionHeader/SectionHeade
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 import PostListItem from '../../../components/forums/PostListItem/PostListItem';
+import Post from '../../../components/forums/Post/Post';
+
 import {useStyles} from './Forum.styles.jsx';
 
 import Box from '@material-ui/core/Box';
@@ -15,22 +17,6 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-
-
-const fakePosts = [
-  {
-    title: 'Hello this is a test post',
-    display_name: 'nysteo',
-    category: 'general',
-    created: new Date(),
-  },
-  {
-    title: 'Anubis is dope',
-    display_name: 'nysteo',
-    category: 'general',
-    created: new Date(),
-  },
-];
 
 export default function Forum({user}) {
   const {enqueueSnackbar} = useSnackbar();
@@ -41,6 +27,8 @@ export default function Forum({user}) {
   const [selectedCourseCode, setSelectedCourseCode] = useState('');
 
   const [posts, setPosts] = useState(undefined);
+  const [selectedPost, setSelectedPost] = useState(undefined);
+  const [selectedContent, setSelectedContent] = useState(undefined);
 
   const [refreshPosts, setRefreshPosts] = useState(0);
 
@@ -70,13 +58,30 @@ export default function Forum({user}) {
     axios.get(`api/public/forums/course/${selectedCourse.id}`)
       .then((response) => {
         const data = standardStatusHandler(response, enqueueSnackbar);
-        console.log(data);
+        console.log(data.posts);
         if (data) {
-          setPosts(data);
+          setPosts(data.posts);
+          setSelectedPost(data.posts[0]);
         }
       })
       .catch(standardErrorHandler(enqueueSnackbar));
   }, [selectedCourse]);
+
+  useEffect(() => {
+    if (!selectedPost) {
+      return null;
+    }
+
+    axios.get(`api/public/forums/post/${selectedPost.id}`)
+      .then((response) => {
+        const data = standardStatusHandler(response, enqueueSnackbar);
+        console.log(data.post);
+        if (data) {
+          setSelectedContent(data.post);
+        }
+      })
+      .catch(standardErrorHandler(enqueueSnackbar));
+  }, [selectedPost]);
 
   const handleCourseSelect = (e) => {
     console.log(e.target.value);
@@ -115,18 +120,30 @@ export default function Forum({user}) {
       </Box>
       <Grid container className={classes.postsContainer}>
         <Grid item xs={3} className={classes.postListContainer}>
-          {fakePosts.map((post, index) => (
+          {posts?.length > 0 && posts.map((post, index) => (
             <PostListItem
               key={`${post.title}-${index}`}
               title={post.title}
               category={post.category}
               user={post.display_name}
               date={post.created}
+              isSelected={Boolean(selectedPost === post)}
+              handleSelect={() => setSelectedPost(post)}
             />
           ))}
         </Grid>
         <Grid item xs={9} className={classes.postContentContainer}>
-
+          {selectedContent && (
+            <Post
+              title={selectedContent.title}
+              content={selectedContent.content}
+              user={selectedContent.display_name}
+              seenCount={selectedContent.seen_count}
+              createdDate={selectedContent.created}
+              updatedDate={selectedContent.last_updated}
+              comments={selectedContent.comments}
+            />
+          )}
         </Grid>
       </Grid>
     </StandardLayout>
