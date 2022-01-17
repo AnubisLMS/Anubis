@@ -52,6 +52,7 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
             f"--netid={submission.owner.netid}",
             f"--commit={submission.commit}",
             f"--repo={submission.repo.repo_url}",
+            f"--path=./student",
             f"--submission-id={submission.id}",
         ],
         # Set the resource requirements
@@ -81,7 +82,7 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
     job = client.V1Job(
         api_version="batch/v1",
         kind="Job",
-        metadata=client.V1ObjectMeta(name="submission-pipeline-{}-{}".format(submission.id, int(time.time()))),
+        metadata=client.V1ObjectMeta(name="submission-pipeline-{}-{}".format(submission.id[:12], int(time.time()))),
         spec=spec,
     )
 
