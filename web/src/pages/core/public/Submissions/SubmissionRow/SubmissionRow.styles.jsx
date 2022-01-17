@@ -49,7 +49,7 @@ export const useStyles = makeStyles((theme) => ({
   },
   commit: {
     fontSize: '13px',
-    color: theme.palette.gray['200'],
+    color: theme.palette.color.gray,
   },
   tests: {
     fontSize: '14px',

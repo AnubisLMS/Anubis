@@ -40,6 +40,9 @@ export const useStyles = makeStyles((theme) => ({
   error: {
     color: theme.palette.color.red,
   },
+  processing: {
+    color: theme.palette.color.orange,
+  },
   expand: {
     fontSize: '14px',
   },

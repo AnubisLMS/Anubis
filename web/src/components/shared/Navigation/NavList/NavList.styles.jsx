@@ -13,7 +13,7 @@ export const useStyles = makeStyles((theme) => ({
     fontSize: '12px',
   },
   item: {
-    color: theme.palette.gray['200'],
+    color: theme.palette.color.gray,
     fontSize: '14px',
     '&:hover,&:focus': {
       backgroundColor: 'rgba(255, 255, 255, 0.08)',
@@ -30,7 +30,7 @@ export const useStyles = makeStyles((theme) => ({
   },
   firebase: {
     fontSize: 24,
-    color: theme.palette.white,
+    color: theme.palette.color.white,
   },
   itemActiveItem: {
     color: '#4fc3f7',

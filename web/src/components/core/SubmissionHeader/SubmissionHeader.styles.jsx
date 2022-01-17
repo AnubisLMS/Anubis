@@ -32,7 +32,7 @@ export const useStyles = makeStyles((theme) => ({
   textLabel: {
     fontWeight: 'Regular',
     fontSize: '13px',
-    color: theme.palette.gray['200'],
+    color: theme.palette.color.gray,
     marginRight: theme.spacing(.5),
     whiteSpace: 'nowrap',
   },

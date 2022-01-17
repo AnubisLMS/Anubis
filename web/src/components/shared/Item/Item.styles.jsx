@@ -66,7 +66,7 @@ export const useStyles = makeStyles((theme) => ({
   },
   subTitle: {
     fontSize: '13px',
-    color: theme.palette.gray['200'],
+    color: theme.palette.color.gray,
   },
   statusIcon: {
     width: '10px',

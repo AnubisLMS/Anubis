@@ -6,7 +6,7 @@ export const useStyles = makeStyles((theme) => ({
   header: {
     paddingTop: theme.spacing(2),
     backgroundColor: theme.palette.dark.black,
-    borderBottom: `1px solid ${theme.palette.gray['200']}`,
+    borderBottom: `1px solid ${theme.palette.color.gray}`,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
@@ -42,7 +42,7 @@ export const useStyles = makeStyles((theme) => ({
     fontSize: '1.5rem',
   },
   headerCourseName: {
-    color: theme.palette.gray['200'],
+    color: theme.palette.color.gray,
   },
   headerCourseLink: {
     color: theme.palette.color.blue,
@@ -95,7 +95,7 @@ export const useStyles = makeStyles((theme) => ({
   overviewItemTitle: {
     fontSize: '14px',
     letterSpacing: '1px',
-    color: theme.palette.gray['200'],
+    color: theme.palette.color.gray,
   },
   overviewItemSubtitle: {
     display: 'flex',

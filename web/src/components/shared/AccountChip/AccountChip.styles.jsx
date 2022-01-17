@@ -55,7 +55,7 @@ export const useStyles = makeStyles((theme) => ({
   profileAction: {
     padding: `${theme.spacing(0)}px ${theme.spacing(6)}px ${theme.spacing(1)}px ${theme.spacing(2)}px`,
     cursor: 'pointer',
-    color: theme.palette.gray['200'],
+    color: theme.palette.color.gray,
     display: 'flex',
     flexDirection: 'row',
     textDecoration: 'none',
@@ -79,7 +79,7 @@ export const useStyles = makeStyles((theme) => ({
     '&:hover': {
       backgroundColor: '#2A3039',
     },
-    color: theme.palette.gray['200'],
+    color: theme.palette.color.gray,
     padding: `${theme.spacing(1)}px ${theme.spacing(6)}px ${theme.spacing(1)}px ${theme.spacing(3)}px`,
     marginBottom: theme.spacing(1),
   },

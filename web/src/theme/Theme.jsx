@@ -30,10 +30,6 @@ let theme = createMuiTheme({
         200: '#21262d',
       },
     },
-    gray: {
-      100: 'c6cdd5',
-      200: '#89929b',
-    },
     white: '#ecf2f8',
     color: {
       red: '#fa7970',
@@ -41,6 +37,8 @@ let theme = createMuiTheme({
       green: '#7ce38b',
       blue: '#77bdfb',
       purple: '#cea5fb',
+      white: '#ecf2f8',
+      gray: '#89929b',
     },
     type: 'dark',
   },

@@ -134,7 +134,7 @@ export default function Submission() {
       passed: !!submission?.build?.passed,
       message: !!submission?.build?.passed ? 'Build Succeeded' : 'Build Failed',
       output_type: 'text',
-      output: submission?.build?.stdout ?? '',
+      output: submission?.build?.stdout ?? null,
     },
   };
 

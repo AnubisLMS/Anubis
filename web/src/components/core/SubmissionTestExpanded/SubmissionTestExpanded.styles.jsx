@@ -10,7 +10,7 @@ export const useStyles = makeStyles((theme) => ({
   },
   testHeader: {
     borderBottom: '1px',
-    borderColor: theme.palette.gray['100'],
+    borderColor: theme.palette.color.gray,
     padding: `${theme.spacing(3)}px ${theme.spacing(6)}px`,
     verticalAlign: 'middle',
   },
@@ -22,7 +22,7 @@ export const useStyles = makeStyles((theme) => ({
     width: 'fit-content',
   },
   submissionIDTitle: {
-    color: theme.palette.gray['200'],
+    color: theme.palette.color.gray,
     display: 'inline',
     fontSize: '14px',
     padding: `0px ${theme.spacing(3)}px`,
@@ -32,7 +32,7 @@ export const useStyles = makeStyles((theme) => ({
     color: theme.palette.white,
   },
   assignmentNameTitle: {
-    color: theme.palette.gray['200'],
+    color: theme.palette.color.gray,
     display: 'inline',
     fontSize: '14px',
     padding: `0px ${theme.spacing(3)}px`,
@@ -73,7 +73,7 @@ export const useStyles = makeStyles((theme) => ({
     paddingBottom: `${theme.spacing(3)}px`,
   },
   testOutput: {
-    color: theme.palette.gray['100'],
+    color: theme.palette.color.gray,
     whiteSpace: 'pre-line',
     fontSize: '16px',
     paddingBottom: `${theme.spacing(3)}px`,

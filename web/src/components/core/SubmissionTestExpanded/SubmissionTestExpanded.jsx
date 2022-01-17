@@ -43,7 +43,7 @@ export default function SubmissionTestExpanded({
 }) {
   const classes = useStyles();
   const diffs = useMemo(() => {
-    return parseDiff(testOutput, {nearbySequences: 'zip'});
+    return parseDiff(testOutput ?? '', {nearbySequences: 'zip'});
   }, [testOutput]);
   const tokens = useMemo(() => {
     if (!!!diffs) return undefined;
@@ -99,7 +99,7 @@ export default function SubmissionTestExpanded({
       <div className={classes.testBody}>
         {testOutputType === 'text' && (
           <Typography className={classes.testOutput}>
-            {testOutput}
+            {testOutput ?? ''}
           </Typography>
         )}
         {testOutputType === 'diff' && (
