@@ -17,6 +17,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 export default function Forum({user}) {
   const {enqueueSnackbar} = useSnackbar();
@@ -91,27 +92,37 @@ export default function Forum({user}) {
   return (
     <StandardLayout>
       <Box className={classes.controlsContainer}>
-        {selectedCourse && (
-          <Box className={classes.courseSelectionContainer}>
-            <Select
-              classes={{
-                root: classes.select,
-              }}
-              value={selectedCourseCode}
-              onChange={handleCourseSelect}
-              disableUnderline
-            >
-              {courses && courses.map((course, index) => (
-                <MenuItem
-                  key={`${course.name}-${index}`}
-                  value={course.course_code}
-                >
-                  {course.course_code}
-                </MenuItem>
-              ))}
-            </Select>
-          </Box>
-        )}
+        <Box className={classes.controlsLeft}>
+          <Typography>
+            Forum
+          </Typography>
+          {selectedCourse && (
+            <Box className={classes.courseSelectionContainer}>
+              <Select
+                classes={{
+                  root: classes.select,
+                }}
+                value={selectedCourseCode}
+                onChange={handleCourseSelect}
+                disableUnderline
+              >
+                {courses && courses.map((course, index) => (
+                  <MenuItem
+                    key={`${course.name}-${index}`}
+                    value={course.course_code}
+                  >
+                    {course.course_code}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Box>
+          )}
+          <Button
+            onClick={refresh}
+          >
+            <RefreshIcon />
+          </Button>
+        </Box>
         <Button
           className={classes.newPostButton}
         >

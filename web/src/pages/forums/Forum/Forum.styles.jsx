@@ -6,9 +6,17 @@ export const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: theme.spacing(1),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+    paddingRight: theme.spacing(3),
+    paddingLeft: theme.spacing(3),
     borderRadius: '5px',
     border: `1px solid ${theme.palette.dark.blue['200']}`,
+  },
+  controlsLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(2),
   },
   courseSelectionContainer: {
     display: 'flex',
