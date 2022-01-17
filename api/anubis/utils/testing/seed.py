@@ -293,18 +293,19 @@ def init_forums(course: Course):
         comments: List[ForumPostComment] = []
         for k in range(3):
             comment = ForumPostComment(
+                id=rand(),
                 owner_id=student2.id,
                 post=post,
-                next_id=None,
+                parent_id=None,
                 approved_by_id=None,
                 anonymous=False,
                 thread_start=False,
                 content=f'comment content {k}'
             )
             comments.append(comment)
-        for index in range(len(comments)-1, 0, -1):
-            comments[index].next_if = comments[index-1].id
-        comments[0].thread_start = True
+        comments[2].thread_start = True
+        comments[1].parent_id = comments[2].id
+        comments[0].parent_id = comments[2].id
         db.session.add_all(comments)
 
 

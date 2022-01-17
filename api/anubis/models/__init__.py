@@ -874,7 +874,7 @@ class ForumPost(db.Model):
     seen_count: int = db.Column(db.Integer, default=0)
 
     # Content
-    title = deferred(db.Column(db.TEXT(1024)))
+    title = db.Column(db.TEXT(1024))
     content = deferred(db.Column(db.TEXT(2 ** 14)))
 
     # Timestamps
@@ -903,10 +903,11 @@ class ForumPost(db.Model):
 
     @property
     def data(self):
+        from anubis.lms.forum import get_post_comments_data
         data = self.meta_data
         data['title'] = self.title
         data['content'] = self.content
-        data['comments'] = [comment.data for comment in self.comments]
+        data['comments'] = get_post_comments_data(self)
         return data
 
     @property
@@ -992,7 +993,7 @@ class ForumPostComment(db.Model):
 
     owner_id: str = db.Column(db.String(128), db.ForeignKey(User.id), nullable=False)
     post_id: str = db.Column(db.String(128), db.ForeignKey(ForumPost.id), nullable=False)
-    next_id: str = db.Column(db.String(128), nullable=True)
+    parent_id: str = db.Column(db.String(128), nullable=True)
     approved_by_id: str = db.Column(db.String(128), db.ForeignKey(User.id), nullable=True)
     anonymous: bool = db.Column(db.Boolean, default=False)
     thread_start: bool = db.Column(db.Boolean, default=False)
@@ -1010,7 +1011,7 @@ class ForumPostComment(db.Model):
             'anonymous': self.anonymous,
             'display_name': 'Anonymous' if self.anonymous else self.owner.name,
             'post_id': self.post_id,
-            'next_id': self.next_id,
+            'parent_id': self.parent_id,
             'approved_by': self.approved_by.name if self.approved_by_id is not None else None,
             'thread_start': self.thread_start,
             'created': str(self.created),

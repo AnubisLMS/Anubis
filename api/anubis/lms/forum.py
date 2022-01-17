@@ -1,15 +1,8 @@
 from typing import List
+
 from anubis.models import (
-    db,
-    User,
-    Course,
-    InCourse,
     ForumPost,
-    ForumCategory,
-    ForumPostInCategory,
-    ForumPostUpvote,
     ForumPostComment,
-    ForumPostViewed,
 )
 from anubis.utils.auth.user import current_user
 from anubis.utils.http import req_assert
@@ -49,3 +42,21 @@ def get_post_comments(post: ForumPost) -> List[ForumPostComment]:
     ).all()
     return comments
 
+
+def get_post_comments_data(post: ForumPost) -> List[dict]:
+    comments: List[ForumPostComment] = post.comments
+
+    def _full_comment(comment: ForumPostComment) -> dict:
+        data = comment.data
+        data['children'] = [
+            _comment.data
+            for _comment in comments
+            if _comment.parent_id == comment.id
+        ]
+        return data
+
+    return [
+        _full_comment(comment)
+        for comment in comments
+        if comment.thread_start is True
+    ]
