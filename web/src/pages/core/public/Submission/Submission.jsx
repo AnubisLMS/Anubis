@@ -109,7 +109,7 @@ export default function Submission() {
         continueSubscribe();
       }
     }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
-  }, []);
+  }, [step]);
 
   if (!submission) {
     return null;
@@ -123,6 +123,19 @@ export default function Submission() {
   const closeModal = () => {
     setIsExpanded(false);
     setModalTest(null);
+  };
+
+  const buildTest = {
+    test: {
+      name: 'Build',
+    },
+    result: {
+      test_name: 'Build',
+      passed: !!submission?.build?.passed,
+      message: !!submission?.build?.passed ? 'Build Succeeded' : 'Build Failed',
+      output_type: 'text',
+      output: submission?.build?.stdout ?? '',
+    },
   };
 
   return (
@@ -140,15 +153,9 @@ export default function Submission() {
         </Box>
         <Box className={classes.submissionContentContainer}>
           <SubmissionContent submission={submission}>
-            <SubmissionTest test={{
-              test: {
-                name: 'Build',
-              },
-              result: {
-                passed: !!submission?.build?.passed,
-              },
-            }}
-            hasExpand={false}
+            <SubmissionTest
+              test={buildTest}
+              expandModal = {() => expandModal(buildTest)}
             />
             {submission?.tests && submission.tests.map((test, index) => (
               <SubmissionTest key={index} test={test} expandModal = {() => expandModal(test)}/>
@@ -158,9 +165,9 @@ export default function Submission() {
         {modalTest &&
           <SubmissionTestExpanded
             open={isExpanded}
-            testName={modalTest.result.test_name}
             submissionID={submission.commit}
             assignmentName={submission.assignment_name}
+            testName={modalTest.result.test_name}
             testSuccess={modalTest.result.passed}
             testOutputType={modalTest.result.output_type}
             testOutput={modalTest.result.output}

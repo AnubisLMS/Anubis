@@ -16,6 +16,7 @@ const SubmissionHeader = ({
   timestamp,
   commit,
   on_time,
+  state,
   processed,
   regrade,
 })=> {
@@ -31,6 +32,10 @@ const SubmissionHeader = ({
         <Typography className={classes.textLabel}>{'Submitted: '}</Typography>
         <Typography className={classes.textContent}>
           {new Date(timestamp).toLocaleDateString('en-US', DATE_OPTIONS)}
+        </Typography>
+        <Typography className={classes.textLabel}>{'State: '}</Typography>
+        <Typography className={classes.textContent}>
+          {state}
         </Typography>
       </Box>
       <Box className={classes.dataContainer}>

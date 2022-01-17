@@ -74,6 +74,7 @@ export const useStyles = makeStyles((theme) => ({
   },
   testOutput: {
     color: theme.palette.gray['100'],
+    whiteSpace: 'pre-line',
     fontSize: '16px',
     paddingBottom: `${theme.spacing(3)}px`,
   },
