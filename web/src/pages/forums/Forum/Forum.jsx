@@ -8,6 +8,7 @@ import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 import PostListItem from '../../../components/forums/PostListItem/PostListItem';
 import Post from '../../../components/forums/Post/Post';
+import CreateDialog from '../../../components/forums/CreateDialog/CreateDialog';
 
 import {useStyles} from './Forum.styles.jsx';
 
@@ -31,6 +32,9 @@ export default function Forum({user}) {
   const [selectedPost, setSelectedPost] = useState(undefined);
   const [selectedContent, setSelectedContent] = useState(undefined);
 
+  const [isDialogOpen, setIsDialogOpen] = useState(undefined);
+  const [dialogMode, setDialogMode] = useState('post');
+
   const [refreshPosts, setRefreshPosts] = useState(0);
 
   const refresh = () => {
@@ -41,7 +45,6 @@ export default function Forum({user}) {
     axios.get('api/public/courses/')
       .then((response) => {
         const data = standardStatusHandler(response, enqueueSnackbar);
-        console.log(data);
         if (data) {
           setCourses(data.courses);
           setSelectedCourse(data.courses[0]);
@@ -59,7 +62,6 @@ export default function Forum({user}) {
     axios.get(`api/public/forums/course/${selectedCourse.id}`)
       .then((response) => {
         const data = standardStatusHandler(response, enqueueSnackbar);
-        console.log(data.posts);
         if (data) {
           setPosts(data.posts);
           setSelectedPost(data.posts[0]);
@@ -84,6 +86,11 @@ export default function Forum({user}) {
       .catch(standardErrorHandler(enqueueSnackbar));
   }, [selectedPost]);
 
+  const handleOpenDialog = (mode = 'post') => {
+    setDialogMode(mode);
+    setIsDialogOpen(true);
+  };
+
   const handleCourseSelect = (e) => {
     console.log(e.target.value);
     setSelectedCourse(e.target.value);
@@ -91,6 +98,10 @@ export default function Forum({user}) {
 
   return (
     <StandardLayout>
+      <CreateDialog
+        isOpen={isDialogOpen}
+        mode={dialogMode}
+      />
       <Box className={classes.controlsContainer}>
         <Box className={classes.controlsLeft}>
           <Typography>
@@ -125,6 +136,7 @@ export default function Forum({user}) {
         </Box>
         <Button
           className={classes.newPostButton}
+          onClick={() => handleOpenDialog('post')}
         >
           Create New Post
         </Button>

@@ -42,9 +42,9 @@ export const useStyles = makeStyles((theme) => ({
   postsContainer: {
     marginTop: theme.spacing(2),
     width: '100%',
+    minHeight: '900px',
   },
   postListContainer: {
-    height: '800px',
     borderLeft: `1px solid ${theme.palette.dark.blue['200']}`,
     borderTop: `1px solid ${theme.palette.dark.blue['200']}`,
     borderBottom: `1px solid ${theme.palette.dark.blue['200']}`,
@@ -56,7 +56,6 @@ export const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(1),
   },
   postContentContainer: {
-    height: '800px',
     border: `1px solid ${theme.palette.dark.blue['200']}`,
     borderRadius: '0px 5px 5px 0px',
   },

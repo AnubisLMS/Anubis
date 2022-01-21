@@ -55,11 +55,8 @@ export const useStyles = makeStyles((theme) => ({
     fontSize: '14px',
   },
   commentListContainer: {
-    padding: theme.spacing(2),
+    paddingTop: theme.spacing(2),
     width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing(4),
   },
 }));
 

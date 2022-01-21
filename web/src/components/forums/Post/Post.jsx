@@ -7,7 +7,7 @@ import CommentIcon from '@material-ui/icons/Comment';
 import CreateIcon from '@material-ui/icons/Create';
 
 import Divider from '../../shared/Divider/Divider';
-import Comment from '../../forums/Comment/Comment';
+import CommentsList from '../CommentsList/CommentsList';
 import {toRelativeDate} from '../../../utils/datetime';
 
 import {useStyles} from './Post.styles';
@@ -22,7 +22,6 @@ export default function Post({
   comments,
 }) {
   const classes = useStyles();
-  console.log(comments);
 
   return (
     <Box className={classes.root}>
@@ -67,17 +66,7 @@ export default function Post({
       </Box>
       <Divider />
       <Box className={classes.commentListContainer}>
-        {comments && comments.map((comment, index) => (
-          <Comment
-            id={comment.id}
-            key={`${comment.display_name}-${index}`}
-            user={comment.display_name}
-            content={comment.content}
-            hasChildren={comment.thread_start}
-            depth={0}
-            createdDate={comment.created}
-          />
-        ))}
+        <CommentsList comments={comments}/>
       </Box>
     </Box>
   );
