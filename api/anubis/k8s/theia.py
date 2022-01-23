@@ -64,7 +64,7 @@ def create_theia_k8s_pod_pvc(
     if theia_session.playground:
         volume_size = get_config_str('PLAYGROUND_VOLUME_SIZE', '100Mi')
     else:
-        volume_size = get_config_str('PLAYGROUND_VOLUME_SIZE', '100Mi')
+        volume_size = get_config_str('THEIA_VOLUME_SIZE', '100Mi')
 
     # Value for if the git secret should be included in the init and sidecar
     # containers (for provisioning and autosave).
