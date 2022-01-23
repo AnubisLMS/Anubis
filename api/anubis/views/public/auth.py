@@ -1,22 +1,16 @@
-import base64
-import json
-import os
-
 import requests
 from flask import Blueprint, make_response, redirect, request
 
-from anubis.lms.courses import get_course_context, get_courses
-from anubis.lms.submissions import fix_dangling
+from anubis.config import config
+from anubis.lms.courses import get_course_context
 from anubis.models import User, db
-from anubis.utils.auth.http import require_admin, require_user
+from anubis.utils.auth.http import require_user
 from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_GITHUB as github_provider
 from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_NYU as nyu_provider
 from anubis.utils.auth.token import create_token
 from anubis.utils.auth.user import current_user, get_current_user
-from anubis.utils.data import is_debug, req_assert
-from anubis.utils.http import error_response, success_response
-from anubis.utils.http.decorators import json_endpoint
-from anubis.config import config
+from anubis.utils.data import is_debug
+from anubis.utils.http import success_response
 
 auth_ = Blueprint("public-auth", __name__, url_prefix="/public/auth")
 nyu_oauth_ = Blueprint("public-oauth", __name__, url_prefix="/public")
@@ -172,84 +166,3 @@ def public_whoami():
             "variant": "warning",
         }
     )
-
-
-@auth_.route("/set-github-username", methods=["POST"])
-@require_user()
-@json_endpoint(required_fields=[("github_username", str)])
-def public_auth_set_github_username(github_username):
-    """
-    Sets a github username for the current user.
-
-    :return:
-    """
-
-    # Make sure github username was specified
-    if github_username is None:
-        return error_response("github username not specified")
-
-    # Make sure the github username is not already being used
-    other: User = User.query.filter(User.github_username == github_username, User.id != current_user.id).first()
-
-    # Assert that there is not a duplicate github username
-    req_assert(other is None, message="github username is already taken")
-
-    # Set github username and commit
-    current_user.github_username = github_username
-    db.session.add(current_user)
-    db.session.commit()
-
-    # Run the fix dangling in case there are some
-    # dangling submissions they have created.
-    fix_dangling()
-
-    # Notify them with status
-    return success_response({"status": "github username updated"})
-
-
-@auth_.route("/cli")
-@require_admin()
-def public_cli_auth():
-    """
-    When the cli authenticates it will open a browser window that will authenticate then
-    ?next them to here. This should redirect the user back to the local server that
-    is running with whatever authentication token it needs.
-
-    :return:
-    """
-
-    # Create a token with 30 days to expire
-    token = create_token(current_user.netid, exp_kwargs={"days": 30})
-
-    # Grab the docker config out of the environ if it is there
-    docker_token = os.environ.get("DOCKER_TOKEN", None)
-    docker_registry = os.environ.get("DOCKER_REGISTRY", None)
-    docker_config = {
-        "registry": docker_registry,
-        "token": docker_token,
-    }
-    if docker_token is None or docker_registry is None:
-        docker_config = None
-
-    # Construct the data response
-    data = json.dumps(
-        {
-            "token": token,
-            "docker_config": docker_config,
-        }
-    )
-
-    # Base64 encode the response
-    b64_encoded_data = base64.b64encode(data.encode()).decode()
-
-    # Construct message to be splayed on the browser
-    message = f"Please copy this into the cli console:\n{b64_encoded_data}"
-
-    # Create the response
-    response = make_response(message)
-
-    # Set the content type to text/plain so that there is no additional
-    # formatting added to the browser display
-    response.headers["Content-Type"] = "text/plain"
-
-    return response
