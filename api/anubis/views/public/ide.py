@@ -76,7 +76,7 @@ def public_ide_initialize(assignment: Assignment):
         # If 3 weeks has passed since the assignment has been due, then we should not allow
         # new sessions to be created
         if assignment.due_date + timedelta(days=3 * 7) <= datetime.now():
-            return error_response("Assignment due date passed over 3 weeks ago.")
+            return error_response("Assignment due date passed over 3 weeks ago. IDEs are disabled.")
 
     # If github repos are enabled for this assignment, then we will
     # need to get the repo url.
@@ -85,7 +85,7 @@ def public_ide_initialize(assignment: Assignment):
         # Make sure github username is set
         req_assert(
             current_user.github_username is not None,
-            message="Please set github username",
+            message="Please link your github account github account on profile page.",
         )
 
         # Make sure we have a repo we can use
