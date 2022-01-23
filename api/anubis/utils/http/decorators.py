@@ -4,7 +4,7 @@ from typing import List, Tuple, Union
 from flask import request
 
 from anubis.utils.auth.user import current_user
-from anubis.utils.data import _verify_data_shape, jsonify
+from anubis.utils.data import verify_data_shape, jsonify
 from anubis.utils.exceptions import AuthenticationError
 from anubis.utils.http import error_response
 
@@ -237,7 +237,7 @@ def verify_shape(*shapes):
 
             # Verify our argument shapes
             for data, shape in zip(args, shapes):
-                r, e = _verify_data_shape(data, shape)
+                r, e = verify_data_shape(data, shape)
                 if not r:
                     return error_response("Shape invalid {}".format(e)), 406
 

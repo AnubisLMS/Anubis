@@ -90,6 +90,9 @@ def get_assignment_due_date(user_id: str, assignment_id: str, grace: bool = Fals
 def get_assignment_data(user_id: str, assignment_id: str) -> Dict[str, Any]:
     assignment: Assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
+    if assignment is None:
+        return None
+
     assignment_data = assignment.data
     fill_user_assignment_data(user_id, assignment_data)
 

@@ -49,7 +49,7 @@ def jsonify(data, status_code=200):
     return res
 
 
-def _verify_data_shape(data, shape, path=None) -> Tuple[bool, Union[str, None]]:
+def verify_data_shape(data, shape, path=None) -> Tuple[bool, Union[str, None]]:
     """
     _verify_data_shape(
       {'data': []},
@@ -125,7 +125,7 @@ def _verify_data_shape(data, shape, path=None) -> Tuple[bool, Union[str, None]]:
                 # Explicit Dict ( need to recurse )
                 elif isinstance(s_value, dict):
                     # Recurse on dict
-                    r, e = _verify_data_shape(data[s_key], s_value, path + "." + s_key)
+                    r, e = verify_data_shape(data[s_key], s_value, path + "." + s_key)
 
                     if r is False:
                         return r, e
@@ -152,7 +152,7 @@ def _verify_data_shape(data, shape, path=None) -> Tuple[bool, Union[str, None]]:
 
                         for item in data[s_key]:
                             # Recurse on list item
-                            r, e = _verify_data_shape(item, s_value, path + ".[" + s_key + "]")
+                            r, e = verify_data_shape(item, s_value, path + ".[" + s_key + "]")
 
                             if r is False:
                                 return r, e

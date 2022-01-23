@@ -20,6 +20,7 @@ const Item = ({
   subTitle,
   link,
   children,
+  onClick,
 }) => {
   const classes = useStyles();
   const variants = useAnimations();
@@ -32,7 +33,14 @@ const Item = ({
   return (
     <Box
       className={classes.root}
-      onClick={() => history.push(link)}
+      onClick={(e) => {
+        if (link) {
+          history.push(link);
+        }
+        if (onClick) {
+          onClick(e);
+        }
+      }}
       onMouseEnter={() => setIsSelected(true)}
       onMouseLeave={() => setIsSelected(false)}
     >

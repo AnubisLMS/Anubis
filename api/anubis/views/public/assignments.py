@@ -44,4 +44,6 @@ def public_assignment_get(assignment_id: str):
     :return:
     """
 
-    return success_response({"assignment": get_assignment_data(current_user.id, assignment_id)})
+    return success_response({
+        "assignment": get_assignment_data(current_user.id, assignment_id)
+    })

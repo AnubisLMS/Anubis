@@ -1,50 +1,40 @@
-import React, {useState, useEffect} from 'react';
-import useSWR from 'swr';
+import React, {useState} from 'react';
 import axios from 'axios';
 import clsx from 'clsx';
 import {useSnackbar} from 'notistack';
-
-import CircularProgress from '@material-ui/core/CircularProgress';
-import TextField from '@material-ui/core/TextField';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import GitHub from '@material-ui/icons/GitHub';
 
+import {useStyles} from './Profile.styles';
+import standardStatusHandler from '../../../../utils/standardStatusHandler';
+import standardErrorHandler from '../../../../utils/standardErrorHandler';
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';
 import SectionHeader from '../../../../components/shared/SectionHeader/SectionHeader.jsx';
 import Divider from '../../../../components/shared/Divider/Divider';
-import standardStatusHandler from '../../../../utils/standardStatusHandler';
-import standardErrorHandler from '../../../../utils/standardErrorHandler';
-import {useStyles} from './Profile.styles';
-import {GitHub} from '@material-ui/icons';
 
 const Profile = () => {
-  const [_github_username, set_github_username] = useState(null);
-  const {isValidating: loading, error, data} = useSWR('/api/public/auth/whoami');
-
-  const [editToggled, setEditToggled] = useState(false);
-
+  const [user, setUser] = useState(null);
+  const [userGroup, setUserGroup] = useState(null);
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
 
-  const user = data?.data?.user ?? null;
-  const userGroup = user?.is_superuser ? 'super User' : user?.is_admin ? 'admin' : 'Student';
-  const github_username = _github_username || user?.github_username;
-
-  const handleSave = () => {
-    axios.post(`/api/public/auth/set-github-username`, {github_username}).then((response) => {
-      standardStatusHandler(response, enqueueSnackbar);
+  React.useEffect(() => {
+    axios.get('/api/public/auth/whoami').then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data?.user) {
+        setUser(data.user);
+      }
     }).catch(standardErrorHandler(enqueueSnackbar));
-  };
+  }, []);
 
-  if (loading) return <CircularProgress/>;
-  if (error) {
-    window.location = '/api/public/auth/login';
-    return null;
-  }
+  React.useEffect(() => {
+    if (!user) return null;
+    setUserGroup(user.is_superuser ? 'superuser' : user.is_admin ? 'admin' : 'student');
+  }, [user]);
 
   if (!user) {
-    window.location = '/api/public/auth/login';
     return null;
   }
 
@@ -68,9 +58,9 @@ const Profile = () => {
           <Box className={classes.userTypes}>
             <Typography>
               User Group:
-              <span className={userGroup === 'super User' ?
-                clsx(classes.userGroup, classes.super): userGroup === 'admin' ?
-                  clsx(classes.userGroup, classes.admin): classes.userGroup}
+              <span className={userGroup === 'superuser' ?
+                clsx(classes.userGroup, classes.super) : userGroup === 'admin' ?
+                  clsx(classes.userGroup, classes.admin) : classes.userGroup}
               >
                 {userGroup}
               </span>
@@ -79,15 +69,15 @@ const Profile = () => {
         </Box>
       </Box>
 
-      <SectionHeader title={'Profile'} />
-      <Divider />
+      <SectionHeader title={'Profile'}/>
+      <Divider/>
       <Box className={classes.fieldsContainer}>
         <Box className={classes.githubContainer}>
           <Typography className={classes.githubText}>
             Github Username
           </Typography>
           <Typography className={classes.githubText}>
-            {github_username ?? 'Not Set'}
+            {user?.github_username ?? 'Account Not Linked'}
           </Typography>
           <Button
             startIcon={<GitHub/>}

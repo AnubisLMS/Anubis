@@ -6,7 +6,7 @@ def register_public_views(app):
     from anubis.views.public.lectures import lectures_
     from anubis.views.public.memes import memes
     from anubis.views.public.profile import profile
-    from anubis.views.public.questions import questions
+    from anubis.views.public.questions import questions_
     from anubis.views.public.repos import repos_
     from anubis.views.public.static import static
     from anubis.views.public.submissions import submissions_
@@ -27,7 +27,7 @@ def register_public_views(app):
         assignments,
         static,
         courses_,
-        questions,
+        questions_,
         memes,
         visuals,
         lectures_,

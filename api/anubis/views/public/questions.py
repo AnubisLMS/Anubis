@@ -1,7 +1,9 @@
 from datetime import datetime
+from typing import List
 
 from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
+from sqlalchemy.sql import func
 
 from anubis.lms.assignments import get_assignment_due_date
 from anubis.lms.courses import is_course_admin
@@ -11,12 +13,12 @@ from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
-from anubis.utils.http.decorators import json_endpoint, json_response, load_from_id
+from anubis.utils.http.decorators import json_endpoint, json_response, load_from_id, verify_shape, verify_data_shape
 
-questions = Blueprint("public-questions", __name__, url_prefix="/public/questions")
+questions_ = Blueprint("public-questions", __name__, url_prefix="/public/questions")
 
 
-@questions.route("/get/<string:id>")
+@questions_.route("/get/<string:id>")
 @require_user()
 @load_from_id(Assignment, verify_owner=False)
 @json_response
@@ -31,10 +33,10 @@ def public_assignment_questions_id(assignment: Assignment):
     return success_response({"questions": get_assigned_questions(assignment.id, current_user.id)})
 
 
-@questions.route("/save/<assignment_question_id>", methods=["POST"])
+@questions_.route("/save/<assignment_id>", methods=["POST"])
 @require_user()
-@json_endpoint(required_fields=[("response", str)])
-def public_questions_save(assignment_question_id: str, response: str):
+@json_endpoint(required_fields=[("questions", list)])
+def public_questions_save(assignment_id: str, questions: list):
     """
     Save the response for an assigned question.
 
@@ -42,34 +44,14 @@ def public_questions_save(assignment_question_id: str, response: str):
       response: str
     }
 
-    :param assignment_question_id:
-    :param response:
+    :param questions:
     :return:
     """
 
-    # Try to find the assigned question
-    assigned_question = AssignedStudentQuestion.query.filter(
-        AssignedStudentQuestion.id == assignment_question_id,
+    assignment: Assignment = Assignment.query.filter(
+        Assignment.id == assignment_id
     ).first()
-
-    # Verify that the assigned question they are attempting to update
-    # actually exists
-    req_assert(assigned_question is not None, message="assigned question does not exist")
-
-    # Check that the person that the assigned question belongs to the
-    # user. If the current user is a course admin (TA, Professor or superuser)
-    # then we can skip this check.
-    if not is_course_admin(assigned_question.assignment.course_id, current_user.id):
-        req_assert(
-            assigned_question.owner_id == current_user.id,
-            message="assigned question does not exist",
-        )
-
-    # Verify that the response is a string object
-    req_assert(isinstance(response, str), message="response must be a string")
-
-    # Get the assignment that this question exists for
-    assignment = assigned_question.assignment
+    req_assert(assignment, message='Assignment does not exist')
 
     # If the assignment is set to not accept late submissions,
     # then we need to do a quick check to make sure they are submitting
@@ -86,11 +68,54 @@ def public_questions_save(assignment_question_id: str, response: str):
         # regrade from the Professor.
         req_assert(now < due_date, message="This assignment does not accept late submissions.")
 
-    # Create a new response
-    res = AssignedQuestionResponse(assigned_question_id=assigned_question.id, response=response)
+    req_assert(len(questions) > 0, message='Provide at least one question response.')
 
-    # Add the response to the session
-    db.session.add(res)
+    shape_good, shape_error = verify_data_shape(questions, [{"questions": dict, "response": dict, "id": str}])
+    req_assert(shape_good, message=shape_error)
+
+    assigned_questions: List[AssignedStudentQuestion] = AssignedStudentQuestion.query.filter(
+        AssignedStudentQuestion.owner_id == current_user.id,
+        AssignedStudentQuestion.assignment_id == assignment.id,
+    ).all()
+
+    last_responses: List[AssignedQuestionResponse] = AssignedQuestionResponse.query.filter(
+        AssignedQuestionResponse.assigned_question_id.in_([
+            assigned_question.id for assigned_question in assigned_questions
+        ]),
+    ).group_by(AssignedQuestionResponse.assigned_question_id).having(func.max(AssignedQuestionResponse.created)).all()
+
+    req_assert(len(assigned_questions)>0, message='No questions assigned')
+
+    for question in questions:
+        assignment_question_id = question['id']
+        response = question['response'].get('text', '')
+
+        # Skip if there is no response data
+        if not response:
+            continue
+
+        # Try to find the assigned question
+        for _assigned_question in assigned_questions:
+            if _assigned_question.id == assignment_question_id:
+                assigned_question = _assigned_question
+                break
+        else:
+            continue
+
+        # Verify that the response is a string object
+        req_assert(isinstance(response, str), message="response must be a string")
+
+        # Skip creating a new response if it matches the last one
+        for last_response in last_responses:
+            if last_response.assigned_question_id == assignment_question_id:
+                if last_response.response == response:
+                    continue
+
+        # Create a new response
+        res = AssignedQuestionResponse(assigned_question_id=assigned_question.id, response=response)
+
+        # Add the response to the session
+        db.session.add(res)
 
     try:
         # Try to commit the response
@@ -102,9 +127,7 @@ def public_questions_save(assignment_question_id: str, response: str):
         # something wrong.
         return error_response("Server was unable to save your response.")
 
-    return success_response(
-        {
-            "status": "Response Saved",
-            "response": res.data,
-        }
-    )
+    return success_response({
+        "questions": get_assigned_questions(assignment_id, current_user.id),
+        "status": "Response Saved",
+    })

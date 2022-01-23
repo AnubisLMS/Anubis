@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 import clsx from 'clsx';
@@ -23,6 +23,7 @@ import useQuery from '../../../../hooks/useQuery';
 import IDEDialog from '../../../../components/core/IDE/IDEDialog';
 import {translateSubmission} from '../../../../utils/submission';
 import standardErrorHandler from '../../../../utils/standardErrorHandler';
+import Questions from '../../../../components/core/Questions/Questions';
 import gfm from 'remark-gfm';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
 
@@ -81,7 +82,8 @@ const Assignment = () => {
         clearTimeout(endPollingTimeout);
         clearInterval(runPollingInterval);
       };
-    };
+    }
+    ;
   }, [runAssignmentPolling]);
 
 
@@ -103,7 +105,7 @@ const Assignment = () => {
             <Box className={classes.headerLeft}>
               <Box className={classes.iconOuterCircle}>
                 <Box className={classes.iconInnerCircle}>
-                  <AssignmentOutlinedIcon />
+                  <AssignmentOutlinedIcon/>
                 </Box>
               </Box>
               <Box className={classes.headerText}>
@@ -143,15 +145,15 @@ const Assignment = () => {
               ) : (
                 <Button onClick={createAssignmentRepo} className={classes.repoButton}>
                   {runAssignmentPolling ? (
-                    <CircularProgress size={24} />
-                  ): 'Create Repo'}
+                    <CircularProgress size={24}/>
+                  ) : 'Create Repo'}
                 </Button>
               )}
 
             </Box>
           </Box>
-          <Divider />
-          <Box className = {classes.content}>
+          <Divider/>
+          <Box className={classes.content}>
             <Typography className={classes.sectionHeader}>
               Overview
             </Typography>
@@ -169,7 +171,7 @@ const Assignment = () => {
                   }>
                     <Typography className={classes.overviewItemTitle}>SUBMITTED</Typography>
                     <Box className={classes.overviewItemSubtitle}>
-                      {!assignment.has_submission ? <CancelIcon /> : <CheckCircleIcon />}
+                      {!assignment.has_submission ? <CancelIcon/> : <CheckCircleIcon/>}
                       <Typography className={classes.overviewItemSubtitleText}>
                         {!assignment.has_submission ? 'No Submission' : 'Sucessfully Submitted'}
                       </Typography>
@@ -182,7 +184,7 @@ const Assignment = () => {
                   }>
                     <Typography className={classes.overviewItemTitle}>GITHUB REPOSITORY</Typography>
                     <Box className={classes.overviewItemSubtitle}>
-                      {!assignment.has_repo ? <CancelIcon /> : <CheckCircleIcon />}
+                      {!assignment.has_repo ? <CancelIcon/> : <CheckCircleIcon/>}
                       <Typography className={classes.overviewItemSubtitleText}>
                         {!assignment.has_repo ? 'No Repository' : 'Repository Created'}
                       </Typography>
@@ -190,9 +192,9 @@ const Assignment = () => {
                   </Box>
                 </Grid>
               </Grid>
-              <br />
-              <Divider />
-              <br />
+              <br/>
+              <Divider/>
+              <br/>
               <Box className={classes.overviewItem}>
                 <Typography className={classes.overviewItemTitle}>DESCRIPTION</Typography>
                 <ReactMarkdownWithHtml
@@ -202,24 +204,18 @@ const Assignment = () => {
                 >
                   {assignment.description}
                 </ReactMarkdownWithHtml>
-                {/* <Typography className={classes.overviewItemSubtitle}>*/}
-                {/* </Typography>*/}
               </Box>
             </Box>
-            <br />
-            <br />
+            <br/>
+            <br/>
             <Typography className={classes.sectionHeader}>
               Questions
             </Typography>
             <Box className={classes.questionContent}>
-              <Box className={classes.emptyQuestions}>
-                <Typography className={classes.emptyQuestionsText}>
-                  Oh no! There are no questions for this assignment.
-                </Typography>
-              </Box>
+              <Questions classes={classes} assignment_id={assignmentId}/>
             </Box>
-            <br />
-            <br />
+            <br/>
+            <br/>
             <Typography className={classes.sectionHeader}>
               Submissions
             </Typography>

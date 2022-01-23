@@ -1,36 +1,160 @@
-import React from 'react';
-import useSWR from 'swr';
-import {Redirect} from 'react-router-dom';
-
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Zoom from '@material-ui/core/Zoom';
+import React, {useState} from 'react';
+import {useSnackbar} from 'notistack';
+import axios from 'axios';
 import Typography from '@material-ui/core/Typography';
+import standardErrorHandler from '../../../utils/standardErrorHandler';
+import standardStatusHandler from '../../../utils/standardStatusHandler';
+import Box from '@material-ui/core/Box';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import DialogActions from '@material-ui/core/DialogActions';
+import gfm from 'remark-gfm';
+import Button from '@material-ui/core/Button';
+import ReactMarkdownWithHtml from 'react-markdown/with-html';
+import QuestionItem from './QuestionItem';
+import QuestionEditor from './QuestionEditor';
 
-import QuestionGrid from './QuestionGrid';
+import 'ace-builds/src-min-noconflict/theme-monokai';
+import 'ace-builds/src-min-noconflict/mode-c_cpp';
+import 'ace-builds/src-min-noconflict/mode-markdown';
+import Dialog from '@material-ui/core/Dialog';
+
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+  },
+  card: {
+    minWidth: '512',
+  },
+  divider: {
+    backgroundColor: '#bbb',
+  },
+  block: {
+    display: 'block',
+  },
+  saveButton: {
+    margin: theme.spacing(1),
+  },
+  markdown: {
+    margin: theme.spacing(1),
+  },
+  icon: {
+    marginRight: theme.spacing(1),
+  },
+  emptyQuestions: {
+    marginTop: theme.spacing(2),
+    width: '100%',
+    minHeight: '150px',
+    border: `2px dashed ${theme.palette.dark.blue['200']}`,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+}));
 
 export default function Questions({assignment_id}) {
-  const {isValidating: loading, error, data} = useSWR(`/api/public/questions/get/${assignment_id}`, {
-    revalidateOnFocus: false,
-  });
+  const classes = useStyles();
+  const {enqueueSnackbar} = useSnackbar();
+  const [questions, setQuestions] = useState([]);
+  const [selectedQuestion, setSelectedQuestion] = useState(null);
 
-  if (assignment_id === null) return <React.Fragment/>;
-  if (loading) return <CircularProgress/>;
-  if (error) return <Redirect to={`/error`}/>;
+  React.useEffect(() => {
+    axios.get(`/api/public/questions/get/${assignment_id}`).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data?.questions) {
+        setQuestions(data.questions);
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  }, []);
 
-  const questions = data?.data?.questions ?? [];
+  const updateResponse = (question) => (value) => {
+    setQuestions((prev) => {
+      for (const item of prev) {
+        console.log(item, question);
+        if (item.id === question.id) {
+          if (!item.response) {
+            item.response = {text: value};
+          } else {
+            item.response.text = value;
+          }
+          break;
+        }
+      }
+      return [...prev];
+    });
+  };
+
+  const saveResponse = () => {
+    axios.post(`/api/public/questions/save/${assignment_id}`, {questions}).then((resp) => {
+      const data = standardStatusHandler(resp, enqueueSnackbar);
+      if (data.questions) {
+        setQuestions(data.questions);
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  };
 
   if (questions.length === 0) {
-    return <React.Fragment/>;
+    return (
+      <Box className={classes.emptyQuestions}>
+        <Typography className={classes.emptyQuestionsText}>
+          Oh no! There are no questions for this assignment.
+        </Typography>
+      </Box>
+    );
   }
 
   return (
-    <Zoom in={true} timeout={200}>
-      <React.Fragment>
-        <Typography variant="body1">
-          Questions
-        </Typography>
-        <QuestionGrid questions={questions}/>
-      </React.Fragment>
-    </Zoom>
+    <React.Fragment>
+      {questions.map((question, index) => (
+        <QuestionItem
+          key={index}
+          question={question}
+          onClick={() => {
+            setSelectedQuestion(question);
+          }}
+        />
+      ))}
+      <Dialog open={!!selectedQuestion} onClose={() => {
+        saveResponse();
+        setSelectedQuestion(null);
+      }} maxWidth={'lg'}>
+        {selectedQuestion && (
+          <React.Fragment>
+            <ReactMarkdownWithHtml
+              className={classes.markdown}
+              plugins={[gfm]}
+              allowDangerousHtml
+            >
+              {selectedQuestion.question}
+            </ReactMarkdownWithHtml>
+            <QuestionEditor
+              question={selectedQuestion}
+              updateResponse={updateResponse(selectedQuestion)}
+              saveResponse={saveResponse}
+            />
+            <DialogActions>
+              <Button
+                variant={'contained'}
+                color={'primary'}
+                className={classes.saveButton}
+                onClick={saveResponse}
+              >
+                Save
+              </Button>
+              {selectedQuestion?.question?.solution ? (
+                <Button
+                  variant={'contained'}
+                  color={'primary'}
+                  className={classes.saveButton}
+                  onClick={() => setShowSolution(true)}
+                >
+                  Show Solution
+                </Button>
+              ) : null}
+            </DialogActions>
+          </React.Fragment>
+        )}
+      </Dialog>
+    </React.Fragment>
   );
 }

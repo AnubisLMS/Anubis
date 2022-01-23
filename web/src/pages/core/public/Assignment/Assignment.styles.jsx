@@ -115,7 +115,7 @@ export const useStyles = makeStyles((theme) => ({
   emptyQuestions: {
     marginTop: theme.spacing(2),
     width: '100%',
-    height: '150px',
+    minHeight: '150px',
     border: `2px dashed ${theme.palette.dark.blue['200']}`,
     display: 'flex',
     alignItems: 'center',

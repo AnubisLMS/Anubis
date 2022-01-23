@@ -16,7 +16,7 @@ from anubis.models import (
     db,
 )
 from anubis.utils.cache import cache
-from anubis.utils.data import _verify_data_shape, is_debug
+from anubis.utils.data import verify_data_shape, is_debug
 from anubis.utils.logging import logger
 
 
@@ -188,7 +188,7 @@ def ingest_questions(questions: dict, assignment: Assignment):
     # Iterate over questions
     rejected, ignored, accepted = [], [], []
     for question_sequence in questions:
-        shape_good, err_path = _verify_data_shape(question_sequence, question_shape)
+        shape_good, err_path = verify_data_shape(question_sequence, question_shape)
         if not shape_good:
             # Reject the question if the shape is bad and continue
             rejected.append(
