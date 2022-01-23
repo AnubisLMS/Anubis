@@ -39,6 +39,8 @@ spec:
               value: "0"
             - name: "LOGGER_NAME"
               value: "autograde-reclaculate"
+            - name: "DOMAIN"
+              values: "{{ .Values.domain }}"
             - name: "GITHUB_TOKEN"
               valueFrom:
                 secretKeyRef:

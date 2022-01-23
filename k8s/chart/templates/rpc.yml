@@ -110,6 +110,8 @@ spec:
             secretKeyRef:
               name: git
               key: token
+        - name: "DOMAIN"
+          values: "{{ .Values.domain }}"
         # sqlalchemy uri
         - name: "DB_PASSWORD"
           valueFrom:

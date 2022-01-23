@@ -7,6 +7,7 @@ from anubis.models import Assignment, AssignmentTest, Submission
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, is_job
 from anubis.utils.http import error_response
+from anubis.config import config
 
 
 @cache.memoize(timeout=60, unless=is_debug, source_check=True)
@@ -137,7 +138,7 @@ def autograde_submission_result_wrapper(
             "tests_passed": best_count,
             "total_tests": len(submission.test_results),
             "tests_passed_names": [test.assignment_test.name for test in submission.test_results if test.passed],
-            "full_stats": "https://anubis-lms.io/api/private/submission/{}".format(submission.id),
+            "full_stats": "https://{}/api/private/submission/{}".format(config.DOMAIN, submission.id),
             "master": "https://github.com/{}".format(repo_path),
             "commits": "https://github.com/{}/commits/master".format(repo_path),
             "commit_tree": "https://github.com/{}/tree/{}".format(repo_path, submission.commit),

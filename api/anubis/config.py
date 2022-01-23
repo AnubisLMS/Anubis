@@ -9,6 +9,7 @@ class Config:
         self.JOB = os.environ.get("JOB", default="0") == "1"
         self.SECRET_KEY = os.environ.get("SECRET_KEY", default="DEBUG")
         self.DB_HOST = os.environ.get("DB_HOST", "db")
+        self.DOMAIN = os.environ.get("DOMAIN", default="localhost")
 
         if not self.MINDEBUG:
             # sqlalchemy

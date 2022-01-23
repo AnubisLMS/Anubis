@@ -132,45 +132,45 @@ spec:
   {{- end }}
 ---
 
+# For the anubis-lms.io redirect when we deploy that
 {{- if not .Values.debug }}
-# Redirect with domain replacement
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: redirect-to-new
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app.kubernetes.io/name: anubis
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
-spec:
-  redirectRegex:
-    regex: ^https://anubis.osiris.services/(.*)
-    replacement: https://anubis-lms.io/${1}
----
-
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: ingress.route.redirect.public
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app.kubernetes.io/name: theia
-    component: proxy
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
-spec:
-  entryPoints:
-    - websecure
-  routes:
-  - kind: Rule
-    match: Host(`anubis.osiris.services`)
-    middlewares:
-    - name: redirect-to-new
-      namespace: {{ .Release.Namespace }}
-    services:
-    - name: anubis-web
-      port: 3000
-  tls:
-    certResolver: le
+## Redirect with domain replacement
+#apiVersion: traefik.containo.us/v1alpha1
+#kind: Middleware
+#metadata:
+#  name: redirect-to-new
+#  namespace: {{ .Release.Namespace }}
+#  labels:
+#    app.kubernetes.io/name: anubis
+#    heritage: {{ .Release.Service | quote }}
+#    release: {{ .Release.Name | quote }}
+#spec:
+#  redirectRegex:
+#    regex: ^https://anubis.osiris.services/(.*)
+#    replacement: https://anubis-lms.io/${1}
+#---
+#apiVersion: traefik.containo.us/v1alpha1
+#kind: IngressRoute
+#metadata:
+#  name: ingress.route.redirect.public
+#  namespace: {{ .Release.Namespace }}
+#  labels:
+#    app.kubernetes.io/name: theia
+#    component: proxy
+#    heritage: {{ .Release.Service | quote }}
+#    release: {{ .Release.Name | quote }}
+#spec:
+#  entryPoints:
+#    - websecure
+#  routes:
+#  - kind: Rule
+#    match: Host(`anubis.osiris.services`)
+#    middlewares:
+#    - name: redirect-to-new
+#      namespace: {{ .Release.Namespace }}
+#    services:
+#    - name: anubis-web
+#      port: 3000
+#  tls:
+#    certResolver: le
 {{- end }}
