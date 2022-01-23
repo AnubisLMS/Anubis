@@ -204,19 +204,17 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
       if (data.session) {
         setSessionState(data.session.state);
         setSession(data.session);
-      }
-      if (data?.session?.autosave !== undefined) {
-        setAutosaveEnabled(data.session.autosave);
-      }
-      if (data?.session?.persistent_storage !== undefined) {
-        setPersistentStorage(data.session.persistent_storage);
-      }
-      if (data?.session?.state === 'Initializing') {
-        setLoading(true);
-        pollSession(data.session.id, state, enqueueSnackbar)();
-      }
-      if (data?.session?.state === 'Running') {
         setShowStop(true);
+        if (data.session?.autosave !== undefined) {
+          setAutosaveEnabled(data.session.autosave);
+        }
+        if (data.session?.persistent_storage !== undefined) {
+          setPersistentStorage(data.session.persistent_storage);
+        }
+        if (data.session?.state === 'Initializing') {
+          setLoading(true);
+          pollSession(data.session.id, state, enqueueSnackbar)();
+        }
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [selectedTheia]);
