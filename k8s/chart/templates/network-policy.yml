@@ -53,95 +53,13 @@ spec:
 
   egress:
   - to:
-     # Github IP Addresses
+     # Allow out to the internet (not to rest of cluster)
     - ipBlock:
-        cidr: 192.30.252.0/22
-    - ipBlock:
-        cidr: 185.199.108.0/22
-    - ipBlock:
-        cidr: 140.82.112.0/20
-    - ipBlock:
-        cidr: 13.114.40.48/32
-    - ipBlock:
-        cidr: 52.192.72.89/32
-    - ipBlock:
-        cidr: 52.69.186.44/32
-    - ipBlock:
-        cidr: 15.164.81.167/32
-    - ipBlock:
-        cidr: 52.78.231.108/32
-    - ipBlock:
-        cidr: 13.234.176.102/32
-    - ipBlock:
-        cidr: 13.234.210.38/32
-    - ipBlock:
-        cidr: 13.229.188.59/32
-    - ipBlock:
-        cidr: 13.250.177.223/32
-    - ipBlock:
-        cidr: 52.74.223.119/32
-    - ipBlock:
-        cidr: 13.236.229.21/32
-    - ipBlock:
-        cidr: 13.237.44.5/32
-    - ipBlock:
-        cidr: 52.64.108.95/32
-    - ipBlock:
-        cidr: 18.228.52.138/32
-    - ipBlock:
-        cidr: 18.228.67.229/32
-    - ipBlock:
-        cidr: 18.231.5.6/32
-    - ipBlock:
-        cidr: 18.181.13.223/32
-    - ipBlock:
-        cidr: 54.238.117.237/32
-    - ipBlock:
-        cidr: 54.168.17.15/32
-    - ipBlock:
-        cidr: 3.34.26.58/32
-    - ipBlock:
-        cidr: 13.125.114.27/32
-    - ipBlock:
-        cidr: 3.7.2.84/32
-    - ipBlock:
-        cidr: 3.6.106.81/32
-    - ipBlock:
-        cidr: 18.140.96.234/32
-    - ipBlock:
-        cidr: 18.141.90.153/32
-    - ipBlock:
-        cidr: 18.138.202.180/32
-    - ipBlock:
-        cidr: 52.63.152.235/32
-    - ipBlock:
-        cidr: 3.105.147.174/32
-    - ipBlock:
-        cidr: 3.106.158.203/32
-    - ipBlock:
-        cidr: 54.233.131.104/32
-    - ipBlock:
-        cidr: 18.231.104.233/32
-    - ipBlock:
-        cidr: 18.228.167.86/32
-
-    ports:
-
-    # HTTP
-    - protocol: TCP
-      port: 443
-    - protocol: TCP
-      port: 80
-
-    # DNS
-  - to:
-    - ipBlock:
-        cidr: 1.1.1.1/32
-    ports:
-    - protocol: TCP
-      port: 53
-    - protocol: UDP
-      port: 53
+        cidr: 0.0.0.0/0
+        except:
+          - 10.0.0.0/8
+          - 192.168.0.0/16
+          - 172.16.0.0/12
 
 ---
 
