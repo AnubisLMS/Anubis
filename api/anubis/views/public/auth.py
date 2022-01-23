@@ -169,7 +169,6 @@ def public_whoami():
         {
             "user": current_user.data,
             "context": course_context,
-            "status": status,
             "variant": "warning",
         }
     )
