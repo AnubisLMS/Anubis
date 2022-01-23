@@ -17,13 +17,9 @@ export const useStyles = makeStyles((theme) => ({
   githubText: {
     fontSize: '16px',
   },
-  editButton: {
+  saveButton: {
     backgroundColor: theme.palette.primary.main,
     borderRadius: theme.spacing(.5),
-  },
-  saveButton: {
-    backgroundColor: theme.palette.color.green,
-    color: 'black',
   },
   bioContainer: {
     marginTop: theme.spacing(3),

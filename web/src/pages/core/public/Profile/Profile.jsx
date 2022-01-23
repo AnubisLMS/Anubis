@@ -16,6 +16,7 @@ import Divider from '../../../../components/shared/Divider/Divider';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../../utils/standardErrorHandler';
 import {useStyles} from './Profile.styles';
+import {GitHub} from '@material-ui/icons';
 
 const Profile = () => {
   const [_github_username, set_github_username] = useState(null);
@@ -85,36 +86,17 @@ const Profile = () => {
           <Typography className={classes.githubText}>
             Github Username
           </Typography>
-          {editToggled ? (
-            <TextField
-              label="Github Username"
-              onChange={(e) => set_github_username(e.target.value)}
-              value={github_username}
-              variant="outlined"
-            />
-          ): (
-            <Typography className={classes.githubText}>
-              {github_username}
-            </Typography>
-          )}
-          {editToggled ? (
-            <Button
-              className={classes.saveButton}
-              onClick={() => {
-                handleSave();
-                setEditToggled(false);
-              }}
-            >
-              Save
-            </Button>
-          ): (
-            <Button
-              className={classes.editButton}
-              onClick={() => setEditToggled(true)}
-            >
-              Edit
-            </Button>
-          )}
+          <Typography className={classes.githubText}>
+            {github_username ?? 'Not Set'}
+          </Typography>
+          <Button
+            startIcon={<GitHub/>}
+            className={classes.saveButton}
+            component="a"
+            href="/api/public/github/login"
+          >
+            Link Account with Github
+          </Button>
         </Box>
       </Box>
     </StandardLayout>

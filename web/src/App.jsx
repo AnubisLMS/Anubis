@@ -112,9 +112,7 @@ const useStyles = makeStyles(() => ({
 
 export default function App() {
   const classes = useStyles();
-  const query = useQuery();
   const [open, setOpen] = useState(window.innerWidth >= 960); // 960px is md
-  const [showError, setShowError] = useState(!!query.get('error'));
 
   return (
     <ThemeProvider theme={theme}>
@@ -155,7 +153,7 @@ export default function App() {
                           })}
                         >
                           <div className={classes.drawerHeader} />
-                          <Error show={showError} onDelete={() => setShowError(false)}/>
+                          <Error/>
                           <div className={classes.main}>
                             <Main user={user}/>
                             <Forums user={user} />

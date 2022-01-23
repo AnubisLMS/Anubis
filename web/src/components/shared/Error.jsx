@@ -1,27 +1,18 @@
 import React from 'react';
-import Chip from '@material-ui/core/Chip';
-import {makeStyles} from '@material-ui/core/styles';
 import useQuery from '../../hooks/useQuery';
+import {useSnackbar} from 'notistack';
 
-const useStyles = makeStyles((theme) => ({
-  card: {
-    minWidth: 275,
-  },
-}));
-
-export default function Error({show, onDelete}) {
-  const classes = useStyles();
+export default function Error() {
+  const {enqueueSnackbar} = useSnackbar();
   const query = useQuery();
+  const error = query.get('error');
 
-  if (!show) return null;
+  React.useEffect(() => {
+    if (!error) return null;
+    enqueueSnackbar(error, {variant: 'error'});
+  }, [error]);
 
   return (
-    <div className={classes.chip}>
-      <Chip
-        label={query.get('error')}
-        onDelete={onDelete}
-        color="secondary"
-      />
-    </div>
+    <div/>
   );
 }

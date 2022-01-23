@@ -5,7 +5,7 @@ import os
 import requests
 from flask import Blueprint, make_response, redirect, request
 
-from anubis.lms.courses import get_course_context
+from anubis.lms.courses import get_course_context, get_courses
 from anubis.lms.submissions import fix_dangling
 from anubis.models import User, db
 from anubis.utils.auth.http import require_admin, require_user
@@ -91,7 +91,7 @@ def public_oauth():
     return r
 
 
-@github_oauth_.route("/link")
+@github_oauth_.route("/login")
 @require_user()
 def public_github_link():
     return github_provider.authorize(callback="https://{}/api/public/github/oauth".format(config.DOMAIN))
@@ -107,6 +107,9 @@ def public_github_oauth():
 
     :return:
     """
+
+    # Get the next url if it was specified.
+    next_url = "/profile"
 
     # Get the authorized response from Github OAuth
     resp = github_provider.authorized_response()
@@ -128,14 +131,14 @@ def public_github_oauth():
         ).json()
 
         # Set github username and commit
-        current_user.github_username = github_user_info["login"]
+        current_user.github_username = github_user_info["login"].strip()
         db.session.add(current_user)
         db.session.commit()
 
         # Notify them with status
-        return success_response({"status": "github username updated"})
+        return redirect(next_url)
     except:
-        return error_response({"status": "fail to update github username"})
+        return redirect(next_url + '?error=Unable to set username')
 
 
 @auth_.route("/whoami")
@@ -149,19 +152,20 @@ def public_whoami():
     # When the current_user is None (ie no one is logged in)
     # just pass back Nones.
     if get_current_user() is None:
-        return success_response(
-            {
-                "user": None,
-                "context": None,
-            }
-        )
+        return success_response({
+            "user": None,
+            "context": None,
+        })
 
     # If their github username is not set, then we want to send
     # a warning telling the user they need to set it in their
     # profile panel.
     status = None
     if current_user.github_username is None:
-        status = "Please set your github username in your profile so we can identify your repos!"
+        courses = get_courses(current_user.netid)
+        # Only show github warning for those in a course
+        if len(courses) > 0:
+            status = "Please set your github username in your profile so we can identify your repos!"
 
     course_context = None
     context = get_course_context(False)
