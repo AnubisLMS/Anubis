@@ -19,6 +19,7 @@ from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_response, load_from_id
 from anubis.utils.rpc import enqueue_ide_stop
+from anubis.utils.config import get_config_int
 
 ide_ = Blueprint("public-ide", __name__, url_prefix="/public/ide")
 
@@ -53,6 +54,27 @@ def public_ide_initialize(assignment: Assignment):
     # the initialization, and return the active session information.
     if active_session is not None:
         return success_response({"active": active_session.active, "session": active_session.data})
+
+    # Check last session
+    last_session: TheiaSession = TheiaSession.query.filter(
+        TheiaSession.owner_id == current_user.id,
+        TheiaSession.active == False,
+    ).order_by(TheiaSession.created.desc()).limit(1).first()
+
+    # Check if last session had a persistent volume
+    if last_session and last_session.persistent_storage:
+        # If it did, then we need to make sure the volume
+        # has had time to unmount.
+        seconds_passed = (datetime.now() - last_session.ended).total_seconds()
+        cooldown_seconds = get_config_int('THEIA_VOLUME_COOLDOWN_SECONDS', 10)
+
+        # If within cooldown time, then give back a warning
+        if seconds_passed < cooldown_seconds:
+            return success_response({
+                'status': 'Please wait a few more seconds. '
+                          'Your last IDEs home volume is still unmounting.',
+                'variant': 'warning',
+            })
 
     # Assert that new ide starts are allowed. If they are not, then
     # we return a status message to the user saying they are not able
