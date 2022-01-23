@@ -60,6 +60,12 @@ def create_theia_k8s_pod_pvc(
     privileged = theia_session.privileged
     persistent_storage = theia_session.persistent_storage
 
+    # Get home volume size from config
+    if theia_session.playground:
+        volume_size = get_config_str('PLAYGROUND_VOLUME_SIZE', '100Mi')
+    else:
+        volume_size = get_config_str('PLAYGROUND_VOLUME_SIZE', '100Mi')
+
     # Value for if the git secret should be included in the init and sidecar
     # containers (for provisioning and autosave).
     include_git_secret: bool = True
@@ -156,7 +162,7 @@ def create_theia_k8s_pod_pvc(
                 storage_class_name=theia_storage_class_name,
                 resources=client.V1ResourceRequirements(
                     requests={
-                        "storage": "1Gi",
+                        "storage": volume_size,
                     }
                 ),
             ),
