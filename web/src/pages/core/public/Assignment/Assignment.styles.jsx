@@ -121,4 +121,8 @@ export const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  markdown: {
+    margin: theme.spacing(1),
+    color: theme.palette.color.gray,
+  },
 }));

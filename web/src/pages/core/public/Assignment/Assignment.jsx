@@ -23,6 +23,8 @@ import useQuery from '../../../../hooks/useQuery';
 import IDEDialog from '../../../../components/core/IDE/IDEDialog';
 import {translateSubmission} from '../../../../utils/submission';
 import standardErrorHandler from '../../../../utils/standardErrorHandler';
+import gfm from 'remark-gfm';
+import ReactMarkdownWithHtml from 'react-markdown/with-html';
 
 
 const Assignment = () => {
@@ -30,8 +32,6 @@ const Assignment = () => {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
 
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
   const [assignment, setAssignment] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [selectedTheia, setSelectedTheia] = useState(null);
@@ -46,8 +46,6 @@ const Assignment = () => {
     axios.get(`/api/public/submissions/`, {
       params: {
         assignmentId, courseId, userId,
-        limit: pageSize,
-        offset: page * pageSize,
       },
     }).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
@@ -197,9 +195,15 @@ const Assignment = () => {
               <br />
               <Box className={classes.overviewItem}>
                 <Typography className={classes.overviewItemTitle}>DESCRIPTION</Typography>
-                <Typography className={classes.overviewItemSubtitle}>
+                <ReactMarkdownWithHtml
+                  className={classes.markdown}
+                  plugins={[gfm]}
+                  allowDangerousHtml
+                >
                   {assignment.description}
-                </Typography>
+                </ReactMarkdownWithHtml>
+                {/* <Typography className={classes.overviewItemSubtitle}>*/}
+                {/* </Typography>*/}
               </Box>
             </Box>
             <br />

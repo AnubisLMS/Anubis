@@ -31,6 +31,7 @@ import PeopleIcon from '@material-ui/icons/People';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import RegradeWarning from './RegradeWarning';
+import DescriptionEditorDialog from './DescriptionEditorDialog';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -240,13 +241,19 @@ export default function AssignmentCard({assignment, editableFields, updateField,
             size={'small'}
             color={'primary'}
             variant={'contained'}
+            startIcon={<EditIcon/>}
             className={clsx(classes.buttonRight, classes.button)}
             component={Link}
             to={`/admin/assignment/questions/${assignment.id}`}
-            startIcon={<EditIcon/>}
           >
             Edit Questions
           </Button>
+          <DescriptionEditorDialog
+            assignment={assignment}
+            updateField={updateField}
+            saveAssignment={saveAssignment}
+            className={classes.button}
+          />
           <Button
             size={'small'}
             color={'primary'}
