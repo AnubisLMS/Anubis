@@ -157,16 +157,6 @@ def public_whoami():
             "context": None,
         })
 
-    # If their github username is not set, then we want to send
-    # a warning telling the user they need to set it in their
-    # profile panel.
-    status = None
-    if current_user.github_username is None:
-        courses = get_courses(current_user.netid)
-        # Only show github warning for those in a course
-        if len(courses) > 0:
-            status = "Please set your github username in your profile so we can identify your repos!"
-
     course_context = None
     context = get_course_context(False)
     if context is not None:
