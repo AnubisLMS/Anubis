@@ -9,7 +9,6 @@ import Grid from '@material-ui/core/Grid';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Typography from '@material-ui/core/Typography';
 import Tooltip from '@material-ui/core/Tooltip';
-import InfoIcon from '@material-ui/icons/Info';
 
 import ListHeader from '../../../../components/shared/ListHeader/ListHeader';
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';
@@ -158,28 +157,34 @@ export default function Playgrounds() {
   }, []);
 
   useEffect(() => {
-    if (!selectedImage) return null;
+    if (!availableImages) return null;
     axios.get(`/api/public/playgrounds/active`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data.session) {
+        setShowStop(true);
         setSessionState(data.session.state);
         setSession(data.session);
-      }
-      if (data?.session?.state === 'Initializing') {
-        setLoading(true);
-        pollSession(data.session.id, state, enqueueSnackbar)();
-      }
-      if (data?.session?.state === 'Running') {
-        setShowStop(true);
+        setSelectedTag(data.session.image_tag);
+        setSelectedImage(data.session.image);
+        if (data.session?.state === 'Initializing') {
+          setLoading(true);
+          pollSession(data.session.id, state, enqueueSnackbar)();
+        }
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
+  }, [availableImages]);
+
+  useEffect(() => {
+    if (!selectedImage) return null;
     const defaultTags = [{title: 'latest', description: null}];
     let tags = selectedImage?.tags ?? defaultTags;
     if (tags.length === 0) {
       tags = defaultTags;
     }
     setAvailableTags(tags);
-    setSelectedTag(tags[0]);
+    if (selectedTag?.image_id !== selectedImage.id) {
+      setSelectedTag(tags[0]);
+    }
   }, [selectedImage]);
 
   const Image = ({title, icon, isSelected}) => {
@@ -212,6 +217,12 @@ export default function Playgrounds() {
       <ListHeader sections={['Your Playground', sessionState || 'No Active IDE']}/>
       <Box className={classes.imageTagContainer}>
         <Grid container xs={12} spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant={'body1'} gutterBottom>
+              With Anubis Playgrounds you can run any of the IDEs we provide with one click. No course sign up
+              necessary. Select an IDE, and a version and hit launch to start.
+            </Typography>
+          </Grid>
           {availableImages && selectedImage && availableImages.map((image, index) => (
             <Grid
               item

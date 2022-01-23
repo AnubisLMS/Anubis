@@ -671,6 +671,7 @@ class TheiaImageTag(db.Model):
     def data(self):
         return {
             "id": self.id,
+            "image_id": self.image_id,
             "tag": self.tag,
             "title": self.title,
             "description": self.description,
@@ -737,6 +738,8 @@ class TheiaSession(db.Model):
             "last_updated": str(self.last_updated),
             "autosave": self.autosave,
             "persistent_storage": self.persistent_storage,
+            "image": self.image.data,
+            "image_tag": self.image_tag.data,
         }
 
     @property
