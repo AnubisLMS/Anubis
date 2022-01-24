@@ -65,10 +65,6 @@ def public_repos_get(assignment_id: str):
 
     db.session.expire_all()
 
-    assignment: Assignment = Assignment.query.filter(
-        Assignment.id == assignment_id,
-    ).first()
-
     if repo is None:
         return success_response({
             "repo": None,
@@ -110,6 +106,9 @@ def public_repos_create(assignment_id: str):
         )
 
     repo = create_assignment_student_repo(current_user, assignment)
+
+    # Clear cache entry
+    cache.delete_memoized(get_assignment_data, current_user.id, assignment_id)
 
     req_assert(repo.repo_created, message="Repo could not be created")
     req_assert(

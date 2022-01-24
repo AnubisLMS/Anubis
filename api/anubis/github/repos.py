@@ -3,10 +3,10 @@ from typing import List
 
 from parse import parse
 
-from anubis.models import Assignment, AssignmentRepo, Submission, SubmissionBuild, SubmissionTestResult, User, db
 from anubis.github.api import github_graphql, github_rest
-from anubis.utils.logging import logger
+from anubis.models import Assignment, AssignmentRepo, Submission, SubmissionBuild, SubmissionTestResult, User, db
 from anubis.utils.data import is_debug
+from anubis.utils.logging import logger
 
 
 def get_github_template_ids(template_repo: str, github_org: str):
@@ -347,20 +347,20 @@ def create_assignment_github_repo(
                 if is_debug():
                     collaborator = 'wabscale'
 
-                # Use github REST api to to add the student as a collaborator
-                # to the repo.
-                data = add_collaborator(github_org, new_repo_name, collaborator)
-
-                # Sometimes it takes a moment before we are able to add collaborators to
-                # the repo. The message in the response will be Not Found in this situation.
-                # We can have it try again to fix.
-                if data.get("message", None) == "Not Found":
-                    logger.error("Failed to add collaborator (Not Found). Trying again.")
+                for i in range(3):
+                    # Use github REST api to add the student as a collaborator
+                    # to the repo.
                     data = add_collaborator(github_org, new_repo_name, collaborator)
 
-                # If the response was None, the api request failed
-                if data is None or data.get("message", None) == "Not Found":
-                    logger.error("Failed to add collaborator")
+                    # Sometimes it takes a moment before we are able to add collaborators to
+                    # the repo. The message in the response will be Not Found in this situation.
+                    # We can have it try again to fix.
+                    if data.get("message", None) == "Not Found":
+                        logger.error(f"Failed to add collaborator (Not Found). Trying again. {i}")
+                    else:
+                        break
+                else:
+                    logger.error("Failed to add collaborator after 3 tries")
                     continue
 
                 # Mark the repo as collaborator configured
@@ -379,20 +379,20 @@ def create_assignment_github_repo(
                 # Get user github username
                 team_slug = repo.assignment.course.github_ta_team_slug
 
-                # Use github REST api to add the ta team as a collaborator
-                # to the repo.
-                data = add_team(github_org, new_repo_name, team_slug)
-
-                # Sometimes it takes a moment before we are able to add collaborators to
-                # the repo. The message in the response will be Not Found in this situation.
-                # We can have it try again to fix.
-                if data.get("message", None) == "Not Found":
-                    logger.error("Failed to add ta team (Not Found). Trying again.")
+                for i in range(3):
+                    # Use github REST api to add the ta team as a collaborator
+                    # to the repo.
                     data = add_team(github_org, new_repo_name, team_slug)
 
-                # If the response was None, the api request failed
-                if data is None or data.get("message", None) == "Not Found":
-                    logger.error("Failed to add ta team")
+                    # Sometimes it takes a moment before we are able to add collaborators to
+                    # the repo. The message in the response will be Not Found in this situation.
+                    # We can have it try again to fix.
+                    if data.get("message", None) == "Not Found":
+                        logger.error(f"Failed to add ta team (Not Found). Trying again. {i}")
+                    else:
+                        break
+                else:
+                    logger.error("Failed to add ta team after 3 tries")
                     continue
 
                 # Mark the repo as collaborator configured
