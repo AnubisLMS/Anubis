@@ -165,5 +165,8 @@ def public_repos_delete(assignment_id: str):
     # Delete cache entry
     cache.delete_memoized(get_repos, current_user.id)
 
+    # Clear cache entry
+    cache.delete_memoized(get_assignment_data, current_user.id, assignment_id)
+
     # Pass them back
     return success_response({"status": "Github Repo & Submissions deleted"})
