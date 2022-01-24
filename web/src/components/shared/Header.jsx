@@ -8,6 +8,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Toolbar from '@material-ui/core/Toolbar';
 import AppBar from '@material-ui/core/AppBar';
 import Hidden from '@material-ui/core/Hidden';
+import Button from '@material-ui/core/Button';
 
 import ProfileAvatar from './AccountChip/AccountChip';
 
@@ -74,6 +75,15 @@ export default function Header({classes, open, onDrawerToggle, user}) {
             <Grid item>
               <div style={{display: 'flex', flexDirection: 'row'}}>
                 {netid && <ProfileAvatar user={user} netid={netid} onContextChange={onContextChange} course={course}/>}
+                {!netid &&
+                  <a href="/api/public/auth/login">
+                    <Button
+                      className={classes.logInButton}
+                    >
+                      Log In
+                    </Button>
+                  </a>
+                }
               </div>
             </Grid>
           </Grid>

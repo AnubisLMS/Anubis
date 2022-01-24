@@ -99,6 +99,9 @@ const useStyles = makeStyles(() => ({
   appBarChip: {
     backgroundColor: theme.palette.primary.main,
   },
+  logInButton: {
+    backgroundColor: theme.palette.primary.main,
+  },
   main: {
     [theme.breakpoints.up('sm')]: {
       padding: theme.spacing(2),
