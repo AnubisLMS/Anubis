@@ -9,11 +9,11 @@ metadata:
 spec:
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: 120
+      stabilizationWindowSeconds: 20
       policies:
       - type: Percent
-        value: 200
-        periodSeconds: 120
+        value: 100
+        periodSeconds: 20
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
@@ -37,11 +37,11 @@ metadata:
 spec:
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: 120
+      stabilizationWindowSeconds: 20
       policies:
       - type: Percent
-        value: 200
-        periodSeconds: 120
+        value: 100
+        periodSeconds: 20
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
@@ -65,11 +65,11 @@ metadata:
 spec:
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: 120
+      stabilizationWindowSeconds: 60
       policies:
       - type: Percent
         value: 100
-        periodSeconds: 120
+        periodSeconds: 30
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
@@ -82,7 +82,7 @@ spec:
       name: memory
       target:
         type: Utilization
-        averageUtilization: 75
+        averageUtilization: 70
 
 ---
 {{- range .Values.hpa.rpc }}

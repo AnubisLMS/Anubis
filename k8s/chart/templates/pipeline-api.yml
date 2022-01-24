@@ -52,7 +52,7 @@ spec:
               name: api
               key: secret-key
         - name: "DOMAIN"
-          values: "{{ .Values.domain }}"
+          value: "{{ .Values.domain }}"
         - name: "REDIS_PASS"
           valueFrom:
             secretKeyRef:

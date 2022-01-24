@@ -49,7 +49,7 @@ spec:
         - name: "PYTHONPATH"
           value: "/opt/app"
         - name: "DOMAIN"
-          values: "{{ .Values.domain }}"
+          value: "{{ .Values.domain }}"
         - name: "DISCORD_BOT_TOKEN"
           valueFrom:
             secretKeyRef:

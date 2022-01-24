@@ -52,7 +52,7 @@ spec:
         - name: "WORKERS"
           value: {{ .Values.api.workers | quote }}
         - name: "DOMAIN"
-          values: "{{ .Values.domain }}"
+          value: "{{ .Values.domain }}"
         {{- if .Values.api.gunicorn_options }}
         - name: "GUNICORN_OPTIONS"
           value: {{ .Values.api.gunicorn_options | quote }}

@@ -40,7 +40,7 @@ spec:
             - name: "LOGGER_NAME"
               value: "reaper"
             - name: "DOMAIN"
-              values: "{{ .Values.domain }}"
+              value: "{{ .Values.domain }}"
             - name: "GITHUB_TOKEN"
               valueFrom:
                 secretKeyRef:
