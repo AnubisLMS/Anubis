@@ -14,7 +14,7 @@ imagePullSecret: "anubis"
 
 # Main anubis api
 api:
-  replicas: 2
+  replicas: 1
   workers: 2
   gunicorn_options: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
   image: "registry.digitalocean.com/anubis/api"
@@ -28,7 +28,7 @@ web:
 
 # API for submission pipeline reporting
 pipeline_api:
-  replicas: 1
+  replicas: 2
   workers: 1
 
 # Theia IDE proxy and poller
@@ -41,7 +41,7 @@ theia:
 
   # theia-proxy deployment
   proxy:
-    replicas: 2
+    replicas: 5
     image: "registry.digitalocean.com/anubis/theia-proxy"
     tag: "latest"
 
