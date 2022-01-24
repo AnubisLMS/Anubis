@@ -14,7 +14,7 @@ imagePullSecret: "anubis"
 
 # Main anubis api
 api:
-  replicas: 1
+  replicas: 3
   workers: 2
   gunicorn_options: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
   image: "registry.digitalocean.com/anubis/api"
