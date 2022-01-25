@@ -8,7 +8,7 @@ RUN set -ex; \
   apt-get install -y --no-install-recommends \
     gdb git make cmake \
     gcc-multilib g++-multilib libc6-dev \
-    clangd qemu-system-i386; \
+    clangd qemu-system-i386 lldb; \
   echo 'set auto-load safe-path /' > /etc/anubis/skel/.gdbinit; \
   echo 'source /opt/pwndbg/gdbinit.py' >> /etc/anubis/skel/.gdbinit; \
   git clone https://github.com/pwndbg/pwndbg.git /opt/pwndbg; \
