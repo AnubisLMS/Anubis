@@ -337,7 +337,7 @@ def verify_expected(
     if not passed:
         if diff:
             test_result.output_type = 'diff'
-            test_result.output += '\n'.join(diff)
+            test_result.output = ''.join(diff)
         else:
             # If diff is not available, fall back to the old way of displaying outputs
             test_result.output_type = 'text'
@@ -354,7 +354,7 @@ def verify_expected(
 
 def xv6_run(cmd: str, test_result: TestResult, timeout=5) -> typing.List[str]:
     """
-    Start xv6 and run command specified. The test_result.stdout will
+    Start xv6 and run command specified. The test_result.output will
     be appended with a message saying what command is being run.
 
     We return a list of the lines parsed
@@ -369,7 +369,7 @@ def xv6_run(cmd: str, test_result: TestResult, timeout=5) -> typing.List[str]:
               '-drive file=./fs.img,media=disk,index=1,format=raw ' \
               '-smp 1 -m 512 -display none -nographic'.format(timeout)
 
-    test_result.stdout += 'Running "{}" in xv6\n\n'.format(cmd)
+    test_result.output += 'Running "{}" in xv6\n\n'.format(cmd)
 
     with open('command', 'w') as f:
         f.write('\n' + cmd + '\n')
