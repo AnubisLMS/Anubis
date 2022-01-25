@@ -137,7 +137,7 @@ def create_theia_k8s_pod_pvc(
     # If persistent storage is enabled for this assignment, then we should create a pvc
     if persistent_storage:
         # Overwrite the volume name to be the user's persistent volume
-        theia_volume_name = netid + "-ide-volume"
+        theia_volume_name = f"ide-volume-{netid}"
 
         # The storage class to be used on prod is probably going to be longhorn. Regardless,
         # we'll want to be able to set this on the fly from a config value. If we default
@@ -157,7 +157,7 @@ def create_theia_k8s_pod_pvc(
                 },
             ),
             spec=client.V1PersistentVolumeClaimSpec(
-                access_modes=["ReadWriteOnce"],
+                access_modes=["ReadWriteMany"],
                 volume_mode="Filesystem",
                 storage_class_name=theia_storage_class_name,
                 resources=client.V1ResourceRequirements(
