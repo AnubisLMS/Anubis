@@ -168,13 +168,15 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
     except (ParserError, TypeError):
         print(traceback.format_exc())
         today = datetime.now().replace(hour=0, minute=0, microsecond=0)
-
-    print("today", today)
+    this_week = today - timedelta(days=7)
 
     eod = today.replace(hour=23, minute=59, second=59, microsecond=0)
     now = datetime.now().replace(microsecond=0)
 
     total_ide_seconds = get_ide_seconds(TheiaSession.created < eod)
+    week_ide_seconds = get_ide_seconds(
+        TheiaSession.created < eod, TheiaSession.created > this_week
+    )
     today_ide_seconds = get_ide_seconds(
         TheiaSession.created < eod, TheiaSession.created > today
     )
@@ -196,11 +198,12 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
     )
 
     report = (
-        "IDEs Active ({})\n{}\n\nIDE Time Served Today: {}\nIDE Time Served Total: {}"
+        "IDEs Active ({})\n{}\n\nIDE Time Served Today: {}\nIDE Time Served Last 7 Days: {}\nIDE Time Served Total: {}"
     ).format(
         len(active_ides),
         data,
         human_readable_datetime(today_ide_seconds),
+        human_readable_datetime(week_ide_seconds),
         human_readable_datetime(total_ide_seconds)
     )
 
