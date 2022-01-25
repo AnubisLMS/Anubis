@@ -3,7 +3,7 @@ DEBUG_PERSISTENT_SERVICES := db traefik redis-master
 DEBUG_RESTART_ALWAYS_SERVICES := api web-dev rpc-default rpc-theia rpc-regrade
 
 # docker-compose settings
-DOCKER_COMPOSE_PUSH_SERVICES := api web theia-init theia-proxy
+DOCKER_COMPOSE_PUSH_SERVICES := api web theia-init theia-sidecar theia-proxy
 
 # K8S
 K8S_RESTART_DEPLOYMENTS := \
