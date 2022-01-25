@@ -85,6 +85,6 @@
     "vscode-editorconfig": "https://github.com/theia-ide/editorconfig-vscode/releases/download/v0.14.4/EditorConfig-0.14.4.vsix",
     "cdt-gdb-vscode": "https://open-vsx.org/api/eclipse-cdt/cdt-gdb-vscode/0.0.92/file/eclipse-cdt.cdt-gdb-vscode-0.0.92.vsix",
     "plantuml": "https://open-vsx.org/api/jebbs/plantuml/2.14.0/file/jebbs.plantuml-2.14.0.vsix",
-    "webfreak-debug": "https://open-vsx.org/api/webfreak/debug/0.25.0/file/webfreak.debug-0.25.0.vsix"
+    "webfreak-debug": "https://open-vsx.org/api/webfreak/debug/0.25.1/file/webfreak.debug-0.25.1.vsix"
   }
 }
