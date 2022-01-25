@@ -68,5 +68,8 @@ These two students reported their situation to their professor who reported it t
 fix this bug within 30 or so minutes. As soon as I heard that this had happened I knew that the only place where such
 a bug could occur would be the proxy service.
 
+The only thing necessary to remediate this issue was removing the in memory caching. All requests through the proxy
+service now do a full round trip to the database to make sure that the IDE is still active.
+
 The moral of this story is that you should add a max-age to your cache entries, and think about these types of
 abstract race conditions when designing scalable systems.

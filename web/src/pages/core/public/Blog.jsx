@@ -8,6 +8,8 @@ import Divider from '@material-ui/core/Divider';
 import BlogPost from '../../../components/core/Blog/BlogPost';
 
 import posts from '../../../content';
+import Box from '@material-ui/core/Box';
+import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -60,6 +62,9 @@ const useStyles = makeStyles((theme) => ({
   root: {
     margin: theme.spacing(5, 0),
   },
+  img: {
+    margin: theme.spacing(1),
+  },
 }));
 
 export default function Blog() {
@@ -76,6 +81,12 @@ export default function Blog() {
       >
         <Switch>
           <Route exact path="/blog">
+            <Box style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+              <img src="/logo512.png" alt="logo512" className={classes.img}/>
+              <Typography variant="h2">
+                Anubis LMS Blog
+              </Typography>
+            </Box>
             {posts.map((post, index) => (
               <Grid item xs = {12} key = {`post-${index}-${post.title}`}>
                 <BlogPost
