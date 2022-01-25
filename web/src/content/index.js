@@ -1,11 +1,20 @@
 export default [
   {
+    slug: 'proxy-vuln',
+    title: 'Proxy Cache Vulnerability',
+    author: 'John Cunniff',
+    authorImage: 'https://avatars.githubusercontent.com/u/36013983',
+    date: '2022-01-25',
+    get: () => {
+      return import('./ProxyVuln.md');
+    },
+  },
+  {
     slug: 'elavator-pitch',
     title: 'Anubis LMS',
     author: 'John Cunniff',
     authorImage: 'https://avatars.githubusercontent.com/u/36013983',
     date: '2021-03-17',
-    isHighlight: true,
     get: () => {
       return import('./ElavatorPitch.md');
     },

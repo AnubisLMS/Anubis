@@ -1,8 +1,6 @@
 
 <preview>
 
-![logo](/logocenter.png)
-
 #### What you gain by using Anubis
 
 There are 4 main benefits
