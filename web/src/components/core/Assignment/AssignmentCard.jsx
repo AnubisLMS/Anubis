@@ -118,7 +118,7 @@ export default function AssignmentCard({assignment, editableFields, updateField,
                       value={assignment[field]}
                       onChange={(_, v) => updateField(assignment.id, field, false, false, true)(v)}
                       options={images}
-                      getOptionLabel={(option) => option.label}
+                      getOptionLabel={(option) => option.title}
                       renderInput={(params) => <TextField {...params} label={label} variant="outlined" />}
                     />
                   </Grid>

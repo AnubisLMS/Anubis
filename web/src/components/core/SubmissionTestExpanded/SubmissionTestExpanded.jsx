@@ -43,10 +43,12 @@ export default function SubmissionTestExpanded({
 }) {
   const classes = useStyles();
   const diffs = useMemo(() => {
+    if (!testOutput) return [];
+    console.log(testOutput);
     return parseDiff(testOutput ?? '', {nearbySequences: 'zip'});
   }, [testOutput]);
   const tokens = useMemo(() => {
-    if (!!!diffs) return undefined;
+    if (!diffs) return [];
     return diffs.map((diff) => tokenize(diff.hunks, {
       hightlight: false,
       enhancers: [markEdits(diffs[0].hunks, {type: 'block'})],
