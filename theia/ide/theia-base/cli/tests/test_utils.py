@@ -26,7 +26,7 @@ def compare_test_fixtures() -> List[CompareTestFixture]:
         matched=False,
         actual=["asdf", "qwe", "123"],
         expected=["asd", "qwe", "123"],
-        diff=['--- \n', '+++ \n', '@@ -1,3 +1,3 @@\n', '-asd', '+asdf', ' qwe', ' 123'],
+        diff=['--- ', '+++ ', '@@ -1,3 +1,3 @@', '-asd', '+asdf', ' qwe', ' 123'],
     ), CompareTestFixture(
         comp_func=utils.test_lines,
         matched=True,
@@ -38,7 +38,7 @@ def compare_test_fixtures() -> List[CompareTestFixture]:
         matched=False,
         actual=["AsD", "QwEd", "123"],
         expected=["aSd", "qWee", "123"],
-        diff=['--- \n', '+++ \n', '@@ -1,3 +1,3 @@\n', " asd", "-qwee", "+qwed", " 123"],
+        diff=['--- ', '+++ ', '@@ -1,3 +1,3 @@', " asd", "-qwee", "+qwed", " 123"],
         case_sensitive=False,
     ), CompareTestFixture(
         comp_func=utils.search_lines,
@@ -56,26 +56,26 @@ def compare_test_fixtures() -> List[CompareTestFixture]:
         matched=False,
         actual=["asd", "qww"],
         expected=["asd", "qww", "123A"],
-        diff=['--- \n', '+++ \n', '@@ -1,3 +1,2 @@\n', " asd", " qww", "-123A"],
+        diff=['--- ', '+++ ', '@@ -1,3 +1,2 @@', " asd", " qww", "-123A"],
     ), CompareTestFixture(
         comp_func=utils.test_lines,
         matched=False,
         actual=["asd", "qww"],
         expected=["asd", "qww", "123A"],
-        diff=['--- \n', '+++ \n', '@@ -1,3 +1,2 @@\n', " asd", " qww", "-123a"],
+        diff=['--- ', '+++ ', '@@ -1,3 +1,2 @@', " asd", " qww", "-123a"],
         case_sensitive=False,
     ), CompareTestFixture(
         comp_func=utils.test_lines,
         matched=False,
         actual=["asd", "qww", "fgff", "kasd", "asdasd"],
         expected=["asd", "qww", "fgff", "kasd", "asdasd", "123A"],
-        diff=['--- \n', '+++ \n', '@@ -3,4 +3,3 @@\n', " fgff", " kasd", " asdasd", "-123A"],
+        diff=['--- ', '+++ ', '@@ -3,4 +3,3 @@', " fgff", " kasd", " asdasd", "-123A"],
     ), CompareTestFixture(
         comp_func=utils.test_lines,
         matched=False,
         actual=["a", "b"],
         expected=["a", "b", "c"],
-        diff=['--- \n', '+++ \n', '@@ -1,3 +1,2 @@\n', " a", " b", " -c"],
+        diff=['--- ', '+++ ', '@@ -1,3 +1,2 @@', " a", " b", "-c"],
     )]
 
 def test_compare_func(compare_test_fixtures: List[CompareTestFixture]):

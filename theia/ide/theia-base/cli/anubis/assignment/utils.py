@@ -247,9 +247,9 @@ def test_lines(
 
     >>> test_lines(['a', 'b', 'c'], ['a', 'b', 'c']) -> (True, [])
     >>> test_lines(['a', 'debugging', 'b', 'c'], ['a', 'b', 'c'])
-    # -> (False, ['--- \n', '+++ \n', '@@ -1,3 +1,4 @@\n', ' a', '+debugging', ' b', ' c'])
+    # -> (False, ['--- ', '+++ ', '@@ -1,3 +1,4 @@', ' a', '+debugging', ' b', ' c'])
     >>> test_lines(['a', 'b'],      ['a', 'b', 'c'])
-    # -> (False, ['--- \n', '+++ \n', '@@ -1,3 +1,2 @@\n', ' a', ' b', '-c'])
+    # -> (False, ['--- ', '+++ ', '@@ -1,3 +1,2 @@', ' a', ' b', '-c'])
 
     :param stdout_lines: students standard out lines as a list of strings
     :param expected_lines: expected lines as a list of strings
@@ -305,7 +305,7 @@ def test_lines(
         else:
             stdout_context += preprocess_func(*stdout_lines[start:end])
 
-    return False, list(difflib.unified_diff(expected_context, stdout_context))
+    return False, list(difflib.unified_diff(expected_context, stdout_context, lineterm=""))
 
 
 def verify_expected(
@@ -337,7 +337,7 @@ def verify_expected(
     if not passed:
         if diff:
             test_result.output_type = 'diff'
-            test_result.output = ''.join(diff)
+            test_result.output = '\n'.join(diff)
         else:
             # If diff is not available, fall back to the old way of displaying outputs
             test_result.output_type = 'text'
