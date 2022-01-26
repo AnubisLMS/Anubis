@@ -76,6 +76,24 @@ def compare_test_fixtures() -> List[CompareTestFixture]:
         actual=["a", "b"],
         expected=["a", "b", "c"],
         diff=['--- ', '+++ ', '@@ -1,3 +1,2 @@', " a", " b", "-c"],
+    ), CompareTestFixture(
+        comp_func=utils.test_lines,
+        matched=False,
+        actual=["exec test failed"],
+        expected=["sample 1", "sample 2", "sample 3", "sample 4", "sample 5", "sample 6", "sample 7"],
+        diff=["--- ", "+++ ", "@@ -1,5 +1 @@", "-sample 1", "-sample 2", "-sample 3", "-sample 4", "-sample 5", "+exec test failed"]
+    ), CompareTestFixture(
+        comp_func=utils.test_lines,
+        matched=False,
+        actual=["sample 1", "sample 2", "exec test failed"],
+        expected=["sample 1", "sample 2", "sample 3", "sample 4", "sample 5", "sample 6", "sample 7"],
+        diff=["--- ", "+++ ", "@@ -1,5 +1,3 @@", " sample 1", " sample 2", "-sample 3", "-sample 4", "-sample 5", "+exec test failed"]
+    ), CompareTestFixture(
+        comp_func=utils.test_lines,
+        matched=False,
+        actual=["sample 1", "sample 2", "sample 3", "sample 4", "sample 5", "sample 6", "sample 7"],
+        expected=["sample 1", "sample 2", "sample x"],
+        diff=["--- ", "+++ ", "@@ -1,3 +1,5 @@", " sample 1", " sample 2", "-sample x", "+sample 3", "+sample 4", "+sample 5"]
     )]
 
 def test_compare_func(compare_test_fixtures: List[CompareTestFixture]):

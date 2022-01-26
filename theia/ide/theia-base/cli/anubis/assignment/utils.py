@@ -291,19 +291,26 @@ def test_lines(
     # unzip the context as tuples
     expected_context, stdout_context = zip(*context)
 
+    # We fill the context with the leading part of the lines that
+    # only present in the longer list of lines
+    # if there IS a mismatch (i.e. mismatch_index != -1 or len(expected_lines) != len(stdout_lines))
+    start = min(len(expected_lines), len(stdout_lines))
+
     if mismatch_index == -1:
         if len(expected_lines) == len(stdout_lines):
             return True, []
 
-        # When there is no mismatch and the length of the lines are different,
-        # we fill the context with the leading part of the lines that
-        # only present in the longer list of lines
-        start = min(len(expected_lines), len(stdout_lines))
+        # If no mismatch occurs, we fill the entire trailing part of
+        # the longer list into the context 
         end = start + context_length
-        if len(expected_lines) > len(stdout_lines):
-            expected_context += preprocess_func(*expected_lines[start:end])
-        else:
-            stdout_context += preprocess_func(*stdout_lines[start:end])
+    else:
+        # Otherwise, we only fill the context to the desired size 
+        end = start + (context_length - len(context))
+
+    if len(expected_lines) > len(stdout_lines):
+        expected_context += preprocess_func(*expected_lines[start:end])
+    else:
+        stdout_context += preprocess_func(*stdout_lines[start:end])
 
     return False, list(difflib.unified_diff(expected_context, stdout_context, lineterm=""))
 
