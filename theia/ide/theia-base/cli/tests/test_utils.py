@@ -94,6 +94,18 @@ def compare_test_fixtures() -> List[CompareTestFixture]:
         actual=["sample 1", "sample 2", "sample 3", "sample 4", "sample 5", "sample 6", "sample 7"],
         expected=["sample 1", "sample 2", "sample x"],
         diff=["--- ", "+++ ", "@@ -1,3 +1,5 @@", " sample 1", " sample 2", "-sample x", "+sample 3", "+sample 4", "+sample 5"]
+    ), CompareTestFixture(
+        comp_func=utils.test_lines,
+        matched=True,
+        actual=["asd\n"],
+        expected=["asd"],
+        diff=[]
+    ), CompareTestFixture(
+        comp_func=utils.test_lines,
+        matched=False,
+        actual=[],
+        expected=["bar"],
+        diff=["--- ", "+++ ", "@@ -1 +0,0 @@", "-bar"]
     )]
 
 def test_compare_func(compare_test_fixtures: List[CompareTestFixture]):

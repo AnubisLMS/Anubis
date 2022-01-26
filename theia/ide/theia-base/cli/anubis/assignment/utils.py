@@ -289,7 +289,7 @@ def test_lines(
             mismatch_index = index
 
     # unzip the context as tuples
-    expected_context, stdout_context = zip(*context)
+    expected_context, stdout_context = zip(*context) if len(context) > 0 else (tuple(), tuple())
 
     # We fill the context with the leading part of the lines that
     # only present in the longer list of lines
