@@ -105,7 +105,7 @@ export default function SubmissionTestExpanded({
         )}
         {testOutputType === 'diff' && (
           <React.Fragment>
-            <h2>Actual / Expected Output</h2>
+            <h2>Expected / Actual Output</h2>
             <Box className={classes.diffBox}>
               {diffs && diffs.map((diff, index) => renderDiffs({...diff, tokens: tokens[index]}))}
             </Box>
