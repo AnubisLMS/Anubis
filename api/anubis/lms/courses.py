@@ -597,7 +597,8 @@ def get_course_users(course: Course) -> List[User]:
     :param course:
     :return:
     """
-    return User.query.join(InCourse, InCourse.owner_id == User.id).filter(Course.id == course.id).all()
+    return User.query.join(InCourse, InCourse.owner_id == User.id)\
+        .filter(InCourse.course_id == course.id).all()
 
 
 def get_course_tas(course: Course) -> List[User]:
@@ -609,7 +610,8 @@ def get_course_tas(course: Course) -> List[User]:
     :param course:
     :return:
     """
-    return User.query.join(TAForCourse, TAForCourse.owner_id == User.id).filter(Course.id == course.id).all()
+    return User.query.join(TAForCourse, TAForCourse.owner_id == User.id)\
+        .filter(TAForCourse.course_id == course.id).all()
 
 
 def get_course_professors(course: Course) -> List[User]:
@@ -621,9 +623,8 @@ def get_course_professors(course: Course) -> List[User]:
     :param course:
     :return:
     """
-    return (
-        User.query.join(ProfessorForCourse, ProfessorForCourse.owner_id == User.id).filter(Course.id == course.id).all()
-    )
+    return User.query.join(ProfessorForCourse, ProfessorForCourse.owner_id == User.id)\
+        .filter(ProfessorForCourse.course_id == course.id).all()
 
 
 def user_to_user_id_set(users: List[User]) -> Set[str]:
