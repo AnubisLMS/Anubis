@@ -44,7 +44,6 @@ export default function SubmissionTestExpanded({
   const classes = useStyles();
   const diffs = useMemo(() => {
     if (!testOutput) return [];
-    console.log(testOutput);
     return parseDiff(testOutput ?? '', {nearbySequences: 'zip'});
   }, [testOutput]);
   const tokens = useMemo(() => {
