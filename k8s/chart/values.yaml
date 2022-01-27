@@ -41,7 +41,7 @@ theia:
 
   # theia-proxy deployment
   proxy:
-    replicas: 5
+    replicas: 10
     image: "registry.digitalocean.com/anubis/theia-proxy"
     tag: "latest"
 
@@ -87,7 +87,7 @@ backup:
 ###############################################################################
 # RPC Pools
 rpc:
-  replicas: 1
+  replicas: 3
   queues: ["default", "theia", "regrade"]
 ###############################################################################
 

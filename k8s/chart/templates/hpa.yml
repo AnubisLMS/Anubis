@@ -75,7 +75,7 @@ spec:
     kind: Deployment
     name: anubis-theia-proxy
   minReplicas: {{ .Values.theia.proxy.replicas }}
-  maxReplicas: 10
+  maxReplicas: 15
   metrics:
   - type: Resource
     resource:
