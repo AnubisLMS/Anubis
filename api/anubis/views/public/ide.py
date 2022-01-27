@@ -12,7 +12,7 @@ from anubis.lms.theia import (
     initialize_ide,
     assert_theia_sessions_enabled,
 )
-from anubis.models import Assignment, AssignmentRepo, TheiaSession, db
+from anubis.models import Assignment, AssignmentRepo, TheiaSession, db, THEIA_DEFAULT_OPTIONS
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
@@ -136,10 +136,7 @@ def public_ide_initialize(assignment: Assignment):
     network_policy = options.get("network_policy", "os-student")
     resources = options.get(
         "resources",
-        {
-            "requests": {"cpu": "250m", "memory": "100Mi"},
-            "limits": {"cpu": "2", "memory": "500Mi"},
-        },
+        THEIA_DEFAULT_OPTIONS['resources'],
     )
 
     # If course admin, then give admin network policy

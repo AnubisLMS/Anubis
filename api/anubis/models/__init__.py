@@ -19,8 +19,8 @@ THEIA_DEFAULT_OPTIONS = {
     "persistent_storage": False,
     "network_policy": "os-student",
     "resources": {
-        "requests": {"cpu": "300m", "memory": "300Mi"},
-        "limits": {"cpu": "2", "memory": "500Mi"},
+        "requests": {"cpu": "750m", "memory": "500Mi"},
+        "limits": {"cpu": "1500m", "memory": "750Mi"},
     },
 }
 

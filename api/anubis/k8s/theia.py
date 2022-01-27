@@ -9,7 +9,7 @@ from kubernetes import client, config
 from anubis.github.parse import parse_github_repo_name
 from anubis.lms.courses import get_course_admin_ids
 from anubis.lms.theia import get_theia_pod_name, mark_session_ended
-from anubis.models import Course, TheiaSession, db
+from anubis.models import Course, TheiaSession, db, THEIA_DEFAULT_OPTIONS
 from anubis.utils.auth.token import create_token
 from anubis.utils.config import get_config_int, get_config_str
 from anubis.utils.data import is_debug
@@ -52,8 +52,8 @@ def create_theia_k8s_pod_pvc(
     repo_name = parse_github_repo_name(repo_url)
 
     # Get the theia session options
-    limits = theia_session.resources.get("limits", {"cpu": "2", "memory": "500Mi"})
-    requests = theia_session.resources.get("requests", {"cpu": "250m", "memory": "100Mi"})
+    limits = theia_session.resources.get("limits", THEIA_DEFAULT_OPTIONS['resources']['limits'])
+    requests = theia_session.resources.get("requests", THEIA_DEFAULT_OPTIONS['resources']['requests'])
     admin = theia_session.admin
     autosave = theia_session.autosave
     credentials = theia_session.credentials
