@@ -10,7 +10,7 @@ def register_public_views(app):
     from anubis.views.public.repos import repos_
     from anubis.views.public.static import static
     from anubis.views.public.submissions import submissions_
-    from anubis.views.public.visuals import visuals
+    from anubis.views.public.visuals import visuals_
     from anubis.views.public.webhook import webhook
     from anubis.views.public.playgrounds import playgrounds_
     from anubis.views.public.forums import forums_
@@ -29,7 +29,7 @@ def register_public_views(app):
         courses_,
         questions_,
         memes,
-        visuals,
+        visuals_,
         lectures_,
         playgrounds_,
         forums_,

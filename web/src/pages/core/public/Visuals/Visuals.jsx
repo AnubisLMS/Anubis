@@ -42,7 +42,34 @@ const Visuals = () => {
           <Card>
             <CardHeader
               avatar={<Avatar src={'/logo512.png'}/>}
-              title={'Anubis Usage Over Time'}
+              title={'Anubis Playgrounds Usage Over Time'}
+              titleTypographyProps={{variant: 'h6'}}
+              subheader={'re-generated every 5 minutes'}
+            />
+            <Button
+              className={classes.button}
+              startIcon={<CloudDownload/>}
+              variant={'contained'}
+              color={'primary'}
+              size={'large'}
+              component={'a'}
+              href={`/api/public/visuals/usage/playgrounds`}
+              download={'anubis-playground-usage.png'}
+            >
+              Download
+            </Button>
+            <CardMedia
+              className={classes.usage}
+              image={`/api/public/visuals/usage/playgrounds`}
+              title={'Anubis Playgrounds Usage'}
+            />
+          </Card>
+        </Grid>
+        <Grid item xs sm={10} lg={8} xl={8}>
+          <Card>
+            <CardHeader
+              avatar={<Avatar src={'/logo512.png'}/>}
+              title={'Anubis Course Usage Over Time'}
               titleTypographyProps={{variant: 'h6'}}
               subheader={'re-generated every 5 minutes'}
             />
@@ -70,7 +97,7 @@ const Visuals = () => {
               size={'large'}
               component={'a'}
               href={`/api/public/visuals/usage/${selected?.id}`}
-              download={'anubis-usage.png'}
+              download={`anubis-${selected?.id}-usage.png`}
             >
               Download
             </Button>

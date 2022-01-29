@@ -91,3 +91,14 @@ def process_file_upload() -> StaticFile:
     db.session.commit()
 
     return blob
+
+
+def make_png_response(blob: bytes) -> Response:
+    # Take the png bytes, and make a flask response
+    response = make_response(blob)
+
+    # Set the response content type
+    response.headers["Content-Type"] = "image/png"
+
+    # Pass back the image response
+    return response

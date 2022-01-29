@@ -1,16 +1,23 @@
-from flask import Blueprint, make_response
+from flask import Blueprint
 
 from anubis.models import Course
-from anubis.utils.cache import cache
-from anubis.utils.data import is_debug
 from anubis.utils.http import req_assert
-from anubis.utils.visuals.usage import get_usage_plot
+from anubis.utils.http.files import make_png_response
+from anubis.utils.visuals.usage import get_usage_plot, get_usage_plot_playgrounds
 
-visuals = Blueprint("public-visuals", __name__, url_prefix="/public/visuals")
+visuals_ = Blueprint("public-visuals", __name__, url_prefix="/public/visuals")
 
 
-@visuals.route("/usage/<string:course_id>")
-@cache.cached(timeout=360, unless=is_debug)
+@visuals_.route("/usage/playgrounds")
+def public_visuals_usage_playgrounds():
+    # Get the png blob of the usage graph.
+    # The get_usage_plot is itself a cached function.
+    blob = get_usage_plot_playgrounds()
+
+    return make_png_response(blob)
+
+
+@visuals_.route("/usage/<string:course_id>")
 def public_visuals_usage(course_id: str):
     """
     Get the usage png graph. This endpoint is heavily
@@ -33,11 +40,4 @@ def public_visuals_usage(course_id: str):
     # The get_usage_plot is itself a cached function.
     blob = get_usage_plot(course.id)
 
-    # Take the png bytes, and make a flask response
-    response = make_response(blob)
-
-    # Set the response content type
-    response.headers["Content-Type"] = "image/png"
-
-    # Pass back the image response
-    return response
+    return make_png_response(blob)

@@ -1,18 +1,14 @@
 import functools
 from datetime import datetime, timedelta
-from email.mime.text import MIMEText
 from hashlib import sha512
 from json import dumps
 from os import environ, urandom
-from smtplib import SMTP
 from typing import Tuple, Union
-from collections import namedtuple
 
 from flask import Response, has_app_context, has_request_context
 
 from anubis.config import config
 from anubis.utils.exceptions import AssertError
-
 
 MYSQL_TEXT_MAX_LENGTH = 2 ** 16 - 1
 
@@ -180,7 +176,7 @@ def split_chunks(lst, n):
     """
     _chunks = []
     for i in range(0, len(lst), n):
-        _chunks.append(lst[i : i + n])
+        _chunks.append(lst[i: i + n])
     return _chunks
 
 
@@ -338,3 +334,5 @@ def req_assert(*expressions, message: str = "invalid", status_code: int = 200):
     """
     if not all(expressions):
         raise AssertError(message, status_code)
+
+

@@ -1,3 +1,4 @@
+import io
 from datetime import datetime
 from io import BytesIO
 from typing import Any, Dict, List, Optional
@@ -5,10 +6,22 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 import pandas as pd
 
-from anubis.models import Assignment, Course, Submission, TheiaSession
+from anubis.models import Assignment, Course, Submission, TheiaSession, TheiaImage
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, is_job
 from anubis.utils.logging import logger
+
+
+def convert_fig_bytes(plt, fig) -> bytes:
+    file_bytes = BytesIO()
+
+    fig.tight_layout()
+    fig.patch.set_facecolor("white")
+    plt.savefig(file_bytes)
+
+    file_bytes.seek(0)
+
+    return file_bytes.read()
 
 
 def get_submissions(course_id: str) -> pd.DataFrame:
@@ -47,7 +60,7 @@ def get_submissions(course_id: str) -> pd.DataFrame:
     return submissions
 
 
-def get_theia_sessions(course_id: str) -> pd.DataFrame:
+def get_theia_sessions(course_id: str = None) -> pd.DataFrame:
     """
     Get all theia session objects, and throw them into a dataframe
 
@@ -55,10 +68,13 @@ def get_theia_sessions(course_id: str) -> pd.DataFrame:
     """
 
     # Get all the theia session sqlalchemy objects
-    raw_theia_sessions = TheiaSession.query.join(Assignment).filter(Assignment.course_id == course_id).all()
+    if course_id is not None:
+        raw_theia_sessions = TheiaSession.query.join(Assignment).filter(Assignment.course_id == course_id).all()
+    else:
+        raw_theia_sessions = TheiaSession.query.filter(TheiaSession.playground == True).all()
 
     # Specify which columns we want
-    columns = ["id", "owner_id", "assignment_id", "created", "ended"]
+    columns = ["id", "owner_id", "assignment_id", "image_id", "created", "ended"]
 
     # Build a dataframe of from the columns we pull out of each theia session object
     theia_sessions = pd.DataFrame(
@@ -224,12 +240,46 @@ def get_usage_plot(course_id: Optional[str]) -> Optional[bytes]:
     )
     axs[1].grid(True)
 
-    file_bytes = BytesIO()
+    return convert_fig_bytes(plt, fig)
 
-    fig.tight_layout()
-    fig.patch.set_facecolor("white")
-    plt.savefig(file_bytes)
 
-    file_bytes.seek(0)
+@cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
+def get_usage_plot_playgrounds():
+    import matplotlib.pyplot as plt
 
-    return file_bytes.read()
+    utcnow = datetime.utcnow().replace(microsecond=0)
+
+    fig, ax = plt.subplots(figsize=(12, 10))
+
+    images = TheiaImage.query.filter().order_by(TheiaImage.id.desc()).all()
+    theia_sessions = get_theia_sessions(None)
+    s = theia_sessions.groupby(["image_id", "created"])["id"].count().reset_index().rename(
+        columns={"id": "count"}
+    ).groupby("image_id")
+    for key, group in s:
+        logger.info(key)
+        for image in images:
+            if image.id == key and image.public:
+                ax.plot(group["created"], group["count"], label=image.title)
+    ax.legend()
+
+    ax.text(
+        0.97,
+        0.9,
+        f"Generated {utcnow} UTC",
+        transform=ax.transAxes,
+        fontsize=12,
+        color="gray",
+        alpha=0.5,
+        ha="right",
+        va="center",
+    )
+    ax.set(
+        title=f"Anubis Playgrounds - IDEs spawned per hour",
+        xlabel="time",
+        ylabel="IDEs spawned",
+    )
+    ax.grid(True)
+
+    return convert_fig_bytes(plt, fig)
+
