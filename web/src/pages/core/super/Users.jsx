@@ -20,7 +20,6 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
-import AuthContext from '../../../context/AuthContext';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -28,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(1),
   },
   dataGridPaper: {
-    height: 800,
+    height: 900,
   },
   dataGrid: {
     height: '100%',
@@ -58,7 +57,7 @@ const toggleSuperuser = (id, {setStudents, setEdits}, enqueueSnackbar) => () => 
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
-const useColumns = (pageState, enqueueSnackbar) => (user) => ([
+const useColumns = (pageState, enqueueSnackbar) => () => ([
   {
     field: 'id',
     headerName: 'View',
@@ -78,6 +77,43 @@ const useColumns = (pageState, enqueueSnackbar) => (user) => ([
   {field: 'netid', headerName: 'netid'},
   {field: 'name', headerName: 'Name', width: 150},
   {field: 'github_username', headerName: 'Github Username', width: 200},
+  {
+    field: 'log_in_as',
+    headerName: 'Log in as',
+    width: 130,
+    renderCell: (params) => (
+      <Tooltip title={`Log in as ${params.row.netid}`}>
+        <Fab
+          size={'small'}
+          style={{backgroundColor: 'yellow'}}
+          onClick={() => {
+            axios.get(`/api/admin/auth/token/${params.row.netid}`).then((response) => {
+              const data = standardStatusHandler(response);
+              if (data) {
+                window.location.reload();
+              }
+            }).catch(standardErrorHandler(enqueueSnackbar));
+          }}
+        >
+          <ExitToAppIcon/>
+        </Fab>
+      </Tooltip>
+    ),
+  },
+  {
+    field: 'is_superuser',
+    headerName: 'Superuser',
+    renderCell: (params) => (
+      <React.Fragment>
+        <Switch
+          checked={params.row.is_superuser}
+          color={'primary'}
+          onClick={toggleSuperuser(params.row.id, pageState, enqueueSnackbar)}
+        />
+      </React.Fragment>
+    ),
+    width: 150,
+  },
 ]);
 
 export default function Users() {
@@ -100,7 +136,7 @@ export default function Users() {
   const columns = useColumns(pageState, enqueueSnackbar);
 
   React.useEffect(() => {
-    axios.get('/api/admin/students/list').then((response) => {
+    axios.get('/api/super/students/list').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data?.students) {
         setSearched(null);
@@ -144,7 +180,7 @@ export default function Users() {
           Anubis
         </Typography>
         <Typography variant={'subtitle1'} color={'textSecondary'}>
-          Student Management
+          User Management
         </Typography>
       </Grid>
       <Grid item xs={12} md={4} key={'search'}>
@@ -169,22 +205,18 @@ export default function Users() {
       <Grid item xs={12} md={10} key={'user-table'}>
         <Paper className={clsx(classes.paper, classes.dataGridPaper)}>
           <div className={classes.dataGrid}>
-            <AuthContext.Consumer>
-              {(user) => (
-                <DataGrid
-                  pagination
-                  pageSize={10}
-                  rowsPerPageOptions={[5, 10, 20]}
-                  rows={rows}
-                  columns={columns(user)}
-                  filterModel={{
-                    items: [
-                      {columnField: 'name', operatorValue: 'contains', value: ''},
-                    ],
-                  }}
-                />
-              )}
-            </AuthContext.Consumer>
+            <DataGrid
+              pagination
+              pageSize={15}
+              rowsPerPageOptions={[5, 10, 20]}
+              rows={rows}
+              columns={columns()}
+              filterModel={{
+                items: [
+                  {columnField: 'name', operatorValue: 'contains', value: ''},
+                ],
+              }}
+            />
           </div>
         </Paper>
       </Grid>

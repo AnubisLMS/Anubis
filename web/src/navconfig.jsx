@@ -51,6 +51,7 @@ import AdminAssignmentGroups from './pages/core/admin/Assignment/AssignmentGroup
 import SuperConfig from './pages/core/super/Config';
 import SuperIDEImages from './pages/core/super/IDEImages';
 import SuperPlaygrounds from './pages/core/super/Playgrounds';
+import SuperUsers from './pages/core/super/Users';
 
 
 export const footer_nav = [
@@ -191,6 +192,12 @@ export const super_nav = [
     icon: <SettingsIcon/>,
     path: '/super/config',
     Page: SuperConfig,
+  },
+  {
+    id: 'Users',
+    icon: <GroupIcon/>,
+    path: '/super/users',
+    Page: SuperUsers,
   },
 ];
 
