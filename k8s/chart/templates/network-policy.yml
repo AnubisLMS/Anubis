@@ -3,16 +3,12 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: theia-session-student-network-policy
-  namespace: {{ .Release.Namespace }}
   labels:
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
+    {{- include "chart.labels" . | nindent 4 }}
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: theia
       network-policy: os-student
-      role: theia-session
   policyTypes:
   - Ingress
   - Egress
@@ -20,7 +16,7 @@ spec:
   - from:
     - podSelector:
         matchLabels:
-          app.kubernetes.io/name: theia
+          {{- include "chart.labels" . | nindent 10 }}
           component: proxy
     ports:
     # Theia port
@@ -67,16 +63,12 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: theia-session-admin-network-policy
-  namespace: {{ .Release.Namespace }}
   labels:
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
+    {{- include "chart.labels" . | nindent 4 }}
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: theia
       network-policy: admin
-      role: theia-session
   policyTypes:
   - Ingress
   - Egress
@@ -148,7 +140,7 @@ spec:
     # Pipeline API
     - podSelector:
         matchLabels:
-          app.kubernetes.io/name: anubis
+          {{- include "chart.labels" . | nindent 10 }}
           component: pipeline-api
     ports:
       - protocol: TCP

@@ -1,17 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: anubis-api
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "chart.fullname" . }}-api
   labels:
-    app.kubernetes.io/name: anubis
+    {{- include "chart.labels" . | nindent 4 }}
     component: api
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: anubis
+      {{- include "chart.labels" . | nindent 6 }}
       component: api
   replicas: {{ .Values.api.replicas }}
   {{- if .Values.rollingUpdates }}
@@ -24,7 +21,7 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: anubis
+        {{- include "chart.labels" . | nindent 8 }}
         component: api
     spec:
       containers:
@@ -42,76 +39,14 @@ spec:
         - name: web
           containerPort: 5000
         env:
-        - name: "DEBUG"
-          value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
-        - name: "MIGRATE"
-          value: "0"
-        - name: "DISABLE_ELK"
-          value: "0"
         # Gunicorn workers
         - name: "WORKERS"
           value: {{ .Values.api.workers | quote }}
-        - name: "DOMAIN"
-          value: "{{ .Values.domain }}"
         {{- if .Values.api.gunicorn_options }}
         - name: "GUNICORN_OPTIONS"
           value: {{ .Values.api.gunicorn_options | quote }}
         {{- end }}
-        - name: "GITHUB_TOKEN"
-          valueFrom:
-            secretKeyRef:
-              name: git
-              key: token
-        - name: "SECRET_KEY"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: secret-key
-        - name: "OAUTH_NYU_CONSUMER_KEY"
-          valueFrom:
-            secretKeyRef:
-              name: oauth
-              key: nyu-consumer-key
-        - name: "OAUTH_NYU_CONSUMER_SECRET"
-          valueFrom:
-            secretKeyRef:
-              name: oauth
-              key: nyu-consumer-secret
-        - name: "OAUTH_GITHUB_CONSUMER_KEY"
-          valueFrom:
-            secretKeyRef:
-              name: oauth
-              key: github-consumer-key
-        - name: "OAUTH_GITHUB_CONSUMER_SECRET"
-          valueFrom:
-            secretKeyRef:
-              name: oauth
-              key: github-consumer-secret
-        - name: "DATABASE_URI"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: database-uri
-        - name: "DB_PASSWORD"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: database-password
-        - name: "DB_HOST"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: database-host
-        - name: "DB_PORT"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: database-port
-        - name: "REDIS_PASS"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: redis-password
+        {{- include "api.env" . | nindent 8 }}
         {{- if .Values.healthChecks }}
         startupProbe:
           httpGet:
@@ -140,16 +75,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: anubis-api
+  name: {{ include "chart.fullname" . }}-api
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: anubis
+    {{- include "chart.labels" . | nindent 4 }}
     component: api
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
 spec:
   selector:
-    app.kubernetes.io/name: anubis
+    {{- include "chart.labels" . | nindent 4 }}
     component: api
   ports:
   - name: web

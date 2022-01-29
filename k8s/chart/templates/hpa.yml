@@ -4,8 +4,10 @@
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: anubis-api
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "chart.fullname" . }}-api
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: api
 spec:
   behavior:
     scaleUp:
@@ -17,7 +19,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: anubis-api
+    name: {{ include "chart.fullname" . }}-api
   minReplicas: {{ .Values.api.replicas }}
   maxReplicas: 5
   metrics:
@@ -32,8 +34,10 @@ spec:
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: anubis-web
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "chart.fullname" . }}-web
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: web
 spec:
   behavior:
     scaleUp:
@@ -45,7 +49,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: anubis-web
+    name: {{ include "chart.fullname" . }}-web
   minReplicas: {{ .Values.web.replicas }}
   maxReplicas: 5
   metrics:
@@ -60,8 +64,10 @@ spec:
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: anubis-theia-proxy
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "chart.fullname" . }}-theia-proxy
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: proxy
 spec:
   behavior:
     scaleUp:
@@ -73,7 +79,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: anubis-theia-proxy
+    name: {{ include "chart.fullname" . }}-theia-proxy
   minReplicas: {{ .Values.theia.proxy.replicas }}
   maxReplicas: 15
   metrics:
@@ -89,13 +95,15 @@ spec:
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: anubis-{{ .name }}
-  namespace: {{ $.Release.Namespace }}
+  name: {{ include "chart.fullname" $ }}-{{ .name }}
+  labels:
+    {{- include "chart.labels" $ | nindent 4 }}
+    component: {{ .name }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: anubis-{{ .name }}
+    name: {{ include "chart.fullname" $ }}-{{ .name }}
   minReplicas: {{ $.Values.rpc.replicas }}
   maxReplicas: 10
   metrics:

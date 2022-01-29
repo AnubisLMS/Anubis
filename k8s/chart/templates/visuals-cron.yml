@@ -3,13 +3,11 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: anubis-visuals
+  name: {{ include "chart.fullname" . }}-visuals
   namespace: {{ .Release.Namespace }}
   labels:
-    app: anubis-visuals
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
-    component: "anubis-visuals"
+    {{- include "chart.labels" . | nindent 4 }}
+    component: "visuals"
 spec:
   schedule: {{ .Values.visuals.schedule | quote }}
   suspend: {{ .Values.visuals.suspend }}
@@ -17,8 +15,8 @@ spec:
   jobTemplate:
     metadata:
       labels:
-        app.kubernetes.io/name: anubis
-        component: visuals-job
+        {{- include "chart.labels" . | nindent 8 }}
+        component: visuals
     spec:
       template:
         spec:
@@ -29,39 +27,7 @@ spec:
             imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
             command: ["python3", "jobs/visuals.py"]
             env:
-            - name: "PYTHONPATH"
-              value: "/opt/app"
-            - name: "DEBUG"
-              value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
             - name: "JOB"
               value: "1"
-            - name: "DISABLE_ELK"
-              value: "0"
-            - name: "LOGGER_NAME"
-              value: "visuals"
-            - name: "REDIS_PASS"
-              valueFrom:
-                secretKeyRef:
-                  name: api
-                  key: redis-password
-            - name: "DATABASE_URI"
-              valueFrom:
-                secretKeyRef:
-                  name: api
-                  key: database-uri
-            - name: "DB_PASSWORD"
-              valueFrom:
-                secretKeyRef:
-                  name: api
-                  key: database-password
-            - name: "DB_HOST"
-              valueFrom:
-                secretKeyRef:
-                  name: api
-                  key: database-host
-            - name: "DB_PORT"
-              valueFrom:
-                secretKeyRef:
-                  name: api
-                  key: database-port
+            {{- include "api.env" . | nindent 12 }}
 {{- end }}

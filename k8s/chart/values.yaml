@@ -1,4 +1,6 @@
 # Global Settings
+nameOverride: "anubis"
+fullnameOverride: ""
 debug: false
 rollingUpdates: true
 healthChecks: true
@@ -44,6 +46,32 @@ theia:
     replicas: 10
     image: "registry.digitalocean.com/anubis/theia-proxy"
     tag: "latest"
+
+  prop:
+    enable: true
+    images:
+    - name: "theia-init"
+      image: "registry.digitalocean.com/anubis/theia-init:latest"
+    - name: "theia-sidecar"
+      image: "registry.digitalocean.com/anubis/theia-sidecar:latest"
+    - name: "theia-base-38"
+      image: "registry.digitalocean.com/anubis/theia-base:python-3.8"
+    - name: "theia-base-39"
+      image: "registry.digitalocean.com/anubis/theia-base:python-3.9"
+    - name: "theia-base-310"
+      image: "registry.digitalocean.com/anubis/theia-base:python-3.10"
+    - name: "theia-xv6"
+      image: "registry.digitalocean.com/anubis/theia-xv6"
+    - name: "theia-golang"
+      image: "registry.digitalocean.com/anubis/theia-golang"
+    - name: "theia-software-engineering"
+      image: "registry.digitalocean.com/anubis/theia-software-engineering"
+    - name: "theia-jepst"
+      image: "registry.digitalocean.com/anubis/theia-jepst"
+    - name: "theia-devops"
+      image: "registry.digitalocean.com/anubis/theia-devops"
+    - name: "theia-admin"
+      image: "registry.digitalocean.com/anubis/theia-admin"
 
 # Discord Bot
 discordbot:

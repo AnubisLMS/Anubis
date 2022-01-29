@@ -27,4 +27,5 @@ helm upgrade \
      --set "backup.suspend=true" \
      --set "autograde_recalculate.suspend=true" \
      --set "daily_cleanup.suspend=true" \
+     --set "theia.prop.enable=false" \
      $@

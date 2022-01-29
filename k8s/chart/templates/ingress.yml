@@ -3,11 +3,8 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
   name: strip-api
-  namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: anubis
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
+    {{- include "chart.labels" . | nindent 4 }}
 spec:
   stripPrefix:
     prefixes:
@@ -19,11 +16,8 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
   name: strip-ide
-  namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: anubis
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
+    {{- include "chart.labels" . | nindent 4 }}
 spec:
   stripPrefix:
     prefixes:
@@ -34,11 +28,8 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: ingress.route.anubis.api.public
-  namespace: {{ .Release.Namespace }}
   labels:
-    app: api
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
+    {{- include "chart.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.debug }}
   entryPoints:
@@ -52,9 +43,8 @@ spec:
     match: Host(`{{ .Values.domain }}`) && PathPrefix(`/api/`)
     middlewares:
     - name: strip-api
-      namespace: {{ .Release.Namespace }}
     services:
-    - name: anubis-api
+    - name: {{ include "chart.fullname" . }}-api
       port: 5000
   {{- if not .Values.debug }}
   tls:
@@ -67,12 +57,9 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: ingress.route.anubis.web
-  namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: anubis
+    {{- include "chart.labels" . | nindent 4 }}
     component: web
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
 spec:
   {{- if .Values.debug }}
   entryPoints:
@@ -85,7 +72,7 @@ spec:
   - kind: Rule
     match: Host(`{{ .Values.domain }}`)
     services:
-    - name: anubis-web
+    - name: {{ include "chart.fullname" . }}-web
       port: 3000
   {{- if not .Values.debug }}
   tls:
@@ -98,12 +85,9 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: ingress.route.theia.public
-  namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: theia
+    {{- include "chart.labels" . | nindent 4 }}
     component: proxy
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
 spec:
   {{- if .Values.debug }}
   entryPoints:
@@ -117,14 +101,13 @@ spec:
     match: Host(`{{ .Values.domain }}`) && PathPrefix(`/ide/`)
     middlewares:
     - name: strip-ide
-      namespace: {{ .Release.Namespace }}
     services:
-    - name: anubis-theia-proxy
+    - name: {{ include "chart.fullname" . }}-theia-proxy
       port: 5000
   - kind: Rule
     match: Host(`ide8000.{{ .Values.domain }}`)
     services:
-    - name: anubis-theia-proxy
+    - name: {{ include "chart.fullname" . }}-theia-proxy
       port: 5000
   {{- if not .Values.debug }}
   tls:
@@ -169,7 +152,7 @@ spec:
 #    - name: redirect-to-new
 #      namespace: {{ .Release.Namespace }}
 #    services:
-#    - name: anubis-web
+#    - name: {{ include "chart.fullname" . }}-web
 #      port: 3000
 #  tls:
 #    certResolver: le

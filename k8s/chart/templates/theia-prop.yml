@@ -1,0 +1,30 @@
+#
+# Use this to propagate new ide images to the kubernetes cluster
+#   kubectl apply -f theia-prop.yaml
+#
+
+{{- if .Values.theia.prop.enable }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "chart.fullname" . }}-theia-prop
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: theia-prop
+spec:
+  selector:
+    matchLabels:
+      name: theia-prop
+  template:
+    metadata:
+      labels:
+        name: theia-prop
+    spec:
+      containers:
+      {{- range .Values.theia.prop.images }}
+      - name: {{ .name }}
+        image: {{ .image }}
+        imagePullPolicy: Always
+        command: ['sh', '-c', 'while true; do sleep 3600; done']
+      {{- end }}
+{{- end }}

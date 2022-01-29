@@ -3,13 +3,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: anubis-theia-proxy
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "chart.fullname" . }}-theia-proxy
   labels:
-    app.kubernetes.io/name: theia
+    {{- include "chart.labels" . | nindent 4 }}
     component: proxy
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
 spec:
   replicas: {{ .Values.theia.proxy.replicas }}
   {{- if .Values.rollingUpdates }}
@@ -21,12 +18,12 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: theia
+      {{- include "chart.labels" . | nindent 6 }}
       component: proxy
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: theia
+        {{- include "chart.labels" . | nindent 8 }}
         component: proxy
     spec:
 
@@ -57,34 +54,7 @@ spec:
         - name: http
           containerPort: 5000
         env:
-        - name: "DEBUG"
-          value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
-        - name: "SECRET_KEY"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: secret-key
-        # sqlalchemy uri
-        - name: "DATABASE_URI"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: database-uri
-        - name: "DB_PASSWORD"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: database-password
-        - name: "DB_HOST"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: database-host
-        - name: "DB_PORT"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: database-port
+        {{- include "api.env" . | nindent 8 }}
         {{- if .Values.healthChecks }}
         startupProbe:
           httpGet:
@@ -114,15 +84,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: anubis-theia-proxy
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "chart.fullname" . }}-theia-proxy
   labels:
-    app.kubernetes.io/name: theia
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
+    {{- include "chart.labels" . | nindent 4 }}
+    component: proxy
 spec:
   selector:
-    app.kubernetes.io/name: theia
+    {{- include "chart.labels" . | nindent 4 }}
     component: proxy
   ports:
     - name: http-tcp
@@ -133,32 +101,28 @@ spec:
       protocol: UDP
       port: 5000
       targetPort: 5000
-
-
 ---
 
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: theia-poller
-  namespace: {{ .Release.Namespace }}
   labels:
-    component: theia-poller
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
+    {{- include "chart.labels" . | nindent 4 }}
+    component: poller
 {{- if .Values.imagePullSecret }}
 imagePullSecrets:
   - name: {{ .Values.imagePullSecret }}
 {{- end }}
 ---
+
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: theia-poller
-  namespace: {{ .Release.Namespace }}
   labels:
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
+    {{- include "chart.labels" . | nindent 4 }}
+    component: poller
 rules:
 - apiGroups: [""]
   resources: ["pods"]
@@ -167,14 +131,14 @@ rules:
   resources: ["events"]
   verbs: ["get", "list"]
 ---
+
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: theia-poller
-  namespace: {{ .Release.Namespace }}
   labels:
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
+    {{- include "chart.labels" . | nindent 4 }}
+    component: poller
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -183,19 +147,15 @@ subjects:
   - kind: ServiceAccount
     name: theia-poller
     namespace: {{ .Release.Namespace }}
-
 ---
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: anubis-theia-poller
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "chart.fullname" . }}-theia-poller
   labels:
-    app.kubernetes.io/name: theia
+    {{- include "chart.labels" . | nindent 4 }}
     component: poller
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
 spec:
   replicas: {{ .Values.theia.poller.replicas }}
   {{- if .Values.rollingUpdates }}
@@ -207,12 +167,12 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: theia
+      {{- include "chart.labels" . | nindent 6 }}
       component: poller
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: theia
+        {{- include "chart.labels" . | nindent 8 }}
         component: poller
     spec:
       serviceAccountName: theia-poller
@@ -231,39 +191,7 @@ spec:
             memory: 500Mi
         {{- end }}
         env:
-        - name: "PYTHONPATH"
-          value: "/opt/app"
-        - name: "SECRET_KEY"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: secret-key
-        # sqlalchemy uri
-        - name: "DATABASE_URI"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: database-uri
-        - name: "DB_PASSWORD"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: database-password
-        - name: "DB_HOST"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: database-host
-        - name: "DB_PORT"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: database-port
-        - name: "REDIS_PASS"
-          valueFrom:
-            secretKeyRef:
-              name: api
-              key: redis-password
+        {{- include "api.env" . | nindent 8 }}
 
 
 {{- end }}
