@@ -120,6 +120,7 @@ def update_student_lists():
     # Iterate through courses, updating student list
     for course in courses:
         get_students(course.id)
+    get_students(None)
 
 
 @with_context

@@ -5,7 +5,7 @@ from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, is_job
 
 
-@cache.memoize(timeout=-1, forced_update=is_debug, unless=is_debug)
+@cache.memoize(timeout=-1, forced_update=is_debug, unless=is_debug, source_check=True)
 def get_students(course_id: str = None) -> List[Dict[str, dict]]:
     """
     Get students by course code. If no course code is specified,
@@ -18,13 +18,13 @@ def get_students(course_id: str = None) -> List[Dict[str, dict]]:
     """
 
     # List of sqlalchemy filters
-    filters = []
-
     if course_id is not None:
-        filters.append(InCourse.course_id == course_id)
+        users = User.query.join(InCourse).filter(InCourse.course_id == course_id).all()
+    else:
+        users = User.query.all()
 
     # Get all users, and break them into their data props
-    return [s.data for s in User.query.join(InCourse).filter(*filters).all()]
+    return [s.data for s in users]
 
 
 @cache.memoize(timeout=60, unless=is_debug)
