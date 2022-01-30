@@ -27,17 +27,21 @@ const checkCourseContextReset = (user) => {
 
 export default function AuthWrapper({children}) {
   const {enqueueSnackbar} = useSnackbar();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(undefined);
   const [reset, setReset] = useState(0);
 
   React.useEffect(() => {
     axios.get('/api/public/auth/whoami').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      checkCourseContextReset(data?.user);
-      setUser({
-        setReset,
-        ...(data?.user ?? {}),
-      });
+      if (data?.user) {
+        checkCourseContextReset(data.user);
+        setUser({
+          setReset,
+          ...data.user,
+        });
+      } else {
+        setUser(null);
+      }
     });
   }, [reset]);
 

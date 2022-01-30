@@ -1,9 +1,12 @@
 import React from 'react';
+import AboutRedirect from './components/shared/AboutRedirect';
 import {Redirect, Route, Switch} from 'react-router-dom';
 import {public_nav, admin_nav, super_nav, footer_nav, not_shown_nav} from './navconfig';
-import NotFound from './components/shared/NotFound';
 
 export default function Main({user}) {
+  if (user === undefined) {
+    return null;
+  }
   return (
     <Switch>
       {public_nav.map(({children}) => children.map(({path, Page, exact = true}) => (
@@ -35,8 +38,11 @@ export default function Main({user}) {
           <Page/>
         </Route>
       ))}
+      <Route exact path={'/about'}>
+        <AboutRedirect user={user}/>
+      </Route>
       <Route exact path={'/'}>
-        <Redirect to={'/visuals'}/>
+        {user === null ? <Redirect to={'/about'}/> : <Redirect to={'/visuals'}/>}
       </Route>
     </Switch>
   );
