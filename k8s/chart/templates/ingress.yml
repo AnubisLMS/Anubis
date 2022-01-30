@@ -115,6 +115,34 @@ spec:
   {{- end }}
 ---
 
+# Public Ingress Route /*
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingress.route.anubis.marketing-web
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: web
+spec:
+  {{- if .Values.debug }}
+  entryPoints:
+    - web
+  {{- else }}
+  entryPoints:
+    - websecure
+  {{- end }}
+  routes:
+  - kind: Rule
+    match: Host(`{{ .Values.marketing.domain }}`)
+    services:
+    - name: {{ include "chart.fullname" . }}-marketing-web
+      port: 3000
+  {{- if not .Values.debug }}
+  tls:
+    certResolver: le
+  {{- end }}
+---
+
 # For the anubis-lms.io redirect when we deploy that
 {{- if not .Values.debug }}
 ## Redirect with domain replacement

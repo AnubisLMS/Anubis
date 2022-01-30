@@ -1,16 +1,17 @@
+{{- if .Values.marketing.enable }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "chart.fullname" . }}-web
+  name: {{ include "chart.fullname" . }}-marketing-web
   labels:
     {{- include "chart.labels" . | nindent 4 }}
-    component: web
+    component: marketing-web
 spec:
   selector:
     matchLabels:
       {{- include "chart.labels" . | nindent 6 }}
-      component: web
-  replicas: {{ .Values.web.replicas }}
+      component: marketing-web
+  replicas: {{ .Values.marketing.replicas }}
   {{- if .Values.rollingUpdates }}
   strategy:
     type: RollingUpdate
@@ -22,12 +23,12 @@ spec:
     metadata:
       labels:
         {{- include "chart.labels" . | nindent 8 }}
-        component: web
+        component: marketing-web
     spec:
       dnsPolicy: ClusterFirst
       containers:
       - name: web
-        image: {{ .Values.web.image }}:{{ .Values.web.tag }}
+        image: {{ .Values.marketing.image }}:{{ .Values.marketing.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
           requests:
@@ -67,15 +68,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "chart.fullname" . }}-web
+  name: {{ include "chart.fullname" . }}-marketing-web
   labels:
     {{- include "chart.labels" . | nindent 4 }}
-    component: web
+    component: marketing-web
 spec:
   selector:
     {{- include "chart.labels" . | nindent 4 }}
-    component: web
+    component: marketing-web
   ports:
   - name: web
     port: 3000
     targetPort: 3000
+{{- end }}

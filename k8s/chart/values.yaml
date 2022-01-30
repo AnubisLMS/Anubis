@@ -78,6 +78,13 @@ discordbot:
   enable: true
   replicas: 1
 
+marketing:
+  enable: true
+  domain: "anubis-lms.io"
+  image: "registry.digitalocean.com/anubis/marketing-site"
+  tag: "latest"
+  replicas: 2
+
 ###############################################################################
 
 

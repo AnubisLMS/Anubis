@@ -28,4 +28,5 @@ helm upgrade \
      --set "autograde_recalculate.suspend=true" \
      --set "daily_cleanup.suspend=true" \
      --set "theia.prop.enable=false" \
+     --set "marketing.enable=false" \
      $@
