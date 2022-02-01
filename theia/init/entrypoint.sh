@@ -33,6 +33,7 @@ if [ -n "${GIT_CRED}" ]; then
     echo "    helper = store" >> /root/.gitconfig
 fi
 
+git config --global core.hooksPath /dev/null
 
 set +e
 
@@ -41,12 +42,5 @@ set -x
 cd /out
 git clone ${GIT_REPO}
 set +x
-
-# Pull any and all repos
-for i in $(find . -maxdepth 2 -name '.git' -type d); do
-    pushd $(dirname $i)
-    git pull --no-verify
-    popd
-done
 
 fix_permissions

@@ -8,6 +8,7 @@ if [ -n "${GIT_CRED}" ]; then
     git config --global credential.helper 'store --file ~/.git-credentials'
     git config --global user.email anubis@osiris.cyber.nyu.edu
     git config --global user.name anubis-robot
+    git config --global core.hooksPath /dev/null
 fi
 
 set +e

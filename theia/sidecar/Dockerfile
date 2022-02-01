@@ -8,7 +8,8 @@ USER theia
 RUN git config --global user.email noreply@anubis.osiris.services \
   && git config --global user.name os3224-robot \
   && git config --global credential.store helper \
-  && git config --global credential.helper 'store --file ~/.git-credentials'
+  && git config --global credential.helper 'store --file ~/.git-credentials' \
+  && git config --global core.hooksPath /dev/null
 USER root
 
 VOLUME /home/project

@@ -2,6 +2,8 @@
 
 set -e
 
+git config --global core.hooksPath /dev/null
+
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${PATH}"
 cd ${1:-/home/anubis}
 
