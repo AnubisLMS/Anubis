@@ -190,7 +190,9 @@ var proxyServer = http.createServer(function (req, res) {
           target: {host, port}
         });
       }).catch(() => {
-        res.writeHead(302, {location: '/'});
+        res.writeHead(302, {location: '/?error=' +
+            'Unable%20to%20connect%20you%20to%20your%20IDE.%20' +
+            'Please%20try%20stopping%20and%20starting%20a%20new%20IDE.'});
         res.end('Please start an ide at https://anubis.osiris.services and click go to ide.');
       })
   }

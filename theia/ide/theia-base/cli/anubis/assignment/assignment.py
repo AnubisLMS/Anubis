@@ -19,7 +19,7 @@ def build(build_result: BuildResult):
 @register_test('Long file test')
 @points_test(10)
 def test_1(test_result: TestResult):
-    test_result.stdout = "Testing long lines\n"
+    test_result.message = "Testing long lines\n"
 
     # Start xv6 and run command
     stdout_lines = xv6_run("echo 123", test_result)
@@ -40,7 +40,7 @@ def test_1(test_result: TestResult):
 @hide_test()
 @points_test(10)
 def test_2(test_result: TestResult):
-    test_result.stdout = "Testing long lines\n"
+    test_result.message = "Testing long lines\n"
 
     # Start xv6 and run command
     stdout_lines = xv6_run("grep the README.md", test_result)

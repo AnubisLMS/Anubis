@@ -4,6 +4,7 @@ import os
 import json
 import string
 import subprocess
+import traceback
 
 from flask import Flask, Response, request, make_response
 
@@ -112,16 +113,21 @@ if ADMIN:
             repo_base = repo_url.removeprefix('https://github.com/')
             netid: str = repo['netid']
 
-            r = subprocess.run(
-                ['git', 'clone', repo_url, netid],
-                cwd=path,
-                timeout=5,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-            )
-            if r.returncode != 0:
-                failed.append('Failed to clone {} for {}'.format(repo_base, netid))
-                print(r.stdout)
+            try:
+                r = subprocess.run(
+                    ['git', 'clone', repo_url, netid],
+                    cwd=path,
+                    timeout=5,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                )
+                if r.returncode != 0:
+                    failed.append('Failed to clone {} for {}'.format(repo_base, netid))
+                    print(r.stdout)
+                    continue
+            except subprocess.TimeoutExpired:
+                failed.append('Failed to clone {} for {} Timeout'.format(repo_base, netid))
+                print(traceback.format_exc())
                 continue
 
             succeeded.append('{:<12} :: {:<32} -> {}/{}'.format(netid, repo_base, assignment_name, netid))

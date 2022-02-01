@@ -22,6 +22,7 @@ import yaml
 INCLUSTER = True
 API_URL = 'http://anubis-api:5000'
 ANUBIS_ADMIN = os.environ.get('ANUBIS_ADMIN', 'OFF') == 'ON'
+ANUBIS_ASSIGNMENT_NAME = os.environ.get('ANUBIS_ASSIGNMENT_NAME', None)
 ANUBIS_ASSIGNMENT_TESTS_REPO = os.environ.get('ANUBIS_ASSIGNMENT_TESTS_REPO', None)
 COURSE_ID = os.environ.get('COURSE_ID', None)
 COURSE_CODE = os.environ.get('COURSE_CODE', 'CS-UY 3224')
@@ -320,7 +321,7 @@ def ls():
 
 
 @assignment.command()
-@click.argument('assignment-name')
+@click.option('--assignment-name', default=ANUBIS_ASSIGNMENT_NAME)
 @require_admin
 @require_not_in_repo
 def clone(assignment_name):
@@ -370,7 +371,7 @@ def clone(assignment_name):
         'assignment_name': assignment_name,
         'path': os.getcwd() + '/',
         'repos': repos,
-    })
+    }, timeout=30)
     click.echo(r.text)
 
     click.echo('4/4 Finished!')
