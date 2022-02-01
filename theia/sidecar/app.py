@@ -48,7 +48,7 @@ def index():
     try:
         # Add
         add = subprocess.run(
-            ['git', 'add', '.'],
+            ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.push=push', 'add', '.'],
             cwd=repo,
             timeout=3,
             stdout=subprocess.PIPE,
@@ -59,7 +59,7 @@ def index():
 
         # Commit
         commit = subprocess.run(
-            ['git', 'commit', '--no-verify', '-m', message],
+            ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.commit=commit', 'commit', '--no-verify', '-m', message],
             cwd=repo,
             timeout=3,
             stdout=subprocess.PIPE,
@@ -70,7 +70,7 @@ def index():
 
         # Push
         push = subprocess.run(
-            ['git', 'push', '--no-verify'],
+            ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.push=push', 'push', '--no-verify'],
             cwd=repo,
             timeout=3,
             stdout=subprocess.PIPE,
@@ -115,7 +115,7 @@ if ADMIN:
 
             try:
                 r = subprocess.run(
-                    ['git', 'clone', repo_url, netid],
+                    ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.clone=clone', 'clone', repo_url, netid],
                     cwd=path,
                     timeout=5,
                     stdout=subprocess.PIPE,
