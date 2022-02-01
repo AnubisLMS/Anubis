@@ -264,15 +264,10 @@ def test_lines(
     # The remaining offset until the first occurence of mismatch is centralized
     # within the context
     context_remaining_offset = context_length // 2
-    # A general preprocessor function for text
-    if case_sensitive:
-        preprocess_func = lambda *texts: tuple(text.strip() for text in texts)
-    else:
-        preprocess_func = lambda *texts: tuple(text.strip().lower() for text in texts)
 
     for index, (_a, _b) in enumerate(zip(expected_lines, stdout_lines)):
         # We defer text preprocessing until we need the lines
-        _a, _b = preprocess_func(_a, _b)
+        _a, _b = (_a.strip(), _b.strip()) if case_sensitive else (_a.strip().lower(), _b.strip().lower())
         context.append((_a, _b))
 
         # When there is a mismatch already, we are only motivated to fill up
@@ -306,6 +301,12 @@ def test_lines(
     else:
         # Otherwise, we only fill the context to the desired size 
         end = start + (context_length - len(context))
+
+    # A general preprocessor function for text
+    if case_sensitive:
+        preprocess_func = lambda *texts: tuple(text.strip() for text in texts)
+    else:
+        preprocess_func = lambda *texts: tuple(text.strip().lower() for text in texts)
 
     if len(expected_lines) > len(stdout_lines):
         expected_context += preprocess_func(*expected_lines[start:end])
