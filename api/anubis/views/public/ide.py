@@ -20,6 +20,7 @@ from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_response, load_from_id
 from anubis.utils.rpc import enqueue_ide_stop
 from anubis.utils.config import get_config_int
+from anubis.utils.cache import cache
 
 ide_ = Blueprint("public-ide", __name__, url_prefix="/public/ide")
 
@@ -66,7 +67,7 @@ def public_ide_initialize(assignment: Assignment):
         # If it did, then we need to make sure the volume
         # has had time to unmount.
         seconds_passed = (datetime.now() - last_session.ended).total_seconds()
-        cooldown_seconds = get_config_int('THEIA_VOLUME_COOLDOWN_SECONDS', 10)
+        cooldown_seconds = get_config_int('THEIA_VOLUME_COOLDOWN_SECONDS', 1)
 
         # If within cooldown time, then give back a warning
         if seconds_passed < cooldown_seconds:
@@ -252,6 +253,9 @@ def public_ide_stop(theia_session_id: str) -> Dict[str, str]:
 
     # Enqueue a ide stop job
     enqueue_ide_stop(theia_session.id)
+
+    # Clear poll cache
+    cache.delete_memoized(theia_poll_ide, theia_session_id, current_user.id)
 
     # Pass back the status
     return success_response(
