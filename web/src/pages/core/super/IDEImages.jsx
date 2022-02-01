@@ -235,6 +235,16 @@ export default function IDEImages() {
                   <TextField
                     fullWidth
                     variant={'outlined'}
+                    label={'Default Tag'}
+                    value={editOpen?.default_tag}
+                    onChange={(e) => updateImageOpen(editOpen?.id, 'default_tag', e.target.value)}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    variant={'outlined'}
                     label={'Icon'}
                     value={editOpen?.icon}
                     onChange={(e) => updateImageOpen(editOpen?.id, 'icon', e.target.value)}
