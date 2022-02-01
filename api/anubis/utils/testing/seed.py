@@ -99,7 +99,7 @@ def create_assignment(
         unique_code=rand(8),
         hidden=False,
         description=lorem,
-        github_template="wabscale/xv6-public",
+        github_template="AnubisLMS/xv6",
         pipeline_image=f"registry.digitalocean.com/anubis/assignment/{rand(8)}",
         release_date=release,
         due_date=due,
@@ -139,7 +139,7 @@ def create_assignment(
             repo_name = get_student_assignment_repo_name(user, assignment)
             repo_url = f"https://github.com/os3224/{repo_name}"
             if do_repos:
-                repo_url = "https://github.com/wabscale/xv6-public"
+                repo_url = "https://github.com/AnubisLMS/xv6"
             repos.append(
                 AssignmentRepo(
                     id=rand(),
@@ -328,6 +328,7 @@ def seed():
         title="Python IDE",
         description="Python IDE",
         icon="devicon-python-plain",
+        default_tag="python-3.10",
         public=True,
     )
     base_tag38 = TheiaImageTag(
