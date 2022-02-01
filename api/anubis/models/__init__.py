@@ -650,6 +650,7 @@ class TheiaImage(db.Model):
             "description": self.description,
             "icon": self.icon,
             "public": self.public,
+            "default_tag": self.default_tag,
             "tags": [tag.data for tag in self.tags],
         }
 
