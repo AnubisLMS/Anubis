@@ -238,7 +238,7 @@ def test_lines(
     stdout_lines: typing.List[str],
     expected_lines: typing.List[str],
     case_sensitive: bool = True,
-    context_length: int = 5,
+    context_length: int = 1000,
 ) -> CompareFuncReturnT:
     """
     Test lines for exact equality. Whitespace will be stripped off each line automatically.

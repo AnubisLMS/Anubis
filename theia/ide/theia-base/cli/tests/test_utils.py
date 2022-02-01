@@ -81,19 +81,19 @@ def compare_test_fixtures() -> List[CompareTestFixture]:
         matched=False,
         actual=["exec test failed"],
         expected=["sample 1", "sample 2", "sample 3", "sample 4", "sample 5", "sample 6", "sample 7"],
-        diff=["--- ", "+++ ", "@@ -1,5 +1 @@", "-sample 1", "-sample 2", "-sample 3", "-sample 4", "-sample 5", "+exec test failed"]
+        diff=["--- ", "+++ ", "@@ -1,7 +1 @@", "-sample 1", "-sample 2", "-sample 3", "-sample 4", "-sample 5", "-sample 6", "-sample 7", "+exec test failed"]
     ), CompareTestFixture(
         comp_func=utils.test_lines,
         matched=False,
         actual=["sample 1", "sample 2", "exec test failed"],
         expected=["sample 1", "sample 2", "sample 3", "sample 4", "sample 5", "sample 6", "sample 7"],
-        diff=["--- ", "+++ ", "@@ -1,5 +1,3 @@", " sample 1", " sample 2", "-sample 3", "-sample 4", "-sample 5", "+exec test failed"]
+        diff=["--- ", "+++ ", "@@ -1,7 +1,3 @@", " sample 1", " sample 2", "-sample 3", "-sample 4", "-sample 5", "-sample 6", "-sample 7", "+exec test failed"]
     ), CompareTestFixture(
         comp_func=utils.test_lines,
         matched=False,
         actual=["sample 1", "sample 2", "sample 3", "sample 4", "sample 5", "sample 6", "sample 7"],
         expected=["sample 1", "sample 2", "sample x"],
-        diff=["--- ", "+++ ", "@@ -1,3 +1,5 @@", " sample 1", " sample 2", "-sample x", "+sample 3", "+sample 4", "+sample 5"]
+        diff=["--- ", "+++ ", "@@ -1,3 +1,7 @@", " sample 1", " sample 2", "-sample x", "+sample 3", "+sample 4", "+sample 5", "+sample 6", "+sample 7"]
     ), CompareTestFixture(
         comp_func=utils.test_lines,
         matched=True,
@@ -106,6 +106,15 @@ def compare_test_fixtures() -> List[CompareTestFixture]:
         actual=[],
         expected=["bar"],
         diff=["--- ", "+++ ", "@@ -1 +0,0 @@", "-bar"]
+    ), CompareTestFixture(
+        comp_func=utils.test_lines,
+        matched=False,
+        actual=["my broken for loop" for _ in range(2000)],
+        expected=["foo", "bar"],
+        # 1000 is the default cutoff for the length of the context
+        # We make sure that excessively long output produced by
+        # student code will not go into the difflib.unified_diff function
+        diff=["--- ", "+++ ", "@@ -1,2 +1,1000 @@", "-foo", "-bar"] + ["+my broken for loop" for _ in range(1000)]
     )]
 
 def test_compare_func(compare_test_fixtures: List[CompareTestFixture]):
