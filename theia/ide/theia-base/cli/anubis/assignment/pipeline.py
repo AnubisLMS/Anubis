@@ -79,14 +79,14 @@ if git_creds is not None:
         f.write(git_creds)
         f.close()
     with open(os.environ.get('HOME') + '/.gitconfig', 'w') as f:
-        f.write('[code]\n')
+        f.write('[core]\n')
         f.write('\thooksPath = /dev/null\n')
         f.write('[credential]\n')
         f.write('\thelper = store\n')
         f.close()
 else:
     with open(os.environ.get('HOME') + '/.gitconfig', 'w') as f:
-        f.write('[code]\n')
+        f.write('[core]\n')
         f.write('\thooksPath = /dev/null\n')
         f.close()
 
