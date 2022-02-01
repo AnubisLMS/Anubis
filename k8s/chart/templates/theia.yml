@@ -26,17 +26,10 @@ spec:
         {{- include "chart.labels" . | nindent 8 }}
         component: proxy
     spec:
-
-      {{- if not .Values.debug }}
-      # There is a weird issue with the dns where it is sometimes not
-      # looking up the database correctly. Set the dns to cloudflare
-      # to fix it.
-      dnsPolicy: 'None'
+      dnsPolicy: 'ClusterFirst'
       dnsConfig:
         nameservers:
           - 1.1.1.1
-      {{- end }}
-
       containers:
       - name: proxy
         image: {{ .Values.theia.proxy.image }}:{{ .Values.theia.proxy.tag }}
