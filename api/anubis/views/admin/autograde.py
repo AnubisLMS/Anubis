@@ -50,7 +50,6 @@ def admin_autograde_cache_reset(assignment_id: str):
 
 @autograde_.route("/assignment/<string:assignment_id>")
 @require_admin()
-@cache.memoize(timeout=60)
 @json_response
 def admin_autograde_assignment_assignment_id(assignment_id):
     """
@@ -98,7 +97,6 @@ def admin_autograde_assignment_assignment_id(assignment_id):
 
 @autograde_.route("/for/<assignment_id>/<user_id>")
 @require_admin()
-# @cache.memoize(timeout=60, unless=is_debug)
 @json_response
 def admin_autograde_for_assignment_id_user_id(assignment_id, user_id):
     """
