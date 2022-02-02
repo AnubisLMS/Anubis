@@ -34,6 +34,7 @@ from anubis.constants import THEIA_DEFAULT_OPTIONS
 from anubis.utils.data import rand
 from anubis.utils.data import with_context
 from anubis.utils.testing.db import clear_database
+from anubis.utils.testing.diffs import rand_diff
 from anubis.utils.testing.lorem import lorem
 from anubis.utils.testing.names import names
 from anubis.utils.logging import logger
@@ -253,7 +254,7 @@ def init_submissions(submissions):
                 else:
                     test_result.message = "Test failed"
                     test_result.output_type = "diff"
-                    test_result.output = "--- \n+++ \n@@ -1,3 +1,3 @@\n a\n-c\n+b\n d"
+                    test_result.output = rand_diff()
 
 
 def init_forums(course: Course):
