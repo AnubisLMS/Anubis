@@ -297,6 +297,7 @@ def create_assignment_github_repo(
     """
 
     repo_created = any(repo.repo_created for repo in repos)
+    data = None
 
     try:
         # If repo has not been created yet
@@ -332,9 +333,9 @@ def create_assignment_github_repo(
                 repo.repo_created = True
             db.session.commit()
     except Exception as e:
+        logger.error(f"Failed to create repo {e}, continuing")
+        logger.error(f'data = {str(data)}')
         logger.error(traceback.format_exc())
-        logger.error(f"Failed to create repo {e}")
-        logger.error(f"continuing")
 
     try:
         for repo in repos:
@@ -367,8 +368,9 @@ def create_assignment_github_repo(
                 repo.collaborator_configured = True
                 db.session.commit()
     except Exception as e:
-        logger.error(traceback.format_exc())
         logger.error(f"Failed to configure collaborators {e}, continuing")
+        logger.error(f'data = {str(data)}')
+        logger.error(traceback.format_exc())
 
     try:
         for repo in repos:
@@ -399,7 +401,8 @@ def create_assignment_github_repo(
                 repo.ta_configured = True
                 db.session.commit()
     except Exception as e:
-        logger.error(traceback.format_exc())
         logger.error(f"Failed to configure ta team {e}, continuing")
+        logger.error(f'data = {str(data)}')
+        logger.error(traceback.format_exc())
 
     return repos
