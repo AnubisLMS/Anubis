@@ -59,7 +59,7 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
     ).order_by(TheiaSession.created.desc()).limit(1).first()
 
     # Check if last session had a persistent volume
-    if last_session and last_session.persistent_storage:
+    if last_session is not None and last_session.persistent_storage and last_session.ended is not None:
         # If it did, then we need to make sure the volume
         # has had time to unmount.
         seconds_passed = (datetime.now() - last_session.ended).total_seconds()

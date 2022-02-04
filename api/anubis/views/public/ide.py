@@ -12,7 +12,8 @@ from anubis.lms.theia import (
     initialize_ide,
     assert_theia_sessions_enabled,
 )
-from anubis.models import Assignment, AssignmentRepo, TheiaSession, db, THEIA_DEFAULT_OPTIONS
+from anubis.models import Assignment, AssignmentRepo, TheiaSession, db
+from anubis.constants import THEIA_DEFAULT_OPTIONS
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
@@ -63,7 +64,7 @@ def public_ide_initialize(assignment: Assignment):
     ).order_by(TheiaSession.created.desc()).limit(1).first()
 
     # Check if last session had a persistent volume
-    if last_session and last_session.persistent_storage:
+    if last_session is not None and last_session.persistent_storage and last_session.ended is not None:
         # If it did, then we need to make sure the volume
         # has had time to unmount.
         seconds_passed = (datetime.now() - last_session.ended).total_seconds()
@@ -131,7 +132,7 @@ def public_ide_initialize(assignment: Assignment):
 
     # Figure out options from user values
     autosave = request.args.get("autosave", "true") == "true"
-    persistent_storage = request.args.get("persistent_storage", "true") == "true"
+    persistent_storage = request.args.get("persistent_storage", "true") == "false"
 
     # Figure out options from assignment
     network_policy = options.get("network_policy", "os-student")
@@ -139,6 +140,7 @@ def public_ide_initialize(assignment: Assignment):
         "resources",
         THEIA_DEFAULT_OPTIONS['resources'],
     )
+    persistent_storage = options.get('persistent_storage', False) and persistent_storage
 
     # If course admin, then give admin network policy
     if is_admin:
