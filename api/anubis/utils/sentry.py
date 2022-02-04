@@ -5,7 +5,7 @@ from anubis.utils.logging import logger
 
 
 def add_sentry(_: Flask):
-    if not is_debug() and config.SENTRY_DSN != '':
+    if not is_debug() and config.SENTRY_DSN != '' and config.SENTRY_DSN is not None:
         import sentry_sdk
         from sentry_sdk.integrations.flask import FlaskIntegration
         logger.info('ADDING SENTRY')
