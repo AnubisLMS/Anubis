@@ -4,6 +4,7 @@ import traceback
 from datetime import datetime, timedelta
 from typing import List, Optional, Tuple
 
+import kubernetes.config
 from kubernetes import client, config
 
 from anubis.constants import THEIA_DEFAULT_OPTIONS
@@ -18,7 +19,7 @@ from anubis.utils.logging import logger
 
 
 def create_theia_k8s_pod_pvc(
-    theia_session: TheiaSession,
+    theia_session: TheiaSession, skip_debug_check: bool = False
 ) -> Tuple[client.V1Pod, Optional[client.V1PersistentVolumeClaim]]:
     """
     Create the python kubernetes objects for a theia session. This is
@@ -64,8 +65,8 @@ def create_theia_k8s_pod_pvc(
     # Get home volume size from config
     if theia_session.playground:
         volume_size = get_config_str('PLAYGROUND_VOLUME_SIZE', '100Mi')
-        limits = get_config_dict('PLAYGROUND_RESOURCE_LIMITS', THEIA_DEFAULT_OPTIONS['resources']['limits'])
-        requests = get_config_dict('PLAYGROUND_RESOURCE_REQUESTS', THEIA_DEFAULT_OPTIONS['resources']['requests'])
+        # limits = get_config_dict('PLAYGROUND_RESOURCE_LIMITS', THEIA_DEFAULT_OPTIONS['resources']['limits'])
+        # requests = get_config_dict('PLAYGROUND_RESOURCE_REQUESTS', THEIA_DEFAULT_OPTIONS['resources']['requests'])
     else:
         volume_size = get_config_str('THEIA_VOLUME_SIZE', '100Mi')
 
@@ -89,7 +90,7 @@ def create_theia_k8s_pod_pvc(
     # not available, then we'll need to not include it in the init and sidecar
     # containers. It is then up to those containers to handle the missing git
     # credentials.
-    if is_debug():
+    if not skip_debug_check and is_debug():
 
         # Load the kubernetes incluster config
         config.load_incluster_config()
@@ -501,7 +502,7 @@ def create_theia_k8s_pod_pvc(
         metadata=client.V1ObjectMeta(
             name=pod_name,
             labels={
-                "app.kubernetes.io/name": "theia",
+                "app.kubernetes.io/name": "anubis",
                 "component": "theia-session",
                 "role": "theia-session",
                 "netid": netid,
