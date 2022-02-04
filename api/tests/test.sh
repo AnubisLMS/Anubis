@@ -4,9 +4,10 @@ set -e
 
 cd $(dirname $0)
 
-TEST_ROOT="$(pwd)"
-API_ROOT="$(pwd)/.."
-SOURCE_DIRS="${API_ROOT}/anubis,${API_ROOT}/jobs"
+export DEBUG=1
+export TEST_ROOT="$(pwd)"
+export API_ROOT="$(pwd)/.."
+export SOURCE_DIRS="${API_ROOT}/anubis,${API_ROOT}/jobs"
 
 pushd ..
 make venv

@@ -387,7 +387,7 @@ def create_repo(s: Session, assignment_id: str = None):
             owner=user,
             assignment_id=assignment_id,
             netid=s.netid,
-            repo_url="https://github.com/wabscale/xv6-public",
+            repo_url="https://github.com/AnubisLMS/xv6",
         )
     )
     db.session.commit()
