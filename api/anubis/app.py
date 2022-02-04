@@ -1,7 +1,7 @@
 from flask import Flask
 
 
-def init_services(app):
+def init_services(app: Flask):
     """
     Initialize app with redis cache, mariadb database, and ELK services
 
@@ -13,6 +13,7 @@ def init_services(app):
     from anubis.utils.exceptions import add_app_exception_handlers
     from anubis.utils.migrate import migrate
     from anubis.utils.healthcheck import add_healthcheck
+    from anubis.utils.sentry import add_sentry
 
     # Init services
     db.init_app(app)
@@ -20,9 +21,10 @@ def init_services(app):
     migrate.init_app(app, db)
     add_app_exception_handlers(app)
     add_healthcheck(app)
+    add_sentry(app)
 
 
-def create_app():
+def create_app() -> Flask:
     """
     Create the main Anubis API Flask app instance
 
@@ -49,10 +51,14 @@ def create_app():
     register_admin_views(app)
     register_super_views(app)
 
+    @app.route('/debug-sentry')
+    def trigger_error():
+        division_by_zero = 1 / 0
+
     return app
 
 
-def create_pipeline_app():
+def create_pipeline_app() -> Flask:
     """
     Create the Submission Pipeline API Flask app instance
 

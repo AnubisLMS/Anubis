@@ -10,6 +10,7 @@ class Config:
         self.SECRET_KEY = os.environ.get("SECRET_KEY", default="DEBUG")
         self.DB_HOST = os.environ.get("DB_HOST", "db")
         self.DOMAIN = os.environ.get("DOMAIN", default="localhost")
+        self.SENTRY_DSN = os.environ.get("SENTRY_DSN", default=None)
 
         if not self.MINDEBUG:
             # sqlalchemy
