@@ -8,10 +8,12 @@ def adjust_assignment_theia_options(assignment_id, options):
     assignment.theia_options = options
     db.session.commit()
 
+
 @with_context
 def set_longhorn():
     from anubis.utils.config import set_config_value
     set_config_value('THEIA_STORAGE_CLASS_NAME', 'longhorn')
+
 
 def test_playground_k8s():
     from anubis.k8s.theia import create_theia_k8s_pod_pvc
