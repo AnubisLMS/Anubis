@@ -36,6 +36,7 @@ services:
       - "DEBUG=1"
       - "DB_HOST=db"
       - "GITHUB_TOKEN"
+      - "SENTRY_DSN"
     volumes:
       - "./api:/opt/app"
     labels:
@@ -53,6 +54,7 @@ services:
       - "DEBUG=1"
       - "DB_HOST=db"
       - "GITHUB_TOKEN"
+      - "SENTRY_DSN"
       - "CREATE_APP_FUNCTION=create_pipeline_app"
     ports:
       - 127.0.0.1:5004:5004
@@ -68,6 +70,7 @@ services:
       - "DEBUG=1"
       - "DB_HOST=db"
       - "GITHUB_TOKEN"
+      - "SENTRY_DSN"
     volumes:
       - "./api:/opt/app"
     labels:
@@ -80,6 +83,7 @@ services:
       - "DEBUG=1"
       - "DB_HOST=db"
       - "GITHUB_TOKEN"
+      - "SENTRY_DSN"
     volumes:
       - "./api:/opt/app"
     labels:
@@ -92,6 +96,7 @@ services:
       - "DEBUG=1"
       - "DB_HOST=db"
       - "GITHUB_TOKEN"
+      - "SENTRY_DSN"
     volumes:
       - "./api:/opt/app"
     labels:
