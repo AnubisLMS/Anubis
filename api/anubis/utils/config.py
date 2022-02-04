@@ -2,8 +2,24 @@ import json
 
 from typing import Optional, Dict
 
-from anubis.models import Config
+from anubis.models import db, Config
 from anubis.utils.cache import cache
+
+
+def set_config_value(key: str, value: str) -> Config:
+    # Find existing config
+    config: Config = Config.query.filter(Config.key == key).first()
+
+    # If config does not exist, add it
+    if config is None:
+        config: Config = Config(key=key)
+        db.session.add(config)
+
+    # Set value
+    config.value = value
+
+    # Commit change
+    db.session.commit()
 
 
 @cache.memoize(timeout=10, source_check=True)
@@ -27,7 +43,7 @@ def get_config_dict(key: str, default: Optional[Dict] = None) -> Optional[Dict]:
 
     # Return the parsed json value if we are able
     try:
-        return json.loads(config_value_raw)
+        return json.loads(config_value_raw.value)
     except json.JSONDecodeError:
         return default
 
