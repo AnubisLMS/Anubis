@@ -71,7 +71,7 @@ const useColumns = (config, setConfig, enqueueSnackbar) => ([
   {
     field: 'value',
     headerName: 'Value',
-    width: 250,
+    width: 400,
     renderCell: (params) => (
       <TextField
         fullWidth
