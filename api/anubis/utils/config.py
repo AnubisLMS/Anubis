@@ -1,7 +1,35 @@
-from typing import Optional
+import json
+
+from typing import Optional, Dict
 
 from anubis.models import Config
 from anubis.utils.cache import cache
+
+
+@cache.memoize(timeout=10, source_check=True)
+def get_config_dict(key: str, default: Optional[Dict] = None) -> Optional[Dict]:
+    """
+    Get a config str entry for a given config key. Optionally specify a
+    default value for if the key does not exist in the config table.
+
+    :param key:
+    :param default:
+    :return:
+    """
+
+    # Query database for config row
+    config_value_raw: Config = Config.query.filter(Config.key == key).first()
+
+    # Check that the config value exists
+    if config_value_raw is None:
+        # Return default if entry was not found
+        return default
+
+    # Return the parsed json value if we are able
+    try:
+        return json.loads(config_value_raw)
+    except json.JSONDecodeError:
+        return default
 
 
 @cache.memoize(timeout=10, source_check=True)

@@ -9,7 +9,6 @@ from anubis.github.repos import get_student_assignment_repo_name
 from anubis.lms.questions import assign_questions
 from anubis.lms.theia import mark_session_ended
 from anubis.models import (
-    THEIA_DEFAULT_OPTIONS,
     ForumPost,
     ForumPostComment,
     ForumCategory,
@@ -31,6 +30,7 @@ from anubis.models import (
     User,
     db,
 )
+from anubis.constants import THEIA_DEFAULT_OPTIONS
 from anubis.utils.data import rand
 from anubis.utils.data import with_context
 from anubis.utils.testing.db import clear_database
