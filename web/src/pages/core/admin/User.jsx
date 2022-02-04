@@ -74,9 +74,13 @@ export default function User() {
             <Typography variant={'subtitle1'} color={'textSecondary'}>
               Courses
             </Typography>
-            {courses.map((course) => (
-              <CourseCard key={course?.id} user={user} course={course}/>
-            ))}
+            <Grid container spacing={2}>
+              {courses.map((course) => (
+                <Grid item xs={12} md={6} key={course?.id}>
+                  <CourseCard user={user} course={course}/>
+                </Grid>
+              ))}
+            </Grid>
           </Grid>
 
           {/* Repos */}
