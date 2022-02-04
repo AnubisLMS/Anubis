@@ -6,6 +6,8 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Item from '../../shared/Item/Item';
 import {useStyles} from './AssignmentItem.styles';
+import {VisibilityOff} from '@material-ui/icons';
+import {Tooltip} from '@material-ui/core';
 
 const AssignmentItem = ({
   name,
@@ -13,6 +15,7 @@ const AssignmentItem = ({
   id,
   submitted,
   dueDate,
+  visible_to_students,
 }) => {
   const history = useHistory();
   const classes = useStyles();
@@ -22,7 +25,8 @@ const AssignmentItem = ({
       showStatus={false}
       title={name}
       subTitle={`from: ${course.name}`}
-      titleIcon={<AssignmentOutlinedIcon/>}
+      titleIcon={visible_to_students ? <AssignmentOutlinedIcon/> :
+        <Tooltip title={'Not visible to students.'}><VisibilityOff className={classes.red}/></Tooltip>}
       link={`/courses/assignment?assignmentId=${id}`}
     >
       <Typography className={submitted ? classes.green : classes.red}>
