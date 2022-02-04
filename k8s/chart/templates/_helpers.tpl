@@ -132,6 +132,11 @@ API env
     secretKeyRef:
       name: api
       key: redis-password
+- name: "SENTRY_DSN"
+  valueFrom:
+    secretKeyRef:
+      name: api
+      key: sentry-dsn
 - name: "IMAGE_PULL_POLICY"
   value: {{ $.Values.imagePullPolicy | quote }}
 {{- end }}

@@ -109,6 +109,7 @@ kubectl create secret generic api \
     --from-literal=redis-password=anubis \
     --from-literal=discord-bot-token=anubis \
     --from-literal=secret-key=DEBUG \
+    --from-literal=sentry-dsn='' \
     --namespace anubis
 
 # Create the oauth configuration secrets
