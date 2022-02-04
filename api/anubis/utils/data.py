@@ -301,7 +301,7 @@ def with_context(function):
 
         # Only create an app context if
         # there is not already one
-        if has_app_context() or has_request_context():
+        if has_app_context() and has_request_context():
             return function(*args, **kwargs)
 
         # Create a fresh app
