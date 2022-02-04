@@ -74,7 +74,6 @@ export default function Users() {
         }
 
         setStudents(students);
-        originalStudents = students;
       } else {
         enqueueSnackbar('Unable to fetch students', {variant: 'error'});
       }
@@ -84,13 +83,11 @@ export default function Users() {
   }, [refresh]);
 
   React.useEffect(() => {
-    if (searchQuery == '' || searchQuery == undefined) {
+    if (searchQuery === '' || searchQuery === undefined) {
       setRefresh(refresh + 1);
       return;
     }
-    const tempStudents = students;
-
-    const newStudents = tempStudents.flat(Infinity).filter((student) =>
+    const newStudents = students.flat(Infinity).filter((student) =>
       student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       student.github_username.toLowerCase().includes(searchQuery.toLowerCase()) ||
       student.netid.toLowerCase().includes(searchQuery.toLowerCase()),
