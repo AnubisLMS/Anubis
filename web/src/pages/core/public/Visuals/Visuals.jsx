@@ -65,49 +65,51 @@ const Visuals = () => {
             />
           </Card>
         </Grid>
-        <Grid item xs sm={10} lg={8} xl={8}>
-          <Card>
-            <CardHeader
-              avatar={<Avatar src={'/logo512.png'}/>}
-              title={'Anubis Course Usage Over Time'}
-              titleTypographyProps={{variant: 'h6'}}
-              subheader={'re-generated every 5 minutes'}
-            />
-            <div className={classes.autocomplete}>
-              <Autocomplete
-                blurOnSelect
-                fullWidth={false}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label={'Select Course'}
-                  />
-                )}
-                options={courses}
-                onChange={(_, course) => setSelected(course)}
-                getOptionLabel={(course) => `${course.course_code} - ${course.name}`}
-                value={selected}
+        {selected && (
+          <Grid item xs sm={10} lg={8} xl={8}>
+            <Card>
+              <CardHeader
+                avatar={<Avatar src={'/logo512.png'}/>}
+                title={'Anubis Course Usage Over Time'}
+                titleTypographyProps={{variant: 'h6'}}
+                subheader={'re-generated every 5 minutes'}
               />
-            </div>
-            <Button
-              className={classes.button}
-              startIcon={<CloudDownload/>}
-              variant={'contained'}
-              color={'primary'}
-              size={'large'}
-              component={'a'}
-              href={`/api/public/visuals/usage/${selected?.id}`}
-              download={`anubis-${selected?.id}-usage.png`}
-            >
+              <div className={classes.autocomplete}>
+                <Autocomplete
+                  blurOnSelect
+                  fullWidth={false}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label={'Select Course'}
+                    />
+                  )}
+                  options={courses}
+                  onChange={(_, course) => setSelected(course)}
+                  getOptionLabel={(course) => `${course.course_code} - ${course.name}`}
+                  value={selected}
+                />
+              </div>
+              <Button
+                className={classes.button}
+                startIcon={<CloudDownload/>}
+                variant={'contained'}
+                color={'primary'}
+                size={'large'}
+                component={'a'}
+                href={`/api/public/visuals/usage/${selected?.id}`}
+                download={`anubis-${selected?.id}-usage.png`}
+              >
               Download
-            </Button>
-            <CardMedia
-              className={classes.usage}
-              image={`/api/public/visuals/usage/${selected?.id}`}
-              title={'Anubis Usage'}
-            />
-          </Card>
-        </Grid>
+              </Button>
+              <CardMedia
+                className={classes.usage}
+                image={`/api/public/visuals/usage/${selected?.id}`}
+                title={'Anubis Usage'}
+              />
+            </Card>
+          </Grid>
+        )}
       </Grid>
     </StandardLayout>
   );
