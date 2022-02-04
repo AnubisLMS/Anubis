@@ -6,12 +6,13 @@ from typing import List, Optional, Tuple
 
 from kubernetes import client, config
 
+from anubis.constants import THEIA_DEFAULT_OPTIONS
 from anubis.github.parse import parse_github_repo_name
 from anubis.lms.courses import get_course_admin_ids
 from anubis.lms.theia import get_theia_pod_name, mark_session_ended
-from anubis.models import Course, TheiaSession, Assignment, db, THEIA_DEFAULT_OPTIONS
+from anubis.models import Course, TheiaSession, Assignment, db
 from anubis.utils.auth.token import create_token
-from anubis.utils.config import get_config_int, get_config_str
+from anubis.utils.config import get_config_int, get_config_str, get_config_dict
 from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
 
@@ -63,6 +64,8 @@ def create_theia_k8s_pod_pvc(
     # Get home volume size from config
     if theia_session.playground:
         volume_size = get_config_str('PLAYGROUND_VOLUME_SIZE', '100Mi')
+        limits = get_config_dict('PLAYGROUND_RESOURCE_LIMITS', THEIA_DEFAULT_OPTIONS['resources']['limits'])
+        requests = get_config_dict('PLAYGROUND_RESOURCE_REQUESTS', THEIA_DEFAULT_OPTIONS['resources']['requests'])
     else:
         volume_size = get_config_str('THEIA_VOLUME_SIZE', '100Mi')
 
