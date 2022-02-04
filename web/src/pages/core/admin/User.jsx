@@ -118,8 +118,21 @@ export default function User() {
             <Paper style={{height: 300}}>
               <DataGrid
                 columns={[
-                  {field: 'assignment_name', headerName: 'Assignment', width: 150},
-                  {field: 'course_code', headerName: 'Course Code', width: 150},
+                  {
+                    field: 'playground', headerName: 'Playground', width: 120, renderCell: (params) => (
+                      <IconButton color={params.value ? 'primary' : 'secondary'}>
+                        {params.value ? <CheckIcon/> : <CancelIcon/>}
+                      </IconButton>
+                    ),
+                  },
+                  {
+                    field: 'image', headerName: 'Image', width: 100, renderCell: (params) => (params.value.title),
+                  },
+                  {
+                    field: 'image_tag', headerName: 'Image Tag', width: 120, renderCell: (params) => (
+                      params.value || params.row.image.default_tag || 'latest'
+                    ),
+                  },
                   {field: 'created', headerName: 'Start Time', width: 170},
                   {field: 'ended', headerName: 'End Time', width: 170},
                   {field: 'state', headerName: 'State'},
@@ -137,6 +150,8 @@ export default function User() {
                       </IconButton>
                     ),
                   },
+                  {field: 'assignment_name', headerName: 'Assignment', width: 150},
+                  {field: 'course_code', headerName: 'Course Code', width: 150},
                 ]}
                 rows={theia}
               />
