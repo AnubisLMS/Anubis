@@ -52,27 +52,6 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
     if active_session is not None:
         return success_response({"active": active_session.active, "session": active_session.data})
 
-    # Check last session
-    last_session: TheiaSession = TheiaSession.query.filter(
-        TheiaSession.owner_id == current_user.id,
-        TheiaSession.active == False,
-    ).order_by(TheiaSession.created.desc()).limit(1).first()
-
-    # Check if last session had a persistent volume
-    if last_session is not None and last_session.persistent_storage and last_session.ended is not None:
-        # If it did, then we need to make sure the volume
-        # has had time to unmount.
-        seconds_passed = (datetime.now() - last_session.ended).total_seconds()
-        cooldown_seconds = get_config_int('THEIA_VOLUME_COOLDOWN_SECONDS', 10)
-
-        # If within cooldown time, then give back a warning
-        if seconds_passed < cooldown_seconds:
-            return success_response({
-                'status': 'Please wait a few more seconds. '
-                          'Your last IDEs home volume is still unmounting.',
-                'variant': 'warning',
-            })
-
     # Assert that new ide starts are allowed. If they are not, then
     # we return a status message to the user saying they are not able
     # to start a new ide.
