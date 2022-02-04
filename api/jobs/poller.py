@@ -9,7 +9,6 @@ from anubis.utils.data import with_context
 from anubis.k8s.theia import update_theia_session
 
 
-@with_context
 def poller():
     """
     Poll Database for sessions created within the last 10 minutes
@@ -32,9 +31,14 @@ def poller():
         update_theia_session(session)
 
 
-if __name__ == "__main__":
+@with_context
+def main():
     config.load_incluster_config()
 
     while True:
         poller()
         time.sleep(1)
+
+
+if __name__ == "__main__":
+    main()
