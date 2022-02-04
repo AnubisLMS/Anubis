@@ -5,7 +5,7 @@ from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, is_job
 
 
-@cache.memoize(timeout=-1, forced_update=is_debug, unless=is_debug, source_check=True)
+@cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug, source_check=True)
 def get_students(course_id: str = None) -> List[Dict[str, dict]]:
     """
     Get students by course code. If no course code is specified,
