@@ -10,19 +10,10 @@ from sqlalchemy.orm import InstrumentedAttribute
 from sqlalchemy.orm import deferred
 from sqlalchemy_json import MutableJson
 
+from anubis.constants import THEIA_DEFAULT_OPTIONS
 from anubis.utils.data import rand
 
 db = SQLAlchemy()
-
-THEIA_DEFAULT_OPTIONS = {
-    "autosave": True,
-    "persistent_storage": False,
-    "network_policy": "os-student",
-    "resources": {
-        "requests": {"cpu": "750m", "memory": "500Mi"},
-        "limits": {"cpu": "1500m", "memory": "750Mi"},
-    },
-}
 
 
 def default_id(max_len=None) -> db.Column:
