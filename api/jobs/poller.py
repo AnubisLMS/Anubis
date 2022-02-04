@@ -1,6 +1,9 @@
-import time
+import os
 from typing import List
 from datetime import datetime, timedelta
+
+if 'SENTRY_DSN' in os.environ:
+    del os.environ['SENTRY_DSN']
 
 from kubernetes import config
 
@@ -9,7 +12,8 @@ from anubis.utils.data import with_context
 from anubis.k8s.theia import update_theia_session
 
 
-def poller():
+@with_context
+def poll():
     """
     Poll Database for sessions created within the last 10 minutes
     if they are active and dont have a cluster_address.
@@ -19,7 +23,7 @@ def poller():
     If the session has failed, update the session to failed.
     """
     # Get all theia sessions within the last 10 minutes that are 
-    # active and dont have cluster_address
+    # active and don't have cluster_address
     theia_sessions: List[TheiaSession] = TheiaSession.query.filter(
         TheiaSession.active == True,
         TheiaSession.cluster_address == None,
@@ -31,13 +35,11 @@ def poller():
         update_theia_session(session)
 
 
-@with_context
 def main():
     config.load_incluster_config()
 
     while True:
-        poller()
-        time.sleep(1)
+        poll()
 
 
 if __name__ == "__main__":
