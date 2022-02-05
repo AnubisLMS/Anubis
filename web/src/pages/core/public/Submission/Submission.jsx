@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
-import clsx from 'clsx';
 
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
@@ -13,8 +12,7 @@ import standardStatusHandler from '../../../../utils/standardStatusHandler';
 import SubmissionContent from '../../../../components/core/SubmissionContent/SubmissionContent';
 import SubmissionHeader from '../../../../components/core/SubmissionHeader/SubmissionHeader';
 import SubmissionTest from '../../../../components/core/SubmissionTest/SubmissionTest';
-import SubmissionTestExpanded
-  from '../../../../components/core/SubmissionTestExpanded/SubmissionTestExpanded';
+import SubmissionTestExpanded from '../../../../components/core/SubmissionTestExpanded/SubmissionTestExpanded';
 
 const regrade = (
   {commit, submission, setSubmission, setStep, setErrorStop},
@@ -134,12 +132,12 @@ export default function Submission() {
       passed: !!submission?.build?.passed,
       message: !!submission?.build?.passed ? 'Build Succeeded' : 'Build Failed',
       output_type: 'text',
-      output: submission?.build?.stdout ?? null,
+      output: submission?.build?.stdout ?? '',
     },
   };
 
   return (
-    <StandardLayout >
+    <StandardLayout>
       <Grid container className={classes.root}>
         <Box className={classes.headerContainer}>
           <SubmissionHeader
@@ -155,10 +153,16 @@ export default function Submission() {
           <SubmissionContent submission={submission}>
             <SubmissionTest
               test={buildTest}
-              expandModal = {() => expandModal(buildTest)}
+              processing={submission.processing}
+              expandModal={() => expandModal(buildTest)}
             />
             {submission?.tests && submission.tests.map((test, index) => (
-              <SubmissionTest key={index} test={test} expandModal = {() => expandModal(test)}/>
+              <SubmissionTest
+                key={index}
+                test={test}
+                processing={submission.processing}
+                expandModal={() => expandModal(test)}
+              />
             ))}
           </SubmissionContent>
         </Box>
