@@ -100,7 +100,15 @@ def register_test(test_name):
         @functools.wraps(func)
         def wrapper():
             result = TestResult()
-            func(result)
+            try:
+                func(result)
+            except (TimeoutError, subprocess.TimeoutExpired):
+                result.passed = False
+                result.message = 'Timeout reached while running this test'
+                result.output_type = 'text'
+                result.output = 'Timeout reached while running this test. ' \
+                                'Check that your code does not have any infinite loops or other performance ' \
+                                'issues that would prevent this test from completing.'
             return result
 
         if wrapper.__dict__.get('test', None) is None:
