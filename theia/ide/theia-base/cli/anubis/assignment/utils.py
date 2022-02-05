@@ -377,7 +377,7 @@ def xv6_run(cmd: str, test_result: TestResult, timeout=5) -> typing.List[str]:
               '-drive file=./fs.img,media=disk,index=1,format=raw ' \
               '-smp 1 -m 512 -display none -nographic'.format(timeout)
 
-    test_result.output += 'Running "{}" in xv6\n\n'.format(cmd)
+    test_result.message = 'Running "{}" in xv6\n\n'.format(cmd)
 
     with open('command', 'w') as f:
         f.write('\n' + cmd + '\n')
