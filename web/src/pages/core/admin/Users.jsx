@@ -89,8 +89,8 @@ export default function Users() {
     }
     const newStudents = students.flat(Infinity).filter((student) =>
       student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.github_username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.netid.toLowerCase().includes(searchQuery.toLowerCase()),
+      student.netid.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (!!student.github_username && student.github_username.toLowerCase().includes(searchQuery.toLowerCase())),
     );
 
     const paginatedStudents = [];
