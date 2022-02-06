@@ -309,7 +309,7 @@ class AssignmentRepo(db.Model):
             "assignment_id": self.assignment_id,
             "assignment_name": self.assignment.name,
             "shared": self.shared,
-            "ready": self.repo_created and self.collaborator_configured and self.ta_configured,
+            "ready": self.repo_created,
             "course_code": self.assignment.course.course_code,
             "repo_url": self.repo_url,
         }

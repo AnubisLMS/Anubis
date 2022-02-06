@@ -1,10 +1,11 @@
 import traceback
-from typing import List
+from typing import List, Tuple
 
 from parse import parse
 
 from anubis.github.api import github_graphql, github_rest
 from anubis.models import Assignment, AssignmentRepo, Submission, SubmissionBuild, SubmissionTestResult, User, db
+from anubis.rpc.safety_nets import create_repo_safety_net
 from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
 
@@ -229,7 +230,7 @@ def _create_assignment_repo_obj(
     return repo
 
 
-def create_assignment_group_repo(users: List[User], assignment: Assignment) -> List[AssignmentRepo]:
+def create_assignment_group_repo(users: List[User], assignment: Assignment) -> Tuple[List[AssignmentRepo], List[str]]:
     """
     This function takes a list of users and an assignment, and creates a single
     assignment repo for the group. This will create an AssignmentRepo entry for
@@ -258,17 +259,17 @@ def create_assignment_group_repo(users: List[User], assignment: Assignment) -> L
     db.session.commit()
 
     # Create the assignment repo
-    repos = create_assignment_github_repo(
+    repos, errors = create_assignment_github_repo(
         repos,
         assignment.github_template,
         assignment.course.github_org,
         new_repo_name,
     )
 
-    return repos
+    return repos, errors
 
 
-def create_assignment_student_repo(user: User, assignment: Assignment) -> AssignmentRepo:
+def create_assignment_student_repo(user: User, assignment: Assignment) -> Tuple[AssignmentRepo, List[str]]:
     # Get a generated assignment repo name
     new_repo_name = get_student_assignment_repo_name(user, assignment)
     new_repo_url = get_student_assignment_repo_url(user, assignment)
@@ -276,31 +277,35 @@ def create_assignment_student_repo(user: User, assignment: Assignment) -> Assign
     # Create the assignment repo row in the db
     repo = _create_assignment_repo_obj(user, assignment, new_repo_url)
 
-    repos = create_assignment_github_repo(
+    repos, errors = create_assignment_github_repo(
         [repo],
         assignment.github_template,
         assignment.course.github_org,
         new_repo_name,
     )
 
-    return repos[0]
+    return repos[0], errors
 
 
+@create_repo_safety_net
 def create_assignment_github_repo(
     repos: List[AssignmentRepo],
     template_repo_path: str,
     github_org: str,
     new_repo_name: str,
-) -> List[AssignmentRepo]:
+) -> Tuple[List[AssignmentRepo], List[str]]:
     """
     Creates an assignment repo and adds collaborators.
 
+    :param n:
     :param repos: AssignmentRepo object
-    :param template_repo_path: "wabscale/xv6-public"
+    :param template_repo_path: "AnubisLMS/xv6"
     :param github_org: "os3224"
     :param new_repo_name: ""
     :return:
     """
+
+    errors = set()
 
     repo_created = any(repo.repo_created for repo in repos)
     data = None
@@ -319,7 +324,9 @@ def create_assignment_github_repo(
                 for repo in repos:
                     repo.repo_created = False
                 db.session.commit()
-                return repos
+                errors.add('This assignment is misconfiguration. Github says that the template repo we are suppose to '
+                           'create your repo from does not exist. Please let your TA know.')
+                return repos, list(errors)
 
             # Get organization and template repo IDs
             owner_id = data["organization"]["id"]
@@ -332,7 +339,8 @@ def create_assignment_github_repo(
             # If the response was None, the api request failed
             if data is None:
                 logger.error("Create repo failed")
-                return repos
+                errors.add('We were not able to create your repo on github. Please try again.')
+                return repos, list(errors)
 
             # Mark the repo as created
             for repo in repos:
@@ -365,11 +373,17 @@ def create_assignment_github_repo(
                     if data.get("message", None) == "Not Found":
                         logger.error(f"Failed to add collaborator (Not Found). Trying again. {i}")
                     elif f'{collaborator} is not a user' in data.get("message", ''):
-                        logger.error(f"Github is saying {collaborator} is not a user")
+                        logger.error(f"Github is saying that {collaborator} is not a user")
+                        errors.add(f"Github is saying that {collaborator} is not a user. "
+                                   f"Please link your github account on the profile page and try again.")
+                        break
                     else:
                         break
                 else:
                     logger.error("Failed to add collaborator after 3 tries")
+                    errors.add(f'We were not able to add you as a collaborator to the repo we created at this time. '
+                               f'We are going to try to add you again in a few minutes. '
+                               f'You are free to start an IDE to work on your assignment while you wait.')
                     continue
 
                 # Mark the repo as collaborator configured
@@ -413,4 +427,4 @@ def create_assignment_github_repo(
         logger.error(f'data = {str(data)}')
         logger.error(traceback.format_exc())
 
-    return repos
+    return repos, list(errors)
