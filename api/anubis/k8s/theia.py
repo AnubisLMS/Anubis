@@ -546,7 +546,7 @@ def reap_theia_session_k8s_resources(theia_session_id: str):
     # Mark the pod for deletion by a label selector
     v1.delete_collection_namespaced_pod(
         namespace="anubis",
-        label_selector="app.kubernetes.io/name=theia,role=theia-session,session={}".format(
+        label_selector="app.kubernetes.io/name=anubis,role=theia-session,session={}".format(
             theia_session_id,
         ),
         propagation_policy="Background",
@@ -566,7 +566,7 @@ def list_theia_pods() -> client.V1PodList:
     # List pods by label selector
     pods = v1.list_namespaced_pod(
         namespace="anubis",
-        label_selector="app.kubernetes.io/name=theia,role=theia-session",
+        label_selector="app.kubernetes.io/name=anubis,role=theia-session",
     )
 
     return pods

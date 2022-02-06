@@ -1,6 +1,6 @@
 from flask import Flask
 from anubis.config import config
-from anubis.utils.data import is_debug
+from anubis.utils.data import is_debug, is_job
 from anubis.utils.logging import logger
 
 
@@ -8,10 +8,12 @@ def add_sentry(_: Flask):
     if not is_debug() and config.SENTRY_DSN != '' and config.SENTRY_DSN is not None:
         import sentry_sdk
         from sentry_sdk.integrations.flask import FlaskIntegration
+
         logger.info('ADDING SENTRY')
+
         sentry_sdk.init(
             dsn=config.SENTRY_DSN,
-            integrations=[FlaskIntegration()],
+            integrations=[FlaskIntegration()] if not is_job() else [],
 
             # Set traces_sample_rate to 1.0 to capture 100%
             # of transactions for performance monitoring.

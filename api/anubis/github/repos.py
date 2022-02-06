@@ -358,6 +358,8 @@ def create_assignment_github_repo(
                     # We can have it try again to fix.
                     if data.get("message", None) == "Not Found":
                         logger.error(f"Failed to add collaborator (Not Found). Trying again. {i}")
+                    elif f'{collaborator} is not a user' in data.get("message", ''):
+                        logger.error(f"Github is saying {collaborator} is not a user")
                     else:
                         break
                 else:
