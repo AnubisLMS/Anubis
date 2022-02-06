@@ -26,6 +26,7 @@ const RepoItem = ({
       subTitle={courseCode}
       titleIcon={<GitHubIcon />}
     >
+      <Typography>{courseCode}</Typography>
       <Typography>{ready ? 'Ready' : 'Processing'}</Typography>
       <Box className={classes.actionsContainer}>
         <Button
