@@ -17,6 +17,8 @@ def fix_github_broken_repos():
             AssignmentRepo.repo_created == False,
             # Collaborator not configured
             AssignmentRepo.collaborator_configured == False,
+            # Tas not configured
+            AssignmentRepo.ta_configured == False,
         ),
         AssignmentRepo.created > datetime.now() + timedelta(minutes=1),
         AssignmentRepo.created < datetime.now() - timedelta(hours=1),
