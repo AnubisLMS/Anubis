@@ -54,6 +54,8 @@ const stopAllSessions = (state, enqueueSnackbar) => () => {
 const useColumns = (state, enqueueSnackbar) => ([
   {field: 'netid', headerName: 'Netid'},
   {field: 'state', headerName: 'State', width: 150},
+  {field: 'image', headerName: 'Image', width: 150, valueGetter: (params) => params.value.title},
+  {field: 'image_tag', headerName: 'Tag', width: 150, valueGetter: (params) => params.value?.title ?? 'latest'},
   {field: 'created', headerName: 'Created', type: 'dateTime', width: 170},
   {
     field: 'redirect_url', headerName: 'Go To IDE', width: 120, renderCell: ({row}) => (
