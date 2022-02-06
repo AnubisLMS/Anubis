@@ -3,7 +3,8 @@ from datetime import datetime
 
 from flask import Blueprint, request
 
-from anubis.lms.theia import initialize_ide, assert_theia_sessions_enabled
+from anubis.ide.initialize import initialize_ide
+from anubis.ide.conditions import assert_theia_sessions_enabled
 from anubis.models import TheiaSession, TheiaImage, TheiaImageTag
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user

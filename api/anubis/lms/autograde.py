@@ -5,9 +5,10 @@ from parse import parse
 from anubis.lms.students import get_students_in_class
 from anubis.models import Assignment, AssignmentTest, Submission
 from anubis.utils.cache import cache
-from anubis.utils.data import is_debug, is_job
+from anubis.utils.data import is_debug, is_job, with_context
 from anubis.utils.http import error_response
 from anubis.env import env
+from anubis.utils.logging import logger
 
 
 @cache.memoize(timeout=60, unless=is_debug, source_check=True)
@@ -196,3 +197,17 @@ def bulk_autograde(assignment_id, netids=None, offset=0, limit=20):
         )
 
     return bests
+
+
+@with_context
+def bulk_regrade(submissions):
+    from anubis.lms.submissions import bulk_regrade_submissions
+
+    logger.info(
+        "bulk regrading {}".format(submissions),
+        extra={
+            "submission_id": submissions,
+        },
+    )
+
+    bulk_regrade_submissions(submissions)

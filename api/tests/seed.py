@@ -1,3 +1,3 @@
-from anubis.rpc.seed import seed
+from anubis.utils.testing.seed import seed
 
 seed()

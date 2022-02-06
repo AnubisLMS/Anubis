@@ -711,7 +711,7 @@ class TheiaSession(db.Model):
 
     @property
     def data(self):
-        from anubis.lms.theia import theia_redirect_url
+        from anubis.ide.redirect import theia_redirect_url
 
         return {
             "id": self.id,

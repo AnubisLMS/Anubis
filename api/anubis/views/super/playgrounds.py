@@ -6,7 +6,7 @@ from anubis.utils.auth.http import require_superuser
 from anubis.utils.http import success_response
 from anubis.utils.http.decorators import json_response
 from anubis.utils.data import req_assert
-from anubis.rpc.theia import reap_theia_playgrounds_all
+from anubis.k8s.theia import reap_theia_playgrounds_all
 from anubis.rpc.enqueue import rpc_enqueue, enqueue_ide_stop
 
 playgrounds_ = Blueprint("super-playgrounds", __name__, url_prefix="/super/playgrounds")

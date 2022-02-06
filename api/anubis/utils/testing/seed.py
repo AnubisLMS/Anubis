@@ -7,7 +7,7 @@ from typing import List
 
 from anubis.github.repos import get_student_assignment_repo_name
 from anubis.lms.questions import assign_questions
-from anubis.lms.theia import mark_session_ended
+from anubis.ide.reap import mark_session_ended
 from anubis.models import (
     ForumPost,
     ForumPostComment,

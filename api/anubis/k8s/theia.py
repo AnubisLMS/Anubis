@@ -10,7 +10,7 @@ from kubernetes import client, config
 from anubis.constants import THEIA_DEFAULT_OPTIONS
 from anubis.github.parse import parse_github_repo_name
 from anubis.lms.courses import get_course_admin_ids
-from anubis.lms.theia import get_theia_pod_name, mark_session_ended
+from anubis.ide.reap import mark_session_ended
 from anubis.models import Course, TheiaSession, Assignment, db
 from anubis.utils.auth.token import create_token
 from anubis.utils.config import get_config_int, get_config_str, get_config_dict
@@ -768,7 +768,6 @@ def fix_stale_theia_resources(theia_pods: client.V1PodList):
         logger.info("Found stale theia database entries: {}".format(str(list(stale_db_ids))))
 
     # Reap theia sessions
-    from anubis.rpc.theia import reap_theia_session_by_id
 
     for stale_pod_id in stale_pods_ids:
         reap_theia_session_by_id(stale_pod_id)
@@ -907,3 +906,149 @@ def update_theia_session(session: TheiaSession):
         logger.info("Theia session started {}".format(pod_name))
 
         db.session.commit()
+
+
+def get_theia_pod_name(theia_session: TheiaSession) -> str:
+    return f"theia-{theia_session.owner.netid}-{theia_session.id}"
+
+
+def reap_theia_session_by_id(theia_session_id: str):
+    """
+    Reap the theia session identified by id. This will mark the theia
+    session resources in kubernetes for deletion, then mark the database
+    entry for the session as inactive.
+
+    :param theia_session_id:
+    :return:
+    """
+
+    # Load incluster kubernetes config
+    config.load_incluster_config()
+
+    # Log the reap
+    logger.info("Attempting to reap theia session {}".format(theia_session_id))
+
+    # Find the theia session in the database
+    theia_session: TheiaSession = TheiaSession.query.filter(
+        TheiaSession.id == theia_session_id,
+    ).first()
+
+    # Make sure that we have a record for this session
+    if theia_session is None:
+        logger.error("Could not find theia session {} when attempting to delete".format(theia_session_id))
+        return
+
+    # Reap the session
+    reap_theia_session(theia_session)
+
+
+def reap_theia_sessions_in_course(course_id: str):
+    """
+    Reap all theia sessions within a specific course. This will
+    kick everyone off their IDEs.
+
+    There may be many database entries that this function updates
+    so we will batch commits to help speed things up, while
+    keeping things relatively consistent in the cluster.
+
+    :param course_id:
+    :return:
+    """
+
+    # Load the incluster config
+    config.load_incluster_config()
+
+    # Lof the reap
+    logger.info(f"Clearing theia sessions course_id={course_id}")
+
+    # Find all theia sessions in the database that are
+    # marked as active.
+    theia_sessions = TheiaSession.query.filter(
+        TheiaSession.active == True,
+        TheiaSession.course_id == course_id,
+    ).all()
+
+    # Iterate through all active theia sessions in the database, deleting and
+    # updating as we go.
+    for n, theia_session in enumerate(theia_sessions):
+        # Reap the session
+        reap_theia_session(theia_session, commit=False)
+
+        # Batch commits in size of 5
+        if n % 5 == 0:
+            db.session.commit()
+
+    db.session.commit()
+
+
+def reap_theia_playgrounds_all():
+    """
+    Reap all theia sessions within anubis playgrounds. This will
+    kick everyone off their IDEs.
+
+    There may be many database entries that this function updates
+    so we will batch commits to help speed things up, while
+    keeping things relatively consistent in the cluster.
+
+    :return:
+    """
+
+    # Load the incluster config
+    config.load_incluster_config()
+
+    # Lof the reap
+    logger.info(f"Clearing theia sessions playgrounds")
+
+    # Find all theia sessions in the database that are
+    # marked as active.
+    theia_sessions = TheiaSession.query.filter(
+        TheiaSession.active == True,
+        TheiaSession.playground == True,
+    ).all()
+
+    # Iterate through all active theia sessions in the database, deleting and
+    # updating as we go.
+    for n, theia_session in enumerate(theia_sessions):
+        # Reap the session
+        reap_theia_session(theia_session, commit=False)
+
+        # Batch commits in size of 5
+        if n % 5 == 0:
+            db.session.commit()
+
+    db.session.commit()
+
+
+def reap_stale_theia_sessions(*_):
+    """
+    Reap any and all stale sessions either in the database or
+    in kubernetes. This function should be run periodically in
+    the reap job to ensure that the state in the database matches
+    what is running in the cluster and vice versa.
+
+    :param _:
+    :return:
+    """
+
+    # Load the incluster config
+    config.load_incluster_config()
+
+    # Log the event
+    logger.info("Clearing stale theia sessions")
+
+    # Get the list of active pods
+    theia_pods = list_theia_pods()
+
+    # Update the records for pod ip addresses
+    update_theia_pod_cluster_addresses(theia_pods)
+
+    # Check that all theia sessions have not
+    # reached the global timeout.
+    reap_old_theia_sessions(theia_pods)
+
+    # Make sure that database entries marked
+    # as active have pods and pods have active
+    # database entries.
+    fix_stale_theia_resources(theia_pods)
+
+    db.session.commit()

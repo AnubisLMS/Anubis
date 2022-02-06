@@ -5,7 +5,7 @@ from flask import Blueprint
 from anubis.lms.courses import assert_course_context, assert_course_superuser, course_context
 from anubis.lms.repos import get_repos
 from anubis.lms.students import get_students
-from anubis.lms.theia import get_recent_sessions
+from anubis.ide.get import get_recent_sessions
 from anubis.models import Assignment, Course, InCourse, Submission, User, db
 from anubis.utils.auth.http import require_admin, require_superuser
 from anubis.utils.auth.user import current_user

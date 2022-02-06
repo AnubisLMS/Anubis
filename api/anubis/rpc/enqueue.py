@@ -10,11 +10,19 @@ from redis import Redis
 from rq import Queue
 
 from anubis.env import env
-from anubis.rpc.assignments import make_shared_assignment
-from anubis.rpc.lms import assign_missing_questions
-from anubis.rpc.pipeline import create_submission_pipeline, reap_stale_submission_pipelines
-from anubis.rpc.seed import seed
-from anubis.rpc.theia import initialize_theia_session, reap_theia_session_by_id, reap_stale_theia_sessions
+from anubis.lms.questions import assign_missing_questions
+from anubis.k8s.pipeline import create_submission_pipeline
+from anubis.utils.testing.seed import seed
+from anubis.utils.data import with_context
+from anubis.k8s.theia import reap_theia_session_by_id, reap_stale_theia_sessions
+from anubis.ide.initialize import initialize_theia_session
+from anubis.k8s.pipeline import reap_pipeline_jobs
+from anubis.lms.assignments import make_shared_assignment
+
+
+@with_context
+def _run_rpc_function(func, *args):
+    return func(*args)
 
 
 def rpc_enqueue(func, queue=None, args=None):
@@ -43,7 +51,7 @@ def rpc_enqueue(func, queue=None, args=None):
 
     with Redis(host=env.CACHE_REDIS_HOST, password=env.CACHE_REDIS_PASSWORD) as conn:
         q = Queue(name=queue, connection=conn)
-        q.enqueue(func, *args)
+        q.enqueue(_run_rpc_function, func, *args)
         conn.close()
 
 
@@ -69,7 +77,7 @@ def enqueue_ide_reap_stale(*args):
 
 def enqueue_pipeline_reap_stale(*args):
     """Reap stale pipeline job resources"""
-    rpc_enqueue(reap_stale_submission_pipelines, queue="theia", args=args)
+    rpc_enqueue(reap_pipeline_jobs, queue="theia", args=args)
 
 
 def enqueue_seed():

@@ -6,13 +6,11 @@ from flask import Blueprint, request
 
 from anubis.constants import THEIA_DEFAULT_OPTIONS
 from anubis.lms.courses import is_course_admin
-from anubis.lms.theia import (
-    get_n_available_sessions,
-    theia_poll_ide,
-    theia_redirect_url,
-    initialize_ide,
-    assert_theia_sessions_enabled,
-)
+from anubis.ide.initialize import initialize_ide
+from anubis.ide.conditions import assert_theia_sessions_enabled
+from anubis.ide.poll import theia_poll_ide
+from anubis.ide.redirect import theia_redirect_url
+from anubis.ide.get import get_n_available_sessions
 from anubis.models import Assignment, AssignmentRepo, TheiaSession, db
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user

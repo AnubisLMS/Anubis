@@ -14,7 +14,7 @@ from anubis.models import (
     User,
     db,
 )
-from anubis.rpc.batch import rpc_bulk_regrade
+from anubis.lms.autograde import bulk_regrade
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, split_chunks
 from anubis.utils.http import error_response, success_response
@@ -263,7 +263,7 @@ def recalculate_late_submissions(student: User, assignment: Assignment):
     # Go through, and reset and enqueue regrade
     s_accept_ids = list(map(lambda x: x.id, s_accept))
     for chunk in split_chunks(s_accept_ids, 32):
-        rpc_enqueue(rpc_bulk_regrade, "regrade", args=[chunk])
+        rpc_enqueue(bulk_regrade, "regrade", args=[chunk])
 
     # Reject the submissions that need to be updated
     for submission in s_reject:

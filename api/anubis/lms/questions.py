@@ -12,11 +12,12 @@ from anubis.models import (
     Assignment,
     AssignmentQuestion,
     InCourse,
+    Course,
     User,
     db,
 )
 from anubis.utils.cache import cache
-from anubis.utils.data import verify_data_shape, is_debug
+from anubis.utils.data import verify_data_shape, is_debug, with_context
 from anubis.utils.logging import logger
 
 
@@ -464,3 +465,42 @@ def fix_missing_question_assignments(assignment: Assignment):
             db.session.add(assigned_question)
 
     db.session.commit()
+
+
+def assign_missing_questions(user_id: str):
+    # Log RPC job start
+    logger.info(f"RPC::assign_missing_questions user_id={user_id}")
+
+    # Query for user in db
+    user: User = User.query.filter(User.id == user_id).first()
+
+    # Verify they exist
+    if user is None:
+        logger.error(f"RPC::assign_missing_questions user does not exist user_id={user_id}")
+        return
+
+    # Get all the courses that the user belongs to
+    courses: List[Course] = (
+        Course.query.join(InCourse)
+        .join(User)
+        .filter(
+            User.id == user.id,
+        )
+        .all()
+    )
+
+    # Iterate over each course the student is in
+    for course in courses:
+
+        # Get all assignments (that have been released and that
+        # have not). Skip assignments that have not had their
+        # questions assigned yet.
+        assignments: List[Assignment] = Assignment.query.filter(
+            Assignment.course_id == course.id,
+            Assignment.questions_assigned == True,
+        ).all()
+
+        # Iterate over assignments
+        for assignment in assignments:
+            # Run missing question fix for each assignment
+            fix_missing_question_assignments(assignment)

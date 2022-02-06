@@ -4,11 +4,10 @@ from datetime import datetime, timedelta
 from flask import Blueprint
 from sqlalchemy import or_
 
-from anubis.lms.autograde import autograde, bulk_autograde
+from anubis.lms.autograde import autograde, bulk_autograde, bulk_regrade
 from anubis.lms.courses import assert_course_context
 from anubis.lms.submissions import init_submission
 from anubis.models import Assignment, Submission, User
-from anubis.rpc.batch import rpc_bulk_regrade
 from anubis.utils.auth.http import require_admin
 from anubis.utils.cache import cache
 from anubis.utils.data import req_assert, split_chunks
@@ -136,7 +135,7 @@ def private_regrade_student_assignment_netid(assignment_id: str, netid: str):
 
     # Enqueue each chunk as a job for the rpc workers
     for chunk in submission_chunks:
-        rpc_enqueue(rpc_bulk_regrade, "regrade", args=[chunk])
+        rpc_enqueue(bulk_regrade, "regrade", args=[chunk])
 
     # Clear cache of autograde results
     cache.delete_memoized(bulk_autograde, assignment.id)
@@ -224,7 +223,7 @@ def private_regrade_assignment(assignment_id):
 
     # Enqueue each chunk as a job for the rpc workers
     for chunk in submission_chunks:
-        rpc_enqueue(rpc_bulk_regrade, "regrade", args=[chunk])
+        rpc_enqueue(bulk_regrade, "regrade", args=[chunk])
 
     # Pass back the enqueued status
     return success_response(
