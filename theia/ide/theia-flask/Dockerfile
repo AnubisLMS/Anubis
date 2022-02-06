@@ -1,4 +1,6 @@
-FROM registry.digitalocean.com/anubis/theia-base:python-3.9 as theia
+ARG PY_VERSION=3.9
+
+FROM registry.digitalocean.com/anubis/theia-base:python-${PY_VERSION} as theia
 USER root
 
 COPY requirements.txt requirements-dev.txt /

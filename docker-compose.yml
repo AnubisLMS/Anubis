@@ -189,9 +189,19 @@ services:
     image: registry.digitalocean.com/anubis/theia-devops:latest
     build: ./theia/ide/theia-devops
 
-  theia-software-engineering:
-    image: registry.digitalocean.com/anubis/theia-software-engineering:latest
-    build: ./theia/ide/theia-software-engineering
+  theia-flask-39:
+    image: registry.digitalocean.com/anubis/theia-flask:python-3.9
+    build:
+      context: ./theia/ide/theia-flask
+      args:
+        PY_VERSION: '3.9'
+
+  theia-flask-310:
+    image: registry.digitalocean.com/anubis/theia-flask:python-3.10
+    build:
+      context: ./theia/ide/theia-flask
+      args:
+        PY_VERSION: '3.10'
 
   theia-jepst:
     image: registry.digitalocean.com/anubis/theia-jepst:latest
