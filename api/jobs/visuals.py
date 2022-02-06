@@ -4,7 +4,7 @@ from typing import List
 from anubis.models import Assignment, Course
 from anubis.utils.data import with_context
 from anubis.utils.visuals.assignments import get_assignment_sundial
-from anubis.utils.visuals.usage import get_usage_plot, get_usage_plot_playgrounds
+from anubis.utils.visuals.usage import get_usage_plot, get_usage_plot_playgrounds, get_usage_plot_active
 
 
 @with_context
@@ -30,6 +30,9 @@ def main():
 
     # Generate playgrounds usage plot
     get_usage_plot_playgrounds()
+
+    # Generate plot for active in last week
+    get_usage_plot_active()
 
 
 if __name__ == "__main__":

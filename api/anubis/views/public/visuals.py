@@ -3,7 +3,7 @@ from flask import Blueprint
 from anubis.models import Course
 from anubis.utils.http import req_assert
 from anubis.utils.http.files import make_png_response
-from anubis.utils.visuals.usage import get_usage_plot, get_usage_plot_playgrounds
+from anubis.utils.visuals.usage import get_usage_plot, get_usage_plot_playgrounds, get_usage_plot_active
 
 visuals_ = Blueprint("public-visuals", __name__, url_prefix="/public/visuals")
 
@@ -39,5 +39,14 @@ def public_visuals_usage(course_id: str):
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
     blob = get_usage_plot(course.id)
+
+    return make_png_response(blob)
+
+
+@visuals_.route("/usage/active")
+def public_visuals_usage_active():
+    # Get the png blob of the usage graph.
+    # The get_usage_plot is itself a cached function.
+    blob = get_usage_plot_active()
 
     return make_png_response(blob)

@@ -1,149 +1,22 @@
-import io
-from datetime import datetime
-from io import BytesIO
-from typing import Any, Dict, List, Optional
+from datetime import datetime, timedelta
+from typing import Optional
 
-import numpy as np
-import pandas as pd
-
-from anubis.models import Assignment, Course, Submission, TheiaSession, TheiaImage
+from anubis.models import Assignment, Course, TheiaImage
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, is_job
 from anubis.utils.logging import logger
+from anubis.utils.usage.submissions import get_submissions
+from anubis.utils.usage.theia import get_theia_sessions
+from anubis.utils.visuals.files import convert_fig_bytes
+from anubis.utils.usage.users import get_active_submission_users, get_active_theia_users
 
 
-def convert_fig_bytes(plt, fig) -> bytes:
-    file_bytes = BytesIO()
-
-    fig.tight_layout()
-    fig.patch.set_facecolor("white")
-    plt.savefig(file_bytes)
-
-    file_bytes.seek(0)
-
-    return file_bytes.read()
-
-
-def get_submissions(course_id: str) -> pd.DataFrame:
-    """
-    Get all submissions from visible assignments, and put them in a dataframe
-
-    :return:
-    """
-    # Get the submission sqlalchemy objects
-    raw_submissions = (
-        Submission.query.join(Assignment)
-        .filter(
-            Assignment.hidden == False,
-            Assignment.course_id == course_id,
-        )
-        .all()
+def add_watermark(ax, utcnow):
+    ax.text(
+        0.97, 0.9, f"Generated {utcnow} UTC",
+        transform=ax.transAxes, fontsize=12, color="gray", alpha=0.5,
+        ha="right", va="center",
     )
-
-    # Specify which columns we want
-    columns = ["id", "owner_id", "assignment_id", "processed", "created"]
-
-    # Build a dataframe of from the columns we pull out of each submission object
-    submissions = pd.DataFrame(
-        data=list(
-            map(
-                lambda x: ({column: getattr(x, column) for column in columns}),
-                raw_submissions,
-            )
-        ),
-        columns=columns,
-    )
-
-    # Round the submission timestamps to the nearest hour
-    submissions["created"] = submissions["created"].apply(lambda date: pd.to_datetime(date).round("H"))
-
-    return submissions
-
-
-def get_theia_sessions(course_id: str = None) -> pd.DataFrame:
-    """
-    Get all theia session objects, and throw them into a dataframe
-
-    :return:
-    """
-
-    # Get all the theia session sqlalchemy objects
-    if course_id is not None:
-        raw_theia_sessions = TheiaSession.query.join(Assignment).filter(Assignment.course_id == course_id).all()
-    else:
-        raw_theia_sessions = TheiaSession.query.filter(TheiaSession.playground == True).all()
-
-    # Specify which columns we want
-    columns = ["id", "owner_id", "assignment_id", "image_id", "created", "ended"]
-
-    # Build a dataframe of from the columns we pull out of each theia session object
-    theia_sessions = pd.DataFrame(
-        data=list(
-            map(
-                lambda x: ({column: getattr(x, column) for column in columns}),
-                raw_theia_sessions,
-            )
-        ),
-        columns=columns,
-    )
-
-    # Round the timestamps to the nearest hour
-    theia_sessions["created"] = theia_sessions["created"].apply(lambda date: pd.to_datetime(date).round("H"))
-    theia_sessions["ended"] = theia_sessions["ended"].apply(lambda date: pd.to_datetime(date).round("H"))
-
-    # Add a duration column
-    if len(theia_sessions) > 0:
-        # Get the duration from subtracting the end from the start time, and converting to minutes
-        theia_sessions["duration"] = theia_sessions[["ended", "created"]].apply(
-            lambda row: (row[0] - row[1]).seconds / 60, axis=1
-        )
-
-    # The apply breaks if there are no rows, so make it empty in that case
-    else:
-        theia_sessions["duration"] = []
-
-    # Drop outliers based on duration
-    theia_sessions = theia_sessions[
-        np.abs(theia_sessions.duration - theia_sessions.duration.mean()) <= (3 * theia_sessions.duration.std())
-    ]
-
-    return theia_sessions
-
-
-@cache.memoize(timeout=360)
-def get_raw_submissions() -> List[Dict[str, Any]]:
-    submissions_df = get_submissions()
-    data = (
-        submissions_df.groupby(["assignment_id", "created"])["id"]
-        .count()
-        .reset_index()
-        .rename(columns={"id": "count"})
-        .to_dict()
-    )
-    data["created"] = {k: str(v) for k, v in data["created"].items()}
-
-    assignment_ids = list(set(data["assignment_id"].values()))
-    response = {}
-
-    for assignment_id in assignment_ids:
-        assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
-        response[assignment_id] = {
-            "data": [],
-            "name": assignment.name,
-            "release_date": str(assignment.release_date),
-            "due_date": str(assignment.due_date),
-        }
-
-    for index, assignment_id in data["assignment_id"].items():
-        response[assignment_id]["data"].append(
-            {
-                "x": data["created"][index],
-                "y": data["count"][index],
-                "label": f"{data['created'][index]} {data['count'][index]}",
-            }
-        )
-
-    return list(response.values())
 
 
 @cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
@@ -202,17 +75,7 @@ def get_usage_plot(course_id: Optional[str]) -> Optional[bytes]:
 
     utcnow = datetime.utcnow().replace(microsecond=0)
 
-    axs[0].text(
-        0.97,
-        0.9,
-        f"Generated {utcnow} UTC",
-        transform=axs[0].transAxes,
-        fontsize=12,
-        color="gray",
-        alpha=0.5,
-        ha="right",
-        va="center",
-    )
+    add_watermark(axs[0], utcnow)
     axs[0].legend(handles=legend_handles0, loc="upper left")
     axs[0].set(
         title=f"{course.course_code} - Submissions over time",
@@ -221,17 +84,7 @@ def get_usage_plot(course_id: Optional[str]) -> Optional[bytes]:
     )
     axs[0].grid(True)
 
-    axs[1].text(
-        0.97,
-        0.9,
-        f"Generated {utcnow} UTC",
-        transform=axs[1].transAxes,
-        fontsize=12,
-        color="gray",
-        alpha=0.5,
-        ha="right",
-        va="center",
-    )
+    add_watermark(axs[1], utcnow)
     axs[1].legend(handles=legend_handles1, loc="upper left")
     axs[1].set(
         title=f"{course.course_code} - Cloud IDEs over time",
@@ -263,21 +116,49 @@ def get_usage_plot_playgrounds():
                 ax.plot(group["created"], group["count"], label=image.title)
     ax.legend()
 
-    ax.text(
-        0.97,
-        0.9,
-        f"Generated {utcnow} UTC",
-        transform=ax.transAxes,
-        fontsize=12,
-        color="gray",
-        alpha=0.5,
-        ha="right",
-        va="center",
-    )
+    add_watermark(ax, utcnow)
     ax.set(
         title=f"Anubis Playgrounds - IDEs spawned per hour",
         xlabel="time",
         ylabel="IDEs spawned",
+    )
+    ax.grid(True)
+
+    return convert_fig_bytes(plt, fig)
+
+
+@cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
+def get_usage_plot_active(days: int = 7):
+    import matplotlib.pyplot as plt
+
+    utcnow = datetime.utcnow().replace(hour=0, second=0, microsecond=0)
+    start_datetime = utcnow - timedelta(days=days)
+
+    xx = []
+    total_y = []
+    theia_y = []
+    autograde_y = []
+
+    for n in range(days):
+        day = start_datetime + timedelta(days=n)
+        submission_set = get_active_submission_users(day)
+        theia_set = get_active_theia_users(day)
+        xx.append(day)
+        total_y.append(len(submission_set) + len(theia_set))
+        autograde_y.append(len(submission_set))
+        theia_y.append(len(theia_set))
+
+    fig, ax = plt.subplots(figsize=(12, 10))
+    ax.plot(xx, total_y, 'b', label='Total users active on platform')
+    ax.plot(xx, autograde_y, 'g--', label='Total users that used Anubis Autograder')
+    ax.plot(xx, theia_y, 'r--', label='Total users that used Anubis IDE')
+    ax.legend()
+
+    add_watermark(ax, utcnow)
+    ax.set(
+        title=f"Anubis LMS - Active users in the last {days} days",
+        xlabel="time",
+        ylabel="Users active",
     )
     ax.grid(True)
 
