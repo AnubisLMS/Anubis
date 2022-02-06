@@ -110,12 +110,6 @@ def public_repos_create(assignment_id: str):
     # Clear cache entry
     cache.delete_memoized(get_assignment_data, current_user.id, assignment_id)
 
-    req_assert(repo.repo_created, message="Repo could not be created")
-    req_assert(
-        repo.collaborator_configured,
-        message="Student could not be added as a collaborator to repo",
-    )
-
     if len(errors) > 0:
         return success_response({
             "repo": repo.data,

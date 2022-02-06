@@ -318,14 +318,33 @@ def create_assignment_github_repo(
             # for creating a repo from the template.
             data = get_github_template_ids(template_repo_path, github_org)
 
-            # If the response was None, the api request failed. Also check that
-            # some expected values are present in the json data response.
-            if data is None and "repository" in data and "id" in data["repository"]:
+            # If response from github is no good
+            if data is None:
+                # Set all repos to failed
                 for repo in repos:
                     repo.repo_created = False
                 db.session.commit()
+
+                # Log error
+                logger.error('Could not get template id')
+                errors.add('There was an issue with connecting to github. '
+                           'Please try again later.')
+
+                return repos, list(errors)
+
+            # If the response was None, the api request failed. Also check that
+            # some expected values are present in the json data response.
+            if "repository" not in data or "id" not in data["repository"]:
+                # Set all repos to failed
+                for repo in repos:
+                    repo.repo_created = False
+                db.session.commit()
+
+                # Log error
+                logger.error('Could not find repo template id')
                 errors.add('This assignment is misconfiguration. Github says that the template repo we are suppose to '
                            'create your repo from does not exist. Please let your TA know.')
+
                 return repos, list(errors)
 
             # Get organization and template repo IDs
