@@ -5,7 +5,7 @@ import jwt
 from flask import g
 from werkzeug.local import LocalProxy
 
-from anubis.config import config
+from anubis.env import env
 from anubis.models import User, Course
 from anubis.utils.auth.token import get_token
 from anubis.utils.logging import logger
@@ -28,7 +28,7 @@ def get_current_user() -> Union[User, None]:
 
     # Try to decode the jwt
     try:
-        decoded = jwt.decode(token, config.SECRET_KEY, algorithms=["HS256"])
+        decoded = jwt.decode(token, env.SECRET_KEY, algorithms=["HS256"])
     except Exception as e:
         logger.error("AUTH decode error\n" + traceback.format_exc())
         return None

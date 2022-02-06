@@ -4,7 +4,7 @@ from typing import Union
 import jwt
 from flask import has_request_context, request
 
-from anubis.config import config
+from anubis.env import env
 from anubis.models import User
 from anubis.utils.config import get_config_int
 
@@ -59,5 +59,5 @@ def create_token(netid: str, exp_kwargs=None, **extras) -> Union[str, None]:
             "exp": datetime.utcnow() + timedelta(**exp_kwargs),
             **extras,
         },
-        config.SECRET_KEY,
+        env.SECRET_KEY,
     )

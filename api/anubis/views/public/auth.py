@@ -1,7 +1,7 @@
 import requests
 from flask import Blueprint, make_response, redirect, request
 
-from anubis.config import config
+from anubis.env import env
 from anubis.lms.courses import get_course_context
 from anubis.models import User, db
 from anubis.utils.auth.http import require_user
@@ -21,7 +21,7 @@ github_oauth_ = Blueprint("public-github-oauth", __name__, url_prefix="/public/g
 def public_login():
     if is_debug():
         return "AUTH"
-    return nyu_provider.authorize(callback="https://{}/api/public/oauth".format(config.DOMAIN))
+    return nyu_provider.authorize(callback="https://{}/api/public/oauth".format(env.DOMAIN))
 
 
 @auth_.route("/logout")
@@ -88,7 +88,7 @@ def public_oauth():
 @github_oauth_.route("/login")
 @require_user()
 def public_github_link():
-    return github_provider.authorize(callback="https://{}/api/public/github/oauth".format(config.DOMAIN))
+    return github_provider.authorize(callback="https://{}/api/public/github/oauth".format(env.DOMAIN))
 
 
 @github_oauth_.route("/oauth")

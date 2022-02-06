@@ -1,7 +1,7 @@
 import os
 
 
-class Config:
+class EnvConfig(object):
     def __init__(self):
         # General flask config
         self.MINDEBUG = os.environ.get("MINDEBUG", default="0") == "1"
@@ -57,4 +57,4 @@ class Config:
         print("Starting with DEBUG: {}".format(self.DEBUG))
 
 
-config = Config()
+env = EnvConfig()

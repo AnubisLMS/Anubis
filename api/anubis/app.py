@@ -33,7 +33,7 @@ def create_app() -> Flask:
 
     :return: Flask app
     """
-    from anubis.config import config
+    from anubis.env import env
 
     # Import views
     from anubis.views.admin import register_admin_views
@@ -42,7 +42,7 @@ def create_app() -> Flask:
 
     # Create app
     app = Flask(__name__)
-    app.config.from_object(config)
+    app.config.from_object(env)
 
     # Initialize app with all the extra services
     init_services(app)
@@ -67,12 +67,12 @@ def create_pipeline_app() -> Flask:
 
     :return: Flask app
     """
-    from anubis.config import config
+    from anubis.env import env
     from anubis.views.pipeline import register_pipeline_views
 
     # Create app
     app = Flask(__name__)
-    app.config.from_object(config)
+    app.config.from_object(env)
 
     # Initialize app with all the extra services
     init_services(app)

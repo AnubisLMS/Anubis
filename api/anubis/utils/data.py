@@ -7,7 +7,7 @@ from typing import Tuple, Union
 
 from flask import Response, has_app_context, has_request_context
 
-from anubis.config import config
+from anubis.env import env
 from anubis.utils.exceptions import AssertError
 
 MYSQL_TEXT_MAX_LENGTH = 2 ** 16 - 1
@@ -19,7 +19,7 @@ def is_debug() -> bool:
 
     :return:
     """
-    return config.DEBUG
+    return env.DEBUG
 
 
 def is_job() -> bool:
@@ -29,7 +29,7 @@ def is_job() -> bool:
     :return:
     """
 
-    return config.JOB
+    return env.JOB
 
 
 def jsonify(data, status_code=200):

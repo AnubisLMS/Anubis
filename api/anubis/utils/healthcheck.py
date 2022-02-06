@@ -5,7 +5,7 @@ def add_healthcheck(app: Flask):
     from anubis.utils.http.decorators import json_response
     from anubis.models import Config
     from anubis.utils.cache import cache_health
-    from anubis.config import config
+    from anubis.env import env
 
     @app.route("/")
     @json_response
@@ -30,7 +30,7 @@ def add_healthcheck(app: Flask):
         # Construct basic status & status code
         status_code = 200
         status = {
-            "service": config.LOGGER_NAME,
+            "service": env.LOGGER_NAME,
             "api": "Healthy",
             "db": "Healthy",
             "cache": "Healthy",

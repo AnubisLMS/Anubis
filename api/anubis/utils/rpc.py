@@ -3,7 +3,7 @@ import traceback
 from redis import Redis
 from rq import Queue
 
-from anubis.config import config
+from anubis.env import env
 from anubis.rpc.assignments import make_shared_assignment
 from anubis.rpc.lms import assign_missing_questions
 from anubis.rpc.pipeline import create_submission_pipeline, reap_stale_submission_pipelines
@@ -28,7 +28,7 @@ def rpc_enqueue(func, queue=None, args=None):
 
     # If we are running in mindebug, there is
     # no rq cluster to send things off to.
-    if config.MINDEBUG:
+    if env.MINDEBUG:
         try:
             return func(*args)
         except Exception as e:
@@ -36,7 +36,7 @@ def rpc_enqueue(func, queue=None, args=None):
             print(traceback.format_exc())
             return
 
-    with Redis(host=config.CACHE_REDIS_HOST, password=config.CACHE_REDIS_PASSWORD) as conn:
+    with Redis(host=env.CACHE_REDIS_HOST, password=env.CACHE_REDIS_PASSWORD) as conn:
         q = Queue(name=queue, connection=conn)
         q.enqueue(func, *args)
         conn.close()

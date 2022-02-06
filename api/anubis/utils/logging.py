@@ -1,6 +1,6 @@
 import logging
 
-from anubis.config import config
+from anubis.env import env
 from anubis.utils.data import is_debug
 
 
@@ -28,4 +28,4 @@ def _get_logger(logger_name):
 
 
 # Create a single logger object for the current app instance
-logger = _get_logger(config.LOGGER_NAME)
+logger = _get_logger(env.LOGGER_NAME)
