@@ -58,6 +58,7 @@ const stopAllSessions = (state, enqueueSnackbar) => () => {
 
 const useColumns = (state, enqueueSnackbar) => ([
   {field: 'netid', headerName: 'Netid'},
+  {field: 'name', headerName: 'Name', width: 150},
   {field: 'state', headerName: 'State', width: 150},
   {field: 'course_code', headerName: 'Course', width: 120},
   {field: 'assignment_name', headerName: 'Assignment', width: 200},
