@@ -74,14 +74,13 @@ const Repos = () => {
       <DeleteDialog />
       <SectionHeader isPage title='Repos' />
       <Divider />
-      <ListHeader sections={['Assignment Name', 'Github Username', 'Status', 'Actions']} />
+      <ListHeader sections={['Assignment Name', 'Status', 'Actions']} />
       {repos && repos.map((repo, index) => (
         <RepoItem
           key={`${repo.assignment_name}-${index}`}
           assignmentId={repo.assignment_id}
           assignmentName={repo.assignment_name}
           courseCode={repo.course_code}
-          githubUsername={repo.github_username}
           ready={repo.ready}
           repo_url={repo.repo_url}
           openDialog={(id) => {

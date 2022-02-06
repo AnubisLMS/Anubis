@@ -13,7 +13,6 @@ const RepoItem = ({
   assignmentId,
   assignmentName,
   courseCode,
-  githubUsername,
   ready,
   repo_url,
   openDialog,
@@ -27,7 +26,6 @@ const RepoItem = ({
       subTitle={courseCode}
       titleIcon={<GitHubIcon />}
     >
-      <Typography>{githubUsername}</Typography>
       <Typography>{ready ? 'Ready' : 'Processing'}</Typography>
       <Box className={classes.actionsContainer}>
         <Button
