@@ -146,13 +146,18 @@ def delete_assignment_repo(user: User, assignment: Assignment, commit: bool = Tr
             Submission.assignment_repo_id == repo.id,
         ).all()
         submission_ids = list(map(lambda x: x.id, submissions))
+        logger.info(f'Deleting submissions len = {len(submission_ids)}')
 
         # Go through all the submissions, deleting builds
         # and tests as we go
+        logger.info(f'Deleting submission builds')
         SubmissionBuild.query.filter(SubmissionBuild.submission_id.in_(submission_ids)).delete()
+
+        logger.info(f'Deleting submission results')
         SubmissionTestResult.query.filter(SubmissionTestResult.submission_id.in_(submission_ids)).delete()
 
         # Delete submissions themselves
+        logger.info(f'Deleting submissions')
         Submission.query.filter(
             Submission.id.in_(submission_ids),
         ).delete()
@@ -161,6 +166,7 @@ def delete_assignment_repo(user: User, assignment: Assignment, commit: bool = Tr
         github_org, repo_name = parse("https://github.com/{}/{}", repo.repo_url)
 
         # Delete the repo
+        logger.info(f'Deleting assignment repo db record')
         AssignmentRepo.query.filter(AssignmentRepo.id == repo.id).delete(synchronize_session=False)
 
         if commit:
@@ -170,7 +176,7 @@ def delete_assignment_repo(user: User, assignment: Assignment, commit: bool = Tr
     try:
         # Make the github api call to delete the repo on github
         r = github_rest(f"/repos/{github_org}/{repo_name}", method="delete")
-        logger.error(r)
+        logger.info(f'successfully deleted repo {r}')
     except Exception as e:
         logger.error(traceback.format_exc())
         logger.error(f"Failed to delete repo {e}")
