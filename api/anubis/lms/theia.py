@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple, Union
 
 from werkzeug.utils import redirect
 
-from anubis.models import db, TheiaSession, User, AssignmentRepo, Assignment
+from anubis.models import db, TheiaSession, User
 from anubis.utils.auth.token import create_token
 from anubis.utils.cache import cache
 from anubis.utils.config import get_config_int
@@ -157,7 +157,7 @@ def initialize_ide(
     privileged: bool = False,
     credentials: bool = False,
 ) -> TheiaSession:
-    from anubis.utils.rpc import enqueue_ide_initialize
+    from anubis.rpc.enqueue import enqueue_ide_initialize
 
     # Create a new session
     session = TheiaSession(

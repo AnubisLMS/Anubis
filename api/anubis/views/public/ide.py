@@ -20,7 +20,7 @@ from anubis.utils.cache import cache
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_response, load_from_id
-from anubis.utils.rpc import enqueue_ide_stop
+from anubis.rpc.enqueue import enqueue_ide_stop
 
 ide_ = Blueprint("public-ide", __name__, url_prefix="/public/ide")
 

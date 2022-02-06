@@ -14,7 +14,7 @@ from anubis.utils.config import get_config_int
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_endpoint, json_response
-from anubis.utils.rpc import enqueue_ide_stop, rpc_enqueue
+from anubis.rpc.enqueue import rpc_enqueue, enqueue_ide_stop
 
 ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 

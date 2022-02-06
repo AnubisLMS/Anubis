@@ -58,7 +58,7 @@ def initialize_theia_session(theia_session_id: str):
         ).count()
         >= max_ides
     ):
-        from anubis.utils.rpc import enqueue_ide_initialize
+        from anubis.rpc.enqueue import enqueue_ide_initialize
 
         # If there are too many active pods, recycle the job through the queue.
         logger.info(

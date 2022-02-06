@@ -41,7 +41,7 @@ def fix_github_broken_repos():
 def fix_github_missing_submissions(org_name: str):
     from anubis.lms.submissions import init_submission
     from anubis.lms.webhook import check_repo, guess_github_repo_owner
-    from anubis.utils.rpc import enqueue_autograde_pipeline
+    from anubis.rpc.enqueue import enqueue_autograde_pipeline
 
     # Do graphql nonsense
     # Refer to here for graphql over https: https://graphql.org/learn/serving-over-http/

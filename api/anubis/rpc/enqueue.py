@@ -1,3 +1,9 @@
+"""
+This is where we should implement any and all job function for the
+redis queue. The rq library requires special namespacing in order to work,
+so these functions must reside in a separate file.
+"""
+
 import traceback
 
 from redis import Redis
@@ -8,8 +14,7 @@ from anubis.rpc.assignments import make_shared_assignment
 from anubis.rpc.lms import assign_missing_questions
 from anubis.rpc.pipeline import create_submission_pipeline, reap_stale_submission_pipelines
 from anubis.rpc.seed import seed
-from anubis.rpc.theia import initialize_theia_session, reap_stale_theia_sessions, reap_theia_session_by_id
-from anubis.rpc.visualizations import create_visuals as create_visuals_
+from anubis.rpc.theia import initialize_theia_session, reap_theia_session_by_id, reap_stale_theia_sessions
 
 
 def rpc_enqueue(func, queue=None, args=None):
@@ -70,11 +75,6 @@ def enqueue_pipeline_reap_stale(*args):
 def enqueue_seed():
     """Enqueue debug seed data"""
     rpc_enqueue(seed, queue="default")
-
-
-def enqueue_create_visuals(*_):
-    """Enqueue create visuals"""
-    rpc_enqueue(create_visuals_, queue="default")
 
 
 def enqueue_assign_missing_questions(*args):

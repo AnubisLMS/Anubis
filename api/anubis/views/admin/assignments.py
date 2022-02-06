@@ -18,7 +18,7 @@ from anubis.github.repos import delete_assignment_repo
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_endpoint, json_response, load_from_id
 from anubis.utils.logging import logger
-from anubis.utils.rpc import enqueue_make_shared_assignment
+from anubis.rpc.enqueue import enqueue_make_shared_assignment
 
 assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
 

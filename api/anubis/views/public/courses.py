@@ -12,7 +12,7 @@ from anubis.utils.cache import cache
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_response
-from anubis.utils.rpc import enqueue_assign_missing_questions
+from anubis.rpc.enqueue import enqueue_assign_missing_questions
 
 courses_ = Blueprint("public-courses", __name__, url_prefix="/public/courses")
 

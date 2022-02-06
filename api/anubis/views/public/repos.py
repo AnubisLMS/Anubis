@@ -105,7 +105,7 @@ def public_repos_create(assignment_id: str):
             message="Assignment does not exist",
         )
 
-    repo = create_assignment_student_repo(current_user, assignment)
+    repo, errors = create_assignment_student_repo(current_user, assignment)
 
     # Clear cache entry
     cache.delete_memoized(get_assignment_data, current_user.id, assignment_id)
@@ -115,6 +115,13 @@ def public_repos_create(assignment_id: str):
         repo.collaborator_configured,
         message="Student could not be added as a collaborator to repo",
     )
+
+    if len(errors) > 0:
+        return success_response({
+            "repo": repo.data,
+            "status": errors[-1],
+            "variant": 'warning',
+        })
 
     # Pass them back
     return success_response({"repo": repo.data})

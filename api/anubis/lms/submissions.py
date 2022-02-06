@@ -19,7 +19,7 @@ from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, split_chunks
 from anubis.utils.http import error_response, success_response
 from anubis.utils.logging import logger
-from anubis.utils.rpc import enqueue_autograde_pipeline, rpc_enqueue
+from anubis.rpc.enqueue import rpc_enqueue, enqueue_autograde_pipeline
 
 
 def bulk_regrade_submissions(submissions: List[Submission]) -> List[dict]:

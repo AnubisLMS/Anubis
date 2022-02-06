@@ -1,17 +1,13 @@
-from typing import List
-
 from datetime import datetime
 from flask import Blueprint
 
-from anubis.lms.theia import initialize_ide, assert_theia_sessions_enabled
-from anubis.models import db, TheiaSession, TheiaImage
+from anubis.models import db, TheiaSession
 from anubis.utils.auth.http import require_superuser
-from anubis.utils.auth.user import current_user
 from anubis.utils.http import success_response
-from anubis.utils.http.decorators import json_response, load_from_id
+from anubis.utils.http.decorators import json_response
 from anubis.utils.data import req_assert
 from anubis.rpc.theia import reap_theia_playgrounds_all
-from anubis.utils.rpc import enqueue_ide_stop, rpc_enqueue
+from anubis.rpc.enqueue import rpc_enqueue, enqueue_ide_stop
 
 playgrounds_ = Blueprint("super-playgrounds", __name__, url_prefix="/super/playgrounds")
 

@@ -12,7 +12,7 @@ from anubis.utils.data import is_debug, req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_response
 from anubis.utils.logging import logger
-from anubis.utils.rpc import enqueue_autograde_pipeline
+from anubis.rpc.enqueue import enqueue_autograde_pipeline
 
 webhook = Blueprint("public-webhook", __name__, url_prefix="/public/webhook")
 
