@@ -222,6 +222,10 @@ export default function Playgrounds() {
               With Anubis Playgrounds you can run any of the IDEs we provide with one click. No course sign up
               necessary. Select an IDE, and a version and hit launch to start.
             </Typography>
+            <Typography variant={'body2'} component={'small'} style={{color: 'grey'}} gutterBottom>
+              {'Don\'t see an IDE you need? Open an issue on our github ' +
+                'requesting what you need, and we\'ll see if we can add it!'}
+            </Typography>
           </Grid>
           {availableImages && selectedImage && availableImages.map((image, index) => (
             <Grid
