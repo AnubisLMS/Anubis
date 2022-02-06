@@ -80,6 +80,8 @@ const useColumns = () => ([
   },
   {
     field: 'tests_passed', headerName: 'Tests Passed', width: 150,
+    sortComparator: (v1, v2, cellParams1, cellParams2) =>
+      cellParams1.value < cellParams2.value,
     renderCell: ({row}) => `${row?.tests_passed}/${row?.total_tests}`,
   },
 ]);
@@ -112,11 +114,8 @@ export default function Results() {
 
   React.useEffect(() => {
     setLoading(true);
-    const offset = pageSize * (page);
-    const limit = pageSize;
     axios.get(
       `/api/admin/autograde/assignment/${assignmentId}`,
-      {params: {limit, offset}},
     ).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
 
@@ -125,21 +124,13 @@ export default function Results() {
         return;
       }
 
-      setStats((state) => {
-        let j = 0;
-        while (state.length < data.total) {
-          state.push({id: j++});
-        }
-        let i = 0;
-        for (let k = offset; k < Math.min(offset + limit, data.total); ++k) {
-          state[k] = data.stats[i++];
-        }
-        return [...state];
-      });
+      if (data.stats) {
+        setStats(data.stats);
+      }
 
       setLoading(false);
     }).catch(standardErrorHandler(enqueueSnackbar));
-  }, [page, pageSize]);
+  }, []);
 
   React.useEffect(() => {
     setRows([...stats]);
@@ -272,17 +263,6 @@ export default function Results() {
             rowCount={students.length}
             columns={columns}
             rows={rows}
-            page={page}
-            pageSize={pageSize}
-            rowsPerPageOptions={[10, 15]}
-            onPageChange={(params) => {
-              setLoading(true);
-              setPage(params.page);
-            }}
-            onPageSizeChange={(params) => {
-              setLoading(true);
-              setPageSize(params.pageSize);
-            }}
             onRowClick={({row}) => setSelected(row)}
           />
         </Paper>

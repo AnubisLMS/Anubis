@@ -68,10 +68,6 @@ def admin_autograde_assignment_assignment_id(assignment_id):
     :return:
     """
 
-    # Get options for autograde calculations
-    limit = get_number_arg("limit", 10)
-    offset = get_number_arg("offset", 0)
-
     # Pull the assignment object
     assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
@@ -82,7 +78,7 @@ def admin_autograde_assignment_assignment_id(assignment_id):
     assert_course_context(assignment)
 
     # Get the (possibly cached) autograde calculations
-    bests = bulk_autograde(assignment_id, limit=limit, offset=offset)
+    bests = bulk_autograde(assignment_id, limit=None, offset=None)
     total = (
         User.query.join(InCourse)
         .filter(
