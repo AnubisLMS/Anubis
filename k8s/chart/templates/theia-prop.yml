@@ -15,6 +15,11 @@ spec:
   selector:
     matchLabels:
       name: theia-prop
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 5
+      maxSurge: 5
   template:
     metadata:
       labels:
