@@ -19,12 +19,12 @@ const SubmissionTest = ({test, expandModal, processing, hasExpand = true}) => {
         )}/>
 
         <Typography className={classes.name}>{test.test.name}</Typography>
-        {!processing && test.result.output === null && (
+        {!!processing && test.result.output === null && (
           <Typography className={clsx(classes.testStatus, classes.processing)}>
             Skipped
           </Typography>
         )}
-        {!!processing && test.result.output === null && (
+        {!processing && test.result.output === null && (
           <Typography className={clsx(classes.testStatus, classes.processing)}>
             Processing
           </Typography>
