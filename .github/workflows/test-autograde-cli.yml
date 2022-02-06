@@ -11,8 +11,12 @@ defaults:
 on:
   push:
     branches: [ master ]
+    paths:
+      - "theia/ide/theia-base/cli/**"
   pull_request:
     branches: [ master ]
+    paths:
+      - "theia/ide/theia-base/cli/**"
 
 jobs:
   build:
