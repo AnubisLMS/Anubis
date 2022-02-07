@@ -34,6 +34,9 @@ def main():
     # Generate plot for active in last week
     get_usage_plot_active()
 
+    # Generate plot for active in last month
+    get_usage_plot_active(days=30, step=7)
+
 
 if __name__ == "__main__":
     print(f"Running visuals job - {datetime.now()}")

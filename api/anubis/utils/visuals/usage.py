@@ -128,7 +128,7 @@ def get_usage_plot_playgrounds():
 
 
 @cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
-def get_usage_plot_active(days: int = 7):
+def get_usage_plot_active(days: int = 7, step: int = 1):
     import matplotlib.pyplot as plt
 
     utcnow = datetime.utcnow().replace(hour=0, second=0, microsecond=0)
@@ -139,24 +139,25 @@ def get_usage_plot_active(days: int = 7):
     theia_y = []
     autograde_y = []
 
-    for n in range(days):
-        day = start_datetime + timedelta(days=n)
-        submission_set = get_active_submission_users(day)
-        theia_set = get_active_theia_users(day)
-        xx.append(day)
+    for n in range(0, days, step):
+        start_day = start_datetime + timedelta(days=n)
+        end_day = start_day + timedelta(days=step-1)
+        submission_set = get_active_submission_users(start_day, end_day)
+        theia_set = get_active_theia_users(start_day, end_day)
+        xx.append(start_day)
         total_y.append(len(submission_set) + len(theia_set))
         autograde_y.append(len(submission_set))
         theia_y.append(len(theia_set))
 
     fig, ax = plt.subplots(figsize=(12, 10))
     ax.plot(xx, total_y, 'b', label='Total users active on platform')
-    ax.plot(xx, autograde_y, 'g--', label='Total users that used Anubis Autograder')
     ax.plot(xx, theia_y, 'r--', label='Total users that used Anubis IDE')
+    ax.plot(xx, autograde_y, 'g--', label='Total users that used Anubis Autograder')
     ax.legend()
 
     add_watermark(ax, utcnow)
     ax.set(
-        title=f"Anubis LMS - Active users in the last {days} days",
+        title=f"Anubis LMS - Active users in the last {days} days - step {step} days",
         xlabel="time",
         ylabel="Users active",
     )

@@ -42,7 +42,7 @@ const Visuals = () => {
           <Card>
             <CardHeader
               avatar={<Avatar src={'/logo512.png'}/>}
-              title={'Anubis LMS Active Users'}
+              title={'Anubis LMS Active Users In Last Week'}
               titleTypographyProps={{variant: 'h6'}}
               subheader={'re-generated every 5 minutes'}
             />
@@ -61,7 +61,34 @@ const Visuals = () => {
             <CardMedia
               className={classes.usage}
               image={`/api/public/visuals/usage/active`}
-              title={'Anubis LMS Active Users'}
+              title={'Anubis LMS Active Users In Last Week'}
+            />
+          </Card>
+        </Grid>
+        <Grid item xs sm={10} lg={8} xl={8}>
+          <Card>
+            <CardHeader
+              avatar={<Avatar src={'/logo512.png'}/>}
+              title={'Anubis LMS Active Users In Last Month'}
+              titleTypographyProps={{variant: 'h6'}}
+              subheader={'re-generated every 5 minutes'}
+            />
+            <Button
+              className={classes.button}
+              startIcon={<CloudDownload/>}
+              variant={'contained'}
+              color={'primary'}
+              size={'large'}
+              component={'a'}
+              href={`/api/public/visuals/usage/active-month`}
+              download={'anubis-active-users.png'}
+            >
+              Download
+            </Button>
+            <CardMedia
+              className={classes.usage}
+              image={`/api/public/visuals/usage/active-month`}
+              title={'Anubis LMS Active Users In Last Month'}
             />
           </Card>
         </Grid>

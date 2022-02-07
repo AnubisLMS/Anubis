@@ -50,3 +50,12 @@ def public_visuals_usage_active():
     blob = get_usage_plot_active()
 
     return make_png_response(blob)
+
+
+@visuals_.route("/usage/active-month")
+def public_visuals_usage_active_month():
+    # Get the png blob of the usage graph.
+    # The get_usage_plot is itself a cached function.
+    blob = get_usage_plot_active(30, 7)
+
+    return make_png_response(blob)
