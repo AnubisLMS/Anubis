@@ -3,10 +3,10 @@ export default [
     slug: 'git-vuln',
     title: 'Abusing Anubis Autosave to Break into Student GitHub Repositories',
     author: 'Alan Cao',
-    authorImage: 'https://avatars.githubusercontent.com/u/17283637?',
+    authorImage: 'https://avatars.githubusercontent.com/u/17283637',
     date: '2022-02-06',
     get: () => {
-      return import("./GitVuln.md");
+      return import('./GitVuln.md');
     },
   },
   {
@@ -20,7 +20,7 @@ export default [
     },
   },
   {
-    slug: 'elavator-pitch',
+    slug: 'elevator-pitch',
     title: 'Anubis LMS',
     author: 'John Cunniff',
     authorImage: 'https://avatars.githubusercontent.com/u/36013983',
