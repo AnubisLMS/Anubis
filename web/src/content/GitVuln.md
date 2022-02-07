@@ -8,17 +8,17 @@ In this writeup, I’ll be presenting an interesting vulnerability I found that 
 
 When you boot into Anubis’s [Theia IDE](https://theia-ide.org), you’re interacting with a provisioned Docker container created just for you. From here, you have the opportunity to access a Linux shell inside to build and debug programs for your assignments. One neat feature that has been introduced is the ability to *autosave*, which can be done inside the assignment repository with the following command:
 
-```graphql
+```bash
 $ anubis autosave
 ```
 
 Once this command is executed, it [calls an HTTP API endpoint](https://github.com/AnubisLMS/Anubis/blob/118f70faccd4ebceb8df4b492469473c7f978396/theia/ide/theia-base/cli/anubis/cli.py#L196-L200) at [http://localhost:5001/](http://localhost:5001/), which actually lives on a *separate container,* but is able to access a shared volume with your IDE container that contains only your assignment repository. When called, this API service then automatically runs Git commands on the repo as `anubis-robot` to commit and push any new changes to the class GitHub to automatically save your progress:
 
-![Untitled](Abusing%20Anubis%20Autosave%20to%20Break%20into%20Student%20GitH%206b539a62cf104f60bb378034ed27b546/Untitled.png)
+![](https://raw.githubusercontent.com/AnubisLMS/Anubis/cb7e48f5564c12d4b279c575bc4faa11019f8fed/docs/design-tex/figures/autograder-1.png)
 
 Having this “sidecar” container is very important: it decouples sensitive functionality from the unprivileged student-facing IDE container. In this instance, having this design pattern means that students are not able to execute Git operations as `anubis-robot`, whose credentials live entirely in the sidecar container in its `~/.git-credentials` path and has Git access to every student and faculty’s codebases in the organization. Thus, the students must make changes, and then run the `anubis autosave` command to interact with your codebase over the shared volume, which will only strictly commit and push to GitHub. Once done, we see the tool spit out some Git output, which was originally from the remote service:
 
-![Untitled](Abusing%20Anubis%20Autosave%20to%20Break%20into%20Student%20GitH%206b539a62cf104f60bb378034ed27b546/Untitled%201.png)
+![](https://raw.githubusercontent.com/AnubisLMS/Anubis/cb7e48f5564c12d4b279c575bc4faa11019f8fed/docs/design-tex/figures/autograder-2.png)
 
 However, what if there is a way we can make this autosave functionality also spill out `anubis-robot`'s credentials for us to gain privileged access to the `os3224` organization? Even worst, what if we can also arbitrarily run *any* malicious command in the sidecar container itself?
 
@@ -53,13 +53,13 @@ It turns out that the Anubis team is pretty security-conscious, and they’ve ac
 
 **However**, after digging a little further into Git documentation, it turns out that `--no-verify` does not stop *post*-hooks! We go back and change the script to `post-commit`, run `anubis autosave` and...
 
-![Screen Shot 2022-02-01 at 2.17.14 AM.png](Abusing%20Anubis%20Autosave%20to%20Break%20into%20Student%20GitH%206b539a62cf104f60bb378034ed27b546/Screen_Shot_2022-02-01_at_2.17.14_AM.png)
+![](https://raw.githubusercontent.com/AnubisLMS/Anubis/cb7e48f5564c12d4b279c575bc4faa11019f8fed/docs/design-tex/figures/pwned-1.png)
 
 Success! We now have access to `anubis-robot`'s username and password token pair! Judging by the `ghp_*` prefix in the API token, we now have stolen a personal access token. **If I was feeling evil, I can now use this to access any student’s (and potentially faculty’s) private repositories just through the GitHub API.**
 
 We can even go a step further and dump out all the sensitive environment variables to see what other cloud resource endpoints we could potentially abuse as an attacker:
 
-![Screen Shot 2022-02-01 at 2.31.58 AM.png](Abusing%20Anubis%20Autosave%20to%20Break%20into%20Student%20GitH%206b539a62cf104f60bb378034ed27b546/Screen_Shot_2022-02-01_at_2.31.58_AM.png)
+![](https://raw.githubusercontent.com/AnubisLMS/Anubis/cb7e48f5564c12d4b279c575bc4faa11019f8fed/docs/design-tex/figures/pwned-2.png)
 
 This is of course blurred out because there is quite a bit of sensitive variables being set that shouldn’t be exposed to the student, such as the Kubernetes service API, which we could abuse with the `/run/secrets/kubernetes.io/serviceaccount/token` JWT token stored in the container to potentially enumerate and mess with sensitive resources that also exist in the Anubis infrastructure. Unfortunately, this didn’t work on my end, but was worth a shot.
 
