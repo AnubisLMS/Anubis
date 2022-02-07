@@ -1,5 +1,15 @@
 export default [
   {
+    slug: 'git-vuln',
+    title: 'Abusing Anubis Autosave to Break into Student GitHub Repositories',
+    author: 'Alan Cao',
+    authorImage: 'https://avatars.githubusercontent.com/u/17283637?',
+    date: '2022-02-06',
+    get: () => {
+      return import("./GitVuln.md");
+    },
+  },
+  {
     slug: 'proxy-vuln',
     title: 'Proxy Cache Vulnerability',
     author: 'John Cunniff',
