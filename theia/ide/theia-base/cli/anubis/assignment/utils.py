@@ -191,10 +191,10 @@ def trim(stdout: str) -> typing.List[str]:
         stdout_lines[index] = stdout_lines[index].strip()
 
     if len(stdout_lines) != 0 and 'terminating on signal 15' in stdout_lines[-1]:
-        stdout_lines.pop()
+        stdout_lines[-1] = stdout_lines[-1].split("$")[0].strip()
 
-    if len(stdout_lines) != 0:
-        stdout_lines[-1] = stdout_lines[-1].strip('$')
+    if len(stdout_lines) != 0 and len(stdout_lines[-1]) == 0:
+        stdout_lines.pop()
 
     print(json.dumps(stdout_lines, indent=2))
     return stdout_lines

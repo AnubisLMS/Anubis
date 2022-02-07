@@ -1,5 +1,6 @@
 import pytest
 
+from collections import namedtuple
 from dataclasses import dataclass, field
 from typing import Callable, List, Sequence, Tuple
 
@@ -123,3 +124,112 @@ def test_compare_func(compare_test_fixtures: List[CompareTestFixture]):
         assert matched == fixture.matched
         assert not matched or (matched and len(fixture.diff) == 0)
         assert diff == fixture.diff
+
+TrimTestCase = namedtuple("TrimTestCase", ["name", "stdout", "expected_result"])
+
+trim_test_cases = [
+    TrimTestCase("trailing timeout at the same line",
+    """Booting from Hard Disk..xv6...
+cpu0: starting
+myprog test.txt
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ Test1
+Test2
+Test3 
+Test4$ qemu-system-i386: terminating on signal 15 from pid 1454 (timeout)""", ["Test1", "Test2", "Test3", "Test4"]),
+    TrimTestCase("trailing timeout at a separate line",
+    """Booting from Hard Disk..xv6...
+cpu0: starting
+myprog test.txt
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ Test1
+Test2
+Test3 
+Test4
+$ qemu-system-i386: terminating on signal 15 from pid 1454 (timeout)""", ["Test1", "Test2", "Test3", "Test4"]),
+    TrimTestCase("trailing $ without newline",
+    """Booting from Hard Disk..xv6...
+cpu0: starting
+myprog test.txt
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ Test1
+Test2
+Test3 
+Test4
+$""", ["Test1", "Test2", "Test3", "Test4"]),
+    TrimTestCase("trailing $ with a newline",
+    """Booting from Hard Disk..xv6...
+cpu0: starting
+myprog test.txt
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ Test1
+Test2
+Test3 
+Test4
+$
+""", ["Test1", "Test2", "Test3", "Test4"]),
+    TrimTestCase("trailing $ at the same line",
+    """Booting from Hard Disk..xv6...
+cpu0: starting
+myprog test.txt
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ Test1
+Test2
+Test3 
+Test4
+Test5$
+""", ["Test1", "Test2", "Test3", "Test4", "Test5"]),
+    TrimTestCase("stdout that requires striping",
+    """Booting from Hard Disk..xv6...
+cpu0: starting
+myprog test.txt
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$   Test1
+Test2    
+Test3    
+   Test4
+$
+""", ["Test1", "Test2", "Test3", "Test4"]),
+    TrimTestCase("stdout without init",
+    """$ Test1
+Test2
+Test3 
+Test4
+$
+""", ["$ Test1", "Test2", "Test3 ", "Test4", "$", ""]),
+    TrimTestCase("two trailing $",
+    """Booting from Hard Disk..xv6...
+cpu0: starting
+myprog test.txt
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ Test1
+Test2
+Test3
+Test4$
+$
+""", ["Test1", "Test2", "Test3", "Test4"]),
+    TrimTestCase("trailing timeout without $",
+    """Booting from Hard Disk..xv6...
+cpu0: starting
+myprog test.txt
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ Test1
+Test2
+Test3 
+Test4
+qemu-system-i386: terminating on signal 15 from pid 1454 (timeout)
+""", ["Test1", "Test2", "Test3", "Test4", "qemu-system-i386: terminating on signal 15 from pid 1454 (timeout)"])
+]
+
+@pytest.mark.parametrize("test_case", trim_test_cases, ids=lambda test_case: test_case.name)
+def test_trim(test_case: TrimTestCase):
+    result = utils.trim(test_case.stdout) 
+    assert result == test_case.expected_result 
