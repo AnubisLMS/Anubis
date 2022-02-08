@@ -38,7 +38,7 @@ const Visuals = () => {
   return (
     <StandardLayout description={'Visuals'}>
       <Grid container spacing={4} justify={'center'}>
-        <Grid item xs sm={10} lg={8} xl={8}>
+        <Grid item xs sm={10} lg={8} xl={6}>
           <Card>
             <CardHeader
               avatar={<Avatar src={'/logo512.png'}/>}
@@ -65,7 +65,7 @@ const Visuals = () => {
             />
           </Card>
         </Grid>
-        <Grid item xs sm={10} lg={8} xl={8}>
+        <Grid item xs sm={10} lg={8} xl={6}>
           <Card>
             <CardHeader
               avatar={<Avatar src={'/logo512.png'}/>}
@@ -92,7 +92,7 @@ const Visuals = () => {
             />
           </Card>
         </Grid>
-        <Grid item xs sm={10} lg={8} xl={8}>
+        <Grid item xs sm={10} lg={8} xl={6}>
           <Card>
             <CardHeader
               avatar={<Avatar src={'/logo512.png'}/>}
@@ -120,7 +120,7 @@ const Visuals = () => {
           </Card>
         </Grid>
         {selected && (
-          <Grid item xs sm={10} lg={8} xl={8}>
+          <Grid item xs sm={10} lg={8} xl={6}>
             <Card>
               <CardHeader
                 avatar={<Avatar src={'/logo512.png'}/>}
