@@ -47,7 +47,7 @@ def public_visuals_usage(course_id: str):
 def public_visuals_usage_active():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
-    blob = get_usage_plot_active(days=14, step=7)
+    blob = get_usage_plot_active(days=14, step=1)
 
     return make_png_response(blob)
 
