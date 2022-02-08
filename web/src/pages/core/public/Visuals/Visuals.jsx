@@ -42,7 +42,7 @@ const Visuals = () => {
           <Card>
             <CardHeader
               avatar={<Avatar src={'/logo512.png'}/>}
-              title={'Anubis LMS Active Users In Last Week'}
+              title={'Anubis LMS Active Users In Last 2 Weeks'}
               titleTypographyProps={{variant: 'h6'}}
               subheader={'re-generated every 5 minutes'}
             />
@@ -61,7 +61,7 @@ const Visuals = () => {
             <CardMedia
               className={classes.usage}
               image={`/api/public/visuals/usage/active`}
-              title={'Anubis LMS Active Users In Last Week'}
+              title={'Anubis LMS Active Users In Last 2 Weeks'}
             />
           </Card>
         </Grid>

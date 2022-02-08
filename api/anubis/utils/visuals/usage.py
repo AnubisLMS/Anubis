@@ -128,7 +128,7 @@ def get_usage_plot_playgrounds():
 
 
 @cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
-def get_usage_plot_active(days: int = 7, step: int = 1):
+def get_usage_plot_active(days: int = 14, step: int = 1):
     import matplotlib.pyplot as plt
 
     now = datetime.now().replace(hour=0, second=0, microsecond=0)
