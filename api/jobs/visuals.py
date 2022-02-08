@@ -32,10 +32,10 @@ def main():
     get_usage_plot_playgrounds()
 
     # Generate plot for active in last week
-    get_usage_plot_active()
+    get_usage_plot_active(days=14, step=1)
 
     # Generate plot for active in last month
-    get_usage_plot_active(days=30, step=7)
+    get_usage_plot_active(days=90, step=7)
 
 
 if __name__ == "__main__":
