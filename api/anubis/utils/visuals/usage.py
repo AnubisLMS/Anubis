@@ -100,7 +100,7 @@ def get_usage_plot(course_id: Optional[str]) -> Optional[bytes]:
 def get_usage_plot_playgrounds():
     import matplotlib.pyplot as plt
 
-    utcnow = datetime.utcnow().replace(microsecond=0)
+    now = datetime.now().replace(microsecond=0)
 
     fig, ax = plt.subplots(figsize=(12, 10))
 
@@ -116,7 +116,7 @@ def get_usage_plot_playgrounds():
                 ax.plot(group["created"], group["count"], label=image.title)
     ax.legend()
 
-    add_watermark(ax, utcnow)
+    add_watermark(ax, datetime.utcnow())
     ax.set(
         title=f"Anubis Playgrounds - IDEs spawned per hour",
         xlabel="time",
@@ -131,8 +131,8 @@ def get_usage_plot_playgrounds():
 def get_usage_plot_active(days: int = 7, step: int = 1):
     import matplotlib.pyplot as plt
 
-    utcnow = datetime.utcnow().replace(hour=0, second=0, microsecond=0)
-    start_datetime = utcnow - timedelta(days=days)
+    now = datetime.now().replace(hour=0, second=0, microsecond=0)
+    start_datetime = now - timedelta(days=days-1)
 
     xx = []
     total_y = []
@@ -145,7 +145,7 @@ def get_usage_plot_active(days: int = 7, step: int = 1):
         submission_set = get_active_submission_users(start_day, end_day)
         theia_set = get_active_theia_users(start_day, end_day)
         xx.append(start_day)
-        total_y.append(len(submission_set) + len(theia_set))
+        total_y.append(len(submission_set.union(theia_set)))
         autograde_y.append(len(submission_set))
         theia_y.append(len(theia_set))
 
@@ -155,7 +155,7 @@ def get_usage_plot_active(days: int = 7, step: int = 1):
     ax.plot(xx, autograde_y, 'g--', label='Total users that used Anubis Autograder')
     ax.legend()
 
-    add_watermark(ax, utcnow)
+    add_watermark(ax, datetime.utcnow())
     ax.set(
         title=f"Anubis LMS - Active users in the last {days} days - step {step} days",
         xlabel="time",
