@@ -12,7 +12,7 @@ K8S_RESTART_DEPLOYMENTS := \
 
 # Theia IDES
 THEIA_BASE_IDE := theia-base-38 theia-base-39 theia-base-310
-THEIA_IDES := theia-xv6 theia-admin theia-devops theia-jepst theia-golang theia-flask-39 theia-flask-310
+THEIA_IDES := theia-xv6 theia-admin theia-devops theia-jepst theia-golang theia-flask-39 theia-flask-310 theia-mysql-39 theia-mysql-310
 
 
 help:

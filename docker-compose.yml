@@ -203,6 +203,20 @@ services:
       args:
         PY_VERSION: '3.10'
 
+  theia-mysql-39:
+    image: registry.digitalocean.com/anubis/theia-mysql:python-3.9
+    build:
+      context: ./theia/ide/theia-mysql
+      args:
+        PY_VERSION: '3.9'
+
+  theia-mysql-310:
+    image: registry.digitalocean.com/anubis/theia-mysql:python-3.10
+    build:
+      context: ./theia/ide/theia-mysql
+      args:
+        PY_VERSION: '3.10'
+
   theia-jepst:
     image: registry.digitalocean.com/anubis/theia-jepst:latest
     build: ./theia/ide/theia-jepst
