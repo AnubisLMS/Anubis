@@ -74,6 +74,10 @@ theia:
       image: "registry.digitalocean.com/anubis/theia-devops"
     - name: "theia-admin"
       image: "registry.digitalocean.com/anubis/theia-admin"
+    - name: "theia-mysql-39"
+      image: "registry.digitalocean.com/anubis/theia-mysql:python-3.9"
+    - name: "theia-mysql-310"
+      image: "registry.digitalocean.com/anubis/theia-mysql:python-3.10"
 
 # Discord Bot
 discordbot:
