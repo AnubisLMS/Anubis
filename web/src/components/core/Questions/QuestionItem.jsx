@@ -44,7 +44,7 @@ export default function QuestionItem({question, onClick}) {
       <Typography style={{color: statusColorCss}}>
         {status}
       </Typography>
-      <Typography> {new Date(submitted).toLocaleString()}</Typography>
+      <Typography> {!!submitted ? new Date(submitted).toLocaleString() : 'No Submission'}</Typography>
     </Item>
   );
 };
