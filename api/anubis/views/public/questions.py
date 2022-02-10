@@ -82,9 +82,10 @@ def public_questions_save(assignment_id: str, questions: list):
         AssignedQuestionResponse.assigned_question_id.in_([
             assigned_question.id for assigned_question in assigned_questions
         ]),
-    ).group_by(AssignedQuestionResponse.assigned_question_id).having(func.max(AssignedQuestionResponse.created)).all()
+    ).group_by(AssignedQuestionResponse.assigned_question_id, AssignedQuestionResponse.id)\
+        .having(func.max(AssignedQuestionResponse.created)).all()
 
-    req_assert(len(assigned_questions)>0, message='No questions assigned')
+    req_assert(len(assigned_questions) > 0, message='No questions assigned')
 
     for question in questions:
         assignment_question_id = question['id']
