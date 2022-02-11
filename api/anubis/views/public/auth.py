@@ -45,7 +45,7 @@ def public_oauth():
     """
 
     # Get the next url if it was specified.
-    next_url = request.args.get("next") or "/courses"
+    next_url = request.args.get("next") or "/playgrounds"
 
     # Get the authorized response from NYU oauth
     resp = nyu_provider.authorized_response()
