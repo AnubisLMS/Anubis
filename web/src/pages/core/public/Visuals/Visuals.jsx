@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
@@ -16,6 +16,36 @@ import {useStyles} from './Visuals.styles';
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../../utils/standardErrorHandler';
+
+
+const visuals = [
+  {
+    title: 'Anubis LMS Active Users Per Day In Last 2 Weeks',
+    url: `/api/public/visuals/usage/active`,
+    filename: 'anubis-active-users-2-weeks.png',
+  },
+  {
+    title: 'Anubis LMS Active Users Per Week In Last 3 Month',
+    url: `/api/public/visuals/usage/active-month`,
+    filename: 'anubis-active-users-3-months.png',
+  },
+  {
+    title: 'Anubis LMS Active Users Per Day In Last Half Year',
+    url: `/api/public/visuals/usage/active-half-year`,
+    filename: 'anubis-active-users-half-year.png',
+  },
+  {
+    title: 'Anubis Playgrounds Usage Over Time',
+    url: `/api/public/visuals/usage/playgrounds`,
+    filename: 'anubis-playground-usage.png',
+  },
+  {
+    title: 'Anubis LMS Active Users In Last 2 Weeks',
+    url: `/api/public/visuals/usage/active`,
+    filename: 'anubis-active-users.png',
+  },
+];
+
 
 const Visuals = () => {
   const classes = useStyles();
@@ -38,87 +68,35 @@ const Visuals = () => {
   return (
     <StandardLayout description={'Visuals'}>
       <Grid container spacing={4} justify={'center'}>
-        <Grid item xs sm={10} lg={8} xl={6}>
-          <Card>
-            <CardHeader
-              avatar={<Avatar src={'/logo512.png'}/>}
-              title={'Anubis LMS Active Users In Last 2 Weeks'}
-              titleTypographyProps={{variant: 'h6'}}
-              subheader={'re-generated every 5 minutes'}
-            />
-            <Button
-              className={classes.button}
-              startIcon={<CloudDownload/>}
-              variant={'contained'}
-              color={'primary'}
-              size={'large'}
-              component={'a'}
-              href={`/api/public/visuals/usage/active`}
-              download={'anubis-active-users.png'}
-            >
-              Download
-            </Button>
-            <CardMedia
-              className={classes.usage}
-              image={`/api/public/visuals/usage/active`}
-              title={'Anubis LMS Active Users In Last 2 Weeks'}
-            />
-          </Card>
-        </Grid>
-        <Grid item xs sm={10} lg={8} xl={6}>
-          <Card>
-            <CardHeader
-              avatar={<Avatar src={'/logo512.png'}/>}
-              title={'Anubis LMS Active Users In Last 3 Month'}
-              titleTypographyProps={{variant: 'h6'}}
-              subheader={'re-generated every 5 minutes'}
-            />
-            <Button
-              className={classes.button}
-              startIcon={<CloudDownload/>}
-              variant={'contained'}
-              color={'primary'}
-              size={'large'}
-              component={'a'}
-              href={`/api/public/visuals/usage/active-month`}
-              download={'anubis-active-users.png'}
-            >
-              Download
-            </Button>
-            <CardMedia
-              className={classes.usage}
-              image={`/api/public/visuals/usage/active-month`}
-              title={'Anubis LMS Active Users In Last 3 Month'}
-            />
-          </Card>
-        </Grid>
-        <Grid item xs sm={10} lg={8} xl={6}>
-          <Card>
-            <CardHeader
-              avatar={<Avatar src={'/logo512.png'}/>}
-              title={'Anubis Playgrounds Usage Over Time'}
-              titleTypographyProps={{variant: 'h6'}}
-              subheader={'re-generated every 5 minutes'}
-            />
-            <Button
-              className={classes.button}
-              startIcon={<CloudDownload/>}
-              variant={'contained'}
-              color={'primary'}
-              size={'large'}
-              component={'a'}
-              href={`/api/public/visuals/usage/playgrounds`}
-              download={'anubis-playground-usage.png'}
-            >
-              Download
-            </Button>
-            <CardMedia
-              className={classes.usage}
-              image={`/api/public/visuals/usage/playgrounds`}
-              title={'Anubis Playgrounds Usage'}
-            />
-          </Card>
-        </Grid>
+        {visuals.map(({title, filename, url}, index) => (
+          <Grid item xs sm={10} lg={8} xl={6} key={index}>
+            <Card>
+              <CardHeader
+                avatar={<Avatar src={'/logo512.png'}/>}
+                title={title}
+                titleTypographyProps={{variant: 'h6'}}
+                subheader={'re-generated every 5 minutes'}
+              />
+              <Button
+                className={classes.button}
+                startIcon={<CloudDownload/>}
+                variant={'contained'}
+                color={'primary'}
+                size={'large'}
+                component={'a'}
+                href={url}
+                download={filename}
+              >
+                Download
+              </Button>
+              <CardMedia
+                className={classes.usage}
+                image={url}
+                title={title}
+              />
+            </Card>
+          </Grid>
+        ))}
         {selected && (
           <Grid item xs sm={10} lg={8} xl={6}>
             <Card>
@@ -154,7 +132,7 @@ const Visuals = () => {
                 href={`/api/public/visuals/usage/${selected?.id}`}
                 download={`anubis-${selected?.id}-usage.png`}
               >
-              Download
+                Download
               </Button>
               <CardMedia
                 className={classes.usage}
