@@ -4,7 +4,7 @@ import {useStyles} from './Ad.styles';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import BugReportIcon from '@material-ui/icons/BugReport';
+import GitHubIcon from '@material-ui/icons/GitHub';
 
 const Ad = () => {
   const classes = useStyles();
@@ -13,7 +13,7 @@ const Ad = () => {
     <Box className={classes.root}>
       <Box className={classes.iconContainer}>
         <Box className={classes.iconInnerCircle}>
-          <BugReportIcon className={classes.icon} />
+          <GitHubIcon className={classes.icon}/>
         </Box>
       </Box>
       <Typography className={classes.adTitle}>
