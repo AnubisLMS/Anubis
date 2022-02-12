@@ -68,7 +68,7 @@ export default function Forum({user}) {
         }
       })
       .catch(standardErrorHandler(enqueueSnackbar));
-  }, [selectedCourse]);
+  }, [selectedCourse, refreshPosts]);
 
   useEffect(() => {
     if (!selectedPost) {
@@ -96,11 +96,21 @@ export default function Forum({user}) {
     setSelectedCourse(e.target.value);
   };
 
+  const handleCreatePost = (post) => {
+    axios.post(`/api/public/forums/post`, {...post, course_id: selectedCourse.id})
+      .then(() => {
+        setRefreshPosts(refreshPosts + 1);
+        setIsDialogOpen(false);
+      })
+      .catch(standardErrorHandler(enqueueSnackbar));
+  };
+
   return (
     <StandardLayout>
       <CreateDialog
         isOpen={isDialogOpen}
         mode={dialogMode}
+        handleCreatePost={handleCreatePost}
       />
       <Box className={classes.controlsContainer}>
         <Box className={classes.controlsLeft}>
