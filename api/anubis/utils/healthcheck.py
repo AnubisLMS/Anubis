@@ -42,9 +42,10 @@ def add_healthcheck(app: Flask):
 
         # If there is any issue, mark the db
         # connection as Unhealthy
-        except:
+        except Exception as e:
             status["db"] = "Unhealthy"
             status_code = 500
+            print(e)
 
         # Attempt to connect to cache
         try:
@@ -52,9 +53,10 @@ def add_healthcheck(app: Flask):
 
         # If there is any issue, mark the cache
         # connection as Unhealthy
-        except:
+        except Exception as e:
             status["cache"] = "Unhealthy"
             status_code = 500
+            print(e)
 
         # Pass back status and status_code
         return status, status_code
