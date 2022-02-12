@@ -2,9 +2,12 @@ import React, {useState} from 'react';
 import Typography from '@material-ui/core/Typography';
 import {makeStyles} from '@material-ui/core/styles';
 import AceEditor from 'react-ace';
+import gfm from 'remark-gfm';
+import ReactMarkdownWithHtml from 'react-markdown/with-html';
 
 import 'ace-builds/src-min-noconflict/theme-monokai';
 import 'ace-builds/src-min-noconflict/mode-c_cpp';
+import 'ace-builds/src-min-noconflict/mode-python';
 import 'ace-builds/src-min-noconflict/mode-markdown';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -21,12 +24,20 @@ const useStyles = makeStyles((theme) => ({
   root: {
     minWidth: 500,
   },
+  markdown: {
+    fontSize: '16px',
+    margin: theme.spacing(1),
+  },
+  subTitle: {
+    color: '#888888',
+  },
 }));
 
 export default function QuestionEditor({question, updateResponse, saveResponse}) {
   const classes = useStyles();
   const [showSolution, setShowSolution] = useState(false);
   const response = question?.response?.text ?? '';
+  const mode = question?.question?.code_language || 'markdown';
 
   return (
     <Box className={classes.root}>
@@ -46,11 +57,21 @@ export default function QuestionEditor({question, updateResponse, saveResponse})
           </Button>
         </DialogActions>
       </Dialog>
-      <Typography variant={'subtitle1'}>
+      <Typography variant={'subtitle1'} className={classes.subTitle}>
+        Question {question.question.pool}
+      </Typography>
+      <ReactMarkdownWithHtml
+        className={classes.markdown}
+        plugins={[gfm]}
+        allowDangerousHtml
+      >
+        {question?.question?.question ?? ''}
+      </ReactMarkdownWithHtml>
+      <Typography variant={'subtitle1'} className={classes.subTitle}>
         Your Answer:
       </Typography>
       <AceEditor
-        mode={question.code_language ?? 'markdown'}
+        mode={mode}
         theme="monokai"
         value={response}
         onChange={updateResponse}

@@ -6,14 +6,13 @@ from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.sql import func
 
 from anubis.lms.assignments import get_assignment_due_date
-from anubis.lms.courses import is_course_admin
 from anubis.lms.questions import get_assigned_questions
 from anubis.models import AssignedQuestionResponse, AssignedStudentQuestion, Assignment, db
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
-from anubis.utils.http.decorators import json_endpoint, json_response, load_from_id, verify_shape, verify_data_shape
+from anubis.utils.http.decorators import json_endpoint, json_response, load_from_id, verify_data_shape
 
 questions_ = Blueprint("public-questions", __name__, url_prefix="/public/questions")
 
@@ -82,7 +81,7 @@ def public_questions_save(assignment_id: str, questions: list):
         AssignedQuestionResponse.assigned_question_id.in_([
             assigned_question.id for assigned_question in assigned_questions
         ]),
-    ).group_by(AssignedQuestionResponse.assigned_question_id, AssignedQuestionResponse.id)\
+    ).group_by(AssignedQuestionResponse.assigned_question_id, AssignedQuestionResponse.id) \
         .having(func.max(AssignedQuestionResponse.created)).all()
 
     req_assert(len(assigned_questions) > 0, message='No questions assigned')
@@ -107,10 +106,14 @@ def public_questions_save(assignment_id: str, questions: list):
         req_assert(isinstance(response, str), message="response must be a string")
 
         # Skip creating a new response if it matches the last one
+        skip = False
         for last_response in last_responses:
             if last_response.assigned_question_id == assignment_question_id:
                 if last_response.response == response:
-                    continue
+                    skip = True
+                    break
+        if skip:
+            continue
 
         # Create a new response
         res = AssignedQuestionResponse(assigned_question_id=assigned_question.id, response=response)
