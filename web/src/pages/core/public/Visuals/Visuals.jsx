@@ -39,11 +39,6 @@ const visuals = [
     url: `/api/public/visuals/usage/playgrounds`,
     filename: 'anubis-playground-usage.png',
   },
-  {
-    title: 'Anubis LMS Active Users In Last 2 Weeks',
-    url: `/api/public/visuals/usage/active`,
-    filename: 'anubis-active-users.png',
-  },
 ];
 
 
