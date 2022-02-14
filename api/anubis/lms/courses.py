@@ -235,6 +235,11 @@ def assert_course_context(*models: Tuple[Any]):
     :return:
     """
 
+    # If the current user is a superuser, then we can skip
+    # any and all course context checks.
+    if current_user.is_superuser:
+        return True
+
     # Get the current course context
     context = get_course_context()
 
