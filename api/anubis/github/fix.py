@@ -20,8 +20,8 @@ def fix_github_broken_repos():
             # Tas not configured
             AssignmentRepo.ta_configured == False,
         ),
-        AssignmentRepo.created > datetime.now() + timedelta(minutes=1),
-        AssignmentRepo.created < datetime.now() - timedelta(hours=1),
+        AssignmentRepo.created <= datetime.now() + timedelta(minutes=1),
+        AssignmentRepo.created >= datetime.now() - timedelta(hours=1),
     ).all()
 
     # Iterate over broken repos, fixing as we go
