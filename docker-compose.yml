@@ -35,6 +35,7 @@ services:
       - "MINDEBUG=0"
       - "DEBUG=1"
       - "DB_HOST=db"
+      - "MPLCONFIGDIR=/tmp"
       - "GITHUB_TOKEN"
       - "SENTRY_DSN"
     volumes:
