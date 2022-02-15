@@ -5,6 +5,7 @@ from anubis.models import Assignment, Course
 from anubis.utils.data import with_context
 from anubis.utils.visuals.assignments import get_assignment_sundial
 from anubis.utils.visuals.usage import get_usage_plot, get_usage_plot_playgrounds, get_usage_plot_active
+from anubis.utils.visuals.users import get_platform_users_plot
 
 
 @with_context
@@ -39,6 +40,9 @@ def main():
 
     # Generate plot for active in last half year
     get_usage_plot_active(days=180, step=1)
+
+    # Generate plot for last year registered users
+    get_platform_users_plot(days=365, step=1)
 
 
 if __name__ == "__main__":

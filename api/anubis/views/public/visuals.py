@@ -66,7 +66,7 @@ def public_visuals_usage_active_half_year():
 def public_visuals_usage_active_month():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
-    blob = get_usage_plot_active(90, 7)
+    blob = get_usage_plot_active(days=90, step=7)
 
     return make_png_response(blob)
 
@@ -75,6 +75,6 @@ def public_visuals_usage_active_month():
 def public_visuals_users_last_year():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
-    blob = get_platform_users_plot(365, 7)
+    blob = get_platform_users_plot(days=365, step=1)
 
     return make_png_response(blob)
