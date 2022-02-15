@@ -10,6 +10,7 @@ import axios from 'axios';
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import {useSnackbar} from 'notistack';
 import Typography from '@material-ui/core/Typography';
+import Link from '@material-ui/core/Link';
 import Paper from '@material-ui/core/Paper';
 import IconButton from '@material-ui/core/IconButton';
 import CheckIcon from '@material-ui/icons/Check';
@@ -93,13 +94,14 @@ export default function User() {
                 columns={[
                   {
                     field: 'repo_url', headerName: 'Repo URL', width: 500, renderCell: (params) => (
-                      <a
+                      <Link
                         href={params.row?.repo_url}
                         target={'_blank'}
                         rel={'noreferrer'}
+                        color={'primary'}
                       >
                         {params.row?.repo_url}
-                      </a>
+                      </Link>
                     ),
                   },
                   {field: 'assignment_name', headerName: 'Assignment', width: 200},
