@@ -67,6 +67,9 @@ export default function UserCard({user, setUser, age}) {
             <Typography gutterBottom variant="subtitle2" style={{color: 'grey'}}>
                 Account Age: {age}
             </Typography>
+            <Typography gutterBottom variant="subtitle2" style={{color: 'grey'}}>
+                Joined Platform: {user.created}
+            </Typography>
           </Grid>
 
           {/* name */}

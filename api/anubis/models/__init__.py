@@ -79,6 +79,7 @@ class User(db.Model):
             "github_username": self.github_username,
             "name": self.name,
             "beta_ui_enabled": get_beta_ui_enabled(self.netid),
+            "created": str(self.created),
             **get_user_permissions(self),
         }
 
