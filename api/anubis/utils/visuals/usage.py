@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, List
 
 from anubis.models import Assignment, Course, TheiaImage
 from anubis.utils.cache import cache
@@ -9,14 +9,7 @@ from anubis.utils.usage.submissions import get_submissions
 from anubis.utils.usage.theia import get_theia_sessions
 from anubis.utils.visuals.files import convert_fig_bytes
 from anubis.utils.usage.users import get_active_submission_users, get_active_theia_users
-
-
-def add_watermark(ax, utcnow):
-    ax.text(
-        0.97, 0.9, f"Generated {utcnow} UTC",
-        transform=ax.transAxes, fontsize=12, color="gray", alpha=0.5,
-        ha="right", va="center",
-    )
+from anubis.utils.visuals.watermark import add_watermark
 
 
 @cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
@@ -31,67 +24,80 @@ def get_usage_plot(course_id: Optional[str]) -> Optional[bytes]:
     if course is None:
         return None
 
-    assignments = Assignment.query.filter(
+    assignments: List[Assignment] = Assignment.query.filter(
         Assignment.hidden == False,
         Assignment.release_date <= datetime.now(),
         Assignment.course_id == course_id,
-    ).all()
+    ).order_by(Assignment.release_date.desc()).all()
     submissions = get_submissions(course_id)
     theia_sessions = get_theia_sessions(course_id)
 
     fig, axs = plt.subplots(2, 1, figsize=(12, 10))
 
-    legend_handles0 = []
-    legend_handles1 = []
-
     # submissions over hour line
-    submissions.groupby(["assignment_id", "created"])["id"].count().reset_index().rename(
+    ss = submissions.groupby(["assignment_id", "created"])["id"].count().reset_index().rename(
         columns={"id": "count"}
-    ).groupby("assignment_id").plot(x="created", label=None, ax=axs[0])
+    ).groupby("assignment_id")
 
     # ides over hour line
-    theia_sessions.groupby(["assignment_id", "created"])["id"].count().reset_index().rename(
+    tt = theia_sessions.groupby(["assignment_id", "created"])["id"].count().reset_index().rename(
         columns={"id": "count"}
-    ).groupby("assignment_id").plot(x="created", label=None, ax=axs[1])
+    ).groupby("assignment_id")
 
-    # assignment release line
-    for color, assignment in zip(mcolors.TABLEAU_COLORS, assignments):
-        legend_handles0.append(
-            axs[0].axvline(
-                x=assignment.due_date,
-                color=color,
-                linestyle="dotted",
-                label=f"{assignment.name}",
-            )
-        )
-        legend_handles1.append(
-            axs[1].axvline(
-                x=assignment.due_date,
-                color=color,
-                linestyle="dotted",
-                label=f"{assignment.name}",
-            )
-        )
+    assignment_colors = {
+        assignment.id: color
+        for assignment, color in zip(assignments, mcolors.TABLEAU_COLORS)
+    }
 
-    utcnow = datetime.utcnow().replace(microsecond=0)
+    for key, group in ss:
+        for assignment in assignments:
+            if assignment.id == key:
+                logger.info(f'PLOTTING ASSIGNMENT SUBMISSIONS = {assignment.id}')
+                color = assignment_colors[assignment.id]
+                axs[0].plot(group['created'], group['count'], color=color, label=None)
+                axs[0].axvline(
+                    x=assignment.due_date,
+                    color=color,
+                    linestyle="dotted",
+                    label=f"{assignment.name}",
+                )
 
-    add_watermark(axs[0], utcnow)
-    axs[0].legend(handles=legend_handles0, loc="upper left")
+    for key, group in tt:
+        for assignment in assignments:
+            if assignment.id == key:
+                logger.info(f'PLOTTING ASSIGNMENT IDES = {assignment.id}')
+                color = assignment_colors[assignment.id]
+                axs[1].plot(group['created'], group['count'], color=color, label=None)
+                axs[1].axvline(
+                    x=assignment.due_date,
+                    color=color,
+                    linestyle="dotted",
+                    label=f"{assignment.name}",
+                )
+
+    # Watermarks
+    add_watermark(axs[0])
+    add_watermark(axs[1])
+
+    # Legends
+    axs[0].legend(loc="upper left")
+    axs[1].legend(loc="upper left")
+
+    # Grids
+    axs[0].grid(True)
+    axs[1].grid(True)
+
+    # Labels
     axs[0].set(
         title=f"{course.course_code} - Submissions over time",
         xlabel="time",
         ylabel="count",
     )
-    axs[0].grid(True)
-
-    add_watermark(axs[1], utcnow)
-    axs[1].legend(handles=legend_handles1, loc="upper left")
     axs[1].set(
         title=f"{course.course_code} - Cloud IDEs over time",
         xlabel="time",
         ylabel="count",
     )
-    axs[1].grid(True)
 
     return convert_fig_bytes(plt, fig)
 
@@ -99,8 +105,6 @@ def get_usage_plot(course_id: Optional[str]) -> Optional[bytes]:
 @cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
 def get_usage_plot_playgrounds():
     import matplotlib.pyplot as plt
-
-    now = datetime.now().replace(microsecond=0)
 
     fig, ax = plt.subplots(figsize=(12, 10))
 
@@ -114,15 +118,15 @@ def get_usage_plot_playgrounds():
         for image in images:
             if image.id == key and image.public:
                 ax.plot(group["created"], group["count"], label=image.title)
-    ax.legend()
 
-    add_watermark(ax, datetime.utcnow())
+    add_watermark(ax)
+    ax.legend()
+    ax.grid()
     ax.set(
         title=f"Anubis Playgrounds - IDEs spawned per hour",
         xlabel="time",
         ylabel="IDEs spawned",
     )
-    ax.grid(True)
 
     return convert_fig_bytes(plt, fig)
 
@@ -155,7 +159,7 @@ def get_usage_plot_active(days: int = 14, step: int = 1):
     ax.plot(xx, autograde_y, 'g--', label='Total users that used Anubis Autograder')
     ax.legend()
 
-    add_watermark(ax, datetime.utcnow())
+    add_watermark(ax)
     ax.set(
         title=f"Anubis LMS - Active users in the last {days} days - step {step} days",
         xlabel="time",
@@ -164,4 +168,3 @@ def get_usage_plot_active(days: int = 14, step: int = 1):
     ax.grid(True)
 
     return convert_fig_bytes(plt, fig)
-

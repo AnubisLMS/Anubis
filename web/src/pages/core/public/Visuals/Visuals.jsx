@@ -20,6 +20,11 @@ import standardErrorHandler from '../../../../utils/standardErrorHandler';
 
 const visuals = [
   {
+    title: 'Anubis LMS Registered Users Last Year',
+    url: `/api/public/visuals/users/last-year`,
+    filename: 'anubis-registered-users-last-year.png',
+  },
+  {
     title: 'Anubis LMS Active Users Per Day In Last 2 Weeks',
     url: `/api/public/visuals/usage/active`,
     filename: 'anubis-active-users-2-weeks.png',

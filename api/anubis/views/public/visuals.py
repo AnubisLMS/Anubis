@@ -4,6 +4,7 @@ from anubis.models import Course
 from anubis.utils.http import req_assert
 from anubis.utils.http.files import make_png_response
 from anubis.utils.visuals.usage import get_usage_plot, get_usage_plot_playgrounds, get_usage_plot_active
+from anubis.utils.visuals.users import get_platform_users_plot
 
 visuals_ = Blueprint("public-visuals", __name__, url_prefix="/public/visuals")
 
@@ -66,5 +67,14 @@ def public_visuals_usage_active_month():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
     blob = get_usage_plot_active(90, 7)
+
+    return make_png_response(blob)
+
+
+@visuals_.route("/users/last-year")
+def public_visuals_users_last_year():
+    # Get the png blob of the usage graph.
+    # The get_usage_plot is itself a cached function.
+    blob = get_platform_users_plot(365, 7)
 
     return make_png_response(blob)

@@ -3,7 +3,7 @@ from typing import List, Set, Tuple
 
 from sqlalchemy.sql import distinct
 
-from anubis.models import db, Submission, TheiaSession
+from anubis.models import db, Submission, TheiaSession, User
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, is_job
 
@@ -43,3 +43,10 @@ def get_active_submission_users(day: datetime = None, end_day: datetime = None) 
     day_start, day_end = _get_day_start_end(day, end_day)
     active_owner_ids = _get_active_ids(Submission, day_start, day_end)
     return set(active_owner_ids)
+
+
+@cache.memoize(timeout=60, source_check=True, unless=is_debug, forced_update=is_job)
+def get_platform_users(day: datetime = None) -> int:
+    return User.query.filter(
+        User.created < day,
+    ).count()
