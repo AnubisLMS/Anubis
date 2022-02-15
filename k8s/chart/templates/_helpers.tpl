@@ -69,6 +69,8 @@ API env
 {{- define "api.env" }}
 - name: "PYTHONPATH"
   value: "/opt/app"
+- name: "MPLCONFIGDIR"
+  value: "/tmp"
 - name: "DEBUG"
   value: {{- if .Values.debug }} "1"{{- else }} "0"{{- end }}
 - name: "MIGRATE"
