@@ -1,4 +1,5 @@
 import traceback
+from datetime import datetime
 from typing import Any, Callable, Optional, Union, List, Set, Tuple
 
 import jwt
@@ -8,8 +9,8 @@ from werkzeug.local import LocalProxy
 from anubis.env import env
 from anubis.models import User, Course
 from anubis.utils.auth.token import get_token
+from anubis.utils.data import req_assert, human_readable_timedelta
 from anubis.utils.logging import logger
-from anubis.utils.data import req_assert
 
 
 def get_current_user() -> Union[User, None]:
@@ -106,3 +107,7 @@ def verify_in_course(course_id: str) -> Course:
 
     return course
 
+
+def account_age_str(user: User) -> str:
+    age = datetime.now() - user.created
+    return human_readable_timedelta(age)

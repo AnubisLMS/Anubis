@@ -8,7 +8,7 @@ from anubis.lms.students import get_students
 from anubis.ide.get import get_recent_sessions
 from anubis.models import Assignment, Course, InCourse, Submission, User, db
 from anubis.utils.auth.http import require_admin, require_superuser
-from anubis.utils.auth.user import current_user
+from anubis.utils.auth.user import current_user, account_age_str
 from anubis.utils.data import req_assert
 from anubis.utils.http import get_number_arg, success_response
 from anubis.utils.http.decorators import json_endpoint, json_response
@@ -91,6 +91,7 @@ def admin_students_info_id(id: str):
     return success_response(
         {
             "user": student.data,
+            "account_age": account_age_str(student),
             "courses": [course.data for course in courses],
             "repos": repos,
             "theia": recent_theia,

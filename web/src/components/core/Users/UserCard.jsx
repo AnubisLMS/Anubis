@@ -46,7 +46,7 @@ function saveUser(user, enqueueSnackbar) {
   });
 }
 
-export default function UserCard({user, setUser}) {
+export default function UserCard({user, setUser, age}) {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [edits, setEdits] = useState(0);
@@ -57,87 +57,66 @@ export default function UserCard({user, setUser}) {
 
   return (
     <Card className={classes.root}>
-      <CardActionArea>
-        <CardContent>
-          <Grid container spacing={1} justify={'center'} alignItems={'flex-start'}>
-            {/* netid */}
-            <Grid item xs={12}>
-              <Typography gutterBottom variant="subtitle1">
+      <CardContent>
+        <Grid container spacing={1} justify={'center'} alignItems={'flex-start'}>
+          {/* netid */}
+          <Grid item xs={12}>
+            <Typography gutterBottom variant="subtitle1">
                 Netid: {user.netid}
-              </Typography>
-            </Grid>
-
-            {/* name */}
-            <Grid item xs={12} md={6}>
-              <TextField
-                className={classes.textField}
-                label="name"
-                value={user.name}
-                onChange={(e) => {
-                  setUser((state) => {
-                    state.name = e.target.value;
-                    return state;
-                  });
-                  incEdits();
-                }}
-              />
-            </Grid>
-
-            {/* github username */}
-            <Grid item xs={12} md={6}>
-              <TextField
-                className={classes.textField}
-                label="Github username"
-                value={user.github_username}
-                onChange={(e) => {
-                  setUser((state) => {
-                    state.github_username = e.target.value;
-                    return state;
-                  });
-                  incEdits();
-                }}
-              />
-            </Grid>
-
-            {/* Is Superuser */}
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={user.is_superuser}
-                    color={'primary'}
-                    onChange={() => {
-                      axios.get(`/api/admin/students/toggle-superuser/${user.id}`).then((response) => {
-                        const data = standardStatusHandler(response, enqueueSnackbar);
-                        if (data) {
-                          setUser((state) => {
-                            state.is_superuser = !state.is_superuser;
-                            return state;
-                          });
-                          incEdits();
-                        }
-                      }).catch(standardErrorHandler(enqueueSnackbar));
-                    }}
-                  />
-                }
-                label="Is Superuser"
-                labelPlacement="end"
-              />
-            </Grid>
+            </Typography>
+            <Typography gutterBottom variant="subtitle2" style={{color: 'grey'}}>
+                Account Age: {age}
+            </Typography>
           </Grid>
-        </CardContent>
-      </CardActionArea>
-      <CardActions>
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
-          startIcon={<SaveIcon/>}
-          onClick={() => saveUser(user, enqueueSnackbar)}
-        >
+
+          {/* name */}
+          <Grid item xs={12} md={6}>
+            <TextField
+              className={classes.textField}
+              label="name"
+              value={user.name}
+              onChange={(e) => {
+                setUser((state) => {
+                  state.name = e.target.value;
+                  return state;
+                });
+                incEdits();
+              }}
+            />
+          </Grid>
+
+          {/* github username */}
+          <Grid item xs={12} md={6}>
+            <TextField
+              className={classes.textField}
+              label="Github username"
+              value={user.github_username}
+              onChange={(e) => {
+                setUser((state) => {
+                  state.github_username = e.target.value;
+                  return state;
+                });
+                incEdits();
+              }}
+            />
+          </Grid>
+
+        </Grid>
+      </CardContent>
+
+      <CardActionArea>
+        <CardActions>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            startIcon={<SaveIcon/>}
+            onClick={() => saveUser(user, enqueueSnackbar)}
+          >
           Save
-        </Button>
-      </CardActions>
+          </Button>
+        </CardActions>
+      </CardActionArea>
     </Card>
   );
 }

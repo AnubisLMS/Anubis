@@ -25,6 +25,7 @@ export default function User() {
   const [repos, setRepos] = useState([]);
   const [theia, setTheia] = useState([]);
   const [user, setUser] = useState(null);
+  const [age, setAge] = useState(null);
 
   React.useEffect(() => {
     axios.get(`/api/admin/students/info/${query.get('userId')}`).then((response) => {
@@ -40,6 +41,9 @@ export default function User() {
       }
       if (data?.theia) {
         setTheia(data.theia);
+      }
+      if (data?.account_age) {
+        setAge(data.account_age);
       }
     });
   }, []);
@@ -67,7 +71,7 @@ export default function User() {
             <Typography variant={'subtitle1'} color={'textSecondary'}>
               Student
             </Typography>
-            <UserCard user={user} setUser={setUser}/>
+            <UserCard user={user} setUser={setUser} age={age}/>
           </Grid>
 
           {/* Courses */}
