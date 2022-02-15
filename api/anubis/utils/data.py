@@ -215,13 +215,13 @@ def human_readable_to_bytes(size: str) -> int:
     return num * factor
 
 
-def human_readable_datetime(delta: timedelta) -> str:
+def human_readable_timedelta(delta: timedelta) -> str:
     """
     Take a timedelta and give a human-readable string
     version.
 
     >>> d = timedelta(days=2, hours=1, seconds=10)
-    >>> human_readable_datetime(d)
+    >>> human_readable_timedelta(d)
     >>> '2d 1h 10s'
 
     :param delta:

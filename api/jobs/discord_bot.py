@@ -13,7 +13,7 @@ from sqlalchemy.sql import func
 from tabulate import tabulate
 
 from anubis.models import db, Course, User, TheiaSession, InCourse
-from anubis.utils.data import with_context, human_readable_datetime
+from anubis.utils.data import with_context, human_readable_timedelta
 
 
 @with_context
@@ -189,8 +189,8 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
         [
             [
                 index,
-                human_readable_datetime(now - ide.created),
-                human_readable_datetime(now - ide.last_proxy),
+                human_readable_timedelta(now - ide.created),
+                human_readable_timedelta(now - ide.last_proxy),
             ]
             for index, ide in enumerate(active_ides)
         ],
@@ -202,9 +202,9 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
     ).format(
         len(active_ides),
         data,
-        human_readable_datetime(today_ide_seconds),
-        human_readable_datetime(week_ide_seconds),
-        human_readable_datetime(total_ide_seconds)
+        human_readable_timedelta(today_ide_seconds),
+        human_readable_timedelta(week_ide_seconds),
+        human_readable_timedelta(total_ide_seconds)
     )
 
     print(report)
