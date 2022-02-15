@@ -1,3 +1,12 @@
 numpy
 pandas
 sklearn
+matplotlib
+scipy
+pytorch
+tensorflow
+keras
+nltk
+spacy
+seaborn
+opencv-python
