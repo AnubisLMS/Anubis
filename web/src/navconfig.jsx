@@ -1,12 +1,11 @@
 import React from 'react';
+import {Redirect} from 'react-router-dom';
 
 import SchoolIcon from '@material-ui/icons/School';
 import AssignmentOutlinedIcon from '@material-ui/icons/AssignmentOutlined';
 import AssessmentIcon from '@material-ui/icons/Assessment';
-import CodeOutlinedIcon from '@material-ui/icons/CodeOutlined';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import AccountCircleOutlinedIcon from '@material-ui/icons/AccountCircleOutlined';
-import PublicIcon from '@material-ui/icons/Public';
 import GroupIcon from '@material-ui/icons/Group';
 import SettingsIcon from '@material-ui/icons/Settings';
 import PieChartIcon from '@material-ui/icons/PieChart';
@@ -262,7 +261,11 @@ export const not_shown_nav = [
     path: '/admin/assignment/groups/:assignmentId',
     Page: AdminAssignmentGroups,
   },
-
+  {
+    id: '',
+    path: '/v',
+    Page: () => <Redirect to={'/visuals'}/>,
+  },
 ];
 
 export const drawerWidth = 240;
