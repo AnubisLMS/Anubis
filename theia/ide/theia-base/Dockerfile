@@ -33,7 +33,7 @@ RUN set -ex; \
     libffi-dev libexpat1-dev \
     libgdbm-dev liblzma-dev zlib1g-dev \
     libsqlite3-dev libssl-dev openssl \
-    libsecret-1-0 sqlite3 bzip2; \
+    libsecret-1-0 sqlite3 libbz2-dev bzip2; \
   apt remove -y python python-pip python3-pip python3; \
   cd /; \
   wget https://www.python.org/ftp/python/$PY_VERSION/Python-$PY_VERSION.tgz; \

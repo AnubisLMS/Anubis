@@ -6,9 +6,19 @@ USER root
 RUN set -ex; \
   apt-get update; \
   apt-get install -y --no-install-recommends \
-    gdb git make cmake \
+    git make cmake \
     gcc-multilib g++-multilib libc6-dev \
-    clangd qemu-system-i386; \
+    clangd qemu-system-i386 libgmp-dev; \
+  cd /; \
+  wget https://ftp.gnu.org/gnu/gdb/gdb-11.2.tar.xz; \
+  tar xJf gdb-11.2.tar.xz; \
+  rm gdb-11.2.tar.xz; \
+  cd gdb-11.2; \
+  ./configure --with-python=python3.10 --prefix=/usr/local; \
+  make -j $(nproc); \
+  make install; \
+  cd ..; \
+  rm -rf gdb-11.2; \
   echo 'set auto-load safe-path /' > /etc/anubis/skel/.gdbinit; \
   echo 'source /opt/pwndbg/gdbinit.py' >> /etc/anubis/skel/.gdbinit; \
   git clone https://github.com/pwndbg/pwndbg.git /opt/pwndbg; \
