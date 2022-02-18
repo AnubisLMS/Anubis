@@ -21,23 +21,28 @@ import standardErrorHandler from '../../../../utils/standardErrorHandler';
 const visuals = [
   {
     title: 'Anubis LMS Registered Users Last Year',
-    url: `/api/public/visuals/users/last-year`,
-    filename: 'anubis-registered-users-last-year.png',
+    url: `/api/public/visuals/users/users-365-1`,
+    filename: 'anubis-registered-users-365-1.png',
   },
   {
     title: 'Anubis LMS Active Users Per Day In Last 2 Weeks',
-    url: `/api/public/visuals/usage/active`,
-    filename: 'anubis-active-users-2-weeks.png',
+    url: `/api/public/visuals/usage/active-14-1`,
+    filename: 'anubis-active-users-14-1.png',
   },
   {
     title: 'Anubis LMS Active Users Per Week In Last 3 Month',
-    url: `/api/public/visuals/usage/active-month`,
-    filename: 'anubis-active-users-3-months.png',
+    url: `/api/public/visuals/usage/active-90-7`,
+    filename: 'anubis-active-users-90-7.png',
   },
   {
     title: 'Anubis LMS Active Users Per Day In Last Half Year',
-    url: `/api/public/visuals/usage/active-half-year`,
-    filename: 'anubis-active-users-half-year.png',
+    url: `/api/public/visuals/usage/active-180-1`,
+    filename: 'anubis-active-users-180-1.png',
+  },
+  {
+    title: 'Anubis LMS Registered Users Last Year - By Month',
+    url: `/api/public/visuals/users/users-365-30`,
+    filename: 'anubis-registered-users-365-30.png',
   },
   {
     title: 'Anubis Playgrounds Usage Over Time',
