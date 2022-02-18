@@ -19,7 +19,7 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         command: ["alembic", "upgrade", "head"]
         env:
-        {{- include "api.env" . | nindent 12 }}
+        {{- include "api.env" . | nindent 8 }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -43,4 +43,4 @@ spec:
         env:
         - name: "JOB"
           value: "1"
-        {{- include "api.env" . | nindent 12 }}
+        {{- include "api.env" . | nindent 8 }}
