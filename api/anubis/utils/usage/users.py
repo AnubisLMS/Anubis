@@ -15,7 +15,7 @@ def _get_active_ids(Model, day_start: datetime, day_end: datetime) -> List[str]:
         Model.created >= day_start,
         Model.created <= day_end,
     ).all()
-    return active_owner_ids
+    return list(map(lambda x: x[0], active_owner_ids))
 
 
 def _get_day_start_end(day: datetime = None, end_day: datetime = None) -> Tuple[datetime, datetime]:
