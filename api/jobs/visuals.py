@@ -32,17 +32,13 @@ def main():
     # Generate playgrounds usage plot
     get_usage_plot_playgrounds()
 
-    # Generate plot for active in last week
-    get_usage_plot_active(days=14, step=1)
-
-    # Generate plot for active in last month
-    get_usage_plot_active(days=90, step=7)
-
-    # Generate plot for active in last half year
-    get_usage_plot_active(days=180, step=1)
+    # Generate plot for active
+    for days, step in [(14, 1), (90, 7), (180, 1), (365, 30)]:
+        get_usage_plot_active(days=days, step=step)
 
     # Generate plot for last year registered users
-    get_platform_users_plot(days=365, step=1)
+    for days, step in [(365, 1), (365, 30)]:
+        get_platform_users_plot(days=days, step=step)
 
 
 if __name__ == "__main__":

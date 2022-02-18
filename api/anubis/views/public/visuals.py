@@ -44,8 +44,8 @@ def public_visuals_usage(course_id: str):
     return make_png_response(blob)
 
 
-@visuals_.route("/usage/active")
-def public_visuals_usage_active():
+@visuals_.route("/usage/active-14-1")
+def public_visuals_usage_active_14_1():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
     blob = get_usage_plot_active(days=14, step=1)
@@ -53,8 +53,8 @@ def public_visuals_usage_active():
     return make_png_response(blob)
 
 
-@visuals_.route("/usage/active-half-year")
-def public_visuals_usage_active_half_year():
+@visuals_.route("/usage/active-180-1")
+def public_visuals_usage_active_180_1():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
     blob = get_usage_plot_active(days=180, step=1)
@@ -62,8 +62,8 @@ def public_visuals_usage_active_half_year():
     return make_png_response(blob)
 
 
-@visuals_.route("/usage/active-month")
-def public_visuals_usage_active_month():
+@visuals_.route("/usage/active-90-7")
+def public_visuals_usage_active_90_7():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
     blob = get_usage_plot_active(days=90, step=7)
@@ -71,10 +71,28 @@ def public_visuals_usage_active_month():
     return make_png_response(blob)
 
 
-@visuals_.route("/users/last-year")
-def public_visuals_users_last_year():
+@visuals_.route("/usage/active-365-30")
+def public_visuals_usage_active_90_7():
+    # Get the png blob of the usage graph.
+    # The get_usage_plot is itself a cached function.
+    blob = get_usage_plot_active(days=365, step=30)
+
+    return make_png_response(blob)
+
+
+@visuals_.route("/users/users-365-1")
+def public_visuals_users_365_1():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
     blob = get_platform_users_plot(days=365, step=1)
+
+    return make_png_response(blob)
+
+
+@visuals_.route("/users/users-365-30")
+def public_visuals_users_365_30():
+    # Get the png blob of the usage graph.
+    # The get_usage_plot is itself a cached function.
+    blob = get_platform_users_plot(days=365, step=30)
 
     return make_png_response(blob)
