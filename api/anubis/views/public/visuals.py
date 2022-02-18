@@ -9,7 +9,7 @@ from anubis.utils.visuals.users import get_platform_users_plot
 visuals_ = Blueprint("public-visuals", __name__, url_prefix="/public/visuals")
 
 
-@visuals_.route("/usage/playgrounds")
+@visuals_.route("/playgrounds")
 def public_visuals_usage_playgrounds():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
@@ -18,7 +18,7 @@ def public_visuals_usage_playgrounds():
     return make_png_response(blob)
 
 
-@visuals_.route("/usage/<string:course_id>")
+@visuals_.route("/course/<string:course_id>")
 def public_visuals_usage(course_id: str):
     """
     Get the usage png graph. This endpoint is heavily
@@ -44,7 +44,7 @@ def public_visuals_usage(course_id: str):
     return make_png_response(blob)
 
 
-@visuals_.route("/usage/active-14-1")
+@visuals_.route("/active/14/1")
 def public_visuals_usage_active_14_1():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
@@ -53,7 +53,7 @@ def public_visuals_usage_active_14_1():
     return make_png_response(blob)
 
 
-@visuals_.route("/usage/active-180-1")
+@visuals_.route("/active/180/1")
 def public_visuals_usage_active_180_1():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
@@ -62,7 +62,7 @@ def public_visuals_usage_active_180_1():
     return make_png_response(blob)
 
 
-@visuals_.route("/usage/active-90-7")
+@visuals_.route("/active/90/7")
 def public_visuals_usage_active_90_7():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
@@ -71,7 +71,7 @@ def public_visuals_usage_active_90_7():
     return make_png_response(blob)
 
 
-@visuals_.route("/usage/active-365-30")
+@visuals_.route("/active/365/30")
 def public_visuals_usage_active_365_30():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
@@ -80,7 +80,7 @@ def public_visuals_usage_active_365_30():
     return make_png_response(blob)
 
 
-@visuals_.route("/users/users-365-1")
+@visuals_.route("/users/365/1")
 def public_visuals_users_365_1():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
@@ -89,7 +89,7 @@ def public_visuals_users_365_1():
     return make_png_response(blob)
 
 
-@visuals_.route("/users/users-365-30")
+@visuals_.route("/users/365/30")
 def public_visuals_users_365_30():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
