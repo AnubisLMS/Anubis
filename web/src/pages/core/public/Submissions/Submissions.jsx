@@ -87,7 +87,7 @@ export default function Submissions() {
       <Divider />
       <ListHeader sections={['Assignment Name', 'Autograde Results', 'Submission', 'Submission Time']} />
       {rows.map((row, index) => (
-        <>
+        <div key={index}>
           {row?.tests && row?.commit &&
             <SubmissionItem
               assignmentDue={row.assignmentDue}
@@ -98,7 +98,7 @@ export default function Submissions() {
               timeStamp={row.timeStamp}
             />
           }
-        </>
+        </div>
       ))}
     </StandardLayout>
 
