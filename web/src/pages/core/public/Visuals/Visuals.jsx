@@ -40,8 +40,8 @@ const visuals = [
     filename: 'anubis-active-users-180-1.png',
   },
   {
-    title: 'Anubis LMS Registered Users Last Year - By Month',
-    url: `/api/public/visuals/users/365/30`,
+    title: 'Anubis LMS Active Users Per Month In Last Year',
+    url: `/api/public/visuals/active/365/30`,
     filename: 'anubis-registered-users-365-30.png',
   },
   {
