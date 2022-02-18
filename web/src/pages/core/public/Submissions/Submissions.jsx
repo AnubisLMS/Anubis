@@ -85,7 +85,7 @@ export default function Submissions() {
     <StandardLayout>
       <SectionHeader title='Submissions' isPage />
       <Divider />
-      <ListHeader sections={['Assignment Name', 'Autograde Results', 'Submission', 'Due Date']} />
+      <ListHeader sections={['Assignment Name', 'Autograde Results', 'Submission', 'Submission Time']} />
       {rows.map((row, index) => (
         <>
           {row?.tests && row?.commit &&
