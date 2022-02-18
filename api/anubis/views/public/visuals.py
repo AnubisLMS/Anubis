@@ -72,7 +72,7 @@ def public_visuals_usage_active_90_7():
 
 
 @visuals_.route("/usage/active-365-30")
-def public_visuals_usage_active_90_7():
+def public_visuals_usage_active_365_30():
     # Get the png blob of the usage graph.
     # The get_usage_plot is itself a cached function.
     blob = get_usage_plot_active(days=365, step=30)
