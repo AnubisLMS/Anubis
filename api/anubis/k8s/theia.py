@@ -521,6 +521,12 @@ def create_theia_k8s_pod_pvc(
             containers=pod_containers,
             # Add the shared Volume(s)
             volumes=pod_volumes,
+            # Minimal service account with no extra permissions
+            service_account_name='theia-ide',
+            # Disable service information from being injected into the environment
+            enable_service_links=False,
+            # Don't mount service account tokens
+            automount_service_account_token=False,
             # Add any extra things in the spec (depending on the
             # options set for the session)
             **spec_extra,

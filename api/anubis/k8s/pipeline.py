@@ -72,7 +72,16 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
                 "network-policy": "submission-pipeline",
             }
         ),
-        spec=client.V1PodSpec(restart_policy="Never", containers=[container]),
+        spec=client.V1PodSpec(
+            restart_policy="Never",
+            containers=[container],
+            # Minimal service account with no extra permissions
+            service_account_name='theia-ide',
+            # Disable service information from being injected into the environment
+            enable_service_links=False,
+            # Don't mount service account tokens
+            automount_service_account_token=False,
+        ),
     )
 
     # Create the specification of deployment

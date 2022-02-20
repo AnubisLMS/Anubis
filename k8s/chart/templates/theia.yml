@@ -99,6 +99,20 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  name: theia-ide
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: theia
+{{- if .Values.imagePullSecret }}
+imagePullSecrets:
+  - name: {{ .Values.imagePullSecret }}
+{{- end }}
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
   name: theia-poller
   labels:
     {{- include "chart.labels" . | nindent 4 }}

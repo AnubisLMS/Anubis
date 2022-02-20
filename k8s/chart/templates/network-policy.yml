@@ -56,7 +56,7 @@ spec:
           - 10.0.0.0/8
           - 192.168.0.0/16
           - 172.16.0.0/12
-          - 169.254.169.254  # Hosting Provider Metadata IP
+          - 169.254.169.254/32  # Hosting Provider Metadata IP
 
 ---
 
@@ -93,7 +93,7 @@ spec:
           - 10.0.0.0/8
           - 192.168.0.0/16
           - 172.16.0.0/12
-          - 169.254.169.254  # Hosting Provider Metadata IP
+          - 169.254.169.254/32  # Hosting Provider Metadata IP
   - to:
     - podSelector:
         matchLabels:
