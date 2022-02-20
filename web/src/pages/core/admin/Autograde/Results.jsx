@@ -237,7 +237,8 @@ export default function Results() {
               color={'primary'}
               variant={'contained'}
               onClick={() => downloadTextFile(
-                `anubis-autograde-${assignment?.course_id}-${assignment?.name}-${nonStupidDatetimeFormat(new Date())}.json`,
+                `anubis-autograde-${assignment?.course_id}-${assignment?.name}` +
+                `-${nonStupidDatetimeFormat(new Date())}.json`,
                 JSON.stringify(stats),
                 'application/json',
               )}
