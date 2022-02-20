@@ -22,6 +22,8 @@ import AutogradeVisuals from '../../../../components/core/Visuals/AutogradeVisua
 import Button from '@material-ui/core/Button';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import ArchiveIcon from '@material-ui/icons/Archive';
+import downloadTextFile from '../../../../utils/downloadTextFile';
+import {nonStupidDatetimeFormat} from '../../../../utils/datetime';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -96,8 +98,6 @@ export default function Results() {
   const [stats, setStats] = useState([]);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pageSize, setPageSize] = useState(10);
-  const [page, setPage] = useState(0);
   const [selected, setSelected] = useState(null);
   const [searched, setSearched] = useState(null);
   const [error, setError] = useState(null);
@@ -227,6 +227,22 @@ export default function Results() {
               download
             >
               Question Assignments (zip)
+            </Button>
+          </Grid>
+
+          {/* Reset questions icon */}
+          <Grid item>
+            <Button
+              startIcon={<ArchiveIcon/>}
+              color={'primary'}
+              variant={'contained'}
+              onClick={() => downloadTextFile(
+                `anubis-autograde-${assignment?.course_id}-${assignment?.name}-${nonStupidDatetimeFormat(new Date())}.json`,
+                JSON.stringify(stats),
+                'application/json',
+              )}
+            >
+              Autograde Data
             </Button>
           </Grid>
 
