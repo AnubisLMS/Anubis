@@ -11,7 +11,7 @@ K8S_RESTART_DEPLOYMENTS := \
   anubis-rpc-regrade anubis-theia-poller anubis-discord-bot
 
 # Theia IDES
-THEIA_BASE_IDE := theia-base-38 theia-base-39 theia-base-310
+THEIA_BASE_IDE := theia-base-38 theia-base-39 theia-base-310 theia-base-38-bare theia-base-39-bare theia-base-310-bare
 THEIA_IDES := theia-xv6 theia-admin theia-devops theia-jepst theia-golang theia-flask-39 theia-flask-310 theia-mysql-39 theia-mysql-310
 
 
