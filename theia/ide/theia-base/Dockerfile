@@ -1,6 +1,7 @@
 # https://github.com/theia-ide/theia-apps/tree/master/theia-cpp-docker
 
 ARG NODE_VERSION=12.22.6
+ARG BUILD_THEIA=ON
 
 FROM node:${NODE_VERSION}-bullseye-slim as base
 
@@ -87,7 +88,7 @@ RUN set -ex; \
 
 # Build Theia Application
 COPY latest.package.json package.json
-RUN set -ex; \
+RUN if [ "${BUILD_THEIA}" = "ON" ]; then set -ex; \
   yarn --pure-lockfile; \
   NODE_OPTIONS="--max-old-space-size=4096" yarn theia build; \
   HEAD_LINE_NUMBER=$(grep -n '</head>' lib/index.html | cut -f1 -d:); \
@@ -107,7 +108,7 @@ RUN set -ex; \
   rm -rf /home/node/*; \
   find / -depth \
     \( -name .cache -o -name __pycache__ -o -name '*.pyc' -o -name .git -o -name .github \) \
-    -exec 'rm' '-rf' '{}' '+';
+    -exec 'rm' '-rf' '{}' '+'; fi
 
 # PRETTY SHELL NECESSARY
 RUN set -ex; \

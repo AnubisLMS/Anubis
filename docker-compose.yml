@@ -159,6 +159,7 @@ services:
       context: ./theia/ide/theia-base
       args:
         PY_VERSION: '3.8.12'
+        BUILD_THEIA: 'ON'
 
   theia-base-39:
     image: registry.digitalocean.com/anubis/theia-base:python-3.9
@@ -166,6 +167,7 @@ services:
       context: ./theia/ide/theia-base
       args:
         PY_VERSION: '3.9.10'
+        BUILD_THEIA: 'ON'
 
   theia-base-310:
     image: registry.digitalocean.com/anubis/theia-base:python-3.10
@@ -173,6 +175,31 @@ services:
       context: ./theia/ide/theia-base
       args:
         PY_VERSION: '3.10.2'
+        BUILD_THEIA: 'ON'
+
+  theia-base-38-bare:
+    image: registry.digitalocean.com/anubis/theia-base:python-3.8-bare
+    build:
+      context: ./theia/ide/theia-base
+      args:
+        PY_VERSION: '3.8.12'
+        BUILD_THEIA: 'OFF'
+
+  theia-base-39-bare:
+    image: registry.digitalocean.com/anubis/theia-base:python-3.9-bare
+    build:
+      context: ./theia/ide/theia-base
+      args:
+        PY_VERSION: '3.9.10'
+        BUILD_THEIA: 'OFF'
+
+  theia-base-310-bare:
+    image: registry.digitalocean.com/anubis/theia-base:python-3.10-bare
+    build:
+      context: ./theia/ide/theia-base
+      args:
+        PY_VERSION: '3.10.2'
+        BUILD_THEIA: 'OFF'
 
   theia-golang:
     image: registry.digitalocean.com/anubis/theia-golang:latest
