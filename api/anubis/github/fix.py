@@ -123,21 +123,24 @@ def fix_github_missing_submissions(org_name: str):
             enqueue_autograde_pipeline(sid)
 
         # Check for missing submissions
-        for commit in map(lambda x: x["node"]["oid"], ref["target"]["history"]["edges"]):
-            submission = Submission.query.filter(Submission.commit == commit).first()
-            if submission is None:
-                print(f"found missing submission {user.github_username} {commit}")
-                submission = Submission(
-                    commit=commit,
-                    owner=user,
-                    assignment=assignment,
-                    repo=repo,
-                    state="Waiting for resources...",
-                )
-                db.session.add(submission)
-                db.session.commit()
-                init_submission(submission)
-                enqueue_autograde_pipeline(submission.id)
+        try:
+            for commit in map(lambda x: x["node"]["oid"], ref["target"]["history"]["edges"]):
+                submission = Submission.query.filter(Submission.commit == commit).first()
+                if submission is None:
+                    print(f"found missing submission {user.github_username} {commit}")
+                    submission = Submission(
+                        commit=commit,
+                        owner=user,
+                        assignment=assignment,
+                        repo=repo,
+                        state="Waiting for resources...",
+                    )
+                    db.session.add(submission)
+                    db.session.commit()
+                    init_submission(submission)
+                    enqueue_autograde_pipeline(submission.id)
+        except TypeError as e:
+            logger.warning(f'Failed to parse commit objects for repo - {e} - {str(repo)}')
 
         r = AssignmentRepo.query.filter(AssignmentRepo.repo_url == repo_url).first()
         if r is not None:
