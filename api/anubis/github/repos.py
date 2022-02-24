@@ -341,7 +341,7 @@ def create_assignment_github_repo(
                 db.session.commit()
 
                 # Log error
-                logger.error('Could not find repo template id')
+                logger.warning('Could not find repo template id')
                 errors.add('This assignment is misconfiguration. Github says that the template repo we are suppose to '
                            'create your repo from does not exist. Please let your TA know.')
 
@@ -357,7 +357,7 @@ def create_assignment_github_repo(
 
             # If the response was None, the api request failed
             if data is None:
-                logger.error("Create repo failed")
+                logger.warning("Create repo failed")
                 errors.add('We were not able to create your repo on github. Please try again.')
                 return repos, list(errors)
 
@@ -366,9 +366,9 @@ def create_assignment_github_repo(
                 repo.repo_created = True
             db.session.commit()
     except Exception as e:
-        logger.error(f"Failed to create repo {e}, continuing")
-        logger.error(f'data = {str(data)}')
-        logger.error(traceback.format_exc())
+        logger.warning(f"Failed to create repo {e}, continuing")
+        logger.warning(f'data = {str(data)}')
+        logger.warning(traceback.format_exc())
 
     try:
         for repo in repos:
@@ -390,16 +390,16 @@ def create_assignment_github_repo(
                     # the repo. The message in the response will be Not Found in this situation.
                     # We can have it try again to fix.
                     if data.get("message", None) == "Not Found":
-                        logger.error(f"Failed to add collaborator (Not Found). Trying again. {i}")
+                        logger.warning(f"Failed to add collaborator (Not Found). Trying again. {i}")
                     elif f'is not a user' in data.get("message", ''):
-                        logger.error(f"Github is saying that {collaborator} is not a user")
+                        logger.warning(f"Github is saying that {collaborator} is not a user")
                         errors.add(f"Github is saying that {collaborator} is not a user. "
                                    f"Please link your github account on the profile page and try again.")
                         break
                     else:
                         break
                 else:
-                    logger.error("Failed to add collaborator after 3 tries")
+                    logger.warning("Failed to add collaborator after 3 tries")
                     errors.add(f'We were not able to add you as a collaborator to the repo we created at this time. '
                                f'We are going to try to add you again in a few minutes. '
                                f'You are free to start an IDE to work on your assignment while you wait.')
@@ -409,9 +409,9 @@ def create_assignment_github_repo(
                 repo.collaborator_configured = True
                 db.session.commit()
     except Exception as e:
-        logger.error(f"Failed to configure collaborators {e}, continuing")
-        logger.error(f'data = {str(data)}')
-        logger.error(traceback.format_exc())
+        logger.warning(f"Failed to configure collaborators {e}, continuing")
+        logger.warning(f'data = {str(data)}')
+        logger.warning(traceback.format_exc())
 
     try:
         for repo in repos:
@@ -431,19 +431,19 @@ def create_assignment_github_repo(
                     # the repo. The message in the response will be Not Found in this situation.
                     # We can have it try again to fix.
                     if data.get("message", None) == "Not Found":
-                        logger.error(f"Failed to add ta team (Not Found). Trying again. {i}")
+                        logger.warning(f"Failed to add ta team (Not Found). Trying again. {i}")
                     else:
                         break
                 else:
-                    logger.error("Failed to add ta team after 3 tries")
+                    logger.warning("Failed to add ta team after 3 tries")
                     continue
 
                 # Mark the repo as collaborator configured
                 repo.ta_configured = True
                 db.session.commit()
     except Exception as e:
-        logger.error(f"Failed to configure ta team {e}, continuing")
-        logger.error(f'data = {str(data)}')
-        logger.error(traceback.format_exc())
+        logger.warning(f"Failed to configure ta team {e}, continuing")
+        logger.warning(f'data = {str(data)}')
+        logger.warning(traceback.format_exc())
 
     return repos, list(errors)
