@@ -117,7 +117,7 @@ export default function IDEImages() {
         if (image.id === iid) {
           for (const tag of image.tags) {
             if (tag.id === id) {
-              image[field] = v;
+              tag[field] = v;
               break;
             }
           }
@@ -248,6 +248,16 @@ export default function IDEImages() {
                     label={'Icon'}
                     value={editOpen?.icon}
                     onChange={(e) => updateImageOpen(editOpen?.id, 'icon', e.target.value)}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    checked={!!editOpen?.webtop}
+                    onChange={() => updateImageOpen(editOpen?.id, 'webtop', !editOpen?.webtop)}
+                    labelPlacement={'end'}
+                    control={<Switch color={'primary'}/>}
+                    label={'webtop'}
                   />
                 </Grid>
 
