@@ -201,6 +201,12 @@ services:
         PY_VERSION: '3.10.2'
         BUILD_THEIA: 'OFF'
 
+  webtop-base-ubuntu:
+    image: registry.digitalocean.com/anubis/webtop-base:ubuntu
+    build:
+      context: ./theia/ide/webtop-base
+      args: {}
+
   theia-golang:
     image: registry.digitalocean.com/anubis/theia-golang:latest
     build: ./theia/ide/theia-golang

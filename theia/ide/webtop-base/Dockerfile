@@ -6,8 +6,8 @@ FROM lscr.io/linuxserver/webtop:$WEBTOP_TAG
 ENV TZ=America/New_York \
     PUID=1001 \
     GUID=1001 \
-    KEYBOARD=en-us-qwerty
-    #SUBFOLDER=/ide
+    KEYBOARD=en-us-qwerty \
+    CUSTOM_PORT=5000
 
 
 RUN set -ex; \
