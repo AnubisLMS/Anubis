@@ -21,6 +21,8 @@ def upgrade():
     op.add_column(
         "theia_image", sa.Column("webtop", sa.Boolean(), nullable=True)
     )
+    conn = op.get_bind()
+    conn.execute('update theia_image set webtop = 0;')
     # ### end Alembic commands ###
 
 
