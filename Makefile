@@ -8,11 +8,17 @@ DOCKER_COMPOSE_PUSH_SERVICES := api web theia-init theia-sidecar theia-proxy
 # K8S
 K8S_RESTART_DEPLOYMENTS := \
 	anubis-api anubis-web anubis-pipeline-api anubis-theia-proxy anubis-rpc-default anubis-rpc-theia \
-  anubis-rpc-regrade anubis-theia-poller anubis-discord-bot
+	anubis-rpc-regrade anubis-theia-poller anubis-discord-bot
 
 # Theia IDES
-THEIA_BASE_IDE := theia-base-38 theia-base-39 theia-base-310 theia-base-38-bare theia-base-39-bare theia-base-310-bare
-THEIA_IDES := theia-xv6 theia-admin theia-devops theia-jepst theia-golang theia-flask-39 theia-flask-310 theia-mysql-39 theia-mysql-310
+THEIA_BASE_IDE := \
+	theia-base-38 theia-base-39 theia-base-310 \
+	theia-base-38-bare theia-base-39-bare theia-base-310-bare \
+	webtop-base-ubuntu
+THEIA_IDES := \
+	theia-xv6 theia-admin theia-devops theia-jepst theia-golang
+	theia-flask-39 theia-flask-310 \
+	theia-mysql-39 theia-mysql-310
 
 
 help:
