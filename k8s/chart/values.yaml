@@ -60,6 +60,12 @@ theia:
       image: "registry.digitalocean.com/anubis/theia-base:python-3.9"
     - name: "theia-base-310"
       image: "registry.digitalocean.com/anubis/theia-base:python-3.10"
+    - name: "theia-base-38-bare"
+      image: "registry.digitalocean.com/anubis/theia-base:python-3.8-bare"
+    - name: "theia-base-39-bare"
+      image: "registry.digitalocean.com/anubis/theia-base:python-3.9-bare"
+    - name: "theia-base-310-bare"
+      image: "registry.digitalocean.com/anubis/theia-base:python-3.10-bare"
     - name: "theia-xv6"
       image: "registry.digitalocean.com/anubis/theia-xv6"
     - name: "theia-golang"
@@ -78,6 +84,8 @@ theia:
       image: "registry.digitalocean.com/anubis/theia-mysql:python-3.9"
     - name: "theia-mysql-310"
       image: "registry.digitalocean.com/anubis/theia-mysql:python-3.10"
+    - name: "webtop-base-ubuntu"
+      image: "registry.digitalocean.com/anubis/webtop-base:ubuntu"
 
 # Discord Bot
 discordbot:
