@@ -2,12 +2,12 @@ from datetime import datetime
 
 from parse import parse
 
+from anubis.env import env
 from anubis.lms.students import get_students_in_class
 from anubis.models import Assignment, AssignmentTest, Submission
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, is_job, with_context
 from anubis.utils.http import error_response
-from anubis.env import env
 from anubis.utils.logging import logger
 
 
@@ -64,8 +64,8 @@ def autograde(student_id, assignment_id, max_time: datetime = None):
             Submission.accepted == True,
             *submission_filters
         )
-        .order_by(Submission.created.desc())
-        .all()
+            .order_by(Submission.created.desc())
+            .all()
     ):
 
         # Calculate the number of tests that passed in this submission

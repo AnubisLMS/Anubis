@@ -49,6 +49,6 @@ def get_theia_sessions(course_id: str = None) -> pd.DataFrame:
     # Drop outliers based on duration
     theia_sessions = theia_sessions[
         np.abs(theia_sessions.duration - theia_sessions.duration.mean()) <= (3 * theia_sessions.duration.std())
-    ]
+        ]
 
     return theia_sessions

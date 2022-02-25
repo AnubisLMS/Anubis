@@ -7,12 +7,12 @@ from anubis.lms.assignments import get_assignment_due_date
 from anubis.lms.submissions import get_submissions, init_submission, reject_late_submission
 from anubis.lms.webhook import check_repo, guess_github_repo_owner, parse_webhook
 from anubis.models import Assignment, AssignmentRepo, Course, InCourse, Submission, User, db
+from anubis.rpc.enqueue import enqueue_autograde_pipeline
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_response
 from anubis.utils.logging import logger
-from anubis.rpc.enqueue import enqueue_autograde_pipeline
 
 webhook = Blueprint("public-webhook", __name__, url_prefix="/public/webhook")
 
@@ -94,13 +94,13 @@ def public_webhook():
 
     repo = (
         AssignmentRepo.query.join(Assignment)
-        .join(Course)
-        .join(InCourse)
-        .join(User)
-        .filter(
+            .join(Course)
+            .join(InCourse)
+            .join(User)
+            .filter(
             AssignmentRepo.repo_url == repo_url,
         )
-        .first()
+            .first()
     )
 
     logger.debug(

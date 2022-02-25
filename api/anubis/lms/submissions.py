@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Union
 
 from anubis.lms.assignments import get_assignment_due_date
+from anubis.lms.autograde import bulk_regrade
 from anubis.models import (
     Assignment,
     AssignmentRepo,
@@ -14,12 +15,11 @@ from anubis.models import (
     User,
     db,
 )
-from anubis.lms.autograde import bulk_regrade
+from anubis.rpc.enqueue import rpc_enqueue, enqueue_autograde_pipeline
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, split_chunks
 from anubis.utils.http import error_response, success_response
 from anubis.utils.logging import logger
-from anubis.rpc.enqueue import rpc_enqueue, enqueue_autograde_pipeline
 
 
 def bulk_regrade_submissions(submissions: List[Submission]) -> List[dict]:
@@ -216,11 +216,11 @@ def get_submissions(
 
     query = (
         Submission.query.join(Assignment)
-        .join(Course)
-        .join(InCourse)
-        .join(User)
-        .filter(Submission.owner_id == owner.id, *filters)
-        .order_by(Submission.created.desc())
+            .join(Course)
+            .join(InCourse)
+            .join(User)
+            .filter(Submission.owner_id == owner.id, *filters)
+            .order_by(Submission.created.desc())
     )
 
     all_total = query.count()

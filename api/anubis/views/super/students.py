@@ -1,7 +1,5 @@
 from flask import Blueprint
 
-from flask import Blueprint
-
 from anubis.lms.students import get_students
 from anubis.utils.auth.http import require_superuser
 from anubis.utils.http import success_response

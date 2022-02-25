@@ -1,16 +1,14 @@
 from typing import List
-from datetime import datetime
 
 from flask import Blueprint, request
 
-from anubis.ide.initialize import initialize_ide
 from anubis.ide.conditions import assert_theia_sessions_enabled
+from anubis.ide.initialize import initialize_ide
 from anubis.models import TheiaSession, TheiaImage, TheiaImageTag
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.http import success_response, req_assert
 from anubis.utils.http.decorators import json_response, load_from_id
-from anubis.utils.config import get_config_int
 
 playgrounds_ = Blueprint("public-playgrounds", __name__, url_prefix="/public/playgrounds")
 

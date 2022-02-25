@@ -3,8 +3,8 @@ import time
 from anubis.lms.autograde import bulk_autograde
 from anubis.models import db
 from anubis.utils.data import with_context
-from anubis.utils.testing.seed import create_assignment, create_course, create_students, init_submissions
 from anubis.utils.testing.db import clear_database
+from anubis.utils.testing.seed import create_assignment, create_course, create_students, init_submissions
 
 
 def do_seed() -> str:

@@ -4,17 +4,17 @@ from typing import List
 
 from flask import Blueprint
 
-from anubis.lms.courses import course_context
 from anubis.ide.initialize import initialize_ide
-from anubis.models import TheiaSession, TheiaImage, db
 from anubis.k8s.theia import reap_theia_sessions_in_course
+from anubis.lms.courses import course_context
+from anubis.models import TheiaSession, TheiaImage, db
+from anubis.rpc.enqueue import rpc_enqueue, enqueue_ide_stop
 from anubis.utils.auth.http import require_admin
 from anubis.utils.auth.user import current_user
 from anubis.utils.config import get_config_int
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_endpoint, json_response
-from anubis.rpc.enqueue import rpc_enqueue, enqueue_ide_stop
 
 ide = Blueprint("admin-ide", __name__, url_prefix="/admin/ide")
 

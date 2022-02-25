@@ -1,4 +1,3 @@
-import sys
 from typing import List
 
 import google.oauth2.credentials

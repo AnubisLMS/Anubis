@@ -4,22 +4,22 @@ import traceback
 from datetime import datetime, timedelta
 from typing import List, Optional, Tuple
 
-import kubernetes.config
 from kubernetes import client, config
 
 from anubis.constants import THEIA_DEFAULT_OPTIONS, WEBTOP_DEFAULT_OPTIONS
 from anubis.github.parse import parse_github_repo_name
-from anubis.lms.courses import get_course_admin_ids
 from anubis.ide.reap import mark_session_ended
+from anubis.lms.courses import get_course_admin_ids
 from anubis.models import Course, TheiaSession, Assignment, db
 from anubis.utils.auth.token import create_token
-from anubis.utils.config import get_config_int, get_config_str, get_config_dict
+from anubis.utils.config import get_config_int, get_config_str
 from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
 
 
 def create_theia_k8s_pod_pvc(
-    theia_session: TheiaSession, skip_debug_check: bool = False
+    theia_session: TheiaSession,
+    skip_debug_check: bool = False
 ) -> Tuple[client.V1Pod, Optional[client.V1PersistentVolumeClaim]]:
     """
     Create the python kubernetes objects for a theia session. This is
@@ -28,6 +28,7 @@ def create_theia_k8s_pod_pvc(
     on the options provided in the theia session database entry.
 
     :param theia_session:
+    :param skip_debug_check:
     :return:
     """
 
@@ -380,7 +381,7 @@ def create_theia_k8s_pod_pvc(
 
     # Initialize theia volume mounts array with
     # the project volume mount
-    theia_volume_mounts .append(
+    theia_volume_mounts.append(
         client.V1VolumeMount(
             mount_path="/home/anubis",
             name=theia_volume_name,

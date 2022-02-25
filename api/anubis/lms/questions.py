@@ -17,7 +17,7 @@ from anubis.models import (
     db,
 )
 from anubis.utils.cache import cache
-from anubis.utils.data import verify_data_shape, is_debug, with_context
+from anubis.utils.data import verify_data_shape, is_debug
 from anubis.utils.logging import logger
 
 
@@ -284,12 +284,12 @@ def get_assigned_questions(assignment_id: str, user_id: str, full: bool = False)
     # Get assigned questions
     assigned_questions = (
         AssignedStudentQuestion.query.join(AssignmentQuestion)
-        .filter(
+            .filter(
             AssignedStudentQuestion.assignment_id == assignment_id,
             AssignedStudentQuestion.owner_id == user_id,
         )
-        .order_by(AssignmentQuestion.pool)
-        .all()
+            .order_by(AssignmentQuestion.pool)
+            .all()
     )
 
     if not full:
@@ -482,11 +482,11 @@ def assign_missing_questions(user_id: str):
     # Get all the courses that the user belongs to
     courses: List[Course] = (
         Course.query.join(InCourse)
-        .join(User)
-        .filter(
+            .join(User)
+            .filter(
             User.id == user.id,
         )
-        .all()
+            .all()
     )
 
     # Iterate over each course the student is in

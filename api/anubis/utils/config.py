@@ -1,5 +1,4 @@
 import json
-
 from typing import Optional, Dict
 
 from anubis.models import db, Config

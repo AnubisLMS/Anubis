@@ -7,18 +7,18 @@ from dateutil.parser import parse as dateparse
 from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
 
+from anubis.github.repos import delete_assignment_repo
 from anubis.lms.assignments import assignment_sync, delete_assignment, delete_assignment_repos
 from anubis.lms.courses import assert_course_context, course_context, is_course_superuser
 from anubis.lms.questions import get_assigned_questions
 from anubis.models import Assignment, AssignmentRepo, AssignmentTest, SubmissionTestResult, User, db
+from anubis.rpc.enqueue import enqueue_make_shared_assignment
 from anubis.utils.auth.http import require_admin
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import rand, req_assert, row2dict
-from anubis.github.repos import delete_assignment_repo
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_endpoint, json_response, load_from_id
 from anubis.utils.logging import logger
-from anubis.rpc.enqueue import enqueue_make_shared_assignment
 
 assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assignments")
 
@@ -409,7 +409,7 @@ def admin_assignments_save(assignment: dict):
 
         # If github.com is in what the user gave, remove it
         if key == "github_template" and value.startswith("https://github.com/"):
-            value = value[len("https://github.com/") :]
+            value = value[len("https://github.com/"):]
 
         if key == "theia_image":
             if value is not None:

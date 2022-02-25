@@ -334,5 +334,3 @@ def req_assert(*expressions, message: str = "invalid", status_code: int = 200):
     """
     if not all(expressions):
         raise AssertError(message, status_code)
-
-

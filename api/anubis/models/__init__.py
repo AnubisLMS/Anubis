@@ -65,7 +65,7 @@ class User(db.Model):
     forum_posts = db.relationship("ForumPost", backref="owner")
     forum_comments = db.relationship("ForumPostComment", backref="owner", foreign_keys='ForumPostComment.owner_id')
     forum_approved_comments = db.relationship("ForumPostComment", backref="approved_by",
-                                        foreign_keys='ForumPostComment.approved_by_id')
+                                              foreign_keys='ForumPostComment.approved_by_id')
     forum_upvotes = db.relationship("ForumPostUpvote", backref="owner")
     forum_posts_viewed = db.relationship("ForumPostViewed", backref="owner")
 
@@ -561,8 +561,8 @@ class SubmissionTestResult(db.Model):
 
     # Fields
     output_type = db.Column(db.String(128), default='text')
-    output = deferred(db.Column(db.Text(2**16)))
-    message = deferred(db.Column(db.Text(2**10)))
+    output = deferred(db.Column(db.Text(2 ** 16)))
+    message = deferred(db.Column(db.Text(2 ** 10)))
     passed = db.Column(db.Boolean)
 
     # Relationships

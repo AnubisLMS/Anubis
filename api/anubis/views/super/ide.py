@@ -6,7 +6,6 @@ from anubis.models import db, TheiaImage, TheiaImageTag
 from anubis.utils.auth.http import require_superuser
 from anubis.utils.http import success_response
 from anubis.utils.http.decorators import json_endpoint, json_response, load_from_id
-from anubis.utils.logging import logger
 
 ide_ = Blueprint("super-ide", __name__, url_prefix="/super/ide")
 

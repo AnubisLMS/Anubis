@@ -1,11 +1,9 @@
-import traceback
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-from dateutil.parser import ParserError
-from dateutil.parser import parse as date_parse
 from sqlalchemy import or_
 
+from anubis.github.repos import create_assignment_group_repo, delete_assignment_repo
 from anubis.lms.courses import assert_course_admin, get_user_course_ids, is_course_admin, add_all_users_to_course
 from anubis.lms.questions import ingest_questions
 from anubis.models import (
@@ -29,8 +27,6 @@ from anubis.utils.cache import cache
 from anubis.utils.config import get_config_int
 from anubis.utils.data import is_debug
 from anubis.utils.data import req_assert
-from anubis.github.repos import create_assignment_group_repo, delete_assignment_repo
-from anubis.utils.logging import logger
 
 
 @cache.memoize(timeout=30, unless=is_debug)
@@ -107,21 +103,21 @@ def get_all_assignments(course_ids: Set[str], admin_course_ids: Set[str]) -> Lis
     # Get the assignment objects that should be visible to this user.
     regular_course_assignments = (
         Assignment.query.join(Course)
-        .filter(
+            .filter(
             Course.id.in_(list(course_ids.difference(admin_course_ids))),
             Assignment.release_date <= datetime.now(),
             Assignment.hidden == False,
         )
-        .all()
+            .all()
     )
 
     # Get the assignment objects that should be visible to this user.
     admin_course_assignments = (
         Assignment.query.join(Course)
-        .filter(
+            .filter(
             Course.id.in_(list(admin_course_ids)),
         )
-        .all()
+            .all()
     )
 
     # Add all the assignment objects to the running list
@@ -255,11 +251,11 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
         # Find if the assignment test exists
         assignment_test = (
             AssignmentTest.query.join(Assignment)
-            .filter(
+                .filter(
                 Assignment.id == assignment.id,
                 AssignmentTest.name == test_name,
             )
-            .first()
+                .first()
         )
 
         # Create the assignment test if it did not already exist

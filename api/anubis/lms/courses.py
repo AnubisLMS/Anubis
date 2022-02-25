@@ -381,10 +381,10 @@ def get_course_data(netid: str, course_id: str) -> Optional[Dict[str, Any]]:
     # Query for tas in course
     tas = (
         User.query.join(TAForCourse)
-        .filter(
+            .filter(
             TAForCourse.course_id == course_id,
         )
-        .all()
+            .all()
     )
 
     # Return course and ta data
@@ -423,10 +423,10 @@ def get_student_course_ids(user: User, default: str = None) -> List[str]:
         # Get all the courses the user is in
         in_courses = (
             InCourse.query.join(Course)
-            .filter(
+                .filter(
                 InCourse.owner_id == user.id,
             )
-            .all()
+                .all()
         )
 
         # Build a list of course ids. If the user
@@ -578,7 +578,6 @@ def get_course_admin_ids(course_id: str, include_superusers: bool = True) -> Lis
 
     # Include all superusers if specified
     if include_superusers:
-
         # Get all superusers
         superusers: List[User] = User.query.filter(User.is_superuser == True).all()
 
@@ -602,7 +601,7 @@ def get_course_users(course: Course) -> List[User]:
     :param course:
     :return:
     """
-    return User.query.join(InCourse, InCourse.owner_id == User.id)\
+    return User.query.join(InCourse, InCourse.owner_id == User.id) \
         .filter(InCourse.course_id == course.id).all()
 
 
@@ -615,7 +614,7 @@ def get_course_tas(course: Course) -> List[User]:
     :param course:
     :return:
     """
-    return User.query.join(TAForCourse, TAForCourse.owner_id == User.id)\
+    return User.query.join(TAForCourse, TAForCourse.owner_id == User.id) \
         .filter(TAForCourse.course_id == course.id).all()
 
 
@@ -628,7 +627,7 @@ def get_course_professors(course: Course) -> List[User]:
     :param course:
     :return:
     """
-    return User.query.join(ProfessorForCourse, ProfessorForCourse.owner_id == User.id)\
+    return User.query.join(ProfessorForCourse, ProfessorForCourse.owner_id == User.id) \
         .filter(ProfessorForCourse.course_id == course.id).all()
 
 

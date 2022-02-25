@@ -2,14 +2,14 @@ from datetime import datetime
 
 from flask import Blueprint
 
+from anubis.github.repos import create_assignment_student_repo, delete_assignment_repo
+from anubis.lms.assignments import get_assignment_data
 from anubis.lms.courses import is_course_admin
 from anubis.lms.repos import get_repos
-from anubis.lms.assignments import get_assignment_data
 from anubis.models import db, Assignment, AssignmentRepo
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.cache import cache
-from anubis.github.repos import create_assignment_student_repo, delete_assignment_repo
 from anubis.utils.http import error_response, req_assert, success_response
 from anubis.utils.http.decorators import json_response
 

@@ -99,4 +99,3 @@ def enqueue_make_shared_assignment(*args):
 def enqueue_create_assignment_github_repo(*args):
     """Enqueue make shared assignment"""
     rpc_enqueue(create_assignment_github_repo, queue="default", args=args)
-   

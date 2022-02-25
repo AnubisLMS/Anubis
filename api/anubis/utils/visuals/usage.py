@@ -7,8 +7,8 @@ from anubis.utils.data import is_debug, is_job
 from anubis.utils.logging import logger
 from anubis.utils.usage.submissions import get_submissions
 from anubis.utils.usage.theia import get_theia_sessions
-from anubis.utils.visuals.files import convert_fig_bytes
 from anubis.utils.usage.users import get_active_submission_users, get_active_theia_users
+from anubis.utils.visuals.files import convert_fig_bytes
 from anubis.utils.visuals.watermark import add_watermark
 
 
@@ -136,7 +136,7 @@ def get_usage_plot_active(days: int = 14, step: int = 1):
     import matplotlib.pyplot as plt
 
     now = datetime.now().replace(hour=0, second=0, microsecond=0)
-    start_datetime = now - timedelta(days=days-1)
+    start_datetime = now - timedelta(days=days - 1)
 
     xx = []
     total_y = []
@@ -145,7 +145,7 @@ def get_usage_plot_active(days: int = 14, step: int = 1):
 
     for n in range(0, days, step):
         start_day = start_datetime + timedelta(days=n)
-        end_day = start_day + timedelta(days=step-1)
+        end_day = start_day + timedelta(days=step - 1)
         submission_set = get_active_submission_users(start_day, end_day)
         theia_set = get_active_theia_users(start_day, end_day)
         xx.append(start_day)

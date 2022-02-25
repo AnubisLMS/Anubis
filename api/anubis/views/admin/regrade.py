@@ -8,12 +8,12 @@ from anubis.lms.autograde import autograde, bulk_autograde, bulk_regrade
 from anubis.lms.courses import assert_course_context
 from anubis.lms.submissions import init_submission
 from anubis.models import Assignment, Submission, User
+from anubis.rpc.enqueue import rpc_enqueue, enqueue_autograde_pipeline
 from anubis.utils.auth.http import require_admin
 from anubis.utils.cache import cache
 from anubis.utils.data import req_assert, split_chunks
 from anubis.utils.http import get_number_arg, success_response
 from anubis.utils.http.decorators import json_response, load_from_id
-from anubis.rpc.enqueue import rpc_enqueue, enqueue_autograde_pipeline
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 

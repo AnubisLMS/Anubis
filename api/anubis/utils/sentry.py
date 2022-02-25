@@ -1,4 +1,5 @@
 from flask import Flask
+
 from anubis.env import env
 from anubis.utils.data import is_debug, is_job
 from anubis.utils.logging import logger
@@ -39,4 +40,3 @@ def add_sentry(app: Flask):
             # release="myapp@1.0.0",
             traces_sampler=traces_sampler,
         )
-

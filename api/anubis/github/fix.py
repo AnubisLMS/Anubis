@@ -3,9 +3,9 @@ from typing import List
 
 from sqlalchemy.sql import or_
 
-from anubis.models import Assignment, AssignmentRepo, Submission, User, db
 from anubis.github.api import github_graphql
 from anubis.github.repos import create_assignment_student_repo
+from anubis.models import Assignment, AssignmentRepo, Submission, User, db
 from anubis.utils.logging import logger
 
 

@@ -1,4 +1,5 @@
 import functools
+
 from anubis.utils.data import is_job
 
 
@@ -10,5 +11,5 @@ def create_repo_safety_net(func):
             from anubis.rpc.enqueue import enqueue_create_assignment_github_repo
             enqueue_create_assignment_github_repo(*args)
         return repos, errors
-    return wrapper
 
+    return wrapper

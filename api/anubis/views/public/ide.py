@@ -5,20 +5,20 @@ from typing import Dict
 from flask import Blueprint, request
 
 from anubis.constants import THEIA_DEFAULT_OPTIONS
-from anubis.lms.courses import is_course_admin
-from anubis.ide.initialize import initialize_ide
 from anubis.ide.conditions import assert_theia_sessions_enabled
+from anubis.ide.get import get_n_available_sessions
+from anubis.ide.initialize import initialize_ide
 from anubis.ide.poll import theia_poll_ide
 from anubis.ide.redirect import theia_redirect_url
-from anubis.ide.get import get_n_available_sessions
+from anubis.lms.courses import is_course_admin
 from anubis.models import Assignment, AssignmentRepo, TheiaSession, db
+from anubis.rpc.enqueue import enqueue_ide_stop
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.cache import cache
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_response, load_from_id
-from anubis.rpc.enqueue import enqueue_ide_stop
 
 ide_ = Blueprint("public-ide", __name__, url_prefix="/public/ide")
 

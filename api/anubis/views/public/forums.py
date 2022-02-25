@@ -1,30 +1,24 @@
 from typing import List
+
 from flask import Blueprint
 
+from anubis.lms.forum import (
+    verify_post,
+    verify_post_owner,
+    verify_post_comment_owner,
+)
 from anubis.models import (
     db,
-    User,
     Course,
-    InCourse,
     ForumPost,
-    ForumCategory,
-    ForumPostInCategory,
-    ForumPostUpvote,
     ForumPostComment,
     ForumPostViewed,
 )
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
-from anubis.utils.http.decorators import json_response, json_endpoint, load_from_id
-from anubis.utils.http import req_assert, success_response, error_response
 from anubis.utils.auth.user import verify_in_course
-from anubis.lms.forum import (
-    get_post_comments,
-    verify_post,
-    verify_post_owner,
-    verify_post_comment,
-    verify_post_comment_owner,
-)
+from anubis.utils.http import success_response
+from anubis.utils.http.decorators import json_response, json_endpoint, load_from_id
 
 forums_ = Blueprint("public-forums", __name__, url_prefix="/public/forums")
 
@@ -239,5 +233,3 @@ def public_delete_forum_post_comment(comment_id: str):
         'status': 'Comment deleted',
         'variant': 'warning',
     })
-
-

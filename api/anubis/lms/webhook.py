@@ -1,7 +1,8 @@
+from typing import Tuple
+
 from anubis.lms.repos import get_repos
 from anubis.models import Assignment, AssignmentRepo, User, db
 from anubis.utils.cache import cache
-from typing import Tuple
 
 
 def parse_webhook(webhook):
@@ -45,7 +46,7 @@ def guess_github_repo_owner(assignment: Assignment, repo_name: str) -> Tuple[Use
     """
     repo_name_split = repo_name.split("-")
     unique_code_index = repo_name_split.index(assignment.unique_code)
-    repo_name_split = repo_name_split[unique_code_index + 1 :]
+    repo_name_split = repo_name_split[unique_code_index + 1:]
     netid1 = "-".join(repo_name_split)
     netid2 = "-".join(repo_name_split[:-1])
     user = User.query.filter(

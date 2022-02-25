@@ -5,9 +5,10 @@ import string
 from datetime import datetime, timedelta
 from typing import List
 
+from anubis.constants import THEIA_DEFAULT_OPTIONS
 from anubis.github.repos import get_student_assignment_repo_name
-from anubis.lms.questions import assign_questions
 from anubis.ide.reap import mark_session_ended
+from anubis.lms.questions import assign_questions
 from anubis.models import (
     ForumPost,
     ForumPostComment,
@@ -30,14 +31,13 @@ from anubis.models import (
     User,
     db,
 )
-from anubis.constants import THEIA_DEFAULT_OPTIONS
 from anubis.utils.data import rand
 from anubis.utils.data import with_context
+from anubis.utils.logging import logger
 from anubis.utils.testing.db import clear_database
 from anubis.utils.testing.diffs import rand_diff
 from anubis.utils.testing.lorem import lorem
 from anubis.utils.testing.names import names
-from anubis.utils.logging import logger
 
 
 def create_name() -> str:

@@ -16,10 +16,10 @@ def get_recent_sessions(user_id: str, limit: int = 10, offset: int = 10) -> List
         TheiaSession.query.filter(
             TheiaSession.owner_id == student.id,
         )
-        .order_by(TheiaSession.created.desc())
-        .limit(limit)
-        .offset(offset)
-        .all()
+            .order_by(TheiaSession.created.desc())
+            .limit(limit)
+            .offset(offset)
+            .all()
     )
 
     return [session.data for session in sessions]

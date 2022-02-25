@@ -153,8 +153,8 @@ def get_assignment_history(assignment_id, netid):
             Submission.assignment_id == assignment.id,
             Submission.owner_id == other.id,
         )
-        .order_by(Submission.created.desc())
-        .all()
+            .order_by(Submission.created.desc())
+            .all()
     )
 
     test_count = len(assignment.full_data["tests"])

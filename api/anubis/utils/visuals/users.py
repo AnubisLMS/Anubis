@@ -1,7 +1,8 @@
-from anubis.utils.usage.users import get_platform_users
+from datetime import datetime, timedelta
+
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, is_job
-from datetime import datetime, timedelta
+from anubis.utils.usage.users import get_platform_users
 from anubis.utils.visuals.files import convert_fig_bytes
 from anubis.utils.visuals.watermark import add_watermark
 
@@ -39,5 +40,3 @@ def get_platform_users_plot(days: int, step: int = 1):
     add_watermark(ax)
 
     return convert_fig_bytes(plt, fig)
-
-

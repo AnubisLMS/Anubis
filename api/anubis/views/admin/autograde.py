@@ -8,7 +8,7 @@ from anubis.models import Assignment, InCourse, Submission, User
 from anubis.utils.auth.http import require_admin
 from anubis.utils.cache import cache
 from anubis.utils.data import req_assert
-from anubis.utils.http import get_number_arg, success_response
+from anubis.utils.http import success_response
 from anubis.utils.http.decorators import json_response
 from anubis.utils.visuals.assignments import (
     get_admin_assignment_visual_data,
@@ -81,10 +81,10 @@ def admin_autograde_assignment_assignment_id(assignment_id):
     bests = bulk_autograde(assignment_id, limit=None, offset=None)
     total = (
         User.query.join(InCourse)
-        .filter(
+            .filter(
             InCourse.course_id == assignment.course_id,
         )
-        .count()
+            .count()
     )
 
     # Pass back the results

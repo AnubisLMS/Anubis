@@ -2,10 +2,10 @@ from typing import List
 
 from flask import Blueprint
 
+from anubis.ide.get import get_recent_sessions
 from anubis.lms.courses import assert_course_context, assert_course_superuser, course_context
 from anubis.lms.repos import get_repos
 from anubis.lms.students import get_students
-from anubis.ide.get import get_recent_sessions
 from anubis.models import Assignment, Course, InCourse, Submission, User, db
 from anubis.utils.auth.http import require_admin, require_superuser
 from anubis.utils.auth.user import current_user, account_age_str
@@ -126,14 +126,14 @@ def admin_students_submissions_id(id: str):
     # Get n most recent submissions from the user
     submissions = (
         Submission.query.join(Assignment)
-        .filter(
+            .filter(
             Submission.owner_id == student.id,
             Assignment.course_id == course_context.id,
         )
-        .order_by(Submission.created.desc())
-        .limit(limit)
-        .offset(offset)
-        .all()
+            .order_by(Submission.created.desc())
+            .limit(limit)
+            .offset(offset)
+            .all()
     )
 
     # Pass back the student and submission information

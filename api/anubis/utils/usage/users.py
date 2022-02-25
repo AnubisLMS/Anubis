@@ -19,7 +19,6 @@ def _get_active_ids(Model, day_start: datetime, day_end: datetime) -> List[str]:
 
 
 def _get_day_start_end(day: datetime = None, end_day: datetime = None) -> Tuple[datetime, datetime]:
-
     if day is None:
         day = datetime.now()
     day_start = day.replace(hour=0, second=0, microsecond=0)
