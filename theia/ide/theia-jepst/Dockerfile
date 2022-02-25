@@ -1,4 +1,4 @@
-FROM registry.digitalocean.com/anubis/theia-base:python-3.9 as theia
+FROM registry.digitalocean.com/anubis/theia-base:python-3.9-bare as theia
 USER root
 
 # Copy file over for skel initialization
