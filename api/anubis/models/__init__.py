@@ -627,6 +627,7 @@ class TheiaImage(db.Model):
     public = db.Column(db.Boolean, nullable=False, default=False)
     default_tag = db.Column(db.String(128), default="latest")
     icon = db.Column(db.String(128))
+    webtop = db.Column(db.Boolean, default=False)
 
     courses = db.relationship(Course, backref="theia_default_image")
     assignments = db.relationship(Assignment, backref="theia_image")
@@ -643,6 +644,7 @@ class TheiaImage(db.Model):
             "icon": self.icon,
             "public": self.public,
             "default_tag": self.default_tag,
+            "webtop": self.webtop,
             "tags": [tag.data for tag in self.tags],
         }
 

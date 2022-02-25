@@ -7,7 +7,7 @@ from typing import List, Optional, Tuple
 import kubernetes.config
 from kubernetes import client, config
 
-from anubis.constants import THEIA_DEFAULT_OPTIONS
+from anubis.constants import THEIA_DEFAULT_OPTIONS, WEBTOP_DEFAULT_OPTIONS
 from anubis.github.parse import parse_github_repo_name
 from anubis.lms.courses import get_course_admin_ids
 from anubis.ide.reap import mark_session_ended
@@ -52,21 +52,30 @@ def create_theia_k8s_pod_pvc(
     # then default to an empty string.
     repo_url = theia_session.repo_url or ""
     repo_name = parse_github_repo_name(repo_url)
+    webtop = theia_session.image.webtop
 
     # Get the theia session options
-    limits = theia_session.resources.get("limits", THEIA_DEFAULT_OPTIONS['resources']['limits'])
-    requests = theia_session.resources.get("requests", THEIA_DEFAULT_OPTIONS['resources']['requests'])
-    admin = theia_session.admin
-    autosave = theia_session.autosave
-    credentials = theia_session.credentials
-    privileged = theia_session.privileged
-    persistent_storage = theia_session.persistent_storage
+    if not theia_session.image.webtop:
+        limits = theia_session.resources.get("limits", THEIA_DEFAULT_OPTIONS['resources']['limits'])
+        requests = theia_session.resources.get("requests", THEIA_DEFAULT_OPTIONS['resources']['requests'])
+        admin = theia_session.admin
+        autosave = theia_session.autosave
+        credentials = theia_session.credentials
+        privileged = theia_session.privileged
+        persistent_storage = theia_session.persistent_storage
+
+    else:
+        limits = theia_session.resources.get("limits", WEBTOP_DEFAULT_OPTIONS['resources']['limits'])
+        requests = theia_session.resources.get("requests", WEBTOP_DEFAULT_OPTIONS['resources']['requests'])
+        admin = False
+        autosave = False
+        credentials = False
+        privileged = False
+        persistent_storage = True
 
     # Get home volume size from config
     if theia_session.playground:
         volume_size = get_config_str('PLAYGROUND_VOLUME_SIZE', '100Mi')
-        # limits = get_config_dict('PLAYGROUND_RESOURCE_LIMITS', THEIA_DEFAULT_OPTIONS['resources']['limits'])
-        # requests = get_config_dict('PLAYGROUND_RESOURCE_REQUESTS', THEIA_DEFAULT_OPTIONS['resources']['requests'])
     else:
         volume_size = get_config_str('THEIA_VOLUME_SIZE', '100Mi')
 
@@ -145,6 +154,10 @@ def create_theia_k8s_pod_pvc(
 
     # Default the pvc to None
     theia_project_pvc = None
+
+    # Volume Mounts
+    theia_volume_mounts = []
+    sidecar_volume_mounts = []
 
     # If persistent storage is enabled for this assignment, then we should create a pvc
     if persistent_storage:
@@ -270,6 +283,12 @@ def create_theia_k8s_pod_pvc(
     ##################################################################################
     # SIDECAR CONTAINER
 
+    if not webtop:
+        sidecar_volume_mounts.append(client.V1VolumeMount(
+            mount_path="/home/anubis",
+            name=theia_volume_name,
+        ))
+
     # Sidecar container where anything that the student should not see exists.
     # The main purpose for this container is to keep the git credentials separate
     # from the student environment. The shared /home/project volume is used to share
@@ -299,12 +318,7 @@ def create_theia_k8s_pod_pvc(
             run_as_user=1001,
         ),
         # Add the shared volume mount to /home/project
-        volume_mounts=[
-            client.V1VolumeMount(
-                mount_path="/home/anubis",
-                name=theia_volume_name,
-            )
-        ],
+        volume_mounts=sidecar_volume_mounts,
     )
 
     ##################################################################################
@@ -361,17 +375,17 @@ def create_theia_k8s_pod_pvc(
 
     # Figure out which uid to use
     theia_user_id = 1001
-    if privileged:
+    if privileged or webtop:
         theia_user_id = 0
 
     # Initialize theia volume mounts array with
     # the project volume mount
-    theia_volume_mounts = [
+    theia_volume_mounts .append(
         client.V1VolumeMount(
             mount_path="/home/anubis",
             name=theia_volume_name,
         )
-    ]
+    )
 
     # If privileged, add docker config file to pod as a volume
     if privileged and include_docker_secret:
@@ -389,6 +403,22 @@ def create_theia_k8s_pod_pvc(
             client.V1VolumeMount(
                 mount_path="/docker",
                 name="docker-config",
+            )
+        )
+
+    if webtop:
+        pod_volumes.append(
+            client.V1Volume(
+                name="dshm",
+                empty_dir=client.V1EmptyDirVolumeSource(
+                    medium="Memory"
+                )
+            )
+        )
+        theia_volume_mounts.append(
+            client.V1VolumeMount(
+                mount_path="/dev/shm",
+                name="dshm",
             )
         )
 
@@ -456,7 +486,7 @@ def create_theia_k8s_pod_pvc(
         # containers should only exist for the management IDEs so that
         # docker can run.
         security_context=client.V1SecurityContext(
-            allow_privilege_escalation=theia_session.privileged,
+            allow_privilege_escalation=theia_session.privileged or webtop,
             privileged=theia_session.privileged,
             run_as_user=theia_user_id,
         ),

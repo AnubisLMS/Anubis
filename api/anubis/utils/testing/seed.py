@@ -368,6 +368,17 @@ def seed():
     )
     db.session.add_all([xv6_image, base_image, admin_image])
 
+    base_webtop = TheiaImage(
+        image="registry.digitalocean.com/anubis/webtop-base",
+        title="Webtop Base",
+        description="Webtop Base",
+        icon="devicon-linux-plain",
+        default_tag="ubuntu",
+        public=True,
+        webtop=True,
+    )
+    db.session.add_all([base_webtop])
+
     db.session.commit()
 
     # OS test course
