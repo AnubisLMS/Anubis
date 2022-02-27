@@ -80,6 +80,7 @@ RUN set -ex; \
   apt autoremove -y; \
   rm -rf /tmp/*; \
   rm -rf /usr/share/doc; \
+  rm -rf /var/cache/apt/*; \
   rm -rf /var/lib/apt/lists/*; \
   rm -rf /home/node/*; \
   find / -depth \

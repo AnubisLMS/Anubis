@@ -9,8 +9,11 @@ ENV TZ=America/New_York \
     KEYBOARD=en-us-qwerty \
     CUSTOM_PORT=5000
 
-
 RUN set -ex; \
+  apt update; \
+  apt install git wget build-essential -y --no-install-recommends; \
+  rm -rf /var/cache/apt/*; \
+  rm -rf /var/lib/apt/lists/*; \
   mkdir -p /home/anubis; \
   chown -R 1001:1001 /home/anubis; \
   usermod -d /home/anubis abc; \
