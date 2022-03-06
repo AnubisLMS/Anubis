@@ -86,6 +86,8 @@ theia:
       image: "registry.digitalocean.com/anubis/theia-mysql:python-3.10"
     - name: "webtop-base-ubuntu"
       image: "registry.digitalocean.com/anubis/webtop-base:ubuntu"
+    - name: "webtop-davinci"
+      image: "registry.digitalocean.com/anubis/webtop-davinci:latest"
 
 # Discord Bot
 discordbot:
