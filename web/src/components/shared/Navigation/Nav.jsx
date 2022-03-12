@@ -32,7 +32,7 @@ const Nav = ({open, handleDrawerClose}) => {
           handleDrawerClose={handleDrawerClose}
         />
       </Box>
-      <Box marginLeft="16px" marginTop="20px">
+      <Box marginLeft="8px" marginRight="8px" marginTop="20px">
         <Ad />
       </Box>
     </Drawer>
