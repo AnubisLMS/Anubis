@@ -2,14 +2,16 @@ import {makeStyles} from '@material-ui/core/styles';
 
 export const useStyles = makeStyles((theme) => ({
   root: {
-    position: 'relative',
+    borderRadius: `${theme.spacing(1)}px`,
+    width: '100%',
+    overflow: 'inherit',
+  },
+  actionArea: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     padding: `${theme.spacing(5)}px ${theme.spacing(2)}px ${theme.spacing(2)}px`,
-    borderRadius: `${theme.spacing(1)}px`,
-    width: '90%',
-    backgroundColor: theme.palette.dark.blue['200'],
+    width: '100%',
   },
   iconContainer: {
     width: '45px',
@@ -21,6 +23,7 @@ export const useStyles = makeStyles((theme) => ({
     borderRadius: '100%',
     backgroundColor: theme.palette.color.blue,
     top: '-23px',
+    zIndex: 3,
   },
   iconInnerCircle: {
     backgroundColor: theme.palette.primary.main,
@@ -32,7 +35,9 @@ export const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
   },
   adTitle: {
-    fontSize: '14px',
+    fontSize: '18px',
+    textAlign: 'center',
+    padding: theme.spacing(0, 1),
   },
   githubButton: {
     width: '100%',
