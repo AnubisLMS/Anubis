@@ -1,10 +1,6 @@
 import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
-import {Redirect} from 'react-router-dom';
 import axios from 'axios';
-
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Box from '@material-ui/core/Box';
 
 import SectionHeader from '../../../../components/shared/SectionHeader/SectionHeader';
 import SubmissionItem from '../../../../components/core/SubmissionItem/SubmissionItem';
@@ -33,7 +29,6 @@ export default function Submissions() {
   const [rowCount, setRowCount] = useState(0);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [redirect, setRedirect] = useState(null);
 
   const assignmentId = query.get('assignmentId');
   const courseId = query.get('courseId');
@@ -77,15 +72,11 @@ export default function Submissions() {
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [pageSize, page]);
 
-  if (redirect !== null) {
-    return <Redirect to={redirect}/>;
-  }
-
   return (
     <StandardLayout>
-      <SectionHeader title='Submissions' isPage />
-      <Divider />
-      <ListHeader sections={['Assignment Name', 'Autograde Results', 'Submission', 'Submission Time']} />
+      <SectionHeader title='Submissions' isPage/>
+      <Divider/>
+      <ListHeader sections={['Assignment Name', 'Autograde Results', 'Submission', 'Submission Time']}/>
       {rows.map((row, index) => (
         <div key={index}>
           {row?.tests && row?.commit &&

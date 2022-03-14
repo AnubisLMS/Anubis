@@ -1,4 +1,5 @@
-import React, {useState} from 'react';
+import React from 'react';
+import {useHistory, useLocation} from 'react-router-dom';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -12,7 +13,9 @@ import {admin_nav, footer_nav, public_nav, super_nav} from '../../../../navconfi
 
 const NavList = ({open, handleDrawerClose}) => {
   const classes = useStyles();
-  const [pathname, setPathname] = useState(window.location.pathname);
+  const location = useLocation();
+  const history = useHistory();
+
   const onClickWrap = (func) => () => {
     func();
     // 960px is the size of md
@@ -34,11 +37,11 @@ const NavList = ({open, handleDrawerClose}) => {
             {children.map(({id: childId, icon, path}) => (
               <NavItem
                 key={childId}
-                onClick={onClickWrap(() => setPathname(path))}
+                onClick={onClickWrap(() => history.push(path))}
                 childId={childId}
                 icon={icon}
                 path={path}
-                pathname={pathname}
+                pathname={location.pathname}
               />
             ))}
           </React.Fragment>
@@ -56,11 +59,11 @@ const NavList = ({open, handleDrawerClose}) => {
                   {admin_nav.map(({id: childId, icon, path}) => (
                     <NavItem
                       key={childId}
-                      onClick={onClickWrap(() => setPathname(path))}
+                      onClick={onClickWrap(() => history.push(path))}
                       childId={childId}
                       icon={icon}
                       path={path}
-                      pathname={pathname}
+                      pathname={location.pathname}
                     />
                   ))}
                 </React.Fragment>
@@ -75,11 +78,11 @@ const NavList = ({open, handleDrawerClose}) => {
                   {super_nav.map(({id: childId, icon, path}) => (
                     <NavItem
                       key={childId}
-                      onClick={onClickWrap(() => setPathname(path))}
+                      onClick={onClickWrap(() => history.push(path))}
                       childId={childId}
                       icon={icon}
                       path={path}
-                      pathname={pathname}
+                      pathname={location.pathname}
                     />
                   ))}
                   <Divider className={classes.divider}/>
@@ -99,11 +102,11 @@ const NavList = ({open, handleDrawerClose}) => {
           {footer_nav.map(({id: childId, icon, path}) => (
             <NavItem
               key={childId}
-              onClick={onClickWrap(() => setPathname(path))}
+              onClick={onClickWrap(() => history.push(path))}
               childId={childId}
               icon={icon}
               path={path}
-              pathname={pathname}
+              pathname={location.pathname}
             />
           ))}
         </List>

@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
-import {Redirect} from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 import axios from 'axios';
 
 import {DataGrid} from '@material-ui/data-grid';
@@ -33,7 +33,7 @@ export default function Assignments() {
   const {enqueueSnackbar} = useSnackbar();
   const [reset, setReset] = useState(0);
   const [assignments, setAssignments] = useState([]);
-  const [redirect, setRedirect] = useState(null);
+  const history = useHistory();
 
   React.useEffect(() => {
     axios.get('/api/admin/assignments/list').then((response) => {
@@ -52,10 +52,6 @@ export default function Assignments() {
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   };
-
-  if (redirect !== null) {
-    return <Redirect to={redirect}/>;
-  }
 
   return (
     <Grid container spacing={2} justify={'center'} alignItems={'center'}>
@@ -92,7 +88,7 @@ export default function Assignments() {
             )},
             {field: 'release_date', headerName: 'Release Date', width: 170},
             {field: 'due_date', headerName: 'Due Date', width: 170},
-          ]} rows={assignments} onRowClick={({row}) => setRedirect(`/admin/assignment/edit/${row.id}`)}/>
+          ]} rows={assignments} onRowClick={({row}) => history.push(`/admin/assignment/edit/${row.id}`)}/>
         </Paper>
       </Grid>
     </Grid>

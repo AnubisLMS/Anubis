@@ -160,7 +160,7 @@ export default function Results() {
   }, [searched]);
 
   if (error) {
-    return <Redirect to={`/error`}/>;
+    history.push(`/error`);
   }
 
   const clearCache = () => {
