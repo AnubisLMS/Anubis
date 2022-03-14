@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import axios from 'axios';
 import {useSnackbar} from 'notistack';
-import {Redirect, useParams} from 'react-router-dom';
+import {useHistory, Redirect, useParams} from 'react-router-dom';
 
 import {DataGrid} from '@material-ui/data-grid';
 import Grid from '@material-ui/core/Grid';
@@ -98,9 +98,9 @@ export default function Results() {
   const [stats, setStats] = useState([]);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState(null);
   const [searched, setSearched] = useState(null);
   const [error, setError] = useState(null);
+  const history = useHistory();
   const columns = useColumns();
 
   React.useEffect(() => {
@@ -158,10 +158,6 @@ export default function Results() {
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [searched]);
-
-  if (selected) {
-    return <Redirect to={`/admin/autograde/submission?assignmentId=${assignment.id}&netid=${selected.id}`}/>;
-  }
 
   if (error) {
     return <Redirect to={`/error`}/>;
@@ -280,7 +276,7 @@ export default function Results() {
             rowCount={students.length}
             columns={columns}
             rows={rows}
-            onRowClick={({row}) => setSelected(row)}
+            onRowClick={({row}) => history.push(`/admin/autograde/submission?assignmentId=${assignment.id}&netid=${row.id}`)}
           />
         </Paper>
       </Grid>

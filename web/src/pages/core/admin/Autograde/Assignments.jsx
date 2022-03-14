@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import clsx from 'clsx';
 import axios from 'axios';
-import {Redirect} from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
 
 import {DataGrid} from '@material-ui/data-grid';
@@ -48,7 +48,7 @@ export default function Assignments() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [assignments, setAssignments] = useState([]);
-  const [selected, setSelected] = useState(null);
+  const history = useHistory();
   const columns = useColumns();
 
   React.useEffect(() => {
@@ -59,10 +59,6 @@ export default function Assignments() {
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, []);
-
-  if (selected) {
-    return <Redirect to={`/admin/autograde/assignment/${selected.id}`}/>;
-  }
 
   return (
     <Grid container spacing={4} justify={'center'}>
@@ -81,7 +77,7 @@ export default function Assignments() {
             sortModel={sortModel}
             columns={columns}
             rows={assignments}
-            onRowClick={({row}) => setSelected(row)}
+            onRowClick={({row}) => history.push(`/admin/autograde/assignment/${row.id}`)}
           />
         </Paper>
       </Grid>
