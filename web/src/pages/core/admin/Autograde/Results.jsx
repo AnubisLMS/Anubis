@@ -276,7 +276,8 @@ export default function Results() {
             rowCount={students.length}
             columns={columns}
             rows={rows}
-            onRowClick={({row}) => history.push(`/admin/autograde/submission?assignmentId=${assignment.id}&netid=${row.id}`)}
+            onRowClick={({row}) => history.push(
+              `/admin/autograde/submission?assignmentId=${assignment.id}&netid=${row.id}`)}
           />
         </Paper>
       </Grid>
