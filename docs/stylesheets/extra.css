@@ -1,0 +1,65 @@
+/* 
+ * Custom color schemes for Anubis. Adapted from palette defined in web/src/theme/Theme.jsx.
+ * For original definitions of the CSS variables, refer to 
+ * https://github.com/squidfunk/mkdocs-material/blob/master/src/assets/stylesheets/main/_colors.scss
+ */
+
+[data-md-color-scheme="light"] {
+    --md-primary-fg-color: #21262d;
+    --md-primary-fg-color--light: #ecb7b7;
+    --md-primary-fg-color--dark:  #161b22;
+
+    /* Text */
+    --md-default-fg-color: var(--md-primary-fg-color--dark);
+    /* Title, quotes */
+    --md-default-fg-color--light: var(--md-primary-fg-color);
+    /* Quote block left border */
+    --md-default-fg-color--lighter: #89929b;
+    /* Links */
+    --md-typeset-a-color: #5686f5;
+    /* Links hover */
+    --md-accent-fg-color: #77bdfb;
+
+    /* Code block comment highlight (gray) */
+    --md-code-hl-comment-color: var(--md-default-fg-color--lighter);
+}
+
+[data-md-color-scheme="dark"] {
+    /* Navbar background, highlighted section, links */
+    --md-primary-fg-color:        #5686f5;
+    --md-primary-fg-color--light: #77bdfb;
+    --md-primary-fg-color--dark:  #ecf2f8;
+    /* Navbar text */
+    --md-primary-bg-color:       var(--md-primary-fg-color--dark);
+
+    /* Site background */
+    --md-default-bg-color: #0d1117;
+    /* Text */
+    --md-default-fg-color: #c1cad3;
+    /* Code block font */
+    --md-code-fg-color: var(--md-primary-fg-color--dark);
+    /* Code block background */
+    --md-code-bg-color: #21262d;
+    /* Code block keyword highlight */
+    --md-code-hl-keyword-color: var(--md-primary-fg-color--light);
+    /* Code block function highlight (purple) */
+    --md-code-hl-function-color: #cea5fb;
+    /* Code block number highlight (red) */
+    --md-code-hl-number-color: #fa7970;
+    /* Code block string highlight (green) */
+    --md-code-hl-string-color: #7ce38b;
+    /* Code block constant highlight (orange) */
+    --md-code-hl-constant-color: #faa356;
+    /* Code block comment highlight (gray) */
+    --md-code-hl-comment-color: #89929b;
+
+    /* Title, quotes */
+    --md-default-fg-color--light: var(--md-primary-fg-color--dark);
+    /* Quote block left border */
+    --md-default-fg-color--lighter: var(--md-primary-fg-color--light);
+    /* "Copy code" button */
+    --md-default-fg-color--lightest: var(--md-primary-fg-color);
+    --md-default-fg-color--dark: var(--md-primary-fg-color--dark);
+
+    --md-footer-bg-color: var(--md-code-bg-color);
+}

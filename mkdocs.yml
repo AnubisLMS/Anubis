@@ -1,0 +1,23 @@
+site_name: Anubis
+
+theme:
+  name: material
+  logo: img/anubis-icon-1.png
+  favicon: img/favicon.ico
+  palette:
+    - scheme: light
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: dark
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences 
+
+extra_css:
+  - stylesheets/extra.css
