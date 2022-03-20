@@ -240,6 +240,10 @@ def sync():
     r = post_json('/admin/assignments/sync', assignment_meta)
     click.echo(json.dumps(r.json(), indent=2))
 
+    click.echo('Building and pushing assignment tests docker image')
+    build('.', True)
+    click.echo('\nSynced')
+
 
 @assignment.command()
 @click.argument('assignment-name')
