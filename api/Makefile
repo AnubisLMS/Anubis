@@ -18,7 +18,7 @@ help:
 
 .PHONY: run                 # Run dev.py in MINDEBUG mode
 run: venv
-	env MINDEBUG=1 DEBUG=1 ./venv/bin/python3 dev.py
+	env MINDEBUG=1 DEBUG=1 MIGRATE=1 ./venv/bin/python3 dev.py
 
 .PHONY: venv                # Create virtualenv
 venv:
