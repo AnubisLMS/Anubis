@@ -61,8 +61,8 @@ def super_ide_images_save(images: list):
 def super_ide_images_new():
     image_db = TheiaImage(
         image="registry.digitalocean.com/anubis/theia-xv6",
-        title="theia-xv6",
-        description="theia-xv6",
+        title="NEWIMAGE",
+        description="NEWIMAGE",
         icon="",
         public=False,
     )
