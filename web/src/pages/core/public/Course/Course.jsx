@@ -92,6 +92,7 @@ const Course = () => {
                 id={assignment.id}
                 course={assignment.course}
                 submitted={assignment.has_submission}
+                visible_to_students={assignment.visible_to_students}
               />
             ))}
           </Box>
