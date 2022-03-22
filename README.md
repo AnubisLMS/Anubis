@@ -4,7 +4,7 @@
   <a href="https://anubis.osiris.services/">
     <img
       alt="Anubis"
-      src="https://raw.githubusercontent.com/GusSand/Anubis/master/docs/design-tex/figures/anubis-icon-1.png"
+      src="https://raw.githubusercontent.com/AnubisLMS/Anubis/master/docs/design-tex/figures/anubis-icon-1.png"
       width="400"
     />
   </a>
@@ -50,7 +50,7 @@ Under this model students can push as many times as they would like before the a
 ![alt docs/img/autograde-results.png](docs/design-tex/figures/autograde-results.png)
 
 > _If you would like to read more on how autograding and assignment management works from a TA/Professors
-> perspective, check out our [detailed design doc](docs/README.md)_
+> perspective, check out our [detailed design doc](docs/README.md)
 
 ### Anubis Cloud IDEs
 
@@ -63,7 +63,7 @@ the browser.
 ![alt docs/img/theia-fullscreen.png](docs/design-tex/figures/theia-fullscreen.png)
 
 > _If you would like a more detailed description of how the IDEs work internally, check out the 
-> [sections on the IDEs in our design doc](docs/README.md)_ 
+> [sections on the IDEs in our design doc](docs/README.md)
 
 ### Insights
 
@@ -71,12 +71,12 @@ Simply by placing timestamps on thing that are already tracked like submissions 
 we can start to both ask and answer some interesting questions about how well students are understanding certain topics.
 
 > _For a more detailed description (plus visuals) of how admin insights work in Anubis, check out
-> the [section on usage statistics in our design doc](/docs/README.md)_
+> the [section on usage statistics in our design doc](/docs/README.md)
 
 
 ## How to contribute
 
-- Checkout the [project board](https://github.com/GusSand/Anubis/projects/1) to see what you can 
+- Checkout the [project board](https://github.com/AnubisLMS/Anubis/projects/1) to see what you can 
 contribute
 - Checkout our [Development Guide](./docs/development_guide.md) to get up and running debugging Anubis
 - Checkout the [Contribution Guide](./.github/CONTRIBUTING.md) to see how to submit PRs and Issues
