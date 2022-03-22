@@ -24,11 +24,12 @@ const LectureItem = ({
       title = {course}
       subTitle = {`from: ${course}`}
       titleIcon = {<FeaturedVideoIcon/>}
-      link = {fileAttachment}
+      // link = {fileAttachment}
     >
       <Typography className = {classes.postTimeText}>{postTime}</Typography>
       <Typography>{title}</Typography>
-      <Button onClick = {() => history.push(fileAttachment)}>
+      <Button component="a" href={fileAttachment} target="_blank" rel="noreferer" onClick = {() =>
+        history.push(fileAttachment)}>
         View Lecture Attachment
       </Button>
     </Item>
