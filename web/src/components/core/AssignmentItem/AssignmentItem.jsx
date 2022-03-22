@@ -25,7 +25,7 @@ const AssignmentItem = ({
       showStatus={false}
       title={name}
       subTitle={`from: ${course.name}`}
-      titleIcon={visible_to_students ? <AssignmentOutlinedIcon/> :
+      titleIcon={visible_to_students ? <Tooltip title={'Visible to students.'}><AssignmentOutlinedIcon/></Tooltip> :
         <Tooltip title={'Not visible to students.'}><VisibilityOff className={classes.red}/></Tooltip>}
       link={`/courses/assignment?assignmentId=${id}`}
     >
