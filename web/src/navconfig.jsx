@@ -26,6 +26,7 @@ import Blog from './pages/core/public/Blog';
 import Visuals from './pages/core/public/Visuals/Visuals';
 import Lectures from './pages/core/public/Lectures/Lectures';
 import Playgrounds from './pages/core/public/Playgrounds/Playgrounds';
+import PrivacyPolicy from './pages/core/public/PrivacyPolicy/PrivacyPolicy';
 
 import Assignment from './pages/core/public/Assignment/Assignment';
 import Course from './pages/core/public/Course/Course';
@@ -74,6 +75,14 @@ export const footer_nav = [
     path: '/playgrounds',
     Page: Playgrounds,
   },
+
+  {
+    id: 'Privacy Policy',
+    icon: <i className="devicon-vscode-plain" style={{fontSize: 20}}/>,
+    path: '/privacypolicy',
+    Page: PrivacyPolicy,
+  },
+
 ];
 
 export const public_nav = [
