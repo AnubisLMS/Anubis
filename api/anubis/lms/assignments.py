@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
+import string
 
 from sqlalchemy import or_
 
@@ -518,3 +519,19 @@ def get_assignment_tests(submission: Submission, only_visible=False):
 
     # Convert to dictionary data
     return [{"test": result.assignment_test.data, "result": result.data} for result in tests]
+
+
+def clean_assignment_name(assignment: Assignment) -> str:
+    """
+    Create short clean assignment name for places that require trimming
+
+    :param assignment:
+    :return:
+    """
+
+    assignment_name = assignment.name.lower().replace('-', '').replace('_', '')
+    valid_charset = set(string.ascii_letters + string.digits)
+
+    return ''.join(c for c in assignment_name if c in valid_charset)
+
+

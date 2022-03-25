@@ -222,7 +222,7 @@ export default function Results() {
               href={`/api/admin/questions/export/${assignmentId}`}
               download
             >
-              Question Assignments (zip)
+              Export Question Responses (zip)
             </Button>
           </Grid>
 

@@ -1,7 +1,7 @@
 import io
+import json
 import random
 import zipfile
-from typing import Dict, List, Optional
 
 import yaml
 
@@ -22,8 +22,8 @@ from anubis.utils.logging import logger
 
 
 def get_question_pool_mapping(
-    questions: List[AssignmentQuestion],
-) -> Dict[int, List[AssignmentQuestion]]:
+    questions: list[AssignmentQuestion],
+) -> dict[int, list[AssignmentQuestion]]:
     """
     Get mapping of sequence to question mapping from list of questions
 
@@ -230,7 +230,7 @@ def ingest_questions(questions: dict, assignment: Assignment):
     return accepted, ignored, rejected
 
 
-def get_all_questions(assignment: Assignment) -> List[Dict[str, str]]:
+def get_all_questions(assignment: Assignment) -> list[dict[str, str]]:
     """
     Get all questions for a given assignment.
 
@@ -258,7 +258,7 @@ def get_all_questions(assignment: Assignment) -> List[Dict[str, str]]:
 
     # Pull questions out of sequences and add
     # them to question_list
-    questions_list: List[Dict[str, str]] = []
+    questions_list: list[dict[str, str]] = []
     for pool in question_pools:
         for q in pool:
             questions_list.append(q.full_data)
@@ -322,7 +322,7 @@ def get_question_assignments(assignment: Assignment):
 
 
 @cache.memoize(timeout=120, unless=is_debug)
-def export_assignment_questions(assignment_id: str) -> Optional[bytes]:
+def export_assignment_questions(assignment_id: str) -> bytes | None:
     """
     Export an assignment questions to a zip file.
 
@@ -397,6 +397,57 @@ def export_assignment_questions(assignment_id: str) -> Optional[bytes]:
     return zip_buffer.getvalue()
 
 
+@cache.memoize(timeout=120, unless=is_debug)
+def export_assignment_question_history(assignment_id: str, user_id: str) -> str | None:
+    # Get the assignment & user
+    assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
+    user = User.query.filter(User.id == user_id).first()
+
+    # If the assignment does not exist, then return None
+    if assignment is None or user is None:
+        return None
+
+    # Make history response
+    history = {
+        'user': user.data,
+        'assignment': assignment.data,
+        'questions': []
+    }
+
+    # Iterate through questions in order
+    for assigned_question in (
+        AssignedStudentQuestion.query.join(AssignmentQuestion)
+            .filter(
+            AssignedStudentQuestion.assignment_id == assignment_id,
+            AssignedStudentQuestion.owner_id == user_id)
+            .order_by(AssignmentQuestion.pool)
+            .all()
+    ):
+        assigned_question: AssignedStudentQuestion
+
+        # Create the question data
+        question = {
+            'question': assigned_question.question.full_data,
+            'responses': [],
+        }
+
+        # Iterate through question responses sorted by time
+        for response in (
+            AssignedQuestionResponse.query.filter(
+                AssignedQuestionResponse.assigned_question_id == assigned_question.id,
+            ).order_by(AssignedQuestionResponse.created.desc()).all()
+        ):
+            response: AssignedQuestionResponse
+
+            # Add response data
+            question['responses'].append(response.data)
+
+        # Add question data
+        history['questions'].append(question)
+
+    return json.dumps(history, indent=2)
+
+
 def fix_missing_question_assignments(assignment: Assignment):
     """
     Calculate and assign questions that are not assigned
@@ -415,7 +466,7 @@ def fix_missing_question_assignments(assignment: Assignment):
     student_ids = set(map(lambda u: u["id"], students))
 
     # Get all assignment questions for this assignment
-    assignment_questions: List[AssignmentQuestion] = AssignmentQuestion.query.filter(
+    assignment_questions: list[AssignmentQuestion] = AssignmentQuestion.query.filter(
         AssignmentQuestion.assignment_id == assignment.id,
     ).all()
 
@@ -433,7 +484,7 @@ def fix_missing_question_assignments(assignment: Assignment):
     for student_id in student_ids:
 
         # Get the question assignments for this student on this assignment
-        student_questions: List[AssignedStudentQuestion] = AssignedStudentQuestion.query.filter(
+        student_questions: list[AssignedStudentQuestion] = AssignedStudentQuestion.query.filter(
             AssignedStudentQuestion.assignment_id == assignment.id,
             AssignedStudentQuestion.owner_id == student_id,
         ).all()
@@ -480,7 +531,7 @@ def assign_missing_questions(user_id: str):
         return
 
     # Get all the courses that the user belongs to
-    courses: List[Course] = (
+    courses: list[Course] = (
         Course.query.join(InCourse)
             .join(User)
             .filter(
@@ -495,7 +546,7 @@ def assign_missing_questions(user_id: str):
         # Get all assignments (that have been released and that
         # have not). Skip assignments that have not had their
         # questions assigned yet.
-        assignments: List[Assignment] = Assignment.query.filter(
+        assignments: list[Assignment] = Assignment.query.filter(
             Assignment.course_id == course.id,
             Assignment.questions_assigned == True,
         ).all()
