@@ -73,7 +73,7 @@ export default function Submission() {
               <StudentAssignmentHistory/>
             </Grid>
             <Grid item xs>
-              <StudentCard student={student}/>
+              <StudentCard student={student} assignment={assignment}/>
             </Grid>
             <Grid item xs>
               <StudentGitCard submission={submission}/>

@@ -26,13 +26,11 @@ import theme from './theme/Theme';
 import AuthWrapper from './components/shared/AuthWrapper';
 import Main from './Main';
 import Forums from './containers/Forums/Forums';
-import useQuery from './hooks/useQuery';
 import Nav from './components/shared/Navigation/Nav';
 import Error from './components/shared/Error';
 import Footer from './components/shared/Footer';
 import Header from './components/shared/Header';
 import DeviceWarning from './components/shared/DeviceWarning';
-import Container from '@material-ui/core/Container';
 
 import 'devicon/devicon.min.css';
 
@@ -139,11 +137,11 @@ export default function App() {
                           [classes.contentShift]: open,
                         })}
                       >
-                        <div className={classes.drawerHeader} />
+                        <div className={classes.drawerHeader}/>
                         <Error/>
                         <div className={classes.main}>
                           <Main user={user}/>
-                          <Forums user={user} />
+                          <Forums user={user}/>
                         </div>
                         <Footer/>
                       </main>

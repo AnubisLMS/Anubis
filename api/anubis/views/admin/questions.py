@@ -8,12 +8,14 @@ from anubis.lms.courses import assert_course_context, assert_course_superuser
 from anubis.lms.questions import (
     assign_questions,
     export_assignment_questions,
+    export_assignment_question_history,
     get_all_questions,
     get_question_assignments,
     hard_reset_questions,
     reset_question_assignments,
 )
-from anubis.models import AssignedStudentQuestion, Assignment, AssignmentQuestion, db
+from anubis.lms.assignments import clean_assignment_name
+from anubis.models import User, AssignedStudentQuestion, Assignment, AssignmentQuestion, db
 from anubis.utils.auth.http import require_admin
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
@@ -365,7 +367,45 @@ def admin_assignments_export(assignment_id: str):
     zip_blob = export_assignment_questions(assignment.id)
 
     # Get a filename from the assignment name and datetime
-    filename = f"{assignment.name}-{str(now)}.zip".replace(" ", "_").replace(":", "")
+    assignment_name = clean_assignment_name(assignment)
+    filename = f"anubis-question-assignments-{assignment_name}-{str(now)}.zip".replace(" ", "_").replace(":", "")
 
     # Send the file back
     return send_file(io.BytesIO(zip_blob), attachment_filename=filename, as_attachment=True)
+
+
+@questions.get("/history/<string:assignment_id>/<string:user_id>")
+@require_admin()
+def admin_assignments_history(assignment_id: str, user_id: str):
+    """
+    Export question response history to a (potentially) large json file
+    for a specific student.
+
+    :param assignment_id:
+    :param user_id:
+    :return:
+    """
+
+    # Get the assignment & user
+    assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
+    user = User.query.filter(User.id == user_id).first()
+
+    # Verify that we got an assignment
+    req_assert(assignment is not None, message="assignment does not exist")
+    req_assert(user is not None, message="user does not exist")
+
+    # Verify that the assignment is accessible to the user in the current course context
+    assert_course_context(assignment, user)
+
+    # Get now datetime
+    now = datetime.now().replace(microsecond=0)
+
+    # Generate an export of the assignment data
+    history_json = export_assignment_question_history(assignment.id, user.id) or '{}'
+
+    # Get a filename from the assignment name and datetime
+    assignment_name = clean_assignment_name(assignment)
+    filename = f"anubis-question-responses-{user.netid}-{assignment_name}-{str(now)}.json".replace(" ", "_").replace(":", "")
+
+    # Send the file back
+    return send_file(io.BytesIO(history_json.encode()), attachment_filename=filename, as_attachment=True)

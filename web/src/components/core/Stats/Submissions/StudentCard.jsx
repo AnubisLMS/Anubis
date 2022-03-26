@@ -7,6 +7,8 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
+import ArchiveIcon from '@material-ui/icons/Archive';
 
 const useStyles = makeStyles({
   root: {
@@ -15,7 +17,7 @@ const useStyles = makeStyles({
 });
 
 
-export default function StudentCard({student}) {
+export default function StudentCard({student, assignment = null}) {
   const classes = useStyles();
 
   if (!student) {
@@ -45,6 +47,19 @@ export default function StudentCard({student}) {
         >
           View Student
         </Button>
+        {!!assignment && (
+          <Button
+            size={'small'}
+            startIcon={<ArchiveIcon/>}
+            color={'primary'}
+            variant={'contained'}
+            component={'a'}
+            href={`/api/admin/questions/history/${assignment.id}/${student.id}`}
+            download
+          >
+            Export Response History (json)
+          </Button>
+        )}
       </CardActions>
     </Card>
   );
