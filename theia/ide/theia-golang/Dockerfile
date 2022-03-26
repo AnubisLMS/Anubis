@@ -69,3 +69,4 @@ RUN set -ex; \
 
 COPY supervisord.conf /supervisord.conf
 USER anubis
+ENV GO111MODULE=on
