@@ -21,6 +21,7 @@ const Nav = ({open, handleDrawerClose}) => {
         paper: classes.drawerPaper,
       }}
       style={{height: '100%'}}
+      PaperProps={{style: {scrollbarWidth: 'none'}}}
     >
       <Box className={classes.listContainer}>
         <Box className={classes.logoContainer}>
@@ -33,7 +34,7 @@ const Nav = ({open, handleDrawerClose}) => {
         />
       </Box>
       <Box marginLeft="8px" marginRight="8px" marginTop="20px">
-        <Ad />
+        <Ad/>
       </Box>
     </Drawer>
   );
