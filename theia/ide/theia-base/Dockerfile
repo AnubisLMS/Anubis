@@ -15,7 +15,11 @@ ENV PY_VERSION=$PY_VERSION \
     ANUBIS_ADMIN="OFF" \
     ANUBIS=1 \
     ANUBIS_IDE=1 \
-    ANUBIS_ASSIGNMENT_NAME=""
+    ANUBIS_ASSIGNMENT_NAME="" \
+    SHELL=/usr/bin/zsh \
+    THEIA_DEFAULT_PLUGINS="local-dir:/opt/theia/plugins/" \
+    LANG="en_US.UTF-8" \
+    LC_ALL="en_US.UTF-8"
 
 WORKDIR /opt/theia
 
@@ -30,13 +34,17 @@ RUN set -ex; \
     > /etc/apt/sources.list.d/llvm.list; \
   apt-get update; \
     apt-get install -y --no-install-recommends \
-    git curl wget build-essential tree clangd zsh exa \
+    git curl wget build-essential tree clangd zsh exa locales \
     libffi-dev libexpat1-dev \
     libgdbm-dev liblzma-dev zlib1g-dev \
     libsqlite3-dev libssl-dev openssl \
     libsecret-1-0 sqlite3 libbz2-dev bzip2; \
   apt remove -y python python-pip python3-pip python3; \
   cd /; \
+  echo 'LANG=en_US.UTF-8' > /etc/locale.conf; \
+  echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen; \
+  echo 'LANG=en_US.UTF-8' > /etc/default/locale; \
+  locale-gen en_US.UTF-8; \
   wget https://www.python.org/ftp/python/$PY_VERSION/Python-$PY_VERSION.tgz; \
   wget https://bootstrap.pypa.io/get-pip.py; \
   tar xvf Python-$PY_VERSION.tgz; \
