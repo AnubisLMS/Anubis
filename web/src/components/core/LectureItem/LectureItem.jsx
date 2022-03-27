@@ -24,12 +24,20 @@ const LectureItem = ({
       title = {course}
       subTitle = {`from: ${course}`}
       titleIcon = {<FeaturedVideoIcon/>}
+<<<<<<< .merge_file_GuSSaM
       // link = {fileAttachment}
     >
       <Typography className = {classes.postTimeText}>{postTime}</Typography>
       <Typography>{title}</Typography>
       <Button component="a" href={fileAttachment} target="_blank" rel="noreferer" onClick = {() =>
         history.push(fileAttachment)}>
+=======
+      link = {fileAttachment}
+    >
+      <Typography className = {classes.postTimeText}>{postTime}</Typography>
+      <Typography>{title}</Typography>
+      <Button onClick = {() => history.push(fileAttachment)}>
+>>>>>>> .merge_file_XvwD1Q
         View Lecture Attachment
       </Button>
     </Item>

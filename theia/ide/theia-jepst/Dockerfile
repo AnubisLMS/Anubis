@@ -9,6 +9,10 @@ COPY motd.txt /etc/motd
 COPY latest.package.json package.json
 RUN set -ex; \
   yarn --pure-lockfile; \
+  NODE_OPTIONS="--max-old-space-size=4096" yarn theia build; \
+  HEAD_LINE_NUMBER=$(grep -n '</head>' lib/index.html | cut -f1 -d:); \
+  SCRIPT_LINE='<script>function ping(){if (document.hasFocus()){fetch("/ide/ping")}};document.addEventListener("focus",ping);setInterval(ping,60000)</script>'; \
+  sed -i "${HEAD_LINE_NUMBER}i${SCRIPT_LINE}" lib/index.html; \
   yarn theia download:plugins; \
   yarn --production; \
   yarn autoclean --force; \
@@ -38,10 +42,13 @@ RUN set -ex; \
 
 # Compile and install glibc 2.32 from source
 RUN set -ex; \
-   cd /; \
-   wget https://snapshot.debian.org/archive/debian/20211205T084953Z/pool/main/g/glibc/libc6_2.32-4_amd64.deb; \
-   dpkg -i libc6_2.32-4_amd64.deb; \
-  rm libc6_2.32-4_amd64.deb; \
+  cd /; \
+  wget https://snapshot.debian.org/archive/debian/20211205T084953Z/pool/main/g/glibc/libc6_2.32-4_amd64.deb; \
+  wget https://snapshot.debian.org/archive/debian/20211205T084953Z/pool/main/g/glibc/locales_2.32-4_all.deb; \
+  wget https://snapshot.debian.org/archive/debian/20211205T084953Z/pool/main/g/glibc/libc-bin_2.32-4_amd64.deb; \
+  wget https://snapshot.debian.org/archive/debian/20211205T084953Z/pool/main/g/glibc/libc-l10n_2.32-4_all.deb; \
+  dpkg --install libc-l10n_2.32-4_all.deb libc-bin_2.32-4_amd64.deb locales_2.32-4_all.deb libc6_2.32-4_amd64.deb; \
+  rm *.deb; \
   ldconfig
 
 USER anubis

@@ -7,6 +7,10 @@ USER root
 COPY latest.package.json package.json
 RUN set -ex; \
   yarn --pure-lockfile; \
+  NODE_OPTIONS="--max-old-space-size=4096" yarn theia build; \
+  HEAD_LINE_NUMBER=$(grep -n '</head>' lib/index.html | cut -f1 -d:); \
+  SCRIPT_LINE='<script>function ping(){if (document.hasFocus()){fetch("/ide/ping")}};document.addEventListener("focus",ping);setInterval(ping,60000)</script>'; \
+  sed -i "${HEAD_LINE_NUMBER}i${SCRIPT_LINE}" lib/index.html; \
   yarn theia download:plugins; \
   yarn --production; \
   yarn autoclean --force; \
@@ -69,3 +73,4 @@ RUN set -ex; \
 
 COPY supervisord.conf /supervisord.conf
 USER anubis
+ENV GO111MODULE=on
