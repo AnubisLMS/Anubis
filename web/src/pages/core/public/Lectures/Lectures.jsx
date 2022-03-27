@@ -37,7 +37,6 @@ const Lectures = () => {
   const get_href = (row) => (
     `/api/public/static${row.static_file.path}/${row.static_file.filename}`
   );
-  console.log(lectures);
   return (
     <StandardLayout>
       <SectionHeader isPage title = 'Lectures'/>
@@ -56,41 +55,5 @@ const Lectures = () => {
     </StandardLayout>
   );
 };
-//     <StandardLayout title={'Lectures'} description={'Lecture notes posted by professors'}>
-//       <Grid container spacing={1} justify={'center'}>
-//         <Grid item xs={12}>
-//           <Paper className={classes.paper}>
-//             <DataGrid
-//               columns={[
-//                 {field: 'course', headerName: 'Course', width: 150},
-//                 {field: 'post_time', headerName: 'Post Time', width: 170},
-//                 {field: 'title', headerName: 'Title', width: 300},
-//                 {
-//                   field: 'a', headerName: 'Lecture Attachment', width: 300, renderCell: ({row}) => (
-//                     <div>
-//                       <Typography
-//                         variant={'body1'}
-//                         color={'primary'}
-//                         style={{display: 'inline'}}
-//                         component={'a'}
-//                         target={'_blank'}
-//                         href={get_href(row)}
-//                       >
-//                         {row.static_file.filename}
-//                       </Typography>
-//                     </div>
-//                   ),
-//                 },
-//               ]}
-//               rows={lectures}
-//               rowsPerPageOptions={[10, 20, 30]}
-//               pagination
-//             />
-//           </Paper>
-//         </Grid>
-//       </Grid>
-//     </StandardLayout>
-//   );
-// };
 
 export default Lectures;
