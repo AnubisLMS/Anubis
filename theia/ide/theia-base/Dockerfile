@@ -1,8 +1,6 @@
 # https://github.com/theia-ide/theia-apps/tree/master/theia-cpp-docker
 
 ARG NODE_VERSION=12.22.6
-ARG BUILD_THEIA=ON
-
 FROM node:${NODE_VERSION}-bullseye-slim as base
 
 ARG PY_VERSION=3.10.0
@@ -16,6 +14,7 @@ ENV PY_VERSION=$PY_VERSION \
     ANUBIS=1 \
     ANUBIS_IDE=1 \
     ANUBIS_ASSIGNMENT_NAME="" \
+    HOME=/home/anubis \
     SHELL=/usr/bin/zsh \
     THEIA_DEFAULT_PLUGINS="local-dir:/opt/theia/plugins/" \
     LANG="en_US.UTF-8" \
@@ -96,6 +95,7 @@ RUN set -ex; \
     -exec 'rm' '-rf' '{}' '+';
 
 # Build Theia Application
+ARG BUILD_THEIA=ON
 COPY latest.package.json package.json
 RUN if [ "${BUILD_THEIA}" = "ON" ]; then set -ex; \
   yarn --pure-lockfile; \

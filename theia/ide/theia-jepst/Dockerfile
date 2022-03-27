@@ -38,10 +38,13 @@ RUN set -ex; \
 
 # Compile and install glibc 2.32 from source
 RUN set -ex; \
-   cd /; \
-   wget https://snapshot.debian.org/archive/debian/20211205T084953Z/pool/main/g/glibc/libc6_2.32-4_amd64.deb; \
-   dpkg -i libc6_2.32-4_amd64.deb; \
-  rm libc6_2.32-4_amd64.deb; \
+  cd /; \
+  wget https://snapshot.debian.org/archive/debian/20211205T084953Z/pool/main/g/glibc/libc6_2.32-4_amd64.deb; \
+  wget https://snapshot.debian.org/archive/debian/20211205T084953Z/pool/main/g/glibc/locales_2.32-4_all.deb; \
+  wget https://snapshot.debian.org/archive/debian/20211205T084953Z/pool/main/g/glibc/libc-bin_2.32-4_amd64.deb; \
+  wget https://snapshot.debian.org/archive/debian/20211205T084953Z/pool/main/g/glibc/libc-l10n_2.32-4_all.deb; \
+  dpkg --install libc-l10n_2.32-4_all.deb libc-bin_2.32-4_amd64.deb locales_2.32-4_all.deb libc6_2.32-4_amd64.deb; \
+  rm *.deb; \
   ldconfig
 
 USER anubis
