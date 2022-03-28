@@ -10,7 +10,7 @@ import standardErrorHandler from '../../../../utils/standardErrorHandler';
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';
 import ListHeader from '../../../../components/shared/ListHeader/ListHeader';
 import Divider from '../../../../components/shared/Divider/Divider';
-
+import ListPagination from '../../../../components/shared/ListPagination/ListPagination';
 
 function translateSubmission({id, assignment_name, assignment_due, commit, processed, state, created, tests}) {
   return {
@@ -44,9 +44,16 @@ export default function Submissions() {
       },
     }).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
+      console.log('Hello, you are here', data);
+      // The above console log statement returns data. This data includes a nested submissions array, total, user list.
       if (data?.total) {
         setRowCount(data?.total);
+        console.log('Breakpoint 2', rowCount);
       }
+      // The above console log statement returns the total number of Submission rows.
+
+      console.log('Breakpoint 3', data?.submissions);
+      // The above console log statements returns the nested submissions array.
       if (data?.submissions) {
         let prev;
         if (rows.length === 0) {
@@ -59,12 +66,28 @@ export default function Submissions() {
         }
 
         const translation = data.submissions.map(translateSubmission);
+        console.log('Breakpoint 4 Translation', translation);
+
         for (let i = page * pageSize; i < (page * pageSize) + translation.length; ++i) {
           prev[i] = translation[i - (page * pageSize)];
         }
 
         setRows([...prev]);
-      }
+        console.log('Breakpoint 5 setRows', rows);
+
+        const paginatedSubmissions = [];
+        while (prev.length) {
+          paginatedSubmissions.push(prev.splice(0, 10));
+        }
+        setRows(paginatedSubmissions);
+      } // line 57
+      // const paginatedSubmissions = [];
+
+      // while (rows.length) {
+      //   paginatedSubmissions.push(rows.splice(0, 10));
+      // }
+      // console.log('Paginated Submissions Index 0', paginatedSubmissions[0]);
+      // console.log('Paginated Submissions Index 1', paginatedSubmissions[1]);
       if (data?.user) {
         setUser(data.user);
       }
@@ -77,21 +100,36 @@ export default function Submissions() {
       <SectionHeader title='Submissions' isPage/>
       <Divider/>
       <ListHeader sections={['Assignment Name', 'Autograde Results', 'Submission', 'Submission Time']}/>
-      {rows.map((row, index) => (
-        <div key={index}>
-          {row?.tests && row?.commit &&
-            <SubmissionItem
-              assignmentDue={row.assignmentDue}
-              assignmentName={row.assignment_name}
-              commit={row.commit}
-              processed={row.processed}
-              tests={row.tests}
-              timeStamp={row.timeStamp}
-            />
-          }
+      {rows[page] && rows[0][0] && (
+        <div>
+          {rows[page].map((row, index) => (
+            <div key={index}>
+              {row?.tests && row?.commit &&
+                <SubmissionItem
+                  assignmentDue={row.assignmentDue}
+                  assignmentName={row.assignment_name}
+                  commit={row.commit}
+                  processed={row.processed}
+                  tests={row.tests}
+                  timeStamp={row.timeStamp}
+                />
+              }
+            </div>
+          ))}
         </div>
-      ))}
+      )}
+      {/*
+        Pagination has been added. However, we only want to load the results that correspond to each page
+      */}
+      {rows.length > 1 && (
+        <ListPagination
+          page = {page}
+          maxPage = {rows.length}
+          setPage = {(page) => setPage(page)}
+          prevPage = {()=> setPage(page - 1)}
+          nextPage = {() => setPage(page + 1)}
+        />
+      )}
     </StandardLayout>
-
   );
 }
