@@ -44,15 +44,15 @@ export default function Submissions() {
       },
     }).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      console.log('Hello, you are here', data);
-      // The above console log statement returns data. This data includes a nested submissions array, total, user list.
+      // console.log('Hello, you are here', data);
+      // The above console log statement returns data. This data object includes a nested submissions array, total integer, user information.
       if (data?.total) {
         setRowCount(data?.total);
-        console.log('Breakpoint 2', rowCount);
+        // console.log('Breakpoint 2', rowCount);
+        // The above console log statement returns the total number of submissions.
       }
-      // The above console log statement returns the total number of Submission rows.
 
-      console.log('Breakpoint 3', data?.submissions);
+      // console.log('Breakpoint 3', data?.submissions);
       // The above console log statements returns the nested submissions array.
       if (data?.submissions) {
         let prev;
@@ -66,28 +66,22 @@ export default function Submissions() {
         }
 
         const translation = data.submissions.map(translateSubmission);
-        console.log('Breakpoint 4 Translation', translation);
+        // console.log('Breakpoint 4 Translation', translation);
 
         for (let i = page * pageSize; i < (page * pageSize) + translation.length; ++i) {
           prev[i] = translation[i - (page * pageSize)];
         }
 
         setRows([...prev]);
-        console.log('Breakpoint 5 setRows', rows);
+        // console.log('Breakpoint 5 setRows', rows);
 
         const paginatedSubmissions = [];
         while (prev.length) {
           paginatedSubmissions.push(prev.splice(0, 10));
         }
         setRows(paginatedSubmissions);
-      } // line 57
-      // const paginatedSubmissions = [];
+      } // loop corresponds to start of loop at line 57
 
-      // while (rows.length) {
-      //   paginatedSubmissions.push(rows.splice(0, 10));
-      // }
-      // console.log('Paginated Submissions Index 0', paginatedSubmissions[0]);
-      // console.log('Paginated Submissions Index 1', paginatedSubmissions[1]);
       if (data?.user) {
         setUser(data.user);
       }
