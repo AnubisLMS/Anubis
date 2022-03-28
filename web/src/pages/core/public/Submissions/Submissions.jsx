@@ -45,7 +45,7 @@ export default function Submissions() {
     }).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       // console.log('Hello, you are here', data);
-      // The above console log statement returns data. 
+      // The above console log statement returns data.
       // This data object includes a nested submissions array, total integer, user information.
       if (data?.total) {
         setRowCount(data?.total);
