@@ -20,6 +20,8 @@ import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
 import AddIcon from '@material-ui/icons/Add';
 import ArchiveIcon from '@material-ui/icons/Archive';
 
+import {useTheme, ThemeProvider} from '@material-ui/core/styles';
+
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 import downloadTextFile from '../../../utils/downloadTextFile';
@@ -49,6 +51,9 @@ const hardResetWarning = (
 export default function QuestionControls({assignmentId, reload, questionsAssigned, assignmentName}) {
   const {enqueueSnackbar} = useSnackbar();
   const [verify, setVerify] = useState(null);
+
+  const theme = useTheme();
+  // console.log('Theme', theme.palette.color.green);
 
   const assignQuestions = () => {
     axios.get(`/api/admin/questions/assign/${assignmentId}`).then((response) => {
@@ -148,15 +153,19 @@ export default function QuestionControls({assignmentId, reload, questionsAssigne
             {/* Add question button */}
             <Grid item xs={12} sm={6} md={3}>
               <Tooltip title={'Add question'}>
+                {/* <ThemeProvider theme={theme}> */}
                 <Button
+                  style = {{
+                    backgroundColor: theme.palette.color.green,
+                  }}
                   fullWidth
                   startIcon={<AddIcon/>}
-                  color={'primary'}
                   variant={'contained'}
                   onClick={addQuestion}
                 >
                   Add New Question
                 </Button>
+                {/* </ThemeProvider> */}
               </Tooltip>
             </Grid>
 
