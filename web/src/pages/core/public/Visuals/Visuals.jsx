@@ -20,14 +20,14 @@ import standardErrorHandler from '../../../../utils/standardErrorHandler';
 
 const visuals = [
   {
-    title: 'Anubis LMS Registered Users Last Year',
-    url: `/api/public/visuals/users/365/1`,
-    filename: 'anubis-registered-users-365-1.png',
-  },
-  {
     title: 'Anubis LMS Active Users Per Day In Last 2 Weeks',
     url: `/api/public/visuals/active/14/1`,
     filename: 'anubis-active-users-14-1.png',
+  },
+  {
+    title: 'Anubis LMS Registered Users Last Year',
+    url: `/api/public/visuals/users/365/1`,
+    filename: 'anubis-registered-users-365-1.png',
   },
   {
     title: 'Anubis LMS Active Users Per Week In Last 3 Month',
