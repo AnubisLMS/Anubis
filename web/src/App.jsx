@@ -31,6 +31,7 @@ import Error from './components/shared/Error';
 import Footer from './components/shared/Footer';
 import Header from './components/shared/Header';
 import DeviceWarning from './components/shared/DeviceWarning';
+import AprilFools from './components/core/AprilFools/AprilFools';
 
 import 'devicon/devicon.min.css';
 
@@ -137,6 +138,7 @@ export default function App() {
                           [classes.contentShift]: open,
                         })}
                       >
+                        <AprilFools/>
                         <div className={classes.drawerHeader}/>
                         <Error/>
                         <div className={classes.main}>
