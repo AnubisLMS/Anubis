@@ -43,8 +43,9 @@ export default function AprilFools() {
           <AlertTitle>Some changes are coming!</AlertTitle>
           <Typography variant={'h6'} gutterBottom>
             Soon there will be <strong><i>2 minute ad videos</i></strong> required when starting an IDE.
-            Check out our <a className={classes.a} href="/api/public/memes/" rel="noreferrer" target="_blank">blog post</a>
-            {' '}explaining the new and exciting changes to the platform
+            Check out our
+            {' '}<a className={classes.a} href="/api/public/memes/" rel="noreferrer" target="_blank">blog post</a>{' '}
+            explaining the new and exciting changes to the platform
           </Typography>
         </Alert>
       </Collapse>
