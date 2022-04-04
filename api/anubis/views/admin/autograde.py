@@ -170,7 +170,7 @@ def private_submission_stats_id(assignment_id: str, netid: str):
     # Calculate the best submission
     submission_id = autograde(student.id, assignment.id)
 
-    # Set the default for the full_data of the submission
+    # set the default for the full_data of the submission
     submission_full_data = None
 
     # Get the submission full_data if there was a best submission

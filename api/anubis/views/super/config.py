@@ -13,7 +13,7 @@ config_ = Blueprint("config", __name__, url_prefix="/super/config")
 @json_response
 def config_list():
     """
-    List all config items.
+    list all config items.
 
     :return:
     """

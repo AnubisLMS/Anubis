@@ -46,7 +46,7 @@ def make_blob_response(file: StaticFile) -> Response:
     # Make a flask response from file data blob
     response = make_response(file.blob)
 
-    # Set its content type header to the proper value
+    # set its content type header to the proper value
     response.headers["Content-Type"] = file.content_type
 
     # If the image is an svg, then we need to make sure that it has
@@ -97,7 +97,7 @@ def make_png_response(blob: bytes) -> Response:
     # Take the png bytes, and make a flask response
     response = make_response(blob)
 
-    # Set the response content type
+    # set the response content type
     response.headers["Content-Type"] = "image/png"
 
     # Pass back the image response

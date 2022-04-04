@@ -4,7 +4,7 @@ import json
 import string
 import traceback
 import urllib.parse
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any
 
 from flask import g, request
 from werkzeug.local import LocalProxy
@@ -34,7 +34,7 @@ from anubis.utils.exceptions import AuthenticationError, LackCourseContext
 from anubis.utils.logging import logger
 
 
-def get_course_context(full_stop: bool = True) -> Union[None, Course]:
+def get_course_context(full_stop: bool = True) -> Course | None:
     """
     Get the course context for the current admin user. On the anubis website
     when a user is an admin, they have a context autocomplete at the top
@@ -225,7 +225,7 @@ def assert_course_superuser(course_id: str = None):
         raise LackCourseContext("Requires course Professor permissions")
 
 
-def assert_course_context(*models: Tuple[Any]):
+def assert_course_context(*models: tuple[Any]):
     """
     This function checks that all the sqlalchemy objects that are
     passed to this function are within the current course context.
@@ -332,7 +332,7 @@ def valid_join_code(join_code: str) -> bool:
 
 
 @cache.memoize(timeout=60, unless=is_debug)
-def get_courses(netid: str) -> List[Dict[str, Any]]:
+def get_courses(netid: str) -> list[dict[str, Any]]:
     """
     Get all classes a given netid is in
 
@@ -354,7 +354,7 @@ def get_courses(netid: str) -> List[Dict[str, Any]]:
 
 
 @cache.memoize(timeout=60, unless=is_debug)
-def get_course_data(netid: str, course_id: str) -> Optional[Dict[str, Any]]:
+def get_course_data(netid: str, course_id: str) -> dict[str, Any] | None:
     """
     Get course data and tas for course
 
@@ -401,7 +401,7 @@ def get_course_data(netid: str, course_id: str) -> Optional[Dict[str, Any]]:
 
 
 @cache.memoize(timeout=60, unless=is_debug)
-def get_student_course_ids(user: User, default: str = None) -> List[str]:
+def get_student_course_ids(user: User, default: str = None) -> list[str]:
     """
     Get the course ids for the courses that the user is in.
 
@@ -415,7 +415,7 @@ def get_student_course_ids(user: User, default: str = None) -> List[str]:
         # Get all
         courses = Course.query.all()
 
-        # List of course ids
+        # list of course ids
         course_ids = list(map(lambda x: x.id, courses))
 
     # Regular User
@@ -442,7 +442,7 @@ def get_student_course_ids(user: User, default: str = None) -> List[str]:
     return course_ids
 
 
-def get_user_permissions(user: User) -> Dict[str, Any]:
+def get_user_permissions(user: User) -> dict[str, Any]:
     """
     Get a user's `professor_for`, `ta_for`, and `admin_for` permissions
 
@@ -481,7 +481,7 @@ def get_user_permissions(user: User) -> Dict[str, Any]:
 
 
 @cache.memoize(timeout=60, unless=is_debug, source_check=True)
-def get_courses_with_visuals() -> List[Dict[str, Any]]:
+def get_courses_with_visuals() -> list[dict[str, Any]]:
     """
     Get a list of the course data for courses with
     usage visuals enabled.
@@ -496,23 +496,23 @@ def get_courses_with_visuals() -> List[Dict[str, Any]]:
     query = Course.query.filter(Course.display_visuals == True).order_by(Course.course_code.desc())
 
     # Get the list of courses
-    courses: List[Course] = query.all()
+    courses: list[Course] = query.all()
 
     # Break down course db objects into dictionary
     return [course.data for course in courses]
 
 
 @cache.memoize(timeout=60, unless=is_debug, source_check=True)
-def get_user_admin_course_ids(user_id: str) -> Set[str]:
-    admin_course_ids: Set[str] = set()
+def get_user_admin_course_ids(user_id: str) -> set[str]:
+    admin_course_ids: set[str] = set()
 
     # Check to see if they are a TA for the course
-    ta: List[TAForCourse] = TAForCourse.query.filter(
+    ta: list[TAForCourse] = TAForCourse.query.filter(
         TAForCourse.owner_id == user_id,
     ).all()
 
     # Check to see if they are a professor for the course
-    prof: List[ProfessorForCourse] = ProfessorForCourse.query.filter(
+    prof: list[ProfessorForCourse] = ProfessorForCourse.query.filter(
         ProfessorForCourse.owner_id == user_id,
     ).all()
 
@@ -525,10 +525,10 @@ def get_user_admin_course_ids(user_id: str) -> Set[str]:
     return admin_course_ids
 
 
-def get_user_course_ids(user: User) -> Tuple[Set[str], Set[str]]:
+def get_user_course_ids(user: User) -> tuple[set[str], set[str]]:
     # Get the list of course ids
-    course_ids: Set[str] = set(get_student_course_ids(user))
-    admin_course_ids: Set[str]
+    course_ids: set[str] = set(get_student_course_ids(user))
+    admin_course_ids: set[str]
 
     # If they are a superuser, then just return True
     if user.is_superuser:
@@ -542,7 +542,7 @@ def get_user_course_ids(user: User) -> Tuple[Set[str], Set[str]]:
 
 
 @cache.memoize(timeout=3600, source_check=True, unless=is_debug)
-def get_course_admin_ids(course_id: str, include_superusers: bool = True) -> List[str]:
+def get_course_admin_ids(course_id: str, include_superusers: bool = True) -> list[str]:
     """
     Get a list of course admin id values.
 
@@ -560,12 +560,12 @@ def get_course_admin_ids(course_id: str, include_superusers: bool = True) -> Lis
         return []
 
     # Query TAs
-    tas: List[TAForCourse] = TAForCourse.query.filter(
+    tas: list[TAForCourse] = TAForCourse.query.filter(
         TAForCourse.course_id == course.id,
     ).all()
 
     # Query professors
-    professors: List[ProfessorForCourse] = ProfessorForCourse.query.filter(
+    professors: list[ProfessorForCourse] = ProfessorForCourse.query.filter(
         ProfessorForCourse.course_id == course.id,
     ).all()
 
@@ -579,7 +579,7 @@ def get_course_admin_ids(course_id: str, include_superusers: bool = True) -> Lis
     # Include all superusers if specified
     if include_superusers:
         # Get all superusers
-        superusers: List[User] = User.query.filter(User.is_superuser == True).all()
+        superusers: list[User] = User.query.filter(User.is_superuser == True).all()
 
         # Calculate superuser ids
         superuser_ids = set(map(lambda x: x.id, superusers))
@@ -591,7 +591,7 @@ def get_course_admin_ids(course_id: str, include_superusers: bool = True) -> Lis
     return list(course_owner_ids)
 
 
-def get_course_users(course: Course) -> List[User]:
+def get_course_users(course: Course) -> list[User]:
     """
     Get all users within the course. These are the User objects for
     each student, ta and professor in the course.
@@ -605,7 +605,7 @@ def get_course_users(course: Course) -> List[User]:
         .filter(InCourse.course_id == course.id).all()
 
 
-def get_course_tas(course: Course) -> List[User]:
+def get_course_tas(course: Course) -> list[User]:
     """
     Get all Users that are TAs for a given course.
 
@@ -618,7 +618,7 @@ def get_course_tas(course: Course) -> List[User]:
         .filter(TAForCourse.course_id == course.id).all()
 
 
-def get_course_professors(course: Course) -> List[User]:
+def get_course_professors(course: Course) -> list[User]:
     """
     Get all Users that are Professors for a given course.
 
@@ -631,7 +631,7 @@ def get_course_professors(course: Course) -> List[User]:
         .filter(ProfessorForCourse.course_id == course.id).all()
 
 
-def user_to_user_id_set(users: List[User]) -> Set[str]:
+def user_to_user_id_set(users: list[User]) -> set[str]:
     """
     Convert a list of users to a set of user.ids.
 
@@ -660,7 +660,7 @@ def get_beta_ui_enabled(netid: str):
     return any(course.get("beta_ui_enabled", False) for course in courses_data)
 
 
-def add_all_users_to_course(users: List[User], course: Course) -> int:
+def add_all_users_to_course(users: list[User], course: Course) -> int:
     """
     Add all users in the list to the specified course. If they are already in the course,
     then no operation will be made for that student.
@@ -671,19 +671,19 @@ def add_all_users_to_course(users: List[User], course: Course) -> int:
     """
 
     # Get list of all user ids
-    user_ids: List[str] = [user.id for user in users]
+    user_ids: list[str] = [user.id for user in users]
 
     # Get all the in_course rows
-    in_courses: List[InCourse] = InCourse.query.filter(
+    in_courses: list[InCourse] = InCourse.query.filter(
         InCourse.owner_id.in_(user_ids),
         InCourse.course_id == course.id,
     ).all()
 
     # Figure out the set of all user ids that are already in the course
-    all_in_course_ids: Set[str] = {ic.owner_id for ic in in_courses}
+    all_in_course_ids: set[str] = {ic.owner_id for ic in in_courses}
 
     # Build a list of all users not already in the course
-    all_not_in_course: List[User] = [user for user in users if user.id not in all_in_course_ids]
+    all_not_in_course: list[User] = [user for user in users if user.id not in all_in_course_ids]
 
     # If there are users that are not in course, then we can add them
     if len(all_not_in_course) > 0:

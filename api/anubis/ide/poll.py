@@ -1,5 +1,3 @@
-from typing import List, Union
-
 from anubis.models import TheiaSession
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug
@@ -8,7 +6,7 @@ from anubis.utils.data import is_debug
 @cache.memoize(timeout=3, unless=is_debug)
 def theia_list_all(user_id: str, limit: int = 10):
     """
-    List all theia sessions that are currently active. Order by the time
+    list all theia sessions that are currently active. Order by the time
     they were created.
 
     * Response is lightly cached *
@@ -17,7 +15,7 @@ def theia_list_all(user_id: str, limit: int = 10):
     :param limit:
     :return:
     """
-    theia_sessions: List[TheiaSession] = (
+    theia_sessions: list[TheiaSession] = (
         TheiaSession.query.filter(
             TheiaSession.owner_id == user_id,
         )
@@ -30,7 +28,7 @@ def theia_list_all(user_id: str, limit: int = 10):
 
 
 @cache.memoize(timeout=1, unless=is_debug)
-def theia_poll_ide(theia_session_id: str, user_id: str) -> Union[None, dict]:
+def theia_poll_ide(theia_session_id: str, user_id: str) -> dict | None:
     """
     Check the status of a theia session. This is called
     when a theia session is created in the frontend. When

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from flask import Blueprint
 
@@ -129,7 +129,7 @@ def public_courses_visuals_list():
 
     # Get (possibly) slightly cached course data for courses with
     # visuals enabled.
-    courses_data: List[Dict[str, Any]] = get_courses_with_visuals()
+    courses_data: list[dict[str, Any]] = get_courses_with_visuals()
 
     # Pass back the cached response
     return success_response({"courses": courses_data})

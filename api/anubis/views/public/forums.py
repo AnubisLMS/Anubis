@@ -1,5 +1,3 @@
-from typing import List
-
 from flask import Blueprint
 
 from anubis.lms.forum import (
@@ -29,7 +27,7 @@ forums_ = Blueprint("public-forums", __name__, url_prefix="/public/forums")
 def public_get_forum_course(course_id: str):
     course: Course = verify_in_course(course_id)
 
-    posts: List[ForumPost] = ForumPost.query.filter(
+    posts: list[ForumPost] = ForumPost.query.filter(
         ForumPost.course_id == course.id,
         ForumPost.visible_to_students == True,
     ).order_by(ForumPost.created.desc()).all()

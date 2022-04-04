@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from anubis.lms.courses import get_student_course_ids
 from anubis.models import LectureNotes, User
 from anubis.utils.cache import cache
@@ -7,7 +5,7 @@ from anubis.utils.data import is_debug
 
 
 @cache.memoize(timeout=10, unless=is_debug, source_check=True)
-def get_lecture_notes(user_id: str, course_id: Optional[str] = None):
+def get_lecture_notes(user_id: str, course_id: str | None = None):
     # Load user
     user = User.query.filter(User.id == user_id).first()
 
@@ -20,7 +18,7 @@ def get_lecture_notes(user_id: str, course_id: Optional[str] = None):
 
     # Build a list of all the LectureNotes visible
     # to this user for each of the courses they are in.
-    lecture_notes: List[LectureNotes] = (
+    lecture_notes: list[LectureNotes] = (
         LectureNotes.query.filter(
             LectureNotes.course_id.in_(course_ids),
             LectureNotes.hidden == False,

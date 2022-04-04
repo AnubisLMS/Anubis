@@ -3,7 +3,6 @@ import math
 import random
 import string
 from datetime import datetime, timedelta
-from typing import List
 
 from anubis.constants import THEIA_DEFAULT_OPTIONS
 from anubis.github.repos import get_student_assignment_repo_name
@@ -187,7 +186,7 @@ def create_assignment(
     return assignment, tests, submissions, repos
 
 
-def create_students(n=10) -> List[User]:
+def create_students(n=10) -> list[User]:
     students = []
     netids = set()
     while len(students) < n:
@@ -291,7 +290,7 @@ def init_forums(course: Course):
         viewed2 = ForumPostViewed(owner=student2, post=post)
         db.session.add_all([viewed1, viewed2])
 
-        comments: List[ForumPostComment] = []
+        comments: list[ForumPostComment] = []
         for k in range(3):
             comment = ForumPostComment(
                 id=rand(),

@@ -13,7 +13,7 @@ students_ = Blueprint("super-students", __name__, url_prefix="/super/students")
 @json_response
 def super_students_list():
     """
-    List all users within the current course context
+    list all users within the current course context
 
     :return:
     """

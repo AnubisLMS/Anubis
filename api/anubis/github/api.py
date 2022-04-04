@@ -1,13 +1,13 @@
 import os
 import traceback
-from typing import Any, Dict, Optional
+from typing import Any
 
 import requests
 
 from anubis.utils.logging import logger
 
 
-def get_github_token() -> Optional[str]:
+def get_github_token() -> str | None:
     # Get GITHUB token from environment
     token = os.environ.get("GITHUB_TOKEN", None)
 
@@ -54,14 +54,14 @@ def github_rest(url, body=None, method: str = "get"):
         return None
 
 
-def github_graphql(query: str, variables: Dict[str, Any] = None) -> Optional[Dict[str, Any]]:
+def github_graphql(query: str, variables: dict[str, Any] = None) -> dict[str, Any] | None:
     # Default values for variables
     if variables is None:
         variables = dict()
 
     token = get_github_token()
 
-    # Set up request options
+    # set up request options
     url = "https://api.github.com/graphql"
     json = {"query": query, "variables": variables}
     headers = {"Authorization": "token %s" % token}

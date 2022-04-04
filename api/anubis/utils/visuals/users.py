@@ -35,7 +35,7 @@ def get_platform_users_plot(days: int, step: int = 1):
         xlabel='Time',
         ylabel='Registered Users',
     )
-    # Set y max to the nearest hundred
+    # set y max to the nearest hundred
     ax.set_ylim([0, ((yy[-1] // 100) + 1) * 100])
     add_watermark(ax)
 

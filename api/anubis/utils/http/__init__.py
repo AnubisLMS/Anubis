@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import Tuple, Union
 
 from flask import request
 from werkzeug.utils import secure_filename
@@ -53,7 +52,7 @@ def error_response(error_message: str) -> dict:
     }
 
 
-def success_response(data: Union[dict, str, None]) -> dict:
+def success_response(data: dict | str | None) -> dict:
     """
     Form a success REST api response dict.
 
@@ -106,7 +105,7 @@ def get_number_arg(arg_name: str = "number", default_value: int = 10, reject_neg
 
 def get_request_file_stream(
     with_filename=False, fail_ok=False
-) -> Union[bytes, None, Tuple[bytes, str], Tuple[None, None]]:
+) -> bytes | None | tuple[bytes, str] | tuple[None, None]:
     """
     Get first file uploaded in the request. Will return None if
     there is no file uploaded.

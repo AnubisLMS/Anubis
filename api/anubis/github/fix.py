@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import List
 
 from sqlalchemy.sql import or_
 
@@ -11,7 +10,7 @@ from anubis.utils.logging import logger
 
 def fix_github_broken_repos():
     # Search for broken repos
-    broken_repos: List[AssignmentRepo] = AssignmentRepo.query.filter(
+    broken_repos: list[AssignmentRepo] = AssignmentRepo.query.filter(
         or_(
             # Repo not created
             AssignmentRepo.repo_created == False,

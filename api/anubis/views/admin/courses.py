@@ -18,7 +18,7 @@ courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
 @json_response
 def admin_courses_list():
     """
-    List the data for the current course context.
+    list the data for the current course context.
 
     :return:
     """
@@ -137,7 +137,7 @@ def admin_courses_save_id(course: dict):
 @json_response
 def admin_course_list_students():
     """
-    List all students for the current course context.
+    list all students for the current course context.
 
     :return:
     """
@@ -172,7 +172,7 @@ def admin_course_list_students():
 @json_response
 def admin_course_list_tas():
     """
-    List all TAs for the current course context.
+    list all TAs for the current course context.
 
     :return:
     """

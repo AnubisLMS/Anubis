@@ -1,5 +1,4 @@
 import json
-from typing import Optional, Dict
 
 from anubis.models import db, Config
 from anubis.utils.cache import cache
@@ -14,15 +13,17 @@ def set_config_value(key: str, value: str) -> Config:
         config: Config = Config(key=key)
         db.session.add(config)
 
-    # Set value
+    # set value
     config.value = value
 
     # Commit change
     db.session.commit()
 
+    return config
+
 
 @cache.memoize(timeout=10, source_check=True)
-def get_config_dict(key: str, default: Optional[Dict] = None) -> Optional[Dict]:
+def get_config_dict(key: str, default: dict | None = None) -> dict | None:
     """
     Get a config str entry for a given config key. Optionally specify a
     default value for if the key does not exist in the config table.
@@ -48,7 +49,7 @@ def get_config_dict(key: str, default: Optional[Dict] = None) -> Optional[Dict]:
 
 
 @cache.memoize(timeout=10, source_check=True)
-def get_config_str(key: str, default: Optional[str] = None) -> Optional[str]:
+def get_config_str(key: str, default: str | None = None) -> str | None:
     """
     Get a config str entry for a given config key. Optionally specify a
     default value for if the key does not exist in the config table.
@@ -71,7 +72,7 @@ def get_config_str(key: str, default: Optional[str] = None) -> Optional[str]:
 
 
 @cache.memoize(timeout=10, source_check=True)
-def get_config_int(key: str, default: Optional[int] = None) -> Optional[int]:
+def get_config_int(key: str, default: int | None = None) -> int | None:
     """
     Get a config int entry for a given config key. Optionally specify a
     default value for if the key does not exist in the config table.

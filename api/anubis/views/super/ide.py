@@ -1,5 +1,3 @@
-from typing import List
-
 from flask import Blueprint
 
 from anubis.models import db, TheiaImage, TheiaImageTag
@@ -14,7 +12,7 @@ ide_ = Blueprint("super-ide", __name__, url_prefix="/super/ide")
 @require_superuser()
 @json_response
 def super_ide_images_list():
-    images: List[TheiaImage] = TheiaImage.query.all()
+    images: list[TheiaImage] = TheiaImage.query.all()
 
     return success_response({"images": [image.data for image in images]})
 
@@ -46,7 +44,7 @@ def super_ide_images_save(images: list):
 
     db.session.commit()
 
-    images: List[TheiaImage] = TheiaImage.query.populate_existing().all()
+    images: list[TheiaImage] = TheiaImage.query.populate_existing().all()
     return success_response(
         {
             "images": [image.data for image in images],
@@ -70,7 +68,7 @@ def super_ide_images_new():
     db.session.add(image_db)
     db.session.commit()
 
-    images: List[TheiaImage] = TheiaImage.query.all()
+    images: list[TheiaImage] = TheiaImage.query.all()
     return success_response(
         {
             "images": [image.data for image in images],
@@ -94,7 +92,7 @@ def super_ide_image_tags_new(theia_image: TheiaImage):
     db.session.add(image_tag_db)
     db.session.commit()
 
-    images: List[TheiaImage] = TheiaImage.query.all()
+    images: list[TheiaImage] = TheiaImage.query.all()
     return success_response(
         {
             "images": [image.data for image in images],
@@ -111,7 +109,7 @@ def super_ide_image_tags_delete(theia_image_tag: TheiaImageTag):
     db.session.delete(theia_image_tag)
     db.session.commit()
 
-    images: List[TheiaImage] = TheiaImage.query.all()
+    images: list[TheiaImage] = TheiaImage.query.all()
     return success_response(
         {"images": [image.data for image in images], "status": "Image Tag reference deleted", "variant": "warning"}
     )

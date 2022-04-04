@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from anubis.lms.repos import get_repos
 from anubis.models import Assignment, AssignmentRepo, User, db
 from anubis.utils.cache import cache
@@ -31,7 +29,7 @@ def parse_webhook(webhook):
     )
 
 
-def guess_github_repo_owner(assignment: Assignment, repo_name: str) -> Tuple[User, str]:
+def guess_github_repo_owner(assignment: Assignment, repo_name: str) -> tuple[User, str]:
     """
     In order to match a webhook to a user, we need to know the github username
     that the repo in question was made for. The github username is in the name

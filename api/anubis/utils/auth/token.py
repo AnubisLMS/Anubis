@@ -44,7 +44,7 @@ def create_token(netid: str, exp_kwargs=None, **extras) -> Union[str, None]:
     # Get setting for number of hours that tokens should last.
     token_exp_hours = get_config_int("AUTH_TOKEN_EXP_HOURS", default=6)
 
-    # Set the expire kwargs
+    # set the expire kwargs
     if exp_kwargs is None:
         exp_kwargs = {"hours": token_exp_hours}
 

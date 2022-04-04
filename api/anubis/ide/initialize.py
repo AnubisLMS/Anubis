@@ -119,7 +119,7 @@ def initialize_theia_session(theia_session_id: str):
 def initialize_ide(
     # Required
     image_id: str,
-    # Optional / Settings
+    # Optional / settings
     image_tag_id: str = None,
     assignment_id: str = None,
     course_id: str = None,
@@ -144,7 +144,7 @@ def initialize_ide(
         state="Initializing",
         # Required
         image_id=image_id,
-        # Options / Settings
+        # Options / settings
         image_tag_id=image_tag_id,
         assignment_id=assignment_id,
         course_id=course_id,

@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import Optional, List
 
 from anubis.models import Assignment, Course, TheiaImage
 from anubis.utils.cache import cache
@@ -13,7 +12,7 @@ from anubis.utils.visuals.watermark import add_watermark
 
 
 @cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
-def get_usage_plot(course_id: Optional[str]) -> Optional[bytes]:
+def get_usage_plot(course_id: str) -> bytes | None:
     import matplotlib.colors as mcolors
     import matplotlib.pyplot as plt
 
@@ -24,7 +23,7 @@ def get_usage_plot(course_id: Optional[str]) -> Optional[bytes]:
     if course is None:
         return None
 
-    assignments: List[Assignment] = Assignment.query.filter(
+    assignments: list[Assignment] = Assignment.query.filter(
         Assignment.hidden == False,
         Assignment.release_date <= datetime.now(),
         Assignment.course_id == course_id,

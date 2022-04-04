@@ -348,7 +348,7 @@ def export_assignment_questions(assignment_id: str) -> bytes | None:
     # Create a zip file using the in-memory buffer
     with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
 
-        # List of student meta data
+        # list of student meta data
         student_metas = []
 
         # Iterate through all the student question assignments
@@ -357,7 +357,7 @@ def export_assignment_questions(assignment_id: str) -> bytes | None:
             # Get the name of the student
             name = data["name"]
 
-            # List of responses for this student
+            # list of responses for this student
             responses = []
 
             # Iterate through each question assigned to the student

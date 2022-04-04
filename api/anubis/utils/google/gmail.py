@@ -6,7 +6,6 @@ from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Dict
 
 import googleapiclient.discovery
 
@@ -15,7 +14,7 @@ from anubis.utils.http.files import get_mime_type
 from anubis.utils.logging import logger
 
 
-def create_message(sender: str, to: str, subject: str, message_text: str) -> Dict[str, str]:
+def create_message(sender: str, to: str, subject: str, message_text: str) -> dict[str, str]:
     """Create a message for an email.
 
     Args:
@@ -53,7 +52,7 @@ def create_message_with_attachment(
     message_text: str,
     file: io.BytesIO,
     filename: str,
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Create a message for an email.
 
     Args:
@@ -100,7 +99,7 @@ def create_message_with_attachment(
 
 def send_message(
     service: googleapiclient.discovery.Resource,
-    message: Dict[str, bytes],
+    message: dict[str, bytes],
     user_id="me",
     force: bool = False,
     raise_: bool = False,

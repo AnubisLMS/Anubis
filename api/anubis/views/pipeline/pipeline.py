@@ -1,5 +1,4 @@
 import json
-from typing import Union
 
 from flask import Blueprint, request
 from parse import parse
@@ -48,7 +47,7 @@ def pipeline_report_panic(submission: Submission):
         },
     )
 
-    # Set the submission state
+    # set the submission state
     submission.processed = True
     submission.state = "Whoops! There was an error on our end. The error has been logged."
     submission.errors = {"panic": request.json}
@@ -160,7 +159,7 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
         },
     )
 
-    submission_test_result: Union[SubmissionTestResult, None] = None
+    submission_test_result: SubmissionTestResult | None = None
 
     # Look for corresponding submission_test_result based on given name
     for result in submission.test_results:
@@ -224,7 +223,7 @@ def pipeline_report_state(submission: Submission, state: str, **kwargs):
     # Get the processed option if it was specified
     processed = request.args.get("processed", default="0")
 
-    # Set the processed field if it was specified
+    # set the processed field if it was specified
     submission.processed = processed != "0"
 
     # Figure out if the test is hidden
@@ -253,7 +252,7 @@ def pipeline_report_state(submission: Submission, state: str, **kwargs):
             AssignmentTest.name == test_name,
         ).first()
 
-        # Set hidden_test to True if the test exists, and if it is marked as hidden
+        # set hidden_test to True if the test exists, and if it is marked as hidden
         hidden_test = assignment_test is not None and assignment_test.hidden
 
     # Update state field if the state report is not for a hidden test

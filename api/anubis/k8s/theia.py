@@ -2,7 +2,6 @@ import base64
 import json
 import traceback
 from datetime import datetime, timedelta
-from typing import List, Optional, Tuple
 
 from kubernetes import client, config
 
@@ -20,7 +19,7 @@ from anubis.utils.logging import logger
 def create_theia_k8s_pod_pvc(
     theia_session: TheiaSession,
     skip_debug_check: bool = False
-) -> Tuple[client.V1Pod, Optional[client.V1PersistentVolumeClaim]]:
+) -> tuple[client.V1Pod, client.V1PersistentVolumeClaim | None]:
     """
     Create the python kubernetes objects for a theia session. This is
     basically building the yaml for the theia session pod and pvc. There is
@@ -38,16 +37,16 @@ def create_theia_k8s_pod_pvc(
     # Construct the theia pod name
     pod_name = get_theia_pod_name(theia_session)
 
-    # List of container objects
+    # list of container objects
     pod_containers = []
 
-    # List of volumes
+    # list of volumes
     pod_volumes = []
 
     # Extra env to add to the theia pod containers
-    sidecar_extra_env: List[client.V1EnvVar] = []
-    theia_extra_env: List[client.V1EnvVar] = []
-    init_extra_env: List[client.V1EnvVar] = []
+    sidecar_extra_env: list[client.V1EnvVar] = []
+    theia_extra_env: list[client.V1EnvVar] = []
+    init_extra_env: list[client.V1EnvVar] = []
 
     # Get the set repo url for this session. If the assignment has github repos disabled,
     # then default to an empty string.
@@ -302,13 +301,13 @@ def create_theia_k8s_pod_pvc(
         image="registry.digitalocean.com/anubis/theia-sidecar",
         image_pull_policy="IfNotPresent",
         env=[
-            # Set the AUTOSAVE environment variable to ON or OFF. If the variable
+            # set the AUTOSAVE environment variable to ON or OFF. If the variable
             # is set to false, then the autosave loop will be skipped.
             client.V1EnvVar(
                 name="AUTOSAVE",
                 value="ON" if autosave else "OFF",
             ),
-            # Set netid for commit messages
+            # set netid for commit messages
             client.V1EnvVar(
                 name="NETID",
                 value=netid,
@@ -368,7 +367,7 @@ def create_theia_k8s_pod_pvc(
 
     # Only set course code env var if it is available for this session
     if theia_session.course_id is not None:
-        # Set the course code to be the course code for the course
+        # set the course code to be the course code for the course
         # that this theia session belongs to.
         theia_extra_env.append(
             client.V1EnvVar(
@@ -448,13 +447,13 @@ def create_theia_k8s_pod_pvc(
         image=f"{theia_image}:{theia_image_tag}",
         # Add environment
         env=[
-            # Set the AUTOSAVE environment variable to ON or OFF
+            # set the AUTOSAVE environment variable to ON or OFF
             # depending on if autosave is enabled for the session.
             client.V1EnvVar(
                 name="AUTOSAVE",
                 value="ON" if autosave else "OFF",
             ),
-            # Setting the repo name makes some of the initialization
+            # setting the repo name makes some of the initialization
             # a little easier.
             client.V1EnvVar(
                 name="REPO_NAME",
@@ -463,12 +462,12 @@ def create_theia_k8s_pod_pvc(
             # Add any extra env if it was specified.
             *theia_extra_env,
         ],
-        # Set the resource limits and requests
+        # set the resource limits and requests
         resources=client.V1ResourceRequirements(
             limits=limits,
             requests=requests,
         ),
-        # Setup the shared volume where the student
+        # setup the shared volume where the student
         # repo exists.
         volume_mounts=theia_volume_mounts,
         # Startup probe is the way that kubernetes can
@@ -519,7 +518,7 @@ def create_theia_k8s_pod_pvc(
         # students will only be able to connect to github.
         extra_labels["network-policy"] = theia_session.network_policy or "os-student"
 
-        # Set up the pod DNS to be pointed to cloudflare 1.1.1.1 instead
+        # set up the pod DNS to be pointed to cloudflare 1.1.1.1 instead
         # of the internal kubernetes dns.
         spec_extra["dns_policy"] = "None"
         spec_extra["dns_config"] = client.V1PodDNSConfig(nameservers=["1.1.1.1"])
@@ -545,13 +544,13 @@ def create_theia_k8s_pod_pvc(
             },
         ),
         spec=client.V1PodSpec(
-            # Set the hostname here so that the terminals on the
+            # set the hostname here so that the terminals on the
             # IDEs will be theia@anubis-ide instead of some ugly
             # container hash.
             hostname="anubis-ide",
-            # Set the init container
+            # set the init container
             init_containers=[init_container],
-            # Set the containers list
+            # set the containers list
             containers=pod_containers,
             # Add the shared Volume(s)
             volumes=pod_volumes,
@@ -603,7 +602,7 @@ def list_theia_pods() -> client.V1PodList:
     """
     v1 = client.CoreV1Api()
 
-    # List pods by label selector
+    # list pods by label selector
     pods = v1.list_namespaced_pod(
         namespace="anubis",
         label_selector="app.kubernetes.io/name=anubis,role=theia-session",
@@ -716,9 +715,9 @@ def fix_stale_theia_resources(theia_pods: client.V1PodList):
     admin_theia_timeout = get_config_int("THEIA_ADMIN_STALE_PROXY_MINUTES", default=60)
 
     # Get list of all courses
-    courses: List[Course] = Course.query.all()
+    courses: list[Course] = Course.query.all()
 
-    active_db_sessions: List[TheiaSession] = []
+    active_db_sessions: list[TheiaSession] = []
 
     # Iterate over all courses
     for course in courses:
@@ -741,7 +740,7 @@ def fix_stale_theia_resources(theia_pods: client.V1PodList):
         )
 
         # Get a list of the standard (student) theia sessions that are active
-        standard_active_db_theia_sessions: List[TheiaSession] = query.filter(
+        standard_active_db_theia_sessions: list[TheiaSession] = query.filter(
             # Filter out admin users (only students in the course)
             ~TheiaSession.owner_id.in_(course_admin_ids),
             # Filter for sessions that have had a proxy in the last 10 minutes
@@ -749,7 +748,7 @@ def fix_stale_theia_resources(theia_pods: client.V1PodList):
         ).all()
 
         # Get a list of the admin (professor/ta) theia sessions that are active
-        admin_active_db_theia_sessions: List[TheiaSession] = query.filter(
+        admin_active_db_theia_sessions: list[TheiaSession] = query.filter(
             # Filter for admin users (only professors+tas)
             TheiaSession.owner_id.in_(course_admin_ids),
             # Filter for sessions that have had a proxy in the last 60 minutes
@@ -764,7 +763,7 @@ def fix_stale_theia_resources(theia_pods: client.V1PodList):
     # Make sure to cover theia sessions that do not have a set
     # course as well. Hold these course-less ides to the
     # standard timeout.
-    no_course_db_active_sessions: List[TheiaSession] = TheiaSession.query.filter(
+    no_course_db_active_sessions: list[TheiaSession] = TheiaSession.query.filter(
         # Get sessions marked as active
         TheiaSession.active == True,
         # Only consider sessions that have had some
@@ -838,7 +837,7 @@ def reap_theia_session(theia_session: TheiaSession, commit: bool = True):
     # have been marked for deletion when this function returns.
     reap_theia_session_k8s_resources(theia_session.id)
 
-    # Update the database entry for the session. Set the end time,
+    # Update the database entry for the session. set the end time,
     # and active to False.
     mark_session_ended(theia_session)
 
@@ -886,7 +885,7 @@ def update_theia_session(session: TheiaSession):
         # in the events for the pod if it has been attached.
         if session.persistent_storage:
             # Get event list for ide pod
-            events: client.CoreV1EventList = v1.list_namespaced_event(
+            events: client.CoreV1Eventlist = v1.list_namespaced_event(
                 "anubis", field_selector=f"involvedObject.name={pod_name}"
             )
 
@@ -916,7 +915,7 @@ def update_theia_session(session: TheiaSession):
     # just mark the theia session as failed, then let the reaper
     # job clean up the kubernetes resources at a later date.
     if pod.status.phase == "Failed":
-        # Set cluster address and state
+        # set cluster address and state
         session.active = False
         session.state = "Failed"
 
@@ -928,7 +927,7 @@ def update_theia_session(session: TheiaSession):
     # If the pod is marked as running. The pod is marked as
     # running when the main containers have started
     if pod.status.phase == "Running":
-        # Set the cluster address and state
+        # set the cluster address and state
         session.cluster_address = pod.status.pod_ip
         session.state = "Running"
 

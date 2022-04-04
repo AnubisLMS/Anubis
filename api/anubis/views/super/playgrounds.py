@@ -18,7 +18,7 @@ playgrounds_ = Blueprint("super-playgrounds", __name__, url_prefix="/super/playg
 @json_response
 def super_playgrounds_list():
     """
-    List all active ide sessions
+    list all active ide sessions
 
     :return:
     """
@@ -51,7 +51,7 @@ def super_playgrounds_stop_id(id: str):
     # Verify it exists
     req_assert(session is not None, message="session does not exist")
 
-    # Set all the things as stopped
+    # set all the things as stopped
     session.active = False
     session.ended = datetime.now()
     session.state = "Ending"

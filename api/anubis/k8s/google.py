@@ -1,6 +1,5 @@
 import base64
 import json
-from typing import List, Optional
 
 import google.oauth2
 import kubernetes.client
@@ -18,8 +17,8 @@ def get_google_secret(v1: kubernetes.client.CoreV1Api, secret_name: str) -> kube
 def get_google_credentials(
     v1: kubernetes.client.CoreV1Api,
     secret: kubernetes.client.V1Secret,
-    scopes: List[str],
-) -> Optional[google.oauth2.credentials.Credentials]:
+    scopes: list[str],
+) -> google.oauth2.credentials.Credentials | None:
     token = json.loads(base64.b64decode(secret.data["token.json"].encode()).decode())
 
     # The file token.json stores the user's access and refresh tokens, and is

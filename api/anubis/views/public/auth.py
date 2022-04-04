@@ -79,7 +79,7 @@ def public_oauth():
     # Make the response depending on if a next_url was specified
     r = make_response(redirect(next_url))
 
-    # Set the token cookie
+    # set the token cookie
     r.set_cookie("token", create_token(user.netid), httponly=True)
 
     return r
@@ -110,7 +110,7 @@ def public_github_oauth():
     if resp is None or "access_token" not in resp:
         return "Access Denied"
 
-    # Setup headers and url
+    # setup headers and url
     github_api_headers = {
         "authorization": "bearer " + resp["access_token"],
         "accept": "application/vnd.github.v3+json",
@@ -124,7 +124,7 @@ def public_github_oauth():
             headers=github_api_headers,
         ).json()
 
-        # Set github username and commit
+        # set github username and commit
         current_user.github_username = github_user_info["login"].strip()
         db.session.add(current_user)
         db.session.commit()

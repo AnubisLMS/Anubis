@@ -52,7 +52,7 @@ def admin_static_delete_static_id(static_id: str):
 @json_response
 def admin_static_list():
     """
-    List all public blob files. Optionally specify a limit
+    list all public blob files. Optionally specify a limit
     and an offset.
 
     /admin/static/list

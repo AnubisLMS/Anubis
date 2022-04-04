@@ -34,7 +34,7 @@ def rpc_enqueue(func, queue=None, args=None):
     :args tuple: ordered arguments for function
     """
 
-    # Set defaults
+    # set defaults
     if queue is None:
         queue = "default"
     if args is None:

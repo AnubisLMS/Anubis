@@ -1,6 +1,5 @@
 import json
 from datetime import datetime
-from typing import List
 
 from flask import Blueprint
 
@@ -176,7 +175,7 @@ def admin_ide_active():
 @json_response
 def admin_ide_list():
     """
-    List all active ide sessions
+    list all active ide sessions
 
     :return:
     """
@@ -210,7 +209,7 @@ def admin_ide_stop_id(id: str):
     # Verify it exists
     req_assert(session is not None, message="session does not exist")
 
-    # Set all the things as stopped
+    # set all the things as stopped
     session.active = False
     session.ended = datetime.now()
     session.state = "Ending"
@@ -248,6 +247,6 @@ def private_ide_reap_all():
 @require_admin()
 @json_response
 def admin_ide_images_list():
-    images: List[TheiaImage] = TheiaImage.query.all()
+    images: list[TheiaImage] = TheiaImage.query.all()
 
     return success_response({"images": [image.data for image in images]})

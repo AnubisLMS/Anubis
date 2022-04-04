@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -17,7 +17,7 @@ from anubis.utils.visuals.queries import (
 
 
 @cache.memoize(timeout=60, unless=is_debug)
-def get_admin_assignment_visual_data(assignment_id: str) -> List[Dict[str, Any]]:
+def get_admin_assignment_visual_data(assignment_id: str) -> list[dict[str, Any]]:
     """
     Get the admin visual data for an assignment. Visual data is generated
     for each assignment test that is part of the assignment.
@@ -275,7 +275,7 @@ def get_assignment_sundial(assignment_id):
         if result["build_passed"]:
             build_passed += 1
 
-            # Set of tests passed names
+            # set of tests passed names
             tests_passed = set(result["tests_passed_names"])
 
             for index in range(len(sundial["children"][0]["children"])):

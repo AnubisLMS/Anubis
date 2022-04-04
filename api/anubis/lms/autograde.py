@@ -34,7 +34,7 @@ def autograde(student_id, assignment_id, max_time: datetime = None):
     :return:
     """
 
-    # List of filters for submission query
+    # list of filters for submission query
     submission_filters = []
 
     # maximum time to check

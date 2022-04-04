@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from hashlib import sha512
 from json import dumps
 from os import environ, urandom
-from typing import Tuple, Union
 
 from flask import Response, has_app_context, has_request_context
 
@@ -45,7 +44,7 @@ def jsonify(data, status_code=200):
     return res
 
 
-def verify_data_shape(data, shape, path=None) -> Tuple[bool, Union[str, None]]:
+def verify_data_shape(data, shape, path=None) -> tuple[bool, str | None]:
     """
     _verify_data_shape(
       {'data': []},
@@ -118,7 +117,7 @@ def verify_data_shape(data, shape, path=None) -> Tuple[bool, Union[str, None]]:
                 if s_value == dict:
                     return True, None
 
-                # Explicit Dict ( need to recurse )
+                # Explicit dict ( need to recurse )
                 elif isinstance(s_value, dict):
                     # Recurse on dict
                     r, e = verify_data_shape(data[s_key], s_value, path + "." + s_key)
@@ -168,7 +167,7 @@ def verify_data_shape(data, shape, path=None) -> Tuple[bool, Union[str, None]]:
     return True, None
 
 
-def split_chunks(lst, n):
+def split_chunks(lst: list, n: int) -> list[list]:
     """
     Split lst into list of lists size n.
 
@@ -180,7 +179,7 @@ def split_chunks(lst, n):
     return _chunks
 
 
-def rand(max_len: int = None):
+def rand(max_len: int | None = None) -> str:
     """
     Get a relatively random hex string of up
     to max_len.

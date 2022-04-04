@@ -65,13 +65,13 @@ def add_app_exception_handlers(app: Flask):
     from anubis.utils.http import error_response
     from anubis.utils.logging import logger
 
-    # Set AuthenticationError handler
+    # set AuthenticationError handler
     @app.errorhandler(AuthenticationError)
     def handler_authentication_error(e: AuthenticationError):
         logger.error(traceback.format_exc())
         return jsonify(error_response(str(e) or "Unauthenticated")), 401
 
-    # Set LackCourseContext handler
+    # set LackCourseContext handler
     @app.errorhandler(LackCourseContext)
     def handle_lack_course_context(e: LackCourseContext):
         logger.error(traceback.format_exc())

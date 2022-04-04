@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Union
 
 from anubis.lms.assignments import get_assignment_due_date
 from anubis.lms.autograde import bulk_regrade
@@ -22,7 +21,7 @@ from anubis.utils.http import error_response, success_response
 from anubis.utils.logging import logger
 
 
-def bulk_regrade_submissions(submissions: List[Submission]) -> List[dict]:
+def bulk_regrade_submissions(submissions: list[Submission]) -> list[dict]:
     """
     Regrade a batch of submissions
     :param submissions:
@@ -40,7 +39,7 @@ def bulk_regrade_submissions(submissions: List[Submission]) -> List[dict]:
     return response
 
 
-def regrade_submission(submission: Union[Submission, str], queue: str = "default") -> dict:
+def regrade_submission(submission: Submission | str, queue: str = "default") -> dict:
     """
     Regrade a submission
 
@@ -185,7 +184,7 @@ def get_submissions(
     assignment_id=None,
     limit=None,
     offset=None,
-) -> Optional[Tuple[List[Dict[str, str]], int]]:
+) -> tuple[list[dict[str, str]], int]:
     """
     Get all submissions for a given netid. Cache the results. Optionally specify
     a class_name and / or assignment_name for additional filtering.
@@ -275,7 +274,7 @@ def recalculate_late_submissions(student: User, assignment: Assignment):
 
 def reject_late_submission(submission: Submission):
     """
-    Set all the fields that need to be set when
+    set all the fields that need to be set when
     rejecting a submission.
 
     * Does not commit changes *
@@ -297,7 +296,7 @@ def reject_late_submission(submission: Submission):
     submission.build.stdout = "Late submissions not accepted"
     db.session.add(submission.build)
 
-    # Set the fields on self to be rejected
+    # set the fields on self to be rejected
     submission.accepted = False
     submission.processed = True
     submission.state = "Late submissions not accepted"

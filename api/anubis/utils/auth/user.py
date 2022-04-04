@@ -1,6 +1,6 @@
 import traceback
 from datetime import datetime
-from typing import Any, Callable, Optional, Union, List, Set, Tuple
+from typing import Any, Callable
 
 import jwt
 from flask import g
@@ -13,7 +13,7 @@ from anubis.utils.data import req_assert, human_readable_timedelta
 from anubis.utils.logging import logger
 
 
-def get_current_user() -> Union[User, None]:
+def get_current_user() -> User | None:
     """
     Load current user based on the token
 
@@ -55,7 +55,7 @@ def get_current_user() -> Union[User, None]:
     return user
 
 
-def verify_users(netids: List[str]) -> Tuple[List[User], Set[str]]:
+def verify_users(netids: list[str]) -> tuple[list[User], set[str]]:
     """
     Takes a list of netids, and returns a list of the users that
     were found, and a set of netids that were not found
@@ -63,7 +63,7 @@ def verify_users(netids: List[str]) -> Tuple[List[User], Set[str]]:
     :param netids:
     :return:
     """
-    found_users: List[User] = User.query.filter(User.netid.in_(netids)).all()
+    found_users: list[User] = User.query.filter(User.netid.in_(netids)).all()
     found_netids = set(user.netid for user in found_users)
     not_found_netids = set(netids).difference(found_netids)
 
@@ -71,7 +71,7 @@ def verify_users(netids: List[str]) -> Tuple[List[User], Set[str]]:
 
 
 def _create_get_current_user_field(field: str) -> Callable:
-    def _func() -> Optional[Any]:
+    def _func() -> Any | None:
         """
         Load current_user.id
         :return:

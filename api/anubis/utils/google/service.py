@@ -1,5 +1,3 @@
-from typing import List
-
 import google.oauth2.credentials
 import googleapiclient.discovery
 import kubernetes.client
@@ -27,7 +25,7 @@ def build_google_service(
     secret_name: str,
     google_api: str,
     google_api_version: str,
-    scopes: List[str],
+    scopes: list[str],
 ) -> googleapiclient.discovery.Resource:
     """
     Build the Google service object for interacting with gmail/calendar apis.
@@ -39,7 +37,7 @@ def build_google_service(
     :return:
     """
 
-    # Setup Kubernetes incluster client
+    # setup Kubernetes incluster client
     kubernetes.config.load_incluster_config()
 
     # Get CoreV1Api object

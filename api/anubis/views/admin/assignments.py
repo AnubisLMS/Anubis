@@ -1,6 +1,5 @@
 import json
 from datetime import datetime, timedelta
-from typing import List
 
 import parse
 from dateutil.parser import parse as dateparse
@@ -27,7 +26,7 @@ assignments = Blueprint("admin-assignments", __name__, url_prefix="/admin/assign
 @require_admin()
 @load_from_id(Assignment, verify_owner=False)
 @json_endpoint([("groups", list)])
-def admin_assignments_shared_id(assignment: Assignment, groups: List[List[str]], **__):
+def admin_assignments_shared_id(assignment: Assignment, groups: list[list[str]], **__):
     """
     Make a shared assignment
 
@@ -130,8 +129,8 @@ def admin_assignments_repo_delete_id(assignment_repo: AssignmentRepo):
     :return:
     """
 
-    # List of repos to delete
-    repos: List[AssignmentRepo] = [assignment_repo]
+    # list of repos to delete
+    repos: list[AssignmentRepo] = [assignment_repo]
 
     # If the assignment repo is shared
     if assignment_repo.shared:
@@ -248,7 +247,7 @@ def admin_assignments_delete_id(assignment: Assignment):
 @json_response
 def admin_assignments_list():
     """
-    List all assignments within the course context.
+    list all assignments within the course context.
 
     * The response will be the row2dict of the assignment, not a data prop *
 

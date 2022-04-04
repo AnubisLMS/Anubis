@@ -20,7 +20,7 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
     :return:
     """
 
-    # Set some conservative resources requests and limits
+    # set some conservative resources requests and limits
     resource_requirements = {
         "limits": {"cpu": "2", "memory": "750Mi"},
         "requests": {"cpu": "500m", "memory": "500Mi"},
@@ -36,7 +36,7 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
         name="pipeline",
         image=submission.assignment.pipeline_image,
         image_pull_policy=os.environ.get("IMAGE_PULL_POLICY", default="Always"),
-        # Setup the environment to include everything necessary for the
+        # setup the environment to include everything necessary for the
         # pipeline to be able to clone, test and report to the pipeline api.
         env=[
             client.V1EnvVar(name="TOKEN", value=submission.token),
@@ -55,7 +55,7 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
             f"--path=./student",
             f"--submission-id={submission.id}",
         ],
-        # Set the resource requirements
+        # set the resource requirements
         resources=client.V1ResourceRequirements(**resource_requirements),
         # Add a security context to disable privilege escalation
         # security_context=client.V1SecurityContext(

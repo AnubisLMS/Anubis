@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import Any
 
 import pandas as pd
 
@@ -43,7 +43,7 @@ def get_submissions(course_id: str) -> pd.DataFrame:
 
 
 @cache.memoize(timeout=360)
-def get_raw_submissions() -> List[Dict[str, Any]]:
+def get_raw_submissions() -> list[dict[str, Any]]:
     submissions_df = get_submissions()
     data = (
         submissions_df.groupby(["assignment_id", "created"])["id"]

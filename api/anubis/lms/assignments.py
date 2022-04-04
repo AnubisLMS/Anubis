@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any
 import string
 
 from sqlalchemy import or_
@@ -70,7 +70,7 @@ def get_assignment_due_date(user_id: str, assignment_id: str, grace: bool = Fals
         return due_date
 
     # Check for a late exception for this student
-    late_exception: Optional[LateException] = LateException.query.filter(
+    late_exception: LateException | None = LateException.query.filter(
         LateException.user_id == user_id,
         LateException.assignment_id == assignment_id,
     ).first()
@@ -84,7 +84,7 @@ def get_assignment_due_date(user_id: str, assignment_id: str, grace: bool = Fals
 
 
 @cache.memoize(timeout=30, unless=is_debug)
-def get_assignment_data(user_id: str, assignment_id: str) -> Dict[str, Any]:
+def get_assignment_data(user_id: str, assignment_id: str) -> dict[str, Any] | None:
     assignment: Assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
 
     if assignment is None:
@@ -96,10 +96,10 @@ def get_assignment_data(user_id: str, assignment_id: str) -> Dict[str, Any]:
     return assignment_data
 
 
-def get_all_assignments(course_ids: Set[str], admin_course_ids: Set[str]) -> List[Assignment]:
+def get_all_assignments(course_ids: set[str], admin_course_ids: set[str]) -> list[Assignment]:
     # Build a list of all the assignments visible
     # to this user for each of the specified courses.
-    assignments: List[Assignment] = []
+    assignments: list[Assignment] = []
 
     # Get the assignment objects that should be visible to this user.
     regular_course_assignments = (
@@ -129,20 +129,20 @@ def get_all_assignments(course_ids: Set[str], admin_course_ids: Set[str]) -> Lis
 
 
 @cache.memoize(timeout=10, unless=is_debug, source_check=True)
-def get_assignments(netid: str, course_id=None) -> Optional[List[Dict[str, Any]]]:
+def get_assignments(netid: str, course_id=None) -> list[dict[str, Any]] | None:
     """
     Get all the current assignments for a netid. Optionally specify a course_id
     to filter by course.
 
     :param netid: netid of user
     :param course_id: optional course name
-    :return: List[Assignment.data]
+    :return: list[Assignment.data]
     """
     # Load user
     user = User.query.filter_by(netid=netid).first()
 
-    course_ids: Set[str] = set()
-    admin_course_ids: Set[str] = set()
+    course_ids: set[str] = set()
+    admin_course_ids: set[str] = set()
 
     # If course id was specified, then filter for a specific class
     if course_id is not None:
@@ -157,7 +157,7 @@ def get_assignments(netid: str, course_id=None) -> Optional[List[Dict[str, Any]]
         admin_course_ids, course_ids = get_user_course_ids(user)
 
     # Get assignment objects
-    assignments: List[Assignment] = get_all_assignments(course_ids, admin_course_ids)
+    assignments: list[Assignment] = get_all_assignments(course_ids, admin_course_ids)
 
     # Take all the sqlalchemy assignment objects,
     # and break them into data dictionaries.
@@ -178,7 +178,7 @@ def get_assignments(netid: str, course_id=None) -> Optional[List[Dict[str, Any]]
     return response
 
 
-def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
+def assignment_sync(assignment_data: dict) -> tuple[dict | str, bool]:
     """
     Take an assignment_data dictionary from a assignment meta.yaml
     and update any and all existing data about the assignment.
@@ -283,7 +283,7 @@ def assignment_sync(assignment_data: dict) -> Tuple[Union[dict, str], bool]:
     return {"assignment": assignment.full_data, "questions": question_message}, True
 
 
-def fill_user_assignment_data(user_id: str, assignment_data: Dict[str, Any]):
+def fill_user_assignment_data(user_id: str, assignment_data: dict[str, Any]):
     assignment_id: str = assignment_data["id"]
 
     # If the current user has a submission for this assignment, then mark it
@@ -312,7 +312,7 @@ def fill_user_assignment_data(user_id: str, assignment_data: Dict[str, Any]):
     assignment_data["due_date"] = str(due_date)
 
 
-def get_recent_assignments(autograde_enabled: bool = None) -> List[Assignment]:
+def get_recent_assignments(autograde_enabled: bool = None) -> list[Assignment]:
     """
     Get recent assignments. Recent assignments based off of
     AUTOGRADE_RECALCULATE_DAYS config item value.
@@ -377,8 +377,8 @@ def delete_assignment_questions(assignment: Assignment):
     AssignmentQuestion.query.filter(AssignmentQuestion.assignment_id == assignment.id).delete(synchronize_session=False)
 
 
-def delete_assignment_repos(assignment: Assignment):
-    repos: List[AssignmentRepo] = AssignmentRepo.query.filter(AssignmentRepo.assignment_id == assignment.id).all()
+def delete_assignment_repos(assignment: Assignment) -> None:
+    repos: list[AssignmentRepo] = AssignmentRepo.query.filter(AssignmentRepo.assignment_id == assignment.id).all()
 
     for repo in repos:
         delete_assignment_repo(repo.owner, assignment, commit=False)
@@ -407,7 +407,7 @@ def delete_assignment(assignment: Assignment) -> None:
     db.session.commit()
 
 
-def convert_group_netids_to_group_users(group_netids: List[List[str]]) -> Tuple[List[User], List[List[User]]]:
+def convert_group_netids_to_group_users(group_netids: list[list[str]]) -> tuple[list[User], list[list[User]]]:
     """
 
     :param group_netids:
@@ -415,7 +415,7 @@ def convert_group_netids_to_group_users(group_netids: List[List[str]]) -> Tuple[
     """
 
     # Flatten groups into a single list of netids
-    all_netids: List[str] = [netid for group in group_netids for netid in group]
+    all_netids: list[str] = [netid for group in group_netids for netid in group]
 
     # Get a list of the found users, and set of not found netids
     users, not_found_netids = verify_users(all_netids)
@@ -440,7 +440,7 @@ def convert_group_netids_to_group_users(group_netids: List[List[str]]) -> Tuple[
     return users, groups
 
 
-def make_shared_assignment(assignment_id: str, group_netids: List[List[str]]) -> dict:
+def make_shared_assignment(assignment_id: str, group_netids: list[list[str]]) -> dict:
     """
 
     group_netids = [

@@ -1,5 +1,3 @@
-from typing import List, Dict, Tuple
-
 from anubis.models import User, TheiaSession
 from anubis.utils.cache import cache
 from anubis.utils.config import get_config_int
@@ -7,12 +5,12 @@ from anubis.utils.data import is_debug
 
 
 @cache.memoize(timeout=5, source_check=True)
-def get_recent_sessions(user_id: str, limit: int = 10, offset: int = 10) -> List[Dict]:
+def get_recent_sessions(user_id: str, limit: int = 10, offset: int = 10) -> list[dict]:
     student = User.query.filter(
         User.id == user_id,
     ).first()
 
-    sessions: List[TheiaSession] = (
+    sessions: list[TheiaSession] = (
         TheiaSession.query.filter(
             TheiaSession.owner_id == student.id,
         )
@@ -26,7 +24,7 @@ def get_recent_sessions(user_id: str, limit: int = 10, offset: int = 10) -> List
 
 
 @cache.memoize(timeout=5, unless=is_debug)
-def get_n_available_sessions() -> Tuple[int, int]:
+def get_n_available_sessions() -> tuple[int, int]:
     """
     Get the number of active sessions and the maximum number of sessions
 

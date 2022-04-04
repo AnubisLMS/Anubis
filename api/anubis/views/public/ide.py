@@ -1,6 +1,5 @@
 import copy
 from datetime import datetime, timedelta
-from typing import Dict
 
 from flask import Blueprint, request
 
@@ -151,7 +150,7 @@ def public_ide_initialize(assignment: Assignment):
 @json_response
 def public_ide_available():
     """
-    List all sessions, active and inactive
+    list all sessions, active and inactive
 
     :return:
     """
@@ -175,7 +174,7 @@ def public_ide_available():
 @json_response
 def public_ide_active(assignment_id):
     """
-    List all sessions, active and inactive
+    list all sessions, active and inactive
 
     :return:
     """
@@ -202,7 +201,7 @@ def public_ide_active(assignment_id):
 
 @ide_.route("/stop/<string:theia_session_id>")
 @require_user()
-def public_ide_stop(theia_session_id: str) -> Dict[str, str]:
+def public_ide_stop(theia_session_id: str) -> dict[str, str]:
     """
     Endpoint for users to request a stop of their IDE. We need to mark the
     IDE as stopped in the database, and enqueue a job to clean up the
@@ -247,7 +246,7 @@ def public_ide_stop(theia_session_id: str) -> Dict[str, str]:
 @ide_.route("/poll/<string:theia_session_id>")
 @require_user()
 @json_response
-def public_ide_poll(theia_session_id: str) -> Dict[str, str]:
+def public_ide_poll(theia_session_id: str) -> dict[str, str]:
     """
     Slightly cached endpoint for polling for session data.
 
@@ -287,7 +286,7 @@ def public_ide_poll(theia_session_id: str) -> Dict[str, str]:
 @ide_.route("/redirect-url/<string:theia_session_id>")
 @require_user()
 @json_response
-def public_ide_redirect_url(theia_session_id: str) -> Dict[str, str]:
+def public_ide_redirect_url(theia_session_id: str) -> dict[str, str]:
     """
     Get the redirect url for a given session
 

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
@@ -72,12 +71,12 @@ def public_questions_save(assignment_id: str, questions: list):
     shape_good, shape_error = verify_data_shape(questions, [{"questions": dict, "response": dict, "id": str}])
     req_assert(shape_good, message=shape_error)
 
-    assigned_questions: List[AssignedStudentQuestion] = AssignedStudentQuestion.query.filter(
+    assigned_questions: list[AssignedStudentQuestion] = AssignedStudentQuestion.query.filter(
         AssignedStudentQuestion.owner_id == current_user.id,
         AssignedStudentQuestion.assignment_id == assignment.id,
     ).all()
 
-    last_responses: List[AssignedQuestionResponse] = AssignedQuestionResponse.query.filter(
+    last_responses: list[AssignedQuestionResponse] = AssignedQuestionResponse.query.filter(
         AssignedQuestionResponse.assigned_question_id.in_([
             assigned_question.id for assigned_question in assigned_questions
         ]),

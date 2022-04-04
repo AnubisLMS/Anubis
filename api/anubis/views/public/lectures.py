@@ -14,7 +14,7 @@ lectures_ = Blueprint("public-lectures", __name__, url_prefix="/public/lectures"
 @json_response
 def public_static_lectures_list():
     """
-    List all lecture notes for the course
+    list all lecture notes for the course
 
     /public/lectures/list
 

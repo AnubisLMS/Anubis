@@ -1,12 +1,10 @@
-from typing import Dict, List
-
 from anubis.models import Course, InCourse, User
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, is_job
 
 
 @cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug, source_check=True)
-def get_students(course_id: str = None) -> List[Dict[str, dict]]:
+def get_students(course_id: str = None) -> list[dict[str, dict]]:
     """
     Get students by course code. If no course code is specified,
     then all courses will be considered.
@@ -17,7 +15,7 @@ def get_students(course_id: str = None) -> List[Dict[str, dict]]:
     :return:
     """
 
-    # List of sqlalchemy filters
+    # list of sqlalchemy filters
     if course_id is not None:
         users = User.query.join(InCourse).filter(InCourse.course_id == course_id).all()
     else:

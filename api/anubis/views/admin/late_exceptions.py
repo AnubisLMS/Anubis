@@ -1,5 +1,3 @@
-from typing import Optional
-
 from dateutil.parser import ParserError
 from dateutil.parser import parse as date_parse
 from flask import Blueprint
@@ -20,7 +18,7 @@ late_exceptions_ = Blueprint("admin-late-exceptions", __name__, url_prefix="/adm
 @json_response
 def admin_late_exception_list(assignment_id: str):
     """
-    List all late exceptions for an assignment
+    list all late exceptions for an assignment
 
     :param assignment_id:
     :return:
@@ -75,7 +73,7 @@ def admin_late_exception_update(assignment_id: str = None, user_id: str = None, 
     assert_course_context(assignment, student)
 
     # Get late exceptions
-    late_exception: Optional[LateException] = LateException.query.filter(
+    late_exception: LateException | None = LateException.query.filter(
         LateException.assignment_id == assignment.id,
         LateException.user_id == student.id,
     ).first()

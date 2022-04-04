@@ -1,5 +1,3 @@
-from typing import List
-
 from flask import Blueprint, request
 
 from anubis.ide.conditions import assert_theia_sessions_enabled
@@ -89,7 +87,7 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
 @json_response
 def public_playgrounds_active():
     """
-    List all sessions, active and inactive
+    list all sessions, active and inactive
 
     :return:
     """
@@ -124,6 +122,6 @@ def public_playgrounds_images():
     :return:
     """
 
-    images: List[TheiaImage] = TheiaImage.query.filter(TheiaImage.public == True).all()
+    images: list[TheiaImage] = TheiaImage.query.filter(TheiaImage.public == True).all()
 
     return success_response({"images": [image.data for image in images]})

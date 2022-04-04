@@ -1,5 +1,4 @@
 from functools import wraps
-from typing import List, Tuple, Union
 
 from flask import request
 
@@ -78,7 +77,7 @@ def json_response(func):
 
 
 def json_endpoint(
-    required_fields: Union[List[str], List[Tuple], None] = None,
+    required_fields: list[str] | list[tuple] | None = None,
     only_required: bool = False,
 ):
     """
@@ -135,7 +134,7 @@ def json_endpoint(
             json_body: dict = request.json
 
             # Build a list of the required field string values
-            _required_fields: List[str] = []
+            _required_fields: list[str] = []
 
             # If the required fields was set, then we
             # need to verify that they exist in the json

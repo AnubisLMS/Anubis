@@ -1,5 +1,3 @@
-from typing import List
-
 from flask import Blueprint
 
 from anubis.ide.get import get_recent_sessions
@@ -21,14 +19,14 @@ students_ = Blueprint("admin-students", __name__, url_prefix="/admin/students")
 @json_response
 def admin_student_list_basic():
     """
-    List the most basic information about all the students
+    list the most basic information about all the students
     within the Anubis system.
 
     :return:
     """
 
     # Get all users
-    students: List[User] = User.query.all()
+    students: list[User] = User.query.all()
 
     # Return their id and netid
     return success_response({"users": [{"id": user.id, "netid": user.netid, "name": user.name} for user in students]})
@@ -39,7 +37,7 @@ def admin_student_list_basic():
 @json_response
 def admin_students_list():
     """
-    List all users within the current course context
+    list all users within the current course context
 
     :return:
     """

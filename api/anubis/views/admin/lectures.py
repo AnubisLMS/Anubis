@@ -19,7 +19,7 @@ lectures_ = Blueprint("admin-lectures", __name__, url_prefix="/admin/lectures")
 @json_response
 def admin_static_lectures_list():
     """
-    List all lecture notes for the course
+    list all lecture notes for the course
 
     /admin/lecture/list
 

@@ -1,5 +1,4 @@
 import traceback
-from typing import List, Tuple
 
 from parse import parse
 
@@ -93,7 +92,7 @@ def get_student_assignment_repo_name(user: User, assignment: Assignment) -> str:
     return new_repo_name
 
 
-def get_group_assignment_repo_name(users: List[User], assignment: Assignment) -> str:
+def get_group_assignment_repo_name(users: list[User], assignment: Assignment) -> str:
     # Get assignment name (lowercase and spaces removed)
     assignment_name = assignment.name.lower().replace(" ", "-")
 
@@ -115,7 +114,7 @@ def get_student_assignment_repo_url(user: User, assignment: Assignment) -> str:
     return new_repo_url
 
 
-def get_group_assignment_repo_url(users: List[User], assignment: Assignment) -> str:
+def get_group_assignment_repo_url(users: list[User], assignment: Assignment) -> str:
     # Create a repo url from assignment name, unique code and github username
     new_repo_name = get_group_assignment_repo_name(users, assignment)
 
@@ -142,7 +141,7 @@ def delete_assignment_repo(user: User, assignment: Assignment, commit: bool = Tr
 
     if repo is not None:
         # Fetch all submissions for the student
-        submissions: List[Submission] = Submission.query.filter(
+        submissions: list[Submission] = Submission.query.filter(
             Submission.assignment_id == assignment.id,
             Submission.assignment_repo_id == repo.id,
         ).all()
@@ -230,7 +229,7 @@ def _create_assignment_repo_obj(
     return repo
 
 
-def create_assignment_group_repo(users: List[User], assignment: Assignment) -> Tuple[List[AssignmentRepo], List[str]]:
+def create_assignment_group_repo(users: list[User], assignment: Assignment) -> tuple[list[AssignmentRepo], list[str]]:
     """
     This function takes a list of users and an assignment, and creates a single
     assignment repo for the group. This will create an AssignmentRepo entry for
@@ -246,7 +245,7 @@ def create_assignment_group_repo(users: List[User], assignment: Assignment) -> T
     new_repo_url = get_group_assignment_repo_url(users, assignment)
 
     # Create the assignment repo row in the db
-    repos: List[AssignmentRepo] = []
+    repos: list[AssignmentRepo] = []
     for user in users:
         # Create repo db entry
         repo = _create_assignment_repo_obj(user, assignment, new_repo_url, commit=False)
@@ -269,7 +268,7 @@ def create_assignment_group_repo(users: List[User], assignment: Assignment) -> T
     return repos, errors
 
 
-def create_assignment_student_repo(user: User, assignment: Assignment) -> Tuple[AssignmentRepo, List[str]]:
+def create_assignment_student_repo(user: User, assignment: Assignment) -> tuple[AssignmentRepo, list[str]]:
     # Get a generated assignment repo name
     new_repo_name = get_student_assignment_repo_name(user, assignment)
     new_repo_url = get_student_assignment_repo_url(user, assignment)
@@ -289,11 +288,11 @@ def create_assignment_student_repo(user: User, assignment: Assignment) -> Tuple[
 
 @create_repo_safety_net
 def create_assignment_github_repo(
-    repos: List[AssignmentRepo],
+    repos: list[AssignmentRepo],
     template_repo_path: str,
     github_org: str,
     new_repo_name: str,
-) -> Tuple[List[AssignmentRepo], List[str]]:
+) -> tuple[list[AssignmentRepo], list[str]]:
     """
     Creates an assignment repo and adds collaborators.
 
@@ -320,7 +319,7 @@ def create_assignment_github_repo(
 
             # If response from github is no good
             if data is None:
-                # Set all repos to failed
+                # set all repos to failed
                 for repo in repos:
                     repo.repo_created = False
                 db.session.commit()
@@ -335,7 +334,7 @@ def create_assignment_github_repo(
             # If the response was None, the api request failed. Also check that
             # some expected values are present in the json data response.
             if "repository" not in data or "id" not in data["repository"]:
-                # Set all repos to failed
+                # set all repos to failed
                 for repo in repos:
                     repo.repo_created = False
                 db.session.commit()

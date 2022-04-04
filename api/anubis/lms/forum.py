@@ -1,5 +1,3 @@
-from typing import List
-
 from anubis.models import (
     ForumPost,
     ForumPostComment,
@@ -36,15 +34,15 @@ def verify_post_comment_owner(comment_id: str) -> ForumPostComment:
     return comment
 
 
-def get_post_comments(post: ForumPost) -> List[ForumPostComment]:
-    comments: List[ForumPostComment] = ForumPostComment.query.filter(
+def get_post_comments(post: ForumPost) -> list[ForumPostComment]:
+    comments: list[ForumPostComment] = ForumPostComment.query.filter(
         ForumPostComment.post_id == post.id,
     ).all()
     return comments
 
 
-def get_post_comments_data(post: ForumPost) -> List[dict]:
-    comments: List[ForumPostComment] = post.comments
+def get_post_comments_data(post: ForumPost) -> list[dict]:
+    comments: list[ForumPostComment] = post.comments
 
     def _full_comment(comment: ForumPostComment) -> dict:
         data = comment.data
