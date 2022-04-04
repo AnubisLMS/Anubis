@@ -138,7 +138,6 @@ export default function App() {
                           [classes.contentShift]: open,
                         })}
                       >
-                        <AprilFools/>
                         <div className={classes.drawerHeader}/>
                         <Error/>
                         <div className={classes.main}>
