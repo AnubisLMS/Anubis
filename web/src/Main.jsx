@@ -3,6 +3,8 @@ import AboutRedirect from './components/shared/AboutRedirect';
 import {Redirect, Route, Switch} from 'react-router-dom';
 import {public_nav, admin_nav, super_nav, footer_nav, not_shown_nav} from './navconfig';
 
+import Playgrounds from './pages/core/public/Playgrounds/Playgrounds.jsx';
+
 export default function Main({user}) {
   if (user === undefined) {
     return null;
@@ -43,6 +45,20 @@ export default function Main({user}) {
       </Route>
       <Route exact path={'/'}>
         {user === null ? <Redirect to={'/about'}/> : <Redirect to={'/visuals'}/>}
+      </Route>
+
+      {/* TODO -- temporary paths for study */}
+      <Route exact path={'/study/activated'}>
+        {user === null ?
+          <Redirect to='/about'/> :
+          <Playgrounds imageId="ae6ae9cdddfcb1577ec2fdd8aa3e046c" />
+        }
+      </Route>
+      <Route exact path={'/study/disabled'}>
+        {user === null ?
+          <Redirect to='/about'/> :
+          <Playgrounds imageId="41978cdaa08b915c5708030e8f81f1b3" />
+        }
       </Route>
     </Switch>
   );

@@ -115,7 +115,7 @@ const startSession = (state, enqueueSnackbar) => () => {
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
-export default function Playgrounds() {
+export default function Playgrounds({imageId}) {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [sessionsAvailable, setSessionsAvailable] = useState(null);
@@ -151,8 +151,14 @@ export default function Playgrounds() {
   useEffect(() => {
     axios.get(`/api/public/playgrounds/images`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      setAvailableImages(data.images);
-      setSelectedImage(data?.images[0]);
+      if (imageId) {
+        const focusedImages = data.images.filter((image) => image.id === imageId);
+        setAvailableImages(focusedImages);
+        setSelectedImage(focusedImages[0]);
+      } else {
+        setAvailableImages(data.images);
+        setSelectedImage(data?.images[0]);
+      }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, []);
 
