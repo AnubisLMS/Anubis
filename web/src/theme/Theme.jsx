@@ -73,6 +73,9 @@ theme = {
       label: {
         textTransform: 'none',
       },
+      colorInherit: {
+        backgroundColor: '#7ce38b',
+      },
     },
     MuiDialog: {
       paper: {
