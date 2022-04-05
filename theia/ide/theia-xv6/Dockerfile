@@ -6,7 +6,7 @@ USER root
 RUN set -ex; \
   apt-get update; \
   apt-get install -y --no-install-recommends \
-    git make cmake \
+    git make cmake strace \
     gcc-multilib g++-multilib libc6-dev \
     clangd qemu-system-i386 libgmp-dev; \
   cd /; \
