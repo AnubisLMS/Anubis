@@ -196,6 +196,7 @@ class InCourse(db.Model):
     course_id = db.Column(db.String(128), db.ForeignKey(Course.id), primary_key=True)
 
 
+
 class Assignment(db.Model):
     __tablename__ = "assignment"
     __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
@@ -228,6 +229,9 @@ class Assignment(db.Model):
     theia_image_id = db.Column(db.String(128), db.ForeignKey("theia_image.id"), default=None)
     theia_image_tag_id = db.Column(db.String(128), db.ForeignKey("theia_image_tag.id"), default=None)
     theia_options = db.Column(MutableJson, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
+
+    # Cheat Detection
+    anti_cheat_enabled = db.Column(db.Boolean, default=False)
 
     # Github
     github_template = db.Column(db.TEXT, nullable=True, default="")
@@ -613,8 +617,6 @@ class SubmissionBuild(db.Model):
             "stdout": self.stdout,
             "passed": self.passed,
         }
-
-
 class TheiaImage(db.Model):
     __tablename__ = "theia_image"
     __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
@@ -751,6 +753,27 @@ class TheiaSession(db.Model):
             "persistent_storage": self.persistent_storage,
         }
 
+class TheiaPaste(db.Model):
+    __tablename__ = "theia_paste"
+    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+
+    id = default_id()
+
+    user_id = db.Column(db.String(128), db.ForeignKey(User.id), index=True)
+    theia_session_id = db.Column(db.String(128), db.ForeignKey(TheiaSession.id), index=True)
+    timestamp = db.Column(db.DateTime, default=datetime.now)
+
+    content =  deferred(db.Column(db.LargeBinary(2**12)))
+
+    @property
+    def data(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "theia_session_id": self.theia_session_id,
+            "timestamp": self.timestamp,
+            "content": self.content,
+        }
 
 class StaticFile(db.Model):
     __tablename__ = "static_file"
