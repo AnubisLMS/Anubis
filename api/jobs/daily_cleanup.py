@@ -1,5 +1,3 @@
-from typing import List, Set
-
 from anubis.lms.courses import get_course_tas, get_course_professors, get_course_users, user_to_user_id_set
 from anubis.models import (
     db,
@@ -22,24 +20,24 @@ def reap_ta_professor():
     """
 
     # Get all current courses
-    courses: List[Course] = Course.query.all()
+    courses: list[Course] = Course.query.all()
 
     # Iterate through all courses within the system
     for course in courses:
 
         # Get all students, professors and TAs for course
-        students: List[User] = get_course_users(course)
-        tas: List[User] = get_course_tas(course)
-        profs: List[User] = get_course_professors(course)
+        students: list[User] = get_course_users(course)
+        tas: list[User] = get_course_tas(course)
+        profs: list[User] = get_course_professors(course)
 
         # Convert to user.id sets
-        student_ids: Set[str] = user_to_user_id_set(students)
-        ta_ids: Set[str] = user_to_user_id_set(tas)
-        prof_ids: Set[str] = user_to_user_id_set(profs)
+        student_ids: set[str] = user_to_user_id_set(students)
+        ta_ids: set[str] = user_to_user_id_set(tas)
+        prof_ids: set[str] = user_to_user_id_set(profs)
 
         # Create a set of user ids that will need to have InCourse
         # objects created for them.
-        students_to_add: Set[str] = set()
+        students_to_add: set[str] = set()
 
         # Calculate which ta and professor ids exist outside of the
         # student ids. Theses ids are the users that are missing
