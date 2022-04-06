@@ -18,24 +18,19 @@ const ListPagination = ({
   return (
     <div className={classes.root}>
       <div className={classes.paginate}>
-        <Button disabled={page === 0} onClick={prevPage}> <ArrowBackIosIcon /> </Button>
+        <Button onClick={prevPage}> <ArrowBackIosIcon /> </Button>
         {page > 0 && (
           <Button
             onClick={() => setPage(page - 1 )}
             className={classes.page}>{page}</Button>
         )}
         <Button className={classes.active}>{page + 1}</Button>
-        {page >= 0 && page <= maxPage -1 && (
+        {page >= 0 && page <= maxPage -2 && (
           <Button
             onClick={() => setPage(page + 1)}
             className={classes.page}>{page + 2}</Button>
         )}
-        {page === 0 && page <= maxPage -2 && (
-          <Button
-            onClick={() => setPage(page + 1)}
-            className={classes.page}>{page + 3}</Button>
-        )}
-        <Button disabled={page === maxPage - 1} onClick={nextPage}> <ArrowForwardIosIcon /> </Button>
+        <Button onClick={nextPage}> <ArrowForwardIosIcon /> </Button>
       </div>
     </div>
   );

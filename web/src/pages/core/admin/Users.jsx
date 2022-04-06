@@ -140,8 +140,13 @@ export default function Users() {
           page={page}
           maxPage={students.length}
           setPage={(page) => setPage(page)}
-          prevPage={() => setPage(page - 1)}
-          nextPage={() => setPage(page + 1)}
+          prevPage={() => setPage((page) => {
+            if (page === 0) {
+              return students.length - 1;
+            }
+            return page - 1;
+          })}
+          nextPage={() => setPage((page + 1) % students.length)}
         />
       )}
     </StandardLayout>

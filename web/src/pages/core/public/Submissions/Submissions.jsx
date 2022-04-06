@@ -39,22 +39,13 @@ export default function Submissions() {
     axios.get(`/api/public/submissions/`, {
       params: {
         assignmentId, courseId, userId,
-        limit: pageSize,
-        offset: page * pageSize,
       },
     }).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      // console.log('Hello, you are here', data);
-      // The above console log statement returns data.
-      // This data object includes a nested submissions array, total integer, user information.
       if (data?.total) {
         setRowCount(data?.total);
-        // console.log('Breakpoint 2', rowCount);
-        // The above console log statement returns the total number of submissions.
       }
 
-      // console.log('Breakpoint 3', data?.submissions);
-      // The above console log statements returns the nested submissions array.
       if (data?.submissions) {
         let prev;
         if (rows.length === 0) {
@@ -66,22 +57,15 @@ export default function Submissions() {
           prev = rows;
         }
 
-        const translation = data.submissions.map(translateSubmission);
-        // console.log('Breakpoint 4 Translation', translation);
-
-        for (let i = page * pageSize; i < (page * pageSize) + translation.length; ++i) {
-          prev[i] = translation[i - (page * pageSize)];
-        }
-
-        setRows([...prev]);
-        // console.log('Breakpoint 5 setRows', rows);
+        const ogRows = data.submissions.map(translateSubmission);
 
         const paginatedSubmissions = [];
-        while (prev.length) {
-          paginatedSubmissions.push(prev.splice(0, 10));
+
+        while (ogRows.length) {
+          paginatedSubmissions.push(ogRows.splice(0, 10));
         }
         setRows(paginatedSubmissions);
-      } // loop corresponds to start of loop at line 57
+      }
 
       if (data?.user) {
         setUser(data.user);
@@ -121,8 +105,13 @@ export default function Submissions() {
           page = {page}
           maxPage = {rows.length}
           setPage = {(page) => setPage(page)}
-          prevPage = {()=> setPage(page - 1)}
-          nextPage = {() => setPage(page + 1)}
+          prevPage = {()=> setPage((page) => {
+            if (page === 0) {
+              return rows.length - 1;
+            }
+            return page - 1;
+          })}
+          nextPage = {() => setPage((page + 1) % rows.length)}
         />
       )}
     </StandardLayout>
