@@ -47,13 +47,14 @@ export default function Main({user}) {
         {user === null ? <Redirect to={'/about'}/> : <Redirect to={'/visuals'}/>}
       </Route>
 
-      {/* TODO -- temporary paths for study */}
+      {/* TODO -- remove once pincer study is over */}
       <Route exact path={'/study/activated'}>
         {user === null ?
           <Redirect to='/about'/> :
           <Playgrounds imageId="ae6ae9cdddfcb1577ec2fdd8aa3e046c" />
         }
       </Route>
+      {/* TODO -- remove once pincer study is over */}
       <Route exact path={'/study/disabled'}>
         {user === null ?
           <Redirect to='/about'/> :

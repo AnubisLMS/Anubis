@@ -115,6 +115,12 @@ const startSession = (state, enqueueSnackbar) => () => {
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
+// TODO -- remove once pincer study is over
+const disabledImages = [
+  '41978cdaa08b915c5708030e8f81f1b3',
+  'ae6ae9cdddfcb1577ec2fdd8aa3e046c',
+];
+
 export default function Playgrounds({imageId}) {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
@@ -156,7 +162,8 @@ export default function Playgrounds({imageId}) {
         setAvailableImages(focusedImages);
         setSelectedImage(focusedImages[0]);
       } else {
-        setAvailableImages(data.images);
+        // TODO -- remove once pincer study is over.
+        setAvailableImages(data.images.filter((s) => !disabledImages.includes(s.id)));
         setSelectedImage(data?.images[0]);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
