@@ -53,6 +53,9 @@ def upgrade():
         "assignment",
         sa.Column("anti_cheat_enabled", sa.Boolean(), nullable=True),
     )
+    conn = op.get_bind()
+    with conn.begin():
+        conn.execute('update `assignment` set `anti_cheat_enabled` = 0;')
     # ### end Alembic commands ###
 
 
