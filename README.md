@@ -5,10 +5,41 @@
     <img
       alt="Anubis"
       src="https://raw.githubusercontent.com/AnubisLMS/Anubis/master/docs/design-tex/figures/anubis-icon-1.png"
-      width="400"
+      width="300"
     />
   </a>
 </p>
+
+
+<div align="center">
+  <h1>Anubis</h1>
+  
+<p>
+  Distributed LMS for automating Computing Science Courses From NYU  
+</p>
+
+<p>
+  <a href="https://github.com/AnubisLMS/Anubis/graphs/contributors">
+    <img src="https://img.shields.io/github/contributors/AnubisLMS/Anubis" alt="contributors" />
+  </a>
+  <a href="">
+    <img src="https://img.shields.io/github/last-commit/AnubisLMS/Anubis" alt="last update" />
+  </a>
+  <a href="https://github.com/Louis3797/AnubisLMS/Anubis">
+    <img src="https://img.shields.io/github/forks/AnubisLMS/Anubis" alt="forks" />
+  </a>
+  <a href="https://github.com/AnubisLMS/Anubis/stargazers">
+    <img src="https://img.shields.io/github/stars/AnubisLMS/Anubis" alt="stars" />
+  </a>
+  <a href="https://github.com/AnubisLMS/Anubis/issues/">
+    <img src="https://img.shields.io/github/issues/AnubisLMS/Anubis" alt="open issues" />
+  </a>
+  <a href="https://github.com/AnubisLMS/Anubis/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/AnubisLMS/Anubis.svg" alt="license" />
+  </a>
+</p>
+  
+</div>
 
 # Table of contents
 
