@@ -13,7 +13,7 @@ from anubis.k8s.theia import update_theia_session
 
 
 @with_context
-def poll():
+def ide_poller():
     """
     Poll Database for sessions created within the last 10 minutes
     if they are active and dont have a cluster_address.
@@ -39,7 +39,7 @@ def main():
     config.load_incluster_config()
 
     while True:
-        poll()
+        ide_poller()
 
 
 if __name__ == "__main__":
