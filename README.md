@@ -1,5 +1,3 @@
-# Anubis LMS
-
 <p align="center">
   <a href="https://anubis.osiris.services/">
     <img
@@ -12,7 +10,7 @@
 
 
 <div align="center">
-  <h1>Anubis</h1>
+  <h1>Anubis LMS</h1>
   
 <p>
   Distributed LMS for automating Computing Science Courses From NYU  
