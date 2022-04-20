@@ -60,13 +60,13 @@ def require_not_in_repo(func):
 def require_in_repo(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        try:
-            git.Repo()
-            return func(*args, **kwargs)
-        except git.exc.InvalidGitRepositoryError:
+        repo_root = shell('git rev-parse --show-toplevel').strip()
+        if 'fatal: not a git repository' in repo_root:
             click.echo('This command can only be run in a git repo. '
                        'Please cd to the repo you would like to operate on.', err=True)
             return 2
+
+        return func(*args, **kwargs)
     return wrapper
 
 
@@ -300,7 +300,7 @@ def init(assignment_name):
 
 @assignment.command()
 @click.argument('path', type=click.Path(exists=True), default='.')
-@click.option('--push/-p', default=False)
+@click.option('--push/-p', default=True)
 @require_admin
 def build(path, push):
     if not os.path.exists('meta.yml'):
