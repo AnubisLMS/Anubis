@@ -82,8 +82,7 @@ push-ides:
 
 .PHONY: prop-ides       # Create theia-prop daemonset to propagate latest ide images
 prop-ides:
-	kubectl apply -f theia/ide/theia-prop.yaml
-	kubectl rollout restart ds theia-prop
+	kubectl rollout restart ds anubis-theia-prop -n anubis
 
 .PHONY: debug           # Start the cluster in debug mode
 debug:
