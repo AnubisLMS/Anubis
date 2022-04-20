@@ -211,7 +211,7 @@ def clone(args: argparse.Namespace):
         os.system(f'rm -rf {args.path}/.git')
         os.system('rm -rf /home/anubis/.git-credentials')
         os.system('rm -rf /home/anubis/.gitconfig')
-        os.system('chmod 777 -R /home/anubis/student')
+        os.system(f'chmod 777 -R {args.path}')
 
 
 def run_build():
