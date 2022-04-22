@@ -1,33 +1,32 @@
 import React, {useState} from 'react';
-import clsx from 'clsx';
 import axios from 'axios';
 import {useSnackbar} from 'notistack';
-import {Link} from 'react-router-dom';
 
-import {DataGrid} from '@material-ui/data-grid/';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
-import Switch from '@material-ui/core/Switch';
-import TextField from '@material-ui/core/TextField';
-import Fab from '@material-ui/core/Fab';
-import Tooltip from '@material-ui/core/Tooltip';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import Typography from '@material-ui/core/Typography';
-
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import Input from '@material-ui/core/Input';
 
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
+
+import StandardLayout from '../../../components/shared/Layouts/StandardLayout';
+import SuperUserItem from '../../../components/core/UserItem/SuperUserItem';
+import ListHeader from '../../../components/shared/ListHeader/ListHeader';
+import ListPagination from '../../../components/shared/ListPagination/ListPagination.jsx';
+import SectionHeader from '../../../components/shared/SectionHeader/SectionHeader';
+import Divider from '../../../components/shared/Divider/Divider';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
     flex: 1,
     padding: theme.spacing(1),
   },
+  studentList: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  },
   dataGridPaper: {
-    height: 900,
+    height: 800,
   },
   dataGrid: {
     height: '100%',
@@ -38,109 +37,44 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: theme.spacing(1),
     paddingRight: theme.spacing(1),
   },
+  search: {
+    width: '100%',
+    backgroundColor: theme.palette.dark.blue['100'],
+    border: `1px solid ${theme.palette.dark.blue['200']}`,
+    padding: theme.spacing(2),
+    borderRadius: theme.spacing(1),
+    marginTop: theme.spacing(2),
+  },
 }));
 
 
-const toggleSuperuser = (id, {setStudents, setEdits}, enqueueSnackbar) => () => {
-  axios.get(`/api/admin/students/toggle-superuser/${id}`).then((response) => {
-    if (standardStatusHandler(response, enqueueSnackbar)) {
-      setStudents((students) => {
+export default function Users() {
+  const classes = useStyles();
+  const {enqueueSnackbar} = useSnackbar();
+  const [students, setStudents] = useState([]);
+  const [page, setPage] = useState(0);
+
+  const [refresh, setRefresh] = useState(0);
+
+  const [searchQuery, setSearchQuery] = useState(undefined);
+
+  const toggleSuperuser = (id, enqueueSnackbar) => () => {
+    axios.get(`/api/admin/students/toggle-superuser/${id}`).then((response) => {
+      if (standardStatusHandler(response, enqueueSnackbar)) {
         for (const student of students) {
           if (student.id === id) {
             student.is_superuser = !student.is_superuser;
           }
         }
-        return students;
-      });
-      setEdits((state) => ++state);
-    }
-  }).catch(standardErrorHandler(enqueueSnackbar));
-};
-
-const useColumns = (pageState, enqueueSnackbar) => () => ([
-  {
-    field: 'id',
-    headerName: 'View',
-    renderCell: (params) => (
-      <Tooltip title={`View ${params.row.netid}`}>
-        <Fab
-          size={'small'}
-          color={'primary'}
-          component={Link}
-          to={`/admin/user?userId=${params.row.id}`}
-        >
-          <VisibilityIcon/>
-        </Fab>
-      </Tooltip>
-    ),
-  },
-  {field: 'netid', headerName: 'netid'},
-  {field: 'name', headerName: 'Name', width: 150},
-  {field: 'github_username', headerName: 'Github Username', width: 200},
-  {
-    field: 'log_in_as',
-    headerName: 'Log in as',
-    width: 130,
-    renderCell: (params) => (
-      <Tooltip title={`Log in as ${params.row.netid}`}>
-        <Fab
-          size={'small'}
-          style={{backgroundColor: 'yellow'}}
-          onClick={() => {
-            axios.get(`/api/admin/auth/token/${params.row.netid}`).then((response) => {
-              const data = standardStatusHandler(response);
-              if (data) {
-                window.location.reload();
-              }
-            }).catch(standardErrorHandler(enqueueSnackbar));
-          }}
-        >
-          <ExitToAppIcon/>
-        </Fab>
-      </Tooltip>
-    ),
-  },
-  {
-    field: 'is_superuser',
-    headerName: 'Superuser',
-    renderCell: (params) => (
-      <React.Fragment>
-        <Switch
-          checked={params.row.is_superuser}
-          color={'primary'}
-          onClick={toggleSuperuser(params.row.id, pageState, enqueueSnackbar)}
-        />
-      </React.Fragment>
-    ),
-    width: 150,
-  },
-]);
-
-export default function Users() {
-  const classes = useStyles();
-  const {enqueueSnackbar} = useSnackbar();
-  const [reset, setReset] = useState(0);
-  const [edits, setEdits] = useState(0);
-  const [students, setStudents] = useState([]);
-  const [searched, setSearched] = useState(null);
-  const [rows, setRows] = useState([]);
-
-  const pageState = {
-    reset, setReset,
-    students, setStudents,
-    searched, setSearched,
-    edits, setEdits,
-    rows, setRows,
+        setRefresh((state) => ++state);
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
   };
-
-  const columns = useColumns(pageState, enqueueSnackbar);
 
   React.useEffect(() => {
     axios.get('/api/super/students/list').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data?.students) {
-        setSearched(null);
-
         for (const student of data.students) {
           student.search = student.name.toLowerCase() +
             student.netid.toLowerCase() +
@@ -148,78 +82,101 @@ export default function Users() {
             student.id.toLowerCase();
         }
 
-        setStudents(data.students);
+        const students = [];
+        while (data.students.length) {
+          students.push(data.students.splice(0, 10));
+        }
+
+        setStudents(students);
       } else {
         enqueueSnackbar('Unable to fetch students', {variant: 'error'});
       }
     }).catch((error) => {
       enqueueSnackbar(error.toString(), {variant: 'error'});
     });
-  }, [reset]);
+  }, [refresh]);
 
   React.useEffect(() => {
-    if (students.length === 0) {
+    if (searchQuery === '' || searchQuery === undefined) {
+      setRefresh(refresh + 1);
       return;
     }
+    const newStudents = students.flat(Infinity).filter((student) =>
+      student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      student.netid.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (!!student.github_username && student.github_username.toLowerCase().includes(searchQuery.toLowerCase())),
+    );
 
-    if (searched === null && students.length > 0) {
-      return setRows(students);
+    const paginatedStudents = [];
+
+    while (newStudents.length) {
+      paginatedStudents.push(newStudents.splice(0, 10));
     }
-
-    setRows([searched]);
-  }, [searched]);
-
-  React.useEffect(() => {
-    setRows(students);
-  }, [students]);
+    setStudents(paginatedStudents);
+    setPage(0);
+  }, [searchQuery]);
 
   return (
-    <Grid container spacing={2} justify={'center'} alignItems={'center'}>
-      <Grid item xs={12}>
-        <Typography variant="h6">
-          Anubis
-        </Typography>
-        <Typography variant={'subtitle1'} color={'textSecondary'}>
-          User Management
-        </Typography>
-      </Grid>
-      <Grid item xs={12} md={4} key={'search'}>
-        <Paper className={classes.paper}>
-          <div className={classes.autocomplete}>
-            <Autocomplete
-              blurOnSelect
-              fullWidth={false}
-              options={students}
-              getOptionLabel={(option) => `${option.netid} ${option.name}`}
-              onChange={(_, value) => setSearched(value)}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label={'Search users'}
-                />
-              )}
-            />
-          </div>
-        </Paper>
-      </Grid>
-      <Grid item xs={12} md={10} key={'user-table'}>
-        <Paper className={clsx(classes.paper, classes.dataGridPaper)}>
-          <div className={classes.dataGrid}>
-            <DataGrid
-              pagination
-              pageSize={15}
-              rowsPerPageOptions={[5, 10, 20]}
-              rows={rows}
-              columns={columns()}
-              filterModel={{
-                items: [
-                  {columnField: 'name', operatorValue: 'contains', value: ''},
-                ],
+    <StandardLayout>
+      <SectionHeader isPage title={'Users'} />
+      <Divider />
+      <Input
+        placeholder={'Search Student By NetId, Name or Github Username'}
+        value={searchQuery}
+        onChange={(event) => setSearchQuery(event.target.value)}
+        className={classes.search}
+      >
+      </Input>
+      <ListHeader sections={['Name', 'Log-in as', 'Github Username', 'netid', 'View', 'Set Superuser']} />
+      {students[page] && students[0][0] && (
+        <div className={classes.studentList}>
+          {(students[0].length > 1) ? students[page].map((student, index) => (
+            <SuperUserItem
+              key={`${student.netid}-${index}`}
+              student={student}
+              githubUsername={student.github_username}
+              id={student.id}
+              netid={student.netid}
+              name={student.name}
+              logIn={() => {
+                axios.get(`/api/admin/auth/token/${student.netid}`).then((response) => {
+                  const data = standardStatusHandler(response);
+                  if (data) {
+                    window.location.reload();
+                  }
+                }).catch(standardErrorHandler(enqueueSnackbar));
               }}
+              superuser={toggleSuperuser(student.id, enqueueSnackbar)}
             />
-          </div>
-        </Paper>
-      </Grid>
-    </Grid>
+          )) : (
+            <SuperUserItem
+              key={`${students[0][0].netid}`}
+              githubUsername={students[0][0].github_username}
+              id={students[0][0].id}
+              netid={students[0][0].netid}
+              name={students[0][0].name}
+              logIn={() => {
+                axios.get(`/api/admin/auth/token/${student.netid}`).then((response) => {
+                  const data = standardStatusHandler(response);
+                  if (data) {
+                    window.location.reload();
+                  }
+                }).catch(standardErrorHandler(enqueueSnackbar));
+              }}
+              superuser={toggleSuperuser(student.id, enqueueSnackbar)}
+            />
+          )}
+        </div>
+      )}
+      {students.length > 1 && (
+        <ListPagination
+          page={page}
+          maxPage={students.length}
+          setPage={(page) => setPage(page)}
+          prevPage={() => setPage(page - 1)}
+          nextPage={() => setPage(page + 1)}
+        />
+      )}
+    </StandardLayout>
   );
 }

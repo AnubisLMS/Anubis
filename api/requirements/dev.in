@@ -12,3 +12,4 @@ pip-tools
 # Python testing framework
 pytest
 coverage
+flask
