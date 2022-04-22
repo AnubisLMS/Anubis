@@ -8,6 +8,7 @@ import {useStyles} from './Nav.styles';
 
 import Ad from './Ad/Ad';
 import NavList from './NavList/NavList';
+import PrivacyPolicy from '../PrivacyPolicy.jsx';
 
 const Nav = ({open, handleDrawerClose}) => {
   const classes = useStyles();
@@ -36,6 +37,10 @@ const Nav = ({open, handleDrawerClose}) => {
       <Box marginLeft="8px" marginRight="8px" marginTop="20px">
         <Ad/>
       </Box>
+      <Box marginLeft="8px" marginRight="4px" marginTop="10px">
+        <PrivacyPolicy/>
+      </Box>
+
     </Drawer>
   );
 };
