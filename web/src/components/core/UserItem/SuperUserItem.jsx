@@ -27,21 +27,21 @@ const SuperUserItem = ({
       subTitle={`from: ${netid}`}
       titleIcon={<AssignmentOutlinedIcon/>}
     >
-    <Button onClick={logIn}>
-      Log-in as
-    </Button>
-    <Typography>
-      {githubUsername}
-    </Typography>
-    {!privileged && (<Typography>{netid}</Typography>)}
-    <Button onClick={() => history.push(`/admin/user?userId=${id}`)}>
-      View User
-    </Button>
-    <Switch
-      checked={student.is_superuser}
-      color={'primary'}
-      onClick={superuser}
-    />
+      <Button onClick={logIn}>
+        Log-in as
+      </Button>
+      <Typography>
+        {githubUsername}
+      </Typography>
+      {!privileged && (<Typography>{netid}</Typography>)}
+      <Button onClick={() => history.push(`/admin/user?userId=${id}`)}>
+        View User
+      </Button>
+      <Switch
+        checked={student.is_superuser}
+        color={'primary'}
+        onClick={superuser}
+      />
     </Item>
   );
 };
