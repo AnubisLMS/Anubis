@@ -13,7 +13,7 @@ const ListHeader = ({sections}) => {
       {sections && sections.map((section, index) => (
         <Grid
           key={`${section}-${index}`}
-          item xs={3}
+          item xs={Math.floor(12/ sections.length)}
           className={
             index === 0 ? clsx(classes.sectionBlock, classes.start) :
               index === sections.length - 1 ? clsx(classes.sectionBlock, classes.end) :

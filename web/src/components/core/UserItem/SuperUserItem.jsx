@@ -21,28 +21,27 @@ const SuperUserItem = ({
   const history = useHistory();
 
   return (
-      <Item
-        showStatus={false}
-        title={name}
-        subTitle={`from: ${netid}`}
-        titleIcon={<AssignmentOutlinedIcon/>}
-        // link={`/admin/user?userId=${id}`}
-      >
-      <Button onClick={logIn}>
-        Log-in as
-      </Button>
-      <Typography>
-        {githubUsername}
-      </Typography>
-      {!privileged && (<Typography>{netid}</Typography>)}
-      <Button onClick={() => history.push(`/admin/user?userId=${id}`)}>
-        View User
-      </Button>
-      <Switch
-        checked={student.is_superuser}
-        color={'primary'}
-        onClick={superuser}
-      />
+    <Item
+      showStatus={false}
+      title={name}
+      subTitle={`from: ${netid}`}
+      titleIcon={<AssignmentOutlinedIcon/>}
+    >
+    <Button onClick={logIn}>
+      Log-in as
+    </Button>
+    <Typography>
+      {githubUsername}
+    </Typography>
+    {!privileged && (<Typography>{netid}</Typography>)}
+    <Button onClick={() => history.push(`/admin/user?userId=${id}`)}>
+      View User
+    </Button>
+    <Switch
+      checked={student.is_superuser}
+      color={'primary'}
+      onClick={superuser}
+    />
     </Item>
   );
 };
