@@ -5,8 +5,8 @@ import AssignmentOutlinedIcon from '@material-ui/icons/AssignmentOutlined';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Switch from '@material-ui/core/Switch';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import Item from '../../shared/Item/Item';
-import {useStyles} from './UserItems.styles';
 
 const SuperUserItem = ({
   id,
@@ -27,9 +27,7 @@ const SuperUserItem = ({
       subTitle={`from: ${netid}`}
       titleIcon={<AssignmentOutlinedIcon/>}
     >
-      <Button onClick={logIn}>
-        Log-in as
-      </Button>
+      <ExitToAppIcon onClick={logIn} />
       <Typography>
         {githubUsername}
       </Typography>
