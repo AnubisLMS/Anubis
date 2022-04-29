@@ -76,7 +76,7 @@ def create_theia_k8s_pod_pvc(
     # Get home volume size from config
     if theia_session.playground:
         if theia_session.image.webtop:
-            volume_size = get_config_str('WEBTOP_VOLUME_SIZE', '300Mi')
+            volume_size = get_config_str('WEBTOP_VOLUME_SIZE', '500Mi')
         else:
             volume_size = get_config_str('PLAYGROUND_VOLUME_SIZE', '100Mi')
     else:
