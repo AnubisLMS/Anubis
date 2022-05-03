@@ -6,6 +6,9 @@ export const useStyles = makeStyles((theme) => ({
     height: '100%',
     width: drawerWidth,
     flexShrink: 0,
+    '& .MuiDrawer-paper::-webkit-scrollbar': {
+      display: 'none',
+    },
   },
   drawerPaper: {
     width: drawerWidth,
