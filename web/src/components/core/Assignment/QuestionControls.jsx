@@ -153,11 +153,7 @@ export default function QuestionControls({assignmentId, reload, questionsAssigne
             {/* Add question button */}
             <Grid item xs={12} sm={6} md={3}>
               <Tooltip title={'Add question'}>
-                {/* <ThemeProvider theme={theme}> */}
                 <Button
-                  // style = {{
-                  //   backgroundColor: theme.palette.color.green,
-                  // }}
                   fullWidth
                   color={'inherit'}
                   startIcon={<AddIcon/>}
@@ -166,7 +162,6 @@ export default function QuestionControls({assignmentId, reload, questionsAssigne
                 >
                   Add New Question
                 </Button>
-                {/* </ThemeProvider> */}
               </Tooltip>
             </Grid>
 
