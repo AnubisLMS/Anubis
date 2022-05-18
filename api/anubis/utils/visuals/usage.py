@@ -16,12 +16,12 @@ def get_usage_plot(course_id: str) -> bytes | None:
     import matplotlib.colors as mcolors
     import matplotlib.pyplot as plt
 
-    logger.info("GENERATING USAGE PLOT PNG")
-
     course: Course = Course.query.filter(Course.id == course_id).first()
 
     if course is None:
         return None
+
+    logger.info(f"Generating course usage plot for :: {course.name}")
 
     assignments: list[Assignment] = Assignment.query.filter(
         Assignment.hidden == False,
