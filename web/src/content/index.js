@@ -1,5 +1,15 @@
 export default [
   {
+    slug: 'sping22-wrap-up',
+    title: 'Spring 2022 Wrap Up',
+    author: 'John Cunniff',
+    authorImage: 'https://avatars.githubusercontent.com/u/36013983',
+    date: '2022-05-18',
+    get: () => {
+      return import('./Spring2022Wrapup.md');
+    },
+  },
+  {
     slug: 'git-vuln',
     title: 'Abusing Anubis Autosave to Break into Student GitHub Repositories',
     author: 'Alan Cao',
