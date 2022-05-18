@@ -14,16 +14,21 @@ def get_theia_sessions(course_id: str = None, start: datetime = None) -> pd.Data
     :return:
     """
 
+    filters = []
+
+    if start is not None:
+        filters.append(TheiaSession.created >= start)
+
     # Get all the theia session sqlalchemy objects
     if course_id is not None:
         raw_theia_sessions = TheiaSession.query.join(Assignment).filter(
             Assignment.course_id == course_id,
-            TheiaSession.created >= start,
+            *filters,
         ).all()
     else:
         raw_theia_sessions = TheiaSession.query.filter(
             TheiaSession.playground == True,
-            TheiaSession.created >= start,
+            *filters,
         ).all()
 
     # Specify which columns we want
