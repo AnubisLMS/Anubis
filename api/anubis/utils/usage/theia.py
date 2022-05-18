@@ -1,21 +1,30 @@
 import numpy as np
 import pandas as pd
+from datetime import datetime
 
 from anubis.models import TheiaSession, Assignment
 
 
-def get_theia_sessions(course_id: str = None) -> pd.DataFrame:
+def get_theia_sessions(course_id: str = None, start: datetime = None) -> pd.DataFrame:
     """
     Get all theia session objects, and throw them into a dataframe
+
+    When ``course_id`` is None will return playground sessions.
 
     :return:
     """
 
     # Get all the theia session sqlalchemy objects
     if course_id is not None:
-        raw_theia_sessions = TheiaSession.query.join(Assignment).filter(Assignment.course_id == course_id).all()
+        raw_theia_sessions = TheiaSession.query.join(Assignment).filter(
+            Assignment.course_id == course_id,
+            TheiaSession.created >= start,
+        ).all()
     else:
-        raw_theia_sessions = TheiaSession.query.filter(TheiaSession.playground == True).all()
+        raw_theia_sessions = TheiaSession.query.filter(
+            TheiaSession.playground == True,
+            TheiaSession.created >= start,
+        ).all()
 
     # Specify which columns we want
     columns = ["id", "owner_id", "assignment_id", "image_id", "created", "ended"]

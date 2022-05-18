@@ -102,22 +102,44 @@ def get_usage_plot(course_id: str) -> bytes | None:
 
 
 @cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
-def get_usage_plot_playgrounds():
+def get_usage_plot_playgrounds(start: datetime = None):
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(figsize=(12, 10))
+    fig: plt.Figure
+    ax: plt.Axes
 
-    images = TheiaImage.query.filter().order_by(TheiaImage.id.desc()).all()
-    theia_sessions = get_theia_sessions(None)
+    # Get list of unique TheiaImages (that are public to playgrounds). Sort by
+    # id so that they are always in the same order.
+    images = TheiaImage.query.filter(TheiaImage.public == True).order_by(TheiaImage.id.desc()).all()
+
+    # Get all playground theia sessions after start datetime
+    theia_sessions = get_theia_sessions(None, start)
+
+    # Count number of playground IDEs per hour using some pandas df witchcraft
     s = theia_sessions.groupby(["image_id", "created"])["id"].count().reset_index().rename(
         columns={"id": "count"}
-    ).groupby("image_id")
-    for key, group in s:
+    )
+
+    # Value counts outside 4 std devs
+    # should be brought down to 4 std devs
+    # to keep plot concise. A few hours in
+    # the year have 6-7x the amount of starts
+    # which throws off the entire look of
+    # the graph.
+    s_std = s['count'].std()
+    s_mean = s['count'].mean()
+    s_max = s_mean + (4 * s_std)
+    s[s['count'] >= s_max] = s_max
+
+    # Group by image
+    for key, group in s.groupby("image_id"):
         logger.info(key)
         for image in images:
             if image.id == key and image.public:
                 ax.plot(group["created"], group["count"], label=image.title)
 
+    # Add extra bits
     add_watermark(ax)
     ax.legend()
     ax.grid()
