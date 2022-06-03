@@ -16,7 +16,7 @@ imagePullSecret: "anubis"
 
 # Main anubis api
 api:
-  replicas: 3
+  replicas: 1
   workers: 2
   gunicorn_options: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
   image: "registry.digitalocean.com/anubis/api"
@@ -24,13 +24,13 @@ api:
 
 # Anubis web static
 web:
-  replicas: 2
+  replicas: 1
   image: "registry.digitalocean.com/anubis/web"
   tag: "latest"
 
 # API for submission pipeline reporting
 pipeline_api:
-  replicas: 2
+  replicas: 1
   workers: 1
 
 # Theia IDE proxy and poller
@@ -43,7 +43,7 @@ theia:
 
   # theia-proxy deployment
   proxy:
-    replicas: 10
+    replicas: 1
     image: "registry.digitalocean.com/anubis/theia-proxy"
     tag: "latest"
 
@@ -103,7 +103,7 @@ marketing:
   domain: "anubis-lms.io"
   image: "registry.digitalocean.com/anubis/marketing-site"
   tag: "latest"
-  replicas: 2
+  replicas: 1
 
 ###############################################################################
 
@@ -114,7 +114,12 @@ marketing:
 reaper:
   enable: true
   suspend: false
-  schedule: "*/5 * * * *"
+  schedule: "0 0 * * *"
+
+visuals:
+  enable: true
+  suspend: false
+  schedule: "0 0 * * *"
 
 daily_cleanup:
   enable: true
@@ -123,18 +128,13 @@ daily_cleanup:
 
 autograde_recalculate:
   enable: true
-  suspend: false
+  suspend: true
   schedule: "*/30 * * * *"
-
-visuals:
-  enable: true
-  suspend: false
-  schedule: "*/5 * * * *"
 
 backup:
   enable: true
   suspend: false
-  schedule: "0 */6 * * *" # Midnight
+  schedule: "0 0 * * *" # Midnight
   secretName: anubis-backup-creds
 ###############################################################################
 
@@ -142,7 +142,7 @@ backup:
 ###############################################################################
 # RPC Pools
 rpc:
-  replicas: 3
+  replicas: 2
   queues: ["default", "theia", "regrade"]
 ###############################################################################
 
@@ -150,7 +150,7 @@ rpc:
 ###############################################################################
 # Horizontal Pod Autoscaling
 hpa:
-  enable: true
+  enable: false
   rpc:
   - name: rpc-default
   - name: rpc-theia
