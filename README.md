@@ -23,7 +23,7 @@
   <a href="">
     <img src="https://img.shields.io/github/last-commit/AnubisLMS/Anubis" alt="last update" />
   </a>
-  <a href="https://github.com/Louis3797/AnubisLMS/Anubis">
+  <a href="https://github.com/AnubisLMS/Anubis/network/members">
     <img src="https://img.shields.io/github/forks/AnubisLMS/Anubis" alt="forks" />
   </a>
   <a href="https://github.com/AnubisLMS/Anubis/stargazers">
@@ -79,7 +79,7 @@ Under this model students can push as many times as they would like before the a
 ![alt docs/img/autograde-results.png](docs/design-tex/figures/autograde-results.png)
 
 > _If you would like to read more on how autograding and assignment management works from a TA/Professors
-> perspective, check out our [detailed design doc](docs/README.md)
+> perspective, check out our [detailed design doc](docs/README.md)_
 
 ### Anubis Cloud IDEs
 
@@ -92,7 +92,7 @@ the browser.
 ![alt docs/img/theia-fullscreen.png](docs/design-tex/figures/theia-fullscreen.png)
 
 > _If you would like a more detailed description of how the IDEs work internally, check out the 
-> [sections on the IDEs in our design doc](docs/README.md)
+> [sections on the IDEs in our design doc](docs/README.md)_
 
 ### Insights
 
@@ -100,7 +100,7 @@ Simply by placing timestamps on thing that are already tracked like submissions 
 we can start to both ask and answer some interesting questions about how well students are understanding certain topics.
 
 > _For a more detailed description (plus visuals) of how admin insights work in Anubis, check out
-> the [section on usage statistics in our design doc](/docs/README.md)
+> the [section on usage statistics in our design doc](/docs/README.md)_
 
 
 ## How to contribute
