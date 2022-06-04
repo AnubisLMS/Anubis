@@ -28,7 +28,7 @@ This semester we grew from 685 users in January to an astounding 1041 users by M
 has been around for 4 semesters now. This means that we nearly doubled our user count in
 a single semester. 
 
-![alt users-plot-20220518-120days.png](/users-plot-20220518-120days.png)
+![alt users-plot-20220518-120days.png](/api/public/static/adc949f0dc2565af/users-plot-20220518-120days.png)
 
 
 #### User retention
@@ -42,7 +42,7 @@ platform. Last semester the most users we had use an IDE was just over 150. This
 our peak day saw 250 users use Anubis. Considering the size of NYU Tandon that is about
 25% of the entire school of engineering!
 
-![alt active-plot-20220518-120days.png](/active-plot-20220518-120days.png)
+![alt active-plot-20220518-120days.png](/api/public/static/da68a6516a391c1e/active-plot-20220518-120days.png)
 
 Students spent a lot of time working in IDEs as well. If we take the number of minutes 
 each IDE was used this semester, and add them all together we found that students spent
@@ -58,13 +58,13 @@ The undergrad Operating Systems course with professor Sandoval had a busy year w
 a midterm and a final exam all on Anubis. Some jumps in submissions right before the 
 deadline show that a few students may have some time management issues. Yikes!
 
-![alt course-plot-cs-uy-3224-20220518-120days.png](/course-plot-cs-uy-3224-20220518-120days.png)
+![alt course-plot-cs-uy-3224-20220518-120days.png](/api/public/static/88f578d52a342aa0/course-plot-cs-uy-3224-20220518-120days.png)
 
 Similarly, the graduate Operating Systems course with Professor Kamen used Anubis for autograding
 as well. Their graphs are less exciting because it looks like the graduate students like to
 start their homeworks early.
 
-![alt course-plot-cd-gy-6223-20220518-120days.png](/course-plot-cd-gy-6223-20220518-120days.png)
+![alt course-plot-cd-gy-6223-20220518-120days.png](/api/public/static/21a6a2aaf0893de2/course-plot-cd-gy-6223-20220518-120days.png)
 
 All of this autograding wasn't free though. In total, we processed _98,081 submissions_ this
 semester. Too bad we fell just short of 100,000 submissions. I have faith in breaking this record
