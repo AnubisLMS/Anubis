@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from 'react';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import makeStyles from '@mui/material/styles/makeStyles';
 
-import CardActionArea from '@material-ui/core/CardActionArea';
-import CardHeader from '@material-ui/core/CardHeader';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CardContent from '@material-ui/core/CardContent';
-import Tooltip from '@material-ui/core/Tooltip';
-import Card from '@material-ui/core/Card';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import CardActionArea from '@mui/material/CardActionArea';
+import CardHeader from '@mui/material/CardHeader';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import CardContent from '@mui/material/CardContent';
+import Tooltip from '@mui/material/Tooltip';
+import Card from '@mui/material/Card';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {useHistory} from 'react-router-dom';
 import BlogContent from './BlogContent';
 

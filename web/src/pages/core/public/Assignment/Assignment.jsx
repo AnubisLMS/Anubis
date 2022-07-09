@@ -3,17 +3,17 @@ import {useSnackbar} from 'notistack';
 import axios from 'axios';
 import clsx from 'clsx';
 
-import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
 
-import AssignmentOutlinedIcon from '@material-ui/icons/AssignmentOutlined';
-import LaunchIcon from '@material-ui/icons/Launch';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import CancelIcon from '@material-ui/icons/Cancel';
+import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
+import LaunchIcon from '@mui/icons-material/Launch';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 import SubmissionItem from '../../../../components/core/SubmissionItem/SubmissionItem';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';

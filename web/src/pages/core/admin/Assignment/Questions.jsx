@@ -3,9 +3,9 @@ import axios from 'axios';
 import {useSnackbar} from 'notistack';
 import {useParams} from 'react-router-dom';
 
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
 
 import standardErrorHandler from '../../../../utils/standardErrorHandler';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';

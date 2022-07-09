@@ -2,15 +2,15 @@ import React, {useEffect, useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
-import {DataGrid} from '@material-ui/data-grid';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
+import {DataGrid} from '@mui/x-data-grid';
+import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
 
 import {useStyles} from './Lectures.styles';
 import useQuery from '../../../../hooks/useQuery';
 import standardErrorHandler from '../../../../utils/standardErrorHandler';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';
-import Typography from '@material-ui/core/Typography';
+import Typography from '@mui/material/Typography';
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';
 import SectionHeader from '../../../../components/shared/SectionHeader/SectionHeader';
 import ListHeader from '../../../../components/shared/ListHeader/ListHeader';

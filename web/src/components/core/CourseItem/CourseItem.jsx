@@ -1,9 +1,9 @@
 import React from 'react';
 import {useHistory} from 'react-router-dom';
 
-import SchoolIcon from '@material-ui/icons/School';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import SchoolIcon from '@mui/icons-material/School';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 import Item from '../../shared/Item/Item';
 import {useStyles} from './CourseItem.styles';
 

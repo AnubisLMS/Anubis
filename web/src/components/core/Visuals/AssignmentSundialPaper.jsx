@@ -3,7 +3,7 @@ import axios from 'axios';
 import {useSnackbar} from 'notistack';
 import {useParams} from 'react-router-dom';
 
-import Paper from '@material-ui/core/Paper';
+import Paper from '@mui/material/Paper';
 
 import useQuery from '../../../hooks/useQuery';
 import standardStatusHandler from '../../../utils/standardStatusHandler';

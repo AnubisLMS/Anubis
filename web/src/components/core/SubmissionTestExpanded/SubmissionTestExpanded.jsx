@@ -1,16 +1,16 @@
 import React, {useMemo} from 'react';
 
-import Divider from '@material-ui/core/Divider';
-import Typography from '@material-ui/core/Typography';
-import Close from '@material-ui/icons/Close';
-import Cancel from '@material-ui/icons/Cancel';
-import Button from '@material-ui/core/Button';
-import CheckCircle from '@material-ui/icons/CheckCircle';
-import Box from '@material-ui/core/Box';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+import Close from '@mui/icons-material/Close';
+import Cancel from '@mui/icons-material/Cancel';
+import Button from '@mui/material/Button';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Box from '@mui/material/Box';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
 
 import {Diff, Hunk, markEdits, parseDiff, tokenize} from 'react-diff-view';
 import 'react-diff-view/style/index.css';

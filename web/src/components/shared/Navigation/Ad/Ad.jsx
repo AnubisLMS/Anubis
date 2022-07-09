@@ -1,12 +1,12 @@
 import React from 'react';
 
 import {useStyles} from './Ad.styles';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import GitHubIcon from '@material-ui/icons/GitHub';
-import Card from '@material-ui/core/Card';
-import CardActionArea from '@material-ui/core/CardActionArea';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import Card from '@mui/material/Card';
+import CardActionArea from '@mui/material/CardActionArea';
 
 const Ad = () => {
   const classes = useStyles();

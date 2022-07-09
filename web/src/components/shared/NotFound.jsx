@@ -1,17 +1,17 @@
 import React from 'react';
-import {makeStyles} from '@material-ui/core/styles';
-import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
-import CardMedia from '@material-ui/core/CardMedia';
-import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
-import RefreshIcon from '@material-ui/icons/Refresh';
-import HomeIcon from '@material-ui/icons/Home';
+import {makeStyles} from '@mui/material/styles';
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardMedia from '@mui/material/CardMedia';
+import CardContent from '@mui/material/CardContent';
+import CardActions from '@mui/material/CardActions';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import HomeIcon from '@mui/icons-material/Home';
 import {Link} from 'react-router-dom';
-import Tooltip from '@material-ui/core/Tooltip';
+import Tooltip from '@mui/material/Tooltip';
 
 const useStyles = makeStyles((theme) => ({
   root: {

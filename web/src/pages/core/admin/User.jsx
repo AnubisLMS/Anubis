@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 
-import Grid from '@material-ui/core/Grid';
-import {DataGrid} from '@material-ui/data-grid';
+import Grid from '@mui/material/Grid';
+import {DataGrid} from '@mui/x-data-grid';
 
 import useQuery from '../../../hooks/useQuery';
 import UserCard from '../../../components/core/Users/UserCard';
@@ -9,13 +9,13 @@ import CourseCard from '../../../components/core/Users/CourseCard';
 import axios from 'axios';
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import {useSnackbar} from 'notistack';
-import Typography from '@material-ui/core/Typography';
-import Link from '@material-ui/core/Link';
-import Paper from '@material-ui/core/Paper';
-import IconButton from '@material-ui/core/IconButton';
-import CheckIcon from '@material-ui/icons/Check';
-import CancelIcon from '@material-ui/icons/Cancel';
-import GitHubIcon from '@material-ui/icons/GitHub';
+import Typography from '@mui/material/Typography';
+import Link from '@mui/material/Link';
+import Paper from '@mui/material/Paper';
+import IconButton from '@mui/material/IconButton';
+import CheckIcon from '@mui/icons-material/Check';
+import CancelIcon from '@mui/icons-material/Cancel';
+import GitHubIcon from '@mui/icons-material/GitHub';
 
 
 export default function User() {

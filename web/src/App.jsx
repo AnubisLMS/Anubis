@@ -10,9 +10,9 @@ import {SnackbarProvider} from 'notistack';
 // React vis stylesheet
 import 'react-vis/dist/style.css';
 
-import {ThemeProvider} from '@material-ui/core/styles';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import CssBaseline from '@material-ui/core/CssBaseline';
+import {ThemeProvider} from '@mui/material/styles';
+import makeStyles from '@mui/material/styles/makeStyles';
+import CssBaseline from '@mui/material/CssBaseline';
 
 // Auth Context
 import AuthContext from './context/AuthContext';

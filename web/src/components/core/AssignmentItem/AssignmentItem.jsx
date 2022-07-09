@@ -1,13 +1,13 @@
 import React from 'react';
 import {useHistory} from 'react-router-dom';
 
-import AssignmentOutlinedIcon from '@material-ui/icons/AssignmentOutlined';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 import Item from '../../shared/Item/Item';
 import {useStyles} from './AssignmentItem.styles';
-import {VisibilityOff} from '@material-ui/icons';
-import {Tooltip} from '@material-ui/core';
+import {VisibilityOff} from '@mui/icons-material';
+import {Tooltip} from '@mui/material';
 
 const AssignmentItem = ({
   name,

@@ -2,17 +2,18 @@ import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
-import {KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider} from '@material-ui/pickers';
+import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
+import {DesktopDatePicker} from '@mui/x-date-pickers/DesktopDatePicker';
 
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import DateFnsUtils from '@date-io/date-fns';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import TextField from '@material-ui/core/TextField';
-import CardActions from '@material-ui/core/CardActions';
-import Button from '@material-ui/core/Button';
-import SaveIcon from '@material-ui/icons/Save';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Autocomplete from '@mui/lab/Autocomplete';
+import TextField from '@mui/material/TextField';
+import CardActions from '@mui/material/CardActions';
+import Button from '@mui/material/Button';
+import SaveIcon from '@mui/icons-material/Save';
 
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
@@ -67,23 +68,17 @@ export default function LateExceptionAddCard({assignment, setReset}) {
           options={students}
           onChange={(_, v) => setSelected(v)}
         />
-        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-          <KeyboardDatePicker
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <DesktopDatePicker
             className={classes.datePicker}
             margin="normal"
             label="Due Date"
-            format="yyyy-MM-dd"
+            format="yyyy-MM-dd hh:mm:ss"
             value={date}
             onChange={(v) => setDate(v)}
+            renderInput={(params) => <TextField {...params} />}
           />
-          <KeyboardTimePicker
-            className={classes.datePicker}
-            margin="normal"
-            label="Time"
-            value={date}
-            onChange={(v) => setDate(v)}
-          />
-        </MuiPickersUtilsProvider>
+        </LocalizationProvider>
       </CardContent>
       <CardActions>
         <Button
@@ -94,7 +89,7 @@ export default function LateExceptionAddCard({assignment, setReset}) {
           startIcon={<SaveIcon/>}
           onClick={save}
         >
-                    Add or Update
+          Add or Update
         </Button>
       </CardActions>
     </Card>

@@ -1,12 +1,12 @@
 import React from 'react';
 import clsx from 'clsx';
 
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Box';
-import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
-import QueryBuilderIcon from '@material-ui/icons/QueryBuilder';
-import PersonIcon from '@material-ui/icons/Person';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Box';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
+import QueryBuilderIcon from '@mui/icons-material/QueryBuilder';
+import PersonIcon from '@mui/icons-material/Person';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 import {toRelativeDate} from '../../../utils/datetime';
 

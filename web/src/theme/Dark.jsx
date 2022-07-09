@@ -1,4 +1,4 @@
-import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
+import {createTheme} from '@mui/material/styles';
 import FiraSans from '../assets/fonts/FiraSans-Regular.ttf';
 
 
@@ -18,7 +18,7 @@ const fira = {
     'U+2191, U+2193, U+2212, U+2215, U+FEFF',
 };
 
-let theme = createMuiTheme({
+let theme = createTheme({
   status: {
     danger: {
       main: '#ff9800',
@@ -30,7 +30,7 @@ let theme = createMuiTheme({
       main: '#009be5',
       dark: '#006db3',
     },
-    type: 'dark',
+    mode: 'dark',
   },
   typography: {
     fontFamily: 'FiraSans, Arial',

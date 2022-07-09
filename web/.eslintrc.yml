@@ -7,14 +7,16 @@ extends:
 globals:
   Atomics: readonly
   SharedArrayBuffer: readonly
-parser: babel-eslint
 parserOptions:
+  parser: '@babel/eslint-parser'
+  requireConfigFile: false
   ecmaFeatures:
     jsx: true
-  ecmaVersion: 2018
+  ecmaVersion: latest
   sourceType: module
 plugins:
   - react
+  - jsx
 rules:
   react/prop-types: off
   require-jsdoc: 0

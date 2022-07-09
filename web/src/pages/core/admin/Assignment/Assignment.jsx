@@ -3,10 +3,10 @@ import axios from 'axios';
 import {Redirect, useParams} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
 
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 import DeleteAssignmentDialog from '../../../../components/core/Assignment/DeleteAssignmentDialog';
 import ManagementIDEDialog from '../../../../components/core/AdminIDE/ManagementIDEDialog';
 import AssignmentCard from '../../../../components/core/Assignment/AssignmentCard';

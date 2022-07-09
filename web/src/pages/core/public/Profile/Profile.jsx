@@ -2,10 +2,10 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import clsx from 'clsx';
 import {useSnackbar} from 'notistack';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import GitHub from '@material-ui/icons/GitHub';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import GitHub from '@mui/icons-material/GitHub';
 
 import {useStyles} from './Profile.styles';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';

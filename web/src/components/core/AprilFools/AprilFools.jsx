@@ -1,10 +1,10 @@
 import React from 'react';
-import {makeStyles} from '@material-ui/core/styles';
-import {Alert, AlertTitle} from '@material-ui/lab';
-import IconButton from '@material-ui/core/IconButton';
-import Collapse from '@material-ui/core/Collapse';
-import CloseIcon from '@material-ui/icons/Close';
-import Typography from '@material-ui/core/Typography';
+import {makeStyles} from '@mui/material/styles';
+import {Alert, AlertTitle} from '@mui/lab';
+import IconButton from '@mui/material/IconButton';
+import Collapse from '@mui/material/Collapse';
+import CloseIcon from '@mui/icons-material/Close';
+import Typography from '@mui/material/Typography';
 
 const useStyles = makeStyles((theme) => ({
   root: {

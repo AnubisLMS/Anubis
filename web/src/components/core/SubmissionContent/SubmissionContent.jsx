@@ -1,9 +1,9 @@
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import React from 'react';
 import RadialChart from 'react-vis/dist/radial-chart';
 import {useStyles} from './SubmissionContent.styles';
-import useTheme from '@material-ui/core/styles/useTheme';
+import useTheme from '@mui/material/styles/useTheme';
 
 const SubmissionContent = ({children, submission}) => {
   const classes = useStyles();

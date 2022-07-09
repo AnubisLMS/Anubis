@@ -1,10 +1,10 @@
 import React from 'react';
 import {useStyles} from './SubmissionTest.styles';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 import clsx from 'clsx';
-import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 
 
 const SubmissionTest = ({test, expandModal, processing, hasExpand = true}) => {

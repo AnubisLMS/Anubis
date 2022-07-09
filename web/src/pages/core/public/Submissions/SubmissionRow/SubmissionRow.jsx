@@ -3,9 +3,9 @@ import {motion} from 'framer-motion';
 import clsx from 'clsx';
 import {useHistory} from 'react-router-dom';
 
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 
 import {useStyles, useAnimations} from './SubmissionRow.styles';
 

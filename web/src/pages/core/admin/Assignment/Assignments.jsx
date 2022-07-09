@@ -3,19 +3,19 @@ import {useSnackbar} from 'notistack';
 import {useHistory} from 'react-router-dom';
 import axios from 'axios';
 
-import {DataGrid} from '@material-ui/data-grid';
-import Paper from '@material-ui/core/Paper';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Tooltip from '@material-ui/core/Tooltip';
-import Button from '@material-ui/core/Button';
+import {DataGrid} from '@mui/x-data-grid';
+import Paper from '@mui/material/Paper';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import Tooltip from '@mui/material/Tooltip';
+import Button from '@mui/material/Button';
 
-import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
-import green from '@material-ui/core/colors/green';
-import grey from '@material-ui/core/colors/grey';
+import green from '@mui/material/colors/green';
+import grey from '@mui/material/colors/grey';
 
 import standardStatusHandler from '../../../../utils/standardStatusHandler';
 import ManagementIDEDialog from '../../../../components/core/AdminIDE/ManagementIDEDialog';

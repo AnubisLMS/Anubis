@@ -1,16 +1,16 @@
 import React from 'react';
-import Typography from '@material-ui/core/Typography';
-import Accordion from '@material-ui/core/Accordion';
-import AccordionSummary from '@material-ui/core/AccordionSummary';
-import AccordionDetails from '@material-ui/core/AccordionDetails';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import CancelIcon from '@material-ui/icons/Cancel';
-import BuildIcon from '@material-ui/icons/Build';
-import Fab from '@material-ui/core/Fab';
-import {makeStyles} from '@material-ui/core/styles';
-import green from '@material-ui/core/colors/green';
+import Typography from '@mui/material/Typography';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CircularProgress from '@mui/material/CircularProgress';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import BuildIcon from '@mui/icons-material/Build';
+import Fab from '@mui/material/Fab';
+import {makeStyles} from '@mui/material/styles';
+import green from '@mui/material/colors/green';
 
 const useStyles = makeStyles((theme) => ({
   heading: {

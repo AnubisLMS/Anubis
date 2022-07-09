@@ -2,13 +2,13 @@ import React, {useEffect, useState} from 'react';
 import Cookies from 'universal-cookie';
 import clsx from 'clsx';
 
-import Grid from '@material-ui/core/Grid';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
-import Toolbar from '@material-ui/core/Toolbar';
-import AppBar from '@material-ui/core/AppBar';
-import Hidden from '@material-ui/core/Hidden';
-import Button from '@material-ui/core/Button';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import Toolbar from '@mui/material/Toolbar';
+import AppBar from '@mui/material/AppBar';
+import Hidden from '@mui/material/Hidden';
+import Button from '@mui/material/Button';
 
 import ProfileAvatar from './AccountChip/AccountChip';
 

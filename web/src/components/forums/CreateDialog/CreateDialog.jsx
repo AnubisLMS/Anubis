@@ -1,12 +1,12 @@
 import React, {useState} from 'react';
 
-import Dialog from '@material-ui/core/Dialog';
-import Box from '@material-ui/core/Box';
-import Input from '@material-ui/core/Input';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import Switch from '@material-ui/core/Switch';
+import Dialog from '@mui/material/Dialog';
+import Box from '@mui/material/Box';
+import Input from '@mui/material/Input';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Switch from '@mui/material/Switch';
 
 import {Editor, EditorState} from 'draft-js';
 

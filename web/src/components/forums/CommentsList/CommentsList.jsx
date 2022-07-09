@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 
-import Box from '@material-ui/core/Box';
+import Box from '@mui/material/Box';
 import Comment from '../Comment/Comment';
 
 import {useStyles} from './CommentsList.styles';

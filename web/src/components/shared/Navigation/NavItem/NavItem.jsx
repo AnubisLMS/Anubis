@@ -2,9 +2,9 @@ import React from 'react';
 import clsx from 'clsx';
 
 import {useStyles} from './NavItem.styles';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 
 
 export default function NavItem({childId, path, icon, pathname, ...props}) {

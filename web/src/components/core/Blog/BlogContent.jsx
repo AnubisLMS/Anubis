@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import makeStyles from '@mui/material/styles/makeStyles';
 
 const useStyles = makeStyles((theme) => ({
   imgbox: {

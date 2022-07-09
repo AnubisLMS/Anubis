@@ -1,11 +1,11 @@
 import React from 'react';
 
-import AssessmentIcon from '@material-ui/icons/Assessment';
-import Typography from '@material-ui/core/Typography';
-import red from '@material-ui/core/colors/red';
-import orange from '@material-ui/core/colors/orange';
-import green from '@material-ui/core/colors/green';
-import useTheme from '@material-ui/core/styles/useTheme';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import Typography from '@mui/material/Typography';
+import red from '@mui/material/colors/red';
+import orange from '@mui/material/colors/orange';
+import green from '@mui/material/colors/green';
+import useTheme from '@mui/material/styles/useTheme';
 
 import Item from '../../shared/Item/Item';
 

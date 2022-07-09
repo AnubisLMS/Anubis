@@ -1,7 +1,7 @@
 import React from 'react';
 
-import Drawer from '@material-ui/core/Drawer';
-import Box from '@material-ui/core/Box';
+import Drawer from '@mui/material/Drawer';
+import Box from '@mui/material/Box';
 import {ReactComponent as Logo} from '../../../assets/images/Logo.svg';
 
 import {useStyles} from './Nav.styles';

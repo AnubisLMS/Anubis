@@ -1,14 +1,14 @@
 import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
-import Typography from '@material-ui/core/Typography';
+import Typography from '@mui/material/Typography';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 import standardStatusHandler from '../../../utils/standardStatusHandler';
-import Box from '@material-ui/core/Box';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import DialogActions from '@material-ui/core/DialogActions';
+import Box from '@mui/material/Box';
+import makeStyles from '@mui/material/styles/makeStyles';
+import DialogActions from '@mui/material/DialogActions';
 import gfm from 'remark-gfm';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
 import QuestionItem from './QuestionItem';
 import QuestionEditor from './QuestionEditor';
@@ -16,7 +16,7 @@ import QuestionEditor from './QuestionEditor';
 import 'ace-builds/src-min-noconflict/theme-monokai';
 import 'ace-builds/src-min-noconflict/mode-c_cpp';
 import 'ace-builds/src-min-noconflict/mode-markdown';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 
 
 const useStyles = makeStyles((theme) => ({

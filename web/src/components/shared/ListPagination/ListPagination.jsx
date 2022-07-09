@@ -2,10 +2,10 @@ import React from 'react';
 import {useStyles} from './ListPagination.styles';
 import clsx from 'clsx';
 
-import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
-import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 
 const ListPagination = ({
   page,

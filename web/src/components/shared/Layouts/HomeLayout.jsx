@@ -1,10 +1,10 @@
 import React from 'react';
 import {Link as SmoothLink, animateScroll as scroll} from 'react-scroll';
 
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Container from '@material-ui/core/Container';
-import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
-import IconButton from '@material-ui/core/IconButton';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Container from '@mui/material/Container';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import IconButton from '@mui/material/IconButton';
 
 
 const useStyles = makeStyles((theme) => ({

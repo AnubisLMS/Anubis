@@ -3,8 +3,8 @@ import {LabelSeries, Sunburst} from 'react-vis';
 import {EXTENDED_DISCRETE_COLOR_RANGE} from 'react-vis/es/theme';
 import {useSnackbar} from 'notistack';
 
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Typography from '@material-ui/core/Typography';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Typography from '@mui/material/Typography';
 
 const LABEL_STYLE = {
   fontSize: '12px',

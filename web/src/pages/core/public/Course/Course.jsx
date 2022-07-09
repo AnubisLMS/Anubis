@@ -2,10 +2,10 @@ import React, {useState, useEffect} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import SchoolIcon from '@material-ui/icons/School';
-import Divider from '@material-ui/core/Divider';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import SchoolIcon from '@mui/icons-material/School';
+import Divider from '@mui/material/Divider';
 
 import standardStatusHandler from '../../../../utils/standardStatusHandler';
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';

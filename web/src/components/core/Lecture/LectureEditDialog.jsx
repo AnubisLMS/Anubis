@@ -2,21 +2,23 @@ import React, {useEffect, useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import TextField from '@material-ui/core/TextField';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import TextField from '@mui/material/TextField';
+import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
+import {DesktopDatePicker} from '@mui/x-date-pickers/DesktopDatePicker';
 
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 import standardStatusHandler from '../../../utils/standardStatusHandler';
-import DateFnsUtils from '@date-io/date-fns';
-import {KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider} from '@material-ui/pickers';
+
 import {nonStupidDatetimeFormat} from '../../../utils/datetime';
 
 const useStyles = makeStyles((theme) => ({
@@ -110,23 +112,17 @@ export default function FileUploadDialog({setReset, open, setOpen, lecture}) {
       >
         <DialogTitle id="alert-dialog-title">Upload file</DialogTitle>
         <DialogContent>
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <KeyboardDatePicker
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DesktopDatePicker
               className={classes.datePicker}
               margin="normal"
               label={'Post Time'}
-              format="yyyy-MM-dd"
+              format="yyyy-MM-dd hh:mm:ss"
               value={postTime}
               onChange={(v) => setPostTime(v)}
+              renderInput={(params) => <TextField {...params} />}
             />
-            <KeyboardTimePicker
-              className={classes.datePicker}
-              margin="normal"
-              label="Time"
-              value={postTime}
-              onChange={(v) => setPostTime(v)}
-            />
-          </MuiPickersUtilsProvider>
+          </LocalizationProvider>
           <TextField
             fullWidth
             className={classes.field}

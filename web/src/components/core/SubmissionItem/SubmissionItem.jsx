@@ -1,7 +1,7 @@
 import React from 'react';
 
-import AssessmentIcon from '@material-ui/icons/Assessment';
-import Typography from '@material-ui/core/Typography';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import Typography from '@mui/material/Typography';
 
 import Item from '../../shared/Item/Item';
 import {useStyles} from './SubmissionItem.styles';

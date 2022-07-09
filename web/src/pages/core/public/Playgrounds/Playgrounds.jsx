@@ -3,12 +3,12 @@ import axios from 'axios';
 import clsx from 'clsx';
 import {useSnackbar} from 'notistack';
 
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Typography from '@material-ui/core/Typography';
-import Tooltip from '@material-ui/core/Tooltip';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import CircularProgress from '@mui/material/CircularProgress';
+import Typography from '@mui/material/Typography';
+import Tooltip from '@mui/material/Tooltip';
 
 import ListHeader from '../../../../components/shared/ListHeader/ListHeader';
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';

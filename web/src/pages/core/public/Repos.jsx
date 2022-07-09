@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 
 import ReposTable from '../../../components/core/Repos/ReposTable';
 import StandardLayout from '../../../components/shared/Layouts/StandardLayout';

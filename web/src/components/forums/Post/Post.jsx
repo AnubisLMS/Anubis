@@ -1,10 +1,10 @@
 import React from 'react';
 
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import CommentIcon from '@material-ui/icons/Comment';
-import CreateIcon from '@material-ui/icons/Create';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import CommentIcon from '@mui/icons-material/Comment';
+import CreateIcon from '@mui/icons-material/Create';
 
 import Divider from '../../shared/Divider/Divider';
 import CommentsList from '../CommentsList/CommentsList';

@@ -4,29 +4,30 @@ import {useSnackbar} from 'notistack';
 import {Link} from 'react-router-dom';
 import clsx from 'clsx';
 
-import {KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider} from '@material-ui/pickers';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Grid from '@material-ui/core/Grid';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import TextField from '@material-ui/core/TextField';
-import DateFnsUtils from '@date-io/date-fns';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
-import Button from '@material-ui/core/Button';
-import CardActions from '@material-ui/core/CardActions';
-import yellow from '@material-ui/core/colors/yellow';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
-import Tooltip from '@material-ui/core/Tooltip';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
+import {DesktopDatePicker} from '@mui/x-date-pickers/DesktopDatePicker';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import TextField from '@mui/material/TextField';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
+import Button from '@mui/material/Button';
+import CardActions from '@mui/material/CardActions';
+import yellow from '@mui/material/colors/yellow';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import Tooltip from '@mui/material/Tooltip';
+import Autocomplete from '@mui/lab/Autocomplete';
 
-import SaveIcon from '@material-ui/icons/Save';
-import EditIcon from '@material-ui/icons/Edit';
-import RefreshIcon from '@material-ui/icons/Refresh';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import AccessTimeIcon from '@material-ui/icons/AccessTime';
-import PeopleIcon from '@material-ui/icons/People';
+import SaveIcon from '@mui/icons-material/Save';
+import EditIcon from '@mui/icons-material/Edit';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import PeopleIcon from '@mui/icons-material/People';
 
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 import standardStatusHandler from '../../../utils/standardStatusHandler';
@@ -119,7 +120,7 @@ export default function AssignmentCard({assignment, editableFields, updateField,
                       onChange={(_, v) => updateField(assignment.id, field, false, false, true)(v)}
                       options={images}
                       getOptionLabel={(option) => option.title}
-                      renderInput={(params) => <TextField {...params} label={label} variant="outlined" />}
+                      renderInput={(params) => <TextField {...params} label={label} variant="outlined"/>}
                     />
                   </Grid>
                 );
@@ -183,23 +184,17 @@ export default function AssignmentCard({assignment, editableFields, updateField,
               case 'datetime':
                 return (
                   <Grid item xs={12} key={field}>
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                      <KeyboardDatePicker
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                      <DesktopDatePicker
                         className={classes.datePicker}
                         margin="normal"
                         label={label}
-                        format="yyyy-MM-dd"
+                        format="yyyy-MM-dd hh:mm:ss"
                         value={assignment[field]}
                         onChange={updateField(assignment.id, field, false, true)}
+                        renderInput={(params) => <TextField {...params} />}
                       />
-                      <KeyboardTimePicker
-                        className={classes.datePicker}
-                        margin="normal"
-                        label="Time"
-                        value={assignment[field]}
-                        onChange={updateField(assignment.id, field, false, true)}
-                      />
-                    </MuiPickersUtilsProvider>
+                    </LocalizationProvider>
                   </Grid>
                 );
               }

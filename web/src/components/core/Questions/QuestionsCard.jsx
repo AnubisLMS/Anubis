@@ -4,21 +4,21 @@ import axios from 'axios';
 import gfm from 'remark-gfm';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
 
-import Typography from '@material-ui/core/Typography';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Accordion from '@material-ui/core/Accordion';
-import AccordionSummary from '@material-ui/core/AccordionSummary';
-import AccordionDetails from '@material-ui/core/AccordionDetails';
-import Grid from '@material-ui/core/Grid';
-import Tooltip from '@material-ui/core/Tooltip';
-import green from '@material-ui/core/colors/green';
-import red from '@material-ui/core/colors/red';
-import grey from '@material-ui/core/colors/grey';
+import Typography from '@mui/material/Typography';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Grid from '@mui/material/Grid';
+import Tooltip from '@mui/material/Tooltip';
+import green from '@mui/material/colors/green';
+import red from '@mui/material/colors/red';
+import grey from '@mui/material/colors/grey';
 
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
-import AssignmentLateIcon from '@material-ui/icons/AssignmentLate';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import AssignmentLateIcon from '@mui/icons-material/AssignmentLate';
 
 import QuestionEditor from './QuestionEditor';
 

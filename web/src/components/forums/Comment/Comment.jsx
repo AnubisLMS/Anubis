@@ -2,11 +2,11 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import {useSnackbar} from 'notistack';
 
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import ReplyIcon from '@material-ui/icons/Reply';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import ReplyIcon from '@mui/icons-material/Reply';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import {useStyles} from './Comment.styles';
 import standardErrorHandler from '../../../utils/standardErrorHandler';

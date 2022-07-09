@@ -4,19 +4,19 @@ import axios from 'axios';
 import {useSnackbar} from 'notistack';
 import {Link} from 'react-router-dom';
 
-import {DataGrid} from '@material-ui/data-grid/';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
-import Switch from '@material-ui/core/Switch';
-import TextField from '@material-ui/core/TextField';
-import Fab from '@material-ui/core/Fab';
-import Tooltip from '@material-ui/core/Tooltip';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import Typography from '@material-ui/core/Typography';
+import {DataGrid} from '@mui/x-data-grid';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Paper from '@mui/material/Paper';
+import Grid from '@mui/material/Grid';
+import Switch from '@mui/material/Switch';
+import TextField from '@mui/material/TextField';
+import Fab from '@mui/material/Fab';
+import Tooltip from '@mui/material/Tooltip';
+import Autocomplete from '@mui/lab/Autocomplete';
+import Typography from '@mui/material/Typography';
 
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';

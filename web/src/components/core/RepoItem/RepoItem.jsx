@@ -1,10 +1,10 @@
 import React from 'react';
 import {useHistory} from 'react-router-dom';
 
-import GitHubIcon from '@material-ui/icons/GitHub';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import Box from '@material-ui/core/Box';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
 
 import {useStyles} from './RepoItem.styles';
 import Item from '../../shared/Item/Item';

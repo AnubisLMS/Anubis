@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
 
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Paper from '@material-ui/core/Paper';
-import Slider from '@material-ui/core/Slider';
-import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Paper from '@mui/material/Paper';
+import Slider from '@mui/material/Slider';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
 
 import {
   DiscreteColorLegend,

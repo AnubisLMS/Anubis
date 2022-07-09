@@ -1,14 +1,14 @@
 import React from 'react';
 
-import {Box} from '@material-ui/core';
-import {Typography} from '@material-ui/core';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import CancelIcon from '@material-ui/icons/Cancel';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import {Box} from '@mui/material';
+import {Typography} from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 import clsx from 'clsx';
 import {useStyles} from './SubmissionHeader.styles';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 
 
 const SubmissionHeader = ({

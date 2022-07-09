@@ -2,12 +2,12 @@ import React from 'react';
 import axios from 'axios';
 import {useSnackbar} from 'notistack';
 
-import {DataGrid} from '@material-ui/data-grid';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import Delete from '@material-ui/icons/Delete';
+import {DataGrid} from '@mui/x-data-grid';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Delete from '@mui/icons-material/Delete';
 
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';

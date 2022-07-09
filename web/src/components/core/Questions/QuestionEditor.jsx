@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import Typography from '@material-ui/core/Typography';
-import {makeStyles} from '@material-ui/core/styles';
+import Typography from '@mui/material/Typography';
+import {makeStyles} from '@mui/material/styles';
 import AceEditor from 'react-ace';
 import gfm from 'remark-gfm';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
@@ -9,13 +9,13 @@ import 'ace-builds/src-min-noconflict/theme-monokai';
 import 'ace-builds/src-min-noconflict/mode-c_cpp';
 import 'ace-builds/src-min-noconflict/mode-python';
 import 'ace-builds/src-min-noconflict/mode-markdown';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Box from '@material-ui/core/Box';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Box from '@mui/material/Box';
 
 const useStyles = makeStyles((theme) => ({
   saveButton: {

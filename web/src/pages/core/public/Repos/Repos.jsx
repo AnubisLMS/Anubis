@@ -2,12 +2,12 @@ import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import {useSnackbar} from 'notistack';
 
-import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogActions from '@material-ui/core/DialogActions';
-import Button from '@material-ui/core/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
 
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';
 import ListHeader from '../../../../components/shared/ListHeader/ListHeader';

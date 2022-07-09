@@ -2,11 +2,11 @@ import React, {useState} from 'react';
 import {useHistory} from 'react-router-dom';
 
 import {useStyles} from './AccountChip.styles';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const AccountChip = ({user, netid, onContextChange, course}) => {
   const classes = useStyles();

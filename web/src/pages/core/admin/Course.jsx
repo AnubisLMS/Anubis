@@ -4,11 +4,11 @@ import {format} from 'date-fns';
 import {useSnackbar} from 'notistack';
 import {Route, Switch} from 'react-router-dom';
 
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 
-import Button from '@material-ui/core/Button';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Typography from '@material-ui/core/Typography';
+import Button from '@mui/material/Button';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Typography from '@mui/material/Typography';
 
 import CourseCard from '../../../components/core/Course/CourseCard';
 import AuthContext from '../../../context/AuthContext';

@@ -1,19 +1,19 @@
 import React, {useState} from 'react';
 
-import {DataGrid} from '@material-ui/data-grid';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import {DataGrid} from '@mui/x-data-grid';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
-import IconButton from '@material-ui/core/IconButton';
-import GitHubIcon from '@material-ui/icons/GitHub';
-import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import IconButton from '@mui/material/IconButton';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import axios from 'axios';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 import standardStatusHandler from '../../../utils/standardStatusHandler';

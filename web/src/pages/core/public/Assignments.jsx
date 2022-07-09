@@ -2,8 +2,8 @@ import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import {useSnackbar} from 'notistack';
 
-import Box from '@material-ui/core/Box';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import Box from '@mui/material/Box';
+import makeStyles from '@mui/material/styles/makeStyles';
 
 import useQuery from '../../../hooks/useQuery';
 import AssignmentItem from '../../../components/core/AssignmentItem/AssignmentItem';

@@ -1,18 +1,18 @@
 import React, {useState} from 'react';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import makeStyles from '@mui/material/styles/makeStyles';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
-import {DataGrid} from '@material-ui/data-grid/';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
+import {DataGrid} from '@mui/x-data-grid';
+import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 
-import SaveIcon from '@material-ui/icons/Save';
-import EditIcon from '@material-ui/icons/Edit';
-import AddIcon from '@material-ui/icons/Add';
+import SaveIcon from '@mui/icons-material/Save';
+import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
 
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';

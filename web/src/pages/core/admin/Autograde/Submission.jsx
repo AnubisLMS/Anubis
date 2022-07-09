@@ -2,9 +2,9 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import {useSnackbar} from 'notistack';
 
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
 
 import {translateSubmission} from '../../../../utils/submission';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';

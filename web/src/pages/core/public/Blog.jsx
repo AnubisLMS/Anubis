@@ -1,15 +1,15 @@
 import React from 'react';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Grid from '@material-ui/core/Grid';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Grid from '@mui/material/Grid';
 import {Route, Switch} from 'react-router-dom';
 
-import Divider from '@material-ui/core/Divider';
+import Divider from '@mui/material/Divider';
 
 import BlogPost from '../../../components/core/Blog/BlogPost';
 
 import posts from '../../../content';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 const useStyles = makeStyles((theme) => ({
   card: {

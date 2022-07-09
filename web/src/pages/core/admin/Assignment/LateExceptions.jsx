@@ -3,16 +3,16 @@ import {useSnackbar} from 'notistack';
 import axios from 'axios';
 import {useParams} from 'react-router-dom';
 
-import {DataGrid} from '@material-ui/data-grid';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Tooltip from '@material-ui/core/Tooltip';
+import {DataGrid} from '@mui/x-data-grid';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import Paper from '@mui/material/Paper';
+import CircularProgress from '@mui/material/CircularProgress';
+import Tooltip from '@mui/material/Tooltip';
 
-import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
-import IconButton from '@material-ui/core/IconButton';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import IconButton from '@mui/material/IconButton';
 
 import standardErrorHandler from '../../../../utils/standardErrorHandler';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';

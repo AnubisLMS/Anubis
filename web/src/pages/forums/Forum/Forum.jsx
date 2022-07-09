@@ -12,13 +12,13 @@ import CreateDialog from '../../../components/forums/CreateDialog/CreateDialog';
 
 import {useStyles} from './Forum.styles.jsx';
 
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 export default function Forum({user}) {
   const {enqueueSnackbar} = useSnackbar();

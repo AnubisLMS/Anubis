@@ -2,8 +2,8 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import {useSnackbar} from 'notistack';
 
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Input from '@material-ui/core/Input';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Input from '@mui/material/Input';
 
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 

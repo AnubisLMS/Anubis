@@ -2,13 +2,13 @@ import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
-import {DataGrid} from '@material-ui/data-grid';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
-import Button from '@material-ui/core/Button';
-import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import {DataGrid} from '@mui/x-data-grid';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 import FileUploadDialog from '../../../components/core/Static/FileUploadDialog';
 import standardStatusHandler from '../../../utils/standardStatusHandler';

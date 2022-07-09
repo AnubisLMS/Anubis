@@ -4,11 +4,11 @@ import axios from 'axios';
 import {useHistory} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
 
-import {DataGrid} from '@material-ui/data-grid';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
+import {DataGrid} from '@mui/x-data-grid';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 
 import standardStatusHandler from '../../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../../utils/standardErrorHandler';

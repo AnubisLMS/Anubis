@@ -2,9 +2,9 @@ import React from 'react';
 import {useHistory} from 'react-router-dom';
 
 // Reference for Icons: https://mui.com/components/material-icons/?query=assignment
-import FeaturedVideoIcon from '@material-ui/icons/FeaturedVideo';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import FeaturedVideoIcon from '@mui/icons-material/FeaturedVideo';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 import Item from '../../shared/Item/Item';
 import {useStyles} from './LectureItem.styles';
 

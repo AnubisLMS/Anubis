@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import {useSnackbar} from 'notistack';
 
-import Box from '@material-ui/core/Box';
+import Box from '@mui/material/Box';
 
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';

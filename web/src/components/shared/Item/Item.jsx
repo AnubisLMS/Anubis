@@ -3,13 +3,13 @@ import {motion} from 'framer-motion';
 import clsx from 'clsx';
 import {useHistory} from 'react-router-dom';
 
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import ListItemIcon from '@mui/material/ListItemIcon';
 
 import {useStyles, useAnimations} from './Item.styles.jsx';
-import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 
 
 const Item = ({
