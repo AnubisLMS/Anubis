@@ -1,4 +1,4 @@
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 
 export const useStyles = makeStyles((theme) => ({
   divider: {

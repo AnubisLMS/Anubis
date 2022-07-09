@@ -1,7 +1,7 @@
 import React from 'react';
 import {Link as SmoothLink, animateScroll as scroll} from 'react-scroll';
 
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Container from '@mui/material/Container';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import IconButton from '@mui/material/IconButton';
@@ -52,7 +52,7 @@ export default function HomeLayout({children = null}) {
           smooth={true}
           offset={-70}
           duration={500}
-        >
+          size="large">
           <ArrowDownwardIcon fontSize={'large'}/>
         </IconButton>
 

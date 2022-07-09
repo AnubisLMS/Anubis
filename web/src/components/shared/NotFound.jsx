@@ -1,5 +1,5 @@
 import React from 'react';
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardMedia from '@mui/material/CardMedia';
@@ -61,7 +61,7 @@ export default function NotFound() {
   const [quote, setQuote] = React.useState(getQuote());
 
   return (
-    <Grid container alignItems={'center'} justify={'center'} direction={'column'}>
+    <Grid container alignItems={'center'} justifyContent={'center'} direction={'column'}>
       <Grid item xs>
         <Card className={classes.root}>
           <CardHeader
@@ -75,7 +75,7 @@ export default function NotFound() {
           />
           <CardActions disableSpacing>
             <Tooltip title={'Mom come pick me up I\'m scared'}>
-              <IconButton component={Link} to={'/'}>
+              <IconButton component={Link} to={'/'} size="large">
                 <HomeIcon/>
               </IconButton>
             </Tooltip>
@@ -84,7 +84,7 @@ export default function NotFound() {
                 aria-label="reload quote"
                 onClick={() => setQuote(getQuote())}
                 className={classes.iconleft}
-              >
+                size="large">
                 <RefreshIcon/>
               </IconButton>
             </Tooltip>

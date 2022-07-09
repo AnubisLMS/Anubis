@@ -1,11 +1,11 @@
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 
 export const useStyles = makeStyles((theme) => ({
   root: {
     paddingLeft: theme.spacing(2),
   },
   categoryHeader: {
-    marginTop: `${theme.spacing(2)}px`,
+    marginTop: theme.spacing(2),
     color: theme.palette.primary.main,
     letterSpacing: '3px',
   },

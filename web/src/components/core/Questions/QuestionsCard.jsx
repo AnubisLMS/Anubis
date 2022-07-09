@@ -5,7 +5,7 @@ import gfm from 'remark-gfm';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
 
 import Typography from '@mui/material/Typography';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -59,7 +59,7 @@ export default function QuestionsCard({questions}) {
 
   return (
     <div className={classes.root}>
-      <Grid container justify={'center'} spacing={1}>
+      <Grid container justifyContent={'center'} spacing={1}>
 
         {questions.map((question) => (
           <Grid item xs={12} key={`question-${question.question.pool}`} className={classes.question}>

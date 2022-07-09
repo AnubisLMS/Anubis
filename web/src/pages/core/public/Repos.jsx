@@ -29,7 +29,7 @@ const Repos = () => {
     <AuthContext.Consumer>
       {(user) => (
         <StandardLayout description={`${user?.name}'s Repos`}>
-          <Grid container spacing={1} justify={'center'}>
+          <Grid container spacing={1} justifyContent={'center'}>
             <Grid item xs={12}>
               <ReposTable rows={rows} setReset={setReset}/>
             </Grid>

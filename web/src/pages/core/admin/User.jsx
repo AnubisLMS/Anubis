@@ -53,7 +53,7 @@ export default function User() {
   }
 
   return (
-    <Grid container spacing={4} justify={'center'} alignItems={'flex-start'}>
+    <Grid container spacing={4} justifyContent={'center'} alignItems={'flex-start'}>
       <Grid item xs={12}>
         <Typography variant="h6">
           Anubis
@@ -126,7 +126,7 @@ export default function User() {
                 columns={[
                   {
                     field: 'playground', headerName: 'Playground', width: 120, renderCell: (params) => (
-                      <IconButton color={params.value ? 'primary' : 'secondary'}>
+                      <IconButton color={params.value ? 'primary' : 'secondary'} size="large">
                         {params.value ? <CheckIcon/> : <CancelIcon/>}
                       </IconButton>
                     ),
@@ -144,14 +144,19 @@ export default function User() {
                   {field: 'state', headerName: 'State'},
                   {
                     field: 'autosave', headerName: 'Autosave', width: 120, renderCell: (params) => (
-                      <IconButton color={params.row.autosave ? 'primary' : 'secondary'}>
+                      <IconButton color={params.row.autosave ? 'primary' : 'secondary'} size="large">
                         {params.row.autosave ? <CheckIcon/> : <CancelIcon/>}
                       </IconButton>
                     ),
                   },
                   {
                     field: 'repo_url', headerName: 'Repo', width: 100, renderCell: ({row}) => (
-                      <IconButton color={'primary'} component={'a'} href={row.repo_url} target={'_blank'}>
+                      <IconButton
+                        color={'primary'}
+                        component={'a'}
+                        href={row.repo_url}
+                        target={'_blank'}
+                        size="large">
                         <GitHubIcon/>
                       </IconButton>
                     ),

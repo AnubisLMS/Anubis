@@ -5,7 +5,7 @@ import 'ace-builds/src-noconflict/mode-markdown';
 import gfm from 'remark-gfm';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';
 
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
@@ -110,7 +110,7 @@ export default function QuestionCard({assignmentQuestion, updateQuestion, saveQu
           </Grid>
         </Grid>
 
-        <Grid container spacing={2} direction={'row'} justify={'center'} className={classes.padding1}>
+        <Grid container spacing={2} direction={'row'} justifyContent={'center'} className={classes.padding1}>
           <Grid item sm={12} md={6}>
             <Typography variant={'body1'}>
               Question Editor
@@ -139,7 +139,7 @@ export default function QuestionCard({assignmentQuestion, updateQuestion, saveQu
           </Grid>
         </Grid>
 
-        <Grid container spacing={2} direction={'row'} justify={'center'} className={classes.padding1}>
+        <Grid container spacing={2} direction={'row'} justifyContent={'center'} className={classes.padding1}>
           <Grid item sm={12} md={6}>
             <Typography variant={'body1'}>
               Solution Editor

@@ -3,7 +3,7 @@ import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
 import {DataGrid} from '@mui/x-data-grid';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
@@ -102,7 +102,7 @@ export default function Static() {
 
   return (
     <div className={classes.root}>
-      <Grid container spacing={4} justify={'center'} alignItems={'center'}>
+      <Grid container spacing={4} justifyContent={'center'} alignItems={'center'}>
         <Grid item xs={12}>
           <Typography variant="h6">
             Anubis

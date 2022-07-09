@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import {useSnackbar} from 'notistack';
 
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 
@@ -55,7 +55,7 @@ export default function Submission() {
 
   return (
     <div className={classes.root}>
-      <Grid container spacing={4} justify={'center'}>
+      <Grid container spacing={4} justifyContent={'center'}>
         <Grid item xs={12}>
           <Typography variant="h6">
             Anubis

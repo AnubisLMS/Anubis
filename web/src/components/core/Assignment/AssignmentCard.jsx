@@ -7,7 +7,7 @@ import clsx from 'clsx';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {DesktopDatePicker} from '@mui/x-date-pickers/DesktopDatePicker';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -201,7 +201,7 @@ export default function AssignmentCard({assignment, editableFields, updateField,
             })}
             <Grid item xs={12}>
               <Tooltip title={'Reload grading progress'}>
-                <IconButton color={'primary'} onClick={() => setReset((prev) => ++prev)}>
+                <IconButton color={'primary'} onClick={() => setReset((prev) => ++prev)} size="large">
                   <RefreshIcon/>
                 </IconButton>
               </Tooltip>

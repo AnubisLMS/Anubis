@@ -4,7 +4,7 @@ import axios from 'axios';
 import {useParams} from 'react-router-dom';
 
 import {DataGrid} from '@mui/x-data-grid';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
@@ -61,7 +61,7 @@ export default function LateExceptions() {
   }
 
   return (
-    <Grid container spacing={2} justify={'center'} alignItems={'center'}>
+    <Grid container spacing={2} justifyContent={'center'} alignItems={'center'}>
       <Grid item xs={12}>
         <Typography variant="h6">
           Anubis
@@ -82,7 +82,7 @@ export default function LateExceptions() {
             {field: 'due_date', headerName: 'Due Date', width: 170},
             {field: 'delete', headerName: 'Delete', width: 170, renderCell: ({row}) => (
               <Tooltip title={'Delete late exception'}>
-                <IconButton color={'secondary'} onClick={remove(row)}>
+                <IconButton color={'secondary'} onClick={remove(row)} size="large">
                   <DeleteForeverIcon/>
                 </IconButton>
               </Tooltip>

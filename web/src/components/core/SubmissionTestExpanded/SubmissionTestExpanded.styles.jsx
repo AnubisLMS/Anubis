@@ -1,4 +1,4 @@
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 
 export const useStyles = makeStyles((theme) => ({
   submissionTestExpandedContainer: {
@@ -6,26 +6,26 @@ export const useStyles = makeStyles((theme) => ({
     minHeight: '400px',
     color: theme.palette.white,
     // backgroundColor: theme.palette.dark.blue['200'],
-    borderRadius: `${theme.spacing(1.25)}px`,
+    borderRadius: theme.spacing(1.25),
   },
   testHeader: {
     borderBottom: '1px',
     borderColor: theme.palette.color.gray,
-    padding: `${theme.spacing(3)}px ${theme.spacing(6)}px`,
+    padding: `${theme.spacing(3)} ${theme.spacing(6)}`,
     verticalAlign: 'middle',
   },
   testName: {
     display: 'inline',
     fontSize: '18px',
     color: theme.palette.white,
-    paddingRight: `${theme.spacing(3)}px`,
+    paddingRight: theme.spacing(3),
     width: 'fit-content',
   },
   submissionIDTitle: {
     color: theme.palette.color.gray,
     display: 'inline',
     fontSize: '14px',
-    padding: `0px ${theme.spacing(3)}px`,
+    padding: `0px ${theme.spacing(3)}`,
     width: 'fit-content',
   },
   submissionID: {
@@ -35,7 +35,7 @@ export const useStyles = makeStyles((theme) => ({
     color: theme.palette.color.gray,
     display: 'inline',
     fontSize: '14px',
-    padding: `0px ${theme.spacing(3)}px`,
+    padding: `0px ${theme.spacing(3)}`,
     width: 'fit-content',
   },
   assignmentName: {
@@ -44,7 +44,7 @@ export const useStyles = makeStyles((theme) => ({
   testStatus: {
     display: 'inline',
     fontSize: '14px',
-    padding: `0px ${theme.spacing(3)}px`,
+    padding: `0px ${theme.spacing(3)}`,
     width: 'fit-content',
   },
   testStatusSuccess: {
@@ -65,18 +65,18 @@ export const useStyles = makeStyles((theme) => ({
     verticalAlign: 'middle',
   },
   testBody: {
-    padding: `${theme.spacing(3)}px ${theme.spacing(6)}px`,
+    padding: `${theme.spacing(3)} ${theme.spacing(6)}`,
   },
   testOutputTitle: {
     color: theme.palette.white,
     fontSize: '18px',
-    paddingBottom: `${theme.spacing(3)}px`,
+    paddingBottom: theme.spacing(3),
   },
   testOutput: {
     color: theme.palette.color.gray,
     whiteSpace: 'pre-line',
     fontSize: '16px',
-    paddingBottom: `${theme.spacing(3)}px`,
+    paddingBottom: theme.spacing(3),
   },
   testDiff: {
     color: 'black',

@@ -4,8 +4,8 @@ import axios from 'axios';
 import {useSnackbar} from 'notistack';
 
 import green from '@mui/material/colors/green';
-import makeStyles from '@mui/material/styles/makeStyles';
 import Dialog from '@mui/material/Dialog';
+import makeStyles from '@mui/styles/makeStyles';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';

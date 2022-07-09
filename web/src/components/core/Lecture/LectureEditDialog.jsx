@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';

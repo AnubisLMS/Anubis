@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import Box from '@mui/material/Box';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import DialogActions from '@mui/material/DialogActions';
 import gfm from 'remark-gfm';
 import Button from '@mui/material/Button';

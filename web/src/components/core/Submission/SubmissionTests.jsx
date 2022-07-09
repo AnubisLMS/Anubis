@@ -1,5 +1,5 @@
 import React from 'react';
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import Typography from '@mui/material/Typography';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -83,7 +83,7 @@ export default function SubmissionTests({tests, stop}) {
             {test.test.hidden ? (
               <div className={classes.hiddenIcon}>
                 <Tooltip title={'Test hidden to students'}>
-                  <IconButton>
+                  <IconButton size="large">
                     <HighlightOffIcon/>
                   </IconButton>
                 </Tooltip>

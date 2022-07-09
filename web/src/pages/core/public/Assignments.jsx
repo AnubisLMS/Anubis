@@ -3,7 +3,7 @@ import axios from 'axios';
 import {useSnackbar} from 'notistack';
 
 import Box from '@mui/material/Box';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 
 import useQuery from '../../../hooks/useQuery';
 import AssignmentItem from '../../../components/core/AssignmentItem/AssignmentItem';

@@ -5,7 +5,7 @@ import {useSnackbar} from 'notistack';
 import {DataGrid} from '@mui/x-data-grid';
 import green from '@mui/material/colors/green';
 import Grid from '@mui/material/Grid';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
@@ -131,7 +131,7 @@ export default function Playgrounds() {
   }, [sessions]);
 
   return (
-    <Grid container spacing={4} justify={'center'} alignItems={'center'}>
+    <Grid container spacing={4} justifyContent={'center'} alignItems={'center'}>
       <Grid item xs={12}>
         <Typography variant="h6">
           Anubis

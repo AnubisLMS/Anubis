@@ -66,6 +66,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.18.2",
+    "@mui/codemod": "^5.8.7",
     "eslint": "^8.19.0",
     "eslint-config-google": "^0.14.0",
     "eslint-config-standard": "^17.0.0",

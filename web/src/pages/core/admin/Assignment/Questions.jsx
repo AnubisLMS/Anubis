@@ -3,7 +3,7 @@ import axios from 'axios';
 import {useSnackbar} from 'notistack';
 import {useParams} from 'react-router-dom';
 
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 
@@ -69,7 +69,7 @@ export default function AssignmentQuestions() {
 
   return (
     <div className={classes.root}>
-      <Grid container spacing={2} justify={'center'} alignItems={'center'}>
+      <Grid container spacing={2} justifyContent={'center'} alignItems={'center'}>
         <Grid item xs={12}>
           <Typography variant="h6">
             Anubis

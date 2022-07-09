@@ -1,4 +1,4 @@
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 
 export const useStyles = makeStyles((theme) => ({
   submissionSummaryContainer: {
@@ -11,7 +11,7 @@ export const useStyles = makeStyles((theme) => ({
     justifyContent: 'space-between',
     position: 'relative',
     borderRadius: theme.spacing(1),
-    padding: `${theme.spacing(0)}px ${theme.spacing(2)}px ${theme.spacing(0)}px ${theme.spacing(2)}px`,
+    padding: `${theme.spacing(0)} ${theme.spacing(2)} ${theme.spacing(0)} ${theme.spacing(2)}`,
   },
   assignmentName: {
     color: theme.palette.white,

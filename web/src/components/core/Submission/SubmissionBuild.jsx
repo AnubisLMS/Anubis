@@ -9,7 +9,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import BuildIcon from '@mui/icons-material/Build';
 import Fab from '@mui/material/Fab';
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import green from '@mui/material/colors/green';
 
 const useStyles = makeStyles((theme) => ({

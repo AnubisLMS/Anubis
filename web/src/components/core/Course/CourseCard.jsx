@@ -4,7 +4,7 @@ import {useSnackbar} from 'notistack';
 import {Link} from 'react-router-dom';
 
 import Grid from '@mui/material/Grid';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import TextField from '@mui/material/TextField';
 import CardActionArea from '@mui/material/CardActionArea';
 import Button from '@mui/material/Button';

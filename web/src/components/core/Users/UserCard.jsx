@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardActions from '@mui/material/CardActions';
@@ -58,7 +58,7 @@ export default function UserCard({user, setUser, age}) {
   return (
     <Card className={classes.root}>
       <CardContent>
-        <Grid container spacing={1} justify={'center'} alignItems={'flex-start'}>
+        <Grid container spacing={1} justifyContent={'center'} alignItems={'flex-start'}>
           {/* netid */}
           <Grid item xs={12}>
             <Typography gutterBottom variant="subtitle1">

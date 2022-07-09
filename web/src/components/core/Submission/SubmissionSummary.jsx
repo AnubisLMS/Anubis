@@ -16,7 +16,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import CircularProgress from '@mui/material/CircularProgress';
 import React from 'react';
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import Divider from '@mui/material/Divider';
 import {useSnackbar} from 'notistack';
 import clsx from 'clsx';
@@ -80,7 +80,7 @@ export default function SubmissionSummary({submission, regrade, stop}) {
     <Tooltip title={submission.state}>
       <IconButton
         onClick={() => regrade(submission.commitHash, enqueueSnackbar)}
-      >
+        size="large">
         <CircularProgress size="1em"/>
       </IconButton>
     </Tooltip>
@@ -103,7 +103,7 @@ export default function SubmissionSummary({submission, regrade, stop}) {
                 <Tooltip title={submission.on_time ?
                   'Submitted On Time' :
                   'Submitted Late'}>
-                  <IconButton component="div">
+                  <IconButton component="div" size="large">
                     {submission.on_time ?
                       <CheckCircleIcon style={{color: green[500]}}/> :
                       <CancelIcon style={{color: red[500]}}/>}
@@ -119,7 +119,7 @@ export default function SubmissionSummary({submission, regrade, stop}) {
             <ListItem>
               <ListItemIcon>
                 <Tooltip title={`Submitted at ${submission.created}`}>
-                  <IconButton component="div">
+                  <IconButton component="div" size="large">
                     <AccessTimeIcon color={'primary'}/>
                   </IconButton>
                 </Tooltip>
@@ -132,7 +132,7 @@ export default function SubmissionSummary({submission, regrade, stop}) {
               <ListItemIcon>
                 {!submission.processed ? (
                   <Tooltip title={'Submission is still processing!'}>
-                    <IconButton>
+                    <IconButton size="large">
                       <CircularProgress size="1em"/>
                     </IconButton>
                   </Tooltip>
@@ -140,7 +140,7 @@ export default function SubmissionSummary({submission, regrade, stop}) {
                   <Tooltip title={testsPassed === totalTests ?
                     'All Tests Passed' :
                     'Not all tests passed'}>
-                    <IconButton>
+                    <IconButton size="large">
                       {testsPassed === totalTests ?
                         <CheckCircleIcon style={{color: green[500]}}/> :
                         <CancelIcon style={{color: red[500]}}/>}

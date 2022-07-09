@@ -8,7 +8,7 @@ import green from '@mui/material/colors/green';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import red from '@mui/material/colors/red';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
 
 
@@ -29,7 +29,7 @@ export default function IDEHeader({sessionsAvailable}) {
   return (
     <div className={classes.root}>
       <Tooltip title={sessionsAvailable ? 'Anubis Cloud IDE Available' : 'Anubis Cloud IDE Not Available'}>
-        <IconButton>
+        <IconButton size="large">
           {sessionsAvailable ?
             <CheckOutlinedIcon style={{color: green[500]}} fontSize={'small'}/> :
             <CloseOutlinedIcon style={{color: red[500]}} fontSize={'small'}/>}
@@ -45,7 +45,7 @@ export default function IDEHeader({sessionsAvailable}) {
         'page to select which assignment you would like to launch an Anubis Cloud IDEfor.' :
         'The maximum quota of Anubis Cloud IDE sessions on our servers has been reached. ' +
         'At this time, we cannot allocate more sessions until others have ended.'}>
-        <IconButton>
+        <IconButton size="large">
           <HelpOutlineOutlinedIcon fontSize={'small'}/>
         </IconButton>
       </Tooltip>

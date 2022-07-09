@@ -1,5 +1,5 @@
 import React from 'react';
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import {Alert, AlertTitle} from '@mui/lab';
 import IconButton from '@mui/material/IconButton';
 import Collapse from '@mui/material/Collapse';

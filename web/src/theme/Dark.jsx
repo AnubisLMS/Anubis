@@ -1,4 +1,4 @@
-import {createTheme} from '@mui/material/styles';
+import {createTheme, adaptV4Theme} from '@mui/material/styles';
 import FiraSans from '../assets/fonts/FiraSans-Regular.ttf';
 
 
@@ -18,7 +18,7 @@ const fira = {
     'U+2191, U+2193, U+2212, U+2215, U+FEFF',
 };
 
-let theme = createTheme({
+let theme = createTheme(adaptV4Theme({
   status: {
     danger: {
       main: '#ff9800',
@@ -54,7 +54,7 @@ let theme = createTheme({
 
     },
   },
-});
+}));
 
 theme = {
   ...theme,

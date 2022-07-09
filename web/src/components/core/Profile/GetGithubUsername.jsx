@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
@@ -68,7 +68,7 @@ export default function GetGithubUsername() {
   };
 
   return (
-    <Grid container justify="center" alignContent={'center'} direction={'column'} spacing={1}>
+    <Grid container justifyContent="center" alignContent={'center'} direction={'column'} spacing={1}>
 
       {!chip.hidden ?
         <Chip
@@ -83,7 +83,7 @@ export default function GetGithubUsername() {
       <Grid item xs={12}>
         <Card>
           <CardContent>
-            <Grid container justify="center" alignContent={'center'} direction={'column'} spacing={1}>
+            <Grid container justifyContent="center" alignContent={'center'} direction={'column'} spacing={1}>
               <Grid item xs={12}>
                 <Typography variant={'h6'}>
                   Please enter your Github Username

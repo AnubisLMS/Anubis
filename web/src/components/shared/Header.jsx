@@ -65,11 +65,11 @@ export default function Header({classes, open, onDrawerToggle, user}) {
                 aria-label="open drawer"
                 onClick={onDrawerToggle}
                 className={classes.menuButton}
-              >
+                size="large">
                 <MenuIcon/>
               </IconButton>
             </Grid>
-            <Hidden xsDown>
+            <Hidden smDown>
               <Grid item xs/>
             </Hidden>
             <Grid item>

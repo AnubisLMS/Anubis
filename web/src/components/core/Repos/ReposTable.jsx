@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import {DataGrid} from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -48,7 +48,7 @@ const useColumns = ({setDeleteOpen, setRepoSelected}) => ([
         target={'_blank'}
         rel={'noreferrer'}
         href={row.repo_url}
-      >
+        size="large">
         <GitHubIcon/>
       </IconButton>
     ),
@@ -61,7 +61,7 @@ const useColumns = ({setDeleteOpen, setRepoSelected}) => ([
           setDeleteOpen(true);
           setRepoSelected({...row});
         }}
-      >
+        size="large">
         <DeleteForeverIcon/>
       </IconButton>
     ),

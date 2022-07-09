@@ -5,7 +5,7 @@ import {useSnackbar} from 'notistack';
 
 import green from '@mui/material/colors/green';
 import Grid from '@mui/material/Grid';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -244,7 +244,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
         <Grid
           container
           direction="row"
-          justify="flex-end"
+          justifyContent="flex-end"
           alignItems="center"
         >
           <Grid item xs={12}>
@@ -284,7 +284,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
                       'responsibility to make sure that your work is saved, and submitted on time.' :
                       'Anubis will not try to automatically commit and push your work to github. It is your ' +
                       'responsibility to make sure that your work is saved, and submitted on time.'}>
-                      <IconButton>
+                      <IconButton size="large">
                         <HelpOutlineOutlinedIcon fontSize={'small'}/>
                       </IconButton>
                     </Tooltip>
@@ -312,7 +312,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
                       'data is backed up elsewhere.' :
                       'Anubis will not mount a persistent volume to your session. All work not saved elsewhere (like ' +
                       'github) will be deleted when the session ends.'}>
-                      <IconButton>
+                      <IconButton size="large">
                         <HelpOutlineOutlinedIcon fontSize={'small'}/>
                       </IconButton>
                     </Tooltip>

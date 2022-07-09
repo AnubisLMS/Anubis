@@ -5,7 +5,7 @@ import {useHistory} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
 
 import {DataGrid} from '@mui/x-data-grid';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
@@ -61,7 +61,7 @@ export default function Assignments() {
   }, []);
 
   return (
-    <Grid container spacing={4} justify={'center'}>
+    <Grid container spacing={4} justifyContent={'center'}>
       <Grid item xs={12}>
         <Typography variant="h6">
           Anubis

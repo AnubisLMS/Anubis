@@ -1,4 +1,4 @@
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 
 export const useStyles = makeStyles((theme) => ({
   submissionContainer: {
@@ -8,14 +8,14 @@ export const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     border: `2px solid ${theme.palette.dark.blue['200']}`,
-    borderRadius: `${theme.spacing(1)}px`,
+    borderRadius: theme.spacing(1),
   },
   headerContainer: {
     width: '100%',
     display: 'flex',
     flexDirection: 'row',
     borderBottom: `1px solid ${theme.palette.dark.blue['200']}`,
-    borderRadius: `${theme.spacing(1)}px ${theme.spacing(1)}px 0px 0px`,
+    borderRadius: `${theme.spacing(1)} ${theme.spacing(1)} 0px 0px`,
     alignItems: 'center',
     padding: theme.spacing(2),
   },

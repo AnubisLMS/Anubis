@@ -72,7 +72,7 @@ const Visuals = () => {
 
   return (
     <StandardLayout description={'Visuals'}>
-      <Grid container spacing={4} justify={'center'}>
+      <Grid container spacing={4} justifyContent={'center'}>
         {visuals.map(({title, filename, url}, index) => (
           <Grid item xs sm={10} lg={8} xl={6} key={index}>
             <Card>

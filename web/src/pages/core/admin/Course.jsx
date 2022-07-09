@@ -7,7 +7,7 @@ import {Route, Switch} from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 
 import Button from '@mui/material/Button';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Typography from '@mui/material/Typography';
 
 import CourseCard from '../../../components/core/Course/CourseCard';
@@ -108,7 +108,7 @@ export default function Course() {
   }
 
   return (
-    <Grid container spacing={4} justify={'center'} alignItems={'center'}>
+    <Grid container spacing={4} justifyContent={'center'} alignItems={'center'}>
       <Grid item xs={12}>
         <Typography variant="h6">
           Anubis

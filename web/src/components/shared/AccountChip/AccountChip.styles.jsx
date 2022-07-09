@@ -1,4 +1,4 @@
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 
 export const useStyles = makeStyles((theme) => ({
   root: {
@@ -47,13 +47,13 @@ export const useStyles = makeStyles((theme) => ({
     right: 0,
   },
   contextTitle: {
-    padding: `${theme.spacing(0)}px ${theme.spacing(6)}px ${theme.spacing(1)}px ${theme.spacing(2)}px`,
+    padding: `${theme.spacing(0)} ${theme.spacing(6)} ${theme.spacing(1)} ${theme.spacing(2)}`,
     color: theme.palette.primary.main,
     letterSpacing: '2px',
     fontSize: '12px',
   },
   profileAction: {
-    padding: `${theme.spacing(0)}px ${theme.spacing(6)}px ${theme.spacing(1)}px ${theme.spacing(2)}px`,
+    padding: `${theme.spacing(0)} ${theme.spacing(6)} ${theme.spacing(1)} ${theme.spacing(2)}`,
     cursor: 'pointer',
     color: theme.palette.color.gray,
     display: 'flex',
@@ -70,7 +70,7 @@ export const useStyles = makeStyles((theme) => ({
   },
   selectedCourse: {
     cursor: 'pointer',
-    padding: `${theme.spacing(1)}px ${theme.spacing(6)}px ${theme.spacing(1)}px ${theme.spacing(3)}px`,
+    padding: `${theme.spacing(1)} ${theme.spacing(6)} ${theme.spacing(1)} ${theme.spacing(3)}`,
     backgroundColor: '#2A3039',
     marginBottom: theme.spacing(1),
   },
@@ -80,7 +80,7 @@ export const useStyles = makeStyles((theme) => ({
       backgroundColor: '#2A3039',
     },
     color: theme.palette.color.gray,
-    padding: `${theme.spacing(1)}px ${theme.spacing(6)}px ${theme.spacing(1)}px ${theme.spacing(3)}px`,
+    padding: `${theme.spacing(1)} ${theme.spacing(6)} ${theme.spacing(1)} ${theme.spacing(3)}`,
     marginBottom: theme.spacing(1),
   },
 }));

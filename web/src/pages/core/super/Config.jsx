@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
@@ -130,7 +130,7 @@ export default function Config() {
 
   return (
     <div className={classes.root}>
-      <Grid container spacing={4} justify={'center'} alignItems={'center'}>
+      <Grid container spacing={4} justifyContent={'center'} alignItems={'center'}>
         <Grid item xs={12}>
           <Typography variant="h6">
             Anubis

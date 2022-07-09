@@ -1,5 +1,5 @@
 import React from 'react';
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import CircularProgress from '@mui/material/CircularProgress';
 import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
@@ -90,7 +90,11 @@ export default function IDETable({rows}) {
               </TableCell>
               <TableCell>
                 <Tooltip title={'End IDE Session'}>
-                  <IconButton component={'a'} href={`/api/public/ide/stop/${row.id}`} disabled={!row.active}>
+                  <IconButton
+                    component={'a'}
+                    href={`/api/public/ide/stop/${row.id}`}
+                    disabled={!row.active}
+                    size="large">
                     <DeleteForeverOutlinedIcon style={{color: row.active ? red[500] : grey[500]}}/>
                   </IconButton>
                 </Tooltip>
@@ -99,7 +103,12 @@ export default function IDETable({rows}) {
                 {row.state === 'Initializing' ?
                   <CircularProgress/> :
                   <Tooltip title={'Open Cloud IDE Session'}>
-                    <IconButton component={'a'} href={row.redirect_url} target="_blank" disabled={!row.active}>
+                    <IconButton
+                      component={'a'}
+                      href={row.redirect_url}
+                      target="_blank"
+                      disabled={!row.active}
+                      size="large">
                       <CodeOutlinedIcon style={{color: row.active ? blue[500] : grey[500]}}/>
                     </IconButton>
                   </Tooltip>
@@ -112,7 +121,7 @@ export default function IDETable({rows}) {
                 {row.class_name}
               </TableCell>
               <TableCell>
-                <IconButton component={'a'} href={row.repo_url} target="_blank">
+                <IconButton component={'a'} href={row.repo_url} target="_blank" size="large">
                   <GitHubIcon style={{color: blue[500]}}/>
                 </IconButton>
               </TableCell>
@@ -140,8 +149,8 @@ export default function IDETable({rows}) {
                 inputProps: {'aria-label': 'rows per page'},
                 native: true,
               }}
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
               ActionsComponent={TablePaginationActions}
               labelRowsPerPage="Submissions per page"
             />

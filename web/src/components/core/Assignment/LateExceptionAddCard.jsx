@@ -6,7 +6,7 @@ import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {DesktopDatePicker} from '@mui/x-date-pickers/DesktopDatePicker';
 
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Autocomplete from '@mui/lab/Autocomplete';

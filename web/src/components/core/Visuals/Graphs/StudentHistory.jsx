@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Paper from '@mui/material/Paper';
 import Slider from '@mui/material/Slider';
 import Typography from '@mui/material/Typography';
@@ -55,7 +55,7 @@ export default function StudentHistory({testResults: rawTestResults, buildResult
 
   return (
     <Paper style={{display: 'flex'}}>
-      <Grid container spacing={2} direction={'column'} justify={'space-between'} style={{width: 200}}>
+      <Grid container spacing={2} direction={'column'} justifyContent={'space-between'} style={{width: 200}}>
         <Grid item>
           <style>
             {`.rv-discrete-color-legend-item {color: #fff;}`}

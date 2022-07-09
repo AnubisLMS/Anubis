@@ -10,8 +10,8 @@ import {SnackbarProvider} from 'notistack';
 // React vis stylesheet
 import 'react-vis/dist/style.css';
 
-import {ThemeProvider} from '@mui/material/styles';
-import makeStyles from '@mui/material/styles/makeStyles';
+import {ThemeProvider, StyledEngineProvider} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import CssBaseline from '@mui/material/CssBaseline';
 
 // Auth Context
@@ -113,47 +113,49 @@ export default function App() {
   const [open, setOpen] = useState(window.innerWidth >= 960); // 960px is md
 
   return (
-    <ThemeProvider theme={theme}>
-      <div className={classes.root}>
-        <SnackbarProvider maxSnack={5}>
-          <DeviceWarning/>
-          <Router>
-            <AuthWrapper>
-              <AuthContext.Consumer>
-                {(user) => (
-                  <CssBaseline>
-                    <Nav
-                      open={open}
-                      handleDrawerClose={() => setOpen(!open)}
-                    />
-                    <div className={classes.app} id={'app'}>
-                      <Header
-                        onDrawerToggle={() => setOpen(!open)}
-                        user={user}
-                        classes={classes}
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={theme}>
+        <div className={classes.root}>
+          <SnackbarProvider maxSnack={5}>
+            <DeviceWarning/>
+            <Router>
+              <AuthWrapper>
+                <AuthContext.Consumer>
+                  {(user) => (
+                    <CssBaseline>
+                      <Nav
                         open={open}
+                        handleDrawerClose={() => setOpen(!open)}
                       />
-                      <main
-                        className={clsx(classes.content, {
-                          [classes.contentShift]: open,
-                        })}
-                      >
-                        <div className={classes.drawerHeader}/>
-                        <Error/>
-                        <div className={classes.main}>
-                          <Main user={user}/>
-                          <Forums user={user}/>
-                        </div>
-                        <Footer/>
-                      </main>
-                    </div>
-                  </CssBaseline>
-                )}
-              </AuthContext.Consumer>
-            </AuthWrapper>
-          </Router>
-        </SnackbarProvider>
-      </div>
-    </ThemeProvider>
+                      <div className={classes.app} id={'app'}>
+                        <Header
+                          onDrawerToggle={() => setOpen(!open)}
+                          user={user}
+                          classes={classes}
+                          open={open}
+                        />
+                        <main
+                          className={clsx(classes.content, {
+                            [classes.contentShift]: open,
+                          })}
+                        >
+                          <div className={classes.drawerHeader}/>
+                          <Error/>
+                          <div className={classes.main}>
+                            <Main user={user}/>
+                            <Forums user={user}/>
+                          </div>
+                          <Footer/>
+                        </main>
+                      </div>
+                    </CssBaseline>
+                  )}
+                </AuthContext.Consumer>
+              </AuthWrapper>
+            </Router>
+          </SnackbarProvider>
+        </div>
+      </ThemeProvider>
+    </StyledEngineProvider>
   );
 }

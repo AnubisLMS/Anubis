@@ -6,7 +6,7 @@ import {useHistory, Redirect, useParams} from 'react-router-dom';
 import {DataGrid} from '@mui/x-data-grid';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
@@ -53,7 +53,7 @@ const useColumns = () => ([
     width: 150,
     renderCell: (params) => (
       <Tooltip title={params.value === null ? 'No Submission' : 'Submitted'}>
-        <IconButton style={{color: params.value === null ? 'red' : 'green'}}>
+        <IconButton style={{color: params.value === null ? 'red' : 'green'}} size="large">
           {params.value === null ? <CancelIcon/> : <CheckOutlinedIcon/>}
         </IconButton>
       </Tooltip>
@@ -65,13 +65,13 @@ const useColumns = () => ([
       <React.Fragment>
         {row?.submission !== null ? (
           <Tooltip title={row?.build_passed ? 'Build Succeeded' : 'Build Failed'}>
-            <IconButton style={{color: row?.build_passed ? 'green' : 'yellow'}}>
+            <IconButton style={{color: row?.build_passed ? 'green' : 'yellow'}} size="large">
               {row?.build_passed ? <CheckOutlinedIcon/> : <CancelIcon/>}
             </IconButton>
           </Tooltip>
         ) : (
           <Tooltip title={'No Submission'}>
-            <IconButton style={{color: 'grey'}}>
+            <IconButton style={{color: 'grey'}} size="large">
               <NotInterested/>
             </IconButton>
           </Tooltip>
@@ -187,7 +187,7 @@ export default function Results() {
   };
 
   return (
-    <Grid container spacing={2} justify={'center'} alignItems={'center'}>
+    <Grid container spacing={2} justifyContent={'center'} alignItems={'center'}>
       <Grid item xs={12}>
         <Typography variant="h6">
           Anubis

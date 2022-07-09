@@ -3,7 +3,7 @@ import axios from 'axios';
 import {useSnackbar} from 'notistack';
 import {useParams} from 'react-router-dom';
 
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
@@ -118,7 +118,7 @@ export default function Tests() {
         </DialogActions>
       </Dialog>
 
-      <Grid container spacing={2} justify={'center'} alignItems={'center'}>
+      <Grid container spacing={2} justifyContent={'center'} alignItems={'center'}>
         <Grid item xs={12}>
           <Typography variant="h6">
             Anubis

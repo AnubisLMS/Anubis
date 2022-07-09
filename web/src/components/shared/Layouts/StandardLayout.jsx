@@ -14,7 +14,7 @@ export default function StandardLayout({title, description = '', children = null
   }
 
   return (
-    <Grid container spacing={4} justify={'center'}>
+    <Grid container spacing={4} justifyContent={'center'}>
       <Grid item xs={12} md={11}>
         {title &&
           <Typography variant="h5">

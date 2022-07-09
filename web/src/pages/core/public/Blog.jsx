@@ -1,5 +1,5 @@
 import React from 'react';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Grid from '@mui/material/Grid';
 import {Route, Switch} from 'react-router-dom';
 
@@ -75,7 +75,7 @@ export default function Blog() {
       <Grid
         container
         direction="column"
-        justify="center"
+        justifyContent="center"
         alignItems="center"
         spacing={4}
       >

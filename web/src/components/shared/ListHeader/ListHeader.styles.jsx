@@ -1,4 +1,4 @@
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 
 export const useStyles = makeStyles((theme) => ({
   container: {
@@ -10,7 +10,7 @@ export const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(2),
     backgroundColor: theme.palette.dark.blue['100'],
     border: `1px solid ${theme.palette.dark.blue['200']}`,
-    borderRadius: `${theme.spacing(1)}px ${theme.spacing(1)}px 0px 0px`,
+    borderRadius: `${theme.spacing(1)} ${theme.spacing(1)} 0px 0px`,
   },
   sectionBlock: {
     display: 'flex',

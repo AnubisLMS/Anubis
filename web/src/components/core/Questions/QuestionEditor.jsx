@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import Typography from '@mui/material/Typography';
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import AceEditor from 'react-ace';
 import gfm from 'remark-gfm';
 import ReactMarkdownWithHtml from 'react-markdown/with-html';

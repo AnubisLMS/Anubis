@@ -3,7 +3,7 @@ import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
 import {DataGrid} from '@mui/x-data-grid';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Autocomplete from '@mui/lab/Autocomplete';
@@ -107,7 +107,7 @@ export default function CourseTasProfessors({base}) {
   ];
 
   return (
-    <Grid container spacing={2} justify={'center'} alignItems={'center'}>
+    <Grid container spacing={2} justifyContent={'center'} alignItems={'center'}>
       <Grid item>
         <Paper className={classes.paper}>
           <div>

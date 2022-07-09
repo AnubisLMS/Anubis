@@ -1,4 +1,4 @@
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import grey from '@mui/material/colors/grey';
 
 export const useStyles = makeStyles((theme) => ({
@@ -64,11 +64,11 @@ export const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.primary.main,
     fontSize: '14px',
     borderRadius: '3px',
-    padding: `${theme.spacing(1)}px ${theme.spacing(3)}px ${theme.spacing(1)}px`,
+    padding: `${theme.spacing(1)} ${theme.spacing(3)} ${theme.spacing(1)}`,
   },
   repoButton: {
     fontSize: '14px',
-    padding: `${theme.spacing(1)}px ${theme.spacing(3)}px ${theme.spacing(1)}px`,
+    padding: `${theme.spacing(1)} ${theme.spacing(3)} ${theme.spacing(1)}`,
     backgroundColor: 'transparent',
     border: `1px solid ${theme.palette.primary.main}`,
     borderRadius: '3px',

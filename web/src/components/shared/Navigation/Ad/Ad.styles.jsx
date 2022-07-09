@@ -1,8 +1,8 @@
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 
 export const useStyles = makeStyles((theme) => ({
   root: {
-    borderRadius: `${theme.spacing(1)}px`,
+    borderRadius: theme.spacing(1),
     width: '100%',
     overflow: 'inherit',
   },
@@ -10,7 +10,7 @@ export const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    padding: `${theme.spacing(5)}px ${theme.spacing(2)}px ${theme.spacing(2)}px`,
+    padding: `${theme.spacing(5)} ${theme.spacing(2)} ${theme.spacing(2)}`,
     width: '100%',
   },
   iconContainer: {

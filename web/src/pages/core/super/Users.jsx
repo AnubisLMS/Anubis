@@ -5,7 +5,7 @@ import {useSnackbar} from 'notistack';
 import {Link} from 'react-router-dom';
 
 import {DataGrid} from '@mui/x-data-grid';
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import Switch from '@mui/material/Switch';
@@ -174,7 +174,7 @@ export default function Users() {
   }, [students]);
 
   return (
-    <Grid container spacing={2} justify={'center'} alignItems={'center'}>
+    <Grid container spacing={2} justifyContent={'center'} alignItems={'center'}>
       <Grid item xs={12}>
         <Typography variant="h6">
           Anubis

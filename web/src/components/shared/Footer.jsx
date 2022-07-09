@@ -1,6 +1,6 @@
 import Copyright from './Copyright';
 import React from 'react';
-import {makeStyles} from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import {Route, Switch} from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({

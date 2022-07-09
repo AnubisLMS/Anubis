@@ -6,7 +6,7 @@ import ReactAce from 'react-ace';
 import 'ace-builds/src-min-noconflict/mode-json';
 import 'ace-builds/src-min-noconflict/theme-monokai';
 
-import makeStyles from '@mui/material/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -96,7 +96,7 @@ export default function GroupAssignment() {
   }
 
   return (
-    <Grid container spacing={2} justify={'center'} alignItems={'center'}>
+    <Grid container spacing={2} justifyContent={'center'} alignItems={'center'}>
       <Grid item xs={12}>
         <Typography variant="h6">
           Anubis
