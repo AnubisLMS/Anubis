@@ -8,7 +8,7 @@ export default function Error() {
   const error = query.get('error');
 
   React.useEffect(() => {
-    if (!error) return null;
+    if (!error) return undefined;
     enqueueSnackbar(error, {variant: 'error'});
   }, [error]);
 

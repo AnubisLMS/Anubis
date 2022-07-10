@@ -35,7 +35,7 @@ const Course = () => {
   }, []);
 
 
-  useEffect(() => {
+  React.useEffect(() => {
     axios.get('/api/public/assignments', {params: {courseId: courseId}}).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {

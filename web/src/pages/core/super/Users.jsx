@@ -159,11 +159,12 @@ export default function Users() {
 
   React.useEffect(() => {
     if (students.length === 0) {
-      return;
+      return null;
     }
 
     if (searched === null && students.length > 0) {
-      return setRows(students);
+      setRows(students);
+      return undefined;
     }
 
     setRows([searched]);

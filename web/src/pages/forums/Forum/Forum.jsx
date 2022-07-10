@@ -56,7 +56,7 @@ export default function Forum({user}) {
 
   useEffect(() => {
     if (!selectedCourse) {
-      return null;
+      return undefined;
     }
 
     axios.get(`api/public/forums/course/${selectedCourse.id}`)
@@ -72,7 +72,7 @@ export default function Forum({user}) {
 
   useEffect(() => {
     if (!selectedPost) {
-      return null;
+      return undefined;
     }
 
     axios.get(`api/public/forums/post/${selectedPost.id}`)

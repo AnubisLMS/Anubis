@@ -30,7 +30,7 @@ const Profile = () => {
   }, []);
 
   React.useEffect(() => {
-    if (!user) return null;
+    if (!user) return undefined;
     setUserGroup(user.is_superuser ? 'superuser' : user.is_admin ? 'admin' : 'student');
   }, [user]);
 

@@ -33,7 +33,7 @@ const Dashboard = () => {
   useEffect(() => {
     axios.get('/api/public/assignments', {params: {courseId: query.get('courseId')}}).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      if (!data) return;
+      if (!data) return undefined;
       const active = data?.assignments.filter((assignment) => {
         const assignmentDueDate = new Date(assignment.due_date);
         if (assignmentDueDate >= new Date()) return assignment;

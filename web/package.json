@@ -39,7 +39,7 @@
     "react-vis": "^1.11.7",
     "remark-gfm": "^3.0.1",
     "universal-cookie": "^4.0.4",
-    "web-vitals": "^2.1.0"
+    "web-vitals": "^2.1.4"
   },
   "proxy": "http://localhost:5000/",
   "scripts": {

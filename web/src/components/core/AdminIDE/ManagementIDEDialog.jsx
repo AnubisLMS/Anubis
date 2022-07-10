@@ -158,7 +158,7 @@ export default function ManagementIDEDialog() {
 
   React.useEffect(() => {
     if (!open) {
-      return null;
+      return undefined;
     }
 
     axios.get(`/api/admin/ide/active`).then((response) => {

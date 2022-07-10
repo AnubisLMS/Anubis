@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import axios from 'axios';
 import {useParams} from 'react-router-dom';
 import {useSnackbar} from 'notistack';
@@ -57,7 +57,7 @@ export default function GroupAssignment() {
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [reset]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     axios.get(`/api/admin/assignments/repos/${assignmentId}`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data?.repos) {

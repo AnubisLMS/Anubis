@@ -85,7 +85,7 @@ export default function Users() {
   React.useEffect(() => {
     if (searchQuery === '' || searchQuery === undefined) {
       setRefresh(refresh + 1);
-      return;
+      return undefined;
     }
     const newStudents = students.flat(Infinity).filter((student) =>
       student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

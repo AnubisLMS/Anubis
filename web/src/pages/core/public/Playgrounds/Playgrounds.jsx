@@ -170,7 +170,7 @@ export default function Playgrounds({imageId}) {
   }, []);
 
   useEffect(() => {
-    if (!availableImages) return null;
+    if (!availableImages) return undefined;
     axios.get(`/api/public/playgrounds/active`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data.session) {
@@ -188,7 +188,7 @@ export default function Playgrounds({imageId}) {
   }, [availableImages]);
 
   useEffect(() => {
-    if (!selectedImage) return null;
+    if (!selectedImage) return undefined;
     const defaultTags = [{title: 'latest', description: null}];
     let tags = selectedImage?.tags ?? defaultTags;
     if (tags.length === 0) {

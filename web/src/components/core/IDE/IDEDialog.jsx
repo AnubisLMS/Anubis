@@ -176,7 +176,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
 
   React.useEffect(() => {
     if (!selectedTheia) {
-      return null;
+      return undefined;
     }
 
     axios.get(`/api/public/assignments/get/${selectedTheia.id}`).then((response) => {
@@ -196,7 +196,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
 
   React.useEffect(() => {
     if (!selectedTheia) {
-      return null;
+      return undefined;
     }
 
     axios.get(`/api/public/ide/active/${selectedTheia.id}`).then((response) => {

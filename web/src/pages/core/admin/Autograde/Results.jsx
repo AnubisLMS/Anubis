@@ -121,7 +121,7 @@ export default function Results() {
 
       if (!data) {
         setError(true);
-        return;
+        return undefined;
       }
 
       if (data.stats) {
@@ -148,7 +148,8 @@ export default function Results() {
 
   React.useEffect(() => {
     if (!searched) {
-      return setRows(stats);
+      setRows(stats);
+      return undefined;
     }
 
     axios.get(`/api/admin/autograde/for/${assignment.id}/${searched.id}`).then((response) => {

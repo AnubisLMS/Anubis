@@ -22,7 +22,7 @@ export default function useSubscribe(path, interval, until, callback) {
 
   useEffect(() => {
     if (state.error || (!state.loading && !!until(state.data))) {
-      return;
+      return undefined;
     }
     const timer = setInterval(() => {
       if (state.error || (!state.loading && !!until(state.data))) {
@@ -43,7 +43,7 @@ export default function useSubscribe(path, interval, until, callback) {
         .catch(function(error) {
           if (!error.response) {
             console.error(error);
-            return;
+            return undefined;
           }
           if (error.response.status === 401) {
             window.location = '/api/public/auth/login';
