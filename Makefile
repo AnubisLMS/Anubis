@@ -111,6 +111,10 @@ mindebug:
 mkdebug:
 	./k8s/debug/provision.sh
 
+.PHONY: mkrestart       # Rebuild and Restart mkdebug
+mkrestart:
+	./k8s/debug/restart.sh
+
 apirun:
 	make -C api run
 
