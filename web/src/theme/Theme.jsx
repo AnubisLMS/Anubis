@@ -1,16 +1,15 @@
 import {createTheme, adaptV4Theme} from '@mui/material/styles';
-import FiraSans from '../assets/fonts/FiraSans-Regular.ttf';
+import FiraCodeRegular from '../assets/fonts/FiraCode-Regular.ttf';
 
 
 const fira = {
-  fontFamily: 'FiraSans',
+  fontFamily: 'FiraCode-Regular',
   fontStyle: 'normal',
   fontDisplay: 'swap',
   fontWeight: 400,
   src: `
-    local('FiraSans'),
-    local('FiraSans-Regular'),
-    url(${FiraSans}) format('ttf')
+    local('FiraCode-Regular'),
+    url(${FiraCodeRegular}) format('ttf')
   `,
   unicodeRange:
     'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, ' +
@@ -18,7 +17,7 @@ const fira = {
     'U+2191, U+2193, U+2212, U+2215, U+FEFF',
 };
 
-let theme = createTheme(adaptV4Theme({
+let theme = createTheme({
   palette: {
     primary: {
       main: '#5686F5',
@@ -43,12 +42,7 @@ let theme = createTheme(adaptV4Theme({
     mode: 'dark',
   },
   typography: {
-    fontFamily: 'FiraSans, Arial',
-    h5: {
-      fontWeight: 300,
-      fontSize: 30,
-      letterSpacing: 0.7,
-    },
+    ...fira,
   },
   shape: {
     borderRadius: 8,
@@ -64,7 +58,7 @@ let theme = createTheme(adaptV4Theme({
 
     },
   },
-}));
+});
 
 theme = {
   ...theme,
