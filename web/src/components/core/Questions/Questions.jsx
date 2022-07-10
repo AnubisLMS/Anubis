@@ -122,7 +122,7 @@ export default function Questions({assignment_id}) {
           <React.Fragment>
             <ReactMarkdownWithHtml
               className={classes.markdown}
-              plugins={[gfm]}
+              remarkPlugins={[gfm]}
               allowDangerousHtml
             >
               {selectedQuestion.question}

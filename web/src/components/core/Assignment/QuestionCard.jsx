@@ -131,7 +131,7 @@ export default function QuestionCard({assignmentQuestion, updateQuestion, saveQu
             </Typography>
             <ReactMarkdownWithHtml
               className={classes.markdown}
-              plugins={[gfm]}
+              remarkPlugins={[gfm]}
               allowDangerousHtml
             >
               {question}
@@ -163,7 +163,7 @@ export default function QuestionCard({assignmentQuestion, updateQuestion, saveQu
             </Typography>
             <ReactMarkdownWithHtml
               className={classes.markdown}
-              plugins={[gfm]}
+              remarkPlugins={[gfm]}
               allowDangerousHtml
             >
               {solution}

@@ -63,7 +63,7 @@ export default function QuestionEditor({question, updateResponse, saveResponse})
       </Typography>
       <ReactMarkdownWithHtml
         className={classes.markdown}
-        plugins={[gfm]}
+        remarkPlugins={[gfm]}
         allowDangerousHtml
       >
         {question?.question?.question ?? ''}

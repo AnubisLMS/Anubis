@@ -199,10 +199,10 @@ const Assignment = () => {
                 <Typography className={classes.overviewItemTitle}>DESCRIPTION</Typography>
                 <ReactMarkdownWithHtml
                   className={classes.markdown}
-                  plugins={[gfm]}
+                  remarkPlugins={[gfm]}
                   allowDangerousHtml
                 >
-                  {assignment.description}
+                  {assignment.description ?? ''}
                 </ReactMarkdownWithHtml>
               </Box>
             </Box>
