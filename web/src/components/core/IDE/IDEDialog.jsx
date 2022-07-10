@@ -268,7 +268,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
                 control={<Switch color={'primary'}/>}
                 label={
                   <div style={{display: 'flex', alignItems: 'center'}}>
-                    <Typography color={autosaveEnabled ? '' : 'secondary'} variant={'body1'}>
+                    <Typography color={autosaveEnabled ? '' : 'error'} variant={'body1'}>
                       {autosaveEnabled ?
                         'Autosave Enabled' :
                         (
@@ -336,7 +336,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
           <Button
             onClick={stopSession(state, enqueueSnackbar)}
             variant={'contained'}
-            color={'secondary'}
+            color={'error'}
             autoFocus
           >
             Stop Session

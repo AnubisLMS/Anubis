@@ -325,7 +325,7 @@ export default function IDEImages() {
                         <Grid item xs={1}>
                           <Button
                             startIcon={<DeleteForeverIcon/>}
-                            color={'secondary'}
+                            color={'error'}
                             variant={'contained'}
                             className={classes.button}
                             onClick={() => delTag(tag.id)}

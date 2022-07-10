@@ -53,7 +53,7 @@ export default function GetGithubUsername() {
       } else {
         setChip({
           label: response.data.error,
-          hidden: false, color: 'secondary',
+          hidden: false, color: 'error',
         });
       }
     }).catch((error) => {
@@ -62,7 +62,7 @@ export default function GetGithubUsername() {
       }
       setChip({
         label: 'Unable to reach API',
-        hidden: false, color: 'secondary',
+        hidden: false, color: 'error',
       });
     });
   };

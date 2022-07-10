@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import Item from '../../shared/Item/Item';
 import {useStyles} from './AssignmentItem.styles';
 import {VisibilityOff} from '@mui/icons-material';
-import {Tooltip} from '@mui/material';
+import Tooltip from '@mui/material/Tooltip';
 
 const AssignmentItem = ({
   name,
@@ -33,7 +33,11 @@ const AssignmentItem = ({
         {submitted ? 'Submitted' : 'Not Submitted'}
       </Typography>
       <Typography>Due Date: {dueDate}</Typography>
-      <Button onClick={() => history.push(`/courses/assignment?assignmentId=${id}`)}>
+      <Button
+        color={'primary'}
+        variant={'contained'}
+        onClick={() => history.push(`/courses/assignment?assignmentId=${id}`)}
+      >
         View Assignment
       </Button>
     </Item>

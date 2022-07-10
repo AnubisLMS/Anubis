@@ -56,7 +56,7 @@ const useColumns = ({setDeleteOpen, setRepoSelected}) => ([
   {
     field: 'delete', headerName: 'Delete', width: 100, renderCell: ({row}) => (
       <IconButton
-        color={'secondary'}
+        color={'error'}
         onClick={() => {
           setDeleteOpen(true);
           setRepoSelected({...row});

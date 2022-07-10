@@ -65,7 +65,7 @@ const useColumns = (state, enqueueSnackbar) => ([
   {field: 'created', headerName: 'Created', type: 'dateTime', width: 170},
   {
     field: 'autosave', headerName: 'Autosave', width: 100, renderCell: ({row}) => (
-      <IconButton color={row.autosave ? 'primary' : 'secondary'} size="large">
+      <IconButton color={row.autosave ? 'primary' : 'error'} size="large">
         {row.autosave ? <CheckIcon/> : <CancelIcon/>}
       </IconButton>
     ),
@@ -111,7 +111,7 @@ const useColumns = (state, enqueueSnackbar) => ([
     field: 'kill', headerName: 'Kill Session', width: 150, renderCell: ({row}) => (
       <Button
         variant={'contained'}
-        color={'secondary'}
+        color={'error'}
         size={'small'}
         startIcon={<DeleteForeverIcon/>}
         onClick={stopSession(row.id, state, enqueueSnackbar)}
@@ -170,7 +170,7 @@ export default function Theia() {
       <Grid item xs={12}>
         <Button
           variant={'contained'}
-          color={'secondary'}
+          color={'error'}
           className={classes.button}
           onClick={stopAllSessions(state, enqueueSnackbar)}
         >

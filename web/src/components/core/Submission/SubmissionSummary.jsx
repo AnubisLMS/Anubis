@@ -52,7 +52,7 @@ export default function SubmissionSummary({submission, regrade, stop}) {
     return (
       <div>
         <Tooltip title={'No submission was captured for this student.'}>
-          <CancelIcon color={'secondary'}/>
+          <CancelIcon color={'error'}/>
         </Tooltip>
         <Typography variant={'h5'} className={clsx(classes.inline, classes.margin)}>
           {submission}

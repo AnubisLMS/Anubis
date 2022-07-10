@@ -184,7 +184,7 @@ export default function QuestionCard({assignmentQuestion, updateQuestion, saveQu
         </Button>
         <Button
           size="small"
-          color={'secondary'}
+          color={'error'}
           variant={'contained'}
           startIcon={<DeleteForeverIcon/>}
           onClick={deleteQuestion}

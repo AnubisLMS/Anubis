@@ -106,7 +106,7 @@ export default function GroupAssignment() {
         </Typography>
       </Grid>
       <Grid item xs={12}>
-        <Button variant={'contained'} color={'secondary'} onClick={() => setOpen(true)}>Reset Repos</Button>
+        <Button variant={'contained'} color={'error'} onClick={() => setOpen(true)}>Reset Repos</Button>
         <Dialog
           open={open}
           onClose={() => {
@@ -129,7 +129,7 @@ export default function GroupAssignment() {
             <FormControlLabel
               value={confirm}
               onChange={(_, v) => setConfirm(v)}
-              control={<Switch color={'secondary'}/>}
+              control={<Switch color={'error'}/>}
               label={<i>I understand what this action does, and want to continue anyway.</i>}
             />
           </DialogContent>
@@ -144,7 +144,7 @@ export default function GroupAssignment() {
               setOpen(false);
               setConfirm(false);
               resetRepos();
-            }} variant={'contained'} color="secondary" disabled={!confirm}>
+            }} variant={'contained'} color='error' disabled={!confirm}>
               Reset Repos
             </Button>
           </DialogActions>

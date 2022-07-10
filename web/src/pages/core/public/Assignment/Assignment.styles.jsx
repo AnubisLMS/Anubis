@@ -61,22 +61,14 @@ export const useStyles = makeStyles((theme) => ({
     height: '20px',
   },
   ideButton: {
-    backgroundColor: theme.palette.primary.main,
     fontSize: '14px',
     borderRadius: '3px',
     padding: `${theme.spacing(1)} ${theme.spacing(3)} ${theme.spacing(1)}`,
   },
   repoButton: {
     fontSize: '14px',
-    padding: `${theme.spacing(1)} ${theme.spacing(3)} ${theme.spacing(1)}`,
-    backgroundColor: 'transparent',
-    border: `1px solid ${theme.palette.primary.main}`,
     borderRadius: '3px',
-    color: theme.palette.color.blue,
-    '&:hover': {
-      backgroundColor: theme.palette.primary.main,
-      color: 'white',
-    },
+    padding: `${theme.spacing(1)} ${theme.spacing(3)} ${theme.spacing(1)}`,
     marginLeft: theme.spacing(2),
   },
   content: {

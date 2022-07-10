@@ -148,7 +148,7 @@ export default function Tests() {
                       onClick={() => setWarning({id, name, index})}
                       control={
                         <Tooltip title={'Delete test forever'}>
-                          <Fab color={'secondary'} size={'small'} className={classes.fab}>
+                          <Fab color={'error'} size={'small'} className={classes.fab}>
                             <DeleteForeverIcon/>
                           </Fab>
                         </Tooltip>

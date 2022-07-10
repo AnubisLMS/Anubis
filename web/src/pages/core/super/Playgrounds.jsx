@@ -87,7 +87,7 @@ const useColumns = (state, enqueueSnackbar) => ([
     field: 'kill', headerName: 'Kill Session', width: 150, renderCell: ({row}) => (
       <Button
         variant={'contained'}
-        color={'secondary'}
+        color={'error'}
         size={'small'}
         startIcon={<DeleteForeverIcon/>}
         onClick={stopSession(row.id, state, enqueueSnackbar)}
@@ -143,7 +143,7 @@ export default function Playgrounds() {
       <Grid item xs={12}>
         <Button
           variant={'contained'}
-          color={'secondary'}
+          color={'error'}
           className={classes.button}
           onClick={stopAllSessions(state, enqueueSnackbar)}
         >

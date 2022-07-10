@@ -314,7 +314,7 @@ export default function ManagementIDEDialog() {
             <Button
               onClick={stopSession(state, enqueueSnackbar)}
               variant={'contained'}
-              color={'secondary'}
+              color={'error'}
               autoFocus
             >
               Stop Session

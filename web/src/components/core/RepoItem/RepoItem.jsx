@@ -31,7 +31,7 @@ const RepoItem = ({
       <Box className={classes.actionsContainer}>
         <Button
           variant={'contained'}
-          color={'secondary'}
+          color={'error'}
           className={classes.deleteButton}
           onClick={() => openDialog(assignmentId)}
         >

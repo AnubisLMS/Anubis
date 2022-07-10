@@ -114,7 +114,7 @@ export default function QuestionControls({assignmentId, reload, questionsAssigne
           <Button onClick={() => {
             verify.action();
             setVerify(null);
-          }} color="secondary" variant={'contained'}>
+          }} color='error' variant={'contained'}>
             Proceed
           </Button>
         </DialogActions>
@@ -198,7 +198,7 @@ export default function QuestionControls({assignmentId, reload, questionsAssigne
                 <Button
                   fullWidth
                   startIcon={<DeleteForeverIcon/>}
-                  color={'secondary'}
+                  color={'error'}
                   variant={'contained'}
                   onClick={() => setVerify({
                     title: 'Reset Question Assignments',
@@ -217,7 +217,7 @@ export default function QuestionControls({assignmentId, reload, questionsAssigne
                 <Button
                   fullWidth
                   startIcon={<DeleteForeverIcon/>}
-                  color={'secondary'}
+                  color={'error'}
                   variant={'contained'}
                   onClick={() => setVerify({
                     title: 'Hard Reset Warning',

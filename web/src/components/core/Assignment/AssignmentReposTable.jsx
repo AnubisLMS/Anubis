@@ -44,7 +44,7 @@ export default function AssignmentReposTable({repos, setReset}) {
           </Typography>
         )},
         {field: 'delete', headerName: 'Delete', width: 150, renderCell: ({row}) => (
-          <Button color={'secondary'} variant={'contained'} startIcon={<Delete/>} onClick={deleteRepo(row.id)}>
+          <Button color={'error'} variant={'contained'} startIcon={<Delete/>} onClick={deleteRepo(row.id)}>
             repo
           </Button>
         )},

@@ -59,7 +59,7 @@ export default function SubmissionTests({tests, stop}) {
             <div className={classes.wrapper}>
               <Fab
                 aria-label="save"
-                color={stop ? 'secondary' : (test.result.passed === false ? 'secondary' : 'primary')}
+                color={stop ? 'error' : (test.result.passed === false ? 'error' : 'primary')}
               >
                 {stop ? (
                   <CancelIcon/>

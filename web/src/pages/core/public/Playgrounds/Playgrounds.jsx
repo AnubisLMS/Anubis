@@ -307,7 +307,7 @@ export default function Playgrounds({imageId}) {
             <Button
               onClick={stopSession(state, enqueueSnackbar)}
               variant={'contained'}
-              color={'secondary'}
+              color={'error'}
               autoFocus
               className={classes.button}
             >

@@ -27,7 +27,11 @@ const CourseItem = ({
     >
       <Typography className={classes.instructorText}>{instructor}</Typography>
       <Typography className={classes.assignmentsText}>{assignments} Assignments</Typography>
-      <Button onClick={() => history.push(`/courses/assignments?courseId=${id}`)}>
+      <Button
+        color={'primary'}
+        variant={'contained'}
+        onClick={() => history.push(`/courses/assignments?courseId=${id}`)}
+      >
         View Course
       </Button>
     </Item>

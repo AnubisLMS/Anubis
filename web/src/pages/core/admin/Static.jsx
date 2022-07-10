@@ -56,7 +56,7 @@ const useColumns = (state, enqueueSnackbar) => ([
     field: 'kill', headerName: 'Delete', width: 150, renderCell: ({row}) => (
       <Button
         variant={'contained'}
-        color={'secondary'}
+        color={'error'}
         size={'small'}
         startIcon={<DeleteForeverIcon/>}
         onClick={deleteFile(row.id, state, enqueueSnackbar)}

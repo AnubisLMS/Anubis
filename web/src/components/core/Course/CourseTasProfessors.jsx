@@ -96,7 +96,7 @@ export default function CourseTasProfessors({base}) {
       field: 'delete', headerName: 'Delete', width: 150, renderCell: (params) => (
         <Button
           variant={'contained'}
-          color={'secondary'}
+          color={'error'}
           startIcon={<DeleteForeverIcon/>}
           onClick={removeTA(params.row.id)}
         >

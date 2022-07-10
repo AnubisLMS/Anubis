@@ -119,7 +119,7 @@ export default function Questions({assignment_id}) {
         setSelectedQuestion(null);
       }} maxWidth={'lg'}>
         {selectedQuestion && (
-          <React.Fragment>
+          <Box sx={{ml: 2, mr: 2}}>
             <ReactMarkdownWithHtml
               className={classes.markdown}
               remarkPlugins={[gfm]}
@@ -152,7 +152,7 @@ export default function Questions({assignment_id}) {
                 </Button>
               ) : null}
             </DialogActions>
-          </React.Fragment>
+          </Box>
         )}
       </Dialog>
     </React.Fragment>

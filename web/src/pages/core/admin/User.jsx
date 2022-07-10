@@ -126,7 +126,7 @@ export default function User() {
                 columns={[
                   {
                     field: 'playground', headerName: 'Playground', width: 120, renderCell: (params) => (
-                      <IconButton color={params.value ? 'primary' : 'secondary'} size="large">
+                      <IconButton color={params.value ? 'primary' : 'error'} size="large">
                         {params.value ? <CheckIcon/> : <CancelIcon/>}
                       </IconButton>
                     ),
@@ -144,7 +144,7 @@ export default function User() {
                   {field: 'state', headerName: 'State'},
                   {
                     field: 'autosave', headerName: 'Autosave', width: 120, renderCell: (params) => (
-                      <IconButton color={params.row.autosave ? 'primary' : 'secondary'} size="large">
+                      <IconButton color={params.row.autosave ? 'primary' : 'error'} size="large">
                         {params.row.autosave ? <CheckIcon/> : <CancelIcon/>}
                       </IconButton>
                     ),

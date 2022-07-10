@@ -35,7 +35,7 @@ export default function PostListItem({
         <Typography className={classes.title}>
           {title}
         </Typography>
-        <Box className={classes.secondary}>
+        <Box className={classes.error}>
           <Box className={classes.infoContainer}>
             <VisibilityIcon className={classes.icon} />
             <Typography>

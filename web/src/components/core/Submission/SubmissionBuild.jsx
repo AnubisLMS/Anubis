@@ -47,7 +47,7 @@ export default function SubmissionBuild({build, stop}) {
         <div className={classes.wrapper}>
           <Fab
             aria-label="save"
-            color={build.passed === false ? 'secondary' : 'primary'}
+            color={build.passed === false ? 'error' : 'primary'}
           >
             {build.passed === null ? (
               <BuildIcon/>

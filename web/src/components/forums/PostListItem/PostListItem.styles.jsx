@@ -34,7 +34,7 @@ export const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     gap: '5px',
   },
-  secondary: {
+  error: {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
