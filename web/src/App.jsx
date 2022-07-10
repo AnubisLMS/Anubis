@@ -10,7 +10,7 @@ import {SnackbarProvider} from 'notistack';
 // React vis stylesheet
 import 'react-vis/dist/style.css';
 
-import {ThemeProvider, StyledEngineProvider} from '@mui/material/styles';
+import {StyledEngineProvider, ThemeProvider} from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import CssBaseline from '@mui/material/CssBaseline';
 
@@ -31,7 +31,6 @@ import Error from './components/shared/Error';
 import Footer from './components/shared/Footer';
 import Header from './components/shared/Header';
 import DeviceWarning from './components/shared/DeviceWarning';
-import AprilFools from './components/core/AprilFools/AprilFools';
 
 import 'devicon/devicon.min.css';
 
