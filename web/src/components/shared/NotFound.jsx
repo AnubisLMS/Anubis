@@ -16,7 +16,7 @@ import Tooltip from '@mui/material/Tooltip';
 const useStyles = makeStyles((theme) => ({
   root: {
     flex: 1,
-    maxWidth: 345,
+    maxWidth: 500,
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',

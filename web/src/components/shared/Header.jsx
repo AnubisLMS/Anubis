@@ -78,7 +78,8 @@ export default function Header({classes, open, onDrawerToggle, user}) {
                 {!netid &&
                   <a href="/api/public/auth/login">
                     <Button
-                      className={classes.logInButton}
+                      color={'primary'}
+                      variant={'contained'}
                     >
                       Log In
                     </Button>
