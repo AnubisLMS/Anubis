@@ -71,11 +71,11 @@ const Assignment = () => {
 
       const runPollingInterval = setInterval(() => {
         axios.get(`/api/public/repos/get/${assignmentId}`)
-        .then((response) => {
-          const data = standardStatusHandler(response, enqueueSnackbar);
-          setRunAssignmentPolling(false);
-          setAssignment(data.assignment);
-        }).catch(standardErrorHandler(enqueueSnackbar));
+          .then((response) => {
+            const data = standardStatusHandler(response, enqueueSnackbar);
+            setRunAssignmentPolling(false);
+            setAssignment(data.assignment);
+          }).catch(standardErrorHandler(enqueueSnackbar));
       }, 1_000);
 
       return () => {
@@ -89,11 +89,11 @@ const Assignment = () => {
 
   const createAssignmentRepo = () => {
     axios.post(`/api/public/repos/create/${assignmentId}`)
-    .then((response) => {
-      standardStatusHandler(response, enqueueSnackbar);
-      setRunAssignmentPolling(true);
-    })
-    .catch(standardErrorHandler(enqueueSnackbar));
+      .then((response) => {
+        standardStatusHandler(response, enqueueSnackbar);
+        setRunAssignmentPolling(true);
+      })
+      .catch(standardErrorHandler(enqueueSnackbar));
   };
 
   return (
