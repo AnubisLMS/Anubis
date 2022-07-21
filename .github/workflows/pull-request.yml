@@ -1,0 +1,79 @@
+name: Anubis Pull Request CD/CI
+
+on:
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+
+jobs:
+
+  # Test Stage.
+  test-api:
+    defaults:
+      run:
+        shell: bash
+        working-directory: api
+    runs-on: ubuntu-latest
+    concurrency: test
+    environment: anubis
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'
+    - uses: actions/cache@v2
+      id: cache-venv  # name for referring later
+      with:
+        path: |
+          **/venv
+        key: ${{ runner.os }}-venv-${{ hashFiles('requirements/dev.txt') }}-${{ hashFiles('../.github/workflows/test-api.yml') }}
+        restore-keys: |
+          ${{ runner.os }}-venv-
+    - name: Install dependencies
+      run: |
+        set -ex
+        python -m venv venv
+        if [ -f requirements/dev.txt ]; then ./venv/bin/pip install -r requirements/dev.txt; fi
+      if: steps.cache-venv.outputs.cache-hit != 'true'
+    - name: Background API
+      run: |
+        set -ex
+        env MINDEBUG=1 MIGRATE=1 ./venv/bin/python3 dev.py &
+    - name: Test with pytest
+      run: |
+        ./tests/mintest.sh
+    - name: Teardown
+      run: |
+        killall -9 python3
+  test-web:
+    name: test web
+    runs-on: ubuntu-latest
+    concurrency: test
+    environment: anubis
+    defaults:
+      run:
+        shell: bash
+        working-directory: web
+    strategy:
+      matrix:
+        node-version: [ 14.x ]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: |
+            **/node_modules
+            **/.eslintcache
+            ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - run: yarn install --frozen-lockfile
+      - run: yarn run build

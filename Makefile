@@ -53,6 +53,10 @@ restart:
 .PHONY: deploy          # Deploy Anubis k8s cluster
 deploy: build push upgrade restart
 
+.PHONY: status          # See status of Anubis k8s cluster
+status:
+	helm status -n anubis anubis
+
 .PHONY: build           # Build all docker images
 build:
 	docker-compose build --parallel --pull $(DOCKER_COMPOSE_PUSH_SERVICES)
