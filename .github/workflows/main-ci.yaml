@@ -27,7 +27,7 @@ jobs:
       with:
         path: |
           **/venv
-        key: ${{ runner.os }}-venv-${{ hashFiles('requirements/dev.txt') }}-${{ hashFiles('../.github/workflows/test-api.yml') }}
+        key: ${{ runner.os }}-venv-${{ hashFiles('requirements/dev.txt') }}-${{ hashFiles('../.github/workflows/main-ci.yml') }}
         restore-keys: |
           ${{ runner.os }}-venv-
     - name: Install dependencies
