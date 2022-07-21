@@ -18,12 +18,12 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "chart.labels" . | nindent 6 }}
+      {{- include "chart.selectorLabels" . | nindent 6 }}
       component: proxy
   template:
     metadata:
       labels:
-        {{- include "chart.labels" . | nindent 8 }}
+        {{- include "chart.selectorLabels" . | nindent 8 }}
         component: proxy
     spec:
       dnsPolicy: 'ClusterFirst'
