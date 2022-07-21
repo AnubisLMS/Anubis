@@ -11,7 +11,6 @@ jobs:
   test-api:
     name: Test api
     runs-on: ubuntu-latest
-    concurrency: test
     environment: anubis
     defaults:
       run:
@@ -53,7 +52,6 @@ jobs:
   test-web:
     name: Test web
     runs-on: ubuntu-latest
-    concurrency: test
     environment: anubis
     defaults:
       run:
@@ -88,7 +86,6 @@ jobs:
     name: build api
     needs: [test-api, test-web]
     runs-on: ubuntu-latest
-    concurrency: build
     environment: anubis
     steps:
       - uses: actions/checkout@v2
@@ -106,7 +103,6 @@ jobs:
     name: build web
     needs: [test-api, test-web]
     runs-on: ubuntu-latest
-    concurrency: build
     environment: anubis
     steps:
       - uses: actions/checkout@v2
@@ -124,7 +120,6 @@ jobs:
     name: build theia proxy
     needs: [test-api, test-web]
     runs-on: ubuntu-latest
-    concurrency: build
     environment: anubis
     steps:
       - uses: actions/checkout@v2
