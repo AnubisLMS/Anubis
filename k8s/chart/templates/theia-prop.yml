@@ -14,6 +14,7 @@ metadata:
 spec:
   selector:
     matchLabels:
+      {{- include "chart.selectorLabels" . | nindent 6 }}
       name: theia-prop
   updateStrategy:
     type: RollingUpdate
@@ -23,6 +24,7 @@ spec:
   template:
     metadata:
       labels:
+        {{- include "chart.selectorLabels" . | nindent 8 }}
         name: theia-prop
     spec:
       containers:

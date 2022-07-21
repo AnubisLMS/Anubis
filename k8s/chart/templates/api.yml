@@ -8,7 +8,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "chart.labels" . | nindent 6 }}
+      {{- include "chart.selectorLabels" . | nindent 6 }}
       component: api
   replicas: {{ .Values.api.replicas }}
   {{- if .Values.rollingUpdates }}
@@ -82,7 +82,7 @@ metadata:
     component: api
 spec:
   selector:
-    {{- include "chart.labels" . | nindent 4 }}
+    {{- include "chart.selectorLabels" . | nindent 4 }}
     component: api
   ports:
   - name: web

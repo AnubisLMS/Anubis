@@ -27,7 +27,7 @@ metadata:
   name: db-visuals-{{ .Release.Revision }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "chart.labels" . | nindent 4 }}
+    {{- include "chart.selectorLabels" . | nindent 4 }}
     component: visuals
 spec:
   backoffLimit: 4

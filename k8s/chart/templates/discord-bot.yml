@@ -11,7 +11,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "chart.labels" . | nindent 6 }}
+      {{- include "chart.selectorLabels" . | nindent 6 }}
       component: discord-bot
   replicas: {{ .Values.discordbot.replicas }}
   {{- if .Values.rollingUpdates }}
@@ -24,7 +24,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "chart.labels" . | nindent 8 }}
+        {{- include "chart.selectorLabels" . | nindent 8 }}
         component: discord-bot
     spec:
       containers:

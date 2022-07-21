@@ -5,7 +5,7 @@ kind: CronJob
 metadata:
   name: {{ include "chart.fullname" . }}-reaper
   labels:
-    {{- include "chart.labels" . | nindent 4 }}
+    {{- include "chart.selectorLabels" . | nindent 4 }}
     component: reaper
 spec:
   schedule: {{ .Values.reaper.schedule | quote }}
@@ -14,7 +14,7 @@ spec:
   jobTemplate:
     metadata:
       labels:
-        {{- include "chart.labels" . | nindent 8 }}
+        {{- include "chart.selectorLabels" . | nindent 8 }}
         component: reaper-job
     spec:
       template:

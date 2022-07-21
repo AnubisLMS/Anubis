@@ -59,7 +59,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "chart.labels" $ | nindent 6 }}
+      {{- include "chart.selectorLabels" $ | nindent 6 }}
       component: rpc-{{ . }}
   replicas: {{ $.Values.rpc.replicas }}
   {{- if $.Values.rollingUpdates }}
@@ -72,7 +72,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "chart.labels" $ | nindent 8 }}
+        {{- include "chart.selectorLabels" $ | nindent 8 }}
         component: rpc-{{ . }}
     spec:
       serviceAccountName: anubis-rpc

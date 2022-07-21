@@ -8,7 +8,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "chart.labels" . | nindent 6 }}
+      {{- include "chart.selectorLabels" . | nindent 6 }}
       component: pipeline-api
   replicas: {{ .Values.pipeline_api.replicas }}
   {{- if .Values.rollingUpdates }}
@@ -21,7 +21,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "chart.labels" . | nindent 8 }}
+        {{- include "chart.selectorLabels" . | nindent 8 }}
         component: pipeline-api
     spec:
       dnsPolicy: ClusterFirst
@@ -66,7 +66,7 @@ metadata:
     component: pipeline-api
 spec:
   selector:
-    {{- include "chart.labels" . | nindent 4 }}
+    {{- include "chart.selectorLabels" . | nindent 4 }}
     component: pipeline-api
   ports:
   - name: web

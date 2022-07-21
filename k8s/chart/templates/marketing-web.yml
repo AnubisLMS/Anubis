@@ -9,7 +9,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "chart.labels" . | nindent 6 }}
+      {{- include "chart.selectorLabels" . | nindent 6 }}
       component: marketing-web
   replicas: {{ .Values.marketing.replicas }}
   {{- if .Values.rollingUpdates }}
@@ -22,7 +22,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "chart.labels" . | nindent 8 }}
+        {{- include "chart.selectorLabels" . | nindent 8 }}
         component: marketing-web
     spec:
       dnsPolicy: ClusterFirst
@@ -74,7 +74,7 @@ metadata:
     component: marketing-web
 spec:
   selector:
-    {{- include "chart.labels" . | nindent 4 }}
+    {{- include "chart.selectorLabels" . | nindent 4 }}
     component: marketing-web
   ports:
   - name: web
