@@ -82,7 +82,7 @@ jobs:
   # to the container registry.
   build-api:
     name: Build api
-    needs: [test-api, test-web]
+    needs: [test-api]
     runs-on: ubuntu-latest
     environment: anubis
     steps:
@@ -99,7 +99,7 @@ jobs:
         run: docker compose push api
   build-web:
     name: Build web
-    needs: [test-api, test-web]
+    needs: [test-web]
     runs-on: ubuntu-latest
     environment: anubis
     steps:
@@ -116,7 +116,6 @@ jobs:
         run: docker compose push web
   build-theia-proxy:
     name: Build theia-proxy
-    needs: [test-api, test-web]
     runs-on: ubuntu-latest
     environment: anubis
     steps:
