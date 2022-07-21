@@ -49,6 +49,7 @@ release: {{ .Release.Name | quote }}
 Selector labels
 */}}
 {{- define "chart.selectorLabels" -}}
+{{- if .Values.tag | quote }}git.tag: {{ .Values.tag | quote }}{{- end }}
 app.kubernetes.io/name: {{ include "chart.name" . | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
 {{- end }}
