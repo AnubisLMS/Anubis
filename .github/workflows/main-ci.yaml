@@ -140,7 +140,7 @@ jobs:
   # deployments.
   deploy:
     name: deploy
-    needs: build
+    needs: [build-api, build-web, build-theia-proxy]
     runs-on: ubuntu-latest
     environment: anubis
     steps:
