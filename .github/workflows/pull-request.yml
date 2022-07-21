@@ -12,7 +12,6 @@ jobs:
   test-api:
     name: Test api
     runs-on: ubuntu-latest
-    environment: anubis
     defaults:
       run:
         shell: bash
@@ -53,7 +52,6 @@ jobs:
   test-web:
     name: test web
     runs-on: ubuntu-latest
-    environment: anubis
     defaults:
       run:
         shell: bash
