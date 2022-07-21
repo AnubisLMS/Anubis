@@ -142,7 +142,7 @@ jobs:
   # deployments.
   deploy:
     name: Deploy to Anubis k8s cluster
-    needs: [build-api, build-web, build-theia-proxy]
+    needs: [build-api, build-web, build-theia-images]
     runs-on: ubuntu-latest
     environment: anubis
     steps:
