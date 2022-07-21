@@ -11,7 +11,6 @@ jobs:
   test-api:
     name: Test api
     runs-on: ubuntu-latest
-    environment: anubis
     defaults:
       run:
         shell: bash
@@ -52,7 +51,6 @@ jobs:
   test-web:
     name: Test web
     runs-on: ubuntu-latest
-    environment: anubis
     defaults:
       run:
         shell: bash
@@ -83,7 +81,7 @@ jobs:
   # Will build the docker image, and push it
   # to the container registry.
   build-api:
-    name: build api
+    name: Build api
     needs: [test-api, test-web]
     runs-on: ubuntu-latest
     environment: anubis
@@ -100,7 +98,7 @@ jobs:
       - name: Push image to registry
         run: docker compose push api
   build-web:
-    name: build web
+    name: Build web
     needs: [test-api, test-web]
     runs-on: ubuntu-latest
     environment: anubis
@@ -117,7 +115,7 @@ jobs:
       - name: Push image to registry
         run: docker compose push web
   build-theia-proxy:
-    name: build theia proxy
+    name: Build theia-proxy
     needs: [test-api, test-web]
     runs-on: ubuntu-latest
     environment: anubis
@@ -138,7 +136,7 @@ jobs:
   # Will push out yaml to the k8s cluster, then restart
   # deployments.
   deploy:
-    name: deploy
+    name: Deploy to Anubis k8s cluster
     needs: [build-api, build-web, build-theia-proxy]
     runs-on: ubuntu-latest
     environment: anubis
