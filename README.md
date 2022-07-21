@@ -16,6 +16,7 @@
   Distributed LMS for automating Computing Science Courses From NYU  
 </p>
 
+[![Anubis Main CD/CI](https://github.com/AnubisLMS/Anubis/actions/workflows/main-ci.yml/badge.svg)](https://github.com/AnubisLMS/Anubis/actions/workflows/main-ci.yml)
 <p>
   <a href="https://github.com/AnubisLMS/Anubis/graphs/contributors">
     <img src="https://img.shields.io/github/contributors/AnubisLMS/Anubis" alt="contributors" />
