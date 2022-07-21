@@ -22,7 +22,7 @@ spec:
           restartPolicy: Never
           containers:
           - name: daily-cleanup
-            image: "{{ .Values.api.image }}:{{ .Values.api.tag }}"
+            image: "{{ .Values.api.image }}:{{ .Values.tag }}"
             imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
             command: ["python3", "jobs/daily_cleanup.py"]
             env:

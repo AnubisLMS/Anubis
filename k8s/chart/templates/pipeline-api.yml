@@ -27,7 +27,7 @@ spec:
       dnsPolicy: ClusterFirst
       containers:
       - name: pipeline-api
-        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+        image: "{{ .Values.api.image }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         ports:
         - name: web

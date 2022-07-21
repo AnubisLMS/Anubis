@@ -26,7 +26,7 @@ services:
       - "traefik.enable=false"
 
   api:
-    image: registry.digitalocean.com/anubis/api:latest
+    image: registry.digitalocean.com/anubis/api:${GIT_TAG:-latest}
     build: ./api
     command: sh -c "while true; do python3 dev.py; sleep 1; done"
     ports:
@@ -104,7 +104,7 @@ services:
       - "traefik.enable=false"
 
   web:
-    image: registry.digitalocean.com/anubis/web:latest
+    image: registry.digitalocean.com/anubis/web:${GIT_TAG:-latest}
     build: ./web
 
   web-dev:
@@ -256,15 +256,15 @@ services:
     build: ./theia/ide/theia-jepst
 
   theia-proxy:
-    image: registry.digitalocean.com/anubis/theia-proxy:latest
+    image: registry.digitalocean.com/anubis/theia-proxy:${GIT_TAG:-latest}
     build: ./theia/proxy
 
   theia-init:
-    image: registry.digitalocean.com/anubis/theia-init:latest
+    image: registry.digitalocean.com/anubis/theia-init:${GIT_TAG:-latest}
     build: ./theia/init
 
   theia-sidecar:
-    image: registry.digitalocean.com/anubis/theia-sidecar:latest
+    image: registry.digitalocean.com/anubis/theia-sidecar:${GIT_TAG:-latest}
     build: ./theia/sidecar
 
 volumes:

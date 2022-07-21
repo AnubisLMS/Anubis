@@ -94,9 +94,9 @@ jobs:
       - name: Log into DigitalOcean container registry
         run: doctl registry login
       - name: Build container image
-        run: docker compose build api
+        run: env GIT_TAG=$$(git log -1 --pretty=%h) docker compose build api
       - name: Push image to registry
-        run: docker compose push api
+        run: env GIT_TAG=$$(git log -1 --pretty=%h) docker compose push api
   build-web:
     name: Build web
     needs: [test-web]
@@ -111,13 +111,19 @@ jobs:
       - name: Log into DigitalOcean container registry
         run: doctl registry login
       - name: Build container image
-        run: docker compose build web
+        run: env GIT_TAG=$$(git log -1 --pretty=%h) docker compose build web
       - name: Push image to registry
-        run: docker compose push web
-  build-theia-proxy:
-    name: Build theia-proxy
+        run: env GIT_TAG=$$(git log -1 --pretty=%h) docker compose push web
+  build-theia-images:
+    name: Build theia-images (non-ide)
     runs-on: ubuntu-latest
     environment: anubis
+    strategy:
+      matrix:
+        image:
+          - theia-proxy
+          - theia-init
+          - theia-sidecar
     steps:
       - uses: actions/checkout@v2
       - name: Install doctl
@@ -127,9 +133,9 @@ jobs:
       - name: Log into DigitalOcean container registry
         run: doctl registry login
       - name: Build container image
-        run: docker compose build theia-proxy
+        run: env GIT_TAG=$$(git log -1 --pretty=%h) docker compose build ${{ matrix.image }}
       - name: Push image to registry
-        run: docker compose push theia-proxy
+        run: env GIT_TAG=$$(git log -1 --pretty=%h) docker compose push ${{ matrix.image }}
 
   # Deploy step.
   # Will push out yaml to the k8s cluster, then restart

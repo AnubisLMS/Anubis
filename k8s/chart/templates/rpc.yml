@@ -78,7 +78,7 @@ spec:
       serviceAccountName: anubis-rpc
       containers:
       - name: {{ include "chart.fullname" $ }}-rpc-{{ . }}
-        image: {{ $.Values.api.image }}:{{ $.Values.api.tag }}
+        image: "{{ $.Values.api.image }}:{{ $.Values.tag }}"
         imagePullPolicy: {{ $.Values.imagePullPolicy }}
         command: ["./rq-worker.sh", {{ . | quote }}]
         {{- if not $.Values.debug }}

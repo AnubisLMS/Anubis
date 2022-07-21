@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+        image: "{{ .Values.api.image }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
           requests:

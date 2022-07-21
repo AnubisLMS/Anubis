@@ -27,7 +27,7 @@ spec:
       dnsPolicy: ClusterFirst
       containers:
       - name: web
-        image: {{ .Values.web.image }}:{{ .Values.web.tag }}
+        image: "{{ .Values.web.image }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
           requests:

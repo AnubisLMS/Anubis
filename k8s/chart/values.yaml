@@ -9,6 +9,7 @@ domain: "anubis.osiris.services"
 vpnOnly: false
 imagePullPolicy: "Always"
 imagePullSecret: "anubis"
+tag: "latest"
 
 
 ###############################################################################
@@ -20,13 +21,11 @@ api:
   workers: 2
   gunicorn_options: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
   image: "registry.digitalocean.com/anubis/api"
-  tag: "latest"
 
 # Anubis web static
 web:
   replicas: 1
   image: "registry.digitalocean.com/anubis/web"
-  tag: "latest"
 
 # API for submission pipeline reporting
 pipeline_api:

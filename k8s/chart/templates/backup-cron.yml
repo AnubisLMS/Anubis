@@ -23,7 +23,7 @@ spec:
             runAsUser: 1000
           containers:
           - name: backup
-            image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+            image: "{{ .Values.api.image }}:{{ .Values.tag }}"
             imagePullPolicy: {{ .Values.imagePullPolicy }}
             command:
             - ./jobs/backup.sh

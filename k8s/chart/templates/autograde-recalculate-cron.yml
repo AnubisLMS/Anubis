@@ -23,7 +23,7 @@ spec:
           restartPolicy: Never
           containers:
           - name: autograde-recalculate
-            image: "{{ .Values.api.image }}:{{ .Values.api.tag }}"
+            image: "{{ .Values.api.image }}:{{ .Values.tag }}"
             imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
             command: ["python3", "jobs/autograde_recalculate.py"]
             env:

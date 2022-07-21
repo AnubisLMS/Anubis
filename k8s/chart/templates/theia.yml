@@ -32,7 +32,7 @@ spec:
           - 1.1.1.1
       containers:
       - name: proxy
-        image: {{ .Values.theia.proxy.image }}:{{ .Values.theia.proxy.tag }}
+        image: "{{ .Values.theia.proxy.image }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if not .Values.debug}}
         resources:
@@ -185,7 +185,7 @@ spec:
       serviceAccountName: theia-poller
       containers:
       - name: poller
-        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+        image: "{{ .Values.api.image }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         args: ["python3", "/opt/app/jobs/ide_poller.py"]
         {{- if not .Values.debug}}

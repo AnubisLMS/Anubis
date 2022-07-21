@@ -10,6 +10,10 @@ K8S_RESTART_DEPLOYMENTS := \
 	anubis-api anubis-web anubis-pipeline-api anubis-theia-proxy anubis-rpc-default anubis-rpc-theia \
 	anubis-rpc-regrade anubis-theia-poller anubis-discord-bot
 
+# To tag docker images
+GIT_TAG ?= $(shell git log -1 --pretty=%h)
+export GIT_TAG
+
 # Theia IDES
 THEIA_BASE_IDE := \
 	theia-base-38 theia-base-39 theia-base-310 \
@@ -43,7 +47,7 @@ context:
 
 .PHONY: upgrade         # Helm upgrade Anubis k8s cluster
 upgrade:
-	helm upgrade --install anubis ./k8s/chart -n anubis
+	helm upgrade --install anubis ./k8s/chart --set tag=$(GIT_TAG) -n anubis
 
 .PHONY: restart         # Restart Anubis k8s cluster
 restart:

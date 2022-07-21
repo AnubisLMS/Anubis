@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: discord-bot
-        image: {{ .Values.api.image }}:{{ .Values.api.tag }}
+        image: "{{ .Values.api.image }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         command: ["python3", "jobs/discord_bot.py"]
         resources:
