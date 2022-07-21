@@ -32,7 +32,7 @@ jobs:
       with:
         path: |
           **/venv
-        key: ${{ runner.os }}-venv-${{ hashFiles('requirements/dev.txt') }}-${{ hashFiles('../.github/workflows/pull-request.yml') }}
+        key: ${{ runner.os }}-venv-${{ hashFiles('requirements/dev.txt') }}
         restore-keys: |
           ${{ runner.os }}-venv-
     - name: Install dependencies
