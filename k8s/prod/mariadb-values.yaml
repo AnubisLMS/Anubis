@@ -292,7 +292,7 @@ mariadbConfiguration: |-
 
   ## Character set
   ##
-  collation_server=utf8mb4_unicode_ci
+  collation_server=utf8mb4_general_ci
   init_connect='SET NAMES utf8'
   character_set_server=utf8mb4
 
