@@ -75,7 +75,7 @@ def admin_late_exception_update(assignment_id: str = None, user_id: str = None, 
     # Get late exceptions
     late_exception: LateException | None = LateException.query.filter(
         LateException.assignment_id == assignment.id,
-        LateException.user_id == student.id,
+        LateException.owner_id == student.id,
     ).first()
 
     # Check that it exists
@@ -136,7 +136,7 @@ def admin_late_exception_remove(assignment_id: str = None, user_id: str = None):
     # Delete the exception if it exists
     LateException.query.filter(
         LateException.assignment_id == assignment.id,
-        LateException.user_id == student.id,
+        LateException.owner_id == student.id,
     ).delete()
 
     # Recalculate the late submissions

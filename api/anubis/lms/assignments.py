@@ -71,7 +71,7 @@ def get_assignment_due_date(user_id: str, assignment_id: str, grace: bool = Fals
 
     # Check for a late exception for this student
     late_exception: LateException | None = LateException.query.filter(
-        LateException.user_id == user_id,
+        LateException.owner_id == user_id,
         LateException.assignment_id == assignment_id,
     ).first()
 
