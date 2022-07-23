@@ -22,45 +22,37 @@ tables = ['anubis_config', 'user', 'course', 'ta_for_course', 'professor_for_cou
           'forum_post', 'forum_category', 'forum_post_in_category', 'forum_post_viewed', 'forum_post_comment',
           'forum_post_upvote']
 
-covered = set()
-
-
-def migrate_ids(table_name: str, size: int = 128, new_size: int = 36):
-    conn = op.get_bind()
+def migrate_id(conn, table_name: str, new_size: int = 36):
     r = conn.execute('select `column_name` from `information_schema`.`columns` '
                      'where `TABLE_SCHEMA` = %s and `TABLE_NAME` = %s and `COLUMN_NAME` = %s;',
                      ('anubis', table_name, 'id'))
     if r.fetchone() is not None:
         print(f'Resizing {table_name}.id to length={new_size}')
         op.alter_column(table_name, 'id',
-                        existing_type=mysql.VARCHAR(length=size),
-                        type_=sa.VARCHAR(length=new_size, collation='utf8mb4_unicode_ci'),
+                        type_=sa.VARCHAR(length=new_size, collation='utf8mb4_general_ci'),
                         nullable=False)
-        covered.add(frozenset({table_name, 'id'}))
-
-    for sub_table_name in tables:
-        r = conn.execute('select `COLUMN_NAME`, `IS_NULLABLE` from `information_schema`.`columns` '
-                         'where `TABLE_SCHEMA` = %s and `TABLE_NAME` = %s and `COLUMN_NAME` LIKE \'%%\\_id\';',
-                         ('anubis', sub_table_name))
-        for key_name, nullable in r.fetchall():
-            if frozenset({table_name, key_name}) in covered:
-                continue
-            print(f'Resizing {sub_table_name}.{key_name} to length={new_size}')
-            op.alter_column(sub_table_name, key_name,
-                            existing_type=mysql.VARCHAR(length=size),
-                            type_=sa.VARCHAR(length=new_size, collation='utf8mb4_unicode_ci'),
-                            nullable=bool(nullable))
-            covered.add(frozenset({table_name, key_name}))
 
 
-def do_migration(old_size: int = 128, new_size: int = 36):
+def do_migration(new_size: int = 36):
     conn = op.get_bind()
 
     with conn.begin() as trx:
         conn.execute('SET FOREIGN_KEY_CHECKS=0;')
 
         for table_name in tables:
-            migrate_ids(table_name, old_size, new_size)
+            migrate_id(conn, table_name, new_size)
+
+        for sub_table_name in tables:
+            r = conn.execute(
+                'select `COLUMN_NAME`, `IS_NULLABLE` from `information_schema`.`columns` '
+                'where `TABLE_SCHEMA` = %s and `TABLE_NAME` = %s and `COLUMN_NAME` LIKE \'%%\\_id\';',
+                ('anubis', sub_table_name))
+            rr = r.fetchall()
+            for key_name, nullable in rr:
+                print(f'Resizing {sub_table_name}.{key_name} to length={new_size}')
+                op.alter_column(sub_table_name, key_name,
+                                type_=sa.VARCHAR(length=new_size, collation='utf8mb4_general_ci'),
+                                nullable=nullable == 'YES')
 
         conn.execute('SET FOREIGN_KEY_CHECKS=1;')
 
@@ -68,8 +60,8 @@ def do_migration(old_size: int = 128, new_size: int = 36):
 
 
 def upgrade():
-    do_migration(old_size=128, new_size=36)
+    do_migration(new_size=36)
 
 
 def downgrade():
-    do_migration(old_size=36, new_size=128)
+    pass #do_migration(new_size=128)
