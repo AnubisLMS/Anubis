@@ -39,7 +39,7 @@ def migrate_ids(conn, table_name: str, key_name: str | list = None):
     key_name: list[str]
 
     i = 0
-    limit = 1000
+    limit = 5000
 
     key_sub_tables = dict()
     for _key_name in key_name:

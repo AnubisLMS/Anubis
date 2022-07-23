@@ -14,56 +14,6 @@ from sqlalchemy.sql.sqltypes import DateTime, Boolean, JSON, Integer
 
 from anubis.constants import THEIA_DEFAULT_OPTIONS
 
-"""
-tables = ['anubis_config', 'user', 'course', 'ta_for_course', 'professor_for_course', 'in_course', 'assignment',
-          'assignment_repo', 'assignment_test', 'assignment_question', 'assigned_student_question',
-          'assigned_student_response', 'submission', 'submission_test_result', 'submission_build', 'theia_image',
-          'theia_image_tag', 'theia_session', 'theia_paste', 'static_file', 'late_exception', 'lecture_notes',
-          'forum_post', 'forum_category', 'forum_post_in_category', 'forum_post_viewed', 'forum_post_comment',
-          'forum_post_upvote']
-
-
-def migrate_ids(table_name: str, key_name: str, size: int = 128, new_size: int = 36):
-    print(f'Resizing {table_name}.id to length={new_size}')
-    op.alter_column(table_name, 'id',
-                    existing_type=mysql.VARCHAR(length=size),
-                    type_=sa.VARCHAR(length=new_size, collation='utf8mb4_unicode_ci'))
-
-    conn = op.get_bind()
-    for sub_table_name in tables:
-        r = conn.execute('select 1 from `information_schema`.`columns` where `TABLE_SCHEMA` = %s `TABLE_NAME` = %s and `COLUMN_NAME` = %s',
-                   ('anubis', sub_table_name, key_name))
-        if r.fetchone() is None:
-            continue
-
-        print(f'Resizing {sub_table_name}.{key_name} to length={new_size}')
-        op.alter_column(sub_table_name, key_name,
-                        existing_type=mysql.VARCHAR(length=size),
-                        type_=sa.VARCHAR(length=new_size, collation='utf8mb4_unicode_ci'))
-
-
-def do_migration(old_size: int = 128, new_size: int = 36):
-    conn = op.get_bind()
-
-    with conn.begin() as trx:
-        conn.execute('SET FOREIGN_KEY_CHECKS=0;')
-
-        migrate_ids('user', 'owner_id', old_size, new_size)
-
-        conn.execute('SET FOREIGN_KEY_CHECKS=1;')
-
-        trx.commit()
-
-
-def upgrade():
-    pass
-
-
-def downgrade():
-    pass
-
-"""
-
 # https://dev.mysql.com/doc/refman/8.0/en/storage-requirements.html
 
 db = SQLAlchemy()
@@ -174,7 +124,7 @@ class Course(db.Model):
         default="https://github.com/os3224/anubis-assignment-tests",
     )
     github_repo_required: bool = Column(Boolean, default=True)
-    theia_default_image_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    theia_default_image_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                          ForeignKey("theia_image.id"), nullable=True)
     theia_default_options = Column(JSON, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
     github_org: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=256),
@@ -228,9 +178,9 @@ class TAForCourse(db.Model):
     __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # Foreign Keys
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                            ForeignKey(User.id), primary_key=True)
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                             ForeignKey(Course.id), primary_key=True)
 
     @property
@@ -246,9 +196,9 @@ class ProfessorForCourse(db.Model):
     __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # Foreign Keys
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                            ForeignKey(User.id), primary_key=True)
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                             ForeignKey(Course.id), primary_key=True)
 
     @property
@@ -264,9 +214,9 @@ class InCourse(db.Model):
     __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     # Foreign Keys
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                            ForeignKey(User.id), primary_key=True)
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                             ForeignKey(Course.id), primary_key=True)
 
 
@@ -278,7 +228,7 @@ class Assignment(db.Model):
     id = default_id()
 
     # Foreign Keys
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                             ForeignKey(Course.id), index=True)
 
     # Fields
@@ -300,9 +250,9 @@ class Assignment(db.Model):
 
     # IDE
     ide_enabled: bool = Column(Boolean, default=True)
-    theia_image_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    theia_image_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                  ForeignKey("theia_image.id"), default=None)
-    theia_image_tag_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    theia_image_tag_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                      ForeignKey("theia_image_tag.id"), default=None)
     theia_options = Column(JSON, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
 
@@ -365,9 +315,9 @@ class AssignmentRepo(db.Model):
     id = default_id()
 
     # Foreign Keys
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                            ForeignKey(User.id), nullable=True)
-    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                 ForeignKey(Assignment.id), nullable=False)
 
     # Fields
@@ -406,7 +356,7 @@ class AssignmentTest(db.Model):
     id = default_id()
 
     # Foreign Keys
-    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                 ForeignKey(Assignment.id))
 
     # Fields
@@ -427,7 +377,7 @@ class AssignmentQuestion(db.Model):
     id = default_id()
 
     # Foreign Keys
-    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                 ForeignKey(Assignment.id), index=True)
 
     # Fields
@@ -474,11 +424,11 @@ class AssignedStudentQuestion(db.Model):
     id = default_id()
 
     # Foreign Keys
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                            ForeignKey(User.id))
-    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                 ForeignKey(Assignment.id), index=True, nullable=False)
-    question_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    question_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                               ForeignKey(AssignmentQuestion.id), index=True, nullable=False)
 
     # Timestamps
@@ -567,11 +517,11 @@ class Submission(db.Model):
     id = default_id()
 
     # Foreign Keys
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                            ForeignKey(User.id), index=True, nullable=True)
-    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                 ForeignKey(Assignment.id), index=True, nullable=False)
-    assignment_repo_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    assignment_repo_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                      ForeignKey(AssignmentRepo.id), nullable=False)
 
     # Timestamps
@@ -644,9 +594,9 @@ class SubmissionTestResult(db.Model):
     id = default_id()
 
     # Foreign Keys
-    submission_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    submission_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                 ForeignKey(Submission.id), primary_key=True)
-    assignment_test_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    assignment_test_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                      ForeignKey(AssignmentTest.id), primary_key=True)
 
     # Timestamps
@@ -692,7 +642,7 @@ class SubmissionBuild(db.Model):
     id = default_id()
 
     # Foreign Keys
-    submission_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    submission_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                 ForeignKey(Submission.id), index=True)
 
     # Fields
@@ -752,7 +702,7 @@ class TheiaImageTag(db.Model):
     __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     id = default_id()
-    image_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    image_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                            ForeignKey(TheiaImage.id), nullable=False)
     tag: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=256), nullable=False,
                       default="latest")
@@ -783,15 +733,15 @@ class TheiaSession(db.Model):
     id = default_id()
 
     # Foreign keys
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                            ForeignKey(User.id), nullable=False)
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                             ForeignKey(Course.id), nullable=True, index=True)
-    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                 ForeignKey(Assignment.id), nullable=True)
-    image_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    image_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                            ForeignKey(TheiaImage.id), nullable=True)
-    image_tag_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    image_tag_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                ForeignKey(TheiaImageTag.id), nullable=True)
 
     # Fields
@@ -866,9 +816,9 @@ class TheiaPaste(db.Model):
 
     id = default_id()
 
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                            ForeignKey(User.id), index=True)
-    theia_session_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    theia_session_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                    ForeignKey(TheiaSession.id), index=True)
     timestamp: datetime = Column(DateTime, default=datetime.now)
 
@@ -890,7 +840,7 @@ class StaticFile(db.Model):
     __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
     id = default_id()
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                             ForeignKey(Course.id), nullable=False, index=True)
 
     # Fields
@@ -937,9 +887,9 @@ class LateException(db.Model):
     __tablename__ = "late_exception"
     __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                            ForeignKey(User.id), primary_key=True)
-    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                 ForeignKey(Assignment.id), primary_key=True)
 
     # New Due Date
@@ -967,9 +917,9 @@ class LectureNotes(db.Model):
     id = default_id()
 
     # Foreign keys
-    static_file_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    static_file_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                  ForeignKey(StaticFile.id), nullable=False, index=True)
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                             ForeignKey(Course.id), nullable=False, index=True)
 
     # Meta fields
@@ -1003,9 +953,9 @@ class ForumPost(db.Model):
 
     id = default_id()
 
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                            ForeignKey(User.id), nullable=False)
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                             ForeignKey(Course.id))
     visible_to_students: bool = Column(Boolean, default=False)
     pinned: bool = Column(Boolean, default=False)
@@ -1063,7 +1013,7 @@ class ForumCategory(db.Model):
     id = default_id()
 
     name: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128))
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                             ForeignKey(Course.id))
 
     # Timestamps
@@ -1087,9 +1037,9 @@ class ForumPostInCategory(db.Model):
     __tablename__ = "forum_post_in_category"
     __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
-    post_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    post_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                           ForeignKey(ForumPost.id), primary_key=True)
-    category_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    category_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                               ForeignKey(ForumCategory.id), primary_key=True)
 
     # Timestamps
@@ -1110,9 +1060,9 @@ class ForumPostViewed(db.Model):
     __tablename__ = "forum_post_viewed"
     __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
 
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                            ForeignKey(User.id), primary_key=True)
-    post_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    post_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                           ForeignKey(ForumPost.id), primary_key=True)
 
     # Timestamps
@@ -1135,12 +1085,12 @@ class ForumPostComment(db.Model):
 
     id = default_id()
 
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                            ForeignKey(User.id), nullable=False)
-    post_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    post_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                           ForeignKey(ForumPost.id), nullable=False)
-    parent_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128), nullable=True)
-    approved_by_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    parent_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length), nullable=True)
+    approved_by_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                                  ForeignKey(User.id), nullable=True)
     anonymous: bool = Column(Boolean, default=False)
     thread_start: bool = Column(Boolean, default=False)
@@ -1184,9 +1134,9 @@ class ForumPostUpvote(db.Model):
 
     id = default_id()
 
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                            ForeignKey(User.id), primary_key=True)
-    post_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+    post_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
                           ForeignKey(ForumPost.id), primary_key=True)
 
     # Timestamps
