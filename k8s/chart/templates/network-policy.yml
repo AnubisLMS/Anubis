@@ -69,7 +69,6 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      {{- include "chart.labels" . | nindent 6 }}
       network-policy: admin
   policyTypes:
   - Ingress
