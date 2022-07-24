@@ -55,7 +55,7 @@ restart:
 		$(K8S_RESTART_DEPLOYMENTS)
 
 .PHONY: deploy          # Deploy Anubis k8s cluster
-deploy: build push upgrade restart
+deploy: build push upgrade
 
 .PHONY: status          # See status of Anubis k8s cluster
 status:

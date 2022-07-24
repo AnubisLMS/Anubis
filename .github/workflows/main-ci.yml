@@ -155,7 +155,5 @@ jobs:
         run: doctl kubernetes cluster kubeconfig save anubis
       - name: Helm upgrade
         run: make upgrade
-      - name: Rollout restarts to deployments
-        run: make restart
       - name: Verify deployment
         run: make status
