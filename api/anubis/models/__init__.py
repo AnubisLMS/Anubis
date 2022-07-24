@@ -647,7 +647,10 @@ class TheiaImage(db.Model):
             "public":      self.public,
             "default_tag": self.default_tag,
             "webtop":      self.webtop,
-            "tags":        [tag.data for tag in self.tags],
+            "tags":        list(sorted(
+                [tag.data for tag in self.tags],
+                key=lambda tag_data: tag_data['title']
+            )),
         }
 
 

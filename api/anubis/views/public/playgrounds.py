@@ -124,4 +124,9 @@ def public_playgrounds_images():
 
     images: list[TheiaImage] = TheiaImage.query.filter(TheiaImage.public == True).all()
 
-    return success_response({"images": [image.data for image in images]})
+    return success_response({
+        "images": list(sorted(
+            [image.data for image in images],
+            key=lambda image_data: image_data['title']
+        ))
+    })
