@@ -2,45 +2,27 @@ import base64
 import copy
 import gzip
 import os
-import uuid
 from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.dialects import mysql
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import deferred, relationship, InstrumentedAttribute
 from sqlalchemy.sql.schema import Column, ForeignKey
-from sqlalchemy.sql.sqltypes import DateTime, Boolean, JSON, Integer
 
-from anubis.constants import THEIA_DEFAULT_OPTIONS
-
-# https://dev.mysql.com/doc/refman/8.0/en/storage-requirements.html
+from anubis.constants import THEIA_DEFAULT_OPTIONS, DB_COLLATION, DB_CHARSET
+from anubis.models.id import default_id_length, default_id
+from anubis.models.sqltypes import String, Text, DateTime, Boolean, JSON, Integer
 
 db = SQLAlchemy()
-
-_default_id_length = 36
-
-
-def default_id_factory() -> str:
-    return str(uuid.uuid4())
-
-
-def default_id() -> Column:
-    return Column(
-        mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-        primary_key=True,
-        index=True,
-        default=default_id_factory,
-    )
 
 
 class Config(db.Model):
     __tablename__ = "anubis_config"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # Fields
-    key: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128), primary_key=True)
-    value: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=2048))
+    key: str = Column(String(length=128), primary_key=True)
+    value: str = Column(String(length=2048))
 
     @property
     def data(self):
@@ -52,16 +34,15 @@ class Config(db.Model):
 
 class User(db.Model):
     __tablename__ = "user"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
     id = default_id()
 
     # Fields
-    netid: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128), primary_key=True,
-                        unique=True, index=True)
-    github_username = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), index=True)
-    name = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14))
+    netid: str = Column(String(length=128), primary_key=True, unique=True, index=True)
+    github_username = Column(Text(length=2 ** 14), index=True)
+    name = Column(Text(length=2 ** 14))
     is_superuser: bool = Column(Boolean, nullable=False, default=False)
     disabled: bool = Column(Boolean, nullable=False, default=False)
 
@@ -78,9 +59,10 @@ class User(db.Model):
     theia_sessions = relationship("TheiaSession", backref="owner")
     late_exceptions = relationship("LateException", backref="user")
     forum_posts = relationship("ForumPost", backref="owner")
-    forum_comments = relationship("ForumPostComment", backref="owner", foreign_keys='ForumPostComment.owner_id')
-    forum_approved_comments = relationship("ForumPostComment", backref="approved_by",
-                                           foreign_keys='ForumPostComment.approved_by_id')
+    forum_comments = relationship("ForumPostComment", backref="owner", foreign_keys="ForumPostComment.owner_id")
+    forum_approved_comments = relationship(
+        "ForumPostComment", backref="approved_by", foreign_keys="ForumPostComment.approved_by_id"
+    )
     forum_upvotes = relationship("ForumPostUpvote", backref="owner")
     forum_posts_viewed = relationship("ForumPostViewed", backref="owner")
 
@@ -107,31 +89,28 @@ class User(db.Model):
 
 class Course(db.Model):
     __tablename__ = "course"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
     id = default_id()
 
     # Fields
-    name = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), nullable=False)
-    course_code = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), nullable=False)
-    semester = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), nullable=True)
-    section = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), nullable=True)
-    professor_display_name = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14))
+    name = Column(Text(length=2 ** 14), nullable=False)
+    course_code = Column(Text(length=2 ** 14), nullable=False)
+    semester = Column(Text(length=2 ** 14), nullable=True)
+    section = Column(Text(length=2 ** 14), nullable=True)
+    professor_display_name = Column(Text(length=2 ** 14))
     autograde_tests_repo = Column(
-        mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14),
+        Text(length=2 ** 14),
         nullable=False,
         default="https://github.com/os3224/anubis-assignment-tests",
     )
     github_repo_required: bool = Column(Boolean, default=True)
-    theia_default_image_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                         ForeignKey("theia_image.id"), nullable=True)
+    theia_default_image_id: str = Column(String(length=default_id_length), ForeignKey("theia_image.id"), nullable=True)
     theia_default_options = Column(JSON, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
-    github_org: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=256),
-                             default="os3224")
-    github_ta_team_slug: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=256),
-                                      default="tas")
-    join_code: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=256), unique=True)
+    github_org: str = Column(String(length=256), default="os3224")
+    github_ta_team_slug: str = Column(String(length=256), default="tas")
+    join_code: str = Column(String(length=256), unique=True)
     display_visuals: bool = Column(Boolean, default=True)
     beta_ui_enabled: bool = Column(Boolean, default=False)
 
@@ -175,13 +154,11 @@ class Course(db.Model):
 
 class TAForCourse(db.Model):
     __tablename__ = "ta_for_course"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # Foreign Keys
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                           ForeignKey(User.id), primary_key=True)
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                            ForeignKey(Course.id), primary_key=True)
+    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), primary_key=True)
+    course_id: str = Column(String(length=default_id_length), ForeignKey(Course.id), primary_key=True)
 
     @property
     def data(self):
@@ -193,13 +170,11 @@ class TAForCourse(db.Model):
 
 class ProfessorForCourse(db.Model):
     __tablename__ = "professor_for_course"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # Foreign Keys
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                           ForeignKey(User.id), primary_key=True)
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                            ForeignKey(Course.id), primary_key=True)
+    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), primary_key=True)
+    course_id: str = Column(String(length=default_id_length), ForeignKey(Course.id), primary_key=True)
 
     @property
     def data(self):
@@ -211,32 +186,29 @@ class ProfessorForCourse(db.Model):
 
 class InCourse(db.Model):
     __tablename__ = "in_course"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # Foreign Keys
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                           ForeignKey(User.id), primary_key=True)
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                            ForeignKey(Course.id), primary_key=True)
+    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), primary_key=True)
+    course_id: str = Column(String(length=default_id_length), ForeignKey(Course.id), primary_key=True)
 
 
 class Assignment(db.Model):
     __tablename__ = "assignment"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
     id = default_id()
 
     # Foreign Keys
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                            ForeignKey(Course.id), index=True)
+    course_id: str = Column(String(length=default_id_length), ForeignKey(Course.id), index=True)
 
     # Fields
-    name = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), nullable=False, index=True)
+    name = Column(Text(length=2 ** 14), nullable=False, index=True)
     hidden: bool = Column(Boolean, default=False)
-    description = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), nullable=True)
+    description = Column(Text(length=2 ** 14), nullable=True)
     unique_code = Column(
-        mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=8),
+        String(length=8),
         unique=True,
         default=lambda: base64.b16encode(os.urandom(4)).decode().lower(),
     )
@@ -245,22 +217,20 @@ class Assignment(db.Model):
     questions_assigned: bool = Column(Boolean, default=False)
 
     # Autograde
-    pipeline_image = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), nullable=True, index=True)
+    pipeline_image = Column(Text(length=2 ** 14), nullable=True, index=True)
     autograde_enabled: bool = Column(Boolean, default=True)
 
     # IDE
     ide_enabled: bool = Column(Boolean, default=True)
-    theia_image_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                 ForeignKey("theia_image.id"), default=None)
-    theia_image_tag_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                     ForeignKey("theia_image_tag.id"), default=None)
+    theia_image_id: str = Column(String(length=default_id_length), ForeignKey("theia_image.id"), default=None)
+    theia_image_tag_id: str = Column(String(length=default_id_length), ForeignKey("theia_image_tag.id"), default=None)
     theia_options = Column(JSON, default=lambda: copy.deepcopy(THEIA_DEFAULT_OPTIONS))
 
     # Cheat Detection
     anti_cheat_enabled: bool = Column(Boolean, default=False)
 
     # Github
-    github_template = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), nullable=True, default="")
+    github_template = Column(Text(length=2 ** 14), nullable=True, default="")
     github_repo_required: bool = Column(Boolean, default=False)
 
     # Dates
@@ -309,20 +279,18 @@ class Assignment(db.Model):
 
 class AssignmentRepo(db.Model):
     __tablename__ = "assignment_repo"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
     id = default_id()
 
     # Foreign Keys
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                           ForeignKey(User.id), nullable=True)
-    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                ForeignKey(Assignment.id), nullable=False)
+    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), nullable=True)
+    assignment_id: str = Column(String(length=default_id_length), ForeignKey(Assignment.id), nullable=False)
 
     # Fields
-    netid: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128), nullable=False)
-    repo_url: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=512), nullable=False)
+    netid: str = Column(String(length=128), nullable=False)
+    repo_url: str = Column(String(length=512), nullable=False)
     shared: bool = Column(Boolean, default=False)
 
     # State booleans
@@ -350,17 +318,16 @@ class AssignmentRepo(db.Model):
 
 class AssignmentTest(db.Model):
     __tablename__ = "assignment_test"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
     id = default_id()
 
     # Foreign Keys
-    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                ForeignKey(Assignment.id))
+    assignment_id: str = Column(String(length=default_id_length), ForeignKey(Assignment.id))
 
     # Fields
-    name = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), index=True)
+    name = Column(Text(length=2 ** 14), index=True)
     hidden: bool = Column(Boolean, default=False)
     points: int = Column(Integer, default=10)
 
@@ -371,22 +338,21 @@ class AssignmentTest(db.Model):
 
 class AssignmentQuestion(db.Model):
     __tablename__ = "assignment_question"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
     id = default_id()
 
     # Foreign Keys
-    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                ForeignKey(Assignment.id), index=True)
+    assignment_id: str = Column(String(length=default_id_length), ForeignKey(Assignment.id), index=True)
 
     # Fields
-    question = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), nullable=False)
-    solution = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), nullable=True)
+    question = Column(Text(length=2 ** 14), nullable=False)
+    solution = Column(Text(length=2 ** 14), nullable=True)
     pool: int = Column(Integer, index=True, nullable=False)
     code_question: bool = Column(Boolean, default=False)
-    code_language = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), nullable=True, default="")
-    placeholder = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), nullable=True, default="")
+    code_language = Column(Text(length=2 ** 14), nullable=True, default="")
+    placeholder = Column(Text(length=2 ** 14), nullable=True, default="")
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
@@ -418,18 +384,17 @@ class AssignmentQuestion(db.Model):
 
 class AssignedStudentQuestion(db.Model):
     __tablename__ = "assigned_student_question"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
     id = default_id()
 
     # Foreign Keys
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                           ForeignKey(User.id))
-    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                ForeignKey(Assignment.id), index=True, nullable=False)
-    question_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                              ForeignKey(AssignmentQuestion.id), index=True, nullable=False)
+    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id))
+    assignment_id: str = Column(String(length=default_id_length), ForeignKey(Assignment.id), index=True, nullable=False)
+    question_id: str = Column(
+        String(length=default_id_length), ForeignKey(AssignmentQuestion.id), index=True, nullable=False
+    )
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
@@ -478,21 +443,21 @@ class AssignedStudentQuestion(db.Model):
 
 class AssignedQuestionResponse(db.Model):
     __tablename__ = "assigned_student_response"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
     id = default_id()
 
     # Foreign Keys
     assigned_question_id = Column(
-        mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
+        String(length=128),
         ForeignKey(AssignedStudentQuestion.id),
         index=True,
         nullable=False,
     )
 
     # Fields
-    response = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), default="", nullable=False)
+    response = Column(Text(length=2 ** 14), default="", nullable=False)
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
@@ -511,31 +476,26 @@ class AssignedQuestionResponse(db.Model):
 
 class Submission(db.Model):
     __tablename__ = "submission"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
     id = default_id()
 
     # Foreign Keys
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                           ForeignKey(User.id), index=True, nullable=True)
-    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                ForeignKey(Assignment.id), index=True, nullable=False)
-    assignment_repo_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                     ForeignKey(AssignmentRepo.id), nullable=False)
+    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), index=True, nullable=True)
+    assignment_id: str = Column(String(length=default_id_length), ForeignKey(Assignment.id), index=True, nullable=False)
+    assignment_repo_id: str = Column(String(length=default_id_length), ForeignKey(AssignmentRepo.id), nullable=False)
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
     last_updated: datetime = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Fields
-    commit: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128), unique=True,
-                         index=True, nullable=False)
+    commit: str = Column(String(length=128), unique=True, index=True, nullable=False)
     processed: bool = Column(Boolean, default=False)
-    state = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), default="")
+    state = Column(Text(length=2 ** 14), default="")
     errors = Column(JSON, default=None, nullable=True)
-    token: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=64),
-                        default=lambda: base64.b16encode(os.urandom(32)).decode())
+    token: str = Column(String(length=64), default=lambda: base64.b16encode(os.urandom(32)).decode())
     accepted: bool = Column(Boolean, default=True)
 
     # Relationships
@@ -588,26 +548,23 @@ class Submission(db.Model):
 
 class SubmissionTestResult(db.Model):
     __tablename__ = "submission_test_result"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
     id = default_id()
 
     # Foreign Keys
-    submission_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                ForeignKey(Submission.id), primary_key=True)
-    assignment_test_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                     ForeignKey(AssignmentTest.id), primary_key=True)
+    submission_id: str = Column(String(length=default_id_length), ForeignKey(Submission.id), primary_key=True)
+    assignment_test_id: str = Column(String(length=default_id_length), ForeignKey(AssignmentTest.id), primary_key=True)
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
     last_updated: datetime = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Fields
-    output_type: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
-                              default='text')
-    output = deferred(Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 16)))
-    message = deferred(Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 10)))
+    output_type: str = Column(String(length=128), default="text")
+    output = deferred(Column(Text(length=2 ** 16)))
+    message = deferred(Column(Text(length=2 ** 10)))
     passed: bool = Column(Boolean)
 
     # Relationships
@@ -636,17 +593,16 @@ class SubmissionTestResult(db.Model):
 
 class SubmissionBuild(db.Model):
     __tablename__ = "submission_build"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
     id = default_id()
 
     # Foreign Keys
-    submission_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                ForeignKey(Submission.id), index=True)
+    submission_id: str = Column(String(length=default_id_length), ForeignKey(Submission.id), index=True)
 
     # Fields
-    stdout = deferred(Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14)))
+    stdout = deferred(Column(Text(length=2 ** 14)))
     passed: bool = Column(Boolean, default=None)
 
     # Timestamps
@@ -663,18 +619,16 @@ class SubmissionBuild(db.Model):
 
 class TheiaImage(db.Model):
     __tablename__ = "theia_image"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id = default_id()
-    image: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=1024), nullable=False,
-                        default="registry.digitalocean.com/anubis/xv6")
-    title: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=1024), default="")
-    description = deferred(Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), default=""))
-    icon: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=1024), default="")
+    image: str = Column(String(length=1024), nullable=False, default="registry.digitalocean.com/anubis/xv6")
+    title: str = Column(String(length=1024), default="")
+    description = deferred(Column(Text(length=2 ** 14), default=""))
+    icon: str = Column(String(length=1024), default="")
     public: bool = Column(Boolean, nullable=False, default=False)
-    default_tag: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
-                              default="latest")
-    icon: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128))
+    default_tag: str = Column(String(length=128), default="latest")
+    icon: str = Column(String(length=128))
     webtop: bool = Column(Boolean, default=False)
 
     courses = relationship(Course, backref="theia_default_image")
@@ -699,17 +653,13 @@ class TheiaImage(db.Model):
 
 class TheiaImageTag(db.Model):
     __tablename__ = "theia_image_tag"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id = default_id()
-    image_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                           ForeignKey(TheiaImage.id), nullable=False)
-    tag: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=256), nullable=False,
-                      default="latest")
-    title: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=1024), nullable=False,
-                        default="")
-    description: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=1024),
-                              nullable=False, default="")
+    image_id: str = Column(String(length=default_id_length), ForeignKey(TheiaImage.id), nullable=False)
+    tag: str = Column(String(length=256), nullable=False, default="latest")
+    title: str = Column(String(length=1024), nullable=False, default="")
+    description: str = Column(String(length=1024), nullable=False, default="")
 
     assignments = relationship(Assignment, backref="image_tag")
     sessions = relationship("TheiaSession", backref="image_tag")
@@ -727,34 +677,28 @@ class TheiaImageTag(db.Model):
 
 class TheiaSession(db.Model):
     __tablename__ = "theia_session"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
     id = default_id()
 
     # Foreign keys
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                           ForeignKey(User.id), nullable=False)
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                            ForeignKey(Course.id), nullable=True, index=True)
-    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                ForeignKey(Assignment.id), nullable=True)
-    image_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                           ForeignKey(TheiaImage.id), nullable=True)
-    image_tag_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                               ForeignKey(TheiaImageTag.id), nullable=True)
+    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), nullable=False)
+    course_id: str = Column(String(length=default_id_length), ForeignKey(Course.id), nullable=True, index=True)
+    assignment_id: str = Column(String(length=default_id_length), ForeignKey(Assignment.id), nullable=True)
+    image_id: str = Column(String(length=default_id_length), ForeignKey(TheiaImage.id), nullable=True)
+    image_tag_id: str = Column(String(length=default_id_length), ForeignKey(TheiaImageTag.id), nullable=True)
 
     # Fields
     playground: bool = Column(Boolean, default=False)
-    repo_url: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128), nullable=True)
+    repo_url: str = Column(String(length=128), nullable=True)
     active: bool = Column(Boolean, default=True)
-    state = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14))
-    cluster_address = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), nullable=True, default=None)
+    state = Column(Text(length=2 ** 14))
+    cluster_address = Column(Text(length=2 ** 14), nullable=True, default=None)
 
     # IDE settings
     resources = Column(JSON, default=lambda: {})
-    network_policy: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128),
-                                 default="os-student")
+    network_policy: str = Column(String(length=128), default="os-student")
     network_locked: bool = Column(Boolean, default=True)
     privileged: bool = Column(Boolean, default=False)
     autosave: bool = Column(Boolean, default=True)
@@ -812,14 +756,12 @@ class TheiaSession(db.Model):
 
 class TheiaPaste(db.Model):
     __tablename__ = "theia_paste"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id = default_id()
 
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                           ForeignKey(User.id), index=True)
-    theia_session_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                   ForeignKey(TheiaSession.id), index=True)
+    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), index=True)
+    theia_session_id: str = Column(String(length=default_id_length), ForeignKey(TheiaSession.id), index=True)
     timestamp: datetime = Column(DateTime, default=datetime.now)
 
     content = deferred(Column(db.LargeBinary(2 ** 12)))
@@ -837,16 +779,15 @@ class TheiaPaste(db.Model):
 
 class StaticFile(db.Model):
     __tablename__ = "static_file"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id = default_id()
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                            ForeignKey(Course.id), nullable=False, index=True)
+    course_id: str = Column(String(length=default_id_length), ForeignKey(Course.id), nullable=False, index=True)
 
     # Fields
-    filename = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14))
-    path = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14))
-    content_type = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14))
+    filename = Column(Text(length=2 ** 14))
+    path = Column(Text(length=2 ** 14))
+    content_type = Column(Text(length=2 ** 14))
     _blob = deferred(Column(db.LargeBinary(length=(2 ** 32) - 1)))
     hidden: bool = Column(Boolean, default=False)
 
@@ -885,12 +826,10 @@ class StaticFile(db.Model):
 
 class LateException(db.Model):
     __tablename__ = "late_exception"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                           ForeignKey(User.id), primary_key=True)
-    assignment_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                ForeignKey(Assignment.id), primary_key=True)
+    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), primary_key=True)
+    assignment_id: str = Column(String(length=default_id_length), ForeignKey(Assignment.id), primary_key=True)
 
     # New Due Date
     due_date: datetime = Column(DateTime, nullable=False)
@@ -912,20 +851,20 @@ class LateException(db.Model):
 
 class LectureNotes(db.Model):
     __tablename__ = "lecture_notes"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id = default_id()
 
     # Foreign keys
-    static_file_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                 ForeignKey(StaticFile.id), nullable=False, index=True)
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                            ForeignKey(Course.id), nullable=False, index=True)
+    static_file_id: str = Column(
+        String(length=default_id_length), ForeignKey(StaticFile.id), nullable=False, index=True
+    )
+    course_id: str = Column(String(length=default_id_length), ForeignKey(Course.id), nullable=False, index=True)
 
     # Meta fields
     post_time: datetime = Column(DateTime, nullable=True, default=datetime.now)
-    title = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), default="")
-    description = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14), default="")
+    title = Column(Text(length=2 ** 14), default="")
+    description = Column(Text(length=2 ** 14), default="")
     hidden: bool = Column(Boolean, default=False)
 
     # Timestamps
@@ -949,72 +888,70 @@ class LectureNotes(db.Model):
 
 class ForumPost(db.Model):
     __tablename__ = "forum_post"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id = default_id()
 
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                           ForeignKey(User.id), nullable=False)
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                            ForeignKey(Course.id))
+    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), nullable=False)
+    course_id: str = Column(String(length=default_id_length), ForeignKey(Course.id))
     visible_to_students: bool = Column(Boolean, default=False)
     pinned: bool = Column(Boolean, default=False)
     anonymous: bool = Column(Boolean, default=False)
     seen_count: int = Column(Integer, default=0)
 
     # Content
-    title = Column(mysql.TEXT(collation="utf8mb4_general_ci", length=1024))
-    content = deferred(Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 14)))
+    title = Column(Text(length=1024))
+    content = deferred(Column(Text(length=2 ** 14)))
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
     last_updated: datetime = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
-    comments = relationship('ForumPostComment', cascade='all,delete', backref='post')
-    in_categories = relationship('ForumPostInCategory', cascade='all,delete', backref='post')
-    views = relationship('ForumPostViewed', cascade='all,delete', backref='post')
-    upvotes = relationship('ForumPostUpvote', cascade='all,delete', backref='post')
+    comments = relationship("ForumPostComment", cascade="all,delete", backref="post")
+    in_categories = relationship("ForumPostInCategory", cascade="all,delete", backref="post")
+    views = relationship("ForumPostViewed", cascade="all,delete", backref="post")
+    upvotes = relationship("ForumPostUpvote", cascade="all,delete", backref="post")
 
     @property
     def meta_data(self):
         return {
-            'id':                  self.id,
-            'title':               self.title,
-            'anonymous':           self.anonymous,
-            'display_name':        'Anonymous' if self.anonymous else self.owner.name,
-            'course_id':           self.course_id,
-            'visible_to_students': self.visible_to_students,
-            'pinned':              self.pinned,
-            'seen_count':          self.seen_count,
-            'created':             str(self.created),
-            'last_updated':        str(self.last_updated),
+            "id":                  self.id,
+            "title":               self.title,
+            "anonymous":           self.anonymous,
+            "display_name":        "Anonymous" if self.anonymous else self.owner.name,
+            "course_id":           self.course_id,
+            "visible_to_students": self.visible_to_students,
+            "pinned":              self.pinned,
+            "seen_count":          self.seen_count,
+            "created":             str(self.created),
+            "last_updated":        str(self.last_updated),
         }
 
     @property
     def data(self):
         from anubis.lms.forum import get_post_comments_data
+
         data = self.meta_data
-        data['title'] = self.title
-        data['content'] = self.content
-        data['comments'] = get_post_comments_data(self)
+        data["title"] = self.title
+        data["content"] = self.content
+        data["comments"] = get_post_comments_data(self)
         return data
 
     @property
     def admin_data(self):
         data = self.data
-        data['display_name'] = self.owner.name
+        data["display_name"] = self.owner.name
         return data
 
 
 class ForumCategory(db.Model):
     __tablename__ = "forum_category"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id = default_id()
 
-    name: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=128))
-    course_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                            ForeignKey(Course.id))
+    name: str = Column(String(length=128))
+    course_id: str = Column(String(length=default_id_length), ForeignKey(Course.id))
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
@@ -1025,22 +962,20 @@ class ForumCategory(db.Model):
     @property
     def data(self):
         return {
-            'id':           self.id,
-            'name':         self.name,
-            'course_id':    self.course_id,
-            'created':      str(self.created),
-            'last_updated': str(self.last_updated),
+            "id":           self.id,
+            "name":         self.name,
+            "course_id":    self.course_id,
+            "created":      str(self.created),
+            "last_updated": str(self.last_updated),
         }
 
 
 class ForumPostInCategory(db.Model):
     __tablename__ = "forum_post_in_category"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
-    post_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                          ForeignKey(ForumPost.id), primary_key=True)
-    category_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                              ForeignKey(ForumCategory.id), primary_key=True)
+    post_id: str = Column(String(length=default_id_length), ForeignKey(ForumPost.id), primary_key=True)
+    category_id: str = Column(String(length=default_id_length), ForeignKey(ForumCategory.id), primary_key=True)
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
@@ -1049,21 +984,19 @@ class ForumPostInCategory(db.Model):
     @property
     def data(self):
         return {
-            'post_id':      self.post_id,
-            'category_id':  self.category_id,
-            'created':      str(self.created),
-            'last_updated': str(self.last_updated),
+            "post_id":      self.post_id,
+            "category_id":  self.category_id,
+            "created":      str(self.created),
+            "last_updated": str(self.last_updated),
         }
 
 
 class ForumPostViewed(db.Model):
     __tablename__ = "forum_post_viewed"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                           ForeignKey(User.id), primary_key=True)
-    post_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                          ForeignKey(ForumPost.id), primary_key=True)
+    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), primary_key=True)
+    post_id: str = Column(String(length=default_id_length), ForeignKey(ForumPost.id), primary_key=True)
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
@@ -1072,30 +1005,27 @@ class ForumPostViewed(db.Model):
     @property
     def data(self):
         return {
-            'owner_id':     self.owner_id,
-            'post_id':      self.post_id,
-            'created':      str(self.created),
-            'last_updated': str(self.last_updated),
+            "owner_id":     self.owner_id,
+            "post_id":      self.post_id,
+            "created":      str(self.created),
+            "last_updated": str(self.last_updated),
         }
 
 
 class ForumPostComment(db.Model):
     __tablename__ = "forum_post_comment"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id = default_id()
 
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                           ForeignKey(User.id), nullable=False)
-    post_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                          ForeignKey(ForumPost.id), nullable=False)
-    parent_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length), nullable=True)
-    approved_by_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                                 ForeignKey(User.id), nullable=True)
+    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), nullable=False)
+    post_id: str = Column(String(length=default_id_length), ForeignKey(ForumPost.id), nullable=False)
+    parent_id: str = Column(String(length=default_id_length), nullable=True)
+    approved_by_id: str = Column(String(length=default_id_length), ForeignKey(User.id), nullable=True)
     anonymous: bool = Column(Boolean, default=False)
     thread_start: bool = Column(Boolean, default=False)
 
-    content: str = deferred(Column(mysql.TEXT(collation="utf8mb4_general_ci", length=2 ** 12)))
+    content: str = deferred(Column(Text(length=2 ** 12)))
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
@@ -1104,40 +1034,38 @@ class ForumPostComment(db.Model):
     @property
     def meta_data(self):
         return {
-            'id':           self.id,
-            'anonymous':    self.anonymous,
-            'display_name': 'Anonymous' if self.anonymous else self.owner.name,
-            'post_id':      self.post_id,
-            'parent_id':    self.parent_id,
-            'approved_by':  self.approved_by.name if self.approved_by_id is not None else None,
-            'thread_start': self.thread_start,
-            'created':      str(self.created),
-            'last_updated': str(self.last_updated),
+            "id":           self.id,
+            "anonymous":    self.anonymous,
+            "display_name": "Anonymous" if self.anonymous else self.owner.name,
+            "post_id":      self.post_id,
+            "parent_id":    self.parent_id,
+            "approved_by":  self.approved_by.name if self.approved_by_id is not None else None,
+            "thread_start": self.thread_start,
+            "created":      str(self.created),
+            "last_updated": str(self.last_updated),
         }
 
     @property
     def data(self):
         data = self.meta_data
-        data['content'] = self.content
+        data["content"] = self.content
         return data
 
     @property
     def admin_data(self):
         data = self.data
-        data['display_name'] = self.owner.name
+        data["display_name"] = self.owner.name
         return data
 
 
 class ForumPostUpvote(db.Model):
     __tablename__ = "forum_post_upvote"
-    __table_args__ = {"mysql_charset": "utf8mb4", "mysql_collate": "utf8mb4_general_ci"}
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id = default_id()
 
-    owner_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                           ForeignKey(User.id), primary_key=True)
-    post_id: str = Column(mysql.VARCHAR(collation="utf8mb4_general_ci", charset="utf8mb4", length=_default_id_length),
-                          ForeignKey(ForumPost.id), primary_key=True)
+    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), primary_key=True)
+    post_id: str = Column(String(length=default_id_length), ForeignKey(ForumPost.id), primary_key=True)
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
@@ -1146,8 +1074,8 @@ class ForumPostUpvote(db.Model):
     @property
     def data(self):
         return {
-            'owner_id':     self.owner_id,
-            'post_id':      self.post_id,
-            'created':      str(self.created),
-            'last_updated': str(self.last_updated),
+            "owner_id":     self.owner_id,
+            "post_id":      self.post_id,
+            "created":      str(self.created),
+            "last_updated": str(self.last_updated),
         }

@@ -29,8 +29,8 @@ from anubis.models import (
     TheiaImageTag,
     User,
     db,
-    default_id_factory,
 )
+from anubis.models.id import default_id_factory
 from anubis.utils.data import rand
 from anubis.utils.data import with_context
 from anubis.utils.logging import logger
