@@ -96,7 +96,7 @@ def upgrade():
         migrate_ids(conn, 'submission')
         migrate_ids(conn, 'submission_test_result')
         migrate_ids(conn, 'submission_build')
-        migrate_ids(conn, 'theia_image', 'image_id')
+        migrate_ids(conn, 'theia_image', ['image_id', 'theia_default_image_id'])
         migrate_ids(conn, 'theia_image_tag', 'image_tag_id')
         migrate_ids(conn, 'theia_session')
         migrate_ids(conn, 'theia_paste')
