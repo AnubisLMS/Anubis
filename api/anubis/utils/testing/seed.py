@@ -29,6 +29,7 @@ from anubis.models import (
     TheiaImageTag,
     User,
     db,
+    default_id_factory,
 )
 from anubis.utils.data import rand
 from anubis.utils.data import with_context
@@ -94,7 +95,7 @@ def create_assignment(
 
     # Assignment 1 uniq
     assignment = Assignment(
-        id=rand(),
+        id=default_id_factory(),
         name=f"{course.course_code} Assignment {i}",
         unique_code=rand(8),
         hidden=False,
@@ -118,7 +119,7 @@ def create_assignment(
     for i in range(random.randint(2, 4)):
         b, c = random.randint(1, 5), random.randint(1, 5)
         assignment_question = AssignmentQuestion(
-            id=rand(),
+            id=default_id_factory(),
             question=f"What is {c} + {b}?",
             solution=f"{c + b}",
             pool=i,
@@ -129,7 +130,7 @@ def create_assignment(
 
     tests = []
     for i in range(random.randint(3, 5)):
-        tests.append(AssignmentTest(id=rand(), name=f"test {i}", assignment_id=assignment.id))
+        tests.append(AssignmentTest(id=default_id_factory(), name=f"test {i}", assignment_id=assignment.id))
 
     submissions = []
     repos = []
@@ -142,7 +143,7 @@ def create_assignment(
                 repo_url = "https://github.com/AnubisLMS/xv6"
             repos.append(
                 AssignmentRepo(
-                    id=rand(),
+                    id=default_id_factory(),
                     owner=user,
                     assignment_id=assignment.id,
                     repo_url=repo_url,
@@ -167,7 +168,7 @@ def create_assignment(
             if submission_count is not None:
                 for i in range(submission_count):
                     submission = Submission(
-                        id=rand(),
+                        id=default_id_factory(),
                         commit=rand_commit(),
                         state="Waiting for resources...",
                         owner=user,
@@ -216,7 +217,7 @@ def create_students(n=10) -> list[User]:
 
 
 def create_course(users, **kwargs):
-    course_id = rand()
+    course_id = default_id_factory()
     course = Course(id=course_id, join_code=course_id[:6], **kwargs)
     db.session.add(course)
 
@@ -293,7 +294,7 @@ def init_forums(course: Course):
         comments: list[ForumPostComment] = []
         for k in range(3):
             comment = ForumPostComment(
-                id=rand(),
+                id=default_id_factory(),
                 owner_id=student2.id,
                 post=post,
                 parent_id=None,
