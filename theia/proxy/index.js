@@ -52,13 +52,7 @@ const authenticate = token => {
 };
 
 const get_session_ip = (token) => {
-  const {session_id, netid} = token;
-  // const cached_ip = cache.get({session_id, netid});
-  // if (cached_ip) {
-  //   return new Promise((resolve) => {
-  //     resolve(cached_ip);
-  //   })
-  // }
+  const {session_id} = token;
   return new Promise((resolve, reject) => {
     knex
       .first('cluster_address')
@@ -68,7 +62,6 @@ const get_session_ip = (token) => {
         console.log(`cluster_ip ${row?.cluster_address}`)
         if (row?.cluster_address) {
           console.log(`caching cluster ip ${row.cluster_address}`)
-          // cache.set({session_id, netid}, row.cluster_address);
           resolve(row.cluster_address);
         } else {
           reject(null);
