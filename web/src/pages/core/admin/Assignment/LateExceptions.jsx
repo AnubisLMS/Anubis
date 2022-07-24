@@ -41,15 +41,15 @@ export default function LateExceptions() {
       }
       if (data?.late_exceptions) {
         setExceptions(data.late_exceptions.map((item) => {
-          item.id = item.user_id;
+          item.id = item.owner_id;
           return item;
         }));
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [reset]);
 
-  const remove = ({assignment_id, user_id}) => () => {
-    axios.get(`/api/admin/late-exceptions/remove/${assignment_id}/${user_id}`).then((response) => {
+  const remove = ({assignment_id, owner_id}) => () => {
+    axios.get(`/api/admin/late-exceptions/remove/${assignment_id}/${owner_id}`).then((response) => {
       standardStatusHandler(response, enqueueSnackbar);
       setReset((prev) => ++prev);
     }).catch(standardErrorHandler(enqueueSnackbar));

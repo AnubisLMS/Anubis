@@ -51,7 +51,7 @@ export default function LateExceptionAddCard({assignment, setReset}) {
     }
     axios.post(`/api/admin/late-exceptions/update`, {
       assignment_id: assignment.id,
-      user_id: selected.id,
+      owner_id: selected.id,
       due_date: nonStupidDatetimeFormat(date),
     }).then((response) => {
       standardStatusHandler(response, enqueueSnackbar);
