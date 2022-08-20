@@ -34,21 +34,27 @@ const saveConfig = (config, enqueueSnackbar) => {
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
-const updateRow = (index, item, setConfig) => (e) => {
+const updateRow = (id, item, setConfig) => (e) => {
   setConfig((prev) => {
-    prev[index][item] = e.target.value;
+    for (const row of prev) {
+      if (row.id !== id) continue;
+      row[item] = e.target.value;
+    }
     return [...prev];
   });
 };
 
-const updateAction = (index, setConfig, enqueueSnackbar) => () => {
+const updateAction = (id, setConfig, enqueueSnackbar) => () => {
   setConfig((prev) => {
-    const action = prev[index]['action'];
-    prev[index]['action'] = (
-      action === 'edit' ? 'disabled' : 'edit'
-    );
-    if (prev[index]['action'] === 'disabled') {
-      saveConfig(prev, enqueueSnackbar);
+    for (const row of prev) {
+      if (row.id !== id) continue;
+      const action = row['action'];
+      row['action'] = (
+        action === 'edit' ? 'disabled' : 'edit'
+      );
+      if (row['action'] === 'disabled') {
+        saveConfig(prev, enqueueSnackbar);
+      }
     }
     return [...prev];
   });
@@ -64,7 +70,7 @@ const useColumns = (config, setConfig, enqueueSnackbar) => ([
         fullWidth
         disabled={params.row.action === 'disabled'}
         value={params.row.key}
-        onChange={updateRow(params.rowIndex, 'key', setConfig)}
+        onChange={updateRow(params.row.id, 'key', setConfig)}
       />
     ),
   },
@@ -77,7 +83,7 @@ const useColumns = (config, setConfig, enqueueSnackbar) => ([
         fullWidth
         disabled={params.row.action === 'disabled'}
         value={params.row.value}
-        onChange={updateRow(params.rowIndex, 'value', setConfig)}
+        onChange={updateRow(params.row.id, 'value', setConfig)}
       />
     ),
   },
@@ -90,7 +96,7 @@ const useColumns = (config, setConfig, enqueueSnackbar) => ([
         color={'primary'}
         variant={'contained'}
         size={'small'}
-        onClick={updateAction(params.rowIndex, setConfig, enqueueSnackbar)}
+        onClick={updateAction(params.row.id, setConfig, enqueueSnackbar)}
         startIcon={params.row.action === 'edit' ? <SaveIcon/> : <EditIcon/>}
       >
         {params.row.action === 'edit' ? 'Save' : 'Edit'}
