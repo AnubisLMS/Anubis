@@ -11,7 +11,7 @@ spec:
       - "/api"
 ---
 
-# Strip prefix /api
+# Strip prefix /ide
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
@@ -22,6 +22,19 @@ spec:
   stripPrefix:
     prefixes:
       - "/ide"
+---
+
+# Strip prefix /docs
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-docs
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+spec:
+  stripPrefix:
+    prefixes:
+      - "/docs"
 ---
 
 apiVersion: traefik.containo.us/v1alpha1
@@ -122,7 +135,7 @@ metadata:
   name: ingress.route.anubis.marketing-web
   labels:
     {{- include "chart.labels" . | nindent 4 }}
-    component: web
+    component: marketing-web
 spec:
   {{- if .Values.debug }}
   entryPoints:
@@ -137,6 +150,36 @@ spec:
     services:
     - name: {{ include "chart.fullname" . }}-marketing-web
       port: 3000
+  {{- if not .Values.debug }}
+  tls:
+    certResolver: le
+  {{- end }}
+---
+
+# Public Ingress Route /*
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingress.route.anubis.cli-docs
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: cli-docs
+spec:
+  {{- if .Values.debug }}
+  entryPoints:
+    - web
+  {{- else }}
+  entryPoints:
+    - websecure
+  {{- end }}
+  routes:
+  - kind: Rule
+    match: Host(`{{ .Values.domain }}`) && PathPrefix(`/docs`)
+    middlewares:
+    - name: strip-docs
+    services:
+    - name: {{ include "chart.fullname" . }}-cli-docs
+      port: 8080
   {{- if not .Values.debug }}
   tls:
     certResolver: le

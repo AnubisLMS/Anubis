@@ -1,0 +1,83 @@
+{{- if and .Values.clidocs.enable not .Values.debug }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chart.fullname" . }}-cli-docs
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: cli-docs
+spec:
+  selector:
+    matchLabels:
+      {{- include "chart.selectorLabels" . | nindent 6 }}
+      component: cli-docs
+  replicas: {{ .Values.marketing.replicas }}
+  {{- if .Values.rollingUpdates }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- include "chart.selectorLabels" . | nindent 8 }}
+        component: cli-docs
+    spec:
+      dnsPolicy: ClusterFirst
+      containers:
+      - name: web
+        image: "{{ .Values.clidocs.image }}:latest"
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits:
+            cpu: 2000m
+            memory: 500Mi
+        ports:
+        - name: web
+          containerPort: 8080
+        {{- if .Values.healthChecks }}
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 1
+          periodSeconds: 1
+          failureThreshold: 60
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 60
+          failureThreshold: 10
+          periodSeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 3
+          failureThreshold: 1
+        {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "chart.fullname" . }}-cli-docs
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: cli-docs
+spec:
+  selector:
+    {{- include "chart.selectorLabels" . | nindent 4 }}
+    component: cli-docs
+  ports:
+  - name: web
+    port: 8080
+    targetPort: 8080
+{{- end }}

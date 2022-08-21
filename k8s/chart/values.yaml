@@ -104,6 +104,12 @@ marketing:
   tag: "latest"
   replicas: 1
 
+clidocs:
+  enable: true
+  image: "registry.digitalocean.com/anubis/docs"
+  tag: "latest"
+  replicas: 1
+
 ###############################################################################
 
 
