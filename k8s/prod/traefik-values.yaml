@@ -2,7 +2,6 @@ globalArguments: []
 additionalArguments:
   - "--log.level=INFO"
   - "--accesslog"
-  - "--accesslog.filepath=/data/access.log"
   - "--accesslog.format=json"
   - "--providers.kubernetescrd=true"
   - "--certificatesresolvers.le.acme.tlschallenge=true"
@@ -88,9 +87,9 @@ persistence:
   enabled: true
   name: data
   #  existingClaim: ""
-  accessMode: ReadWriteOnce
-  size: 8Gi
-  # storageClass: ""
+  accessMode: ReadWriteMany
+  size: 128Mi
+  storageClass: "longhorn"
   path: /data
   annotations: {}
   # subPath: "" # only mount a subpath of the Volume into the pod
