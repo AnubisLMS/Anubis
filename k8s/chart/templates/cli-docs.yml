@@ -1,4 +1,4 @@
-{{- if and .Values.clidocs.enable not .Values.debug }}
+{{- if and .Values.clidocs.enable (not .Values.debug) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
