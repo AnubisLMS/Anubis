@@ -64,10 +64,12 @@ status:
 .PHONY: build           # Build all docker images
 build:
 	docker-compose build --parallel --pull $(DOCKER_COMPOSE_PUSH_SERVICES)
+	env GIT_TAG=latest docker-compose build --parallel --pull $(DOCKER_COMPOSE_PUSH_SERVICES)
 
 .PHONY: push            # Push images to registry.digitalocean.com (requires vpn)
 push: build
 	docker-compose push $(DOCKER_COMPOSE_PUSH_SERVICES)
+	env GIT_TAG=latest docker-compose push $(DOCKER_COMPOSE_PUSH_SERVICES)
 
 .PHONY: build-base-ides # Build base ide images
 build-base-ides:
