@@ -2,7 +2,7 @@ name: Anubis Pull Request CD/CI
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
   workflow_dispatch:
 
 

@@ -2,7 +2,7 @@ name: Anubis Main CD/CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:

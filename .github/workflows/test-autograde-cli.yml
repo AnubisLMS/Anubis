@@ -10,11 +10,11 @@ defaults:
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - "theia/ide/theia-base/cli/**"
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - "theia/ide/theia-base/cli/**"
 
