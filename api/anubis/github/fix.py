@@ -49,7 +49,7 @@ def fix_github_missing_submissions(org_name: str):
       organization(login: $orgName){
         repositories(first:100,orderBy:{field:CREATED_AT,direction:DESC}){
           nodes{
-            ref(qualifiedName:"master") {
+            ref(qualifiedName:"main") {
           target {
             ... on Commit {
               history(first: 20) {
