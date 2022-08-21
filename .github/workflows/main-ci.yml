@@ -95,8 +95,12 @@ jobs:
         run: doctl registry login
       - name: Build container image
         run: env GIT_TAG=$(git log -1 --pretty=%h) docker compose build api
+      - name: Build container image
+        run: env GIT_TAG=latest docker compose build api
       - name: Push image to registry
         run: env GIT_TAG=$(git log -1 --pretty=%h) docker compose push api
+      - name: Push image to registry
+        run: env GIT_TAG=latest docker compose push api
   build-web:
     name: Build web
     needs: [test-web]
@@ -112,8 +116,12 @@ jobs:
         run: doctl registry login
       - name: Build container image
         run: env GIT_TAG=$(git log -1 --pretty=%h) docker compose build web
+      - name: Build container image
+        run: env GIT_TAG=latest docker compose build web
       - name: Push image to registry
         run: env GIT_TAG=$(git log -1 --pretty=%h) docker compose push web
+      - name: Push image to registry
+        run: env GIT_TAG=latest docker compose push web
   build-theia-images:
     name: Build theia-images (non-ide)
     runs-on: ubuntu-latest
@@ -134,8 +142,12 @@ jobs:
         run: doctl registry login
       - name: Build container image
         run: env GIT_TAG=$(git log -1 --pretty=%h) docker compose build ${{ matrix.image }}
+      - name: Build container image
+        run: env GIT_TAG=latest docker compose build ${{ matrix.image }}
       - name: Push image to registry
         run: env GIT_TAG=$(git log -1 --pretty=%h) docker compose push ${{ matrix.image }}
+      - name: Push image to registry
+        run: env GIT_TAG=latest docker compose push ${{ matrix.image }}
 
   # Deploy step.
   # Will push out yaml to the k8s cluster, then restart
