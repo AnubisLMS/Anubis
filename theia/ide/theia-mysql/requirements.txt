@@ -1,5 +1,0 @@
-flask
-pymysql
-flake8
-nose
-coverage

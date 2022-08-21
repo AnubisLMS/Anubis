@@ -1,7 +1,0 @@
-assignment:
-  name: "{name}"
-  class: "{course_code}"
-
-  # Don't change these!
-  unique_code: "{unique_code}"
-  pipeline_image: "registry.digitalocean.com/anubis/assignment/{unique_code}"

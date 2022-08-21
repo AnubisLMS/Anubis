@@ -1,4 +1,0 @@
-Click>=7.0
-requests
-pyyaml
-pytest
