@@ -29,4 +29,5 @@ helm upgrade \
      --set "daily_cleanup.suspend=true" \
      --set "theia.prop.enable=false" \
      --set "marketing.enable=false" \
+     --set "tag=latest" \
      $@
