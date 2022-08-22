@@ -212,7 +212,7 @@ export default function ManagementIDEDialog() {
         startIcon={<CodeOutlinedIcon/>}
         onClick={handleOpen}
       >
-        Management IDE
+        Admin IDE
       </Button>
       <Dialog
         open={open}
