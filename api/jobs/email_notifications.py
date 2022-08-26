@@ -61,7 +61,8 @@ def _send_assignment_condition_email_notifications(
 
 
 def email_notifications():
-    recent_assignments = get_recent_assignments()
+    recent_assignments = get_recent_assignments(delta=timedelta(hours=3))
+
     service = build_google_service(
         'gmail',
         'gmail',

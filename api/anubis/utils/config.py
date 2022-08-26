@@ -83,11 +83,10 @@ def get_config_int(key: str, default: int | None = None) -> int | None:
     """
 
     # Query database for config row
-    config_value: Config = Config.query.filter(Config.key == key).first()
+    value: str = get_config_str(key, None)
 
-    # Check that the config value exists
-    if config_value is None:
-        # Return default if entry was not found
+    # If value is None, then return default
+    if value is None:
         return default
 
     # Attempt to convert and return the entry as an int
@@ -95,7 +94,7 @@ def get_config_int(key: str, default: int | None = None) -> int | None:
         # Try to convert the value to an int. This will raise a value
         # exception if there is any issue with the format with the
         # value.
-        config_value_int = int(config_value.value.strip())
+        config_value_int = int(value.strip())
 
         # Pass back the converted integer value
         return config_value_int
@@ -106,3 +105,40 @@ def get_config_int(key: str, default: int | None = None) -> int | None:
 
         # If there was any issue, return default
         return default
+
+
+@cache.memoize(timeout=10, source_check=True)
+def get_config_bool(key: str, default: bool = False) -> bool:
+    """
+    Get a config bool entry for a given config key. Optionally specify a
+    default value for if the key does not exist in the config table.
+
+    Valid values for parsing will be ints, "ON"/"OFF", and "true"/"false"
+
+    :param key:
+    :param default:
+    :return:
+    """
+
+    value = get_config_str(key, None)
+    if value is None:
+        return default
+
+    try:
+        # Try to convert the value to an int. This will raise a value
+        # exception if there is any issue with the format with the
+        # value.
+        return bool(int(value.strip()))
+    except ValueError:
+        pass
+
+    # Match on different acceptable variations
+    match value.lower():
+        case 'on' | 'true':
+            return True
+        case 'off' | 'false':
+            return False
+        case _:
+            return default
+
+

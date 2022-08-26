@@ -10,7 +10,7 @@ from anubis.models import TheiaSession, TheiaImage, db
 from anubis.rpc.enqueue import rpc_enqueue, enqueue_ide_stop
 from anubis.utils.auth.http import require_admin
 from anubis.utils.auth.user import current_user
-from anubis.utils.config import get_config_int
+from anubis.utils.config import get_config_bool
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_endpoint, json_response
@@ -103,7 +103,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
         return error_response("Can not parse JSON options")
 
     # Get the config value for if ide starts are allowed.
-    theia_starts_enabled = get_config_int("THEIA_STARTS_ENABLED", default=1) == 1
+    theia_starts_enabled = get_config_bool("THEIA_STARTS_ENABLED", default=True)
 
     # Assert that new ide starts are allowed. If they are not, then
     # we return a status message to the user saying they are not able

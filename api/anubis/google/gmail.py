@@ -12,6 +12,7 @@ import googleapiclient.discovery
 from anubis.utils.data import is_debug
 from anubis.utils.http.files import get_mime_type
 from anubis.utils.logging import logger
+from anubis.utils.config import get_config_bool
 
 
 def create_message(sender: str, to: str, subject: str, message_text: str) -> dict[str, str]:
@@ -116,8 +117,12 @@ def send_message(
       Sent Message.
     """
 
+    email_send_enabled: bool = get_config_bool('EMAIL_SEND_ENABLED', default=False)
+
     logger.debug(f"SENDING EMAIL {json.dumps(message)}")
-    if not force and is_debug():
+    if not force and is_debug() and not email_send_enabled:
+        logger.info(f'Email send disabled, skipping '
+                    f'debug={is_debug()} email_send_enabled={email_send_enabled}')
         return
 
     try:
