@@ -105,12 +105,12 @@ const initialize = (req, res, url, query) => {
   // Authenticate the token in the http query
   const query_token = authenticate(query.get('token'));
   if (query_token === null) {
-    res.writeHead(302, {location: 'https://anubis.osiris.services/error'});
+    res.writeHead(302, {location: 'https://anubis-lms.io/error'});
     res.end('redirecting...');
     return;
   }
 
-  let domain = DEBUG ? 'localhost' : 'anubis.osiris.services';
+  let domain = DEBUG ? 'localhost' : 'anubis-lms.io';
 
   // Set cookie for ide session & redirect
   const signed_token = jwt.sign({
