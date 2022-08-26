@@ -6,6 +6,8 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import GitHub from '@mui/icons-material/GitHub';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 
 import {useStyles} from './Profile.styles';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';
@@ -33,6 +35,15 @@ const Profile = () => {
     if (!user) return undefined;
     setUserGroup(user.is_superuser ? 'superuser' : user.is_admin ? 'admin' : 'student');
   }, [user]);
+
+  const handleToggle = (key) => {
+    axios.get(`/api/public/profile/toggle-email-notifications/${key}`).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data?.user) {
+        setUser(data.user);
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  };
 
   if (!user) {
     return null;
@@ -82,6 +93,7 @@ const Profile = () => {
           <Button
             startIcon={<GitHub/>}
             className={classes.saveButton}
+            variant={'contained'}
             component="a"
             href="/api/public/github/login"
           >
@@ -89,6 +101,27 @@ const Profile = () => {
           </Button>
         </Box>
       </Box>
+      {[
+        {key: 'deadline_email_enabled', title: 'Deadline Notifications'},
+        {key: 'release_email_enabled', title: 'Release Notifications '},
+      ].map((({key, title}) => (
+        <Box className={classes.fieldsContainer} key={key}>
+          <Box className={classes.githubContainer}>
+            <Typography className={classes.githubText}>
+              {title}
+            </Typography>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={user[key]}
+                  onChange={() => handleToggle(key)}
+                  name={title}
+                />
+              }
+            />
+          </Box>
+        </Box>
+      )))}
     </StandardLayout>
   );
 };

@@ -27,7 +27,7 @@ const Ad = () => {
         <Typography className={classes.adTitle}>
           Interested in Contributing?
         </Typography>
-        <Button className={classes.githubButton}>
+        <Button className={classes.githubButton} variant={'contained'}>
           {'We\'re on Github'}
         </Button>
       </CardActionArea>

@@ -16,9 +16,10 @@ export const useStyles = makeStyles((theme) => ({
   },
   githubText: {
     fontSize: '16px',
+    minWidth: '200px',
   },
   saveButton: {
-    backgroundColor: theme.palette.primary.main,
+    // backgroundColor: theme.palette.primary.main,
     borderRadius: theme.spacing(.5),
   },
   bioContainer: {

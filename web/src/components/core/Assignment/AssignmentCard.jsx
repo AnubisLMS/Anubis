@@ -224,7 +224,7 @@ export default function AssignmentCard({assignment, editableFields, updateField,
           </Button>
           <Button
             size={'small'}
-            style={{backgroundColor: yellow[500]}}
+            color={'secondary'}
             variant={'contained'}
             className={classes.button}
             onClick={() => setWarningOpen(true)}

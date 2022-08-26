@@ -22,6 +22,12 @@ let theme = createTheme({
     primary: {
       main: '#5686F5',
     },
+    secondary: {
+      main: 'rgb(255, 152, 0)',
+    },
+    error: {
+      main: 'rgb(244, 67, 54)',
+    },
     dark: {
       black: '#0d1117',
       blue: {

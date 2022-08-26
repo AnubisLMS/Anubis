@@ -42,7 +42,6 @@ export const useStyles = makeStyles((theme) => ({
   githubButton: {
     width: '100%',
     marginTop: theme.spacing(2),
-    backgroundColor: theme.palette.primary.main,
     borderRadius: '2px',
   },
 }));

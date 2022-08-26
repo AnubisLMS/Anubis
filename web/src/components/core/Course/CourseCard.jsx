@@ -113,7 +113,7 @@ export default function CourseCard({course, _disabled, editableFields, updateFie
               <Button
                 size={'small'}
                 startIcon={<EditIcon/>}
-                style={{backgroundColor: yellow[500]}}
+                color={'secondary'}
                 variant={'contained'}
                 className={classes.button}
                 component={Link}
@@ -124,7 +124,7 @@ export default function CourseCard({course, _disabled, editableFields, updateFie
               <Button
                 size={'small'}
                 startIcon={<EditIcon/>}
-                style={{backgroundColor: yellow[500]}}
+                color={'secondary'}
                 variant={'contained'}
                 className={classes.button}
                 component={Link}
@@ -136,7 +136,7 @@ export default function CourseCard({course, _disabled, editableFields, updateFie
                 <Button
                   size={'small'}
                   startIcon={<EditIcon/>}
-                  style={{backgroundColor: yellow[500]}}
+                  color={'secondary'}
                   variant={'contained'}
                   className={classes.button}
                   component={Link}
