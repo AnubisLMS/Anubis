@@ -168,7 +168,7 @@ export default function IDEImages() {
             Anubis
           </Typography>
           <Typography variant={'subtitle1'} color={'textSecondary'}>
-            Config
+            IDE Images
           </Typography>
         </Grid>
         <Grid item xs={12}>

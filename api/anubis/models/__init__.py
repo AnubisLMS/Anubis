@@ -1096,6 +1096,14 @@ class EmailTemplate(db.Model):
     body: str = Column(String(length=4096))
     subject: str = Column(String(length=1024))
 
+    @property
+    def data(self):
+        return {
+            "key":     self.key,
+            "body":    self.body,
+            "subject": self.subject,
+        }
+
 
 class EmailEvent(db.Model):
     __tablename__ = "email_event"
@@ -1124,3 +1132,16 @@ class EmailEvent(db.Model):
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
     last_updated: datetime = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    @property
+    def data(self):
+        return {
+            "owner_id":       self.owner_id,
+            "template_id":    self.template_id,
+            "reference_id":   self.reference_id,
+            "reference_type": self.reference_type,
+            "subject":        self.subject,
+            "body":           self.body,
+            "created":        str(self.created),
+            "last_updated":   str(self.last_updated),
+        }

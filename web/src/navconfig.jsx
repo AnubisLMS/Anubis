@@ -49,6 +49,7 @@ import AdminAssignmentGroups from './pages/core/admin/Assignment/AssignmentGroup
 // super
 import SuperConfig from './pages/core/super/Config';
 import SuperIDEImages from './pages/core/super/IDEImages';
+import EmailTemplates from './pages/core/super/EmailTemplates';
 import SuperPlaygrounds from './pages/core/super/Playgrounds';
 import SuperUsers from './pages/core/super/Users';
 
@@ -197,6 +198,12 @@ export const super_nav = [
     icon: <GroupIcon/>,
     path: '/super/users',
     Page: SuperUsers,
+  },
+  {
+    id: 'Email Templates',
+    icon: <GroupIcon/>,
+    path: '/super/email',
+    Page: EmailTemplates,
   },
 ];
 
