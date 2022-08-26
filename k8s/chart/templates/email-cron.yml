@@ -70,7 +70,7 @@ spec:
               imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
               command: [ "python3", "jobs/email_notifications.py" ]
               env:
-                - name: "JOB"
-                  value: "1"
-            {{- include "api.env" . | nindent 12 }}
+              - name: "JOB"
+                value: "1"
+              {{- include "api.env" . | nindent 14 }}
 {{- end }}

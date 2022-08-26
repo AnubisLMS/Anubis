@@ -125,6 +125,8 @@ def send_message(
                     f'debug={is_debug()} email_send_enabled={email_send_enabled}')
         return
 
+    return
+
     try:
         message = service.users().messages().send(userId=user_id, body=message).execute()
         return message
