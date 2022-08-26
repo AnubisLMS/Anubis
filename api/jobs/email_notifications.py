@@ -3,11 +3,11 @@ from typing import Callable
 
 import googleapiclient.discovery
 
+from anubis.google.service import build_google_service
 from anubis.lms.assignments import get_recent_assignments
 from anubis.lms.courses import get_course_users
 from anubis.models import Assignment, Course, User
 from anubis.utils.email.event import send_email_event
-from anubis.utils.google.service import build_google_service
 from anubis.utils.logging import logger
 
 now = datetime.now()
