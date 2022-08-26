@@ -110,92 +110,92 @@ export default function AssignmentCard({assignment, editableFields, updateField,
             {editableFields.map(({field, label, disabled = false, type = 'string'}) => {
               // Based on Label
               switch (field) {
-                case 'theia_image':
-                  return (
-                    <Grid item xs={12} lg={6}>
-                      <Autocomplete
-                        fullWidth
-                        value={assignment[field]}
-                        onChange={(_, v) => updateField(assignment.id, field, false, false, true)(v)}
-                        options={images}
-                        getOptionLabel={(option) => option.title}
-                        renderInput={(params) => <TextField {...params} label={label} variant="outlined"/>}
-                      />
-                    </Grid>
-                  );
+              case 'theia_image':
+                return (
+                  <Grid item xs={12} lg={6}>
+                    <Autocomplete
+                      fullWidth
+                      value={assignment[field]}
+                      onChange={(_, v) => updateField(assignment.id, field, false, false, true)(v)}
+                      options={images}
+                      getOptionLabel={(option) => option.title}
+                      renderInput={(params) => <TextField {...params} label={label} variant="outlined"/>}
+                    />
+                  </Grid>
+                );
               }
 
               // Based on type
               switch (type) {
-                case 'string':
-                  return (
-                    <Grid item xs={12} lg={6} key={field}>
-                      <TextField
-                        fullWidth
-                        disabled={disabled}
-                        variant={'outlined'}
-                        label={label}
-                        value={assignment[field]}
-                        onChange={updateField(assignment.id, field)}
-                      />
-                    </Grid>
-                  );
-                case 'json':
-                  return (
-                    <Grid item xs={12} lg={6} key={field}>
-                      <TextField
-                        fullWidth
-                        disabled={disabled}
-                        variant={'outlined'}
-                        label={label}
-                        value={jsonValues[field]}
-                        onChange={(e) => {
-                          setJsonValues((prev) => {
-                            prev[field] = e.target.value;
-                            return {...prev};
-                          });
-                          try {
-                            const value = JSON.parse(e.target.value);
-                            updateField(assignment.id, field, false, false, true)(value);
-                          } catch (e) {
-                          }
-                        }}
-                      />
-                    </Grid>
-                  );
-                case 'boolean':
-                  return (
-                    <Grid item xs={12} md={6} key={field}>
-                      <FormControlLabel
-                        value={assignment[field]}
-                        control={
-                          <Switch
-                            checked={assignment[field]}
-                            color={'primary'}
-                            onClick={updateField(assignment.id, field, true)}
-                          />
+              case 'string':
+                return (
+                  <Grid item xs={12} lg={6} key={field}>
+                    <TextField
+                      fullWidth
+                      disabled={disabled}
+                      variant={'outlined'}
+                      label={label}
+                      value={assignment[field]}
+                      onChange={updateField(assignment.id, field)}
+                    />
+                  </Grid>
+                );
+              case 'json':
+                return (
+                  <Grid item xs={12} lg={6} key={field}>
+                    <TextField
+                      fullWidth
+                      disabled={disabled}
+                      variant={'outlined'}
+                      label={label}
+                      value={jsonValues[field]}
+                      onChange={(e) => {
+                        setJsonValues((prev) => {
+                          prev[field] = e.target.value;
+                          return {...prev};
+                        });
+                        try {
+                          const value = JSON.parse(e.target.value);
+                          updateField(assignment.id, field, false, false, true)(value);
+                        } catch (e) {
                         }
-                        label={label}
-                        labelPlacement="end"
-                      />
-                    </Grid>
-                  );
-                case 'datetime':
-                  return (
-                    <Grid item xs={12} key={field}>
-                      <LocalizationProvider dateAdapter={AdapterDateFns}>
-                        <DesktopDateTimePicker
-                          className={classes.datePicker}
-                          margin="normal"
-                          label={label}
-                          format="yyyy-MM-dd hh:mm:ss"
-                          value={assignment[field]}
-                          onChange={updateField(assignment.id, field, false, true)}
-                          renderInput={(params) => <TextField {...params} />}
+                      }}
+                    />
+                  </Grid>
+                );
+              case 'boolean':
+                return (
+                  <Grid item xs={12} md={6} key={field}>
+                    <FormControlLabel
+                      value={assignment[field]}
+                      control={
+                        <Switch
+                          checked={assignment[field]}
+                          color={'primary'}
+                          onClick={updateField(assignment.id, field, true)}
                         />
-                      </LocalizationProvider>
-                    </Grid>
-                  );
+                      }
+                      label={label}
+                      labelPlacement="end"
+                    />
+                  </Grid>
+                );
+              case 'datetime':
+                return (
+                  <Grid item xs={12} key={field}>
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                      <DesktopDateTimePicker
+                        className={classes.datePicker}
+                        margin="normal"
+                        label={label}
+                        format="yyyy-MM-dd hh:mm:ss"
+                        value={assignment[field]}
+                        onChange={updateField(assignment.id, field, false, true)}
+                        renderInput={(params) => <TextField {...params} />}
+                      />
+                    </LocalizationProvider>
+                  </Grid>
+                );
               }
             })}
             <Grid item xs={12}>
