@@ -4,8 +4,8 @@ fullnameOverride: ""
 debug: false
 rollingUpdates: true
 healthChecks: true
-# domain: "anubis-lms.io"
-domain: "anubis.osiris.services"
+domain: "anubis-lms.io"
+#domain: "anubis.osiris.services"
 vpnOnly: false
 imagePullPolicy: "Always"
 imagePullSecret: "anubis"

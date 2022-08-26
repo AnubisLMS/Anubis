@@ -158,6 +158,7 @@ ports:
         sans:
           - ide.anubis-lms.io
           - ide8000.anubis-lms.io
+          - about.anubis-lms.io
 
 podSecurityContext: null
 securityContext: null
