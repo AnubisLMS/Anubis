@@ -1,0 +1,76 @@
+{{- if .Values.reaper.enable }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "chart.fullname" . }}-email
+  labels:
+      {{- include "chart.labels" . | nindent 4 }}
+    component: email
+  {{- if .Values.imagePullSecret }}
+imagePullSecrets:
+  - name: {{ .Values.imagePullSecret }}
+  {{- end }}
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "chart.fullname" . }}-email
+  labels:
+      {{- include "chart.labels" . | nindent 4 }}
+    rbac.authorization.k8s.io/pipeline-create-jobs: "true"
+rules:
+  - apiGroups: [ "" ]
+    resources: [ "secrets" ]
+    verbs: [ "get", "patch" ]
+    resourceNames: [ "{{ .Values.email.secretName }}" ]
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "chart.fullname" . }}-email
+  labels:
+      {{- include "chart.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "chart.fullname" . }}-email
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "chart.fullname" . }}-email
+    namespace: anubis
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "chart.fullname" . }}-email
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: email
+spec:
+  schedule: {{ .Values.visuals.schedule | quote }}
+  suspend: {{ .Values.visuals.suspend }}
+  concurrencyPolicy: Replace
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "chart.selectorLabels" . | nindent 8 }}
+        component: email
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ include "chart.fullname" . }}-email
+          restartPolicy: Never
+          containers:
+            - name: email
+              image: "{{ .Values.api.image }}:{{ .Values.tag }}"
+              imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+              command: [ "python3", "jobs/email_notifications.py" ]
+              env:
+                - name: "JOB"
+                  value: "1"
+            {{- include "api.env" . | nindent 12 }}
+{{- end }}

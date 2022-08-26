@@ -141,6 +141,12 @@ backup:
   suspend: false
   schedule: "0 0 * * *" # Midnight
   secretName: anubis-backup-creds
+
+email:
+  enable: true
+  suspend: false
+  schedule: "0 */5 * * *"
+  secretName: google-gmail-creds
 ###############################################################################
 
 

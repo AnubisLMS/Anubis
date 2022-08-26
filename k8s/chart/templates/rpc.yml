@@ -28,7 +28,7 @@ rules:
 {{- if .Values.debug }}
 - apiGroups: [""]
   resources: ["secrets"]
-  verbs: ["get", "read"]
+  verbs: ["get"]
 {{- end}}
 ---
 
@@ -87,7 +87,7 @@ spec:
             cpu: 100m
             memory: 200Mi
           limits:
-            cpu: 2
+            cpu: 2000m
             memory: 1Gi
         {{- end }}
         env:
