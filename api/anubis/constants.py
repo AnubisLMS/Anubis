@@ -17,7 +17,10 @@ WEBTOP_DEFAULT_OPTIONS = {
         "limits": {"cpu": "3", "memory": "4Gi"},
     },
 }
+
 DB_COLLATION = "utf8mb4_general_ci"
 DB_CHARSET = "utf8mb4"
 
 EMAIL_FROM = "noreply@anubis-lms.io"
+
+NYU_DOMAIN = 'anubis.osiris.services'

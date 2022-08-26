@@ -1,6 +1,10 @@
+from urllib.parse import urlunparse
+from urllib.parse import quote
+
 import requests
 from flask import Blueprint, make_response, redirect, request
 
+from anubis.constants import NYU_DOMAIN
 from anubis.env import env
 from anubis.lms.courses import get_course_context
 from anubis.models import User, db
@@ -21,13 +25,30 @@ github_oauth_ = Blueprint("public-github-oauth", __name__, url_prefix="/public/g
 def public_login():
     if is_debug():
         return "AUTH"
-    return nyu_provider.authorize(callback="https://{}/api/public/oauth".format(env.DOMAIN))
+    return nyu_provider.authorize(callback="https://{}/api/public/oauth".format(NYU_DOMAIN))
 
 
 @auth_.route("/logout")
 def public_logout():
     r = make_response(redirect("/"))
     r.set_cookie("token", "")
+    return r
+
+
+@auth_.route("/oauth-workaround")
+def public_nyu_oauth_workaround():
+    token = request.args.get('token', None)
+    next_url = request.args.get('next') or None
+
+    if token is None:
+        return 'Error', 400
+
+    # Make the response depending on if a next_url was specified
+    r = make_response(redirect(next_url))
+
+    # set the token cookie
+    r.set_cookie("token", token, httponly=True)
+
     return r
 
 
@@ -45,7 +66,7 @@ def public_oauth():
     """
 
     # Get the next url if it was specified.
-    next_url = request.args.get("next") or "/playgrounds"
+    next_url = "/playgrounds"
 
     # Get the authorized response from NYU oauth
     resp = nyu_provider.authorized_response()
@@ -77,10 +98,10 @@ def public_oauth():
         next_url = "/profile"
 
     # Make the response depending on if a next_url was specified
-    r = make_response(redirect(next_url))
-
-    # set the token cookie
-    r.set_cookie("token", create_token(user.netid), httponly=True)
+    token = create_token(user.netid)
+    r = make_response(redirect(urlunparse((
+        'https', env.DOMAIN, '/api/public/auth/oauth-workaround', '', f'next={quote(next_url)}&token={quote(token)}', ''
+    ))))
 
     return r
 
@@ -113,7 +134,7 @@ def public_github_oauth():
     # setup headers and url
     github_api_headers = {
         "authorization": "bearer " + resp["access_token"],
-        "accept": "application/vnd.github.v3+json",
+        "accept":        "application/vnd.github.v3+json",
     }
     github_api_url = "https://api.github.com/user"
 
@@ -147,7 +168,7 @@ def public_whoami():
     # just pass back Nones.
     if get_current_user() is None:
         return success_response({
-            "user": None,
+            "user":    None,
             "context": None,
         })
 
@@ -155,13 +176,13 @@ def public_whoami():
     context = get_course_context(False)
     if context is not None:
         course_context = {
-            "id": context.id,
+            "id":   context.id,
             "name": context.name,
         }
 
     return success_response(
         {
-            "user": current_user.data,
+            "user":    current_user.data,
             "context": course_context,
             "variant": "warning",
         }

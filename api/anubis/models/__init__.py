@@ -40,7 +40,7 @@ class User(db.Model):
     id = default_id()
 
     # Fields
-    netid: str = Column(String(length=128), primary_key=True, unique=True, index=True)
+    netid: str = Column(String(length=128), unique=True)
     github_username = Column(Text(length=2 ** 14), index=True)
     name = Column(Text(length=2 ** 14))
     is_superuser: bool = Column(Boolean, nullable=False, default=False)
