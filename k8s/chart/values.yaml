@@ -17,19 +17,19 @@ tag: "latest"
 
 # Main anubis api
 api:
-  replicas: 1
+  replicas: 2
   workers: 2
   gunicorn_options: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
   image: "registry.digitalocean.com/anubis/api"
 
 # Anubis web static
 web:
-  replicas: 1
+  replicas: 2
   image: "registry.digitalocean.com/anubis/web"
 
 # API for submission pipeline reporting
 pipeline_api:
-  replicas: 1
+  replicas: 2
   workers: 1
 
 # Theia IDE proxy and poller
@@ -42,7 +42,7 @@ theia:
 
   # theia-proxy deployment
   proxy:
-    replicas: 1
+    replicas: 2
     image: "registry.digitalocean.com/anubis/theia-proxy"
     tag: "latest"
 
@@ -119,12 +119,12 @@ clidocs:
 reaper:
   enable: true
   suspend: false
-  schedule: "0 0 * * *"
+  schedule: "0 */5 * * *"
 
 visuals:
   enable: true
   suspend: false
-  schedule: "0 0 * * *"
+  schedule: "0 */5 * * *"
 
 daily_cleanup:
   enable: true
@@ -133,7 +133,7 @@ daily_cleanup:
 
 autograde_recalculate:
   enable: true
-  suspend: true
+  suspend: false
   schedule: "*/30 * * * *"
 
 backup:
