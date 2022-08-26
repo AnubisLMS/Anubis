@@ -44,7 +44,7 @@ def super_email_template_save(key: str, subject: str, body: str):
 
     return get_all_templates({
         'variant': 'success',
-        'status': 'Template saved'
+        'status':  'Template saved'
     })
 
 
@@ -66,8 +66,9 @@ def super_email_template_new(key: str):
 
     return get_all_templates({
         'variant': 'success',
-        'status': 'Template created'
+        'status':  'Template created'
     })
+
 
 @email_.post("/template/delete")
 @require_superuser()
@@ -83,7 +84,7 @@ def super_email_template_delete(key: str):
 
     return get_all_templates({
         'variant': 'warning',
-        'status': 'Template Deleted'
+        'status':  'Template Deleted'
     })
 
 
