@@ -18,4 +18,6 @@ WEBTOP_DEFAULT_OPTIONS = {
     },
 }
 DB_COLLATION = "utf8mb4_general_ci"
-DB_CHARSET = "utf8mb4",
+DB_CHARSET = "utf8mb4"
+
+EMAIL_FROM = "noreply@anubis-lms.io"

@@ -45,6 +45,8 @@ class User(db.Model):
     name = Column(Text(length=2 ** 14))
     is_superuser: bool = Column(Boolean, nullable=False, default=False)
     disabled: bool = Column(Boolean, nullable=False, default=False)
+    deadline_email_enabled: bool = Column(Boolean, nullable=False, default=True)
+    release_email_enabled: bool = Column(Boolean, nullable=False, default=True)
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
@@ -71,12 +73,14 @@ class User(db.Model):
         from anubis.lms.courses import get_user_permissions, get_beta_ui_enabled
 
         return {
-            "id":              self.id,
-            "netid":           self.netid,
-            "github_username": self.github_username,
-            "name":            self.name,
-            "beta_ui_enabled": get_beta_ui_enabled(self.netid),
-            "created":         str(self.created),
+            "id":                     self.id,
+            "netid":                  self.netid,
+            "github_username":        self.github_username,
+            "name":                   self.name,
+            "beta_ui_enabled":        get_beta_ui_enabled(self.netid),
+            "deadline_email_enabled": self.deadline_email_enabled,
+            "release_email_enabled":  self.release_email_enabled,
+            "created":                str(self.created),
             **get_user_permissions(self),
         }
 
@@ -1082,3 +1086,41 @@ class ForumPostUpvote(db.Model):
             "created":      str(self.created),
             "last_updated": str(self.last_updated),
         }
+
+
+class EmailTemplate(db.Model):
+    __tablename__ = "email_template"
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
+
+    key: str = Column(String(length=128), primary_key=True, index=True)
+    body: str = Column(String(length=4096))
+    subject: str = Column(String(length=1024))
+
+
+class EmailEvent(db.Model):
+    __tablename__ = "email_event"
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
+
+    id: str = default_id()
+
+    # Who the email was sent to
+    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id))
+
+    # Email Template used
+    template_id: str = Column(String(length=128), ForeignKey(EmailTemplate.key))
+
+    # The id of the thing that was referenced (like say an assignment id for
+    # a deadline notification)
+    reference_id: str = Column(String(length=default_id_length))
+
+    # The type of thing being referenced in reference id (like "assignment_deadline" if
+    # it is an assignment deadline)
+    reference_type: str = Column(String(length=128))
+
+    # Email subject and body
+    subject: str = deferred(Column(String(2048)))
+    body: str = deferred(Column(String(8192)))
+
+    # Timestamps
+    created: datetime = Column(DateTime, default=datetime.now)
+    last_updated: datetime = Column(DateTime, default=datetime.now, onupdate=datetime.now)

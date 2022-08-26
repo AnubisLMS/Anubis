@@ -12,6 +12,30 @@ from anubis.utils.http.decorators import json_response
 profile = Blueprint("public-profile", __name__, url_prefix="/public/profile")
 
 
+@profile.route("/toggle-email-notifications/<string:key>")
+@require_user()
+@json_response
+def public_profile_toggle_email_notifications(key: str):
+    status: str | None = None
+
+    match key:
+        case "deadline_email_enabled":
+            current_user.deadline_email_enabled = not current_user.deadline_email_enabled
+            status = "Deadline Notification " + ("Enabled" if current_user.deadline_email_enabled else "Disabled")
+        case "release_email_enabled":
+            current_user.release_email_enabled = not current_user.release_email_enabled
+            status = "Release Notification " + ("Enabled" if current_user.release_email_enabled else "Disabled")
+
+    db.session.add(current_user)
+    db.session.commit()
+
+    return success_response({
+        "user": current_user.data,
+        "status": status,
+        "variant": "success",
+    })
+
+
 @profile.route("/set-github-username")
 @require_user()
 @json_response

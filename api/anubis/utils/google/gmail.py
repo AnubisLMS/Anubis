@@ -99,7 +99,7 @@ def create_message_with_attachment(
 
 def send_message(
     service: googleapiclient.discovery.Resource,
-    message: dict[str, bytes],
+    message: dict[str, str],
     user_id="me",
     force: bool = False,
     raise_: bool = False,
@@ -116,7 +116,7 @@ def send_message(
       Sent Message.
     """
 
-    logger.info(f"SENDING EMAIL {json.dumps(message)}")
+    logger.debug(f"SENDING EMAIL {json.dumps(message)}")
     if not force and is_debug():
         return
 

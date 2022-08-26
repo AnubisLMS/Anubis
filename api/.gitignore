@@ -6,3 +6,5 @@ env
 .coverage
 
 .pytest_cache
+
+token.json
