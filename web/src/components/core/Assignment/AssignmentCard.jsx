@@ -6,7 +6,7 @@ import clsx from 'clsx';
 
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
-import {DesktopDatePicker} from '@mui/x-date-pickers/DesktopDatePicker';
+import {DesktopDateTimePicker} from '@mui/x-date-pickers/DesktopDateTimePicker';
 import makeStyles from '@mui/styles/makeStyles';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
@@ -16,7 +16,6 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import Button from '@mui/material/Button';
 import CardActions from '@mui/material/CardActions';
-import yellow from '@mui/material/colors/yellow';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
@@ -111,92 +110,92 @@ export default function AssignmentCard({assignment, editableFields, updateField,
             {editableFields.map(({field, label, disabled = false, type = 'string'}) => {
               // Based on Label
               switch (field) {
-              case 'theia_image':
-                return (
-                  <Grid item xs={12} lg={6}>
-                    <Autocomplete
-                      fullWidth
-                      value={assignment[field]}
-                      onChange={(_, v) => updateField(assignment.id, field, false, false, true)(v)}
-                      options={images}
-                      getOptionLabel={(option) => option.title}
-                      renderInput={(params) => <TextField {...params} label={label} variant="outlined"/>}
-                    />
-                  </Grid>
-                );
+                case 'theia_image':
+                  return (
+                    <Grid item xs={12} lg={6}>
+                      <Autocomplete
+                        fullWidth
+                        value={assignment[field]}
+                        onChange={(_, v) => updateField(assignment.id, field, false, false, true)(v)}
+                        options={images}
+                        getOptionLabel={(option) => option.title}
+                        renderInput={(params) => <TextField {...params} label={label} variant="outlined"/>}
+                      />
+                    </Grid>
+                  );
               }
 
               // Based on type
               switch (type) {
-              case 'string':
-                return (
-                  <Grid item xs={12} lg={6} key={field}>
-                    <TextField
-                      fullWidth
-                      disabled={disabled}
-                      variant={'outlined'}
-                      label={label}
-                      value={assignment[field]}
-                      onChange={updateField(assignment.id, field)}
-                    />
-                  </Grid>
-                );
-              case 'json':
-                return (
-                  <Grid item xs={12} lg={6} key={field}>
-                    <TextField
-                      fullWidth
-                      disabled={disabled}
-                      variant={'outlined'}
-                      label={label}
-                      value={jsonValues[field]}
-                      onChange={(e) => {
-                        setJsonValues((prev) => {
-                          prev[field] = e.target.value;
-                          return {...prev};
-                        });
-                        try {
-                          const value = JSON.parse(e.target.value);
-                          updateField(assignment.id, field, false, false, true)(value);
-                        } catch (e) {
-                        }
-                      }}
-                    />
-                  </Grid>
-                );
-              case 'boolean':
-                return (
-                  <Grid item xs={12} md={6} key={field}>
-                    <FormControlLabel
-                      value={assignment[field]}
-                      control={
-                        <Switch
-                          checked={assignment[field]}
-                          color={'primary'}
-                          onClick={updateField(assignment.id, field, true)}
-                        />
-                      }
-                      label={label}
-                      labelPlacement="end"
-                    />
-                  </Grid>
-                );
-              case 'datetime':
-                return (
-                  <Grid item xs={12} key={field}>
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-                      <DesktopDatePicker
-                        className={classes.datePicker}
-                        margin="normal"
+                case 'string':
+                  return (
+                    <Grid item xs={12} lg={6} key={field}>
+                      <TextField
+                        fullWidth
+                        disabled={disabled}
+                        variant={'outlined'}
                         label={label}
-                        format="yyyy-MM-dd hh:mm:ss"
                         value={assignment[field]}
-                        onChange={updateField(assignment.id, field, false, true)}
-                        renderInput={(params) => <TextField {...params} />}
+                        onChange={updateField(assignment.id, field)}
                       />
-                    </LocalizationProvider>
-                  </Grid>
-                );
+                    </Grid>
+                  );
+                case 'json':
+                  return (
+                    <Grid item xs={12} lg={6} key={field}>
+                      <TextField
+                        fullWidth
+                        disabled={disabled}
+                        variant={'outlined'}
+                        label={label}
+                        value={jsonValues[field]}
+                        onChange={(e) => {
+                          setJsonValues((prev) => {
+                            prev[field] = e.target.value;
+                            return {...prev};
+                          });
+                          try {
+                            const value = JSON.parse(e.target.value);
+                            updateField(assignment.id, field, false, false, true)(value);
+                          } catch (e) {
+                          }
+                        }}
+                      />
+                    </Grid>
+                  );
+                case 'boolean':
+                  return (
+                    <Grid item xs={12} md={6} key={field}>
+                      <FormControlLabel
+                        value={assignment[field]}
+                        control={
+                          <Switch
+                            checked={assignment[field]}
+                            color={'primary'}
+                            onClick={updateField(assignment.id, field, true)}
+                          />
+                        }
+                        label={label}
+                        labelPlacement="end"
+                      />
+                    </Grid>
+                  );
+                case 'datetime':
+                  return (
+                    <Grid item xs={12} key={field}>
+                      <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <DesktopDateTimePicker
+                          className={classes.datePicker}
+                          margin="normal"
+                          label={label}
+                          format="yyyy-MM-dd hh:mm:ss"
+                          value={assignment[field]}
+                          onChange={updateField(assignment.id, field, false, true)}
+                          renderInput={(params) => <TextField {...params} />}
+                        />
+                      </LocalizationProvider>
+                    </Grid>
+                  );
               }
             })}
             <Grid item xs={12}>

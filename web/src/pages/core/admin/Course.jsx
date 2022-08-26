@@ -16,7 +16,6 @@ import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 import CourseTasProfessors from '../../../components/core/Course/CourseTasProfessors';
 
-
 const useStyles = makeStyles((theme) => ({
   root: {
     minWidth: 275,

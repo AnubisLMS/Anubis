@@ -14,7 +14,7 @@ import ListItemText from '@mui/material/ListItemText';
 import TextField from '@mui/material/TextField';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
-import {DesktopDatePicker} from '@mui/x-date-pickers/DesktopDatePicker';
+import {DesktopDateTimePicker} from '@mui/x-date-pickers/DesktopDateTimePicker';
 
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 import standardStatusHandler from '../../../utils/standardStatusHandler';
@@ -100,7 +100,7 @@ export default function FileUploadDialog({setReset}) {
         <DialogContent>
 
           <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DesktopDatePicker
+            <DesktopDateTimePicker
               className={classes.datePicker}
               margin="normal"
               label={'Post Time'}

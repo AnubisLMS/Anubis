@@ -4,7 +4,7 @@ import axios from 'axios';
 
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
-import {DesktopDatePicker} from '@mui/x-date-pickers/DesktopDatePicker';
+import {DesktopDateTimePicker} from '@mui/x-date-pickers/DesktopDateTimePicker';
 
 import makeStyles from '@mui/styles/makeStyles';
 import Card from '@mui/material/Card';
@@ -69,7 +69,7 @@ export default function LateExceptionAddCard({assignment, setReset}) {
           onChange={(_, v) => setSelected(v)}
         />
         <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <DesktopDatePicker
+          <DesktopDateTimePicker
             className={classes.datePicker}
             margin="normal"
             label="Due Date"
