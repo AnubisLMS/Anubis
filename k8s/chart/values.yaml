@@ -144,7 +144,7 @@ backup:
 
 email:
   enable: true
-  suspend: false
+  suspend: true
   schedule: "0 */5 * * *"
   secretName: google-gmail-creds
 ###############################################################################

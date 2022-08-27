@@ -14,6 +14,7 @@ import BookIcon from '@mui/icons-material/Book';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import ImportContactsIcon from '@mui/icons-material/ImportContacts';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import EmailIcon from '@mui/icons-material/Email';
 
 import Dashboard from './pages/core/public/Dashboard/Dashboard';
 import Courses from './pages/core/public/Courses/Courses';
@@ -201,7 +202,7 @@ export const super_nav = [
   },
   {
     id: 'Email Templates',
-    icon: <GroupIcon/>,
+    icon: <EmailIcon/>,
     path: '/super/email',
     Page: EmailTemplates,
   },

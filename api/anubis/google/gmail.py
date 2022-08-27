@@ -1,6 +1,7 @@
 import base64
 import io
 import json
+import traceback
 from email.mime.audio import MIMEAudio
 from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
@@ -125,12 +126,11 @@ def send_message(
                     f'debug={is_debug()} email_send_enabled={email_send_enabled}')
         return
 
-    return
-
     try:
         message = service.users().messages().send(userId=user_id, body=message).execute()
         return message
     except Exception as e:
+        logger.error(traceback.format_exc())
         if raise_:
             raise e
         return False

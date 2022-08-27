@@ -17,12 +17,12 @@ kind: Role
 metadata:
   name: {{ include "chart.fullname" . }}-email
   labels:
-      {{- include "chart.labels" . | nindent 4 }}
-    rbac.authorization.k8s.io/pipeline-create-jobs: "true"
+    {{- include "chart.labels" . | nindent 4 }}
+    component: email
 rules:
   - apiGroups: [ "" ]
     resources: [ "secrets" ]
-    verbs: [ "get", "patch" ]
+    verbs: [ "get", "list", "patch" ]
     resourceNames: [ "{{ .Values.email.secretName }}" ]
 ---
 
@@ -51,8 +51,8 @@ metadata:
     {{- include "chart.labels" . | nindent 4 }}
     component: email
 spec:
-  schedule: {{ .Values.visuals.schedule | quote }}
-  suspend: {{ .Values.visuals.suspend }}
+  schedule: {{ .Values.email.schedule | quote }}
+  suspend: {{ .Values.email.suspend }}
   concurrencyPolicy: Replace
   jobTemplate:
     metadata:
@@ -60,6 +60,8 @@ spec:
         {{- include "chart.selectorLabels" . | nindent 8 }}
         component: email
     spec:
+      ttlSecondsAfterFinished: 120
+      backoffLimit: 1
       template:
         spec:
           serviceAccountName: {{ include "chart.fullname" . }}-email

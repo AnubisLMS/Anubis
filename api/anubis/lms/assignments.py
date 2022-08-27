@@ -312,6 +312,13 @@ def fill_user_assignment_data(user_id: str, assignment_data: dict[str, Any]):
     assignment_data["due_date"] = str(due_date)
 
 
+def get_active_assignment() -> list[Assignment]:
+    return Assignment.query.filter(
+        Assignment.release_date < datetime.now(),
+        Assignment.due_date > datetime.now(),
+    ).all()
+
+
 def get_recent_assignments(
     autograde_enabled: bool = None,
     delta: timedelta = None
