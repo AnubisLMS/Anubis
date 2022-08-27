@@ -54,19 +54,20 @@ def send_email_event(
 
     # Send email
     try:
-        send_message(service, message)
+        success = send_message(service, message) is not False
     except Error as e:
         logger.error(f'Failed to send email!\nerror={e}\n\n{traceback.format_exc()}\nemail={message}')
         return
 
-    event: EmailEvent = EmailEvent(
-        owner_id=user.id,
-        template_id=template_key,
-        reference_id=reference_id,
-        reference_type=reference_type,
-        subject=subject,
-        body=body,
-    )
-    db.session.add(event)
-    db.session.commit()
+    if success:
+        event: EmailEvent = EmailEvent(
+            owner_id=user.id,
+            template_id=template_key,
+            reference_id=reference_id,
+            reference_type=reference_type,
+            subject=subject,
+            body=body,
+        )
+        db.session.add(event)
+        db.session.commit()
 
