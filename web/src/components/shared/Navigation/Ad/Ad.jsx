@@ -15,7 +15,7 @@ const Ad = () => {
     <Card className={classes.root}>
       <CardActionArea
         className={classes.actionArea}
-        href="https://github.com/AnubisLMS/Anubis"
+        href="https://github.com/AnubisLMS"
         target="_blank"
         rel="noreferrer"
       >
