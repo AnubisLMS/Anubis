@@ -55,6 +55,15 @@ def _send_assignment_condition_email_notifications(
                 'course':     course,
             }
 
+            # Skip if student has disabled notifications
+            match reference_type:
+                case 'assignment_release':
+                    if not student.release_email_enabled:
+                        continue
+                case 'assignment_deadline':
+                    if not student.deadline_email_enabled:
+                        continue
+
             send_email_event(
                 service,
                 student,
