@@ -38,14 +38,15 @@ def _send_assignment_condition_email_notifications(
         course: Course = assignment.course
         students: list[User] = get_course_users(course)
 
-        logger.info(f'Inspecting reference_type={reference_type} assignment_id={assignment.id} course_id={assignment.course_id} ')
+        logger.info(f'Inspecting reference_type={reference_type} '
+                    f'assignment_id={assignment.id} course_id={assignment.course_id} ')
 
         if not condition(assignment):
             logger.info(f'Condition not met for assignment, skipping')
             return
 
         else:
-            logger.info(f'Condition met, sending email')
+            logger.info(f'Condition met, sending emails')
 
         logger.info(f'students = {students}')
         for student in students:
@@ -59,10 +60,14 @@ def _send_assignment_condition_email_notifications(
             match reference_type:
                 case 'assignment_release':
                     if not student.release_email_enabled:
+                        logger.debug(f'Skipping email for user based off preferences user_id={student.id}')
                         continue
                 case 'assignment_deadline':
                     if not student.deadline_email_enabled:
+                        logger.debug(f'Skipping email for user based off preferences user_id={student.id}')
                         continue
+
+            logger.debug(f'Sending email for user based off preferences user_id={student.id}')
 
             send_email_event(
                 service,

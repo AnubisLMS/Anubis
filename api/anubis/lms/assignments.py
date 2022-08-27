@@ -316,6 +316,7 @@ def get_active_assignment() -> list[Assignment]:
     return Assignment.query.filter(
         Assignment.release_date < datetime.now(),
         Assignment.due_date > datetime.now(),
+        Assignment.hidden == False,
     ).all()
 
 

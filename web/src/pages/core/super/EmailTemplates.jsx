@@ -13,14 +13,13 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Box from '@mui/material/Box';
-
-import SaveIcon from '@mui/icons-material/Save';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 
 import AceEditor from 'react-ace';
 import 'ace-builds/src-min-noconflict/mode-text';
+import 'ace-builds/src-min-noconflict/mode-html';
 
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
@@ -172,7 +171,7 @@ export default function EmailTemplates() {
                     Body:
                   </Typography>
                   <AceEditor
-                    mode="text"
+                    mode="html"
                     theme="monokai"
                     value={editOpen?.body}
                     onChange={(v) => setEditOpen((prev) => {
