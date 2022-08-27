@@ -21,7 +21,7 @@ def _get_logger(logger_name):
     formatter = logging.Formatter("%(asctime)s %(name)s %(filename)s %(levelname)s :: %(message)s")
     streamer.setFormatter(formatter)
     _logger = logging.getLogger(logger_name)
-    _logger.setLevel(logging.DEBUG if is_debug() else logging.DEBUG)
+    _logger.setLevel(logging.DEBUG if is_debug() else logging.INFO)
     _logger.addHandler(streamer)
 
     return _logger
