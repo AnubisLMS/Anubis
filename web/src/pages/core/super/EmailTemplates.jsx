@@ -163,6 +163,12 @@ export default function EmailTemplates() {
                       prev.subject = v;
                       return {...prev};
                     })}
+                    setOptions={{
+                      enableBasicAutocompletion: false,
+                      enableLiveAutocompletion: false,
+                      enableSnippets: false,
+                      showLineNumbers: true,
+                    }}
                   />
                 </Grid>
 
@@ -178,6 +184,12 @@ export default function EmailTemplates() {
                       prev.body = v;
                       return {...prev};
                     })}
+                    setOptions={{
+                      enableBasicAutocompletion: false,
+                      enableLiveAutocompletion: false,
+                      enableSnippets: false,
+                      showLineNumbers: true,
+                    }}
                   />
                 </Grid>
 
