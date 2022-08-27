@@ -143,8 +143,8 @@ export default function EmailTemplates() {
           <Dialog
             open={!!editOpen}
             onClose={() => {
-                saveTemplate(editOpen);
-                setEditOpen(false);
+              saveTemplate(editOpen);
+              setEditOpen(false);
             }}
           >
             <DialogTitle>{editOpen?.key}</DialogTitle>
