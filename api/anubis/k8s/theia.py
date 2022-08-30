@@ -169,6 +169,7 @@ def create_theia_k8s_pod_pvc(
     # If the assignment does not have persistent volumes enabled, then create a blank
     # "empty-dir" volume. This skips the allocation of the pvc.
     else:
+        theia_project_pvc = None
         pod_volumes.append(k8s.V1Volume(name=theia_volume_name))
 
     # If the git secret should be included, then we add them to the
