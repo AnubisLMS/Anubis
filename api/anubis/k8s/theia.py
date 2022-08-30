@@ -3,15 +3,16 @@ import json
 import traceback
 from datetime import datetime, timedelta
 
-from kubernetes import client, config
+from kubernetes import client as k8s, config as k8s_config
 
 from anubis.constants import THEIA_DEFAULT_OPTIONS, WEBTOP_DEFAULT_OPTIONS
 from anubis.github.parse import parse_github_repo_name
 from anubis.ide.reap import mark_session_ended
+from anubis.k8s.pvc import get_user_pvc
 from anubis.lms.courses import get_course_admin_ids
 from anubis.models import Course, TheiaSession, Assignment, db
 from anubis.utils.auth.token import create_token
-from anubis.utils.config import get_config_int, get_config_str
+from anubis.utils.config import get_config_int
 from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
 
@@ -19,7 +20,7 @@ from anubis.utils.logging import logger
 def create_theia_k8s_pod_pvc(
     theia_session: TheiaSession,
     skip_debug_check: bool = False
-) -> tuple[client.V1Pod, client.V1PersistentVolumeClaim | None]:
+) -> tuple[k8s.V1Pod, k8s.V1PersistentVolumeClaim | None]:
     """
     Create the python kubernetes objects for a theia session. This is
     basically building the yaml for the theia session pod and pvc. There is
@@ -44,9 +45,9 @@ def create_theia_k8s_pod_pvc(
     pod_volumes = []
 
     # Extra env to add to the theia pod containers
-    sidecar_extra_env: list[client.V1EnvVar] = []
-    theia_extra_env: list[client.V1EnvVar] = []
-    init_extra_env: list[client.V1EnvVar] = []
+    sidecar_extra_env: list[k8s.V1EnvVar] = []
+    theia_extra_env: list[k8s.V1EnvVar] = []
+    init_extra_env: list[k8s.V1EnvVar] = []
 
     # Get the set repo url for this session. If the assignment has github repos disabled,
     # then default to an empty string.
@@ -73,19 +74,10 @@ def create_theia_k8s_pod_pvc(
         privileged = False
         persistent_storage = True
 
-    # Get home volume size from config
-    if theia_session.playground:
-        if theia_session.image.webtop:
-            volume_size = get_config_str('WEBTOP_VOLUME_SIZE', '500Mi')
-        else:
-            volume_size = get_config_str('PLAYGROUND_VOLUME_SIZE', '100Mi')
-    else:
-        volume_size = get_config_str('THEIA_VOLUME_SIZE', '100Mi')
-
     # Put assignment name in theia container environment
     if theia_session.assignment_id is not None:
         assignment: Assignment = theia_session.assignment
-        theia_extra_env.append(client.V1EnvVar(
+        theia_extra_env.append(k8s.V1EnvVar(
             name="ANUBIS_ASSIGNMENT_NAME",
             value=assignment.name,
         ))
@@ -105,15 +97,15 @@ def create_theia_k8s_pod_pvc(
     if not skip_debug_check and is_debug():
 
         # Load the kubernetes incluster config
-        config.load_incluster_config()
-        v1 = client.CoreV1Api()
+        k8s_config.load_incluster_config()
+        v1 = k8s.CoreV1Api()
 
         # Determine if the git secret should be included
         try:
             # Attempt to read the git secret from the anubis namespace.
-            # This will throw client.exceptions.ApiException(404) if
+            # This will throw k8s.exceptions.ApiException(404) if
             # the secret is not available.
-            git_secret: client.V1Secret = v1.read_namespaced_secret("git", "anubis")
+            git_secret: k8s.V1Secret = v1.read_namespaced_secret("git", "anubis")
 
             # Decode git token
             git_token = base64.b64decode(git_secret.data["token"].encode()).decode("utf-8", "ignore")
@@ -123,8 +115,8 @@ def create_theia_k8s_pod_pvc(
                 include_git_secret = False
                 autosave = False
 
-        # Catch kubernetes.client.exceptions.ApiException
-        except client.exceptions.ApiException as e:
+        # Catch kubernetes.k8s.exceptions.ApiException
+        except k8s.exceptions.ApiException as e:
             # If we 404ed, then the secret is not there.
             if e.status == 404:
                 include_git_secret = False
@@ -133,9 +125,9 @@ def create_theia_k8s_pod_pvc(
         # Determine if the docker config json secret should be included (for admin ide)
         try:
             # Attempt to read the anubis secret from the anubis namespace.
-            # This will throw client.exceptions.ApiException(404) if
+            # This will throw k8s.exceptions.ApiException(404) if
             # the secret is not available.
-            anubis_secret: client.V1Secret = v1.read_namespaced_secret("anubis-registry", "anubis")
+            anubis_secret: k8s.V1Secret = v1.read_namespaced_secret("anubis-registry", "anubis")
 
             # Decode git token
             docker_config_json = base64.b64decode(anubis_secret.data[".dockerconfigjson"].encode()).decode(
@@ -146,17 +138,14 @@ def create_theia_k8s_pod_pvc(
             if docker_config_json == "DEBUG":
                 include_docker_secret = False
 
-        # Catch kubernetes.client.exceptions.ApiException
-        except client.exceptions.ApiException as e:
+        # Catch kubernetes.k8s.exceptions.ApiException
+        except k8s.exceptions.ApiException as e:
             # If we 404ed, then the secret is not there.
             if e.status == 404:
                 include_docker_secret = False
 
     # Construct the PVC name from the theia pod name
     theia_volume_name = f"{netid}-{theia_session.id[:6]}-ide"
-
-    # Default the pvc to None
-    theia_project_pvc = None
 
     # Volume Mounts
     theia_volume_mounts = []
@@ -165,42 +154,13 @@ def create_theia_k8s_pod_pvc(
     # If persistent storage is enabled for this assignment, then we should create a pvc
     if persistent_storage:
         # Overwrite the volume name to be the user's persistent volume
-        theia_volume_name = f"ide-volume-{netid}"
-
-        # The storage class to be used on prod is probably going to be longhorn. Regardless,
-        # we'll want to be able to set this on the fly from a config value. If we default
-        # to None, then the cluster default storage class will be used.
-        theia_storage_class_name = get_config_str("THEIA_STORAGE_CLASS_NAME", default=None)
-
-        # Create the persistent volume claim object. Since this is a
-        # ReadWriteMany volume, the default storage class should
-        # support it.
-        theia_project_pvc = client.V1PersistentVolumeClaim(
-            metadata=client.V1ObjectMeta(
-                name=theia_volume_name,
-                labels={
-                    "app.kubernetes.io/name": "anubis",
-                    "role": "session-storage",
-                    "netid": netid,
-                },
-            ),
-            spec=client.V1PersistentVolumeClaimSpec(
-                access_modes=["ReadWriteMany"],
-                volume_mode="Filesystem",
-                storage_class_name=theia_storage_class_name,
-                resources=client.V1ResourceRequirements(
-                    requests={
-                        "storage": volume_size,
-                    }
-                ),
-            ),
-        )
+        theia_volume_name, theia_project_pvc = get_user_pvc(theia_session.owner, theia_session)
 
         # Append the PVC to the volume list
         pod_volumes.append(
-            client.V1Volume(
+            k8s.V1Volume(
                 name=theia_volume_name,
-                persistent_volume_claim=client.V1PersistentVolumeClaimVolumeSource(
+                persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(
                     claim_name=theia_volume_name,
                 ),
             )
@@ -209,7 +169,7 @@ def create_theia_k8s_pod_pvc(
     # If the assignment does not have persistent volumes enabled, then create a blank
     # "empty-dir" volume. This skips the allocation of the pvc.
     else:
-        pod_volumes.append(client.V1Volume(name=theia_volume_name))
+        pod_volumes.append(k8s.V1Volume(name=theia_volume_name))
 
     # If the git secret should be included, then we add them to the
     # sidecar and init envs here.
@@ -219,10 +179,10 @@ def create_theia_k8s_pod_pvc(
             # Add the git credentials secret to the container. The entrypoint
             # processes for this container will read this credential and drop
             # it where it needs to.
-            client.V1EnvVar(
+            k8s.V1EnvVar(
                 name="GIT_CRED",
-                value_from=client.V1EnvVarSource(
-                    secret_key_ref=client.V1SecretKeySelector(name="git", key="credentials")
+                value_from=k8s.V1EnvVarSource(
+                    secret_key_ref=k8s.V1SecretKeySelector(name="git", key="credentials")
                 ),
             ),
         )
@@ -232,10 +192,10 @@ def create_theia_k8s_pod_pvc(
             # Add the git credentials secret to the container. The entrypoint
             # processes for this container will read this credential and drop
             # it where it needs to.
-            client.V1EnvVar(
+            k8s.V1EnvVar(
                 name="GIT_CRED",
-                value_from=client.V1EnvVarSource(
-                    secret_key_ref=client.V1SecretKeySelector(name="git", key="credentials")
+                value_from=k8s.V1EnvVarSource(
+                    secret_key_ref=k8s.V1SecretKeySelector(name="git", key="credentials")
                 ),
             ),
         )
@@ -245,7 +205,7 @@ def create_theia_k8s_pod_pvc(
     if admin:
 
         # Add ANUBIS_ADMIN=ON to theia container and sidecar container
-        anubis_admin_env = client.V1EnvVar(name="ANUBIS_ADMIN", value="ON")
+        anubis_admin_env = k8s.V1EnvVar(name="ANUBIS_ADMIN", value="ON")
         sidecar_extra_env.append(anubis_admin_env)
         theia_extra_env.append(anubis_admin_env)
 
@@ -253,7 +213,7 @@ def create_theia_k8s_pod_pvc(
         # tests repo environment variable to both theia container and
         # sidecar container
         if theia_session.course_id:
-            anubis_assignment_tests_repo_env = client.V1EnvVar(
+            anubis_assignment_tests_repo_env = k8s.V1EnvVar(
                 name="ANUBIS_ASSIGNMENT_TESTS_REPO",
                 value=theia_session.course.autograde_tests_repo,
             )
@@ -265,18 +225,18 @@ def create_theia_k8s_pod_pvc(
 
     # Create the init container. This will clone the initial repo onto
     # the shared volume.
-    init_container = client.V1Container(
+    init_container = k8s.V1Container(
         name=f"theia-init",
         image="registry.digitalocean.com/anubis/theia-init",
         image_pull_policy="IfNotPresent",
         env=[
             # Git repo to clone
-            client.V1EnvVar(name="GIT_REPO", value=repo_url),
+            k8s.V1EnvVar(name="GIT_REPO", value=repo_url),
             # Add extra env if there is any
             *init_extra_env,
         ],
         volume_mounts=[
-            client.V1VolumeMount(
+            k8s.V1VolumeMount(
                 mount_path="/out",
                 name=theia_volume_name,
             )
@@ -287,7 +247,7 @@ def create_theia_k8s_pod_pvc(
     # SIDECAR CONTAINER
 
     if not webtop:
-        sidecar_volume_mounts.append(client.V1VolumeMount(
+        sidecar_volume_mounts.append(k8s.V1VolumeMount(
             mount_path="/home/anubis",
             name=theia_volume_name,
         ))
@@ -296,26 +256,26 @@ def create_theia_k8s_pod_pvc(
     # The main purpose for this container is to keep the git credentials separate
     # from the student environment. The shared /home/project volume is used to share
     # the repo between these two containers.
-    sidecar_container = client.V1Container(
+    sidecar_container = k8s.V1Container(
         name="sidecar",
         image="registry.digitalocean.com/anubis/theia-sidecar",
         image_pull_policy="IfNotPresent",
         env=[
             # set the AUTOSAVE environment variable to ON or OFF. If the variable
             # is set to false, then the autosave loop will be skipped.
-            client.V1EnvVar(
+            k8s.V1EnvVar(
                 name="AUTOSAVE",
                 value="ON" if autosave else "OFF",
             ),
             # set netid for commit messages
-            client.V1EnvVar(
+            k8s.V1EnvVar(
                 name="NETID",
                 value=netid,
             ),
             *sidecar_extra_env,
         ],
         # Add a security context to disable privilege escalation
-        security_context=client.V1SecurityContext(
+        security_context=k8s.V1SecurityContext(
             allow_privilege_escalation=False,
             run_as_non_root=True,
             run_as_user=1001,
@@ -339,7 +299,7 @@ def create_theia_k8s_pod_pvc(
         # theia init process to initialize the anubis cli with
         # the token.
         theia_extra_env.append(
-            client.V1EnvVar(
+            k8s.V1EnvVar(
                 name="INCLUSTER",
                 value=base64.b64encode(token.encode()).decode(),
             )
@@ -351,13 +311,13 @@ def create_theia_k8s_pod_pvc(
             # context cookie is loaded from a request (see get_course_context
             # function in anubis.lms.courses for more details)
             theia_extra_env.append(
-                client.V1EnvVar(
+                k8s.V1EnvVar(
                     name="COURSE_CONTEXT",
                     value=base64.urlsafe_b64encode(
                         json.dumps(
                             {
-                                "id": theia_session.course.id,
-                                "name": theia_session.course.name,
+                                "id":          theia_session.course.id,
+                                "name":        theia_session.course.name,
                                 "course_code": theia_session.course.course_code,
                             }
                         ).encode()
@@ -370,7 +330,7 @@ def create_theia_k8s_pod_pvc(
         # set the course code to be the course code for the course
         # that this theia session belongs to.
         theia_extra_env.append(
-            client.V1EnvVar(
+            k8s.V1EnvVar(
                 name="COURSE_CODE",
                 value=theia_session.course.course_code,
             )
@@ -384,7 +344,7 @@ def create_theia_k8s_pod_pvc(
     # Initialize theia volume mounts array with
     # the project volume mount
     theia_volume_mounts.append(
-        client.V1VolumeMount(
+        k8s.V1VolumeMount(
             mount_path="/home/anubis",
             name=theia_volume_name,
         )
@@ -393,17 +353,17 @@ def create_theia_k8s_pod_pvc(
     # If privileged, add docker config file to pod as a volume
     if privileged and include_docker_secret:
         pod_volumes.append(
-            client.V1Volume(
+            k8s.V1Volume(
                 name="docker-config",
-                secret=client.V1SecretVolumeSource(
+                secret=k8s.V1SecretVolumeSource(
                     default_mode=0o644,
                     secret_name="anubis-registry",
-                    items=[client.V1KeyToPath(key=".dockerconfigjson", path="config.json")],
+                    items=[k8s.V1KeyToPath(key=".dockerconfigjson", path="config.json")],
                 ),
             )
         )
         theia_volume_mounts.append(
-            client.V1VolumeMount(
+            k8s.V1VolumeMount(
                 mount_path="/docker",
                 name="docker-config",
             )
@@ -411,15 +371,15 @@ def create_theia_k8s_pod_pvc(
 
     if webtop:
         pod_volumes.append(
-            client.V1Volume(
+            k8s.V1Volume(
                 name="dshm",
-                empty_dir=client.V1EmptyDirVolumeSource(
+                empty_dir=k8s.V1EmptyDirVolumeSource(
                     medium="Memory"
                 )
             )
         )
         theia_volume_mounts.append(
-            client.V1VolumeMount(
+            k8s.V1VolumeMount(
                 mount_path="/dev/shm",
                 name="dshm",
             )
@@ -432,14 +392,14 @@ def create_theia_k8s_pod_pvc(
 
     # Create the main theia container. This is where the theia server runs, and
     # where the student will have a shell on.
-    theia_container = client.V1Container(
+    theia_container = k8s.V1Container(
         name="theia",
         image_pull_policy="IfNotPresent",
         ports=[
-            client.V1ContainerPort(container_port=5000),
+            k8s.V1ContainerPort(container_port=5000),
             # Optional proxy ports
-            *(client.V1ContainerPort(container_port=8000 + i, protocol="TCP") for i in range(11)),
-            *(client.V1ContainerPort(container_port=8000 + i, protocol="UDP") for i in range(11)),
+            *(k8s.V1ContainerPort(container_port=8000 + i, protocol="TCP") for i in range(11)),
+            *(k8s.V1ContainerPort(container_port=8000 + i, protocol="UDP") for i in range(11)),
         ],
         # Use the theia image that was specified in the database. If this is
         # a student session, this should be the theia image that is default either
@@ -449,13 +409,13 @@ def create_theia_k8s_pod_pvc(
         env=[
             # set the AUTOSAVE environment variable to ON or OFF
             # depending on if autosave is enabled for the session.
-            client.V1EnvVar(
+            k8s.V1EnvVar(
                 name="AUTOSAVE",
                 value="ON" if autosave else "OFF",
             ),
             # setting the repo name makes some of the initialization
             # a little easier.
-            client.V1EnvVar(
+            k8s.V1EnvVar(
                 name="REPO_NAME",
                 value=repo_name,
             ),
@@ -463,7 +423,7 @@ def create_theia_k8s_pod_pvc(
             *theia_extra_env,
         ],
         # set the resource limits and requests
-        resources=client.V1ResourceRequirements(
+        resources=k8s.V1ResourceRequirements(
             limits=limits,
             requests=requests,
         ),
@@ -475,8 +435,8 @@ def create_theia_k8s_pod_pvc(
         # The pod will not be marked as ready until the
         # webserver has started and the startup probe has
         # succeeded.
-        startup_probe=client.V1Probe(
-            http_get=client.V1HTTPGetAction(
+        startup_probe=k8s.V1Probe(
+            http_get=k8s.V1HTTPGetAction(
                 path="/",
                 port=5000,
             ),
@@ -488,7 +448,7 @@ def create_theia_k8s_pod_pvc(
         # If the session should be privileged, set it here. Privileged
         # containers should only exist for the management IDEs so that
         # docker can run.
-        security_context=client.V1SecurityContext(
+        security_context=k8s.V1SecurityContext(
             allow_privilege_escalation=theia_session.privileged or webtop,
             privileged=theia_session.privileged,
             run_as_user=theia_user_id,
@@ -521,7 +481,7 @@ def create_theia_k8s_pod_pvc(
         # set up the pod DNS to be pointed to cloudflare 1.1.1.1 instead
         # of the internal kubernetes dns.
         spec_extra["dns_policy"] = "None"
-        spec_extra["dns_config"] = client.V1PodDNSConfig(nameservers=["1.1.1.1"])
+        spec_extra["dns_config"] = k8s.V1PodDNSConfig(nameservers=["1.1.1.1"])
 
     # If the network is not locked, then we still need to apply
     # the admin policy. The gist of this policy is that the pod
@@ -531,19 +491,19 @@ def create_theia_k8s_pod_pvc(
         extra_labels["network-policy"] = "admin"
 
     # Create pod object
-    pod = client.V1Pod(
-        metadata=client.V1ObjectMeta(
+    pod = k8s.V1Pod(
+        metadata=k8s.V1ObjectMeta(
             name=pod_name,
             labels={
                 "app.kubernetes.io/name": "anubis",
-                "component": "theia-session",
-                "role": "theia-session",
-                "netid": netid,
-                "session": theia_session.id,
+                "component":              "theia-session",
+                "role":                   "theia-session",
+                "netid":                  netid,
+                "session":                theia_session.id,
                 **extra_labels,
             },
         ),
-        spec=client.V1PodSpec(
+        spec=k8s.V1PodSpec(
             # set the hostname here so that the terminals on the
             # IDEs will be theia@anubis-ide instead of some ugly
             # container hash.
@@ -577,7 +537,7 @@ def reap_theia_session_k8s_resources(theia_session_id: str):
     :param theia_session_id:
     :return:
     """
-    v1 = client.CoreV1Api()
+    v1 = k8s.CoreV1Api()
 
     # Log the reap
     logger.info("Reaping TheiaSession {}".format(theia_session_id))
@@ -592,7 +552,7 @@ def reap_theia_session_k8s_resources(theia_session_id: str):
     )
 
 
-def list_theia_pods() -> client.V1PodList:
+def list_theia_pods() -> k8s.V1PodList:
     """
     Get a list of all theia pods that are currently active within the
     kubernetes cluster. This list may not match exactly what is marked
@@ -600,7 +560,7 @@ def list_theia_pods() -> client.V1PodList:
 
     :return:
     """
-    v1 = client.CoreV1Api()
+    v1 = k8s.CoreV1Api()
 
     # list pods by label selector
     pods = v1.list_namespaced_pod(
@@ -622,7 +582,7 @@ def active_theia_pod_count() -> int:
     return len(list_theia_pods().items)
 
 
-def update_theia_pod_cluster_addresses(theia_pods: client.V1PodList):
+def update_theia_pod_cluster_addresses(theia_pods: k8s.V1PodList):
     """
     Iterate through all theia pods, updating the pod cluster
     addresses in the database as we go.
@@ -651,7 +611,7 @@ def update_theia_pod_cluster_addresses(theia_pods: client.V1PodList):
     db.session.commit()
 
 
-def reap_old_theia_sessions(theia_pods: client.V1PodList):
+def reap_old_theia_sessions(theia_pods: k8s.V1PodList):
     """
     Check that all the active pods have not reached the
     maximum lifetime of a theia session.
@@ -690,7 +650,7 @@ def reap_old_theia_sessions(theia_pods: client.V1PodList):
             db.session.commit()
 
 
-def fix_stale_theia_resources(theia_pods: client.V1PodList):
+def fix_stale_theia_resources(theia_pods: k8s.V1PodList):
     """
     Checks that all active Theia Sessions have active pods.
 
@@ -848,7 +808,7 @@ def reap_theia_session(theia_session: TheiaSession, commit: bool = True):
 
 def update_theia_session(session: TheiaSession):
     # Load the kubernetes incluster config
-    v1 = client.CoreV1Api()
+    v1 = k8s.CoreV1Api()
 
     # Get the name of the pod
     pod_name = get_theia_pod_name(session)
@@ -857,12 +817,12 @@ def update_theia_session(session: TheiaSession):
         # If the pod has not been created yet, then a 404 will be thrown.
         # Skip logging if that is the case.
         # Get the pod information from the kubernetes api
-        pod: client.V1Pod = v1.read_namespaced_pod(
+        pod: k8s.V1Pod = v1.read_namespaced_pod(
             namespace="anubis",
             name=pod_name,
         )
 
-    except client.exceptions.ApiException as e:
+    except k8s.exceptions.ApiException as e:
 
         # If the status code is 404, then it has not been created yet
         if e.status == 404:
@@ -885,13 +845,13 @@ def update_theia_session(session: TheiaSession):
         # in the events for the pod if it has been attached.
         if session.persistent_storage:
             # Get event list for ide pod
-            events: client.CoreV1Eventlist = v1.list_namespaced_event(
+            events: k8s.CoreV1Eventlist = v1.list_namespaced_event(
                 "anubis", field_selector=f"involvedObject.name={pod_name}"
             )
 
             # Iterate through events
             for event in events.items:
-                event: client.CoreV1Event
+                event: k8s.CoreV1Event
 
                 # attachdetach-controller starts success messages like
                 # this when volume has attached
@@ -935,9 +895,9 @@ def update_theia_session(session: TheiaSession):
         logger.info(
             "theia",
             extra={
-                "event": "session-init",
+                "event":      "session-init",
                 "session_id": session.id,
-                "netid": session.owner.netid,
+                "netid":      session.owner.netid,
             },
         )
 
@@ -962,7 +922,7 @@ def reap_theia_session_by_id(theia_session_id: str):
     """
 
     # Load incluster kubernetes config
-    config.load_incluster_config()
+    k8s_config.load_incluster_config()
 
     # Log the reap
     logger.info("Attempting to reap theia session {}".format(theia_session_id))
@@ -995,7 +955,7 @@ def reap_theia_sessions_in_course(course_id: str):
     """
 
     # Load the incluster config
-    config.load_incluster_config()
+    k8s_config.load_incluster_config()
 
     # Lof the reap
     logger.info(f"Clearing theia sessions course_id={course_id}")
@@ -1033,7 +993,7 @@ def reap_theia_playgrounds_all():
     """
 
     # Load the incluster config
-    config.load_incluster_config()
+    k8s_config.load_incluster_config()
 
     # Lof the reap
     logger.info(f"Clearing theia sessions playgrounds")
@@ -1070,7 +1030,7 @@ def reap_stale_theia_sessions(*_):
     """
 
     # Load the incluster config
-    config.load_incluster_config()
+    k8s_config.load_incluster_config()
 
     # Log the event
     logger.info("Clearing stale theia sessions")

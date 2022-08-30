@@ -8,6 +8,7 @@ from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http import success_response
 from anubis.utils.http.decorators import json_response
+from anubis.rpc.enqueue import enqueue_reap_pvc_user
 
 profile = Blueprint("public-profile", __name__, url_prefix="/public/profile")
 
@@ -103,3 +104,25 @@ def public_set_github_username():
 
     # And give back the new github username as the response
     return success_response(github_username)
+
+
+@profile.delete("/pvc")
+@require_user()
+@json_response
+def public_profile_delete_pvc():
+    """
+    Endpoint for a user to use when they want to reset their pvc.
+    The method required to hit this is "delete", so it cannot be
+    hit accidentally as easy.
+
+    :return:
+    """
+
+    # Enqueue reap job
+    enqueue_reap_pvc_user(current_user.id)
+
+    # Pass back status
+    return success_response({
+        'status': 'Volume delete scheduled',
+        'variant': 'warning',
+    })
