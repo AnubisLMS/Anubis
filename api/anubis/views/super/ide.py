@@ -58,7 +58,7 @@ def super_ide_images_save(images: list):
 @json_response
 def super_ide_images_new():
     image_db = TheiaImage(
-        image="registry.digitalocean.com/anubis/theia-xv6",
+        image="registry.digitalocean.com/anubis/theia-cpp",
         title="NEWIMAGE",
         description="NEWIMAGE",
         icon="",

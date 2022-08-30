@@ -189,8 +189,8 @@ services:
   theia-golang:
     image: registry.digitalocean.com/anubis/theia-golang:latest
 
-  theia-xv6:
-    image: registry.digitalocean.com/anubis/theia-xv6:latest
+  theia-cpp:
+    image: registry.digitalocean.com/anubis/theia-cpp:latest
 
   theia-admin:
     image: registry.digitalocean.com/anubis/theia-admin:latest

@@ -28,7 +28,7 @@
 
 
 
-SERVICES := api web theia-init theia-proxy theia-admin theia-xv6
+SERVICES := api web theia-init theia-proxy theia-admin theia-cpp
 
 
 # There are a few assumptions here. I'm assuming that if this is run on

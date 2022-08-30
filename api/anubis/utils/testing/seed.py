@@ -353,7 +353,7 @@ def seed():
     db.session.add_all([base_tag38, base_tag39, base_tag310])
 
     xv6_image = TheiaImage(
-        image="registry.digitalocean.com/anubis/theia-xv6",
+        image="registry.digitalocean.com/anubis/theia-cpp",
         title="C/C++ IDE",
         description="C/C++ IDE",
         icon="devicon-cplusplus-plain",
