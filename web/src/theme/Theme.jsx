@@ -4,7 +4,7 @@ import FiraCodeRegular from '../assets/fonts/FiraCode-Regular.ttf';
 
 const fira = {
   fontFamily: 'FiraCode',
-  fontStyle: 'normal',
+  fontStyle: 'regular',
   fontDisplay: 'swap',
   fontWeight: 400,
   src: `
@@ -94,7 +94,7 @@ theme = {
     },
     MuiCssBaseline: {
       '@global': {
-        '@font-fact': [fira],
+        '@font-face': [fira],
       },
     },
   },

@@ -22,6 +22,7 @@ import {drawerWidth} from './navconfig';
 
 // Dark theme
 import theme from './theme/Theme';
+import './assets/fonts/FiraCode-Regular.ttf';
 
 import AuthWrapper from './components/shared/AuthWrapper';
 import Main from './Main';
