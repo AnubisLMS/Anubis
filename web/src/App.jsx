@@ -111,6 +111,7 @@ export default function App() {
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
+        <CssBaseline/>
         <div className={classes.root}>
           <SnackbarProvider maxSnack={5}>
             <DeviceWarning/>
@@ -118,7 +119,7 @@ export default function App() {
               <AuthWrapper>
                 <AuthContext.Consumer>
                   {(user) => (
-                    <CssBaseline>
+                    <React.Fragment>
                       <Nav
                         open={open}
                         handleDrawerClose={() => setOpen(!open)}
@@ -144,7 +145,7 @@ export default function App() {
                           <Footer/>
                         </main>
                       </div>
-                    </CssBaseline>
+                    </React.Fragment>
                   )}
                 </AuthContext.Consumer>
               </AuthWrapper>

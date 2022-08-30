@@ -3,11 +3,12 @@ import FiraCodeRegular from '../assets/fonts/FiraCode-Regular.ttf';
 
 
 const fira = {
-  fontFamily: 'FiraCode-Regular',
+  fontFamily: 'FiraCode',
   fontStyle: 'normal',
   fontDisplay: 'swap',
   fontWeight: 400,
   src: `
+    local('FiraCode'),
     local('FiraCode-Regular'),
     url(${FiraCodeRegular}) format('ttf')
   `,
@@ -89,6 +90,11 @@ theme = {
       root: {
         backgroundColor: theme.palette.dark.blue['100'],
         borderColor: theme.palette.primary.main,
+      },
+    },
+    MuiCssBaseline: {
+      '@global': {
+        '@font-fact': [fira],
       },
     },
   },
