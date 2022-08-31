@@ -7,7 +7,8 @@ from googleapiclient.errors import Error
 
 from anubis.constants import EMAIL_FROM
 from anubis.models import db, User, EmailTemplate, EmailEvent
-from anubis.google.gmail import send_message, create_message
+from anubis.google.gmail import send_message
+from anubis.utils.email.smtp import create_message
 from anubis.utils.logging import logger
 
 
