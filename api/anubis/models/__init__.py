@@ -40,7 +40,7 @@ class User(db.Model):
     id = default_id()
 
     # Fields
-    netid: str = Column(String(length=128), unique=True)
+    netid: str = Column(String(length=128), unique=True, nullable=False)
     github_username = Column(Text(length=2 ** 14), index=True)
     name = Column(Text(length=2 ** 14))
     is_superuser: bool = Column(Boolean, nullable=False, default=False)
@@ -219,6 +219,7 @@ class Assignment(db.Model):
     accept_late: bool = Column(Boolean, default=True)
     hide_due_date: bool = Column(Boolean, default=False)
     questions_assigned: bool = Column(Boolean, default=False)
+    email_notifications_enabled: bool = Column(Boolean, default=True, nullable=False)
 
     # Autograde
     pipeline_image = Column(Text(length=2 ** 14), nullable=True, index=True)
