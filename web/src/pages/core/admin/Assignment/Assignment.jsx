@@ -33,6 +33,7 @@ const editableFields = [
   {field: 'ide_enabled', label: 'IDEs Enabled', type: 'boolean'},
   {field: 'hide_due_date', label: 'Hide Due Date', type: 'boolean'},
   {field: 'autograde_enabled', label: 'Autograde Enabled', type: 'boolean'},
+  {field: 'email_notifications_enabled', label: 'Email Notifications Enabled', type: 'boolean'},
   {field: 'release_date', label: 'Release Date', type: 'datetime'},
   {field: 'due_date', label: 'Due Date', type: 'datetime'},
   {field: 'grace_date', label: 'Grace Date', type: 'datetime'},
