@@ -125,12 +125,12 @@ clidocs:
 reaper:
   enable: true
   suspend: false
-  schedule: "0 */5 * * *"
+  schedule: "*/5 * * * *"
 
 visuals:
   enable: true
   suspend: false
-  schedule: "0 */5 * * *"
+  schedule: "*/5 * * * *"
 
 daily_cleanup:
   enable: true
@@ -151,7 +151,7 @@ backup:
 email:
   enable: true
   suspend: false
-  schedule: "0 */5 * * *"
+  schedule: "*/5 * * * *"
   secretName: google-gmail-creds
 ###############################################################################
 
