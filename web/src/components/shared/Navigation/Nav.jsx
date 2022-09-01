@@ -6,7 +6,7 @@ import {ReactComponent as Logo} from '../../../assets/images/Logo.svg';
 
 import {useStyles} from './Nav.styles';
 
-import Ad from './Ad/Ad';
+import GithubAd from '../Ad/GithubAd/GithubAd';
 import NavList from './NavList/NavList';
 
 const Nav = ({open, handleDrawerClose}) => {
@@ -33,7 +33,7 @@ const Nav = ({open, handleDrawerClose}) => {
         />
       </Box>
       <Box marginLeft="8px" marginRight="8px" marginTop="20px">
-        <Ad/>
+        <GithubAd/>
       </Box>
     </Drawer>
   );

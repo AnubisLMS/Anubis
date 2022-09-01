@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {useStyles} from './Ad.styles';
+import {useStyles} from './GithubAd.styles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -8,7 +8,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 
-const Ad = () => {
+const GithubAd = () => {
   const classes = useStyles();
 
   return (
@@ -35,4 +35,4 @@ const Ad = () => {
   );
 };
 
-export default Ad;
+export default GithubAd;
