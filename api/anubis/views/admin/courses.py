@@ -8,6 +8,7 @@ from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert, row2dict
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_endpoint, json_response
+from anubis.github.team import add_member, remove_member
 
 courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
 
@@ -325,7 +326,7 @@ def admin_course_make_ta_id(user_id: str):
     """
 
     # Get the user that will be the TA
-    other = User.query.filter(User.id == user_id).first()
+    other: User = User.query.filter(User.id == user_id).first()
 
     # Check that the user exists
     req_assert(other is not None, message="user does not exist")
@@ -358,6 +359,12 @@ def admin_course_make_ta_id(user_id: str):
     db.session.add(ta)
     db.session.commit()
 
+    add_member(
+        course_context.github_org,
+        course_context.github_ta_team_slug,
+        other.github_username
+    )
+
     # Return the status
     return success_response({"status": "TA added to course"})
 
@@ -377,7 +384,7 @@ def admin_course_remove_ta_id(user_id: str):
     assert_course_superuser(course_context.id)
 
     # Get the user object for the specified user
-    other = User.query.filter(User.id == user_id).first()
+    other: User = User.query.filter(User.id == user_id).first()
 
     # Make sure that the other user exists
     req_assert(other is not None, message="user does not exist")
@@ -394,6 +401,12 @@ def admin_course_remove_ta_id(user_id: str):
 
     # Commit the delete
     db.session.commit()
+
+    remove_member(
+        course_context.github_org,
+        course_context.github_ta_team_slug,
+        other.github_username
+    )
 
     # Return the status
     return success_response(
@@ -416,7 +429,7 @@ def admin_course_make_professor_id(user_id: str):
     """
 
     # Get the other user
-    other = User.query.filter(User.id == user_id).first()
+    other: User = User.query.filter(User.id == user_id).first()
 
     # Make sure they exist
     req_assert(other is not None, message="user does not exist")
@@ -450,6 +463,12 @@ def admin_course_make_professor_id(user_id: str):
     db.session.add(prof)
     db.session.commit()
 
+    add_member(
+        course_context.github_org,
+        course_context.github_ta_team_slug,
+        other.github_username
+    )
+
     # Return the status
     return success_response({"status": "Professor added to course"})
 
@@ -466,7 +485,7 @@ def admin_course_remove_professor_id(user_id: str):
     """
 
     # Get the other user
-    other = User.query.filter(User.id == user_id).first()
+    other: User = User.query.filter(User.id == user_id).first()
 
     # Make sure the other user exists
     req_assert(other is not None, message="user does not exist")
@@ -479,6 +498,12 @@ def admin_course_remove_professor_id(user_id: str):
 
     # Commit the delete
     db.session.commit()
+
+    remove_member(
+        course_context.github_org,
+        course_context.github_ta_team_slug,
+        other.github_username
+    )
 
     # Return the status
     return success_response(

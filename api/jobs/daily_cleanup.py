@@ -1,3 +1,6 @@
+import traceback
+
+from anubis.github.team import add_member, list_members
 from anubis.lms.assignments import get_recent_assignments
 from anubis.lms.courses import get_active_courses
 from anubis.lms.courses import get_course_tas, get_course_professors, get_course_users, user_to_user_id_set
@@ -10,6 +13,47 @@ from anubis.models import (
 )
 from anubis.utils.data import with_context
 from anubis.utils.logging import logger
+
+
+def reap_github_admin_teams():
+    """
+    Make sure tas are properly added to groups
+
+    :return:
+    """
+
+    # Get all current courses
+    courses: list[Course] = get_active_courses()
+
+    # Iterate through all courses within the system
+    for course in courses:
+        if course.github_ta_team_slug == '' or course.github_ta_team_slug is None:
+            logger.info(f'Skipping reap_github_ta_teams course_id = {course.id}')
+            continue
+
+        logger.info(f'Inspecting github ta permissions course_id = {course.id} '
+                    f'org = "{course.github_org}" team = "{course.github_ta_team_slug}"')
+
+        # Get all students, professors and TAs for course
+        tas: list[User] = get_course_tas(course)
+        profs: list[User] = get_course_professors(course)
+        members: list[str] = list_members(course.github_org, course.github_ta_team_slug)
+
+        for user in set(tas).union(set(profs)):
+            if user.github_username == '' or user.github_username is None:
+                logger.info(f'User does not have github linked yet, skipping for now')
+                continue
+
+            if user.github_username in members:
+                logger.info(f'Skipping adding user to team. Already member user = "{user.id}"')
+                continue
+
+            logger.info(f'Adding user to team. Not already member user = "{user.id}"')
+
+            try:
+                add_member(course.github_org, course.github_ta_team_slug, user.github_username)
+            except Exception as e:
+                logger.error(f'Could not complete member add {e}\n\n' + traceback.format_exc())
 
 
 def reap_ta_professor():
@@ -85,6 +129,9 @@ def reap():
 
     # Fix question assignments
     fix_question_assignments()
+
+    # Check that course admins are in ta group on GitHub
+    reap_github_admin_teams()
 
 
 if __name__ == "__main__":
