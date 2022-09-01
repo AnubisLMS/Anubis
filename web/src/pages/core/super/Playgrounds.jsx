@@ -58,6 +58,7 @@ const useColumns = (state, enqueueSnackbar) => ([
   {field: 'image', headerName: 'Image', width: 150, valueGetter: (params) => params.value.title},
   {field: 'image_tag', headerName: 'Tag', width: 150, valueGetter: (params) => params.value?.title ?? 'latest'},
   {field: 'created', headerName: 'Created', type: 'dateTime', width: 170},
+  {field: 'created_delta', headerName: 'Age', width: 170},
   {field: 'last_proxy_delta', headerName: 'Last Ping', width: 170},
   {
     field: 'redirect_url', headerName: 'Go To IDE', width: 120, renderCell: ({row}) => (

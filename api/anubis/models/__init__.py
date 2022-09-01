@@ -740,6 +740,7 @@ class TheiaSession(db.Model):
             "active":             self.active,
             "state":              self.state,
             "created":            str(self.created),
+            "created_delta":      human_readable_timedelta(datetime.now() - self.created),
             "ended":              str(self.ended),
             "last_proxy":         str(self.last_proxy),
             "last_proxy_delta":   human_readable_timedelta(datetime.now() - self.last_proxy),
