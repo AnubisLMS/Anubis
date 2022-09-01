@@ -159,7 +159,7 @@ export default function Users() {
 
   React.useEffect(() => {
     if (students.length === 0) {
-      return null;
+      return undefined;
     }
 
     if (searched === null && students.length > 0) {
