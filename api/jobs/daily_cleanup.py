@@ -1,4 +1,7 @@
+from anubis.lms.assignments import get_recent_assignments
+from anubis.lms.courses import get_active_courses
 from anubis.lms.courses import get_course_tas, get_course_professors, get_course_users, user_to_user_id_set
+from anubis.lms.questions import fix_missing_question_assignments
 from anubis.models import (
     db,
     Course,
@@ -7,9 +10,6 @@ from anubis.models import (
 )
 from anubis.utils.data import with_context
 from anubis.utils.logging import logger
-from anubis.lms.assignments import get_recent_assignments
-from anubis.lms.questions import fix_missing_question_assignments
-from anubis.lms.courses import get_active_courses
 
 
 def reap_ta_professor():

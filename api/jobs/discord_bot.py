@@ -6,9 +6,9 @@ from typing import List, Union
 
 import discord
 import flask_sqlalchemy
+from PIL import Image, ImageDraw, ImageFont
 from dateutil.parser import parse as date_parse, ParserError
 from discord.ext import commands
-from PIL import Image, ImageDraw, ImageFont
 from sqlalchemy.sql import func
 from tabulate import tabulate
 

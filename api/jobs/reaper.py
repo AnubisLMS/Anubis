@@ -5,8 +5,8 @@ from typing import List
 
 from anubis.github.fix import fix_github_missing_submissions, fix_github_broken_repos
 from anubis.lms.assignments import get_recent_assignments
-from anubis.lms.students import get_students
 from anubis.lms.courses import get_active_courses
+from anubis.lms.students import get_students
 from anubis.lms.submissions import init_submission
 from anubis.models import (
     db,

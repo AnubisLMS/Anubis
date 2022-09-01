@@ -2,7 +2,6 @@ from anubis.lms.assignments import get_recent_assignments
 from anubis.lms.autograde import bulk_autograde
 from anubis.utils.data import with_context
 from anubis.utils.visuals.assignments import get_assignment_sundial
-from anubis.utils.logging import logger
 
 
 def autograde_recalculate():

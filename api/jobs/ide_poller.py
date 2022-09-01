@@ -1,6 +1,6 @@
 import os
-from typing import List
 from datetime import datetime, timedelta
+from typing import List
 
 if 'SENTRY_DSN' in os.environ:
     del os.environ['SENTRY_DSN']
