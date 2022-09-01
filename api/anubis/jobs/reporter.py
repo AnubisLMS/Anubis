@@ -1,6 +1,6 @@
 import os
 
-from jobs.discord_bot import generate_report
+from anubis.jobs.discord_bot import generate_report
 from discord import Webhook, RequestsWebhookAdapter
 
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "DEBUG")
