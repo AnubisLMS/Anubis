@@ -5,7 +5,13 @@ import string
 from sqlalchemy import or_
 
 from anubis.github.repos import create_assignment_group_repo, delete_assignment_repo
-from anubis.lms.courses import assert_course_admin, get_user_course_ids, is_course_admin, add_all_users_to_course
+from anubis.lms.courses import (
+    assert_course_admin,
+    get_user_course_ids,
+    is_course_admin,
+    add_all_users_to_course,
+    is_course_archived,
+)
 from anubis.lms.questions import ingest_questions
 from anubis.models import (
     TheiaSession,
@@ -155,6 +161,8 @@ def get_assignments(netid: str, course_id=None) -> list[dict[str, Any]] | None:
     # courses that the user is in.
     else:
         admin_course_ids, course_ids = get_user_course_ids(user)
+
+    course_ids = set(filter(lambda cid: not is_course_archived(cid), course_ids))
 
     # Get assignment objects
     assignments: list[Assignment] = get_all_assignments(course_ids, admin_course_ids)

@@ -347,10 +347,16 @@ def get_courses(netid: str) -> list[dict[str, Any]]:
     course_ids = get_student_course_ids(user)
 
     # Query for classes
-    classes = Course.query.filter(Course.id.in_(course_ids)).all()
+    courses = Course.query.filter(Course.id.in_(course_ids)).all()
+
+    # Filter out archived courses for non-tas
+    courses = list(filter(
+        lambda course: not is_course_archived(course) or is_course_admin(course.id, user.id),
+        courses
+    ))
 
     # Convert to list of data representation
-    return [c.data for c in classes]
+    return [c.data for c in courses]
 
 
 @cache.memoize(timeout=60, unless=is_debug)
@@ -381,10 +387,10 @@ def get_course_data(netid: str, course_id: str) -> dict[str, Any] | None:
     # Query for tas in course
     tas = (
         User.query.join(TAForCourse)
-            .filter(
+        .filter(
             TAForCourse.course_id == course_id,
         )
-            .all()
+        .all()
     )
 
     # Return course and ta data
@@ -392,7 +398,7 @@ def get_course_data(netid: str, course_id: str) -> dict[str, Any] | None:
         **course_data,
         "tas": [
             {
-                "name": ta.name,
+                "name":  ta.name,
                 "netid": ta.netid,
             }
             for ta in tas
@@ -423,10 +429,10 @@ def get_student_course_ids(user: User, default: str = None) -> list[str]:
         # Get all the courses the user is in
         in_courses = (
             InCourse.query.join(Course)
-                .filter(
+            .filter(
                 InCourse.owner_id == user.id,
             )
-                .all()
+            .all()
         )
 
         # Build a list of course ids. If the user
@@ -454,13 +460,13 @@ def get_user_permissions(user: User) -> dict[str, Any]:
     if user.is_superuser:
         super_for = [{"id": course.id, "name": course.name} for course in Course.query.all()]
         return {
-            "is_superuser": True,
-            "is_admin": True,
+            "is_superuser":  True,
+            "is_admin":      True,
             "professor_for": super_for,
             # super_for is deepcopied to avoid introducing exceptions
             # if further data processing is needed
-            "ta_for": copy.deepcopy(super_for),
-            "admin_for": copy.deepcopy(super_for),
+            "ta_for":        copy.deepcopy(super_for),
+            "admin_for":     copy.deepcopy(super_for),
         }
 
     professor_for = [pf.data for pf in user.professor_for_course]
@@ -472,11 +478,11 @@ def get_user_permissions(user: User) -> dict[str, Any]:
     admin_for = copy.deepcopy(ta_for)
 
     return {
-        "is_superuser": False,
-        "is_admin": len(admin_for) > 0,
+        "is_superuser":  False,
+        "is_admin":      len(admin_for) > 0,
         "professor_for": professor_for,
-        "ta_for": ta_for,
-        "admin_for": admin_for,
+        "ta_for":        ta_for,
+        "admin_for":     admin_for,
     }
 
 
@@ -698,6 +704,27 @@ def add_all_users_to_course(users: list[User], course: Course) -> int:
 
     # Return the number of students that were added
     return len(all_not_in_course)
+
+
+def get_active_courses() -> list[Course]:
+    """
+    Get list of currently active courses. Courses with
+    "[archive]" in the name will be excluded. Very useful
+    for filtering out old courses in things like the reaper.
+
+    :return:
+    """
+    return Course.query.filter(
+        ~Course.name.like('%[%Archive]%')
+    ).all()
+
+
+def is_course_archived(course: str | Course) -> bool:
+    if isinstance(course, str):
+        course = Course.query.filter(Course.id == course).first()
+        if course is None:
+            return False
+    return 'Archive' in course.name
 
 
 course_context: Course = LocalProxy(get_course_context)

@@ -9,6 +9,7 @@ from anubis.constants import THEIA_DEFAULT_OPTIONS, WEBTOP_DEFAULT_OPTIONS
 from anubis.github.parse import parse_github_repo_name
 from anubis.ide.reap import mark_session_ended
 from anubis.k8s.pvc import get_user_pvc
+from anubis.lms.courses import get_active_courses
 from anubis.lms.courses import get_course_admin_ids
 from anubis.models import Course, TheiaSession, Assignment, db
 from anubis.utils.auth.token import create_token
@@ -676,7 +677,7 @@ def fix_stale_theia_resources(theia_pods: k8s.V1PodList):
     admin_theia_timeout = get_config_int("THEIA_ADMIN_STALE_PROXY_MINUTES", default=60)
 
     # Get list of all courses
-    courses: list[Course] = Course.query.all()
+    courses: list[Course] = get_active_courses()
 
     active_db_sessions: list[TheiaSession] = []
 

@@ -3,18 +3,19 @@ import traceback
 from datetime import datetime, timedelta
 from typing import List
 
+from anubis.github.fix import fix_github_missing_submissions, fix_github_broken_repos
 from anubis.lms.assignments import get_recent_assignments
+from anubis.lms.students import get_students
+from anubis.lms.courses import get_active_courses
 from anubis.lms.submissions import init_submission
 from anubis.models import (
     db,
     Submission,
     Course,
 )
-from anubis.utils.data import with_context
-from anubis.github.fix import fix_github_missing_submissions, fix_github_broken_repos
-from anubis.utils.logging import logger
 from anubis.rpc.enqueue import enqueue_autograde_pipeline, enqueue_ide_reap_stale, enqueue_pipeline_reap_stale
-from anubis.lms.students import get_students
+from anubis.utils.data import with_context
+from anubis.utils.logging import logger
 
 
 def reap_stale_submissions():
@@ -37,7 +38,7 @@ def reap_stale_submissions():
         Submission.state != 'regrading',
     ).update({
         'processed': True,
-        'state': "Reaped after timeout",
+        'state':     "Reaped after timeout",
     }, False)
 
     # Commit any changes
@@ -59,8 +60,8 @@ def reap_recent_assignments():
 
     for assignment in recent_assignments:
         for submission in Submission.query.filter(
-                Submission.assignment_id == assignment.id,
-                Submission.build == None,
+            Submission.assignment_id == assignment.id,
+            Submission.build == None,
         ).all():
             if submission.build is None:
                 init_submission(submission)
@@ -81,7 +82,7 @@ def reap_github():
     """
 
     # Pull all courses
-    courses: List[Course] = Course.query.all()
+    courses: List[Course] = get_active_courses()
 
     # Iterate over all course attempting to fix issues
     # on each github org.
@@ -115,7 +116,7 @@ def update_student_lists():
     """
 
     # Pull all courses
-    courses: List[Course] = Course.query.all()
+    courses: List[Course] = get_active_courses()
 
     # Iterate through courses, updating student list
     for course in courses:
