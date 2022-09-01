@@ -9,6 +9,7 @@ from anubis.utils.data import with_context
 from anubis.utils.logging import logger
 from anubis.lms.assignments import get_recent_assignments
 from anubis.lms.questions import fix_missing_question_assignments
+from anubis.lms.courses import get_active_courses
 
 
 def reap_ta_professor():
@@ -20,7 +21,7 @@ def reap_ta_professor():
     """
 
     # Get all current courses
-    courses: list[Course] = Course.query.all()
+    courses: list[Course] = get_active_courses()
 
     # Iterate through all courses within the system
     for course in courses:
