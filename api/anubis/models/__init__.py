@@ -12,6 +12,7 @@ from sqlalchemy.sql.schema import Column, ForeignKey
 from anubis.constants import THEIA_DEFAULT_OPTIONS, DB_COLLATION, DB_CHARSET
 from anubis.models.id import default_id_length, default_id
 from anubis.models.sqltypes import String, Text, DateTime, Boolean, JSON, Integer
+from anubis.utils.data import human_readable_timedelta
 
 db = SQLAlchemy()
 
@@ -741,6 +742,7 @@ class TheiaSession(db.Model):
             "created":            str(self.created),
             "ended":              str(self.ended),
             "last_proxy":         str(self.last_proxy),
+            "last_proxy_delta":   human_readable_timedelta(datetime.now() - self.last_proxy),
             "last_updated":       str(self.last_updated),
             "autosave":           self.autosave,
             "persistent_storage": self.persistent_storage,
