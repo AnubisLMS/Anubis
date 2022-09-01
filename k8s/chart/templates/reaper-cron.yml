@@ -24,7 +24,7 @@ spec:
           - name: reaper
             image: "{{ .Values.api.image }}:{{ .Values.tag }}"
             imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
-            command: ["python3", "jobs/reaper.py"]
+            command: ["python3", "anubis/jobs/reaper.py"]
             env:
             - name: "JOB"
               value: "1"

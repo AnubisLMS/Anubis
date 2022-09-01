@@ -25,7 +25,7 @@ spec:
           - name: visuals
             image: "{{ .Values.api.image }}:{{ .Values.tag }}"
             imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
-            command: ["python3", "jobs/visuals.py"]
+            command: ["python3", "anubis/jobs/visuals.py"]
             env:
             - name: "JOB"
               value: "1"

@@ -25,7 +25,7 @@ spec:
           - name: autograde-recalculate
             image: "{{ .Values.api.image }}:{{ .Values.tag }}"
             imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
-            command: ["python3", "jobs/autograde_recalculate.py"]
+            command: ["python3", "anubis/jobs/autograde_recalculate.py"]
             env:
             {{- include "api.env" . | nindent 12 }}
 {{- end }}

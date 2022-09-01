@@ -70,7 +70,7 @@ spec:
             - name: email
               image: "{{ .Values.api.image }}:{{ .Values.tag }}"
               imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
-              command: [ "python3", "jobs/email_notifications.py" ]
+              command: [ "python3", "anubis/jobs/email_notifications.py" ]
               env:
               - name: "JOB"
                 value: "1"

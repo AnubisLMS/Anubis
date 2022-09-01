@@ -31,7 +31,7 @@ spec:
       - name: discord-bot
         image: "{{ .Values.api.image }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
-        command: ["python3", "jobs/discord_bot.py"]
+        command: ["python3", "anubis/jobs/discord_bot.py"]
         resources:
           requests:
             cpu: 100m

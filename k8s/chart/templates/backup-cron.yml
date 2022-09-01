@@ -26,7 +26,7 @@ spec:
             image: "{{ .Values.api.image }}:{{ .Values.tag }}"
             imagePullPolicy: {{ .Values.imagePullPolicy }}
             command:
-            - ./jobs/backup.sh
+            - ./anubis/jobs/backup.sh
             env:
             {{- include "api.env" . | nindent 12 }}
             - name: "SFTP_HOST"
