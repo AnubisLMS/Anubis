@@ -132,12 +132,12 @@ visuals:
   suspend: false
   schedule: "*/5 * * * *"
 
-daily_cleanup:
+daily_reaper:
   enable: true
   suspend: false
   schedule: "0 4 * * *"  # 4AM
 
-autograde_recalculate:
+autograde_reaper:
   enable: true
   suspend: false
   schedule: "*/30 * * * *"

@@ -2,6 +2,7 @@ from anubis.lms.assignments import get_recent_assignments
 from anubis.lms.autograde import bulk_autograde
 from anubis.utils.data import with_context
 from anubis.utils.visuals.assignments import get_assignment_sundial
+from anubis.constants import REAPER_TXT
 
 
 def autograde_recalculate():
@@ -37,23 +38,6 @@ def reap():
 
 
 if __name__ == "__main__":
-    print("""
-             ___
-            /   \\\\
-       /\\\\ | . . \\\\
-     ////\\\\|     ||
-   ////   \\\\\\ ___//\\
-  ///      \\\\      \\
- ///       |\\\\      |     
-//         | \\\\  \\   \\    
-/          |  \\\\  \\   \\   
-           |   \\\\ /   /   
-           |    \\/   /    
-           |     \\\\/|     
-           |      \\\\|     
-           |       \\\\     
-           |        |     
-           |_________\\  
+    print(REAPER_TXT)
 
-""")
     reap()

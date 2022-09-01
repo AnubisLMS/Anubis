@@ -1,31 +1,30 @@
 
-{{- if .Values.autograde_recalculate.enable }}
+{{- if .Values.daily_reaper.enable }}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "chart.fullname" . }}-autograde-recalculate
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "chart.fullname" . }}-daily-reaper
   labels:
     {{- include "chart.labels" . | nindent 4 }}
-    component: autograde-recalculate
+    component: daily-reaper
 spec:
-  schedule: {{ .Values.autograde_recalculate.schedule | quote }}
-  suspend: {{ .Values.autograde_recalculate.suspend }}
+  schedule: {{ .Values.daily_reaper.schedule | quote }}
+  suspend: {{ .Values.daily_reaper.suspend }}
   concurrencyPolicy: Replace
   jobTemplate:
     metadata:
       labels:
         {{- include "chart.selectorLabels" . | nindent 8 }}
-        component: autograde-recalculate
+        component: daily-reaper
     spec:
       template:
         spec:
           restartPolicy: Never
           containers:
-          - name: autograde-recalculate
+          - name: daily-reaper
             image: "{{ .Values.api.image }}:{{ .Values.tag }}"
             imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
-            command: ["python3", "anubis/jobs/autograde_recalculate.py"]
+            command: ["python3", "anubis/jobs/daily_reaper.py"]
             env:
             {{- include "api.env" . | nindent 12 }}
 {{- end }}

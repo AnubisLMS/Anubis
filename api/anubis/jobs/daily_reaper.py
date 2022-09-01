@@ -13,6 +13,7 @@ from anubis.models import (
 )
 from anubis.utils.data import with_context
 from anubis.utils.logging import logger
+from anubis.constants import REAPER_TXT
 
 
 def reap_github_admin_teams():
@@ -135,24 +136,6 @@ def reap():
 
 
 if __name__ == "__main__":
-    print("")
-    print("""
-             ___
-            /   \\\\
-       /\\\\ | . . \\\\
-     ////\\\\|     ||
-   ////   \\\\\\ ___//\\
-  ///      \\\\      \\
- ///       |\\\\      |     
-//         | \\\\  \\   \\    
-/          |  \\\\  \\   \\   
-           |   \\\\ /   /   
-           |    \\/   /    
-           |     \\\\/|     
-           |      \\\\|     
-           |       \\\\     
-           |        |     
-           |_________\\  
+    print(REAPER_TXT)
 
-""")
     reap()

@@ -10,6 +10,7 @@ from anubis.models import Assignment, Course, User
 from anubis.utils.data import with_context
 from anubis.utils.email.event import send_email_event
 from anubis.utils.logging import logger
+from anubis.constants import REAPER_TXT
 
 now = datetime.now()
 
@@ -107,24 +108,6 @@ def email_notifications():
 
 
 if __name__ == "__main__":
-    print("")
-    print("""
-             ___
-            /   \\\\
-       /\\\\ | . . \\\\
-     ////\\\\|     ||
-   ////   \\\\\\ ___//\\
-  ///      \\\\      \\
- ///       |\\\\      |     
-//         | \\\\  \\   \\    
-/          |  \\\\  \\   \\   
-           |   \\\\ /   /   
-           |    \\/   /    
-           |     \\\\/|     
-           |      \\\\|     
-           |       \\\\     
-           |        |     
-           |_________\\  
+    print(REAPER_TXT)
 
-""")
     email_notifications()

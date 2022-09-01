@@ -3,6 +3,7 @@ import traceback
 from datetime import datetime, timedelta
 from typing import List
 
+from anubis.constants import REAPER_TXT
 from anubis.github.fix import fix_github_missing_submissions, fix_github_broken_repos
 from anubis.lms.assignments import get_recent_assignments
 from anubis.lms.courses import get_active_courses
@@ -146,24 +147,6 @@ def reap():
 
 
 if __name__ == "__main__":
-    print("")
-    print("""
-             ___
-            /   \\\\
-       /\\\\ | . . \\\\
-     ////\\\\|     ||
-   ////   \\\\\\ ___//\\
-  ///      \\\\      \\
- ///       |\\\\      |     
-//         | \\\\  \\   \\    
-/          |  \\\\  \\   \\   
-           |   \\\\ /   /   
-           |    \\/   /    
-           |     \\\\/|     
-           |      \\\\|     
-           |       \\\\     
-           |        |     
-           |_________\\  
+    print(REAPER_TXT)
 
-""")
     reap()
