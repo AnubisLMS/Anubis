@@ -4,6 +4,7 @@ import AlertTitle from '@mui/material/AlertTitle';
 import Button from '@mui/material/Button';
 import Zoom from '@mui/material/Zoom';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import Typography from '@mui/material/Typography';
 
 export default function HiringAd() {
   return (
@@ -11,10 +12,10 @@ export default function HiringAd() {
       <Alert
         severity="success"
         variant="outlined"
-        sx={{m: 1}}
+        sx={{mt: 2, mb: 2}}
         action={
           <Button
-            sx={{m: 1}}
+            sx={{m: 2}}
             variant={'contained'}
             color={'primary'}
             startIcon={<ExitToAppIcon/>}
@@ -26,9 +27,17 @@ export default function HiringAd() {
           </Button>
         }
       >
-        <AlertTitle>{'Anubis is Hiring!'}</AlertTitle>
-        Know or want to know about full stack engineering, or distributed computing? Anubis is a massively
-        advanced modern system that is reaching hundreds of your peers built by students at Tandon.
+        <AlertTitle sx={{fontSize: 22}}>
+          <strong>
+            {'Anubis is Hiring!'}
+          </strong>
+        </AlertTitle>
+        <Typography variant={'body1'}>
+          Know or want to know about full stack engineering, or distributed computing?
+          Are your classes too easy?
+          Anubis is a massively advanced modern system that is reaching hundreds of
+          your peers built entirely by students at Tandon.
+        </Typography>
       </Alert>
     </Zoom>
   );
