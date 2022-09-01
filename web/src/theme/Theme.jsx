@@ -1,16 +1,14 @@
-import {createTheme, adaptV4Theme} from '@mui/material/styles';
-import FiraCodeRegular from '../assets/fonts/FiraCode-Regular.ttf';
+import {createTheme} from '@mui/material/styles';
 
 
 const fira = {
-  fontFamily: 'FiraCode',
+  fontFamily: 'Fira Code',
   fontStyle: 'regular',
   fontDisplay: 'swap',
   fontWeight: 400,
   src: `
-    local('FiraCode'),
-    local('FiraCode-Regular'),
-    url(${FiraCodeRegular}) format('ttf')
+    local('Fira Code'),
+    url(/fonts/FiraCode-Regular.ttf) format('ttf')
   `,
   unicodeRange:
     'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, ' +
@@ -94,7 +92,7 @@ theme = {
     },
     MuiCssBaseline: {
       '@global': {
-        '@font-face': [fira],
+        '@font-face': fira,
       },
     },
   },
