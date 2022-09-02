@@ -16,7 +16,7 @@ export default function RegradeWarning({warningOpen, setWarningOpen, regradeAssi
         setWarningOpen(false);
         regradeAssignment(params);
       }}
-      style={{backgroundColor: yellow[500]}}
+      color={'secondary'}
       variant={'contained'}
       size={'small'}
     >
