@@ -303,14 +303,15 @@ def reject_late_submission(submission: Submission):
     db.session.add(submission)
 
 
-def init_submission(submission: Submission, commit: bool = True):
+def init_submission(submission: Submission, commit: bool = True, verbose: bool = True):
     """
     Create adjacent submission models.
 
     :return:
     """
 
-    logger.debug("initializing submission {}".format(submission.id))
+    if verbose:
+        logger.debug("initializing submission {}".format(submission.id))
 
     # If the models already exist, yeet
     if len(submission.test_results) != 0:
@@ -325,7 +326,8 @@ def init_submission(submission: Submission, commit: bool = True):
     # Find tests for the current assignment
     tests = AssignmentTest.query.filter_by(assignment_id=submission.assignment_id).all()
 
-    logger.debug("found tests: {}".format(list(map(lambda x: x.data, tests))))
+    if verbose:
+        logger.debug("found tests: {}".format(list(map(lambda x: x.data, tests))))
 
     for test in tests:
         tr = SubmissionTestResult(submission_id=submission.id, assignment_test_id=test.id)
