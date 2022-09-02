@@ -4,7 +4,7 @@ import FiraRegular from '../assets/fonts/FiraCode-Regular.ttf';
 
 const fira = {
   fontFamily: 'Fira Code',
-  fontStyle: 'regular',
+  fontStyle: 'normal',
   fontDisplay: 'swap',
   fontWeight: 400,
   src: `
