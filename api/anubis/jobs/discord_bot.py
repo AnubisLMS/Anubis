@@ -225,7 +225,11 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
     ).set_thumbnail(url=bot.user.avatar_url).set_author(name="Anubis Bot")
 
 
+intents = discord.Intents.default()
+intents.message_content = True
+
 bot = commands.Bot(
+    intents=intents,
     command_prefix="!",
     case_insensitive=True,
     help_command=None,
