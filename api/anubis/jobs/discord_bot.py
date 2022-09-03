@@ -222,7 +222,7 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
     return discord.Embed(
         title="IDE report",
         description="```" + report + "```"
-    ).set_thumbnail(url=bot.user.avatar_url).set_author(name="Anubis Bot")
+    ).set_thumbnail(url=bot.user.avatar.url).set_author(name="Anubis Bot")
 
 
 intents = discord.Intents.default()
@@ -291,7 +291,7 @@ async def contribute_(ctx, *args):
     emb = discord.Embed(
         title="Contributing to Anubis",
         description=desc,
-    ).set_thumbnail(url=bot.user.avatar_url)
+    ).set_thumbnail(url=bot.user.avatar.url)
     await ctx.send(embed=emb)
 
 
@@ -304,7 +304,7 @@ async def help_(ctx, *args):
     """
     emb = discord.Embed(
         title="Anubis Bot Help", description=""
-    ).set_thumbnail(url=bot.user.avatar_url)
+    ).set_thumbnail(url=bot.user.avatar.url)
     for command in bot.commands:
         emb.add_field(name=bot.command_prefix + command.name, value=command.help)
     await ctx.send(embed=emb)
