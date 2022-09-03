@@ -34,7 +34,6 @@ export default function HiringAd() {
         </AlertTitle>
         <Typography variant={'body1'}>
           Know or want to know about full stack engineering, or distributed computing?
-          Are your classes too easy?
           Anubis is a massively advanced modern system that is reaching hundreds of
           your peers built entirely by students at Tandon.
         </Typography>
