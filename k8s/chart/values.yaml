@@ -145,7 +145,7 @@ autograde_reaper:
 backup:
   enable: true
   suspend: false
-  schedule: "0 0 * * *" # Midnight
+  schedule: "0 */6 * * *" # Midnight
   secretName: anubis-backup-creds
 
 email:
