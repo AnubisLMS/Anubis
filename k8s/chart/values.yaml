@@ -17,7 +17,7 @@ tag: "latest"
 
 # Main anubis api
 api:
-  replicas: 2
+  replicas: 3
   workers: 2
   gunicorn_options: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
   image: "registry.digitalocean.com/anubis/api"
@@ -42,7 +42,7 @@ theia:
 
   # theia-proxy deployment
   proxy:
-    replicas: 2
+    replicas: 16
     image: "registry.digitalocean.com/anubis/theia-proxy"
     tag: "latest"
 
@@ -159,7 +159,7 @@ email:
 ###############################################################################
 # RPC Pools
 rpc:
-  replicas: 2
+  replicas: 3
   queues: ["default", "theia", "regrade"]
 ###############################################################################
 
