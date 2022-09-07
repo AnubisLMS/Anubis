@@ -1,3 +1,4 @@
+import string
 import traceback
 
 from parse import parse
@@ -28,8 +29,8 @@ def get_github_template_ids(template_repo: str, github_org: str):
     return github_graphql(
         id_query,
         {
-            "orgName": github_org,
-            "templateName": github_template_name,
+            "orgName":       github_org,
+            "templateName":  github_template_name,
             "templateOwner": github_template_owner,
         },
     )
@@ -55,9 +56,9 @@ def create_repo_from_template(owner_id: str, template_repo_id: str, new_repo_nam
     return github_graphql(
         create_query,
         {
-            "ownerId": owner_id,
+            "ownerId":        owner_id,
             "templateRepoId": template_repo_id,
-            "newName": new_repo_name,
+            "newName":        new_repo_name,
         },
     )
 
@@ -82,9 +83,14 @@ def add_collaborator(github_org: str, new_repo_name: str, github_username: str):
     )
 
 
+def get_github_safe_assignment_name(assignment: Assignment) -> str:
+    valid_charset = set(string.ascii_lowercase + string.digits + '_-')
+    return ''.join(c for c in assignment.name.lower().replace(" ", "-") if c in valid_charset)
+
+
 def get_student_assignment_repo_name(user: User, assignment: Assignment) -> str:
     # Get assignment name (lowercase and spaces removed)
-    assignment_name = assignment.name.lower().replace(" ", "-")
+    assignment_name = get_github_safe_assignment_name(assignment)
 
     # Create a repo name from assignment name, unique code and github username
     new_repo_name = f"{assignment_name}-{assignment.unique_code}-{user.netid}"
@@ -94,7 +100,7 @@ def get_student_assignment_repo_name(user: User, assignment: Assignment) -> str:
 
 def get_group_assignment_repo_name(users: list[User], assignment: Assignment) -> str:
     # Get assignment name (lowercase and spaces removed)
-    assignment_name = assignment.name.lower().replace(" ", "-")
+    assignment_name = get_github_safe_assignment_name(assignment)
 
     netids = "-".join(user.netid for user in users)
 
