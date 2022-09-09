@@ -8,7 +8,7 @@ from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert, row2dict
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_endpoint, json_response
-from anubis.github.team import add_member, remove_member
+from anubis.github.team import add_github_team_member, remote_github_team_member
 
 courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
 
@@ -359,7 +359,7 @@ def admin_course_make_ta_id(user_id: str):
     db.session.add(ta)
     db.session.commit()
 
-    add_member(
+    add_github_team_member(
         course_context.github_org,
         course_context.github_ta_team_slug,
         other.github_username
@@ -402,7 +402,7 @@ def admin_course_remove_ta_id(user_id: str):
     # Commit the delete
     db.session.commit()
 
-    remove_member(
+    remote_github_team_member(
         course_context.github_org,
         course_context.github_ta_team_slug,
         other.github_username
@@ -463,7 +463,7 @@ def admin_course_make_professor_id(user_id: str):
     db.session.add(prof)
     db.session.commit()
 
-    add_member(
+    add_github_team_member(
         course_context.github_org,
         course_context.github_ta_team_slug,
         other.github_username
@@ -499,7 +499,7 @@ def admin_course_remove_professor_id(user_id: str):
     # Commit the delete
     db.session.commit()
 
-    remove_member(
+    remote_github_team_member(
         course_context.github_org,
         course_context.github_ta_team_slug,
         other.github_username
