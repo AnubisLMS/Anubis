@@ -1,6 +1,6 @@
 import traceback
 
-from anubis.github.team import add_member, list_members
+from anubis.github.team import add_member, remove_member, list_members
 from anubis.lms.assignments import get_recent_assignments
 from anubis.lms.courses import get_active_courses
 from anubis.lms.courses import get_course_tas, get_course_professors, get_course_users, user_to_user_id_set
@@ -40,6 +40,9 @@ def reap_github_admin_teams():
         profs: list[User] = get_course_professors(course)
         members: list[str] = list_members(course.github_org, course.github_ta_team_slug)
 
+        # Set of members of the team that should be there
+        accounted_for_members = set()
+
         for user in set(tas).union(set(profs)):
             if user.github_username == '' or user.github_username is None:
                 logger.info(f'User does not have github linked yet, skipping for now')
@@ -47,6 +50,7 @@ def reap_github_admin_teams():
 
             if user.github_username in members:
                 logger.info(f'Skipping adding user to team. Already member user = "{user.id}"')
+                accounted_for_members.add(user.github_username)
                 continue
 
             logger.info(f'Adding user to team. Not already member user = "{user.id}"')
@@ -55,6 +59,15 @@ def reap_github_admin_teams():
                 add_member(course.github_org, course.github_ta_team_slug, user.github_username)
             except Exception as e:
                 logger.error(f'Could not complete member add {e}\n\n' + traceback.format_exc())
+
+            accounted_for_members.add(user.github_username)
+
+        # Remove unaccounted for members
+        for github_username in set(members).difference(accounted_for_members):
+            remove_member(course.github_org, course.github_ta_team_slug, github_username)
+
+
+
 
 
 def reap_ta_professor():
