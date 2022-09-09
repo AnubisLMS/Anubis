@@ -2,7 +2,7 @@ FROM node:alpine
 
 WORKDIR /opt/app
 COPY . .
-RUN yarn
+RUN yarn && apk add --no-cache tini
 USER nobody
 
 # Increase internal node memory limit.
@@ -10,5 +10,5 @@ USER nobody
 # get hit first.
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-ENTRYPOINT ["/usr/local/bin/node"]
-CMD ["/opt/app/index.js"]
+ENTRYPOINT ["tini", "--"]
+CMD ["/usr/local/bin/node", "/opt/app/index.js"]
