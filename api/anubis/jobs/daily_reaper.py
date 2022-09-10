@@ -1,5 +1,6 @@
 import traceback
 
+from anubis.constants import REAPER_TXT
 from anubis.github.team import add_github_team_member, remote_github_team_member, list_github_team_members
 from anubis.lms.assignments import get_recent_assignments
 from anubis.lms.courses import get_active_courses
@@ -13,7 +14,6 @@ from anubis.models import (
 )
 from anubis.utils.data import with_context
 from anubis.utils.logging import logger
-from anubis.constants import REAPER_TXT
 
 
 def reap_github_admin_teams():
@@ -36,6 +36,7 @@ def reap_github_admin_teams():
                     f'org = "{course.github_org}" team = "{course.github_ta_team_slug}"')
 
         # Get all students, professors and TAs for course
+        superusers: list[User] = User.query.filter(User.is_superuser == True).all()
         tas: list[User] = get_course_tas(course)
         profs: list[User] = get_course_professors(course)
         members: list[str] = list_github_team_members(course.github_org, course.github_ta_team_slug)
@@ -43,7 +44,7 @@ def reap_github_admin_teams():
         # Set of members of the team that should be there
         accounted_for_members = set()
 
-        for user in set(tas).union(set(profs)):
+        for user in set(tas).union(set(profs)).union(set(superusers)):
             if user.github_username == '' or user.github_username is None:
                 logger.info(f'User does not have github linked yet, skipping for now')
                 continue
@@ -65,9 +66,6 @@ def reap_github_admin_teams():
         # Remove unaccounted for members
         for github_username in set(members).difference(accounted_for_members):
             remote_github_team_member(course.github_org, course.github_ta_team_slug, github_username)
-
-
-
 
 
 def reap_ta_professor():
