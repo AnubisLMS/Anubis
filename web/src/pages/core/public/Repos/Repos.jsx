@@ -62,7 +62,7 @@ const Repos = () => {
         <Button onClick={() => setDialogOpen(false)} color="primary" variant={'contained'} autoFocus>
           Cancel
         </Button>
-        <Button onClick={handleDeleteRepo} color="Secondary" variant={'contained'}>
+        <Button onClick={handleDeleteRepo} color="secondary" variant={'contained'}>
           Yes delete my repo
         </Button>
       </DialogActions>
