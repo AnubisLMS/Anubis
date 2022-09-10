@@ -27,6 +27,7 @@ import Blog from './pages/core/public/Blog';
 import Visuals from './pages/core/public/Visuals/Visuals';
 import Lectures from './pages/core/public/Lectures/Lectures';
 import Playgrounds from './pages/core/public/Playgrounds/Playgrounds';
+import PrivacyPolicy from './pages/core/public/PrivacyPolicy';
 
 import Assignment from './pages/core/public/Assignment/Assignment';
 import Course from './pages/core/public/Course/Course';
@@ -268,6 +269,11 @@ export const not_shown_nav = [
     id: '',
     path: '/admin/assignment/groups/:assignmentId',
     Page: AdminAssignmentGroups,
+  },
+  {
+    id: '',
+    path: '/privacy-policy',
+    Page: PrivacyPolicy,
   },
   {
     id: '',

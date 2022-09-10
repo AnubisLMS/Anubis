@@ -16,6 +16,7 @@ import StandardLayout from '../../../../components/shared/Layouts/StandardLayout
 import SectionHeader from '../../../../components/shared/SectionHeader/SectionHeader.jsx';
 import Divider from '../../../../components/shared/Divider/Divider';
 import DeletePvc from '../../../../components/core/Profile/DeletePvc';
+import PrivacyPolicyModal from '../../../../components/shared/PrivacyPolicy/PrivacyPolicyModal';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -129,6 +130,14 @@ const Profile = () => {
             Delete my IDE Volume
           </Typography>
           <DeletePvc/>
+        </Box>
+      </Box>
+      <Box className={classes.fieldsContainer}>
+        <Box className={classes.githubContainer}>
+          <Typography className={classes.githubText}>
+            Privacy Policy
+          </Typography>
+          <PrivacyPolicyModal/>
         </Box>
       </Box>
     </StandardLayout>
