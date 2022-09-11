@@ -22,6 +22,7 @@ import Autocomplete from '@mui/lab/Autocomplete';
 import IDEHeader from '../IDE/IDEHeader';
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
+import {ideStartDelay} from '../../../constant';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -169,7 +170,7 @@ export default function ManagementIDEDialog() {
       if (data.session) {
         setTimeout(() => {
           setSession(data.session);
-        }, 1000);
+        }, ideStartDelay);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [open]);

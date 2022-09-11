@@ -17,6 +17,7 @@ import standardStatusHandler from '../../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../../utils/standardErrorHandler';
 import SectionHeader from '../../../../components/shared/SectionHeader/SectionHeader';
 import {useStyles} from './Playgrounds.styles';
+import {ideStartDelay} from '../../../../constant';
 
 const stopSession = (state, enqueueSnackbar) => () => {
   const {session, setSession, setLoading, setSessionState, setShowStop} = state;
@@ -55,7 +56,7 @@ const checkSession = (id, state, enqueueSnackbar, after = null) => {
           setSession(data.session);
           setLoading(false);
           setShowStop(true);
-        }, 1000);
+        }, ideStartDelay);
       } else {
         setSession(null);
         setLoading(false);

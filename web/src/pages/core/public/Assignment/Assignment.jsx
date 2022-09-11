@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 import clsx from 'clsx';
+import gfm from 'remark-gfm';
+import ReactMarkdownWithHtml from 'react-markdown/with-html';
 
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -15,17 +17,15 @@ import LaunchIcon from '@mui/icons-material/Launch';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 
+import {useStyles} from './Assignment.styles';
+import {translateSubmission} from '../../../../utils/submission';
 import SubmissionItem from '../../../../components/core/SubmissionItem/SubmissionItem';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';
-import {useStyles} from './Assignment.styles';
 import useQuery from '../../../../hooks/useQuery';
 import IDEDialog from '../../../../components/core/IDE/IDEDialog';
-import {translateSubmission} from '../../../../utils/submission';
 import standardErrorHandler from '../../../../utils/standardErrorHandler';
 import Questions from '../../../../components/core/Questions/Questions';
-import gfm from 'remark-gfm';
-import ReactMarkdownWithHtml from 'react-markdown/with-html';
 
 
 const Assignment = () => {

@@ -24,6 +24,7 @@ import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 import IDEInstructions from './IDEInstructions';
 import IDEHeader from './IDEHeader';
+import {ideStartDelay} from '../../../constant';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -72,7 +73,7 @@ const checkSession = (id, state, enqueueSnackbar, after = null) => {
           setSession(data.session);
           setLoading(false);
           setShowStop(true);
-        }, 1000);
+        }, ideStartDelay);
       } else {
         setSession(null);
         setLoading(false);
