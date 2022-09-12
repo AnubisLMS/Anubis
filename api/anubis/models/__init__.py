@@ -747,7 +747,7 @@ class TheiaSession(db.Model):
             "last_updated":       str(self.last_updated),
             "autosave":           self.autosave,
             "persistent_storage": self.persistent_storage,
-            "image":              self.image.data,
+            "image":              self.image.data if self.image_id else None,
             "image_tag":          self.image_tag.data if self.image_tag_id else None,
         }
 

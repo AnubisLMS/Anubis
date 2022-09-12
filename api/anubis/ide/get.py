@@ -4,8 +4,8 @@ from anubis.utils.config import get_config_int
 from anubis.utils.data import is_debug
 
 
-@cache.memoize(timeout=5, source_check=True)
-def get_recent_sessions(user_id: str, limit: int = 10, offset: int = 10) -> list[dict]:
+@cache.memoize(timeout=5, source_check=True, unless=is_debug)
+def get_recent_sessions(user_id: str, limit: int = 10, offset: int = 0) -> list[dict]:
     student = User.query.filter(
         User.id == user_id,
     ).first()
