@@ -47,7 +47,7 @@ def index():
     if repo is None or not os.path.isdir(os.path.join(repo, '.git')):
         return text_response('Please navigate to the repository that you would like to autosave')
 
-    output: list[bytes] = []
+    output: str = ""
 
     try:
         # We skip the add and commit phase if push_only is enabled
@@ -63,7 +63,7 @@ def index():
             )
             if add.returncode != 0:
                 return text_response('Failed to git add')
-            output.append(add.stdout)
+            output += add.stdout.decode() + '\n'
 
             # Commit
             commit = subprocess.run(
@@ -75,7 +75,7 @@ def index():
             )
             if commit.returncode != 0:
                 return text_response('Failed to git commit')
-            output.append(commit.stdout)
+            output += commit.stdout.decode() + '\n'
 
         # Push
         push_args = ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.push=push', 'push', '--no-verify']
@@ -90,13 +90,12 @@ def index():
         )
         if push.returncode != 0:
             return text_response('Failed to git push')
-        output.append(push.stdout)
+        output += push.stdout.decode() + '\n'
 
     except subprocess.TimeoutExpired:
         return text_response('Autosave timeout')
 
-    output.append(b'\n')
-    return text_response(b"".join(output).decode())
+    return text_response(output)
 
 
 if ADMIN:
