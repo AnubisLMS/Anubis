@@ -32,6 +32,7 @@ def index():
     # Get options from the form
     repo: str = request.form.get('repo', default=None)
     message: str = request.form.get('message', default='Anubis Cloud IDE Autosave').strip()
+    push_only: bool = request.form.get('push_only', default='false').lower() == 'true'
 
     # Default commit message if empty
     if message == '':
@@ -45,28 +46,35 @@ def index():
     if repo is None or not os.path.isdir(os.path.join(repo, '.git')):
         return text_response('Please navigate to the repository that you would like to autosave')
 
-    try:
-        # Add
-        add = subprocess.run(
-            ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.push=push', 'add', '.'],
-            cwd=repo,
-            timeout=3,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        )
-        if add.returncode != 0:
-            return text_response('Failed to git add')
+    output: list[bytes] = []
 
-        # Commit
-        commit = subprocess.run(
-            ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.commit=commit', 'commit', '--no-verify', '-m', message],
-            cwd=repo,
-            timeout=3,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        )
-        if commit.returncode != 0:
-            return text_response('Failed to git commit')
+    try:
+        # We skip the add and commit phase if push_only is enabled
+        # In that case, we will only try to push
+        if not push_only:
+            # Add
+            add = subprocess.run(
+                ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.push=push', 'add', '.'],
+                cwd=repo,
+                timeout=3,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+            if add.returncode != 0:
+                return text_response('Failed to git add')
+            output.append(add.stdout)
+
+            # Commit
+            commit = subprocess.run(
+                ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.commit=commit', 'commit', '--no-verify', '-m', message],
+                cwd=repo,
+                timeout=3,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+            if commit.returncode != 0:
+                return text_response('Failed to git commit')
+            output.append(commit.stdout)
 
         # Push
         push = subprocess.run(
@@ -78,12 +86,13 @@ def index():
         )
         if push.returncode != 0:
             return text_response('Failed to git push')
+        output.append(push.stdout)
 
     except subprocess.TimeoutExpired:
         return text_response('Autosave timeout')
 
-    output = (add.stdout + commit.stdout + push.stdout + b'\n').decode()
-    return text_response(output)
+    output.append(b'\n')
+    return text_response(b"".join(output).decode())
 
 
 if ADMIN:
