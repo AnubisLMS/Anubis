@@ -40,6 +40,11 @@ set +e
 # Clone
 set -x
 cd /out
+cat >> .gitconfig << EOF
+[user]
+    email = $GIT_COMMITTER_EMAIL
+    name = $GIT_COMMITTER_NAME
+EOF
 git clone ${GIT_REPO}
 set +x
 

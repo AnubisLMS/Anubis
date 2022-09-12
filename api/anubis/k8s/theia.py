@@ -226,7 +226,7 @@ def create_theia_k8s_pod_pvc(
     # INIT CONTAINER
 
     # Create the init container. This will clone the initial repo onto
-    # the shared volume.
+    # the shared volume and configure .gitconfig for the student.
     init_container = k8s.V1Container(
         name=f"theia-init",
         image="registry.digitalocean.com/anubis/theia-init",
@@ -234,6 +234,19 @@ def create_theia_k8s_pod_pvc(
         env=[
             # Git repo to clone
             k8s.V1EnvVar(name="GIT_REPO", value=repo_url),
+            # used to set the committer information so that the student can commit
+            # directly without setting it up everytime.
+            # fall back to the name of the student.
+            k8s.V1EnvVar(
+                name="GIT_COMMITTER_NAME",
+                value=theia_session.owner.committer_name or theia_session.owner.name,
+            ),
+            # similar to GIT_COMMITTER_NAME, but we fall back to the inferred
+            # nyu email of the student.
+            k8s.V1EnvVar(
+                name="GIT_COMMITTER_EMAIL",
+                value=theia_session.owner.committer_email or f"{theia_session.owner.netid}@nyu.edu",
+            ),
             # Add extra env if there is any
             *init_extra_env,
         ],
