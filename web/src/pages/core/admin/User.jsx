@@ -132,7 +132,9 @@ export default function User() {
                     ),
                   },
                   {
-                    field: 'image', headerName: 'Image', width: 100, renderCell: (params) => (params.value?.title ?? ''),
+                    field: 'image', headerName: 'Image', width: 100, renderCell: (params) => (
+                      params.value?.title ?? ''
+                    ),
                   },
                   {
                     field: 'image_tag', headerName: 'Image Tag', width: 120, renderCell: (params) => (
