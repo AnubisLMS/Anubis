@@ -65,7 +65,12 @@ def test_playground_k8s():
 
         # Verify env
         init_env = {env.name: env.value for env in init_container.env}
-        assert init_env == {'GIT_REPO': '', 'GIT_CRED': None}
+        assert init_env == {
+            'GIT_REPO': '',
+            'GIT_CRED': None,
+            'GIT_COMMITTER_EMAIL': f'{s.netid}@nyu.edu',
+            'GIT_COMMITTER_NAME': s.name,
+        }
 
         # Verify image
         assert init_container.image == 'registry.digitalocean.com/anubis/theia-init'

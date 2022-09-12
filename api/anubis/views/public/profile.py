@@ -7,7 +7,7 @@ from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert
 from anubis.utils.http import success_response
-from anubis.utils.http.decorators import json_response
+from anubis.utils.http.decorators import json_endpoint, json_response
 from anubis.rpc.enqueue import enqueue_reap_pvc_user
 
 profile = Blueprint("public-profile", __name__, url_prefix="/public/profile")
@@ -126,3 +126,30 @@ def public_profile_delete_pvc():
         'status': 'Volume delete scheduled',
         'variant': 'warning',
     })
+
+
+@profile.route("/update-committer-info", methods=["PATCH"])
+@require_user()
+@json_endpoint([("committer_name", str), ("committer_email", str)])
+def public_set_committer_name(committer_name: str, committer_email: str) -> dict[str, object]:
+    """
+    Allow the user to modify the committer information
+    that appears in their commit messages.
+    Passing a string that is empty after stripping
+    unsets the corresponding field.
+    """
+    # Unlike the GitHub user name, not much check is needed
+    # because Git does not care about the format.
+    # We do want to unset the field if an empty string is given.
+    current_user.committer_name = committer_name.strip() or None
+    current_user.committer_email = committer_email.strip() or None
+
+    # Commit the changes
+    db.session.add(current_user)
+    db.session.commit()
+
+    return success_response(
+        {
+            "status": "Committer information updated",
+        }
+    )
