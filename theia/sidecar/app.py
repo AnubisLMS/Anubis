@@ -33,6 +33,7 @@ def index():
     repo: str = request.form.get('repo', default=None)
     message: str = request.form.get('message', default='Anubis Cloud IDE Autosave').strip()
     push_only: bool = request.form.get('push_only', default='false').lower() == 'true'
+    force_push: bool = request.form.get('force_push', default='false').lower() == 'true'
 
     # Default commit message if empty
     if message == '':
@@ -77,8 +78,11 @@ def index():
             output.append(commit.stdout)
 
         # Push
+        push_args = ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.push=push', 'push', '--no-verify']
+        if force_push:
+            push_args.append('--force')
         push = subprocess.run(
-            ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.push=push', 'push', '--no-verify'],
+            push_args,
             cwd=repo,
             timeout=3,
             stdout=subprocess.PIPE,
