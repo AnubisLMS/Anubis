@@ -138,7 +138,7 @@ export default function User() {
                   },
                   {
                     field: 'image_tag', headerName: 'Image Tag', width: 120, renderCell: (params) => (
-                      params.value || params.row.image?.default_tag || 'latest'
+                      params.value?.title || params.row.image?.default_tag || 'latest'
                     ),
                   },
                   {field: 'created', headerName: 'Start Time', width: 170},
