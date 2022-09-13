@@ -5,8 +5,8 @@ RUN adduser -D -u 1001 theia \
   && pip3 install --no-cache-dir flask supervisor gunicorn
 
 USER theia
-RUN git config --global user.email noreply@anubis.osiris.services \
-  && git config --global user.name os3224-robot \
+RUN git config --global user.email anubis@anubis-lms.io \
+  && git config --global user.name anubis-robot \
   && git config --global credential.store helper \
   && git config --global credential.helper 'store --file ~/.git-credentials' \
   && git config --global core.hooksPath /dev/null
