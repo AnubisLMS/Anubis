@@ -62,6 +62,7 @@ spec:
       {{- include "chart.selectorLabels" $ | nindent 6 }}
       component: rpc-{{ . }}
   replicas: {{ $.Values.rpc.replicas }}
+  revisionHistoryLimit: {{ $.Values.revisionHistoryLimit }}
   {{- if $.Values.rollingUpdates }}
   strategy:
     type: RollingUpdate

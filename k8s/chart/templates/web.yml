@@ -11,6 +11,7 @@ spec:
       {{- include "chart.selectorLabels" . | nindent 6 }}
       component: web
   replicas: {{ .Values.web.replicas }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if .Values.rollingUpdates }}
   strategy:
     type: RollingUpdate

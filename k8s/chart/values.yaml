@@ -10,6 +10,7 @@ vpnOnly: false
 imagePullPolicy: "Always"
 imagePullSecret: "anubis"
 tag: "latest"
+revisionHistoryLimit: 3
 
 
 ###############################################################################

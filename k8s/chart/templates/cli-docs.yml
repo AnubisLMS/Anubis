@@ -12,6 +12,7 @@ spec:
       {{- include "chart.selectorLabels" . | nindent 6 }}
       component: cli-docs
   replicas: {{ .Values.marketing.replicas }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if .Values.rollingUpdates }}
   strategy:
     type: RollingUpdate

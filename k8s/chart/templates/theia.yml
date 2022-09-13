@@ -9,6 +9,7 @@ metadata:
     component: proxy
 spec:
   replicas: {{ .Values.theia.proxy.replicas }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if .Values.rollingUpdates }}
   strategy:
     type: RollingUpdate
