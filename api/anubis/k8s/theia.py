@@ -274,6 +274,7 @@ def create_theia_k8s_pod_pvc(
                 name="NETID",
                 value=netid,
             ),
+            k8s.V1EnvVar(name="GIT_REPO", value=repo_url),
             *sidecar_extra_env,
         ],
         # Add a security context to disable privilege escalation

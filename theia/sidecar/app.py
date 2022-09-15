@@ -1,16 +1,20 @@
 #!/usr/bin/python3
 
 import os
-import json
 import string
 import subprocess
 import traceback
 
 from flask import Flask, Response, request, make_response
 
-app = Flask(__name__)
 NETID = os.environ.get('NETID', default=None)
 ADMIN = os.environ.get('ANUBIS_ADMIN', default=None) == 'ON'
+GIT_REPO = os.environ.get('GIT_REPO', default='')
+GIT_REPO_PATH = '/home/anubis/' + GIT_REPO.split('/')[-1]
+print(f'GIT_REPO = {GIT_REPO}')
+print(f'GIT_REPO_PATH = {GIT_REPO_PATH}')
+
+app = Flask(__name__)
 
 
 def text_response(message: str, status_code: int = 200) -> Response:
@@ -30,7 +34,6 @@ def relatively_safe_filename(filename: str) -> str:
 @app.route('/', methods=['POST'])
 def index():
     # Get options from the form
-    repo: str = request.form.get('repo', default=None)
     message: str = request.form.get('message', default='Anubis Cloud IDE Autosave').strip()
     push_only: bool = request.form.get('push_only', default='false').lower() == 'true'
     force_push: bool = request.form.get('force_push', default='false').lower() == 'true'
@@ -44,7 +47,7 @@ def index():
         message += ' netid=' + NETID
 
     # Make sure that the repo given exists and is a git repo
-    if repo is None or not os.path.isdir(os.path.join(repo, '.git')):
+    if GIT_REPO_PATH is None or not os.path.isdir(os.path.join(GIT_REPO_PATH, '.git')):
         return text_response('Please navigate to the repository that you would like to autosave')
 
     output: str = ""
@@ -56,7 +59,7 @@ def index():
             # Add
             add = subprocess.run(
                 ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.push=push', 'add', '.'],
-                cwd=repo,
+                cwd=GIT_REPO_PATH,
                 timeout=3,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -67,8 +70,9 @@ def index():
 
             # Commit
             commit = subprocess.run(
-                ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.commit=commit', 'commit', '--no-verify', '-m', message],
-                cwd=repo,
+                ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.commit=commit', 'commit', '--no-verify', '-m',
+                 message],
+                cwd=GIT_REPO_PATH,
                 timeout=3,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -83,7 +87,7 @@ def index():
             push_args.append('--force')
         push = subprocess.run(
             push_args,
-            cwd=repo,
+            cwd=GIT_REPO_PATH,
             timeout=3,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -147,5 +151,3 @@ if ADMIN:
         return text_response(
             'Succeeded:\n' + '\n'.join(succeeded) + '\nFailed:\n' + '\n'.join(failed)
         )
-
-
