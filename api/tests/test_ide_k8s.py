@@ -117,7 +117,7 @@ def test_playground_k8s():
 
         # Check env
         sidecar_env = {env.name: env.value for env in sidecar_container.env}
-        assert sidecar_env == {'AUTOSAVE': 'OFF', 'NETID': s.netid, 'GIT_CRED': None}
+        assert sidecar_env == {'AUTOSAVE': 'OFF', 'NETID': s.netid, 'GIT_CRED': None, 'GIT_REPO': '',}
 
         # Check ports
         assert sidecar_container.ports is None
@@ -254,7 +254,7 @@ def test_assignment_ide_k8s():
 
         # Check env
         sidecar_env = {env.name: env.value for env in sidecar_container.env}
-        assert sidecar_env == {'AUTOSAVE': 'ON', 'NETID': s.netid, 'GIT_CRED': None}
+        assert sidecar_env == {'AUTOSAVE': 'ON', 'NETID': s.netid, 'GIT_CRED': None, 'GIT_REPO': 'https://github.com/AnubisLMS/xv6'}
 
         # Check ports
         assert sidecar_container.ports is None
