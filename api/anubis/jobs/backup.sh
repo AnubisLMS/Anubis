@@ -20,5 +20,6 @@ mysqldump \
 if [ -n "${SFTP_LOCATION}" ]; then
     echo 'scping file to remote'
     echo "put /tmp/${BACKUP_FILE} ${SFTP_LOCATION}" | sftp ${SFTP_USER}@${SFTP_HOST}
+    echo "put /tmp/${BACKUP_FILE} ${SFTP_LOCATION}/latest.sql.gz" | sftp ${SFTP_USER}@${SFTP_HOST}
 fi
 
