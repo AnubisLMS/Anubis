@@ -23,6 +23,9 @@ def init_services(app: Flask):
     add_healthcheck(app)
     add_sentry(app)
 
+    db.app = app
+    cache.app = app
+
 
 def create_app() -> Flask:
     """

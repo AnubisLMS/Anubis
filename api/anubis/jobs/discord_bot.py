@@ -14,6 +14,7 @@ from tabulate import tabulate
 
 from anubis.models import db, Course, User, TheiaSession, InCourse
 from anubis.utils.data import with_context, human_readable_timedelta
+from anubis.utils.visuals.usage import get_usage_plot_active
 
 
 @with_context
@@ -151,6 +152,11 @@ def images_to_bytes(img: Image) -> BytesIO:
 
 
 @with_context
+def generate_active_plot(*args, **kwargs) -> BytesIO:
+    return BytesIO(get_usage_plot_active(*args, **kwargs))
+
+
+@with_context
 def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, Image.Image]:
     """
     Generate a report of the statuses of Anubis. The statuses are:
@@ -256,10 +262,21 @@ async def report_(ctx, platform="desktop", *args):
         await ctx.send(f"```{generate_report()}```")
 
 
+@bot.command(name="active", help="Get current active plot.")
+async def active_(ctx, days=14, step=1, *_):
+    now = datetime.now().replace(microsecond=0)
+    await ctx.send(
+        file=discord.File(
+            generate_active_plot(days=days, step=step),
+            filename=f"anubis-active-14days-1step-{now.year}{now.month}{now.day}-{now.hour}{now.minute}{now.second}.png"
+        )
+    )
+
+
 @bot.command(
     name="ide", help="Anubis ide usage report. Use !ide mobile for mobile-friendly version"
 )
-async def ides_(ctx, day=None, *args):
+async def ides_(ctx, day=None, *_):
     """
     Respond to `!report` command with a report of the statuses of Anubis
 
