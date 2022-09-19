@@ -18,6 +18,7 @@ from anubis.k8s.pvc import reap_user_pvc
 from anubis.k8s.theia import reap_theia_session_by_id, reap_stale_theia_sessions
 from anubis.lms.assignments import make_shared_assignment
 from anubis.lms.questions import assign_missing_questions
+from anubis.lms.autograde import bulk_autograde
 from anubis.utils.data import with_context
 from anubis.utils.testing.seed import seed
 
@@ -105,3 +106,8 @@ def enqueue_create_assignment_github_repo(*args):
 def enqueue_reap_pvc_user(*args):
     """Enqueue reap pvc for user"""
     rpc_enqueue(reap_user_pvc, queue='default', args=args)
+
+
+def enqueue_bulk_autograde(*args):
+    """Enqueue bulk autograde of assignment"""
+    rpc_enqueue(bulk_autograde, queue="regrade", args=args)

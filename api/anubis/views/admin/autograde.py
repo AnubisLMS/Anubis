@@ -15,6 +15,7 @@ from anubis.utils.visuals.assignments import (
     get_assignment_history,
     get_assignment_sundial,
 )
+from anubis.rpc.enqueue import enqueue_bulk_autograde
 
 autograde_ = Blueprint("admin-autograde", __name__, url_prefix="/admin/autograde")
 
@@ -46,6 +47,33 @@ def admin_autograde_cache_reset(assignment_id: str):
     cache.delete_memoized(get_assignment_sundial)
 
     return success_response({"message": "success"})
+
+
+@autograde_.get("/run/<string:assignment_id>")
+@require_admin()
+@json_response
+def admin_autograde_run_assignment_id(assignment_id: str):
+    """
+
+    :param assignment_id:
+    :return:
+    """
+
+    # Pull the assignment object
+    assignment = Assignment.query.filter(Assignment.id == assignment_id).first()
+
+    # Verify that we got an assignment
+    req_assert(assignment is not None, message="assignment does not exist")
+
+    # Verify that the current course context, and the assignment course match
+    assert_course_context(assignment)
+
+    # Enqueue regrade to be run in rpc worker
+    enqueue_bulk_autograde(assignment.id)
+
+    return success_response({
+        'status': 'Regrade of assignment has been enqueued',
+    })
 
 
 @autograde_.route("/assignment/<string:assignment_id>")
