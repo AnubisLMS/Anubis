@@ -14,8 +14,8 @@ DEVELOPER_DEFAULT_OPTIONS = {
     "persistent_storage": True,
     "network_policy": "os-student",
     "resources": {
-        "requests": {"cpu": "1000m", "memory": "1Gi"},
-        "limits": {"cpu": "2000m", "memory": "2Gi"},
+        "requests": {"cpu": "2000m", "memory": "4Gi"},
+        "limits": {"cpu": "4000m", "memory": "6Gi"},
     },
 }
 
