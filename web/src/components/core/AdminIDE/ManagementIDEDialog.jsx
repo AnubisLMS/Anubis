@@ -295,6 +295,17 @@ export default function ManagementIDEDialog() {
                 labelPlacement={'end'}
                 label="Credentials"
               />
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.docker} onChange={updateSetting('docker')}
+                    name="credentials" color="primary"
+                  />
+                }
+                labelPlacement={'end'}
+                label="Docker"
+              />
             </Grid>
           </Grid>
         </DialogContent>

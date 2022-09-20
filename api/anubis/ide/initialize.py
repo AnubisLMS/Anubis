@@ -158,7 +158,7 @@ def initialize_ide(
         # Admin Options
         admin=admin,
         credentials=credentials,
-        docker=docker or admin,
+        docker=docker,
     )
     db.session.add(session)
     db.session.commit()

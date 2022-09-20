@@ -39,7 +39,7 @@ def admin_ide_admin_settings():
                 "repo_url": course_context.autograde_tests_repo,
                 # Options
                 "admin": True,
-                "privileged": True,
+                "docker": True,
                 "network_locked": False,
                 "network_policy": "admin",
                 "resources": '{"limits": {"cpu": "2", "memory": "2Gi"}, "requests": {"cpu": "1", "memory": "500Mi"}}',
@@ -87,7 +87,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
     autosave = settings.get("autosave", True)
     admin = settings.get("admin", True)
     credentials = settings.get("credentials", True)
-    privileged = settings.get("privileged", True)
+    docker = settings.get("docker", True)
     persistent_storage = settings.get("persistent_storage", False)
 
     image_id = image.get("id", None)
@@ -126,6 +126,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
         resources=resources,
         credentials=credentials,
         persistent_storage=persistent_storage,
+        docker=docker,
     )
 
     return success_response(
