@@ -1,4 +1,4 @@
-{{- if .Values.reaper.enable }}
+{{- if and .Values.reaper.enable (not .Values.debug) }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:

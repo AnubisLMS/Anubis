@@ -29,8 +29,6 @@ services:
     image: registry.digitalocean.com/anubis/api:${GIT_TAG:-latest}
     build: ./api
     command: sh -c "while true; do python3 dev.py; sleep 1; done"
-    ports:
-      - 5000:5000
     environment:
       - "MINDEBUG=0"
       - "DEBUG=1"
@@ -164,6 +162,10 @@ services:
   theia-sidecar:
     image: registry.digitalocean.com/anubis/theia-sidecar:${GIT_TAG:-latest}
     build: ./theia/sidecar
+
+  theia-dockerd:
+    image: registry.digitalocean.com/anubis/theia-dockerd:${GIT_TAG:-latest}
+    build: theia/dockerd
 
   theia-base-38:
     image: registry.digitalocean.com/anubis/theia-base:python-3.8

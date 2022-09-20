@@ -714,6 +714,7 @@ class TheiaSession(db.Model):
     credentials: bool = Column(Boolean, default=False)
     persistent_storage: bool = Column(Boolean, default=False)
     admin: bool = Column(Boolean, default=False)
+    docker: bool = Column(Boolean, default=False)
 
     k8s_requested: bool = Column(Boolean, default=False)
 

@@ -18,7 +18,7 @@ eval $(minikube docker-env)
 pushd ..
 # Build services in parallel to speed things up
 export GIT_TAG=latest
-docker-compose build --parallel --pull api web theia-proxy theia-init theia-sidecar
+make build
 popd
 
 ./debug/upgrade.sh

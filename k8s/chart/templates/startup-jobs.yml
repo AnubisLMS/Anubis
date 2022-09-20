@@ -21,6 +21,8 @@ spec:
         env:
         {{- include "api.env" . | nindent 8 }}
 ---
+
+{{- if not .Values.debug }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -44,3 +46,4 @@ spec:
         - name: "JOB"
           value: "1"
         {{- include "api.env" . | nindent 8 }}
+{{- end }}

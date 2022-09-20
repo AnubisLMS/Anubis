@@ -288,6 +288,40 @@ def create_theia_k8s_pod_pvc(
     )
 
     ##################################################################################
+    # DOCKERD CONTAINER
+
+    if theia_session.docker:
+        certs_volume = k8s.V1Volume(name="dockerd-certs", empty_dir={})
+        certs_volume_mount = k8s.V1VolumeMount(name="dockerd-certs", mount_path="/certs")
+
+        pod_volumes.append(certs_volume)
+        theia_volume_mounts.append(certs_volume_mount)
+
+        theia_extra_env.append(k8s.V1EnvVar(name="ANUBIS_RUN_DOCKERD", value="1"))
+
+        dockerd_container = k8s.V1Container(
+            name="dockerd",
+            image="registry.digitalocean.com/anubis/theia-dockerd",
+            image_pull_policy="IfNotPresent",
+            env=[
+                k8s.V1EnvVar(name="ANUBIS_RUN_DOCKERD", value="1")
+            ],
+            # Add a security context to disable privilege escalation
+            security_context=k8s.V1SecurityContext(
+                allow_privilege_escalation=True,
+                run_as_non_root=True,
+                run_as_user=1001,
+                privileged=True,  # Hardcode privileged as it is required for docker (even rootless)
+            ),
+            # Add the shared certs volume
+            volume_mounts=[
+                certs_volume_mount
+            ],
+        )
+
+        pod_containers.append(dockerd_container)
+
+    ##################################################################################
     # THEIA CONTAINER
 
     # If this is an admin IDE session, then we should add a token

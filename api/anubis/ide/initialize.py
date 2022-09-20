@@ -134,6 +134,7 @@ def initialize_ide(
     admin: bool = False,
     privileged: bool = False,
     credentials: bool = False,
+    docker: bool = False,
 ) -> TheiaSession:
     from anubis.rpc.enqueue import enqueue_ide_initialize
 
@@ -159,6 +160,7 @@ def initialize_ide(
         admin=admin,
         privileged=privileged,
         credentials=credentials,
+        docker=docker or admin,
     )
     db.session.add(session)
     db.session.commit()
