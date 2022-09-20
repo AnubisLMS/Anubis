@@ -24,8 +24,8 @@ WEBTOP_DEFAULT_OPTIONS = {
     "persistent_storage": False,
     "network_policy": "os-student",
     "resources": {
-        "requests": {"cpu": "1", "memory": "1Gi"},
-        "limits": {"cpu": "3", "memory": "4Gi"},
+        "requests": {"cpu": "1000m", "memory": "1Gi"},
+        "limits": {"cpu": "3000m", "memory": "4Gi"},
     },
 }
 
