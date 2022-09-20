@@ -45,6 +45,7 @@ class User(db.Model):
     github_username = Column(Text(length=2 ** 14), index=True)
     name = Column(Text(length=2 ** 14))
     is_superuser: bool = Column(Boolean, nullable=False, default=False)
+    is_anubis_developer: bool = Column(Boolean, nullable=False, default=False)
     disabled: bool = Column(Boolean, nullable=False, default=False)
     deadline_email_enabled: bool = Column(Boolean, nullable=False, default=True)
     release_email_enabled: bool = Column(Boolean, nullable=False, default=True)

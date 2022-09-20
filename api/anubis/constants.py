@@ -8,6 +8,17 @@ THEIA_DEFAULT_OPTIONS = {
     },
 }
 
+DEVELOPER_DEFAULT_IMAGE = "registry.digitalocean.com/anubis/theia-base"
+DEVELOPER_DEFAULT_OPTIONS = {
+    "autosave": False,
+    "persistent_storage": True,
+    "network_policy": "os-student",
+    "resources": {
+        "requests": {"cpu": "1000m", "memory": "1Gi"},
+        "limits": {"cpu": "2000m", "memory": "2Gi"},
+    },
+}
+
 WEBTOP_DEFAULT_OPTIONS = {
     "autosave": True,
     "persistent_storage": False,

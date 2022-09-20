@@ -7,6 +7,7 @@ from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.http import success_response, req_assert
 from anubis.utils.http.decorators import json_response, load_from_id
+from anubis.constants import DEVELOPER_DEFAULT_IMAGE, DEVELOPER_DEFAULT_OPTIONS
 
 playgrounds_ = Blueprint("public-playgrounds", __name__, url_prefix="/public/playgrounds")
 
@@ -54,6 +55,19 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
     # to start a new ide.
     assert_theia_sessions_enabled()
 
+    # Default status
+    status = "Session created"
+
+    # Default to not setting
+    resources = dict()
+    docker = False
+
+    # If the person launching is a developer, then add the extra stuff
+    if current_user.is_anubis_developer and theia_image.image == DEVELOPER_DEFAULT_IMAGE:
+        status = "Developer session created"
+        resources = DEVELOPER_DEFAULT_OPTIONS['resources']
+        docker = True
+
     # Create IDE
     session: TheiaSession = initialize_ide(
         image_id=theia_image.id,
@@ -66,10 +80,10 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
         network_policy="os-student",
         persistent_storage=True,
         autosave=False,
-        resources=dict(),
+        resources=resources,
         admin=False,
         credentials=False,
-        docker=False,
+        docker=docker,
     )
 
     # Redirect to proxy
@@ -77,7 +91,7 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
         {
             "active": session.active,
             "session": session.data,
-            "status": "Session created",
+            "status": status,
         }
     )
 

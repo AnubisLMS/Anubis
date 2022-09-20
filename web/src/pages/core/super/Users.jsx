@@ -41,13 +41,13 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-const toggleSuperuser = (id, {setStudents, setEdits}, enqueueSnackbar) => () => {
-  axios.get(`/api/admin/students/toggle-superuser/${id}`).then((response) => {
+const toggleField = (field) => (id, {setStudents, setEdits}, enqueueSnackbar) => () => {
+  axios.get(`/api/super/students/toggle-${field}/${id}`).then((response) => {
     if (standardStatusHandler(response, enqueueSnackbar)) {
       setStudents((students) => {
         for (const student of students) {
           if (student.id === id) {
-            student.is_superuser = !student.is_superuser;
+            student['is_' + field] = !student['is_' + field];
           }
         }
         return students;
@@ -56,6 +56,9 @@ const toggleSuperuser = (id, {setStudents, setEdits}, enqueueSnackbar) => () => 
     }
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
+
+const toggleSuperuser = toggleField('superuser');
+const toggleDeveloper = toggleField('anubis_developer');
 
 const useColumns = (pageState, enqueueSnackbar) => () => ([
   {
@@ -99,6 +102,20 @@ const useColumns = (pageState, enqueueSnackbar) => () => ([
         </Fab>
       </Tooltip>
     ),
+  },
+  {
+    field: 'is_anubis_developer',
+    headerName: 'Developer',
+    renderCell: (params) => (
+      <React.Fragment>
+        <Switch
+          checked={params.row.is_anubis_developer}
+          color={'primary'}
+          onClick={toggleDeveloper(params.row.id, pageState, enqueueSnackbar)}
+        />
+      </React.Fragment>
+    ),
+    width: 150,
   },
   {
     field: 'is_superuser',
