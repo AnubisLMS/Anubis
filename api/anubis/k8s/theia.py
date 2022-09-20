@@ -88,7 +88,7 @@ def create_theia_k8s_pod_pvc(
 
     # Value for if the docker secret should be included in the admin
     # theia container. Default to the value of privileged.
-    include_docker_secret: bool = privileged
+    include_docker_secret: bool = admin
 
     # If we are in debug mode, then check if the git secret is available. If it is
     # not available, then we'll need to not include it in the init and sidecar
@@ -374,7 +374,7 @@ def create_theia_k8s_pod_pvc(
 
     # Figure out which uid to use
     theia_user_id = 1001
-    if privileged or webtop:
+    if webtop:
         theia_user_id = 0
 
     # Initialize theia volume mounts array with
@@ -387,7 +387,7 @@ def create_theia_k8s_pod_pvc(
     )
 
     # If privileged, add docker config file to pod as a volume
-    if privileged and include_docker_secret:
+    if admin and include_docker_secret:
         pod_volumes.append(
             k8s.V1Volume(
                 name="docker-config",
