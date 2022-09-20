@@ -5,7 +5,6 @@ import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Item from '../../shared/Item/Item';
-import {useStyles} from './UserItems.styles';
 
 const UserItem = ({
   id,

@@ -276,18 +276,6 @@ export default function ManagementIDEDialog() {
               <FormControlLabel
                 control={
                   <Switch
-                    checked={settings.privileged} onChange={updateSetting('privileged')}
-                    name="privileged" color="primary"
-                  />
-                }
-                labelPlacement={'end'}
-                label="Privileged"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Switch
                     checked={settings.autosave} onChange={updateSetting('autosave')}
                     name="autosave" color="primary"
                   />
