@@ -1,6 +1,6 @@
 FROM python:3.10-alpine
 
-RUN adduser -D -u 1001 anubis \
+RUN adduser -D -u 1001 -h /home/theia anubis \
   && apk add --update --no-cache git bash \
   && pip3 install --no-cache-dir flask supervisor gunicorn
 

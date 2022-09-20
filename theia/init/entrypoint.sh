@@ -10,16 +10,6 @@ fix_permissions() {
     chown -R 1001:1001 /out
 }
 
-# Add motd to bashrc if it is not there already
-if ! grep '/etc/motd' /out/.bashrc; then
-    echo "adding motd to bashrc"
-    echo "" >> /out/.bashrc
-    echo "alias python=python3" >> /out/.bashrc
-    echo "cat /etc/motd" >> /out/.bashrc
-else
-    echo "skipping adding motd to bashrc"
-fi
-
 fix_permissions
 
 if [ ! "${GIT_REPO}" ]; then
