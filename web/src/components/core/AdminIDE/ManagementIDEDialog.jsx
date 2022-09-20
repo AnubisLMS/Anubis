@@ -295,6 +295,7 @@ export default function ManagementIDEDialog() {
                 labelPlacement={'end'}
                 label="Credentials"
               />
+            </Grid>
             <Grid item xs={12}>
               <FormControlLabel
                 control={
