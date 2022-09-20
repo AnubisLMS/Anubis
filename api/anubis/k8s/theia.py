@@ -221,6 +221,15 @@ def create_theia_k8s_pod_pvc(
             theia_extra_env.append(anubis_assignment_tests_repo_env)
             sidecar_extra_env.append(anubis_assignment_tests_repo_env)
 
+    # Initialize theia volume mounts array with
+    # the project volume mount
+    theia_volume_mounts.append(
+        k8s.V1VolumeMount(
+            mount_path="/home/anubis",
+            name=theia_volume_name,
+        )
+    )
+
     ##################################################################################
     # INIT CONTAINER
 
@@ -314,7 +323,7 @@ def create_theia_k8s_pod_pvc(
             ),
             # Add the shared certs volume
             volume_mounts=[
-                certs_volume_mount
+                *theia_volume_mounts,
             ],
         )
 
@@ -376,15 +385,6 @@ def create_theia_k8s_pod_pvc(
     theia_user_id = 1001
     if webtop:
         theia_user_id = 0
-
-    # Initialize theia volume mounts array with
-    # the project volume mount
-    theia_volume_mounts.append(
-        k8s.V1VolumeMount(
-            mount_path="/home/anubis",
-            name=theia_volume_name,
-        )
-    )
 
     # If privileged, add docker config file to pod as a volume
     if admin and include_docker_secret:

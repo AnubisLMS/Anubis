@@ -15,11 +15,9 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.http.address=:80"
-      - "--entrypoints.https.address=:443"
 
     ports:
-      - "80:80"
-      - "443:443"
+      - "${TRAEFIK_PORT:-80}:80"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     labels:
@@ -55,8 +53,6 @@ services:
       - "GITHUB_TOKEN"
       - "SENTRY_DSN"
       - "CREATE_APP_FUNCTION=create_pipeline_app"
-    ports:
-      - 127.0.0.1:5004:5004
     volumes:
       - "./api:/opt/app"
     labels:
@@ -107,7 +103,7 @@ services:
 
   web-dev:
     image: node:16-alpine
-    user: 1000:1000
+    user: "${ANUBIS_UID:-1000}:${ANUBIS_UID:-1000}"
     working_dir: /opt/app
     command: sh -c 'yarn && yarn run start'
     environment:
@@ -115,8 +111,6 @@ services:
       REACT_APP_DEV: dev
     volumes:
       - ./web:/opt/app
-    ports:
-      - 127.0.0.1:3000:3000
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.web.loadbalancer.server.port=3000"

@@ -2,7 +2,7 @@
 DEBUG_PERSISTENT_SERVICES := db traefik redis-master
 DEBUG_RESTART_ALWAYS_SERVICES := api web-dev rpc-default rpc-theia rpc-regrade
 
-# docker-compose settings
+# docker compose settings
 DOCKER_COMPOSE_PUSH_SERVICES := api web theia-init theia-sidecar theia-proxy theia-dockerd
 
 # K8S
@@ -13,6 +13,9 @@ K8S_RESTART_DEPLOYMENTS := \
 # To tag docker images
 GIT_TAG ?= $(shell git log -1 --pretty=%h)
 export GIT_TAG
+
+TRAEFIK_PORT := $(shell if [ "$$ANUBIS_IDE" = "1" ]; then echo 8000; else echo 80; fi)
+ANUBIS_UID := $(shell if [ "$$ANUBIS_IDE" = "1" ]; then echo 1001; else echo 1000; fi)
 
 help:
 	@echo 'For convenience'
@@ -52,24 +55,24 @@ status:
 
 .PHONY: build           # Build all docker images
 build:
-	docker-compose build --parallel --pull $(DOCKER_COMPOSE_PUSH_SERVICES)
-	env GIT_TAG=latest docker-compose build --parallel --pull $(DOCKER_COMPOSE_PUSH_SERVICES)
+	docker compose build --parallel --pull $(DOCKER_COMPOSE_PUSH_SERVICES)
+	env GIT_TAG=latest docker compose build --parallel --pull $(DOCKER_COMPOSE_PUSH_SERVICES)
 
 .PHONY: push            # Push images to registry.digitalocean.com (requires vpn)
 push: build
-	docker-compose push $(DOCKER_COMPOSE_PUSH_SERVICES)
-	env GIT_TAG=latest docker-compose push $(DOCKER_COMPOSE_PUSH_SERVICES)
+	docker compose push $(DOCKER_COMPOSE_PUSH_SERVICES)
+	env GIT_TAG=latest docker compose push $(DOCKER_COMPOSE_PUSH_SERVICES)
 
 .PHONY: debug           # Start the cluster in debug mode
 debug:
-	docker-compose up -d $(DEBUG_PERSISTENT_SERVICES)
-	docker-compose up \
+	docker compose up -d $(DEBUG_PERSISTENT_SERVICES)
+	docker compose up \
 		-d --force-recreate \
 		$(DEBUG_RESTART_ALWAYS_SERVICES)
 	@echo 'Waiting for db'
 	@until mysqladmin -h 127.0.0.1 ping &> /dev/null; do sleep 1; done
 	@echo 'running migrations'
-	docker-compose exec api alembic upgrade head
+	docker compose exec api alembic upgrade head
 	make startup-links
 
 .PHONY: mindebug        # Setup mindebug environment
@@ -97,13 +100,13 @@ apirun:
 webrun:
 	make -C web run
 
-# Reset local docker-compose db
+# Reset local docker compose db
 yeetdb:
-	docker-compose kill db
-	docker-compose rm -f
+	docker compose kill db
+	docker compose rm -f
 	docker volume rm anubis_db_data
-	docker-compose up -d --force-recreate db
+	docker compose up -d --force-recreate db
 
 theia-%:
-	docker-compose build $@
+	docker compose build $@
 

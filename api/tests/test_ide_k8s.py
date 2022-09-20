@@ -172,7 +172,7 @@ def test_assignment_ide_k8s():
         assert ide.autosave is True
         assert ide.playground is False
         assert ide.admin is False
-        assert ide.privileged is False
+        assert ide.docker is False
         assert ide.persistent_storage is False
         assert ide.repo_url == 'https://github.com/AnubisLMS/xv6'
 

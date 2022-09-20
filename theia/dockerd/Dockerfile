@@ -8,9 +8,9 @@ ENV DOCKER_HOST="tcp://localhost:2376" \
 
 USER 0
 RUN set -eux; \
-    adduser -D -u 1001 theia; \
+    adduser -D -u 1001 anubis; \
     apk add --no-cache supervisor; \
-    sed -i 's/rootless/theia/' /etc/subuid /etc/subgid;
+    sed -i 's/rootless/anubis/' /etc/subuid /etc/subgid;
 
 VOLUME /certs
 
