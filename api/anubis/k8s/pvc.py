@@ -4,7 +4,10 @@ from anubis.models import User, TheiaSession
 from anubis.utils.config import get_config_str
 
 
-def get_pvc_size(theia_session: TheiaSession = None) -> str:
+def get_pvc_size(owner: User, theia_session: TheiaSession = None) -> str:
+    if owner.is_anubis_developer:
+        return get_config_str('DEVELOPER_VOLUME_SIZE', '4Gi')
+
     # Get home volume size from config
     if theia_session is not None and theia_session.playground:
         if theia_session.image.webtop:
@@ -26,7 +29,7 @@ def get_pvc_name(user: User, theia_session: TheiaSession = None) -> str:
 
 
 def get_user_pvc(user: User, theia_session: TheiaSession = None) -> tuple[str, k8s.V1PersistentVolumeClaim]:
-    volume_size = get_pvc_size(theia_session)
+    volume_size = get_pvc_size(user, theia_session)
     netid = user.netid
 
     # Overwrite the volume name to be the user's persistent volume
