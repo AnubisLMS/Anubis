@@ -134,6 +134,7 @@ jobs:
           - theia-proxy
           - theia-init
           - theia-sidecar
+          - theia-dockerd
     steps:
       - uses: actions/checkout@v2
       - name: Install doctl
