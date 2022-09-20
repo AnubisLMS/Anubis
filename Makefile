@@ -16,6 +16,8 @@ export GIT_TAG
 
 TRAEFIK_PORT := $(shell if [ "$$ANUBIS_IDE" = "1" ]; then echo 8000; else echo 80; fi)
 ANUBIS_UID := $(shell if [ "$$ANUBIS_IDE" = "1" ]; then echo 1001; else echo 1000; fi)
+export TRAEFIK_PORT
+export ANUBIS_UID
 
 help:
 	@echo 'For convenience'
