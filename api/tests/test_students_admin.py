@@ -18,7 +18,3 @@ def test_students_admin():
         },
         fail_for=["student", "ta"],
     )
-    permission_test(
-        f"/admin/students/toggle-superuser/{student_id}",
-        fail_for=["student", "ta", "professor"],
-    )
