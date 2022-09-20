@@ -132,7 +132,6 @@ def initialize_ide(
     resources: dict = None,
     # Admin fields
     admin: bool = False,
-    privileged: bool = False,
     credentials: bool = False,
     docker: bool = False,
 ) -> TheiaSession:
@@ -158,7 +157,6 @@ def initialize_ide(
         resources=resources,
         # Admin Options
         admin=admin,
-        privileged=privileged,
         credentials=credentials,
         docker=docker or admin,
     )

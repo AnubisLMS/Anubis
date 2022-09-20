@@ -63,7 +63,6 @@ def create_theia_k8s_pod_pvc(
         admin = theia_session.admin
         autosave = theia_session.autosave
         credentials = theia_session.credentials
-        privileged = theia_session.privileged
         persistent_storage = theia_session.persistent_storage
 
     else:
@@ -486,8 +485,8 @@ def create_theia_k8s_pod_pvc(
         # containers should only exist for the management IDEs so that
         # docker can run.
         security_context=k8s.V1SecurityContext(
-            allow_privilege_escalation=theia_session.privileged or webtop,
-            privileged=theia_session.privileged,
+            allow_privilege_escalation=webtop,
+            privileged=False,
             run_as_user=theia_user_id,
         ),
     )

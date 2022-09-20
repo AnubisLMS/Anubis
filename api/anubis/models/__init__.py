@@ -709,7 +709,6 @@ class TheiaSession(db.Model):
     resources = Column(JSON, default=lambda: {})
     network_policy: str = Column(String(length=128), default="os-student")
     network_locked: bool = Column(Boolean, default=True)
-    privileged: bool = Column(Boolean, default=False)
     autosave: bool = Column(Boolean, default=True)
     credentials: bool = Column(Boolean, default=False)
     persistent_storage: bool = Column(Boolean, default=False)
@@ -759,7 +758,6 @@ class TheiaSession(db.Model):
             "image":              self.image.data,
             "repo_url":           self.repo_url,
             "autosave":           self.autosave,
-            "privileged":         self.privileged,
             "credentials":        self.credentials,
             "network_locked":     self.network_locked,
             "persistent_storage": self.persistent_storage,

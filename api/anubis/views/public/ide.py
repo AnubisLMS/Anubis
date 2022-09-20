@@ -133,7 +133,6 @@ def public_ide_initialize(assignment: Assignment):
         persistent_storage=persistent_storage,
         autosave=autosave,
         resources=resources,
-        privileged=False,
         admin=is_admin,
         credentials=is_admin,
     )

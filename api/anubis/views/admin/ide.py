@@ -125,7 +125,6 @@ def admin_ide_initialize_custom(settings: dict, **_):
         autosave=autosave,
         resources=resources,
         credentials=credentials,
-        privileged=privileged,
         persistent_storage=persistent_storage,
     )
 

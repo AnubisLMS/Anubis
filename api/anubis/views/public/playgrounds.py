@@ -68,7 +68,6 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
         autosave=False,
         resources=dict(),
         admin=False,
-        privileged=False,
         credentials=False,
         docker=False,
     )
