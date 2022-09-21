@@ -173,6 +173,7 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
     ).set_thumbnail(url=bot.user.avatar.url).set_author(name="Anubis Bot")
 
 
+@with_context
 def generate_email_report(day: str = None):
     today = get_day(day)
 
