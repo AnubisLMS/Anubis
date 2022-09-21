@@ -12,7 +12,7 @@ from discord.ext import commands
 from sqlalchemy.sql import func
 from tabulate import tabulate
 
-from anubis.models import db, Course, User, TheiaSession, InCourse
+from anubis.models import db, Course, User, TheiaSession, InCourse, EmailEvent
 from anubis.utils.data import with_context, human_readable_timedelta
 from anubis.utils.visuals.usage import get_usage_plot_active
 
@@ -231,6 +231,22 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
     ).set_thumbnail(url=bot.user.avatar.url).set_author(name="Anubis Bot")
 
 
+def generate_email_report():
+    report = ""
+    today = datetime.now().replace(hour=0, minute=0, microsecond=0)
+
+    emails_total: int = EmailEvent.query.count()
+    emails_today: int = EmailEvent.query.filter(EmailEvent.created > today).count()
+
+    report += f"Emails Send Total: {emails_total}\n"
+    report += f"Emails Send Today: {emails_today}\n"
+
+    return discord.Embed(
+        title="Email report",
+        description="```" + report + "```"
+    ).set_thumbnail(url=bot.user.avatar.url).set_author(name="Anubis Bot")
+
+
 intents = discord.Intents.default()
 intents.message_content = True
 
@@ -291,6 +307,18 @@ async def ides_(ctx, day=None, *_):
         )
     else:
         await ctx.send(embed=generate_ide_report(day))
+
+
+@bot.command(
+    name="email", help="Anubis email usage report."
+)
+async def email_(ctx, day=None, *_):
+    """
+    Respond to `!report` command with a report of the statuses of Anubis
+
+    :return:
+    """
+    await ctx.send(embed=generate_email_report(day))
 
 
 @bot.command(name="contribute", aliases=("github",), help="Contributing to Anubis")
