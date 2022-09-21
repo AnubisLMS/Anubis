@@ -5,83 +5,16 @@ from io import BytesIO
 from typing import List, Union
 
 import discord
-import flask_sqlalchemy
 from PIL import Image, ImageDraw, ImageFont
 from dateutil.parser import parse as date_parse, ParserError
 from discord.ext import commands
 from sqlalchemy.sql import func
 from tabulate import tabulate
 
+from anubis.lms.courses import get_course_users
 from anubis.models import db, Course, User, TheiaSession, InCourse, EmailEvent
 from anubis.utils.data import with_context, human_readable_timedelta
 from anubis.utils.visuals.usage import get_usage_plot_active
-
-
-@with_context
-def get_courses() -> flask_sqlalchemy.BaseQuery:
-    """
-    A helper function that constructs query for courses
-
-    :return: A query object with TEST and DEMO course filtered
-    """
-    return Course.query.filter(Course.name != "TEST", Course.name != "DEMO")
-
-
-@with_context
-def get_active_users_this_semester() -> int:
-    """
-    Count the number of users registered for at least one course this semester
-
-    :return: The number of users registered for at least one course this semester
-    """
-    return (
-        User.query.join(InCourse, User.id == InCourse.owner_id)
-        .join(Course, InCourse.course_id == Course.id)
-        .filter(Course.name != "TEST", Course.name != "DEMO")
-        .distinct()
-        .count()
-    )
-
-
-@with_context
-def get_ides_opened_this_semester() -> int:
-    """
-    Count the total number of IDEs opened this semester
-
-    :return: Total number of IDEs opened this semester
-    """
-    return TheiaSession.query.join(Course, TheiaSession.course_id == Course.id).count()
-
-
-@with_context
-def get_course_user_count(course) -> int:
-    """
-    Count the number of users registered for a course
-
-    :param course: The course object
-    :return: Number of users registered for this course
-    """
-    return (
-        User.query.join(InCourse, User.id == InCourse.owner_id)
-        .join(Course, Course.id == InCourse.course_id)
-        .filter(Course.id == course.id)
-        .count()
-    )
-
-
-@with_context
-def get_course_theia_session_count(course) -> int:
-    """
-    Count the number of IDEs opened for a course this semester
-
-    :param course: The course object
-    :return: Number of IDEs opened this semester
-    """
-    return (
-        TheiaSession.query.join(Course, TheiaSession.course_id == Course.id)
-        .filter(Course.id == course.id)
-        .count()
-    )
 
 
 def generate_report(mobile: bool = False) -> str:
@@ -102,13 +35,18 @@ def generate_report(mobile: bool = False) -> str:
         [
             course.name,
             course.course_code,
-            get_course_user_count(course),
-            get_course_theia_session_count(course)
+            len(get_course_users(course)),
+            TheiaSession.query.join(Course).filter(Course.id == course.id).count()
         ]
-        for course in get_courses()
+        for course in Course.query.all()
     ]
-    active_users = get_active_users_this_semester()
-    ides_opened = get_ides_opened_this_semester()
+    active_users = (
+        User.query.join(InCourse, User.id == InCourse.owner_id)
+        .join(Course, InCourse.course_id == Course.id)
+        .distinct()
+        .count()
+    )
+    ides_opened = TheiaSession.query.join(Course, TheiaSession.course_id == Course.id).count()
 
     return (
         tabulate(data, ("Course Name", "Course Code", "Users", "IDEs opened"))
@@ -151,6 +89,14 @@ def images_to_bytes(img: Image) -> BytesIO:
     return BytesIO(b.getvalue())
 
 
+def get_day(day: str = None) -> datetime:
+    try:
+        return date_parse(day)
+    except (ParserError, TypeError):
+        print(traceback.format_exc())
+        return datetime.now().replace(hour=0, minute=0, microsecond=0)
+
+
 @with_context
 def generate_active_plot(*args, **kwargs) -> BytesIO:
     return BytesIO(get_usage_plot_active(*args, **kwargs))
@@ -169,11 +115,7 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
     :return: The text of the report
     """
 
-    try:
-        today = date_parse(day)
-    except (ParserError, TypeError):
-        print(traceback.format_exc())
-        today = datetime.now().replace(hour=0, minute=0, microsecond=0)
+    today = get_day(day)
     this_week = today - timedelta(days=7)
 
     eod = today.replace(hour=23, minute=59, second=59, microsecond=0)
@@ -231,9 +173,10 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
     ).set_thumbnail(url=bot.user.avatar.url).set_author(name="Anubis Bot")
 
 
-def generate_email_report():
+def generate_email_report(day: str = None):
+    today = get_day(day)
+
     report = ""
-    today = datetime.now().replace(hour=0, minute=0, microsecond=0)
 
     emails_total: int = EmailEvent.query.count()
     emails_today: int = EmailEvent.query.filter(EmailEvent.created > today).count()
