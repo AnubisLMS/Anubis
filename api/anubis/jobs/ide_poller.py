@@ -1,6 +1,5 @@
 import os
 from datetime import datetime, timedelta
-from typing import List
 
 if 'SENTRY_DSN' in os.environ:
     del os.environ['SENTRY_DSN']
@@ -24,7 +23,7 @@ def ide_poller():
     """
     # Get all theia sessions within the last 10 minutes that are 
     # active and don't have cluster_address
-    theia_sessions: List[TheiaSession] = TheiaSession.query.filter(
+    theia_sessions: list[TheiaSession] = TheiaSession.query.filter(
         TheiaSession.active == True,
         TheiaSession.cluster_address == None,
         TheiaSession.created > datetime.now() - timedelta(minutes=10),

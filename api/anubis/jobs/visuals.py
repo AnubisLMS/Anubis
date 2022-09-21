@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import List
 
 from anubis.models import Assignment, Course
 from anubis.utils.data import with_context
@@ -11,7 +10,7 @@ from anubis.utils.visuals.users import get_platform_users_plot
 @with_context
 def main():
     # Get courses with visuals enabled
-    courses_with_visuals: List[Course] = Course.query.filter(
+    courses_with_visuals: list[Course] = Course.query.filter(
         Course.display_visuals == True
     ).all()
 
@@ -20,7 +19,7 @@ def main():
         get_usage_plot(course.id)
 
     # Get recent assignments
-    recent_assignments: List[Assignment] = Assignment.query.filter(
+    recent_assignments: list[Assignment] = Assignment.query.filter(
         Assignment.release_date > datetime.now(),
         Assignment.due_date < datetime.now() - timedelta(weeks=4)
     ).all()

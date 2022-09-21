@@ -2,7 +2,6 @@ import os
 import traceback
 from datetime import datetime, timedelta
 from io import BytesIO
-from typing import List, Union
 
 import discord
 from PIL import Image, ImageDraw, ImageFont
@@ -103,7 +102,7 @@ def generate_active_plot(*args, **kwargs) -> BytesIO:
 
 
 @with_context
-def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, Image.Image]:
+def generate_ide_report(day=None, mobile: bool = False) -> discord.Embed | Image.Image:
     """
     Generate a report of the statuses of Anubis. The statuses are:
         Course names and code
@@ -128,7 +127,7 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
     today_ide_seconds = get_ide_seconds(
         TheiaSession.created < eod, TheiaSession.created > today
     )
-    active_ides: List[TheiaSession] = TheiaSession.query.filter(
+    active_ides: list[TheiaSession] = TheiaSession.query.filter(
         TheiaSession.active == True,
         TheiaSession.created < eod
     ).all()
@@ -174,7 +173,7 @@ def generate_ide_report(day=None, mobile: bool = False) -> Union[discord.Embed, 
 
 
 @with_context
-def generate_email_report(day: str = None):
+def generate_email_report(day: str = None) -> discord.Embed | Image.Image:
     today = get_day(day)
 
     report = ""

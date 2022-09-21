@@ -1,7 +1,6 @@
 import json
 import traceback
 from datetime import datetime, timedelta
-from typing import List
 
 from anubis.constants import REAPER_TXT
 from anubis.github.fix import fix_github_missing_submissions, fix_github_broken_repos
@@ -83,7 +82,7 @@ def reap_github():
     """
 
     # Pull all courses
-    courses: List[Course] = get_active_courses()
+    courses: list[Course] = get_active_courses()
 
     # Iterate over all course attempting to fix issues
     # on each github org.
@@ -117,7 +116,7 @@ def update_student_lists():
     """
 
     # Pull all courses
-    courses: List[Course] = get_active_courses()
+    courses: list[Course] = get_active_courses()
 
     # Iterate through courses, updating student list
     for course in courses:

@@ -3,6 +3,7 @@ from typing import Callable
 
 import googleapiclient.discovery
 
+from anubis.constants import REAPER_TXT
 from anubis.google.service import build_google_service
 from anubis.lms.assignments import get_active_assignment
 from anubis.lms.courses import get_course_users
@@ -10,7 +11,6 @@ from anubis.models import Assignment, Course, User
 from anubis.utils.data import with_context
 from anubis.utils.email.event import send_email_event
 from anubis.utils.logging import logger
-from anubis.constants import REAPER_TXT
 
 now = datetime.now()
 
