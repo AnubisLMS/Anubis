@@ -737,6 +737,7 @@ class TheiaSession(db.Model):
             "netid":              self.owner.netid,
             "name":               self.owner.name,
             "repo_url":           self.repo_url,
+            "docker":             self.docker,
             "redirect_url":       theia_redirect_url(self.id, self.owner.netid),
             "active":             self.active,
             "state":              self.state,

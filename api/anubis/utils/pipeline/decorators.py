@@ -1,10 +1,10 @@
-import logging
 from functools import wraps
 
 from flask import request
 
 from anubis.models import Submission
 from anubis.utils.http import error_response
+from anubis.utils.logging import logger
 
 
 def check_submission_token(func):
@@ -33,13 +33,13 @@ def check_submission_token(func):
         # Verify submission exists
         if submission is None:
             # Log that there was an issue with finding the submission
-            logging.error(
+            logger.error(
                 "Invalid submission from submission pipeline",
                 extra={
                     "submission_id": submission_id,
-                    "path": request.path,
-                    "headers": request.headers,
-                    "ip": request.remote_addr,
+                    "path":          request.path,
+                    "headers":       request.headers,
+                    "ip":            request.remote_addr,
                 },
             )
 
@@ -49,13 +49,13 @@ def check_submission_token(func):
         # Verify we got a token
         if token is None:
             # Log that there was an issue with finding a token
-            logging.error(
+            logger.error(
                 "Attempted report post with no token",
                 extra={
                     "submission_id": submission_id,
-                    "path": request.path,
-                    "headers": request.headers,
-                    "ip": request.remote_addr,
+                    "path":          request.path,
+                    "headers":       request.headers,
+                    "ip":            request.remote_addr,
                 },
             )
 
@@ -65,13 +65,13 @@ def check_submission_token(func):
         # Verify token matches
         if token != submission.token:
             # Log that there was an issue verifying tokens
-            logging.error(
+            logger.error(
                 "Invalid token reported from pipeline",
                 extra={
                     "submission_id": submission_id,
-                    "path": request.path,
-                    "headers": request.headers,
-                    "ip": request.remote_addr,
+                    "path":          request.path,
+                    "headers":       request.headers,
+                    "ip":            request.remote_addr,
                 },
             )
 
@@ -79,7 +79,7 @@ def check_submission_token(func):
             return error_response("Invalid"), 406
 
         # Log that the request was validated
-        logging.info("Pipeline request validated {}".format(request.path))
+        logger.info("Pipeline request validated {}".format(request.path))
 
         # Call the view function, and pass the
         # submission sqlalchemy object.
