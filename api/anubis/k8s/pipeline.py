@@ -218,6 +218,9 @@ def reap_pipeline_jobs() -> int:
         submission: Submission = Submission.query.filter(
             Submission.id == submission_id,
         ).first()
+        if submission is None:
+            logger.error(f"submission from db not found {submission_id}")
+            continue
 
         # Calculate job created time
         job_created = job.metadata.creation_timestamp.replace(tzinfo=None)

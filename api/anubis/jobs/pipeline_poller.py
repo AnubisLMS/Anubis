@@ -9,12 +9,11 @@ from anubis.utils.data import with_context
 from anubis.k8s.pipeline import reap_pipeline_jobs
 
 
-@with_context
 def main():
     config.load_incluster_config()
 
     while True:
-        reap_pipeline_jobs()
+        with_context(reap_pipeline_jobs)()
 
 
 if __name__ == "__main__":
