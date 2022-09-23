@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pipeline-poller
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: pipeline-poller
+{{- if .Values.imagePullSecret }}
+imagePullSecrets:
+  - name: {{ .Values.imagePullSecret }}
+{{- end }}
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pipeline-poller
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: pipeline-poller
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list"]
+- apiGroups: ["batch", "extensions"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "delete", "deletecollection"]
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pipeline-poller
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: pipeline-poller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pipeline-poller
+subjects:
+  - kind: ServiceAccount
+    name: pipeline-poller
+    namespace: {{ .Release.Namespace }}
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chart.fullname" . }}-pipeline-poller
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: pipeline-poller
+spec:
+  replicas: {{ .Values.theia.poller.replicas }}
+  {{- if .Values.rollingUpdates }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "chart.selectorLabels" . | nindent 6 }}
+      component: pipeline-poller
+  template:
+    metadata:
+      labels:
+        {{- include "chart.selectorLabels" . | nindent 8 }}
+        component: pipeline-poller
+    spec:
+      serviceAccountName: pipeline-poller
+      containers:
+      - name: poller
+        image: "{{ .Values.api.image }}:{{ .Values.tag }}"
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        args: ["python3", "/opt/app/anubis/jobs/pipeline_poller.py"]
+        {{- if not .Values.debug}}
+        resources:
+          requests:
+            cpu: 200m
+            memory: 250Mi
+          limits:
+            cpu: 1
+            memory: 500Mi
+        {{- end }}
+        env:
+        {{- include "api.env" . | nindent 8 }}

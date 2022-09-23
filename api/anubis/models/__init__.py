@@ -504,6 +504,7 @@ class Submission(db.Model):
     errors = Column(JSON, default=None, nullable=True)
     token: str = Column(String(length=64), default=lambda: base64.b16encode(os.urandom(32)).decode())
     accepted: bool = Column(Boolean, default=True)
+    pipeline_log: str = deferred(Column(Text(length=2 ** 16)))
 
     # Relationships
     build = relationship(
@@ -548,6 +549,7 @@ class Submission(db.Model):
         from anubis.lms.assignments import get_assignment_tests
 
         data = self.full_data
+        data["pipeline_log"] = self.pipeline_log
         data["tests"] = get_assignment_tests(self, only_visible=False)
 
         return data

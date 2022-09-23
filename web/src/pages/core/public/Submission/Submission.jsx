@@ -123,6 +123,19 @@ export default function Submission() {
     setModalTest(null);
   };
 
+  const pipelineLogTest = {
+    test: {
+      name: 'Pipeline Log',
+    },
+    result: {
+      test_name: 'Pipeline Log',
+      passed: !!submission?.build?.passed,
+      message: 'Not Visible to Students',
+      output_type: 'text',
+      output: submission?.pipeline_log ?? null,
+    },
+  };
+
   const buildTest = {
     test: {
       name: 'Build',
@@ -151,6 +164,13 @@ export default function Submission() {
         </Box>
         <Box className={classes.submissionContentContainer}>
           <SubmissionContent submission={submission}>
+            {submission?.pipeline_log && (
+              <SubmissionTest
+                test={pipelineLogTest}
+                processing={submission.processing}
+                expandModal={() => expandModal(pipelineLogTest)}
+              />
+            )}
             <SubmissionTest
               test={buildTest}
               processing={submission.processing}

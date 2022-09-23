@@ -88,17 +88,21 @@ def public_submission(commit: str):
     # Make sure we caught one
     req_assert(submission is not None, message="submission does not exist")
 
+    # Course that the submission belongs to
+    course_id = submission.assignment.course_id
+
     # Make sure the user is allowed to see the submission if it does not belong to them
     if not submission.owner_id == current_user.id:
-        # Course that the submission belongs to
-        course_id = submission.assignment.course_id
-
         # Assert that the current user is a admin for the course (TA, Professor, Superuser).
         # If they are not, then pass back that submissions does not exist message.
         req_assert(
             is_course_admin(course_id, current_user.id),
             message="submission does not exist",
         )
+
+    # If they are a course admin, give full admin data
+    if is_course_admin(course_id):
+        return success_response({"submission": submission.admin_data})
 
     # Hand back submission
     return success_response({"submission": submission.full_data})

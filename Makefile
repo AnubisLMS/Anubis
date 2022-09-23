@@ -7,8 +7,9 @@ DOCKER_COMPOSE_PUSH_SERVICES := api web theia-init theia-sidecar theia-proxy the
 
 # K8S
 K8S_RESTART_DEPLOYMENTS := \
-	anubis-api anubis-web anubis-pipeline-api anubis-theia-proxy anubis-rpc-default anubis-rpc-theia \
-	anubis-rpc-regrade anubis-theia-poller anubis-discord-bot
+	anubis-api anubis-web anubis-pipeline-api anubis-pipeline-poller anubis-theia-proxy \
+	anubis-rpc-default anubis-rpc-theia anubis-rpc-regrade \
+	anubis-theia-poller anubis-discord-bot
 
 # To tag docker images
 GIT_TAG ?= $(shell git log -1 --pretty=%h)

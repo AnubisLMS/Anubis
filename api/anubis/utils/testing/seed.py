@@ -237,6 +237,7 @@ def init_submissions(submissions):
 
     for submission in submissions:
         submission.processed = True
+        submission.pipeline_log = "blah blah blah log"
 
         build_pass = random.randint(0, 2) != 0
         submission.build.passed = build_pass
@@ -401,7 +402,6 @@ def seed():
     )
 
     logger.info('creating forum for os')
-    init_forums(intro_to_os_course)
 
     os_assignment0, _, os_submissions0, _ = create_assignment(
         intro_to_os_course,

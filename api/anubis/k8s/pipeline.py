@@ -5,11 +5,13 @@ from datetime import datetime, timedelta
 
 import kubernetes
 from kubernetes import client, config
+from pottery import Redlock
 
 from anubis.models import Submission, db
 from anubis.utils.config import get_config_int
 from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
+from anubis.utils.redis import redis
 
 
 def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
@@ -70,6 +72,7 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
                 "app.kubernetes.io/name": "submission-pipeline",
                 "role": "submission-pipeline-worker",
                 "network-policy": "submission-pipeline",
+                "submission-id": submission.id,
             }
         ),
         spec=client.V1PodSpec(
@@ -85,20 +88,29 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
     )
 
     # Create the specification of deployment
-    spec = client.V1JobSpec(template=template, backoff_limit=3, ttl_seconds_after_finished=30)
+    spec = client.V1JobSpec(template=template, backoff_limit=3, ttl_seconds_after_finished=300)
 
     # Instantiate the job object
     job = client.V1Job(
         api_version="batch/v1",
         kind="Job",
-        metadata=client.V1ObjectMeta(name="submission-pipeline-{}-{}".format(submission.id[:12], int(time.time()))),
+        metadata=client.V1ObjectMeta(
+            name="submission-pipeline-{}".format(submission.id),
+            labels={
+                "app.kubernetes.io/name": "submission-pipeline",
+                "role": "submission-pipeline-worker",
+                "submission-id": submission.id,
+            }
+        ),
         spec=spec,
     )
 
     return job
 
 
-def delete_pipeline_job(batch_v1: client.BatchV1Api, job: client.V1Job):
+def delete_pipeline_job(job: client.V1Job):
+    batch_v1 = client.BatchV1Api()
+
     # Log that we are cleaning up the job
     logger.info("deleting namespaced job {}".format(job.metadata.name))
     try:
@@ -109,6 +121,55 @@ def delete_pipeline_job(batch_v1: client.BatchV1Api, job: client.V1Job):
         )
     except kubernetes.client.exceptions.ApiException:
         logger.error("failed to delete api job, continuing" + traceback.format_exc())
+
+
+def read_pipeline_job_log(job: client.V1Job) -> str:
+    v1 = client.CoreV1Api()
+    logger.info(f'Reading logs for job: {job.metadata.name}')
+    pods = v1.list_namespaced_pod(
+        namespace=job.metadata.namespace,
+        label_selector=f"job-name={job.metadata.name}"
+    )
+
+    pod = None
+    for _pod in pods.items:
+        if _pod.status.phase == "Succeeded":
+            pod = _pod
+            break
+    else:
+        logger.error(f"could not find successful pod for job: {job.metadata.name}")
+        return ''
+
+    try:
+        return v1.read_namespaced_pod_log(
+            name=pod.metadata.name,
+            namespace=pod.metadata.namespace,
+            container="pipeline",
+        )[:(2**16)-1]
+    except kubernetes.client.exceptions.ApiException:
+        logger.error("failed to get pod logs, continuing" + traceback.format_exc())
+        return 'UNABLE TO GET PIPELINE LOG'
+
+
+def reap_pipeline_job(job: client.V1Job, submission: Submission):
+    # Capture the pipeline log
+    submission.pipeline_log = read_pipeline_job_log(job)
+    db.session.add(submission)
+    db.session.commit()
+
+    # Attempt to delete the k8s job
+    delete_pipeline_job(job)
+
+
+def get_active_pipeline_jobs() -> list[client.V1Job]:
+    batch_v1 = client.BatchV1Api()
+
+    # Get all pipeline jobs in the anubis namespace
+    jobs = batch_v1.list_namespaced_job(
+        namespace="anubis",
+        label_selector="app.kubernetes.io/name=submission-pipeline,role=submission-pipeline-worker",
+    )
+    return jobs.items
 
 
 def reap_pipeline_jobs() -> int:
@@ -124,20 +185,39 @@ def reap_pipeline_jobs() -> int:
     batch_v1 = client.BatchV1Api()
 
     # Get all pipeline jobs in the anubis namespace
-    jobs = batch_v1.list_namespaced_job(
-        namespace="anubis",
-        label_selector="app.kubernetes.io/name=submission-pipeline,role=submission-pipeline-worker",
-    )
+    jobs = get_active_pipeline_jobs()
 
     # Get the autograde pipeline timeout from config
     autograde_pipeline_timeout_minutes = get_config_int("AUTOGRADE_PIPELINE_TIMEOUT_MINUTES", default=5)
 
-    # Count the number of active jobs
-    active_count = 0
-
     # Iterate through all pipeline jobs
-    for job in jobs.items:
+    for job in jobs:
         job: client.V1Job
+
+        # If submission id not in labels just skip. Job ttl will delete itself.
+        if 'submission-id' not in job.metadata.labels:
+            logger.error(f'skipping job based off old label format: {job.metadata.name}')
+            continue
+
+        # Read submission id from labels
+        submission_id = job.metadata.labels['submission-id']
+
+        # Create a distributed lock for the submission job
+        lock = Redlock(
+            key=f'submission-job-{submission_id}',
+            masters={redis},
+            auto_release_time=3.0,
+        )
+        if not lock.acquire(blocking=False):
+            continue
+
+        # Log that we are inspecting the pipeline
+        logger.debug(f'inspecting pipeline: {job.metadata.name}')
+
+        # Get database record of the submission
+        submission: Submission = Submission.query.filter(
+            Submission.id == submission_id,
+        ).first()
 
         # Calculate job created time
         job_created = job.metadata.creation_timestamp.replace(tzinfo=None)
@@ -146,21 +226,16 @@ def reap_pipeline_jobs() -> int:
         if datetime.utcnow() - job_created > timedelta(minutes=autograde_pipeline_timeout_minutes):
 
             # Attempt to delete the k8s job
-            delete_pipeline_job(batch_v1, job)
+            reap_pipeline_job(job, submission)
 
         # If the job has finished, and was marked as successful, then
         # we can clean it up
         elif job.status.succeeded is not None and job.status.succeeded >= 1:
 
             # Attempt to delete the k8s job
-            delete_pipeline_job(batch_v1, job)
+            reap_pipeline_job(job, submission)
 
-        # If the job has not finished, then we increment the active_count
-        # and continue
-        else:
-            active_count += 1
-
-    return active_count
+        lock.release()
 
 
 def create_submission_pipeline(submission_id: str):
@@ -188,7 +263,7 @@ def create_submission_pipeline(submission_id: str):
     config.load_incluster_config()
 
     # Cleanup finished jobs
-    active_jobs = reap_pipeline_jobs()
+    active_jobs = len(get_active_pipeline_jobs())
 
     if active_jobs > max_jobs:
         logger.info(

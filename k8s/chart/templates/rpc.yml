@@ -23,7 +23,7 @@ rules:
   resources: ["jobs"]
   verbs: ["get", "list", "watch", "create", "delete"]
 - apiGroups: [""]
-  resources: ["pods", "persistentvolumeclaims"]
+  resources: ["pods", "persistentvolumeclaims", "pods/log"]
   verbs: ["get", "list", "watch", "create", "delete", "deletecollection"]
 {{- if .Values.debug }}
 - apiGroups: [""]
