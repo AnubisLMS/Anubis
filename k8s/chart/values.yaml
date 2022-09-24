@@ -28,10 +28,15 @@ web:
   replicas: 2
   image: "registry.digitalocean.com/anubis/web"
 
-# API for submission pipeline reporting
-pipeline_api:
-  replicas: 2
-  workers: 1
+pipeline:
+  # API for submission pipeline reporting
+  api:
+    replicas: 2
+    workers: 1
+
+  # API for submission pipeline reporting
+  poller:
+    replicas: 2
 
 # Theia IDE proxy and poller
 theia:

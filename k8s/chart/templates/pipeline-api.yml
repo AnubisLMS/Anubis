@@ -10,7 +10,7 @@ spec:
     matchLabels:
       {{- include "chart.selectorLabels" . | nindent 6 }}
       component: pipeline-api
-  replicas: {{ .Values.pipeline_api.replicas }}
+  replicas: {{ .Values.pipeline.api.replicas }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if .Values.rollingUpdates }}
   strategy:
@@ -39,7 +39,7 @@ spec:
         - name: "CREATE_APP_FUNCTION"
           value: "create_pipeline_app"
         - name: "WORKERS"
-          value: {{ .Values.pipeline_api.workers | quote }}
+          value: {{ .Values.pipeline.api.workers | quote }}
         {{- include "api.env" . | nindent 8 }}
         {{- if .Values.healthChecks }}
         livenessProbe:
