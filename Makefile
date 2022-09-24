@@ -17,6 +17,7 @@ export GIT_TAG
 
 TRAEFIK_PORT := $(shell if [ "$$ANUBIS_IDE" = "1" ]; then echo 8000; else echo 80; fi)
 ANUBIS_UID := $(shell if [ "$$ANUBIS_IDE" = "1" ]; then echo 1001; else echo 1000; fi)
+DEV_URL := $(shell if [ "$$ANUBIS_IDE" = "1" ]; then echo "https://ide8000.anubis-lms.io"; else echo "http://localhost"; fi)
 export TRAEFIK_PORT
 export ANUBIS_UID
 
@@ -28,12 +29,12 @@ help:
 
 startup-links:
 	@echo ''
-	@echo 'seed: http://localhost/api/admin/seed/'
-	@echo 'auth: http://localhost/api/admin/auth/token/superuser'
-	@echo 'auth: http://localhost/api/admin/auth/token/professor'
-	@echo 'auth: http://localhost/api/admin/auth/token/ta'
-	@echo 'auth: http://localhost/api/admin/auth/token/student'
-	@echo 'site: http://localhost/'
+	@echo 'seed: $(DEV_URL)/api/admin/seed/'
+	@echo 'auth: $(DEV_URL)/api/admin/auth/token/superuser'
+	@echo 'auth: $(DEV_URL)/api/admin/auth/token/professor'
+	@echo 'auth: $(DEV_URL)/api/admin/auth/token/ta'
+	@echo 'auth: $(DEV_URL)/api/admin/auth/token/student'
+	@echo 'site: $(DEV_URL)/'
 
 .PHONY: context         # Grab kubectl and registry login from doctl
 context:
