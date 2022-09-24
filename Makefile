@@ -13,11 +13,14 @@ K8S_RESTART_DEPLOYMENTS := \
 
 # To tag docker images
 GIT_TAG ?= $(shell git log -1 --pretty=%h)
-export GIT_TAG
 
+# Anubis IDE variables
 TRAEFIK_PORT := $(shell if [ "$$ANUBIS_IDE" = "1" ]; then echo 8000; else echo 80; fi)
 ANUBIS_UID := $(shell if [ "$$ANUBIS_IDE" = "1" ]; then echo 1001; else echo 1000; fi)
 DEV_URL := $(shell if [ "$$ANUBIS_IDE" = "1" ]; then echo "https://ide8000.anubis-lms.io"; else echo "http://localhost"; fi)
+
+# Export make variables
+export GIT_TAG
 export TRAEFIK_PORT
 export ANUBIS_UID
 
