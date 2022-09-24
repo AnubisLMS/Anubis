@@ -94,12 +94,6 @@ theia:
       image: "registry.digitalocean.com/anubis/webtop-base:python-3.9"
     - name: "webtop-base-310"
       image: "registry.digitalocean.com/anubis/webtop-base:python-3.10"
-    - name: "webtop-davinci"
-      image: "registry.digitalocean.com/anubis/webtop-davinci:latest"
-    - name: "webtop-pincer"
-      image: "registry.digitalocean.com/anubis/webtop-pincer:latest"
-    - name: "webtop-pincer-disabled"
-      image: "registry.digitalocean.com/anubis/webtop-pincer-disabled:latest"
 
 # Discord Bot
 discordbot:
