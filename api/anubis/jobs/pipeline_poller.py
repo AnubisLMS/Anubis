@@ -1,4 +1,5 @@
 import os
+import time
 
 if 'SENTRY_DSN' in os.environ:
     del os.environ['SENTRY_DSN']
@@ -14,6 +15,7 @@ def main():
 
     while True:
         with_context(reap_pipeline_jobs)()
+        time.sleep(1)
 
 
 if __name__ == "__main__":
