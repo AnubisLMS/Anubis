@@ -172,7 +172,7 @@ def get_active_pipeline_jobs() -> list[client.V1Job]:
     return jobs.items
 
 
-def reap_pipeline_jobs() -> int:
+def reap_pipeline_jobs():
     """
     Runs through all jobs in the namespace. If the job is finished, it will
     send a request to the kube api to delete it. Number of active jobs is
