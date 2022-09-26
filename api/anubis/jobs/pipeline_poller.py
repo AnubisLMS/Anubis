@@ -7,7 +7,7 @@ if 'SENTRY_DSN' in os.environ:
 from kubernetes import config
 
 from anubis.utils.data import with_context
-from anubis.k8s.pipeline import reap_pipeline_jobs
+from anubis.k8s.pipeline.reap import reap_pipeline_jobs
 
 
 def main():

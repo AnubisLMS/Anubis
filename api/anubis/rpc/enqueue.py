@@ -12,10 +12,11 @@ from rq import Queue
 from anubis.env import env
 from anubis.github.repos import create_assignment_github_repo
 from anubis.ide.initialize import initialize_theia_session
-from anubis.k8s.pipeline import create_submission_pipeline
-from anubis.k8s.pipeline import reap_pipeline_jobs
-from anubis.k8s.pvc import reap_user_pvc
-from anubis.k8s.theia import reap_theia_session_by_id, reap_stale_theia_sessions
+from anubis.k8s.pipeline.create import create_submission_pipeline
+from anubis.k8s.pipeline.reap import reap_pipeline_jobs
+from anubis.k8s.pvc.reap import reap_user_pvc
+from anubis.k8s.theia.reap import reap_theia_session_by_id
+from anubis.k8s.theia.reap import reap_stale_theia_sessions
 from anubis.lms.assignments import make_shared_assignment
 from anubis.lms.questions import assign_missing_questions
 from anubis.lms.autograde import bulk_autograde

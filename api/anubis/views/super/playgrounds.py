@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask import Blueprint
 
-from anubis.k8s.theia import reap_theia_playgrounds_all
+from anubis.k8s.theia.reap import reap_theia_playgrounds_all
 from anubis.models import db, TheiaSession
 from anubis.rpc.enqueue import rpc_enqueue, enqueue_ide_stop
 from anubis.utils.auth.http import require_superuser

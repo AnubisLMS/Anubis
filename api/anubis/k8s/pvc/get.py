@@ -1,4 +1,4 @@
-from kubernetes import client as k8s, config as k8s_config
+from kubernetes import client as k8s
 
 from anubis.models import User, TheiaSession
 from anubis.utils.config import get_config_str
@@ -65,25 +65,3 @@ def get_user_pvc(user: User, theia_session: TheiaSession = None) -> tuple[str, k
     )
 
     return theia_volume_name, theia_project_pvc
-
-
-def reap_user_pvc(user_id: str):
-    # Load the kubernetes incluster config
-    k8s_config.load_incluster_config()
-    v1 = k8s.CoreV1Api()
-
-    user: User = User.query.filter(User.id == user_id).first()
-
-    if user is None:
-        raise RuntimeError('User not found!')
-
-    volume_name = get_pvc_name(user)
-
-    v1.delete_namespaced_persistent_volume_claim(
-        name=volume_name,
-        namespace="anubis",
-        body=k8s.V1DeleteOptions(
-            propagation_policy="Background",
-
-        )
-    )

@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import Blueprint
 
 from anubis.ide.initialize import initialize_ide
-from anubis.k8s.theia import reap_theia_sessions_in_course
+from anubis.k8s.theia.reap import reap_theia_sessions_in_course
 from anubis.lms.courses import course_context
 from anubis.models import TheiaSession, TheiaImage, db
 from anubis.rpc.enqueue import rpc_enqueue, enqueue_ide_stop

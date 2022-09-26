@@ -7,7 +7,7 @@ if 'SENTRY_DSN' in os.environ:
 from kubernetes import config
 
 from anubis.utils.data import with_context
-from anubis.k8s.theia import update_all_theia_sessions
+from anubis.k8s.theia.update import update_all_theia_sessions
 
 
 def main():

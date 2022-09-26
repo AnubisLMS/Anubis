@@ -1,6 +1,6 @@
 from kubernetes import config, client
 
-from anubis.k8s.theia import create_theia_k8s_pod_pvc
+from anubis.k8s.theia.create import create_theia_k8s_pod_pvc
 from anubis.models import TheiaSession, db
 from anubis.utils.auth.user import current_user
 from anubis.utils.config import get_config_int

@@ -16,7 +16,7 @@ def set_longhorn():
 
 
 def test_playground_k8s():
-    from anubis.k8s.theia import create_theia_k8s_pod_pvc
+    from anubis.k8s.theia.create import create_theia_k8s_pod_pvc
 
     set_longhorn()
 
@@ -137,7 +137,7 @@ def test_playground_k8s():
 
 
 def test_assignment_ide_k8s():
-    from anubis.k8s.theia import create_theia_k8s_pod_pvc
+    from anubis.k8s.theia.create import create_theia_k8s_pod_pvc
     s = Session("student", new=True)
 
     assignments = s.get("/public/assignments/list")["assignments"]
