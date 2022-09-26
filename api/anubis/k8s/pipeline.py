@@ -11,7 +11,7 @@ from anubis.models import Submission, db
 from anubis.utils.config import get_config_int
 from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
-from anubis.utils.redis import redis
+from anubis.utils.redis import create_redis_lock
 
 
 def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
@@ -203,11 +203,7 @@ def reap_pipeline_jobs():
         submission_id = job.metadata.labels['submission-id']
 
         # Create a distributed lock for the submission job
-        lock = Redlock(
-            key=f'submission-job-{submission_id}',
-            masters={redis},
-            auto_release_time=3.0,
-        )
+        lock = create_redis_lock(f'submission-job-{submission_id}')
         if not lock.acquire(blocking=False):
             continue
 

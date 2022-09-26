@@ -9,13 +9,14 @@ from anubis.constants import THEIA_DEFAULT_OPTIONS, WEBTOP_DEFAULT_OPTIONS
 from anubis.github.parse import parse_github_repo_name
 from anubis.ide.reap import mark_session_ended
 from anubis.k8s.pvc import get_user_pvc
-from anubis.lms.courses import get_active_courses
-from anubis.lms.courses import get_course_admin_ids
+from anubis.lms.courses import get_active_courses, get_course_admin_ids
+from anubis.lms.theia import get_active_theia_sessions
 from anubis.models import Course, TheiaSession, Assignment, db
 from anubis.utils.auth.token import create_token
 from anubis.utils.config import get_config_int
 from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
+from anubis.utils.redis import create_redis_lock
 
 
 def create_theia_k8s_pod_pvc(
@@ -840,6 +841,31 @@ def reap_theia_session(theia_session: TheiaSession, commit: bool = True):
     # Commit the changes to the database entry
     if commit:
         db.session.commit()
+
+
+def update_all_theia_sessions():
+    """
+    Poll Database for sessions created within the last 10 minutes
+    if they are active and dont have a cluster_address.
+
+    If the session is running match the pod to the cluster_address
+
+    If the session has failed, update the session to failed.
+    """
+
+    # Go through all active sessions
+    for session in get_active_theia_sessions():
+
+        # Synchronize session resource
+        lock = create_redis_lock(f'theia-session-{session.id}')
+        if not lock.acquire(blocking=True):
+            continue
+
+        # Try to update the session info
+        update_theia_session(session)
+
+        # Release lock
+        lock.release()
 
 
 def update_theia_session(session: TheiaSession):

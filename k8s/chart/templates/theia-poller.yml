@@ -76,14 +76,14 @@ spec:
       - name: poller
         image: "{{ .Values.api.image }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
-        args: ["python3", "/opt/app/anubis/jobs/ide_poller.py"]
+        args: ["python3", "/opt/app/anubis/jobs/theia_poller.py"]
         {{- if not .Values.debug}}
         resources:
           requests:
             cpu: 200m
             memory: 250Mi
           limits:
-            cpu: 1
+            cpu: 1000m
             memory: 500Mi
         {{- end }}
         env:

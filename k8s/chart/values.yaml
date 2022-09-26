@@ -44,7 +44,7 @@ theia:
 
   # theia-poller deployment
   poller:
-    replicas: 1
+    replicas: 3
 
   # theia-proxy deployment
   proxy:
