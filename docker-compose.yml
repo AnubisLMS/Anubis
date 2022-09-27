@@ -15,11 +15,10 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.http.address=:80"
-
     ports:
       - "${TRAEFIK_PORT:-80}:80"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "${DOCKER_SOCK:-/var/run/docker.sock}:/var/run/docker.sock:ro"
     labels:
       - "traefik.enable=false"
 
@@ -40,7 +39,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.services.api.loadbalancer.server.port=5000"
       - "traefik.http.middlewares.strip-api.stripprefix.prefixes=/api"
-      - "traefik.http.routers.api-public.rule=(Host(`localhost`) && PathPrefix(`/api/`)) || (Host(`localhost`) && PathPrefix(`/api/`) && HeadersRegexp(`web`, `new`))"
+      - "traefik.http.routers.api-public.rule=(Host(`localhost`) || (Host(`ide8000.anubis-lms.io`)) && PathPrefix(`/api/`)"
       - "traefik.http.routers.api-public.entrypoints=http,https"
       - "traefik.http.routers.api-public.middlewares=strip-api@docker"
 
@@ -114,7 +113,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.web.loadbalancer.server.port=3000"
-      - "traefik.http.routers.web-public.rule=Host(`localhost`)"
+      - "traefik.http.routers.web-public.rule=(Host(`localhost`) || (Host(`ide8000.anubis-lms.io`))"
       - "traefik.http.routers.web-public.entrypoints=http,https"
 
   db:
