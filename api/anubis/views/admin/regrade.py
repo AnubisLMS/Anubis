@@ -1,21 +1,20 @@
 import math
-from datetime import datetime, timedelta
 
 from flask import Blueprint
 from sqlalchemy import or_
 
 from anubis.lms.autograde import autograde, bulk_autograde
-from anubis.lms.regrade import bulk_regrade_submissions
 from anubis.lms.courses import assert_course_context
+from anubis.lms.submissions import bulk_regrade_submissions
 from anubis.lms.submissions import init_submission
 from anubis.models import Assignment, Submission, User
+from anubis.rpc.enqueue import enqueue_bulk_regrade_assignment
 from anubis.rpc.enqueue import rpc_enqueue, enqueue_autograde_pipeline
 from anubis.utils.auth.http import require_admin
 from anubis.utils.cache import cache
 from anubis.utils.data import req_assert, split_chunks
 from anubis.utils.http import get_number_arg, success_response
 from anubis.utils.http.decorators import json_response, load_from_id
-from anubis.rpc.enqueue import enqueue_bulk_regrade_assignment
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 
@@ -54,10 +53,10 @@ def admin_regrade_status(assignment: Assignment):
     # Return the status
     return success_response(
         {
-            "percent": f"{percent}% of submissions processed",
+            "percent":    f"{percent}% of submissions processed",
             "processing": processing,
-            "processed": total - processing,
-            "total": total,
+            "processed":  total - processing,
+            "total":      total,
         }
     )
 
@@ -145,7 +144,7 @@ def private_regrade_student_assignment_netid(assignment_id: str, netid: str):
 
     return success_response(
         {
-            "status": f"{submission_count} submissions enqueued. This may take a while.",
+            "status":      f"{submission_count} submissions enqueued. This may take a while.",
             "submissions": submission_ids,
         }
     )

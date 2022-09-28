@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from anubis.lms.assignments import get_assignment_due_date
-from anubis.lms.regrade import bulk_regrade_submissions
 from anubis.models import (
     Assignment,
     AssignmentRepo,
@@ -14,13 +13,13 @@ from anubis.models import (
     User,
     db,
 )
-from anubis.rpc.enqueue import rpc_enqueue, enqueue_autograde_pipeline
 from anubis.utils.cache import cache
-from anubis.utils.data import is_debug, split_chunks
+from anubis.utils.data import is_debug, split_chunks, with_context
 from anubis.utils.http import error_response, success_response
 from anubis.utils.logging import logger
 
 
+@with_context
 def bulk_regrade_submissions(submissions: list[Submission]) -> list[dict]:
     """
     Regrade a batch of submissions
@@ -47,6 +46,7 @@ def regrade_submission(submission: Submission | str, queue: str = "default") -> 
     :param queue:
     :return: dict response
     """
+    from anubis.rpc.enqueue import enqueue_autograde_pipeline
 
     # If the submission is a string, then we consider it to be a submission id
     if isinstance(submission, str):
@@ -93,6 +93,7 @@ def fix_dangling():
 
     :return:
     """
+    from anubis.rpc.enqueue import enqueue_autograde_pipeline
 
     # Running list of fixed submissions
     fixed = []
@@ -216,11 +217,11 @@ def get_submissions(
 
     query = (
         Submission.query.join(Assignment)
-            .join(Course)
-            .join(InCourse)
-            .join(User)
-            .filter(Submission.owner_id == owner.id, *filters)
-            .order_by(Submission.created.desc())
+        .join(Course)
+        .join(InCourse)
+        .join(User)
+        .filter(Submission.owner_id == owner.id, *filters)
+        .order_by(Submission.created.desc())
     )
 
     all_total = query.count()
@@ -244,6 +245,7 @@ def recalculate_late_submissions(student: User, assignment: Assignment):
     :param assignment:
     :return:
     """
+    from anubis.rpc.enqueue import rpc_enqueue
 
     # Get the due date for this student
     due_date = get_assignment_due_date(student, assignment, grace=True)
@@ -345,3 +347,10 @@ def init_submission(submission: Submission, commit: bool = True, verbose: bool =
     if commit:
         # Commit new models
         db.session.commit()
+
+
+def get_latest_user_submissions(assignment: Assignment, user: User, limit: int = 3) -> list[Submission]:
+    return Submission.query.join(User).join(Assignment).filter(
+        Submission.assignment_id == assignment.id,
+        Submission.owner_id == user.id,
+    ).order_by(Submission.created.desc()).limit(limit).all()
