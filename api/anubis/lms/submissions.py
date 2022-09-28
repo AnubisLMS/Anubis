@@ -68,6 +68,7 @@ def regrade_submission(submission: Submission | str, queue: str = "default") -> 
     submission.processed = False
     submission.state = "regrading"
     submission.last_updated = datetime.now()
+    submission.pipeline_log = None
 
     # Reset the accompanying database objects
     init_submission(submission)
