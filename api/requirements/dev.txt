@@ -43,7 +43,7 @@ cachetools==5.2.0
     # via
     #   -r requirements/common.txt
     #   google-auth
-certifi==2022.9.14
+certifi==2022.9.24
     # via
     #   -r requirements/common.txt
     #   kubernetes
@@ -124,9 +124,9 @@ google-api-core==2.10.1
     # via
     #   -r requirements/common.txt
     #   google-api-python-client
-google-api-python-client==2.62.0
+google-api-python-client==2.63.0
     # via -r requirements/common.txt
-google-auth==2.11.1
+google-auth==2.12.0
     # via
     #   -r requirements/common.txt
     #   google-api-core
@@ -321,13 +321,13 @@ rich==12.5.1
     # via
     #   -r requirements/common.txt
     #   flask-limiter
-rq==1.11.0
+rq==1.11.1
     # via -r requirements/common.txt
 rsa==4.9
     # via
     #   -r requirements/common.txt
     #   google-auth
-sentry-sdk[flask]==1.9.8
+sentry-sdk[flask]==1.9.9
     # via -r requirements/common.txt
 six==1.16.0
     # via
