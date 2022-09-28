@@ -82,7 +82,7 @@ def index():
             output += commit.stdout.decode() + '\n'
 
         # Push
-        push_args = ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.push=push', 'push', '--no-verify']
+        push_args = ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.push=push', 'push', '--no-verify', GIT_REPO]
         if force_push:
             push_args.append('--force')
         push = subprocess.run(
