@@ -49,6 +49,7 @@ def create_app() -> Flask:
 
     # Initialize app with all the extra services
     init_services(app)
+    app.test_request_context()
 
     register_public_views(app)
     register_admin_views(app)

@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 from flask import Blueprint
 from sqlalchemy import or_
 
-from anubis.lms.autograde import autograde, bulk_autograde, bulk_regrade
+from anubis.lms.autograde import autograde, bulk_autograde
+from anubis.lms.regrade import bulk_regrade_submissions
 from anubis.lms.courses import assert_course_context
 from anubis.lms.submissions import init_submission
 from anubis.models import Assignment, Submission, User
@@ -14,6 +15,7 @@ from anubis.utils.cache import cache
 from anubis.utils.data import req_assert, split_chunks
 from anubis.utils.http import get_number_arg, success_response
 from anubis.utils.http.decorators import json_response, load_from_id
+from anubis.rpc.enqueue import enqueue_bulk_regrade_assignment
 
 regrade = Blueprint("admin-regrade", __name__, url_prefix="/admin/regrade")
 
@@ -135,7 +137,7 @@ def private_regrade_student_assignment_netid(assignment_id: str, netid: str):
 
     # Enqueue each chunk as a job for the rpc workers
     for chunk in submission_chunks:
-        rpc_enqueue(bulk_regrade, "regrade", args=[chunk])
+        rpc_enqueue(bulk_regrade_submissions, "regrade", args=[chunk])
 
     # Clear cache of autograde results
     cache.delete_memoized(bulk_autograde, assignment.id)
@@ -179,25 +181,6 @@ def private_regrade_assignment(assignment_id):
     processed = get_number_arg("processed", default_value=-1)
     reaped = get_number_arg("reaped", default_value=-1)
 
-    # Build a list of filters based on the options
-    filters = []
-
-    # Number of hours back to regrade
-    if hours > 0:
-        filters.append(Submission.created > datetime.now() - timedelta(hours=hours))
-
-    # Only regrade submissions that have been processed
-    if processed == 1:
-        filters.append(Submission.processed == True)
-
-    # Only regrade submissions that have not been processed
-    if not_processed == 1:
-        filters.append(Submission.processed == False)
-
-    # Only regrade submissions that have been reaped
-    if reaped == 1:
-        filters.append(Submission.state == "Reaped after timeout")
-
     # Find the assignment
     assignment = Assignment.query.filter(or_(Assignment.id == assignment_id, Assignment.name == assignment_id)).first()
 
@@ -207,28 +190,12 @@ def private_regrade_assignment(assignment_id):
     # Assert that the assignment is within the current course context
     assert_course_context(assignment)
 
-    # Get all submissions matching the filters
-    submissions = Submission.query.filter(
-        Submission.assignment_id == assignment.id,
-        Submission.owner_id is not None,
-        *filters,
-    ).all()
-
-    # Get a count of submissions for the response
-    submission_count = len(submissions)
-
-    # Split the submissions into bite sized chunks
-    submission_ids = [s.id for s in submissions]
-    submission_chunks = split_chunks(submission_ids, 100)
-
-    # Enqueue each chunk as a job for the rpc workers
-    for chunk in submission_chunks:
-        rpc_enqueue(bulk_regrade, "regrade", args=[chunk])
+    # Enqueue assignment regrade for rpc worker
+    enqueue_bulk_regrade_assignment(assignment.id, hours, not_processed, processed, reaped)
 
     # Pass back the enqueued status
     return success_response(
         {
-            "status": f"{submission_count} submissions enqueued.",
-            "submissions": submission_ids,
+            "status": f"Regrade enqueued.",
         }
     )

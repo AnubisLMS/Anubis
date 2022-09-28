@@ -22,6 +22,7 @@ from anubis.lms.questions import assign_missing_questions
 from anubis.lms.autograde import bulk_autograde
 from anubis.utils.data import with_context
 from anubis.utils.testing.seed import seed
+from anubis.lms.regrade import bulk_regrade_assignment, bulk_regrade_submissions
 
 
 @with_context
@@ -112,3 +113,13 @@ def enqueue_reap_pvc_user(*args):
 def enqueue_bulk_autograde(*args):
     """Enqueue bulk autograde of assignment"""
     rpc_enqueue(bulk_autograde, queue="regrade", args=args)
+
+
+def enqueue_bulk_regrade_assignment(*args):
+    """Enqueue bulk autograde of assignment"""
+    rpc_enqueue(bulk_regrade_assignment, queue="regrade", args=args)
+
+
+def enqueue_bulk_regrade_submissions(*args):
+    """Enqueue bulk autograde of assignment"""
+    rpc_enqueue(bulk_regrade_submissions, queue="regrade", args=args)

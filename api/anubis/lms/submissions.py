@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from anubis.lms.assignments import get_assignment_due_date
-from anubis.lms.autograde import bulk_regrade
+from anubis.lms.regrade import bulk_regrade_submissions
 from anubis.models import (
     Assignment,
     AssignmentRepo,
@@ -263,7 +263,7 @@ def recalculate_late_submissions(student: User, assignment: Assignment):
     # Go through, and reset and enqueue regrade
     s_accept_ids = list(map(lambda x: x.id, s_accept))
     for chunk in split_chunks(s_accept_ids, 32):
-        rpc_enqueue(bulk_regrade, "regrade", args=[chunk])
+        rpc_enqueue(bulk_regrade_submissions, "regrade", args=[chunk])
 
     # Reject the submissions that need to be updated
     for submission in s_reject:
