@@ -1,4 +1,5 @@
 import os
+import time
 
 from kubernetes import client, config
 
@@ -158,7 +159,7 @@ def create_pipeline_job_obj(submission: Submission) -> client.V1Job:
         api_version="batch/v1",
         kind="Job",
         metadata=client.V1ObjectMeta(
-            name="submission-pipeline-{}".format(submission.id),
+            name="submission-pipeline-{}-{}".format(submission.owner.netid, int(time.time())),
             labels={
                 "app.kubernetes.io/name": "submission-pipeline",
                 "role":                   "submission-pipeline-worker",

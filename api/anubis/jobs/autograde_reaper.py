@@ -3,6 +3,7 @@ from anubis.lms.assignments import get_recent_assignments
 from anubis.lms.autograde import bulk_autograde
 from anubis.utils.data import with_context
 from anubis.utils.visuals.assignments import get_assignment_sundial
+from anubis.utils.logging import logger
 
 
 def autograde_recalculate():
@@ -14,18 +15,18 @@ def autograde_recalculate():
 
     recent_assignments = get_recent_assignments(autograde_enabled=True)
 
-    print('Recent assignments:')
-    print('\n'.join(' ' * 4 + assignment.name for assignment in recent_assignments))
+    logger.info('Recent assignments:')
+    logger.info('\n'.join(' ' * 4 + assignment.name for assignment in recent_assignments))
 
     for assignment in recent_assignments:
-        print('Running bulk autograde on {:<20} :: {:<20}'.format(
+        logger.info('Running bulk autograde on {:<20} :: {:<20}'.format(
             assignment.name,
             assignment.course.course_code,
         ))
-        bulk_autograde(assignment.id)
+        bulk_autograde(assignment.id, limit=None, offset=None)
 
     for assignment in recent_assignments:
-        print('Running sundial recalc on {:<20} :: {:<20}'.format(
+        logger.info('Running sundial recalc on {:<20} :: {:<20}'.format(
             assignment.name,
             assignment.course.course_code,
         ))
@@ -38,6 +39,6 @@ def reap():
 
 
 if __name__ == "__main__":
-    print(REAPER_TXT)
+    logger.info(REAPER_TXT)
 
     reap()

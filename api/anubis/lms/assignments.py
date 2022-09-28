@@ -352,7 +352,7 @@ def get_recent_assignments(
         autograde_recalculate_duration = delta
 
     recent_assignments = Assignment.query.filter(
-        Assignment.release_date > datetime.now() - autograde_recalculate_duration,
+        Assignment.due_date > datetime.now() - autograde_recalculate_duration,
         Assignment.due_date < datetime.now() + autograde_recalculate_duration,
         *filters,
     ).all()
