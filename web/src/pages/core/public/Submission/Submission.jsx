@@ -13,6 +13,7 @@ import SubmissionContent from '../../../../components/core/SubmissionContent/Sub
 import SubmissionHeader from '../../../../components/core/SubmissionHeader/SubmissionHeader';
 import SubmissionTest from '../../../../components/core/SubmissionTest/SubmissionTest';
 import SubmissionTestExpanded from '../../../../components/core/SubmissionTestExpanded/SubmissionTestExpanded';
+import {submissionUpdateSubscribe} from '../../../../constant';
 
 const regrade = (
   {commit, submission, setSubmission, setStep, setErrorStop},
@@ -55,7 +56,7 @@ export default function Submission() {
   const commit = query.get('commit');
 
   const continueSubscribe = () => setTimeout(() => {
-    if (step < 300) {
+    if (step < submissionUpdateSubscribe) {
       setStep((state) => ++state);
     }
   }, 1000);
