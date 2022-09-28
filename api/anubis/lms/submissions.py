@@ -177,7 +177,7 @@ def fix_dangling():
     return fixed
 
 
-@cache.memoize(timeout=5, unless=is_debug, source_check=True)
+@cache.memoize(timeout=300, unless=is_debug, source_check=True)
 def get_submissions(
     user_id=None,
     course_id=None,
