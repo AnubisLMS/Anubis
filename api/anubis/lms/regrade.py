@@ -12,7 +12,7 @@ def bulk_regrade_assignment(
     not_processed: int = -1,
     processed: int = -1,
     reaped: int = -1,
-    latest_only: bool = False,
+    latest_only: int = -1,
 ):
     from anubis.lms.submissions import get_latest_user_submissions
 
@@ -20,7 +20,13 @@ def bulk_regrade_assignment(
         Assignment.id == assignment_id,
     ).first()
 
-    if not latest_only:
+    if latest_only > 1:
+        users = get_course_users(assignment)
+        submissions = []
+        for user in users:
+            submissions.extend(get_latest_user_submissions(assignment, user))
+
+    else:
         # Build a list of filters based on the options
         filters = []
 
@@ -46,12 +52,6 @@ def bulk_regrade_assignment(
             Submission.owner_id is not None,
             *filters,
         ).all()
-
-    else:
-        users = get_course_users(assignment)
-        submissions = []
-        for user in users:
-            submissions.extend(get_latest_user_submissions(assignment, user))
 
     # Split the submissions into bite sized chunks
     submission_ids = [s.id for s in submissions]

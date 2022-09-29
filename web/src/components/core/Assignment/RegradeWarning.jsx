@@ -55,7 +55,7 @@ export default function RegradeWarning({warningOpen, setWarningOpen, regradeAssi
         />
         <RegradeButton
           title={'Regrade latest only'}
-          params={{latest_only: true}}
+          params={{latest_only: '1'}}
         />
         <RegradeButton
           title={'Regrade last 6 hours'}

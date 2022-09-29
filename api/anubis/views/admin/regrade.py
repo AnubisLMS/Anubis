@@ -179,6 +179,7 @@ def private_regrade_assignment(assignment_id):
     not_processed = get_number_arg("not_processed", default_value=-1)
     processed = get_number_arg("processed", default_value=-1)
     reaped = get_number_arg("reaped", default_value=-1)
+    latest_only = get_number_arg("latest_only", default_value=-1)
 
     # Find the assignment
     assignment = Assignment.query.filter(or_(Assignment.id == assignment_id, Assignment.name == assignment_id)).first()
@@ -190,7 +191,7 @@ def private_regrade_assignment(assignment_id):
     assert_course_context(assignment)
 
     # Enqueue assignment regrade for rpc worker
-    enqueue_bulk_regrade_assignment(assignment.id, hours, not_processed, processed, reaped)
+    enqueue_bulk_regrade_assignment(assignment.id, hours, not_processed, processed, reaped, latest_only)
 
     # Pass back the enqueued status
     return success_response(
