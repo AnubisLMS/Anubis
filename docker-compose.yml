@@ -24,7 +24,7 @@ services:
 
   api:
     image: registry.digitalocean.com/anubis/api:${GIT_TAG:-latest}
-    build: 
+    build:
       context: ./api
       args:
         - GIT_TAG=${GIT_TAG:-latest}
