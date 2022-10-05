@@ -47,6 +47,9 @@ class EnvConfig(object):
         self.OAUTH_GITHUB_CONSUMER_KEY = os.environ.get("OAUTH_GITHUB_CONSUMER_KEY", default="DEBUG")
         self.OAUTH_GITHUB_CONSUMER_SECRET = os.environ.get("OAUTH_GITHUB_CONSUMER_SECRET", default="DEBUG")
 
+        # Github Tag
+        self.GIT_TAG = os.environ.get("GIT_TAG", default="latest")
+
         # Logger
         self.LOGGER_NAME = os.environ.get("LOGGER_NAME", default="anubis-api")
 
