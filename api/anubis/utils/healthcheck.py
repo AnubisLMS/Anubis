@@ -37,6 +37,7 @@ def add_healthcheck(app: Flask):
             "api": "Healthy",
             "db": "Healthy",
             "cache": "Healthy",
+            "commit": env.GIT_TAG
         }
 
         # Attempt to connect to db
