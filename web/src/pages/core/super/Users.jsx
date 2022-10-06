@@ -18,6 +18,8 @@ import Typography from '@mui/material/Typography';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
+import {SuperDeletePvc} from '../../../components/core/Profile/DeletePvc.jsx';
+
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 
@@ -130,6 +132,14 @@ const useColumns = (pageState, enqueueSnackbar) => () => ([
       </React.Fragment>
     ),
     width: 150,
+  },
+  {
+    field: 'Delete IDE Volume',
+    headerName: 'Delete IDE Volume',
+    renderCell: (params) => (
+      <SuperDeletePvc id={`${params.row.id}`} netid={`${params.row.netid}`}/>
+    ),
+    width: 200,
   },
 ]);
 

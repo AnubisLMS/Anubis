@@ -38,18 +38,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function DeletePvc() {
+// Generate the actual button and the box, private
+function generateComponent(deleteThePvc, netid = ``) {
   const [confirm, setConfirm] = useState(false);
   const [open, setOpen] = useState(false);
   const {enqueueSnackbar} = useSnackbar();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
-
-  const deleteThePvc = () => {
-    axios.delete(`/api/public/profile/pvc`).then((response) => {
-      const data = standardStatusHandler(response, enqueueSnackbar);
-    }).catch(standardErrorHandler(enqueueSnackbar));
-  };
 
   const handleOpen = () => {
     setOpen(true);
@@ -70,12 +65,21 @@ export default function DeletePvc() {
           Are you sure you want to continue?
         </DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            You are about to delete your Anubis Cloud IDE volume. This will delete
-            your home directory, and any work that resides there. If you have a IDE
-            open, the delete will occur after your IDE is stopped. This action cannot
-            be undone. Please confirm to continue.
-          </DialogContentText>
+          {netid === `` ? (
+            <DialogContentText>
+              You are about to delete your Anubis Cloud IDE volume. This will delete
+              your home directory, and any work that resides there. If you have a IDE
+              open, the delete will occur after your IDE is stopped. This action cannot
+              be undone. Please confirm to continue.
+            </DialogContentText>
+          ) : (
+            <DialogContentText>
+              You are about to delete the Anubis Cloud IDE volume for user with NET ID: {`${netid}`}. This will delete
+              their home directory, and any work that resides there. If they have a IDE
+              open, the delete will occur after their IDE is stopped. This action cannot
+              be undone. Please confirm to continue.
+            </DialogContentText>
+          )}
           <FormControlLabel
             control={
               <Switch
@@ -123,4 +127,24 @@ export default function DeletePvc() {
       </Box>
     </Box>
   );
+}
+
+export default function DeletePvc() {
+  const deleteThePvc = () => {
+    axios.delete(`/api/public/profile/pvc`).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  };
+
+  return (generateComponent(deleteThePvc));
+}
+
+export function SuperDeletePvc({id, netid}) {
+  const deleteThePvc = () => {
+    axios.delete(`/api/super/students/pvc/${id}`).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  };
+
+  return (generateComponent(deleteThePvc, netid));
 }
