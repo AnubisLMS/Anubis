@@ -6,6 +6,7 @@ from anubis.utils.auth.http import require_superuser
 from anubis.utils.data import req_assert
 from anubis.utils.http import success_response
 from anubis.utils.http.decorators import json_response
+from anubis.rpc.enqueue import enqueue_reap_pvc_user
 
 students_ = Blueprint("super-students", __name__, url_prefix="/super/students")
 
@@ -91,3 +92,28 @@ def super_students_toggle_anubis_developer(id: str):
     # Pass back the status based on if the other user is now no longer a superuser
     else:
         return success_response({"status": f"{other.name} is no longer an anubis developer", "variant": "success"})
+
+@students_.delete("/pvc/<string:id>")
+@require_superuser()
+@json_response
+def super_students_delete_pvc(id: str):
+    """
+    Delete a user's existing Persistent Volume Claim (PVC). Requires current user to be superuser
+    to be able to make this change. 
+
+    :param id:
+    :return:
+    """
+
+    # Get the other user and check if they exist, if not we stop
+    other: User = User.query.filter(User.id == id).first()
+    req_assert(other is not None, message="user does not exist")
+
+    # Reap that pvc for that other user
+    enqueue_reap_pvc_user(id)
+
+    return success_response({
+        "status": f"Volume deletion scheduled for user: {other.netid}.",
+        "variant": "warning"
+    })
+
