@@ -13,7 +13,7 @@ import useQuery from '../../../../hooks/useQuery';
 import CourseItem from '../../../../components/core/CourseItem/CourseItem';
 import AssignmentItem from '../../../../components/core/AssignmentItem/AssignmentItem';
 import SectionHeader from '../../../../components/shared/SectionHeader/SectionHeader';
-import HiringAd from '../../../../components/shared/Ad/HiringAd/HiringAd';
+// import HiringAd from '../../../../components/shared/Ad/HiringAd/HiringAd';
 
 const Dashboard = () => {
   const query = useQuery();
@@ -45,9 +45,9 @@ const Dashboard = () => {
 
   return (
     <StandardLayout>
-      <SectionHeader isPage title='Anubis LMS Dashboard' />
-      <Box className={classes.divider} />
-      <HiringAd/>
+      <SectionHeader isPage title='Anubis LMS Dashboard'/>
+      <Box className={classes.divider}/>
+      {/* <HiringAd/> */}
       <SectionHeader
         title='Courses'
         linkText='View All Courses'
