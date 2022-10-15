@@ -122,7 +122,7 @@ const startSession = (state, enqueueSnackbar) => () => {
 
   const params = {autosave: autosaveEnabled, persistent_storage: persistentStorage};
   setLoading(true);
-  axios.post(`/api/public/ide/initialize/${selectedTheia.id}`, {params}).then((response) => {
+  axios.post(`/api/public/ide/initialize/${selectedTheia.id}`, params).then((response) => {
     const data = standardStatusHandler(response, enqueueSnackbar);
     if (data?.session) {
       setShowStop(false);

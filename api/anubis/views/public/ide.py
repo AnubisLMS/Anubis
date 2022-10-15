@@ -18,6 +18,7 @@ from anubis.utils.cache import cache
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_response, load_from_id
+from anubis.utils.logging import logger
 
 ide_ = Blueprint("public-ide", __name__, url_prefix="/public/ide")
 
@@ -106,8 +107,11 @@ def public_ide_initialize(assignment: Assignment):
     options = copy.deepcopy(assignment.theia_options)
 
     # Figure out options from user values
-    autosave = request.args.get("autosave", "true") == "true"
-    persistent_storage = request.args.get("persistent_storage", "true") == "false"
+    autosave = request.json.get("autosave", True)
+    persistent_storage = request.json.get("persistent_storage", False)
+
+    logger.debug(f'autosave = {autosave}')
+    logger.debug(f'persistent_storage = {persistent_storage}')
 
     # Figure out options from assignment
     network_policy = options.get("network_policy", "os-student")
