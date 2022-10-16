@@ -178,9 +178,6 @@ services:
   theia-base-310-bare:
     image: registry.digitalocean.com/anubis/theia-base:python-3.10-bare
 
-  webtop-base-ubuntu:
-    image: registry.digitalocean.com/anubis/webtop-base:ubuntu
-
   theia-golang:
     image: registry.digitalocean.com/anubis/theia-golang:latest
 
