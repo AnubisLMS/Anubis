@@ -57,8 +57,8 @@ theia:
     images:
     - name: "theia-init"
       image: "registry.digitalocean.com/anubis/theia-init:latest"
-    - name: "theia-sidecar"
-      image: "registry.digitalocean.com/anubis/theia-sidecar:latest"
+    - name: "theia-autosave"
+      image: "registry.digitalocean.com/anubis/theia-autosave:latest"
     - name: "theia-dockerd"
       image: "registry.digitalocean.com/anubis/theia-dockerd:latest"
     - name: "theia-base-38"

@@ -152,9 +152,9 @@ services:
     image: registry.digitalocean.com/anubis/theia-init:${GIT_TAG:-latest}
     build: ./theia/init
 
-  theia-sidecar:
-    image: registry.digitalocean.com/anubis/theia-sidecar:${GIT_TAG:-latest}
-    build: ./theia/sidecar
+  theia-autosave:
+    image: registry.digitalocean.com/anubis/theia-autosave:${GIT_TAG:-latest}
+    build: theia/autosave
 
   theia-dockerd:
     image: registry.digitalocean.com/anubis/theia-dockerd:${GIT_TAG:-latest}

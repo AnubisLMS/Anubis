@@ -40,7 +40,7 @@ def create_theia_k8s_pod_pvc(
     pod_volumes = []
 
     # Extra env to add to the theia pod containers
-    sidecar_extra_env: list[k8s.V1EnvVar] = []
+    autosave_extra_env: list[k8s.V1EnvVar] = []
     theia_extra_env: list[k8s.V1EnvVar] = []
     init_extra_env: list[k8s.V1EnvVar] = []
 
@@ -76,7 +76,7 @@ def create_theia_k8s_pod_pvc(
             value=assignment.name,
         ))
 
-    # Value for if the git secret should be included in the init and sidecar
+    # Value for if the git secret should be included in the init and autosave sidecar
     # containers (for provisioning and autosave).
     include_git_secret: bool = True
 
@@ -85,7 +85,7 @@ def create_theia_k8s_pod_pvc(
     include_docker_secret: bool = admin
 
     # If we are in debug mode, then check if the git secret is available. If it is
-    # not available, then we'll need to not include it in the init and sidecar
+    # not available, then we'll need to not include it in the init and autosave sidecar
     # containers. It is then up to those containers to handle the missing git
     # credentials.
     if not skip_debug_check and is_debug():
@@ -104,7 +104,7 @@ def create_theia_k8s_pod_pvc(
             # Decode git token
             git_token = base64.b64decode(git_secret.data["token"].encode()).decode("utf-8", "ignore")
 
-            # If git token is DEBUG, then we should not pass it to the init and sidecar
+            # If git token is DEBUG, then we should not pass it to the init and autosave sidecar
             if git_token == "DEBUG":
                 include_git_secret = False
                 autosave = False
@@ -128,7 +128,7 @@ def create_theia_k8s_pod_pvc(
                 "utf-8", "ignore"
             )
 
-            # If git token is DEBUG, then we should not pass it to the init and sidecar
+            # If git token is DEBUG, then we should not pass it to the init and autosave sidecar
             if docker_config_json == "DEBUG":
                 include_docker_secret = False
 
@@ -143,7 +143,7 @@ def create_theia_k8s_pod_pvc(
 
     # Volume Mounts
     theia_volume_mounts = []
-    sidecar_volume_mounts = []
+    autosave_volume_mounts = []
 
     # If persistent storage is enabled for this assignment, then we should create a pvc
     if persistent_storage:
@@ -167,10 +167,10 @@ def create_theia_k8s_pod_pvc(
         pod_volumes.append(k8s.V1Volume(name=theia_volume_name))
 
     # If the git secret should be included, then we add them to the
-    # sidecar and init envs here.
+    # autosave sidecar and init envs here.
     if include_git_secret:
-        # Add git cred to sidecar
-        sidecar_extra_env.append(
+        # Add git cred to autosave sidecar
+        autosave_extra_env.append(
             # Add the git credentials secret to the container. The entrypoint
             # processes for this container will read this credential and drop
             # it where it needs to.
@@ -199,21 +199,21 @@ def create_theia_k8s_pod_pvc(
     # admin features in the IDE by passing in the proper ADMIN environment variables.
     if admin:
 
-        # Add ANUBIS_ADMIN=ON to theia container and sidecar container
+        # Add ANUBIS_ADMIN=ON to theia container and autosave sidecar container
         anubis_admin_env = k8s.V1EnvVar(name="ANUBIS_ADMIN", value="ON")
-        sidecar_extra_env.append(anubis_admin_env)
+        autosave_extra_env.append(anubis_admin_env)
         theia_extra_env.append(anubis_admin_env)
 
         # If this session belongs to a course, then add the assignment
         # tests repo environment variable to both theia container and
-        # sidecar container
+        # autosave sidecar container
         if theia_session.course_id:
             anubis_assignment_tests_repo_env = k8s.V1EnvVar(
                 name="ANUBIS_ASSIGNMENT_TESTS_REPO",
                 value=theia_session.course.autograde_tests_repo,
             )
             theia_extra_env.append(anubis_assignment_tests_repo_env)
-            sidecar_extra_env.append(anubis_assignment_tests_repo_env)
+            autosave_extra_env.append(anubis_assignment_tests_repo_env)
 
     # Initialize theia volume mounts array with
     # the project volume mount
@@ -248,21 +248,21 @@ def create_theia_k8s_pod_pvc(
     )
 
     ##################################################################################
-    # SIDECAR CONTAINER
+    # AUTOSAVE SIDECAR CONTAINER
 
     if not webtop:
-        sidecar_volume_mounts.append(k8s.V1VolumeMount(
+        autosave_volume_mounts.append(k8s.V1VolumeMount(
             mount_path="/home/anubis",
             name=theia_volume_name,
         ))
 
-    # Sidecar container where anything that the student should not see exists.
+    # Autosave container where anything that the student should not see exists.
     # The main purpose for this container is to keep the git credentials separate
     # from the student environment. The shared /home/project volume is used to share
     # the repo between these two containers.
-    sidecar_container = k8s.V1Container(
-        name="sidecar",
-        image="registry.digitalocean.com/anubis/theia-sidecar",
+    autosave_container = k8s.V1Container(
+        name="autosave",
+        image="registry.digitalocean.com/anubis/theia-autosave",
         image_pull_policy="IfNotPresent",
         env=[
             # set the AUTOSAVE environment variable to ON or OFF. If the variable
@@ -277,7 +277,7 @@ def create_theia_k8s_pod_pvc(
                 value=netid,
             ),
             k8s.V1EnvVar(name="GIT_REPO", value=repo_url),
-            *sidecar_extra_env,
+            *autosave_extra_env,
         ],
         # Add a security context to disable privilege escalation
         security_context=k8s.V1SecurityContext(
@@ -286,7 +286,7 @@ def create_theia_k8s_pod_pvc(
             run_as_user=1001,
         ),
         # Add the shared volume mount to /home/project
-        volume_mounts=sidecar_volume_mounts,
+        volume_mounts=autosave_volume_mounts,
     )
 
     ##################################################################################
@@ -488,10 +488,10 @@ def create_theia_k8s_pod_pvc(
     ##################################################################################
     # POD
 
-    # Add the main theia container, and the sidecar
+    # Add the main theia container, and the autosave sidecar
     # to the containers list.
     pod_containers.append(theia_container)
-    pod_containers.append(sidecar_container)
+    pod_containers.append(autosave_container)
 
     # Extra labels to be applied to the pod
     extra_labels = {}

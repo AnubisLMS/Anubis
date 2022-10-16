@@ -131,7 +131,7 @@ jobs:
         image:
           - theia-proxy
           - theia-init
-          - theia-sidecar
+          - theia-autosave
           - theia-dockerd
     steps:
       - uses: actions/checkout@v2
