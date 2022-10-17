@@ -159,7 +159,7 @@ def test_assignment_ide_k8s():
 
     create_repo(s, assignment_id)
 
-    r = s.post(f"/public/ide/initialize/{assignment_id}")
+    r = s.post(f"/public/ide/initialize/{assignment_id}", json={})
     ide_id = r['session']['id']
 
     @with_context
