@@ -324,6 +324,30 @@ def create_theia_k8s_pod_pvc(
         pod_containers.append(dockerd_container)
 
     ##################################################################################
+    # AUTOGRADE CONTAINER
+
+    if theia_session.autograde:
+
+        # Submission may not be created. Skip handling this for now
+        if theia_session.submission_id is not None:
+            submission = theia_session.submission
+            submission_token = submission.token
+        else:
+            submission_token = 'ABC'
+
+        autograde_container = k8s.V1Container(
+            name="autograde",
+            image="registry.digitalocean.com/anubis/theia-autograde",
+            image_pull_policy="IfNotPresent",
+            env=[
+                *autosave_extra_env,
+                k8s.V1EnvVar(name="TOKEN", value=submission_token),
+            ],
+        )
+
+        pod_containers.append(autograde_container)
+
+    ##################################################################################
     # THEIA CONTAINER
 
     # If this is an admin IDE session, then we should add a token

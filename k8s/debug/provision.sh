@@ -21,13 +21,13 @@ if uname -a | grep -i linux &> /dev/null; then
     # On linux, we can use the standard unix commands for
     # getting the core and memory resources
     CPUS=$(( $(nproc) / 2 ))
-    MEM="$( echo "$(free -h | nice grep -i 'mem' | awk '{print substr($2, 1, length($2)-2)}') / 2" | bc -l )Gi"
+    MEM="$( echo "$(free -h | nice grep -i 'mem' | awk '{print substr($2, 1, length($2)-2)}') / 2" | bc -l )G"
 else
     # On MacOS, we'll need to calculate the CPUs and cores
     # using sysctl. nproc and free are too cool for MacOS
     # apparently...
     CPUS=$(( $(sysctl -n hw.ncpu) / 2 ))
-    MEM="$(( $(( $(sysctl -n hw.memsize) / 1048576 )) / 2 ))Mi"
+    MEM="$(( $(( $(sysctl -n hw.memsize) / 1048576 )) / 2 ))M"
 fi
 
 # The calico cni is super important for the minikube debugging. It is up

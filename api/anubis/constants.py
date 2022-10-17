@@ -29,6 +29,9 @@ WEBTOP_DEFAULT_OPTIONS = {
     },
 }
 
+AUTOGRADE_IDE_DEFAULT_IMAGE = "registry.digitalocean.com/anubis/theia-jepst-test"
+
+
 DB_COLLATION = "utf8mb4_general_ci"
 DB_CHARSET = "utf8mb4"
 
