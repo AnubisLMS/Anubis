@@ -14,7 +14,4 @@ def test_students_admin():
         f"/super/students/toggle-anubis_developer/{student_id}",
         fail_for=["student", "ta", "professor"],
     )
-    permission_test(
-        f"/super/students/pvc/{student_id}",
-        fail_for=["student", "ta", "professor"],
-    )
+
