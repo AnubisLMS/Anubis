@@ -4,7 +4,7 @@ import json
 import os
 import sys
 import traceback
-from typing import Tuple
+
 
 import requests
 
@@ -64,7 +64,7 @@ def print_full_error(e, r):
 
 
 @with_context
-def create_user(permission: str = "superuser", add_to_os: bool = True) -> Tuple[str, str, str]:
+def create_user(permission: str = "superuser", add_to_os: bool = True) -> tuple[str, str, str]:
     assert permission in ["superuser", "professor", "ta", "student"]
 
     name = create_name()
