@@ -404,7 +404,7 @@ def admin_assignments_save(assignment: dict):
 
         # If the key is a date, then convert to datetime
         if "date" in key and isinstance(value, str):
-            value = dateparse(value.replace("T", " ").replace("Z", ""))
+            value = dateparse(value.replace("T", " ").replace("Z", "")).replace(microsecond=0)
 
         # If github.com is in what the user gave, remove it
         if key == "github_template" and value.startswith("https://github.com/"):
