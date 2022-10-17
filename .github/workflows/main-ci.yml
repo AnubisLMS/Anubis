@@ -132,6 +132,7 @@ jobs:
           - theia-proxy
           - theia-init
           - theia-autosave
+          - theia-autograde
           - theia-dockerd
     steps:
       - uses: actions/checkout@v2

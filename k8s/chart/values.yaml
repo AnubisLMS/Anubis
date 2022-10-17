@@ -59,6 +59,8 @@ theia:
       image: "registry.digitalocean.com/anubis/theia-init:latest"
     - name: "theia-autosave"
       image: "registry.digitalocean.com/anubis/theia-autosave:latest"
+    - name: "theia-autograde"
+      image: "registry.digitalocean.com/anubis/theia-autograde:latest"
     - name: "theia-dockerd"
       image: "registry.digitalocean.com/anubis/theia-dockerd:latest"
     - name: "theia-base-38"
