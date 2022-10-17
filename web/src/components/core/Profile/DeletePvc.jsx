@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 // Generate the actual button and the box, private
-function generateComponent(deleteThePvc, netid = ``) {
+function generateDeletePvcComponent(deleteThePvc, netid = ``) {
   const [confirm, setConfirm] = useState(false);
   const [open, setOpen] = useState(false);
   const {enqueueSnackbar} = useSnackbar();
@@ -136,7 +136,7 @@ export default function DeletePvc() {
     }).catch(standardErrorHandler(enqueueSnackbar));
   };
 
-  return (generateComponent(deleteThePvc));
+  return (generateDeletePvcComponent(deleteThePvc));
 }
 
 export function SuperDeletePvc({id, netid}) {
@@ -146,5 +146,5 @@ export function SuperDeletePvc({id, netid}) {
     }).catch(standardErrorHandler(enqueueSnackbar));
   };
 
-  return (generateComponent(deleteThePvc, netid));
+  return (generateDeletePvcComponent(deleteThePvc, netid));
 }
