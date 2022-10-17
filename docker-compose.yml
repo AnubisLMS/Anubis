@@ -156,13 +156,17 @@ services:
     image: registry.digitalocean.com/anubis/theia-init:${GIT_TAG:-latest}
     build: ./theia/init
 
-  theia-sidecar:
-    image: registry.digitalocean.com/anubis/theia-sidecar:${GIT_TAG:-latest}
-    build: ./theia/sidecar
+  theia-autosave:
+    image: registry.digitalocean.com/anubis/theia-autosave:${GIT_TAG:-latest}
+    build: theia/autosave
 
   theia-dockerd:
     image: registry.digitalocean.com/anubis/theia-dockerd:${GIT_TAG:-latest}
     build: theia/dockerd
+
+  theia-autograde:
+    image: registry.digitalocean.com/anubis/theia-autograde:${GIT_TAG:-latest}
+    build: theia/autograde
 
   theia-base-38:
     image: registry.digitalocean.com/anubis/theia-base:python-3.8
@@ -181,9 +185,6 @@ services:
 
   theia-base-310-bare:
     image: registry.digitalocean.com/anubis/theia-base:python-3.10-bare
-
-  webtop-base-ubuntu:
-    image: registry.digitalocean.com/anubis/webtop-base:ubuntu
 
   theia-golang:
     image: registry.digitalocean.com/anubis/theia-golang:latest

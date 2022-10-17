@@ -307,7 +307,6 @@ def fill_user_assignment_data(user_id: str, assignment_data: dict[str, Any]):
         AssignmentRepo.owner_id == user_id,
         AssignmentRepo.assignment_id == assignment_id,
         AssignmentRepo.repo_created == True,
-        AssignmentRepo.collaborator_configured == True,
     ).first()
 
     # If the current user has a repo for this assignment, then mark it

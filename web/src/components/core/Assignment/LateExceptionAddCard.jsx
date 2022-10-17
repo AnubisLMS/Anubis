@@ -73,7 +73,8 @@ export default function LateExceptionAddCard({assignment, setReset}) {
             className={classes.datePicker}
             margin="normal"
             label="Due Date"
-            format="yyyy-MM-dd hh:mm:ss"
+            ampm={false}
+            inputFormat="yyyy-MM-dd hh:mm:ss a"
             value={date}
             onChange={(v) => setDate(v)}
             renderInput={(params) => <TextField {...params} />}

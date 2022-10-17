@@ -128,6 +128,7 @@ def initialize_ide(
     network_locked: bool = True,
     network_policy: str = "os-student",
     autosave: bool = True,
+    autograde: bool = False,
     persistent_storage: bool = True,
     resources: dict = None,
     # Admin fields
@@ -159,6 +160,7 @@ def initialize_ide(
         admin=admin,
         credentials=credentials,
         docker=docker,
+        autograde=autograde,
     )
     db.session.add(session)
     db.session.commit()

@@ -3,7 +3,7 @@ DEBUG_PERSISTENT_SERVICES := db traefik redis-master
 DEBUG_RESTART_ALWAYS_SERVICES := api web-dev rpc-default rpc-theia rpc-regrade
 
 # docker compose settings
-DOCKER_COMPOSE_PUSH_SERVICES := api web theia-init theia-sidecar theia-proxy theia-dockerd
+DOCKER_COMPOSE_PUSH_SERVICES := api web theia-init theia-autosave theia-autograde theia-proxy theia-dockerd
 
 # K8S
 K8S_RESTART_DEPLOYMENTS := \
@@ -53,6 +53,11 @@ upgrade:
 .PHONY: restart         # Restart Anubis k8s cluster
 restart:
 	kubectl rollout restart -n anubis deploy \
+		$(K8S_RESTART_DEPLOYMENTS)
+
+.PHONY: scalezero       # Scale all services to zero replicas (sometimes necessary for maintenance)
+scalezero:
+	kubectl scale deploy -n anubis --replicas 0 \
 		$(K8S_RESTART_DEPLOYMENTS)
 
 .PHONY: deploy          # Deploy Anubis k8s cluster

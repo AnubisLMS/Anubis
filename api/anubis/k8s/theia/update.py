@@ -53,7 +53,7 @@ def update_all_theia_sessions():
 
         # Synchronize session resource
         lock = create_redis_lock(f'theia-session-{session.id}')
-        if not lock.acquire(blocking=True):
+        if not lock.acquire(blocking=False):
             continue
 
         # Try to update the session info

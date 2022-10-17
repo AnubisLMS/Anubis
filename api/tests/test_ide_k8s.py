@@ -75,16 +75,17 @@ def test_playground_k8s():
         assert init_container.volume_mounts[0].name == f'ide-volume-{s.netid}'
 
         theia_container: V1Container = None
-        sidecar_container: V1Container = None
+        autosave_container: V1Container = None
         for container in pod.spec.containers:
-            if container.name == 'theia':
-                theia_container = container
-            elif container.name == 'sidecar':
-                sidecar_container = container
+            match container.name:
+                case 'theia':
+                    theia_container = container
+                case 'autosave':
+                    autosave_container = container
 
         # Verify we found
         assert theia_container
-        assert sidecar_container
+        assert autosave_container
 
         ###########################################
         # Verify theia container
@@ -113,25 +114,25 @@ def test_playground_k8s():
         assert theia_container.volume_mounts[0].read_only is None
 
         ###########################################
-        # Verify sidecar container
+        # Verify autosave container
 
         # Check env
-        sidecar_env = {env.name: env.value for env in sidecar_container.env}
-        assert sidecar_env == {'AUTOSAVE': 'OFF', 'NETID': s.netid, 'GIT_CRED': None, 'GIT_REPO': '',}
+        autosave_env = {env.name: env.value for env in autosave_container.env}
+        assert autosave_env == {'AUTOSAVE': 'OFF', 'NETID': s.netid, 'GIT_CRED': None, 'GIT_REPO': '',}
 
         # Check ports
-        assert sidecar_container.ports is None
+        assert autosave_container.ports is None
 
         # Check security context
-        assert sidecar_container.security_context.allow_privilege_escalation is False
-        assert sidecar_container.security_context.privileged is None
-        assert sidecar_container.security_context.run_as_user == 1001
+        assert autosave_container.security_context.allow_privilege_escalation is False
+        assert autosave_container.security_context.privileged is None
+        assert autosave_container.security_context.run_as_user == 1001
 
         # Verify volume
-        assert len(sidecar_container.volume_mounts) == 1
-        assert sidecar_container.volume_mounts[0].mount_path == '/home/anubis'
-        assert sidecar_container.volume_mounts[0].name == f'ide-volume-{s.netid}'
-        assert sidecar_container.volume_mounts[0].read_only is None
+        assert len(autosave_container.volume_mounts) == 1
+        assert autosave_container.volume_mounts[0].mount_path == '/home/anubis'
+        assert autosave_container.volume_mounts[0].name == f'ide-volume-{s.netid}'
+        assert autosave_container.volume_mounts[0].read_only is None
 
     _check_playground(ide_id)
 
@@ -158,7 +159,7 @@ def test_assignment_ide_k8s():
 
     create_repo(s, assignment_id)
 
-    r = s.post(f"/public/ide/initialize/{assignment_id}")
+    r = s.post(f"/public/ide/initialize/{assignment_id}", json={})
     ide_id = r['session']['id']
 
     @with_context
@@ -210,16 +211,17 @@ def test_assignment_ide_k8s():
         assert init_container.volume_mounts[0].mount_path == '/out'
 
         theia_container: V1Container = None
-        sidecar_container: V1Container = None
+        autosave_container: V1Container = None
         for container in pod.spec.containers:
-            if container.name == 'theia':
-                theia_container = container
-            elif container.name == 'sidecar':
-                sidecar_container = container
+            match container.name:
+                case 'theia':
+                    theia_container = container
+                case 'autosave':
+                    autosave_container = container
 
         # Verify we found
         assert theia_container
-        assert sidecar_container
+        assert autosave_container
 
         ###########################################
         # Verify theia container
@@ -250,23 +252,23 @@ def test_assignment_ide_k8s():
         assert theia_container.volume_mounts[0].read_only is None
 
         ###########################################
-        # Verify sidecar container
+        # Verify autosave container
 
         # Check env
-        sidecar_env = {env.name: env.value for env in sidecar_container.env}
-        assert sidecar_env == {'AUTOSAVE': 'ON', 'NETID': s.netid, 'GIT_CRED': None, 'GIT_REPO': 'https://github.com/AnubisLMS/xv6'}
+        autosave_env = {env.name: env.value for env in autosave_container.env}
+        assert autosave_env == {'AUTOSAVE': 'ON', 'NETID': s.netid, 'GIT_CRED': None, 'GIT_REPO': 'https://github.com/AnubisLMS/xv6'}
 
         # Check ports
-        assert sidecar_container.ports is None
+        assert autosave_container.ports is None
 
         # Check security context
-        assert sidecar_container.security_context.allow_privilege_escalation is False
-        assert sidecar_container.security_context.privileged is None
-        assert sidecar_container.security_context.run_as_user == 1001
+        assert autosave_container.security_context.allow_privilege_escalation is False
+        assert autosave_container.security_context.privileged is None
+        assert autosave_container.security_context.run_as_user == 1001
 
         # Verify volume
-        assert len(sidecar_container.volume_mounts) == 1
-        assert sidecar_container.volume_mounts[0].mount_path == '/home/anubis'
-        assert sidecar_container.volume_mounts[0].read_only is None
+        assert len(autosave_container.volume_mounts) == 1
+        assert autosave_container.volume_mounts[0].mount_path == '/home/anubis'
+        assert autosave_container.volume_mounts[0].read_only is None
 
     _check_assignment_ide(ide_id)

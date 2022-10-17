@@ -22,7 +22,7 @@ def test_ide_public():
 
     create_repo(s, assignment_id)
 
-    resp = s.post(f"/public/ide/initialize/{assignment_id}")
+    resp = s.post(f"/public/ide/initialize/{assignment_id}", json={})
     assert resp["session"] is not None
     assert resp["active"]
     session_id = resp["session"]["id"]

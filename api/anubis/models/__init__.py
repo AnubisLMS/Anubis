@@ -516,6 +516,7 @@ class Submission(db.Model):
     )
     test_results = relationship("SubmissionTestResult", cascade="all,delete", backref="submission", lazy=False)
     repo = relationship(AssignmentRepo, backref="submissions")
+    theia_session = relationship('TheiaSession', cascade='all,delete', backref='submission', lazy=True)
 
     @property
     def data(self):
@@ -700,6 +701,7 @@ class TheiaSession(db.Model):
     assignment_id: str = Column(String(length=default_id_length), ForeignKey(Assignment.id), nullable=True)
     image_id: str = Column(String(length=default_id_length), ForeignKey(TheiaImage.id), nullable=True)
     image_tag_id: str = Column(String(length=default_id_length), ForeignKey(TheiaImageTag.id), nullable=True)
+    submission_id: str = Column(String(length=default_id_length), ForeignKey(Submission.id), nullable=True)
 
     # Fields
     playground: bool = Column(Boolean, default=False)
@@ -717,6 +719,7 @@ class TheiaSession(db.Model):
     persistent_storage: bool = Column(Boolean, default=False)
     admin: bool = Column(Boolean, default=False)
     docker: bool = Column(Boolean, default=False)
+    autograde: bool = Column(Boolean, default=False)
 
     k8s_requested: bool = Column(Boolean, default=False)
 
