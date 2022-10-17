@@ -55,6 +55,11 @@ restart:
 	kubectl rollout restart -n anubis deploy \
 		$(K8S_RESTART_DEPLOYMENTS)
 
+.PHONY: scalezero       # Scale all services to zero replicas (sometimes necessary for maintenance)
+scalezero:
+	kubectl scale deploy -n anubis --replicas 0 \
+		$(K8S_RESTART_DEPLOYMENTS)
+
 .PHONY: deploy          # Deploy Anubis k8s cluster
 deploy: build push upgrade
 
