@@ -42,6 +42,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'inline',
   },
   datePicker: {
+    width: 300,
     marginRight: theme.spacing(2),
   },
   button: {
@@ -183,12 +184,13 @@ export default function AssignmentCard({assignment, editableFields, updateField,
               case 'datetime':
                 return (
                   <Grid item xs={12} key={field}>
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <LocalizationProvider dateAdapter={AdapterDateFns} className={classes.datePicker}>
                       <DesktopDateTimePicker
-                        className={classes.datePicker}
                         margin="normal"
                         label={label}
-                        format="yyyy-MM-dd hh:mm:ss"
+                        ampm={false}
+                        inputFormat="yyyy-MM-dd HH:mm:ss"
+                        views={['year', 'day', 'hours', 'minutes', 'seconds']}
                         value={assignment[field]}
                         onChange={updateField(assignment.id, field, false, true)}
                         renderInput={(params) => <TextField {...params} />}

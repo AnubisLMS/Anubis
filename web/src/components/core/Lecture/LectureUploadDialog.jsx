@@ -104,7 +104,8 @@ export default function FileUploadDialog({setReset}) {
               className={classes.datePicker}
               margin="normal"
               label={'Post Time'}
-              format="yyyy-MM-dd hh:mm:ss"
+              ampm={false}
+              inputFormat="yyyy-MM-dd hh:mm:ss a"
               value={postTime}
               onChange={(v) => setPostTime(v)}
               renderInput={(params) => <TextField {...params} />}
