@@ -112,6 +112,7 @@ services:
     environment:
       NODE_ENV: development
       REACT_APP_DEV: dev
+      DANGEROUSLY_DISABLE_HOST_CHECK: 'true'
     volumes:
       - ./web:/opt/app
     labels:
