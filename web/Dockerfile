@@ -10,7 +10,7 @@ COPY . .
 RUN set -eux; \
     yarn run build; \
     rm -rf node_modules src public package.json yarn.lock; \
-    find / -depth -name '.cache' -exec 'rm' '-rf' '{}' ';'
+    find /usr /home -depth -name '.cache' -exec 'rm' '-rf' '{}' ';'
 
 
 FROM node:16-alpine
