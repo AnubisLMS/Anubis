@@ -113,6 +113,7 @@ services:
       NODE_ENV: development
       REACT_APP_DEV: dev
       DANGEROUSLY_DISABLE_HOST_CHECK: 'true'
+      REACT_APP_GIT_TAG: "${GIT_TAG:-latest}"      
     volumes:
       - ./web:/opt/app
     labels:
