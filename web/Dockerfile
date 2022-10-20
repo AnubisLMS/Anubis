@@ -1,5 +1,8 @@
 FROM node:16-alpine
 
+ARG REACT_APP_GIT_TAG=latest
+ENV REACT_APP_GIT_TAG=${REACT_APP_GIT_TAG}
+
 # This disables webpack source maps from being created in the build step
 ENV GENERATE_SOURCEMAP=false
 
