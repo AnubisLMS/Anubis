@@ -92,6 +92,13 @@ export default function Submission() {
           return enqueueSnackbar('Build failed', {variant: 'error'});
         }
       }
+      
+      // sort all the tests in Alpha Order
+      submission.tests.sort(function(a, b){
+        var nameA = a.name.toUpperCase();
+        var nameB = b.name.toUpperCase();
+        return (textA < textB) ? -1 : (textA > textB) ? 1 : 0
+      });
 
       for (let index = 0; index < submission.tests.length; index++) {
         const oldTest = submission.tests[index];
