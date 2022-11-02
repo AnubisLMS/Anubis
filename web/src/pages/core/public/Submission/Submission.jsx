@@ -71,6 +71,14 @@ export default function Submission() {
       }
 
       const newSubmission = translateSubmission(data.submission);
+      
+      // sort all the tests in Alpha Order
+      newSubmission.tests.sort(function(a, b) {
+        const nameA = a.test.name.toUpperCase();
+        const nameB = b.test.name.toUpperCase();
+        return (nameA > nameB) ? 1 : (nameA < nameB) ? -1 : 0;
+      })
+      
       setSubmission(newSubmission);
 
       if (newSubmission.error || newSubmission.build.passed === false) {
@@ -92,13 +100,6 @@ export default function Submission() {
           return enqueueSnackbar('Build failed', {variant: 'error'});
         }
       }
-      
-      // sort all the tests in Alpha Order
-      submission.tests.sort(function(a, b){
-        var nameA = a.name.toUpperCase();
-        var nameB = b.name.toUpperCase();
-        return (textA < textB) ? -1 : (textA > textB) ? 1 : 0
-      });
 
       for (let index = 0; index < submission.tests.length; index++) {
         const oldTest = submission.tests[index];

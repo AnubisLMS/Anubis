@@ -44,7 +44,7 @@
   "proxy": "http://localhost:5000/",
   "scripts": {
     "start": "react-scripts start",
-    "lint": "yarn eslint --ext .jsx,.js .",
+    "lint": "yarn eslint --ext .jsx,.js --fix .",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
