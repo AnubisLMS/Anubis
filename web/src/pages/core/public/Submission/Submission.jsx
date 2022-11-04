@@ -71,6 +71,14 @@ export default function Submission() {
       }
 
       const newSubmission = translateSubmission(data.submission);
+
+      // sort all the tests in Alpha Order
+      newSubmission.tests.sort(function(a, b) {
+        const nameA = a.test.name.toUpperCase();
+        const nameB = b.test.name.toUpperCase();
+        return (nameA > nameB) ? 1 : (nameA < nameB) ? -1 : 0;
+      });
+
       setSubmission(newSubmission);
 
       if (newSubmission.error || newSubmission.build.passed === false) {
