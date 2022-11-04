@@ -102,7 +102,10 @@ services:
 
   web:
     image: registry.digitalocean.com/anubis/web:${GIT_TAG:-latest}
-    build: ./web
+    build:
+      context: ./web
+      args:
+        REACT_APP_GIT_TAG: "${GIT_TAG:-latest}"
 
   web-dev:
     image: node:16-alpine
