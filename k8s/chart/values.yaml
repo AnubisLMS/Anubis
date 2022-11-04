@@ -85,6 +85,8 @@ theia:
       image: "registry.digitalocean.com/anubis/theia-flask:python-3.10"
     - name: "theia-jepst"
       image: "registry.digitalocean.com/anubis/theia-jepst"
+    - name: "theia-jepst-test"
+      image: "registry.digitalocean.com/anubis/theia-jepst:test"
     - name: "webtop-jepst"
       image: "registry.digitalocean.com/anubis/webtop-jepst"
     - name: "theia-devops"
