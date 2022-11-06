@@ -3,7 +3,7 @@ import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Button from '@mui/material/Button';
 import Zoom from '@mui/material/Zoom';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import GitHubIcon from '@mui/icons-material/GitHub';
 import Typography from '@mui/material/Typography';
 
 export default function CodeServerAd() {
@@ -18,7 +18,7 @@ export default function CodeServerAd() {
             sx={{m: 2}}
             variant={'contained'}
             color={'primary'}
-            startIcon={<ExitToAppIcon/>}
+            startIcon={<GitHubIcon/>}
             href="https://github.com/AnubisLMS/IDE/issues/new"
             target="_blank"
             rel="noreferrer"
