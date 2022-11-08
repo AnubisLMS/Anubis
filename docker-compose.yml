@@ -116,7 +116,8 @@ services:
       NODE_ENV: development
       REACT_APP_DEV: dev
       DANGEROUSLY_DISABLE_HOST_CHECK: 'true'
-      REACT_APP_GIT_TAG: "${GIT_TAG:-latest}"      
+      REACT_APP_GIT_TAG: "${GIT_TAG:-latest}"
+      WDS_SOCKET_PORT: "80"
     volumes:
       - ./web:/opt/app
     labels:
