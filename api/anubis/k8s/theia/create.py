@@ -343,6 +343,9 @@ def create_theia_k8s_pod_pvc(
                 *autosave_extra_env,
                 k8s.V1EnvVar(name="TOKEN", value=submission_token),
             ],
+            volume_mounts=[
+                *theia_volume_mounts,
+            ],
         )
 
         pod_containers.append(autograde_container)

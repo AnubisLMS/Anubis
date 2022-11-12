@@ -2,7 +2,7 @@ import functools
 
 from flask import Response, make_response, request
 
-from models import UserState
+from autograde.models import UserState
 
 
 def user_state_from_request() -> UserState:

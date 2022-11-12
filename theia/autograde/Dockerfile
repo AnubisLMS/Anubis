@@ -14,10 +14,10 @@ RUN set -eux; \
     git config --global core.hooksPath /dev/null
 USER root
 
-VOLUME /home/project
+VOLUME /home/anubis
 
 COPY supervisord.conf /supervisord.conf
-COPY app.py /app.py
+COPY autograde /opt/app/autograde
 
 USER anubis
 ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]
