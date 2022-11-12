@@ -48,7 +48,10 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
     # If there was an existing session for this assignment found, skip
     # the initialization, and return the active session information.
     if active_session is not None:
-        return success_response({"active": active_session.active, "session": active_session.data})
+        return success_response({
+            "active": active_session.active,
+            "session": active_session.data,
+        })
 
     # Assert that new ide starts are allowed. If they are not, then
     # we return a status message to the user saying they are not able
