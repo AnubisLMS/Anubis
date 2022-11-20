@@ -4,7 +4,7 @@ const Knex = require("knex");
 const jwt = require("jsonwebtoken");
 const Cookie = require("universal-cookie");
 const urlparse = require("url-parse");
-const LRU = require("lru-cache");
+const luxon = require("luxon");
 
 const SECRET_KEY = process.env.SECRET_KEY ?? 'DEBUG';
 const DEBUG = process.env.DEBUG === '1';
@@ -123,23 +123,13 @@ const initialize = (req, res, url, query) => {
   res.end('redirecting...')
 };
 
-function changeTimezone(date, ianatz) {
-  // suppose the date is 12:00 UTC
-  var invdate = new Date(date.toLocaleString('en-US', {
-    timeZone: ianatz
-  }));
-
-  // then invdate will be 07:00 in Toronto
-  // and the diff is 5 hours
-  var diff = date.getTime() - invdate.getTime();
-
-  // so 12:00 in Toronto is 17:00 UTC
-  return new Date(date.getTime() - diff); // needs to subtract
-
+function getNow() {
+  const date = luxon.DateTime.local();
+  return `${date.year}-${date.month}-${date.day} ${date.hour}:${date.minute}:${date.second}`;
 }
 
 const updateProxyTime = session_id => {
-  const now = changeTimezone(new Date(), 'America/New_York');
+  const now = getNow();
   knex('theia_session')
     .where({id: session_id})
     .update({last_proxy: now})
