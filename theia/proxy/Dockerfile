@@ -2,7 +2,10 @@ FROM node:alpine
 
 WORKDIR /opt/app
 COPY . .
-RUN yarn && apk add --no-cache tini
+RUN set -eux; \
+    apk add --no-cache tini tzdata; \
+    ln -s /usr/share/zoneinfo/America/New_York /etc/localtime; \
+    yarn --production;
 USER nobody
 
 # Increase internal node memory limit.
