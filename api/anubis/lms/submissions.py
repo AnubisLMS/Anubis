@@ -148,7 +148,7 @@ def recalculate_late_submissions(student: User, assignment: Assignment):
     from anubis.rpc.enqueue import rpc_enqueue
 
     # Get the due date for this student
-    due_date = get_assignment_due_date(student, assignment, grace=True)
+    due_date = get_assignment_due_date(student.id, assignment.id, grace=True)
 
     # Get the submissions that need to be rejected
     s_reject = Submission.query.filter(
