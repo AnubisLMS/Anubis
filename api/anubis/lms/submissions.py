@@ -154,12 +154,16 @@ def recalculate_late_submissions(student: User, assignment: Assignment):
     s_reject = Submission.query.filter(
         Submission.created > due_date,
         Submission.accepted == True,
+        Submission.assignment_id == assignment.id,
+        Submission.owner_id == student.id,
     ).all()
 
     # Get the submissions that need to be accepted
     s_accept = Submission.query.filter(
         Submission.created < due_date,
         Submission.accepted == False,
+        Submission.assignment_id == assignment.id,
+        Submission.owner_id == student.id,
     ).all()
 
     # Go through, and reset and enqueue regrade
