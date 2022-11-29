@@ -103,7 +103,7 @@ def admin_late_exception_update(assignment_id: str = None, user_id: str = None, 
     db.session.commit()
 
     # Recalculate the late submissions
-    recalculate_late_submissions(student, assignment)
+    recalculate_late_submissions(student.id, assignment.id)
 
     # Break down for response
     return success_response({"status": "Late exceptions updated"})
