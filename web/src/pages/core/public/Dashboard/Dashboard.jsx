@@ -13,7 +13,6 @@ import useQuery from '../../../../hooks/useQuery';
 import CourseItem from '../../../../components/core/CourseItem/CourseItem';
 import AssignmentItem from '../../../../components/core/AssignmentItem/AssignmentItem';
 import SectionHeader from '../../../../components/shared/SectionHeader/SectionHeader';
-import CodeServerAd from '../../../../components/shared/Ad/CodeServerAd/CodeServerAd';
 
 const Dashboard = () => {
   const query = useQuery();
@@ -47,7 +46,6 @@ const Dashboard = () => {
     <StandardLayout>
       <SectionHeader isPage title='Anubis LMS Dashboard'/>
       <Box className={classes.divider}/>
-      <CodeServerAd/>
       <SectionHeader
         title='Courses'
         linkText='View All Courses'

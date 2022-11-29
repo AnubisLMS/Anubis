@@ -10,7 +10,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 
-import CodeServerAd from '../../../../components/shared/Ad/CodeServerAd/CodeServerAd';
 import ListHeader from '../../../../components/shared/ListHeader/ListHeader';
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';
@@ -229,7 +228,6 @@ export default function Playgrounds({imageId}) {
     <StandardLayout>
       <SectionHeader isPage title={'Playgrounds'}/>
       <Box className={classes.divider}/>
-      <CodeServerAd/>
       <ListHeader sections={['Your Playground', sessionState || 'No Active IDE']}/>
       <Box className={classes.imageTagContainer}>
         <Grid container xs={12} spacing={2}>
