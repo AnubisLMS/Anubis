@@ -83,7 +83,7 @@ def admin_late_exception_update(assignment_id: str = None, user_id: str = None, 
         # Create if it did not already exist
         late_exception = LateException(
             assignment_id=assignment.id,
-            user_id=student.id,
+            owner_id=student.id,
         )
         db.session.add(late_exception)
 
