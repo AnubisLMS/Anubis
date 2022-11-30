@@ -4,7 +4,8 @@ additionalArguments:
   - "--accesslog"
   - "--accesslog.format=json"
   - "--providers.kubernetescrd=true"
-  - "--certificatesresolvers.le.acme.tlschallenge=true"
+  - '--certificatesresolvers.le.acme.dnschallenge.provider=digitalocean'
+  - '--certificatesresolvers.le.acme.dnschallenge.delaybeforecheck=0'
   - "--certificatesresolvers.le.acme.email=noreply@anubis-lms.io"
   - "--certificatesresolvers.le.acme.storage=/data/acme.json"
 
@@ -157,8 +158,19 @@ ports:
       - main: anubis-lms.io
         sans:
           - ide.anubis-lms.io
-          - ide8000.anubis-lms.io
           - about.anubis-lms.io
+          - ide8000.anubis-lms.io
+          - ide8001.anubis-lms.io
+          - ide8002.anubis-lms.io
+          - ide8003.anubis-lms.io
+          - ide8004.anubis-lms.io
+          - ide8005.anubis-lms.io
+          - ide8006.anubis-lms.io
+          - ide8007.anubis-lms.io
+          - ide8008.anubis-lms.io
+          - ide8009.anubis-lms.io
+          - ide8010.anubis-lms.io
+
 
 podSecurityContext: null
 securityContext: null
