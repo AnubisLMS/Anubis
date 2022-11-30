@@ -18,7 +18,7 @@ revisionHistoryLimit: 3
 
 # Main anubis api
 api:
-  replicas: 3
+  replicas: 4
   workers: 2
   gunicorn_options: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
   image: "registry.digitalocean.com/anubis/api"
@@ -44,13 +44,15 @@ theia:
 
   # theia-poller deployment
   poller:
-    replicas: 3
+    replicas: 4
 
   # theia-proxy deployment
   proxy:
     replicas: 16
     image: "registry.digitalocean.com/anubis/theia-proxy"
     tag: "latest"
+    portMin: 8000
+    portMax: 8010
 
   prop:
     enable: true
