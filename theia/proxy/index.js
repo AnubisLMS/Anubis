@@ -158,7 +158,7 @@ var proxyServer = http.createServer(function (req, res) {
     default:
       if (token === null) {
         res.writeHead(302, {location: '/'});
-        res.end('Please start an ide at https://anubis.osiris.services and click go to ide.');
+        res.end('Please start an ide at https://anubis-lms.io/ and click go to ide.');
         return;
       }
 
@@ -176,7 +176,7 @@ var proxyServer = http.createServer(function (req, res) {
         res.writeHead(302, {location: '/?error=' +
             'Unable%20to%20connect%20you%20to%20your%20IDE.%20' +
             'Please%20try%20stopping%20and%20starting%20a%20new%20IDE.'});
-        res.end('Please start an ide at https://anubis.osiris.services and click go to ide.');
+        res.end('Please start an ide at https://anubis-lms.io/ and click go to ide.');
       })
   }
 });
