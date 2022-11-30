@@ -8,6 +8,7 @@ const luxon = require("luxon");
 
 const SECRET_KEY = process.env.SECRET_KEY ?? 'DEBUG';
 const DEBUG = process.env.DEBUG === '1';
+const MAX_PROXY_PORT = 8010;
 
 /**
  * Least Recently Used Cache for ip address lookups. Creating an
@@ -140,9 +141,11 @@ const updateProxyTime = session_id => {
 var proxyServer = http.createServer(function (req, res) {
   let {url, token, query, port} = parse_req(req);
   log_req(req, url);
-  
-  if ((req.headers?.host ?? '').startsWith('ide8000.'))
-    port = 8000;
+
+  for (let _port = 8000; _port <= MAX_PROXY_PORT; ++_port) {
+    if ((req.headers?.host ?? '').startsWith(`ide${_port}.`))
+      port = _port;
+  }
 
   switch (url.pathname) {
     case '/initialize':
@@ -162,9 +165,9 @@ var proxyServer = http.createServer(function (req, res) {
         return;
       }
 
-      if (port !== 5000 && (port < 8000 || port > 8010)) {
+      if (port !== 5000 && (port < 8000 || port > MAX_PROXY_PORT)) {
         res.writeHead(400)
-        res.end('Only valid proxy ports are 8000-8010');
+        res.end(`Only valid proxy ports are 8000-${MAX_PROXY_PORT}`);
         return;
       }
 
