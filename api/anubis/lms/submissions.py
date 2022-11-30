@@ -3,7 +3,6 @@ from datetime import datetime
 from anubis.lms.assignments import get_assignment_due_date
 from anubis.models import (
     Assignment,
-    AssignmentRepo,
     AssignmentTest,
     Course,
     InCourse,

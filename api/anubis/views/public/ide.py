@@ -9,6 +9,7 @@ from anubis.ide.get import get_n_available_sessions
 from anubis.ide.initialize import initialize_ide
 from anubis.ide.poll import theia_poll_ide
 from anubis.ide.redirect import theia_redirect_url
+from anubis.lms.assignments import get_assignment_due_date
 from anubis.lms.courses import is_course_admin
 from anubis.models import Assignment, AssignmentRepo, TheiaSession, db
 from anubis.rpc.enqueue import enqueue_ide_stop
@@ -41,12 +42,12 @@ def public_ide_initialize(assignment: Assignment):
     # Check for existing active session
     active_session = (
         TheiaSession.query.join(Assignment)
-            .filter(
+        .filter(
             TheiaSession.owner_id == current_user.id,
             TheiaSession.assignment_id == assignment.id,
             TheiaSession.active,
         )
-            .first()
+        .first()
     )
 
     # If there was an existing session for this assignment found, skip
@@ -73,9 +74,13 @@ def public_ide_initialize(assignment: Assignment):
             message="Assignment has not been released",
         )
 
+        # Get due date for this assignment. There may be a LateException on record for this student.
+        # In that case, this function will pull the proper datetime.
+        due_date = get_assignment_due_date(current_user.id, assignment.id, grace=True)
+
         # If 3 weeks has passed since the assignment has been due, then we should not allow
         # new sessions to be created
-        if assignment.due_date + timedelta(days=3 * 7) <= datetime.now():
+        if due_date + timedelta(days=3 * 7) <= datetime.now():
             return error_response("Assignment due date passed over 3 weeks ago. IDEs are disabled.")
 
     # If github repos are enabled for this assignment, then we will
@@ -142,9 +147,9 @@ def public_ide_initialize(assignment: Assignment):
     )
 
     return success_response({
-        "active": session.active,
+        "active":  session.active,
         "session": session.data,
-        "status": "Session created",
+        "status":  "Session created",
     })
 
 
@@ -196,7 +201,7 @@ def public_ide_active(assignment_id):
     # If they do have a session, then pass back True
     return success_response(
         {
-            "active": True,
+            "active":  True,
             "session": session.data,
         }
     )
@@ -240,7 +245,7 @@ def public_ide_stop(theia_session_id: str) -> dict[str, str]:
     # Pass back the status
     return success_response(
         {
-            "status": "Session stopped.",
+            "status":  "Session stopped.",
             "variant": "warning",
         }
     )
@@ -272,7 +277,7 @@ def public_ide_poll(theia_session_id: str) -> dict[str, str]:
     status, variant = {
         "Running": ("Session is now ready.", "success"),
         # "Ended": ("Session ended.", "warning"),
-        "Failed": ("Session failed to start. Please try again.", "error"),
+        "Failed":  ("Session failed to start. Please try again.", "error"),
     }.get(session_state, (None, None))
 
     # Pass back the status and data
@@ -280,7 +285,7 @@ def public_ide_poll(theia_session_id: str) -> dict[str, str]:
         {
             "loading": loading,
             "session": session_data,
-            "status": status,
+            "status":  status,
             "variant": variant,
         }
     )
