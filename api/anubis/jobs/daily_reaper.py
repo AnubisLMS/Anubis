@@ -2,7 +2,7 @@ import traceback
 
 from anubis.constants import REAPER_TXT
 from anubis.github.team import add_github_team_member, remote_github_team_member, list_github_team_members
-from anubis.lms.assignments import get_recent_assignments
+from anubis.lms.assignments import get_recent_assignments, verify_active_assignment_github_repo_collaborators
 from anubis.lms.courses import get_active_courses
 from anubis.lms.courses import get_course_tas, get_course_professors, get_course_users, user_to_user_id_set
 from anubis.lms.questions import fix_missing_question_assignments
@@ -144,6 +144,9 @@ def reap():
 
     # Check that course admins are in ta group on GitHub
     reap_github_admin_teams()
+
+    # Make sure all active assignment collaborators are up to date
+    verify_active_assignment_github_repo_collaborators()
 
 
 if __name__ == "__main__":

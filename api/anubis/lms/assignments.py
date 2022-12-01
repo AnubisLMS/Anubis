@@ -558,7 +558,7 @@ def clean_assignment_name(assignment: Assignment) -> str:
     return ''.join(c for c in assignment_name if c in valid_charset)
 
 
-def verify_active_assignment_github_repos():
+def verify_active_assignment_github_repo_collaborators():
     """
     Go through each github repo for each
 
