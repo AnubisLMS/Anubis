@@ -10,6 +10,11 @@ from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
 
 
+def parse_github_url(repo_url: str) -> tuple[str, str]:
+    org, repo = parse("https://github.com/{}/{}", repo_url)
+    return org, repo
+
+
 def get_github_template_ids(template_repo: str, github_org: str):
     id_query = """
     query githubTemplateInfo($orgName: String!, $templateName: String!, $templateOwner: String!) {  
@@ -36,7 +41,7 @@ def get_github_template_ids(template_repo: str, github_org: str):
     )
 
 
-def create_repo_from_template(owner_id: str, template_repo_id: str, new_repo_name: str):
+def create_repo_from_template(owner_id: str, template_repo_id: str, repo_name: str):
     create_query = """
     mutation githubTemplateCreate($ownerId: ID!, $templateRepoId: ID!, $newName: String!) { 
       cloneTemplateRepository(input: {
@@ -58,14 +63,14 @@ def create_repo_from_template(owner_id: str, template_repo_id: str, new_repo_nam
         {
             "ownerId":        owner_id,
             "templateRepoId": template_repo_id,
-            "newName":        new_repo_name,
+            "newName":        repo_name,
         },
     )
 
 
-def add_team(github_org: str, new_repo_name: str, team_slug: str):
+def add_team(github_org: str, repo_name: str, team_slug: str):
     return github_rest(
-        f"/orgs/{github_org}/teams/{team_slug}/repos/{github_org}/{new_repo_name}",
+        f"/orgs/{github_org}/teams/{team_slug}/repos/{github_org}/{repo_name}",
         {
             "permission": "admin",
         },
@@ -73,14 +78,24 @@ def add_team(github_org: str, new_repo_name: str, team_slug: str):
     )
 
 
-def add_collaborator(github_org: str, new_repo_name: str, github_username: str):
+def add_collaborator(github_org: str, repo_name: str, github_username: str):
     return github_rest(
-        f"/repos/{github_org}/{new_repo_name}/collaborators/{github_username}",
+        f"/repos/{github_org}/{repo_name}/collaborators/{github_username}",
         {
             "permission": "push",
         },
         method="put",
     )
+
+
+def list_collaborators(github_org: str, repo_name: str) -> list[str]:
+    return [
+        collaborator.get('login', None)
+        for collaborator in github_rest(
+            f"/repos/{github_org}/{repo_name}/collaborators",
+            method="get"
+        )
+    ]
 
 
 def get_github_safe_assignment_name(assignment: Assignment) -> str:
@@ -169,7 +184,7 @@ def delete_assignment_repo(user: User, assignment: Assignment, commit: bool = Tr
         ).delete()
 
         # Parse out github org and repo_name from url before deletion
-        github_org, repo_name = parse("https://github.com/{}/{}", repo.repo_url)
+        github_org, repo_name = parse_github_url(repo.repo_url)
 
         # Delete the repo
         logger.info(f'Deleting assignment repo db record')
@@ -452,3 +467,45 @@ def create_assignment_github_repo(
         logger.warning(traceback.format_exc())
 
     return repos, list(errors)
+
+
+def verify_collaborators_assignment_repo(assignment_repo: AssignmentRepo):
+    # Get github org and repo name from the url of the assignment
+    github_org, repo_name = parse_github_url(assignment_repo.repo_url)
+
+    # Get repo owner's github username
+    github_username: str = assignment_repo.owner.github_username
+
+    # Log the verify call
+    logger.info(f'verify_collaborators_assignment_repo( {github_org}/{repo_name} )')
+
+    try:
+        # Get list of all collaborators for repo
+        collaborators = list_collaborators(github_org, repo_name)
+
+        # If missing collaborator, then we need to add them
+        if github_username not in collaborators:
+            # Log the add
+            logger.info(f'Adding missing collaborator to {github_org}/{repo_name}')
+
+            # Add collaborator
+            add_collaborator(github_org, repo_name, github_username)
+
+    except Exception as e:
+        logger.warning(f'verify_collaborators_assignment_repo( {github_org}/{repo_name} )\n'
+                       f'Exception = {e}\n'
+                       f'{traceback.format_exc()}')
+
+
+def verify_collaborators_assignment(assignment: Assignment):
+    # Log verify call
+    logger.info(f'verify_collaborators_assignment( {assignment=} )')
+
+    # Get all repos for assignment
+    assignment_repos = AssignmentRepo.query.filter(
+        AssignmentRepo.assignment_id == assignment.id,
+    ).all()
+
+    # Verify repo for each repo in assignment
+    for assignment_repo in assignment_repos:
+        verify_collaborators_assignment_repo(assignment_repo)

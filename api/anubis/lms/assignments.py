@@ -34,6 +34,7 @@ from anubis.utils.cache import cache
 from anubis.utils.config import get_config_int
 from anubis.utils.data import is_debug
 from anubis.utils.data import req_assert
+from anubis.github.repos import verify_collaborators_assignment
 
 
 @cache.memoize(timeout=30, unless=is_debug)
@@ -555,5 +556,17 @@ def clean_assignment_name(assignment: Assignment) -> str:
     valid_charset = set(string.ascii_letters + string.digits)
 
     return ''.join(c for c in assignment_name if c in valid_charset)
+
+
+def verify_active_assignment_github_repos():
+    """
+    Go through each github repo for each
+
+    :return:
+    """
+    active_assignments = get_active_assignment()
+
+    for assignment in active_assignments:
+        verify_collaborators_assignment(assignment)
 
 
