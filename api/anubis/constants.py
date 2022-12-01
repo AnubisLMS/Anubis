@@ -1,3 +1,4 @@
+# Standard IDE variables
 THEIA_DEFAULT_OPTIONS = {
     "autosave": True,
     "persistent_storage": False,
@@ -8,6 +9,7 @@ THEIA_DEFAULT_OPTIONS = {
     },
 }
 
+# Developer IDE variables
 DEVELOPER_DEFAULT_IMAGE = "registry.digitalocean.com/anubis/theia-base"
 DEVELOPER_DEFAULT_OPTIONS = {
     "autosave": False,
@@ -19,6 +21,7 @@ DEVELOPER_DEFAULT_OPTIONS = {
     },
 }
 
+# Webtop IDE variables
 WEBTOP_DEFAULT_OPTIONS = {
     "autosave": True,
     "persistent_storage": False,
@@ -29,15 +32,20 @@ WEBTOP_DEFAULT_OPTIONS = {
     },
 }
 
+# Autograde IDE related variables
 AUTOGRADE_IDE_DEFAULT_IMAGE = "registry.digitalocean.com/anubis/theia-jepst-test"
 
+# NYU specific variables
+NYU_DOMAIN = 'anubis.osiris.services'
 
+# Database Variables
 DB_COLLATION = "utf8mb4_general_ci"
 DB_CHARSET = "utf8mb4"
 
+# Google Gmail variables
 EMAIL_FROM = "noreply@anubis-lms.io"
-
-NYU_DOMAIN = 'anubis.osiris.services'
+GOOGLE_GMAIL_CREDS_SECRET = "google-gmail-creds"
+GOOGLE_GMAIL_CREDS_SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
 
 REAPER_TXT = """

@@ -29,7 +29,6 @@ events = [
 
 
 def _send_assignment_condition_email_notifications(
-    service: googleapiclient.discovery.Resource,
     recent_assignments: list[Assignment],
     condition: Callable[[Assignment], bool],
     template_key: str,
@@ -76,7 +75,6 @@ def _send_assignment_condition_email_notifications(
             logger.debug(f'Sending email for user based off preferences user_id={student.id}')
 
             send_email_event(
-                service,
                 student,
                 assignment.id,
                 reference_type,
@@ -90,16 +88,8 @@ def email_notifications():
     recent_assignments = get_active_assignment()
     logger.info(f'recent_assignments = {str(recent_assignments)}')
 
-    service = build_google_service(
-        'google-gmail-creds',
-        'gmail',
-        'v1',
-        ['https://www.googleapis.com/auth/gmail.send']
-    )
-
     for event in events:
         _send_assignment_condition_email_notifications(
-            service,
             recent_assignments,
             event['condition'],
             event['template_key'],

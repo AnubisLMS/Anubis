@@ -1,19 +1,16 @@
 import traceback
 
-import googleapiclient.discovery
 import jinja2
 from googleapiclient.errors import Error
 
-
 from anubis.constants import EMAIL_FROM
+from anubis.utils.google.gmail import send_message
 from anubis.models import db, User, EmailTemplate, EmailEvent
-from anubis.google.gmail import send_message
 from anubis.utils.email.smtp import create_message
 from anubis.utils.logging import logger
 
 
 def send_email_event(
-    service: googleapiclient.discovery.Resource,
     user: User,
     reference_id: str,
     reference_type: str,
@@ -55,7 +52,7 @@ def send_email_event(
 
     # Send email
     try:
-        success = send_message(service, message) is not False
+        success = send_message(message) is not False
     except Error as e:
         logger.error(f'Failed to send email!\nerror={e}\n\n{traceback.format_exc()}\nemail={message}')
         return
@@ -71,4 +68,3 @@ def send_email_event(
         )
         db.session.add(event)
         db.session.commit()
-

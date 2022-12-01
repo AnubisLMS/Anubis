@@ -6,10 +6,20 @@ import googleapiclient.discovery
 from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
 from anubis.utils.config import get_config_bool
+from anubis.utils.google.service import build_google_service
+from anubis.constants import GOOGLE_GMAIL_CREDS_SCOPES, GOOGLE_GMAIL_CREDS_SECRET
+
+
+def get_gmail_service() -> googleapiclient.discovery.Resource:
+    return build_google_service(
+        GOOGLE_GMAIL_CREDS_SECRET,
+        'gmail',
+        'v1',
+        GOOGLE_GMAIL_CREDS_SCOPES
+    )
 
 
 def send_message(
-    service: googleapiclient.discovery.Resource,
     message: dict[str, str],
     user_id="me",
     force: bool = False,
@@ -18,14 +28,15 @@ def send_message(
     """Send an email message.
 
     Args:
-      service: Authorized Gmail API service instance.
+      message: Message to be sent.
       user_id: User's email address. The special value "me"
       can be used to indicate the authenticated user.
-      message: Message to be sent.
 
     Returns:
       Sent Message.
     """
+
+    service = get_gmail_service()
 
     email_send_enabled: bool = get_config_bool('EMAIL_SEND_ENABLED', default=False)
 
