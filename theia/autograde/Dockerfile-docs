@@ -1,0 +1,17 @@
+ARG PYTHON_VERSION=3.10
+FROM python:${PYTHON_VERSION}-slim-bullseye AS build
+WORKDIR /build
+
+COPY requirements.txt requirements_dev.txt /build/
+RUN set -eux; \
+    apt update; \
+    apt install -y make; \
+    pip install --no-cache-dir -r requirements.txt -r requirements_dev.txt; \
+    rm -rf /usr/share/doc; \
+    rm -rf /var/cache/apt/*; \
+    rm -rf /var/lib/apt/lists/*
+COPY . .
+RUN make docs
+
+FROM nginxinc/nginx-unprivileged:1.23-alpine
+COPY --from=build /build/docs/html/ /usr/share/nginx/html/

@@ -1,16 +1,16 @@
-{{- if and .Values.cli_docs.enable (not .Values.debug) }}
+{{- if .Values.autograde_docs.enable }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "chart.fullname" . }}-cli-docs
+  name: {{ include "chart.fullname" . }}-theia-autograde-docs
   labels:
     {{- include "chart.labels" . | nindent 4 }}
-    component: cli-docs
+    component: theia-autograde-docs
 spec:
   selector:
     matchLabels:
       {{- include "chart.selectorLabels" . | nindent 6 }}
-      component: cli-docs
+      component: theia-autograde-docs
   replicas: {{ .Values.marketing.replicas }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if .Values.rollingUpdates }}
@@ -24,12 +24,12 @@ spec:
     metadata:
       labels:
         {{- include "chart.selectorLabels" . | nindent 8 }}
-        component: cli-docs
+        component: theia-autograde-docs
     spec:
       dnsPolicy: ClusterFirst
       containers:
       - name: web
-        image: "{{ .Values.cli_docs.image }}:latest"
+        image: "{{ .Values.autograde_docs.image }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
           requests:
@@ -40,26 +40,26 @@ spec:
             memory: 500Mi
         ports:
         - name: web
-          containerPort: {{ .Values.cli_docs.port }}
+          containerPort: {{ .Values.autograde_docs.port }}
         {{- if .Values.healthChecks }}
         startupProbe:
           httpGet:
             path: /
-            port: {{ .Values.cli_docs.port }}
+            port: {{ .Values.autograde_docs.port }}
           initialDelaySeconds: 1
           periodSeconds: 1
           failureThreshold: 60
         livenessProbe:
           httpGet:
             path: /
-            port: {{ .Values.cli_docs.port }}
+            port: {{ .Values.autograde_docs.port }}
           initialDelaySeconds: 60
           failureThreshold: 10
           periodSeconds: 60
         readinessProbe:
           httpGet:
             path: /
-            port: {{ .Values.cli_docs.port }}
+            port: {{ .Values.autograde_docs.port }}
           initialDelaySeconds: 3
           periodSeconds: 3
           failureThreshold: 1
@@ -69,16 +69,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "chart.fullname" . }}-cli-docs
+  name: {{ include "chart.fullname" . }}-theia-autograde-docs
   labels:
     {{- include "chart.labels" . | nindent 4 }}
-    component: cli-docs
+    component: theia-autograde-docs
 spec:
   selector:
     {{- include "chart.selectorLabels" . | nindent 4 }}
-    component: cli-docs
+    component: theia-autograde-docs
   ports:
   - name: web
-    port: 8080
-    targetPort: 8080
+    port: {{ .Values.autograde_docs.port }}
+    targetPort: {{ .Values.autograde_docs.port }}
 {{- end }}

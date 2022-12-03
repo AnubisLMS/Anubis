@@ -3,13 +3,16 @@ DEBUG_PERSISTENT_SERVICES := db traefik redis-master
 DEBUG_RESTART_ALWAYS_SERVICES := api web-dev rpc-default rpc-theia rpc-regrade
 
 # docker compose settings
-DOCKER_COMPOSE_PUSH_SERVICES := api web theia-init theia-autosave theia-autograde theia-proxy theia-dockerd
+DOCKER_COMPOSE_PUSH_SERVICES := \
+	api web \
+	theia-init theia-autosave theia-autograde \
+	theia-proxy theia-dockerd theia-autograde-docs
 
 # K8S
 K8S_RESTART_DEPLOYMENTS := \
 	anubis-api anubis-web anubis-pipeline-api anubis-pipeline-poller anubis-theia-proxy \
 	anubis-rpc-default anubis-rpc-theia anubis-rpc-regrade \
-	anubis-theia-poller anubis-discord-bot
+	anubis-theia-poller anubis-discord-bot anubis-theia-autograde-docs
 
 # To tag docker images
 GIT_TAG ?= $(shell git log -1 --pretty=%h)

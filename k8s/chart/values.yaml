@@ -107,7 +107,7 @@ theia:
       image: "registry.digitalocean.com/anubis/webtop-base:python-3.10"
 
 # Discord Bot
-discordbot:
+discord_bot:
   enable: true
   replicas: 1
 
@@ -118,11 +118,18 @@ marketing:
   tag: "latest"
   replicas: 1
 
-clidocs:
+cli_docs:
   enable: true
   image: "registry.digitalocean.com/anubis/docs"
   tag: "latest"
   replicas: 1
+  port: 8080
+
+autograde_docs:
+  enable: true
+  image: "registry.digitalocean.com/anubis/theia-autograde-docs"
+  replicas: 1
+  port: 8080
 
 ###############################################################################
 

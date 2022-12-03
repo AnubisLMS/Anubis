@@ -37,6 +37,19 @@ spec:
       - "/docs"
 ---
 
+# Strip prefix /autograde
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-autograde
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+spec:
+  stripPrefix:
+    prefixes:
+      - "/autograde"
+---
+
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
@@ -181,6 +194,36 @@ spec:
     - name: strip-docs
     services:
     - name: {{ include "chart.fullname" . }}-cli-docs
+      port: 8080
+  {{- if not .Values.debug }}
+  tls:
+    certResolver: le
+  {{- end }}
+---
+
+# Public Ingress Route /*
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingress.route.anubis.theia-autograde-docs
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: theia-autograde-docs
+spec:
+  {{- if .Values.debug }}
+  entryPoints:
+    - web
+  {{- else }}
+  entryPoints:
+    - websecure
+  {{- end }}
+  routes:
+  - kind: Rule
+    match: Host(`{{ .Values.domain }}`) && PathPrefix(`/autograde`)
+    middlewares:
+    - name: strip-autograde
+    services:
+    - name: {{ include "chart.fullname" . }}-theia-autograde-docs
       port: 8080
   {{- if not .Values.debug }}
   tls:

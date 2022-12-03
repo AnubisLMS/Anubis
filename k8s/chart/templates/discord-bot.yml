@@ -1,4 +1,4 @@
-{{- if .Values.discordbot.enable }}
+{{- if .Values.discord_bot.enable }}
 
 apiVersion: apps/v1
 kind: Deployment
@@ -13,7 +13,7 @@ spec:
     matchLabels:
       {{- include "chart.selectorLabels" . | nindent 6 }}
       component: discord-bot
-  replicas: {{ .Values.discordbot.replicas }}
+  replicas: {{ .Values.discord_bot.replicas }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if .Values.rollingUpdates }}
   strategy:

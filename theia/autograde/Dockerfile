@@ -1,9 +1,10 @@
 FROM python:3.10-alpine
 
+COPY requirements.txt /requirements.txt
 RUN set -eux; \
     adduser -D -u 1001 -h /home/theia anubis; \
     apk add --update --no-cache git bash; \
-    pip3 install --no-cache-dir flask supervisor gunicorn
+    pip3 install --no-cache-dir -r /requirements.txt
 
 USER anubis
 RUN set -eux; \
