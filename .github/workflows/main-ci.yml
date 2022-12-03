@@ -133,6 +133,7 @@ jobs:
           - theia-init
           - theia-autosave
           - theia-autograde
+          - theia-autograde-docs
           - theia-dockerd
     steps:
       - uses: actions/checkout@v2
