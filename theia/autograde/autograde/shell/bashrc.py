@@ -1,9 +1,9 @@
 import argparse
-
-import jinja2
 import os
 
-from autograde.exercise import get_exercises
+import jinja2
+
+from autograde.exercise.get import get_exercises
 from autograde.logging import log
 
 bashrc_template = jinja2.Template("""
@@ -66,7 +66,6 @@ set_ps1
 """)
 
 
-
 def init_bashrc(args: argparse.Namespace):
     exercises = get_exercises()
 
@@ -80,10 +79,3 @@ def init_bashrc(args: argparse.Namespace):
     log.debug(bashrc)
     with open(bashrc_path, 'w') as bashrc_file:
         bashrc_file.write(bashrc)
-
-
-def run_debug_shell(_: argparse.Namespace):
-    if os.path.exists('.bashrc'):
-        log.error(f'')
-    os.system('bash --rcfile .bashrc')
-

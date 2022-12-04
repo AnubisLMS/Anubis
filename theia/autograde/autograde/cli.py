@@ -1,8 +1,8 @@
 import argparse
 
 from autograde.logging import init_logging
-from autograde.server import run_server
-from autograde.shell import run_debug_shell
+from autograde.server.run import run_server
+from autograde.shell.run import run_debug_shell
 
 
 def noargs(_):

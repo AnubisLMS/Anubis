@@ -1,46 +1,10 @@
-import argparse
 import os
-import traceback
 
-
+from autograde.exercise.get import get_exercises
+from autograde.exercise.find import find_exercise
 from autograde.logging import log
-from autograde.models import FileSystemState, FileSystemCondition, Exercise, UserState
+from autograde.models import UserState, Exercise, FileSystemCondition, FileSystemState
 from autograde.utils import RejectionException
-
-_exercises: list[Exercise] | None = None
-
-
-def get_exercises() -> list[Exercise]:
-    return _exercises
-
-
-def init_exercises(args: argparse.Namespace):
-    global _exercises
-
-    try:
-        module_name = args.exercise_module.removesuffix('.py')
-        exercise_module = __import__(module_name)
-    except Exception as e:
-        log.error(traceback.format_exc())
-        log.error(f'Failed to import exercise module {e=}')
-        exit(1)
-
-    try:
-        _exercises = exercise_module._exercises
-    except Exception as e:
-        log.error(traceback.format_exc())
-        log.error(f'Failed to import exercise module {e=}')
-        exit(1)
-
-    log.info(f'loaded exercises {_exercises=}')
-
-
-def find_exercise(name: str) -> tuple[Exercise| None, int]:
-    for index, exercise in enumerate(_exercises):
-        if exercise.name == name:
-            return exercise, index
-    else:
-        return None, -1
 
 
 def verify_exercise(user_state: UserState) -> Exercise:
@@ -52,9 +16,10 @@ def verify_exercise(user_state: UserState) -> Exercise:
 
 def verify_required(exercise: Exercise, _: UserState):
     _, index = find_exercise(exercise.name)
+    exercises = get_exercises()
 
     for required_exercise_index in range(index):
-        required_exercise = _exercises[required_exercise_index]
+        required_exercise = exercises[required_exercise_index]
         if not required_exercise.complete:
             raise RejectionException(f'Required exercise not complete: {required_exercise.name}')
 
