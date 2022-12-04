@@ -14,7 +14,7 @@ contains everything you will need to create, run, and debug anubis shell autogra
 assignments.
 
 .. NOTE::
-   If you are in an Anubis Admin IDE, you do not need to install the package. It will be pre-installed.
+   If you are in an Anubis IDE, you do not need to install the package. It will be pre-installed.
 
 .. code-block:: sh
    :caption: Install Anubis Shell Autograder CLI
