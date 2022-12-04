@@ -1,24 +1,12 @@
 import functools
+import string
 
-from flask import Response, make_response, request
-
-from anubis_autograde.models import UserState
+from flask import Response, make_response
 
 
-def user_state_from_request() -> UserState:
-    user_exercise_name: str = request.form.get('exercise', default='').strip()
-    user_command: str = request.form.get('command', default='')
-    user_output: str = request.form.get('output', default='')
-    user_cwd: str = request.form.get('cwd', default='/home/anubis')
-
-    user_state = UserState(
-        exercise_name=user_exercise_name,
-        command=user_command,
-        output=user_output,
-        cwd=user_cwd,
-    )
-
-    return user_state
+def remove_unprintable(s: str | bytes) -> str:
+    valid: set[int] = set(ord(c) for c in string.printable)
+    return ''.join(chr(c) for c in s if (c if isinstance(c, int) else ord(c)) in valid)
 
 
 def text_response(func):

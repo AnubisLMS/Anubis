@@ -1,4 +1,5 @@
 import os
+import traceback
 
 from anubis_autograde.exercise.get import get_exercises
 from anubis_autograde.exercise.find import find_exercise
@@ -86,14 +87,38 @@ def verify_filesystem_conditions(exercise: Exercise, _: UserState):
                     raise RejectionException(f'File: {path} does not match expected content')
 
 
+def verify_env_var_conditions(exercise: Exercise, user_state: UserState):
+    pass
+
+
+def run_eject_function(exercise: Exercise, user_state: UserState):
+    log.info(f'Running eject function for {exercise=} {user_state=}')
+    try:
+        complete = exercise.eject_function(exercise, user_state)
+
+        # Verify that the return value for the eject function is actually a bool
+        if not isinstance(complete, bool):
+            log.error(f'return of eject_function for {exercise.name} was not bool {complete=}')
+            return
+
+        exercise.complete = complete
+    except Exception:
+        log.error(f'{traceback.format_exc()}\neject_function for {exercise.name} threw error')
+
+
 def run_exercise(user_state: UserState) -> Exercise:
     exercise = verify_exercise(user_state)
-
     verify_required(exercise, user_state)
+
+    # If eject function specified, then run that and return
+    if exercise.eject_function is not None:
+        run_eject_function(exercise, user_state)
+        return exercise
+
     verify_command_regex(exercise, user_state)
     verify_output_regex(exercise, user_state)
     verify_filesystem_conditions(exercise, user_state)
 
     exercise.complete = True
 
-    return Exercise
+    return exercise

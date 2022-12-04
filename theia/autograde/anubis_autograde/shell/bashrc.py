@@ -20,36 +20,38 @@ status() {
     curl http://localhost:5003/status -s
 }
 
-current_excercise() {
+current_exercise() {
     echo ${EXERCISES[EXERCISE_INDEX]}
 }
 
 set_ps1() {
-    export PS1="(\\[\\033[01;34m\\]$(current_excercise)\\[\\033[00m\\]) ${debian_chroot:+($debian_chroot)}\\[\\033[01;32m\\]\\u@\\h\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$ "
+    export PS1="(\\[\\033[01;34m\\]$(current_exercise)\\[\\033[00m\\]) ${debian_chroot:+($debian_chroot)}\\[\\033[01;32m\\]\\u@\\h\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$ "
 }
 
 check_exercise() {
-    EXERCISE=$(current_excercise)
-    ENVIRONMENT=$(env)
-    COMMAND=$(HISTTIMEFORMAT= history 1 | sed -e "s/^[ ]*[0-9]*[ ]*//")
+    EXERCISE=$(current_exercise)
+    ENVIRONMENT=$(env | base64)
+    COMMAND=$(cat /tmp/command 2>&1)
     OUTPUT=$(cat /tmp/output 2>&1)
     [ "$COMMAND" = "status" ] && return
+    [ "$COMMAND" = "" ] && return
     STATUS_CODE=$(curl http://localhost:5003/submit \\
         --output /dev/stderr --write-out "%{http_code}" \\
         --data "exercise=${EXERCISE}" \\
         --data "command=${COMMAND}" \\
         --data "output=${OUTPUT}" \\
         --data "cwd=${PWD}" \\
+        --data "env=${ENVIRONMENT}" \\
         -s)
     if (( $STATUS_CODE == 200 )); then
         EXERCISE_INDEX=$(( $EXERCISE_INDEX + 1 ))
     fi
+    echo -n > /tmp/output > /tmp/command
     set_ps1
 }
 PROMPT_COMMAND="check_exercise"
 
 preexec_invoke_exec () {
-    [ -n "$COMP_LINE" ] && return
     [ "$BASH_COMMAND" = "$PROMPT_COMMAND" ] && return
     [ "$BASH_COMMAND" = "status" ] && return
 
@@ -71,7 +73,7 @@ def init_bashrc(args: argparse.Namespace):
     exercises = get_exercises()
 
     home = os.environ['HOME']
-    bashrc_dir = home if not args.prod else os.getcwd()
+    bashrc_dir = home if args.prod else os.getcwd()
     bashrc_path = os.path.join(bashrc_dir, '.bashrc')
 
     log.info(f'Generating shell rc {bashrc_path=} {exercises=}')

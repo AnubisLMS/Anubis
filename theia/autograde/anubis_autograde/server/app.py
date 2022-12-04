@@ -1,8 +1,8 @@
 from flask import Flask
 
-from anubis_autograde.exercise.get import get_exercises
+from anubis_autograde.exercise.get import get_exercises, get_user_state
 from anubis_autograde.exercise.verify import run_exercise
-from anubis_autograde.utils import text_response, reject_handler, user_state_from_request
+from anubis_autograde.utils import text_response, reject_handler
 
 app = Flask(__name__)
 
@@ -22,7 +22,7 @@ def status():
 @reject_handler
 def submit():
     # Get options from the form
-    user_state = user_state_from_request()
+    user_state = get_user_state()
     exercise = run_exercise(user_state)
 
     return exercise.win_message.format(
