@@ -52,7 +52,8 @@ def complete_reject(func):
     def wrapper(*args, **kwargs) -> Response | tuple[str, int]:
         from anubis_autograde.exercise.get import is_all_complete
         if is_all_complete():
-            return f'This assignment is complete. You can use the reset command to replay.'
+            return f'This assignment is complete. ' \
+                   f'You can use the reset command to replay.', 200
         return func(*args, **kwargs)
 
     return wrapper
