@@ -1,66 +1,62 @@
+import argparse
 import os
-import re
+import traceback
 
-from flask import current_app
+
+from autograde.logging import log
 from autograde.models import FileSystemState, FileSystemCondition, Exercise, UserState
 from autograde.utils import RejectionException
 
-exercises: dict[str, Exercise] = {
-    'helloworld':       Exercise(
-        name='helloworld',
-        command_regex=re.compile(r'echo \'?"?[Hh]ello\s[Ww]orld!?\'?"?'),
-        output_regex=re.compile(r'[Hh]ello\s[Ww]orld!?'),
-    ),
-    'mkdir exercise1':  Exercise(
-        name='mkdir exercise1',
-        requires_exercises=['helloworld'],
-        command_regex=re.compile(r'mkdir \'?"?exercise1?\'?"?'),
-        filesystem_conditions=[
-            FileSystemCondition(
-                path='exercise1',
-                directory=True,
-                state=FileSystemState.PRESENT,
-            )
-        ]
-    ),
-    'cd exercise1':     Exercise(
-        name='cd exercise1',
-        requires_exercises=['mkdir exercise1'],
-        command_regex=re.compile(r'cd \'?"?exercise1?\'?"?'),
-    ),
-    'pipe hello world': Exercise(
-        name='pipe hello world',
-        requires_exercises=['cd exercise1'],
-        command_regex=re.compile(r'echo \'?"?[Hh]ello\s[Ww]orld!?\'?"? > exercise.txt'),
-        filesystem_conditions=[
-            FileSystemCondition(
-                path='exercise1/exercise.txt',
-                state=FileSystemState.PRESENT,
-                content_regex=re.compile(r'[Hh]ello\s[Ww]orld!')
-            )
-        ]
-    ),
-}
+_exercises: list[Exercise] | None = None
+
+
+def get_exercises() -> list[Exercise]:
+    return _exercises
+
+
+def init_exercises(args: argparse.Namespace):
+    global _exercises
+
+    try:
+        module_name = args.exercise_module.removesuffix('.py')
+        exercise_module = __import__(module_name)
+    except Exception as e:
+        log.error(traceback.format_exc())
+        log.error(f'Failed to import exercise module {e=}')
+        exit(1)
+
+    try:
+        _exercises = exercise_module._exercises
+    except Exception as e:
+        log.error(traceback.format_exc())
+        log.error(f'Failed to import exercise module {e=}')
+        exit(1)
+
+    log.info(f'loaded exercises {_exercises=}')
+
+
+def find_exercise(name: str) -> tuple[Exercise| None, int]:
+    for index, exercise in enumerate(_exercises):
+        if exercise.name == name:
+            return exercise, index
+    else:
+        return None, -1
 
 
 def verify_exercise(user_state: UserState) -> Exercise:
-    exercise = exercises.get(user_state.exercise_name, None)
+    exercise, _ = find_exercise(user_state.exercise_name)
     if exercise is None:
         raise RejectionException('Exercise not found!')
     return exercise
 
 
 def verify_required(exercise: Exercise, _: UserState):
-    # Verify required exercises complete
-    if exercise.requires_exercises is None:
-        return
+    _, index = find_exercise(exercise.name)
 
-    current_app.logger.info(f'exercise.requires_exercises = {exercise.requires_exercises}')
-
-    for requires_exercise_name in exercise.requires_exercises:
-        requires_exercise = exercises[requires_exercise_name]
-        if not requires_exercise.complete:
-            raise RejectionException(f'Required exercise not complete: {requires_exercise.name}')
+    for required_exercise_index in range(index):
+        required_exercise = _exercises[required_exercise_index]
+        if not required_exercise.complete:
+            raise RejectionException(f'Required exercise not complete: {required_exercise.name}')
 
 
 def verify_command_regex(exercise: Exercise, user_state: UserState):
@@ -68,7 +64,7 @@ def verify_command_regex(exercise: Exercise, user_state: UserState):
     if exercise.command_regex is None:
         return
 
-    current_app.logger.info(f'exercise.command_regex = {exercise.command_regex}')
+    log.info(f'exercise.command_regex = {exercise.command_regex}')
 
     command_match = exercise.command_regex.match(user_state.command)
     if command_match is None:
@@ -80,7 +76,7 @@ def verify_output_regex(exercise: Exercise, user_state: UserState):
     if exercise.output_regex is None:
         return
 
-    current_app.logger.info(f'exercise.command_regex = {exercise.command_regex}')
+    log.info(f'exercise.command_regex = {exercise.command_regex}')
 
     output_match = exercise.output_regex.match(user_state.output)
     if output_match is None:
@@ -92,6 +88,7 @@ def verify_filesystem_conditions(exercise: Exercise, _: UserState):
         return
 
     for filesystem_condition in exercise.filesystem_conditions:
+        filesystem_condition: FileSystemCondition
         path = os.path.join('/home/anubis', filesystem_condition.path)
         exists = os.path.exists(path)
         isdir = os.path.isdir(path)

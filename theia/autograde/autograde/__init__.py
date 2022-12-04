@@ -1,1 +1,1 @@
-from autograde.app import app
+from autograde.cli import main

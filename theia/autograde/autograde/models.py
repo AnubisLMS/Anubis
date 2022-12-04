@@ -20,7 +20,6 @@ class FileSystemCondition:
 @dataclasses.dataclass
 class Exercise:
     name: str = None
-    requires_exercises: list[str] = None
     win_message: str = 'Congrats! You did the exercise by typing {user_command}'
     command_regex: re.Pattern = None
     output_regex: re.Pattern = None
