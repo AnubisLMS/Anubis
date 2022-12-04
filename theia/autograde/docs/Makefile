@@ -5,7 +5,7 @@
 PYTHON       ?= python
 SPHINXOPTS    =
 SPHINXBUILD   = -msphinx
-SPHINXPROJ    = anubis
+SPHINXPROJ    = anubis_autograde
 SOURCEDIR     = .
 BUILDDIR      = .
 

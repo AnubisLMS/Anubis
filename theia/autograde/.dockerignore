@@ -2,3 +2,8 @@ venv
 docs/doctrees
 docs/html
 exercise.py
+
+/docs/anubis_autograde.exercise.rst
+/docs/anubis_autograde.rst
+/docs/anubis_autograde.server.rst
+/docs/anubis_autograde.shell.rst

@@ -10,7 +10,7 @@ exercise_template = jinja2.Template("""
 
 import re
 
-from autograde.models import Exercise, FileSystemCondition, FileSystemState
+from anubis_autograde.models import Exercise, FileSystemCondition, FileSystemState
 
 
 exercises: list[Exercise] = [

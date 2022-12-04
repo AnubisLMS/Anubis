@@ -61,7 +61,7 @@ clean-docs: ## remove docs generated files
 
 docs: ## Generate docs
 	$(MAKE) -C docs clean
-	$(VENV)sphinx-apidoc -o docs/ autograde
+	$(VENV)sphinx-apidoc -o docs/ anubis_autograde
 	$(MAKE) -C docs PYTHON=$(PYTHON) html
 
 docs-preview: ## View generated docs

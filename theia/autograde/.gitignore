@@ -112,6 +112,7 @@ exercise.py
 
 docs/modules.rst
 docs/autograde*.rst
+docs/anubis_autograde*.rst
 
 docs/html
 docs/doctrees
