@@ -108,7 +108,7 @@ ENV/
 assignment-test*
 exercise.py
 .idea
-
+.bashrc
 
 docs/modules.rst
 docs/autograde*.rst
