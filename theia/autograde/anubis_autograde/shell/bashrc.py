@@ -30,6 +30,7 @@ set_ps1() {
 
 check_exercise() {
     EXERCISE=$(current_excercise)
+    ENVIRONMENT=$(env)
     COMMAND=$(HISTTIMEFORMAT= history 1 | sed -e "s/^[ ]*[0-9]*[ ]*//")
     OUTPUT=$(cat /tmp/output 2>&1)
     [ "$COMMAND" = "status" ] && return
@@ -70,7 +71,7 @@ def init_bashrc(args: argparse.Namespace):
     exercises = get_exercises()
 
     home = os.environ['HOME']
-    bashrc_dir = home if not args.debug else os.getcwd()
+    bashrc_dir = home if not args.prod else os.getcwd()
     bashrc_path = os.path.join(bashrc_dir, '.bashrc')
 
     log.info(f'Generating shell rc {bashrc_path=} {exercises=}')

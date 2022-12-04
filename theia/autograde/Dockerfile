@@ -4,7 +4,7 @@ COPY requirements.txt /requirements.txt
 RUN set -eux; \
     adduser -D -u 1001 -h /home/theia anubis; \
     apk add --update --no-cache git bash; \
-    pip3 install --no-cache-dir -r /requirements.txt
+    pip3 install --no-cache-dir -r /requirements.txt \
 
 USER anubis
 RUN set -eux; \

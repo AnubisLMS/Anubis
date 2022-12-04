@@ -29,6 +29,7 @@ def make_parser() -> argparse.ArgumentParser:
     parser_server.add_argument('--token', default=None, help='')
     parser_server.add_argument('--netid', default=None, help='')
     parser_server.add_argument('--test', action='store_true')
+    parser_server.add_argument('--prod', action='store_true', help='Enables production mode. This will overwrite the ')
     parser_server.add_argument('exercise_module')
     parser_server.set_defaults(func=run_server)
 

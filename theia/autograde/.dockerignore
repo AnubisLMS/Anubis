@@ -3,6 +3,7 @@ docs/doctrees
 docs/html
 exercise.py
 .bashrc
+.bash_history
 
 /docs/anubis_autograde.exercise.rst
 /docs/anubis_autograde.rst

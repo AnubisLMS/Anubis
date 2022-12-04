@@ -9,7 +9,8 @@ Table of Contents
    :caption: General:
 
    introduction
-   autograding
+   example_configuration
+   writing_an_assignment
 
 .. toctree::
    :maxdepth: 1

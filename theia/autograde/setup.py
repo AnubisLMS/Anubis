@@ -39,14 +39,14 @@ setup(
     description="CLI component to the Anubis autograder.",
     entry_points={
         'console_scripts': [
-            'anubis-autograde=autograde.cli:main',
+            'anubis-autograde=anubis_autograde.cli:main',
         ],
     },
     install_requires=requirements,
     include_package_data=True,
     keywords='anubis',
     name='anubis-autograde',
-    packages=find_packages(include=['autograde', 'autograde.*']),
+    packages=find_packages(include=['anubis_autograde', 'anubis_autograde.*']),
     setup_requires=setup_requirements,
     # test_suite='tests',
     # tests_require=test_requirements,
