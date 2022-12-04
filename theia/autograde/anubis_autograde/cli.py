@@ -33,10 +33,12 @@ def make_parser() -> argparse.ArgumentParser:
     parser_server.add_argument('exercise_module')
     parser_server.set_defaults(func=run_server)
 
+    # shell
     parser_shell = subparsers.add_parser('shell',
                                          help='run autograde shell (for debugging). run from directory server is running in')
     parser_shell.set_defaults(func=run_debug_shell)
 
+    # exercise
     parser_exercise_init = subparsers.add_parser('exercise-init',
                                          help='generate exercise.py from template')
     parser_exercise_init.set_defaults(func=run_exercise_init)

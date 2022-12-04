@@ -26,6 +26,13 @@ class Exercise:
     complete: bool = False
     filesystem_conditions: list[FileSystemCondition] = None
 
+    def __str__(self):
+        name = self.name
+        return f'<Exercise {name=}>'
+
+    def __repr__(self):
+        return str(self)
+
 
 @dataclasses.dataclass
 class UserState:

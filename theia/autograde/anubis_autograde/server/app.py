@@ -3,11 +3,6 @@ from flask import Flask
 from anubis_autograde.exercise.get import get_exercises
 from anubis_autograde.exercise.verify import run_exercise
 from anubis_autograde.utils import text_response, reject_handler, user_state_from_request
-from flask import Flask
-
-from anubis_autograde.exercise.get import get_exercises
-from anubis_autograde.exercise.verify import run_exercise
-from anubis_autograde.utils import text_response, reject_handler, user_state_from_request
 
 app = Flask(__name__)
 

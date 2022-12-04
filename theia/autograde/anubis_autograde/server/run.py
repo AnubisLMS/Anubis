@@ -34,9 +34,17 @@ def run_server(args: argparse.Namespace):
     init_server_logging()
     init_exercises(args)
     init_bashrc(args)
-    _StandaloneApplication(app, options={
-        'bind':                     args.bind,
-        'workers':                  1,
-        'capture-output':           True,
-        'enable-stdio-inheritance': True,
-    }).run()
+    if args.debug:
+        host, port = args.bind.split(':')
+        exercise_module = args.exercise_module \
+            if not args.exercise_module.endswith('.py') \
+            else args.exercise_module + '.py'
+        app.run(host, port, debug=True, extra_files=[exercise_module])
+
+    else:
+        _StandaloneApplication(app, options={
+            'bind':                     args.bind,
+            'workers':                  1,
+            'capture-output':           True,
+            'enable-stdio-inheritance': True,
+        }).run()
