@@ -5,7 +5,7 @@ from anubis_autograde.exercise.find import find_exercise
 from anubis_autograde.exercise.get import get_exercises
 from anubis_autograde.logging import log
 from anubis_autograde.models import UserState, Exercise, FileSystemCondition, ExistState, EnvVarCondition
-from anubis_autograde.utils import RejectionException
+from anubis_autograde.utils import RejectionException, expand_path
 
 
 def verify_exercise(user_state: UserState) -> Exercise:
@@ -37,6 +37,18 @@ def verify_command_regex(exercise: Exercise, user_state: UserState):
         raise RejectionException('Sorry your command does not seem right.')
 
 
+def verify_cwd_regex(exercise: Exercise, user_state: UserState):
+    # Check cwd against regex
+    if exercise.cwd_regex is None:
+        return
+
+    log.info(f'exercise.cwd_regex = {exercise.cwd_regex}')
+
+    cwd_match = exercise.cwd_regex.match(user_state.cwd)
+    if cwd_match is None:
+        raise RejectionException('Sorry your current working directory does not seem right.')
+
+
 def verify_output_regex(exercise: Exercise, user_state: UserState):
     # Check output against regex
     if exercise.output_regex is None:
@@ -49,13 +61,16 @@ def verify_output_regex(exercise: Exercise, user_state: UserState):
         raise RejectionException('Sorry your output does not seem right.')
 
 
-def verify_filesystem_conditions(exercise: Exercise, _: UserState):
+def verify_filesystem_conditions(exercise: Exercise, user_state: UserState):
     if exercise.filesystem_conditions is None:
         return
 
     for filesystem_condition in exercise.filesystem_conditions:
         filesystem_condition: FileSystemCondition
-        path = os.path.join('/home/anubis', filesystem_condition.path)
+        base_path = user_state.cwd if filesystem_condition.relative else os.environ['HOME']
+        path = os.path.join(base_path, filesystem_condition.path)
+        path = expand_path(path)
+
         exists = os.path.exists(path)
         isdir = os.path.isdir(path)
 
@@ -135,6 +150,7 @@ def run_exercise(user_state: UserState) -> Exercise:
 
     verify_command_regex(exercise, user_state)
     verify_output_regex(exercise, user_state)
+    verify_cwd_regex(exercise, user_state)
     verify_filesystem_conditions(exercise, user_state)
     verify_env_var_conditions(exercise, user_state)
 

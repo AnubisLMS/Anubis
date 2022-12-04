@@ -15,6 +15,10 @@ class UserState:
 
 
 class ExistState(str, enum.Enum):
+    """
+    PRESENT = 'PRESENT'
+    ABSENT = 'ABSENT'
+    """
     PRESENT = 'PRESENT'
     ABSENT = 'ABSENT'
 
@@ -22,6 +26,7 @@ class ExistState(str, enum.Enum):
 @dataclasses.dataclass
 class FileSystemCondition:
     path: str
+    relative: bool = True
     directory: bool = False
     state: ExistState = ExistState.PRESENT
     content: str = None
@@ -39,8 +44,10 @@ class EnvVarCondition:
 class Exercise:
     name: str = None
     win_message: str = 'Congrats! You did the exercise by typing {user_command}'
+    hint_message: str = None
     command_regex: re.Pattern = None
     output_regex: re.Pattern = None
+    cwd_regex: re.Pattern = None
     complete: bool = False
     filesystem_conditions: list[FileSystemCondition] = None
     env_var_conditions: list[EnvVarCondition] = None

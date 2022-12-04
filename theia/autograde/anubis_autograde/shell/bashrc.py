@@ -9,15 +9,27 @@ from anubis_autograde.logging import log
 bashrc_template = jinja2.Template("""
 #!/bin/bash
 
+GRADE_URL=http://localhost:5003
 EXERCISES=(
 {% for exercise in exercises %}
     "{{ exercise.name }}"
 {% endfor %}
 )
-EXERCISE_INDEX=0
+EXERCISE_INDEX=$(curl ${GRADE_URL}/current -s || echo 0)
+
+curl ${GRADE_URL}/start -s
+
+reset() {
+    EXERCISE_INDEX=$(curl ${GRADE_URL}/reset -s)
+    set_ps1
+}
 
 status() {
-    curl http://localhost:5003/status -s
+    curl ${GRADE_URL}/status -s
+}
+
+hint() {
+    curl ${GRADE_URL}/hint -s
 }
 
 current_exercise() {
@@ -30,12 +42,15 @@ set_ps1() {
 
 check_exercise() {
     EXERCISE=$(current_exercise)
-    ENVIRONMENT=$(env | base64)
+    ENVIRONMENT=$(env | base64 --ignore-garbage)
     COMMAND=$(cat /tmp/command 2>&1)
     OUTPUT=$(cat /tmp/output 2>&1)
     [ "$COMMAND" = "status" ] && return
+    [ "$COMMAND" = "hint" ] && return
+    [ "$COMMAND" = "reset" ] && return
+    [ "$COMMAND" = "set_ps1" ] && return
     [ "$COMMAND" = "" ] && return
-    STATUS_CODE=$(curl http://localhost:5003/submit \\
+    STATUS_CODE=$(curl ${GRADE_URL}/submit \\
         --output /dev/stderr --write-out "%{http_code}" \\
         --data "exercise=${EXERCISE}" \\
         --data "command=${COMMAND}" \\
@@ -54,6 +69,8 @@ PROMPT_COMMAND="check_exercise"
 preexec_invoke_exec () {
     [ "$BASH_COMMAND" = "$PROMPT_COMMAND" ] && return
     [ "$BASH_COMMAND" = "status" ] && return
+    [ "$BASH_COMMAND" = "hint" ] && return
+    [ "$BASH_COMMAND" = "reset" ] && return
 
     exec 1>&3
     rm -f /tmp/output /tmp/command

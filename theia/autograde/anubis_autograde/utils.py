@@ -1,7 +1,15 @@
 import functools
+import glob
 import string
 
 from flask import Response, make_response
+
+
+def expand_path(path: str) -> str:
+    paths = glob.glob(path, recursive=True)
+    if len(paths) >= 1:
+        return paths[0]
+    return path
 
 
 def remove_unprintable(s: str | bytes) -> str:
@@ -35,6 +43,17 @@ def reject_handler(func):
             return func(*args, **kwargs)
         except RejectionException as e:
             return e.msg, e.status_code
+
+    return wrapper
+
+
+def complete_reject(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs) -> Response | tuple[str, int]:
+        from anubis_autograde.exercise.get import is_all_complete
+        if is_all_complete():
+            return f'This assignment is complete. You can use the reset command to replay.'
+        return func(*args, **kwargs)
 
     return wrapper
 
