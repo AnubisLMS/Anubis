@@ -14,7 +14,7 @@ def status():
     for exercise in get_exercises():
         output += f'`-> name:     {exercise.name}\n'
         output += f'    complete: {exercise.complete}\n'
-    return output
+    return output.strip()
 
 
 @app.post('/submit')
