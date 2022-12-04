@@ -40,6 +40,7 @@ autograde server on startup.
 The student shell will look something like this:
 
 ::
+
     (helloworld) anubis@anubis-ide:~$
 
 The ``(helloworld)`` is the name of the current exercise.

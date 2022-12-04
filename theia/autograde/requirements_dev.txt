@@ -1,4 +1,5 @@
 pytest
 sphinx
+myst-parser
 pydata_sphinx_theme
 sphinx_rtd_theme

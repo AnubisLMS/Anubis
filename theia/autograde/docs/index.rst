@@ -9,8 +9,8 @@ Table of Contents
    :caption: General:
 
    introduction
-   example_configuration
    writing_an_assignment
+   example_configuration
 
 .. toctree::
    :maxdepth: 1
