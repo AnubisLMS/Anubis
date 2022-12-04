@@ -1,8 +1,8 @@
 import argparse
 import traceback
 
-from autograde.exercise.get import set_exercises
-from autograde.logging import log
+from anubis_autograde.exercise.get import set_exercises
+from anubis_autograde.logging import log
 
 
 def init_exercises(args: argparse.Namespace):

@@ -18,7 +18,7 @@ USER root
 VOLUME /home/anubis
 
 COPY supervisord.conf /supervisord.conf
-COPY autograde /opt/app/autograde
+COPY anubis_autograde /opt/app/autograde
 
 USER anubis
 ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]

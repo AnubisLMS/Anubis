@@ -3,8 +3,8 @@ import os
 
 import jinja2
 
-from autograde.exercise.get import get_exercises
-from autograde.logging import log
+from anubis_autograde.exercise.get import get_exercises
+from anubis_autograde.logging import log
 
 bashrc_template = jinja2.Template("""
 #!/bin/bash

@@ -1,4 +1,4 @@
-from autograde.models import Exercise
+from anubis_autograde.models import Exercise
 
 _exercises: list[Exercise] | None = None
 

@@ -3,9 +3,9 @@ import logging
 
 import gunicorn.app.base
 
-from autograde.exercise.init import init_exercises
-from autograde.server.app import app
-from autograde.shell.bashrc import init_bashrc
+from anubis_autograde.exercise.init import init_exercises
+from anubis_autograde.server.app import app
+from anubis_autograde.shell.bashrc import init_bashrc
 
 
 class _StandaloneApplication(gunicorn.app.base.BaseApplication):

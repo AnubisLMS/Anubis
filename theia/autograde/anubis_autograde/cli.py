@@ -1,9 +1,9 @@
 import argparse
 
-from autograde.logging import init_logging
-from autograde.server.run import run_server
-from autograde.shell.run import run_debug_shell
-from autograde.exercise.run import run_exercise_init
+from anubis_autograde.logging import init_logging
+from anubis_autograde.server.run import run_server
+from anubis_autograde.shell.run import run_debug_shell
+from anubis_autograde.exercise.run import run_exercise_init
 
 
 def noargs(_):

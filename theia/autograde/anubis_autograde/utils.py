@@ -2,7 +2,7 @@ import functools
 
 from flask import Response, make_response, request
 
-from autograde.models import UserState
+from anubis_autograde.models import UserState
 
 
 def user_state_from_request() -> UserState:

@@ -1,5 +1,5 @@
-from autograde.exercise.get import get_exercises
-from autograde.models import Exercise
+from anubis_autograde.exercise.get import get_exercises
+from anubis_autograde.models import Exercise
 
 
 def find_exercise(name: str) -> tuple[Exercise| None, int]:

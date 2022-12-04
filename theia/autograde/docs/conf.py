@@ -15,7 +15,7 @@ import sys
 
 os.environ['TOKEN'] = ''
 sys.path.insert(0, os.path.abspath('..'))
-import autograde
+import anubis_autograde
 
 # -- General configuration ---------------------------------------------
 

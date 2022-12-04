@@ -1,10 +1,10 @@
 import os
 
-from autograde.exercise.get import get_exercises
-from autograde.exercise.find import find_exercise
-from autograde.logging import log
-from autograde.models import UserState, Exercise, FileSystemCondition, FileSystemState
-from autograde.utils import RejectionException
+from anubis_autograde.exercise.get import get_exercises
+from anubis_autograde.exercise.find import find_exercise
+from anubis_autograde.logging import log
+from anubis_autograde.models import UserState, Exercise, FileSystemCondition, FileSystemState
+from anubis_autograde.utils import RejectionException
 
 
 def verify_exercise(user_state: UserState) -> Exercise:
