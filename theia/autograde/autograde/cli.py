@@ -3,6 +3,7 @@ import argparse
 from autograde.logging import init_logging
 from autograde.server.run import run_server
 from autograde.shell.run import run_debug_shell
+from autograde.exercise.run import run_exercise_init
 
 
 def noargs(_):
@@ -34,6 +35,10 @@ def make_parser() -> argparse.ArgumentParser:
     parser_shell = subparsers.add_parser('shell',
                                          help='run autograde shell (for debugging). run from directory server is running in')
     parser_shell.set_defaults(func=run_debug_shell)
+
+    parser_exercise_init = subparsers.add_parser('exercise-init',
+                                         help='generate exercise.py from template')
+    parser_exercise_init.set_defaults(func=run_exercise_init)
 
     return parser
 
