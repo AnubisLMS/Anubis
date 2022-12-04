@@ -14,7 +14,7 @@ class UserState:
     environ: dict[str, str]
 
 
-class FileSystemState(str, enum.Enum):
+class ExistState(str, enum.Enum):
     PRESENT = 'PRESENT'
     ABSENT = 'ABSENT'
 
@@ -23,7 +23,7 @@ class FileSystemState(str, enum.Enum):
 class FileSystemCondition:
     path: str
     directory: bool = False
-    state: FileSystemState = FileSystemState.PRESENT
+    state: ExistState = ExistState.PRESENT
     content: str = None
     content_regex: re.Pattern = None
 
@@ -31,7 +31,8 @@ class FileSystemCondition:
 @dataclasses.dataclass
 class EnvVarCondition:
     name: str
-    value_regex: re.Pattern
+    value_regex: re.Pattern = None
+    state: ExistState = ExistState.PRESENT
 
 
 @dataclasses.dataclass

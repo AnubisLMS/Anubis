@@ -1,10 +1,10 @@
 import os
 import traceback
 
-from anubis_autograde.exercise.get import get_exercises
 from anubis_autograde.exercise.find import find_exercise
+from anubis_autograde.exercise.get import get_exercises
 from anubis_autograde.logging import log
-from anubis_autograde.models import UserState, Exercise, FileSystemCondition, FileSystemState
+from anubis_autograde.models import UserState, Exercise, FileSystemCondition, ExistState, EnvVarCondition
 from anubis_autograde.utils import RejectionException
 
 
@@ -60,9 +60,9 @@ def verify_filesystem_conditions(exercise: Exercise, _: UserState):
         isdir = os.path.isdir(path)
 
         # Check State
-        if filesystem_condition.state == FileSystemState.PRESENT and not exists:
+        if filesystem_condition.state == ExistState.PRESENT and not exists:
             raise RejectionException(f'File or Directory: {path} should exist')
-        if filesystem_condition.state != FileSystemState.PRESENT and exists:
+        if filesystem_condition.state != ExistState.PRESENT and exists:
             raise RejectionException(f'File or Directory: {path} should not exist')
 
         # Check directory
@@ -88,7 +88,25 @@ def verify_filesystem_conditions(exercise: Exercise, _: UserState):
 
 
 def verify_env_var_conditions(exercise: Exercise, user_state: UserState):
-    pass
+    if exercise.env_var_conditions is None:
+        return
+
+    for env_var_condition in exercise.env_var_conditions:
+        env_var_condition: EnvVarCondition
+
+        name = env_var_condition.name
+        value = user_state.environ.get(name, None)
+        exists = value is not None
+
+        if env_var_condition.state == ExistState.ABSENT and exists:
+            raise RejectionException(f'Environment Variable: "{name}" should not be set')
+        if env_var_condition.state == ExistState.PRESENT and not exists:
+            raise RejectionException(f'Environment Variable: "{name}" should be set')
+
+        if env_var_condition.value_regex is not None:
+            value_match = env_var_condition.value_regex.match(value)
+            if value_match is None:
+                raise RejectionException(f'Environment Variable: "{name}" does not match expected value')
 
 
 def run_eject_function(exercise: Exercise, user_state: UserState):
@@ -118,6 +136,7 @@ def run_exercise(user_state: UserState) -> Exercise:
     verify_command_regex(exercise, user_state)
     verify_output_regex(exercise, user_state)
     verify_filesystem_conditions(exercise, user_state)
+    verify_env_var_conditions(exercise, user_state)
 
     exercise.complete = True
 

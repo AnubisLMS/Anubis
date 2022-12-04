@@ -10,7 +10,7 @@ exercise_template = jinja2.Template("""
 
 import re
 
-from anubis_autograde.models import Exercise, FileSystemCondition, FileSystemState
+from anubis_autograde.models import Exercise, FileSystemCondition, ExistState
 
 
 exercises: list[Exercise] = [
@@ -26,7 +26,7 @@ exercises: list[Exercise] = [
             FileSystemCondition(
                 path='exercise1',
                 directory=True,
-                state=FileSystemState.PRESENT,
+                state=ExistState.PRESENT,
             )
         ]
     ),
@@ -40,7 +40,7 @@ exercises: list[Exercise] = [
         filesystem_conditions=[
             FileSystemCondition(
                 path='exercise1/exercise.txt',
-                state=FileSystemState.PRESENT,
+                state=ExistState.PRESENT,
                 content_regex=re.compile(r'[Hh]ello\\s[Ww]orld!')
             )
         ]
