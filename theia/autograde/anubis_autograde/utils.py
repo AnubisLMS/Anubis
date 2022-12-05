@@ -1,6 +1,7 @@
 import functools
 import glob
 import string
+import typing
 
 import jinja2
 from flask import Response, make_response
@@ -14,7 +15,7 @@ def expand_path(path: str) -> str:
     return path
 
 
-def remove_unprintable(s: str | bytes) -> str:
+def remove_unprintable(s: typing.Union[str, bytes]) -> str:
     valid: set[int] = set(ord(c) for c in string.printable)
     return ''.join(chr(c) for c in s if (c if isinstance(c, int) else ord(c)) in valid)
 
@@ -40,7 +41,7 @@ def text_response(func):
 
 def reject_handler(func):
     @functools.wraps(func)
-    def wrapper(*args, **kwargs) -> Response | tuple[str, int]:
+    def wrapper(*args, **kwargs) -> typing.Union[Response, typing.Tuple[str, int]]:
         try:
             return func(*args, **kwargs)
         except RejectionException as e:
@@ -51,7 +52,7 @@ def reject_handler(func):
 
 def complete_reject(func):
     @functools.wraps(func)
-    def wrapper(*args, **kwargs) -> Response | tuple[str, int]:
+    def wrapper(*args, **kwargs) -> typing.Union[Response, typing.Tuple[str, int]]:
         from anubis_autograde.exercise.get import is_all_complete
         if is_all_complete():
             return f'This assignment is complete. ' \

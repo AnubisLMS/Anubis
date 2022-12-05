@@ -42,9 +42,11 @@ def run_server(args: argparse.Namespace):
         app.run(host, port, debug=True, extra_files=[exercise_module])
 
     else:
-        _StandaloneApplication(app, options={
-            'bind':                     args.bind,
-            'workers':                  1,
-            'capture-output':           True,
-            'enable-stdio-inheritance': True,
-        }).run()
+        _StandaloneApplication(
+            app, options={
+                'bind':                     args.bind,
+                'workers':                  1,
+                'capture-output':           True,
+                'enable-stdio-inheritance': True,
+            }
+            ).run()

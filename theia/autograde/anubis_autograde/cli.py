@@ -1,9 +1,10 @@
 import argparse
+import os
 
+from anubis_autograde.exercise.run import run_exercise_init
 from anubis_autograde.logging import init_logging
 from anubis_autograde.server.run import run_server
 from anubis_autograde.shell.run import run_debug_shell
-from anubis_autograde.exercise.run import run_exercise_init
 
 
 def noargs(_):
@@ -19,9 +20,11 @@ def make_parser() -> argparse.ArgumentParser:
     parser.add_argument('-l', '--log_file', dest='log_file', default=None, help='File to log to (as well as console)')
     parser.set_defaults(func=noargs)
 
-    subparsers = parser.add_subparsers(title='sub-commands',
-                                       help='sub-command help',
-                                       dest='subparser')
+    subparsers = parser.add_subparsers(
+        title='sub-commands',
+        help='sub-command help',
+        dest='subparser'
+        )
 
     # server
     parser_server = subparsers.add_parser('server', help='run autograde server')
@@ -34,19 +37,24 @@ def make_parser() -> argparse.ArgumentParser:
     parser_server.set_defaults(func=run_server)
 
     # shell
-    parser_shell = subparsers.add_parser('shell',
-                                         help='run autograde shell (for debugging). run from directory server is running in')
+    parser_shell = subparsers.add_parser(
+        'shell',
+        help='run autograde shell (for debugging). run from directory server is running in'
+        )
     parser_shell.set_defaults(func=run_debug_shell)
 
     # exercise
-    parser_exercise_init = subparsers.add_parser('exercise-init',
-                                         help='generate exercise.py from template')
+    parser_exercise_init = subparsers.add_parser(
+        'exercise-init',
+        help='generate exercise.py from template'
+        )
     parser_exercise_init.set_defaults(func=run_exercise_init)
 
     return parser
 
 
 def main():
+    os.environ['FORCE_COLOR'] = 'true'
     parser = make_parser()
     args = parser.parse_args()
     init_logging(args)

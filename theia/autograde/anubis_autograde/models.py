@@ -1,8 +1,7 @@
 import dataclasses
 import enum
 import re
-from typing import Callable
-
+import typing
 
 
 @dataclasses.dataclass
@@ -11,7 +10,7 @@ class UserState:
     command: str
     output: str
     cwd: str
-    environ: dict[str, str]
+    environ: typing.Dict[str, str]
 
 
 class ExistState(str, enum.Enum):
@@ -45,18 +44,18 @@ class Exercise:
     name: str = None
     complete: bool = False
     start_message: str = None
-    win_message: str = 'Congrats! You did the exercise by typing {user_command}'
+    win_message: str = 'Congrats! You did the exercise by typing {{user_command}}'
     hint_message: str = None
     command_regex: re.Pattern = None
     output_regex: re.Pattern = None
     cwd_regex: re.Pattern = None
-    filesystem_conditions: list[FileSystemCondition] = None
-    env_var_conditions: list[EnvVarCondition] = None
-    eject_function: Callable[['Exercise', UserState], bool] = None
+    filesystem_conditions: typing.List[FileSystemCondition] = None
+    env_var_conditions: typing.List[EnvVarCondition] = None
+    eject_function: typing.Callable[['Exercise', UserState], bool] = None
 
     def __str__(self):
         name = self.name
-        return f'<Exercise {name=}>'
+        return f'<Exercise name={name}>'
 
     def __repr__(self):
         return str(self)

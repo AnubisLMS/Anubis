@@ -1,6 +1,7 @@
 import base64
 import binascii
 import traceback
+import typing
 
 from flask import request
 
@@ -8,12 +9,12 @@ from anubis_autograde.logging import log
 from anubis_autograde.models import Exercise, UserState
 from anubis_autograde.utils import remove_unprintable
 
-_start_message: str | None = None
-_end_message: str | None = None
-_exercises: list[Exercise] | None = None
+_start_message: typing.Optional[str] = None
+_end_message: typing.Optional[str] = None
+_exercises: typing.Optional[typing.List[Exercise]] = None
 
 
-def get_active_exercise() -> tuple[int, Exercise | None]:
+def get_active_exercise() -> typing.Tuple[int, typing.Optional[Exercise]]:
     for index, exercise in enumerate(_exercises):
         if not exercise.complete:
             return index, exercise
@@ -27,7 +28,7 @@ def get_active_exercise_hint() -> str:
     return f'Exercise Hint: {current_exercise.hint_message}'
 
 
-def get_exercises() -> list[Exercise]:
+def get_exercises() -> typing.List[Exercise]:
     return _exercises
 
 
@@ -44,10 +45,10 @@ def get_end_message() -> str:
 
 
 def set_exercises(
-    exercises: list[Exercise],
+    exercises: typing.List[Exercise],
     start_message: str,
     end_message: str,
-) -> tuple[list[Exercise], str, str]:
+) -> typing.Tuple[typing.List[Exercise], str, str]:
     global _exercises, _start_message, _end_message
     _exercises = exercises
     _start_message = start_message
@@ -65,11 +66,11 @@ def is_all_complete() -> bool:
     return all(map(lambda exercise: exercise.complete, _exercises))
 
 
-def _parse_user_env(user_env: str) -> dict[str, str]:
+def _parse_user_env(user_env: str) -> typing.Dict[str, str]:
     try:
         decoded: bytes = base64.b64decode(user_env.replace('\n', ''))
     except binascii.Error:
-        log.error(f'{traceback.format_exc()}\n{user_env=}\nUnable to parse user_env')
+        log.error(f'{traceback.format_exc()}\nuser_env={user_env}\nUnable to parse user_env')
         return dict()
 
     decoded: str = remove_unprintable(decoded)
@@ -82,7 +83,7 @@ def _parse_user_env(user_env: str) -> dict[str, str]:
         try:
             equals = line.index('=')
         except ValueError:
-            log.warning(f'Could not parse env line {line=}')
+            log.warning(f'Could not parse env line line={line}')
             continue
 
         name = line[0:equals]

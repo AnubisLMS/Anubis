@@ -29,7 +29,7 @@ export PRINT_HELP_PYSCRIPT
 
 BROWSER ?= python -c "$$BROWSER_PYSCRIPT"
 
-PYTHON_VERSION ?= 3.10
+PYTHON_VERSION ?= 3.7
 
 help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
@@ -70,6 +70,7 @@ docs-preview: ## View generated docs
 venv: ## create venv
 	virtualenv -p $(shell which python$(PYTHON_VERSION)) venv
 	venv/bin/pip install -r requirements.txt  -r requirements_dev.txt
+	venv/bin/pip install -e .
 
 .PHONY: context         # Grab kubectl and registry login from doctl
 context:

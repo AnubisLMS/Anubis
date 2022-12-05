@@ -1,7 +1,8 @@
-import logging
 import argparse
+import logging
 
 log = logging.getLogger('anubis-autograder')
+
 
 def init_logging(args: argparse.Namespace):
     level = logging.DEBUG if args.verbose else logging.INFO

@@ -125,13 +125,13 @@ def verify_env_var_conditions(exercise: Exercise, user_state: UserState):
 
 
 def run_eject_function(exercise: Exercise, user_state: UserState):
-    log.info(f'Running eject function for {exercise=} {user_state=}')
+    log.info(f'Running eject function for exercise={exercise} user_state={user_state}')
     try:
         complete = exercise.eject_function(exercise, user_state)
 
         # Verify that the return value for the eject function is actually a bool
         if not isinstance(complete, bool):
-            log.error(f'return of eject_function for {exercise.name} was not bool {complete=}')
+            log.error(f'return of eject_function for {exercise.name} was not bool complete={complete}')
             return
 
         exercise.complete = complete
