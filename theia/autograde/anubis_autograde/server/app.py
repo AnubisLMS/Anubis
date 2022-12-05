@@ -19,9 +19,13 @@ app = Flask(__name__)
 @app.get('/start')
 @text_response
 def start():
-    if get_start_message() is None:
-        return ''
-    return get_start_message()
+    message = get_start_message()
+    _, exercise = get_active_exercise()
+    if exercise.start_message is not None:
+        if len(message) > 1:
+            message += '\n'
+        message += str(exercise.start_message)
+    return message
 
 
 @app.get('/current')
@@ -71,6 +75,10 @@ def submit():
         user_command=user_state.command,
         user_output=user_state.output,
     )
+
+    _, current_exercise = get_active_exercise()
+    if current_exercise is not None and current_exercise.start_message is not None:
+        win_message += f'\n{current_exercise.start_message}'
 
     if is_all_complete() and get_end_message() is not None:
         win_message += f'\n{get_end_message()}'

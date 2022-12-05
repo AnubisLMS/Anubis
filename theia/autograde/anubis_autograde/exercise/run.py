@@ -12,22 +12,22 @@ import re
 
 from anubis_autograde.models import Exercise, FileSystemCondition, ExistState
 
-start_message: str = '''echo hello world
-mkdir exercise1
-cd exercise1
-echo hello world > exercise.txt'''
+start_message: str = ''''''
 
-end_message: str = '''Congratulations! You have finished this assignment. '''
+end_message: str = '''Congratulations! You have finished this assignment.'''
 
 exercises: list[Exercise] = [
     Exercise(
         name='helloworld',
-        hint_message='\\ntype: echo "hello world"',
+        start_message='Write a command to print out hello \"world\"',
+        hint_message='echo "hello world"',
         command_regex=re.compile(r'echo \\'?"?[Hh]ello\\s[Ww]orld!?\\'?"?'),
         output_regex=re.compile(r'[Hh]ello\\s[Ww]orld!?'),
     ),
     Exercise(
         name='mkdir exercise1',
+        start_message='Create a \"exercise1\" directory',
+        hint_message='mkdir exercise1',
         command_regex=re.compile(r'mkdir \\'?"?exercise1?\\'?"?'),
         filesystem_conditions=[
             FileSystemCondition(
@@ -39,10 +39,14 @@ exercises: list[Exercise] = [
     ),
     Exercise(
         name='cd exercise1',
+        start_message='Change directory into the exercise1 directory',
+        hint_message='cd exercise1',
         command_regex=re.compile(r'cd \\'?"?exercise1\\'?"?'),
     ),
     Exercise(
         name='pipe hello world',
+        start_message='Use the print command from earlier to pipe \"hello world\" into a file \"exercise.txt\"',
+        hint_message='echo hello world > exercise.txt',
         command_regex=re.compile(r'echo \\'?"?[Hh]ello\\s[Ww]orld!?\\'?"? > exercise.txt'),
         cwd_regex=re.compile(r'.*/exercise1$'),
         filesystem_conditions=[

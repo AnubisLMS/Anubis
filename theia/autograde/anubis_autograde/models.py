@@ -43,12 +43,13 @@ class EnvVarCondition:
 @dataclasses.dataclass
 class Exercise:
     name: str = None
+    complete: bool = False
+    start_message: str = None
     win_message: str = 'Congrats! You did the exercise by typing {user_command}'
     hint_message: str = None
     command_regex: re.Pattern = None
     output_regex: re.Pattern = None
     cwd_regex: re.Pattern = None
-    complete: bool = False
     filesystem_conditions: list[FileSystemCondition] = None
     env_var_conditions: list[EnvVarCondition] = None
     eject_function: Callable[['Exercise', UserState], bool] = None

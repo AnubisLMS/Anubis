@@ -31,11 +31,15 @@ def get_exercises() -> list[Exercise]:
     return _exercises
 
 
-def get_start_message() -> str | None:
+def get_start_message() -> str:
+    if _start_message is None:
+        return ''
     return _start_message
 
 
-def get_end_message() -> str | None:
+def get_end_message() -> str:
+    if _end_message is None:
+        return ''
     return _end_message
 
 
