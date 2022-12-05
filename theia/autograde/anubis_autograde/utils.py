@@ -2,7 +2,9 @@ import functools
 import glob
 import string
 
+import jinja2
 from flask import Response, make_response
+from termcolor import colored as _colored
 
 
 def expand_path(path: str) -> str:
@@ -64,3 +66,12 @@ class RejectionException(Exception):
         self.msg = msg
         self.status_code = status_code
         super(RejectionException, self).__init__(msg)
+
+
+def colorize_render(
+    s: str,
+    termcolor_args: tuple = ('cyan',),
+    **kwargs
+) -> str:
+    colored = _colored(s, *termcolor_args)
+    return jinja2.Template(colored).render(**kwargs)

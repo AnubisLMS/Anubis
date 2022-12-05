@@ -11,7 +11,7 @@ from anubis_autograde.exercise.get import (
     get_end_message,
 )
 from anubis_autograde.exercise.verify import run_exercise
-from anubis_autograde.utils import text_response, reject_handler, complete_reject
+from anubis_autograde.utils import text_response, reject_handler, complete_reject, colorize_render
 
 app = Flask(__name__)
 
@@ -19,12 +19,12 @@ app = Flask(__name__)
 @app.get('/start')
 @text_response
 def start():
-    message = get_start_message()
+    message = colorize_render(get_start_message())
     _, exercise = get_active_exercise()
     if exercise.start_message is not None:
         if len(message) > 1:
             message += '\n'
-        message += str(exercise.start_message)
+        message += colorize_render(exercise.start_message)
     return message
 
 
@@ -48,17 +48,18 @@ def reset():
 def status():
     _, current_exercise = get_active_exercise()
     output = 'Exercise Status:\n'
+    arrow = colorize_render('->', termcolor_args=('cyan', None, ['blink']))
     for exercise in get_exercises():
-        line_start = '  ' if exercise != current_exercise else '->'
+        line_start = '  ' if exercise != current_exercise else arrow
         output += f'{line_start} {exercise.name}\n'
-    return output.strip()
+    return output.removesuffix('\n')
 
 
 @app.get('/hint')
 @text_response
 @complete_reject
 def hint():
-    return get_active_exercise_hint()
+    return colorize_render(get_active_exercise_hint(), termcolor_args=("yellow",))
 
 
 @app.post('/submit')
@@ -70,7 +71,8 @@ def submit():
     user_state = get_user_state()
     exercise = run_exercise(user_state)
 
-    win_message = exercise.win_message.format(
+    win_message = colorize_render(
+        exercise.win_message,
         user_exercise_name=user_state.exercise_name,
         user_command=user_state.command,
         user_output=user_state.output,
@@ -78,9 +80,9 @@ def submit():
 
     _, current_exercise = get_active_exercise()
     if current_exercise is not None and current_exercise.start_message is not None:
-        win_message += f'\n{current_exercise.start_message}'
+        win_message += f'\n{colorize_render(current_exercise.start_message)}'
 
     if is_all_complete() and get_end_message() is not None:
-        win_message += f'\n{get_end_message()}'
+        win_message += f'\n{colorize_render(get_end_message(), termcolor_args=("yellow",))}'
 
     return win_message
