@@ -20,7 +20,7 @@ define PRINT_HELP_PYSCRIPT
 import re, sys
 
 for line in sys.stdin:
-	match = re.match(r'^([a-zA-Z_-]+):.*?## (.*)$$', line)
+	match = re.match(r'^([a-zA-Z\._-]+):.*?## (.*)$$', line)
 	if match:
 		target, help = match.groups()
 		print("%-20s %s" % (target, help))
@@ -59,13 +59,17 @@ clean-docs: ## remove docs generated files
 	make -C docs clean
 
 
-docs: ## Generate docs
+docs: exercise.py ## Generate docs
 	$(MAKE) -C docs clean
 	$(VENV)sphinx-apidoc -o docs/ anubis_autograde
 	$(MAKE) -C docs PYTHON=$(PYTHON) html
 
 docs-preview: ## View generated docs
 	$(BROWSER) docs/html/index.html
+
+.PHONY: exercise.py
+exercise.py: ## Generate exercise.py
+	$(PYTHON) dev.py exercise-init
 
 venv: ## create venv
 	virtualenv -p $(shell which python$(PYTHON_VERSION)) venv
