@@ -17,7 +17,10 @@ EXERCISES=(
 )
 EXERCISE_INDEX=$(curl ${GRADE_URL}/current -s || echo 0)
 
-curl ${GRADE_URL}/start -s
+
+start_message() {
+    curl ${GRADE_URL}/start -s
+}
 
 reset() {
     EXERCISE_INDEX=$(curl ${GRADE_URL}/reset -s)
@@ -45,6 +48,7 @@ check_exercise() {
     ENVIRONMENT=$(env | base64 --ignore-garbage)
     COMMAND=$(cat /tmp/command 2>&1)
     OUTPUT=$(cat /tmp/output 2>&1)
+    [ "$COMMAND" = "start_message" ] && return
     [ "$COMMAND" = "status" ] && return
     [ "$COMMAND" = "hint" ] && return
     [ "$COMMAND" = "reset" ] && return
@@ -68,6 +72,7 @@ PROMPT_COMMAND="check_exercise"
 
 preexec_invoke_exec () {
     [ "$BASH_COMMAND" = "$PROMPT_COMMAND" ] && return
+    [ "$BASH_COMMAND" = "start_message" ] && return
     [ "$BASH_COMMAND" = "status" ] && return
     [ "$BASH_COMMAND" = "hint" ] && return
     [ "$BASH_COMMAND" = "reset" ] && return
@@ -83,6 +88,7 @@ exec 3>&1
 trap 'preexec_invoke_exec' DEBUG
 
 set_ps1
+start_message
 """)
 
 
