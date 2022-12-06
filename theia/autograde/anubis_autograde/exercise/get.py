@@ -7,6 +7,7 @@ from flask import request
 
 from anubis_autograde.logging import log
 from anubis_autograde.models import Exercise, UserState
+from anubis_autograde.utils import colorize_render
 from anubis_autograde.utils import remove_unprintable
 
 _start_message: typing.Optional[str] = None
@@ -24,8 +25,8 @@ def get_active_exercise() -> typing.Tuple[int, typing.Optional[Exercise]]:
 def get_active_exercise_hint() -> str:
     _, current_exercise = get_active_exercise()
     if current_exercise.hint_message is None:
-        return 'This exercise does not have a hint'
-    return f'Exercise Hint: {current_exercise.hint_message}'
+        return colorize_render(f'Exercise Hint: {current_exercise.hint_message}', termcolor_args=("yellow",))
+    return colorize_render(f'Exercise Hint: {current_exercise.hint_message}', termcolor_args=("yellow",))
 
 
 def get_exercises() -> typing.List[Exercise]:
@@ -35,13 +36,13 @@ def get_exercises() -> typing.List[Exercise]:
 def get_start_message() -> str:
     if _start_message is None:
         return ''
-    return _start_message
+    return colorize_render(_start_message)
 
 
 def get_end_message() -> str:
     if _end_message is None:
         return ''
-    return _end_message
+    return colorize_render(_end_message, termcolor_args=("yellow",))
 
 
 def set_exercises(

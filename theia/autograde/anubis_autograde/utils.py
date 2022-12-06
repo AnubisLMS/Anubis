@@ -1,5 +1,6 @@
 import functools
 import glob
+import os
 import string
 import typing
 
@@ -9,6 +10,7 @@ from termcolor import colored as _colored
 
 
 def expand_path(path: str) -> str:
+    path = os.path.expanduser(path)
     paths = glob.glob(path, recursive=True)
     if len(paths) >= 1:
         return paths[0]
@@ -45,7 +47,17 @@ def reject_handler(func):
         try:
             return func(*args, **kwargs)
         except RejectionException as e:
-            return e.msg, e.status_code
+            msg = f'{e.msg}\n'
+
+            from anubis_autograde.exercise.get import get_active_exercise, get_start_message
+            _, current_exercise = get_active_exercise()
+            current_exercise.failures += 1
+            if current_exercise.failures > current_exercise.fail_to_start_message_count and get_start_message() is not None:
+                msg += '\n' + colorize_render(get_start_message())
+            if current_exercise.failures > current_exercise.fail_to_hint_message_count and current_exercise.hint_message is not None:
+                msg += '\n' + colorize_render(current_exercise.hint_message)
+
+            return msg, e.status_code
 
     return wrapper
 

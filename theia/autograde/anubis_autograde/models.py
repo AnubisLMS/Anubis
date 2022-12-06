@@ -25,7 +25,6 @@ class ExistState(str, enum.Enum):
 @dataclasses.dataclass
 class FileSystemCondition:
     path: str
-    relative: bool = True
     directory: bool = False
     state: ExistState = ExistState.PRESENT
     content: str = None
@@ -44,14 +43,19 @@ class Exercise:
     name: str = None
     complete: bool = False
     start_message: str = None
-    win_message: str = 'Congrats! You did the exercise by typing {{user_command}}'
+    win_message: str = 'Congrats! You did the exercise by typing {{ user_state.command }}'
+    fail_message: str = None
     hint_message: str = None
+    fail_to_hint_message_count: int = 2
+    fail_to_start_message_count: int = 8
     command_regex: re.Pattern = None
     output_regex: re.Pattern = None
     cwd_regex: re.Pattern = None
     filesystem_conditions: typing.List[FileSystemCondition] = None
     env_var_conditions: typing.List[EnvVarCondition] = None
     eject_function: typing.Callable[['Exercise', UserState], bool] = None
+
+    failures: int = 0  # internal use only
 
     def __str__(self):
         name = self.name

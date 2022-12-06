@@ -67,8 +67,6 @@ def verify_filesystem_conditions(exercise: Exercise, user_state: UserState):
 
     for filesystem_condition in exercise.filesystem_conditions:
         filesystem_condition: FileSystemCondition
-        base_path = user_state.cwd if filesystem_condition.relative else os.environ['HOME']
-        path = os.path.join(base_path, filesystem_condition.path)
         path = expand_path(path)
 
         exists = os.path.exists(path)

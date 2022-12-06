@@ -19,7 +19,7 @@ app = Flask(__name__)
 @app.get('/start')
 @text_response
 def start():
-    message = colorize_render(get_start_message())
+    message = get_start_message()
     _, exercise = get_active_exercise()
     if exercise.start_message is not None:
         if len(message) > 1:
@@ -59,7 +59,7 @@ def status():
 @text_response
 @complete_reject
 def hint():
-    return colorize_render(get_active_exercise_hint(), termcolor_args=("yellow",))
+    return get_active_exercise_hint()
 
 
 @app.post('/submit')
@@ -73,16 +73,15 @@ def submit():
 
     win_message = colorize_render(
         exercise.win_message,
-        user_exercise_name=user_state.exercise_name,
-        user_command=user_state.command,
-        user_output=user_state.output,
+        user_state=user_state,
     )
 
     _, current_exercise = get_active_exercise()
     if current_exercise is not None and current_exercise.start_message is not None:
-        win_message += f'\n{colorize_render(current_exercise.start_message)}'
+        start_message = colorize_render(current_exercise.start_message, user_state=user_state)
+        win_message += f'\n{start_message}'
 
     if is_all_complete() and get_end_message() is not None:
-        win_message += f'\n{colorize_render(get_end_message(), termcolor_args=("yellow",))}'
+        win_message += f'\n{get_end_message()}'
 
     return win_message
