@@ -13,7 +13,7 @@ import typing
 
 from anubis_autograde.models import Exercise, FileSystemCondition, ExistState
 
-start_message: str = ''''''
+start_message: str = '''Welcome to the Hello World assignment!'''
 
 end_message: str = '''Congratulations! You have finished this assignment.'''
 
@@ -29,12 +29,13 @@ exercises: typing.List[Exercise] = [
         name='mkdir exercise1',
         start_message='Create a \"exercise1\" directory',
         hint_message='mkdir exercise1',
-        command_regex=re.compile(r'mkdir \\'?"?exercise1?\\'?"?'),
         filesystem_conditions=[
             FileSystemCondition(
                 path='exercise1',
-                directory=True,
                 state=ExistState.PRESENT,
+                state_fail_message='Try creating the exercise1 directory with the mkdir command',
+                directory=True,
+                directory_fail_message='Try creating a directory instead of a file',
             )
         ]
     ),

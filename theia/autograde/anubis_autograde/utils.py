@@ -47,15 +47,17 @@ def reject_handler(func):
         try:
             return func(*args, **kwargs)
         except RejectionException as e:
-            msg = f'{e.msg}\n'
+            msg = e.msg
 
-            from anubis_autograde.exercise.get import get_active_exercise, get_start_message
+            from anubis_autograde.exercise.get import get_active_exercise, get_start_message, get_active_exercise_hint
             _, current_exercise = get_active_exercise()
             current_exercise.failures += 1
-            if current_exercise.failures > current_exercise.fail_to_start_message_count and get_start_message() is not None:
-                msg += '\n' + colorize_render(get_start_message())
+            if current_exercise.failures > current_exercise.fail_to_assignment_start_message_count and get_start_message() is not None:
+                msg += '\n' + get_start_message()
+            if current_exercise.failures > current_exercise.fail_to_exercise_start_message_count and current_exercise.start_message is not None:
+                msg += '\n' + colorize_render(current_exercise.start_message)
             if current_exercise.failures > current_exercise.fail_to_hint_message_count and current_exercise.hint_message is not None:
-                msg += '\n' + colorize_render(current_exercise.hint_message)
+                msg += '\n' + get_active_exercise_hint()
 
             return msg, e.status_code
 
