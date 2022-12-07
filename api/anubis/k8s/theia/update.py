@@ -97,29 +97,44 @@ def update_theia_session(session: TheiaSession):
 
         # Boolean to indicate if volume has attached
         volume_attached: bool = False
+        scheduled: bool = False
+        scaling: bool = False
+
+        # Get event list for ide pod
+        events: k8s.CoreV1Eventlist = v1.list_namespaced_event(
+            "anubis", field_selector=f"involvedObject.name={pod_name}"
+        )
+
+        # Iterate through events
+        for event in events.items:
+            event: k8s.CoreV1Event
+
+            # If scheduled, then there will be a "Scheduled" event
+            if 'Scheduled' in event.reason:
+                scheduled = True
+                continue
+
+            # 0/10 nodes are available: 10 Insufficient cpu, 2 Insufficient memory.
+            if 'FailedScheduling' in event.reason and 'Insufficient' in event.message:
+                scaling = True
+                continue
+
+            # attachdetach-controller starts success messages like
+            # this when volume has attached
+            if "AttachVolume.Attach succeeded" in event.message:
+                volume_attached = True
+                break
+
+        if not scheduled and scaling:
+            session.state = "We are adding more servers to handle your IDE. Give us a minute..."
 
         # If storage volume needs to be attached, we should check
         # in the events for the pod if it has been attached.
-        if session.persistent_storage:
-            # Get event list for ide pod
-            events: k8s.CoreV1Eventlist = v1.list_namespaced_event(
-                "anubis", field_selector=f"involvedObject.name={pod_name}"
-            )
-
-            # Iterate through events
-            for event in events.items:
-                event: k8s.CoreV1Event
-
-                # attachdetach-controller starts success messages like
-                # this when volume has attached
-                if "AttachVolume.Attach succeeded" in event.message:
-                    volume_attached = True
-                    break
-
-        # If we are expecting a volume, but it has not been attached, then
-        # we should set the status message to state such
-        if session.persistent_storage and not volume_attached:
-            session.state = "Waiting for Persistent Volume to attach..."
+        elif scheduled and session.persistent_storage:
+            # If we are expecting a volume, but it has not been attached, then
+            # we should set the status message to state such
+            if session.persistent_storage and not volume_attached:
+                session.state = "Waiting for Persistent Volume to attach..."
 
         # State that the ide server has not yet started
         else:
