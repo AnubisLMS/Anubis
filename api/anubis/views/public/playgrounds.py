@@ -8,6 +8,7 @@ from anubis.utils.auth.user import current_user
 from anubis.utils.http import success_response, req_assert
 from anubis.utils.http.decorators import json_response, load_from_id
 from anubis.constants import DEVELOPER_DEFAULT_IMAGE, DEVELOPER_DEFAULT_OPTIONS, AUTOGRADE_IDE_DEFAULT_IMAGE
+from anubis.utils.config import get_config_bool
 
 playgrounds_ = Blueprint("public-playgrounds", __name__, url_prefix="/public/playgrounds")
 
@@ -63,7 +64,7 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
 
     # Default to not setting
     resources = dict()
-    docker = False
+    docker = get_config_bool('PLAYGROUND_DOCKERD', default=False)
     autograde = False
 
     # If the person launching is a developer, then add the extra stuff
