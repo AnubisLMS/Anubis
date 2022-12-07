@@ -19,14 +19,14 @@ def get_github_token() -> str | None:
     return token
 
 
-def github_rest(url, body=None, method: str = "get"):
+def github_rest(url, body=None, method: str = "get", accept: str = "application/vnd.github.v3+json"):
     # Get the github api token
     token = get_github_token()
 
     url = "https://api.github.com" + url
     headers = {
-        "Accept": "application/vnd.github.v3+json",
-        "Authorization": "token %s" % token,
+        "Accept": accept,
+        "Authorization": f"token {token}",
     }
 
     req_function = {

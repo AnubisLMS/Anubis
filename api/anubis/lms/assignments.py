@@ -320,7 +320,7 @@ def fill_user_assignment_data(user_id: str, assignment_data: dict[str, Any]):
     assignment_data["due_date"] = str(due_date)
 
 
-def get_active_assignment() -> list[Assignment]:
+def get_active_assignments() -> list[Assignment]:
     return Assignment.query.filter(
         Assignment.release_date < datetime.now(),
         Assignment.due_date > datetime.now(),
@@ -564,7 +564,7 @@ def verify_active_assignment_github_repo_collaborators():
 
     :return:
     """
-    active_assignments = get_active_assignment()
+    active_assignments = get_active_assignments()
 
     for assignment in active_assignments:
         verify_collaborators_assignment(assignment)

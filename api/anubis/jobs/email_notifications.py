@@ -5,7 +5,7 @@ import googleapiclient.discovery
 
 from anubis.constants import REAPER_TXT
 from anubis.google.service import build_google_service
-from anubis.lms.assignments import get_active_assignment
+from anubis.lms.assignments import get_active_assignments
 from anubis.lms.courses import get_course_users
 from anubis.models import Assignment, Course, User
 from anubis.utils.data import with_context
@@ -85,7 +85,7 @@ def _send_assignment_condition_email_notifications(
 
 @with_context
 def email_notifications():
-    recent_assignments = get_active_assignment()
+    recent_assignments = get_active_assignments()
     logger.info(f'recent_assignments = {str(recent_assignments)}')
 
     for event in events:
