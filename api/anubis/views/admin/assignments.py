@@ -10,6 +10,8 @@ from anubis.github.repos import delete_assignment_repo
 from anubis.lms.assignments import assignment_sync, delete_assignment, delete_assignment_repos
 from anubis.lms.courses import assert_course_context, course_context, is_course_superuser
 from anubis.lms.questions import get_assigned_questions
+from anubis.lms.shell_autograde import verify_shell_autograde_exercise_path_allowed, verify_shell_exercise_repo_allowed, \
+    autograde_shell_assignment_sync
 from anubis.models import Assignment, AssignmentRepo, AssignmentTest, SubmissionTestResult, User, db
 from anubis.rpc.enqueue import enqueue_make_shared_assignment
 from anubis.utils.auth.http import require_admin
@@ -48,7 +50,7 @@ def admin_assignments_shared_id(assignment: Assignment, groups: list[list[str]],
     return success_response(
         {
             "assignment": assignment.full_data,
-            "status": "Group assignments enqueued",
+            "status":     "Group assignments enqueued",
         }
     )
 
@@ -72,8 +74,8 @@ def admin_assignments_reset_repos_id(assignment: Assignment):
     return success_response(
         {
             "assignment": assignment.full_data,
-            "status": "Repos reset",
-            "variant": "warning",
+            "status":     "Repos reset",
+            "variant":    "warning",
         }
     )
 
@@ -104,13 +106,13 @@ def admin_assignments_repos_id(assignment: Assignment):
     return success_response(
         {
             "assignment": assignment.full_data,
-            "repos": [
+            "repos":      [
                 {
-                    "id": repo.id,
-                    "url": repo.repo_url,
-                    "ssh": get_ssh_url(repo.repo_url),
+                    "id":    repo.id,
+                    "url":   repo.repo_url,
+                    "ssh":   get_ssh_url(repo.repo_url),
                     "netid": repo.netid,
-                    "name": repo.owner.name if repo.owner_id is not None else "N/A",
+                    "name":  repo.owner.name if repo.owner_id is not None else "N/A",
                 }
                 for repo in repos
             ],
@@ -170,7 +172,7 @@ def private_assignment_id_questions_get_netid(assignment: Assignment, netid: str
 
     return success_response(
         {
-            "netid": user.netid,
+            "netid":     user.netid,
             "questions": get_assigned_questions(assignment.id, user.id),
         }
     )
@@ -204,7 +206,7 @@ def admin_assignments_get_id(assignment: Assignment):
     return success_response(
         {
             "assignment": assignment_data,
-            "tests": [test.data for test in assignment.tests],
+            "tests":      [test.data for test in assignment.tests],
         }
     )
 
@@ -236,7 +238,7 @@ def admin_assignments_delete_id(assignment: Assignment):
     # Pass back the full data
     return success_response(
         {
-            "status": "Assignment deleted",
+            "status":  "Assignment deleted",
             "variant": "warning",
         }
     )
@@ -339,7 +341,7 @@ def admin_assignment_tests_delete_assignment_test_id(assignment_test_id: str):
     # Pass back the status
     return success_response(
         {
-            "status": f"{test_name} deleted",
+            "status":  f"{test_name} deleted",
             "variant": "warning",
         }
     )
@@ -368,7 +370,7 @@ def admin_assignments_add():
 
     return success_response(
         {
-            "status": "New assignment created.",
+            "status":     "New assignment created.",
             "assignment": new_assignment.data,
         }
     )
@@ -407,8 +409,8 @@ def admin_assignments_save(assignment: dict):
             value = dateparse(value.replace("T", " ").replace("Z", "")).replace(microsecond=0)
 
         # If github.com is in what the user gave, remove it
-        if key == "github_template" and value.startswith("https://github.com/"):
-            value = value[len("https://github.com/"):]
+        if key in {"github_template", "shell_assignment_repo"} and value.startswith("https://github.com/"):
+            value = value.removeprefix('https://github.com/')
 
         if key == "theia_image":
             if value is not None:
@@ -421,6 +423,16 @@ def admin_assignments_save(assignment: dict):
             continue
 
         setattr(db_assignment, key, value)
+
+    # Verify basics
+    req_assert(
+        verify_shell_exercise_repo_allowed(db_assignment),
+        message='Shell Assignment Repo is in invalid form. Please use form "<github org>/<github repo>"'
+    )
+    req_assert(
+        verify_shell_autograde_exercise_path_allowed(db_assignment),
+        message='Shell Assignment Repo Path is in invalid form. Please use form "<subdirectory>/exercise.py"'
+    )
 
     # Attempt to commit
     try:
@@ -470,3 +482,20 @@ def private_assignment_sync(assignment: dict):
 
     # Return
     return success_response(message)
+
+
+@assignments.get("/shell/sync/<string:id>")
+@require_admin(unless_debug=True)
+@json_response
+@load_from_id(Assignment)
+def admin_assignments_shell_sync(assignment: Assignment):
+    """
+    :return:
+    """
+
+    autograde_shell_assignment_sync(assignment)
+
+    # Return
+    return success_response({
+        'status': 'Exercises synced. See "Edit Tests" page to see current tests.'
+    })

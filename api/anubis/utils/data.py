@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from hashlib import sha512
 from json import dumps
 from os import environ, urandom
+import urllib.parse
 
 from flask import Response, has_app_context, has_request_context
 
@@ -333,3 +334,21 @@ def req_assert(*expressions, message: str = "invalid", status_code: int = 200):
     """
     if not all(expressions):
         raise AssertError(message, status_code)
+
+
+def form_url(
+    domain: str,
+    path: str,
+    scheme: str = 'https',
+    query: str = '',
+    fragment: str = '',
+):
+    """
+
+    :return:
+    """
+
+    # (addressing scheme, network location, path, query, fragment identifier)
+    return urllib.parse.urlunsplit((scheme, domain, path, query, fragment))
+
+

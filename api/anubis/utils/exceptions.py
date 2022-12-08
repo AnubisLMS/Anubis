@@ -3,7 +3,14 @@ import traceback
 from flask import Flask, jsonify
 
 
-class AssertError(Exception):
+class AnubisError(Exception):
+    """
+    Generic Anubis error
+    """
+    pass
+
+
+class AssertError(AnubisError):
     """
     This exception should be raised when an assertion
     fails in the request.
@@ -18,7 +25,7 @@ class AssertError(Exception):
         return self._message, self._status_code
 
 
-class AuthenticationError(Exception):
+class AuthenticationError(AnubisError):
     """
     This exception should be raised if a request
     lacks the proper authentication fow whatever
@@ -30,7 +37,7 @@ class AuthenticationError(Exception):
     """
 
 
-class LackCourseContext(Exception):
+class LackCourseContext(AnubisError):
     """
     Most of the admin actions require there to
     be a course context to be set. This exception
@@ -43,7 +50,7 @@ class LackCourseContext(Exception):
     """
 
 
-class GoogleCredentialsException(Exception):
+class GoogleCredentialsException(AnubisError):
     """
     This is raised when the google credentials are
     invalid in any way. This is not something that
@@ -79,6 +86,8 @@ def add_app_exception_handlers(app: Flask):
 
     @app.errorhandler(AssertError)
     def handle_assertion_error(e: AssertError):
+        from anubis.models import db
+        db.session.rollback()
         logger.error(traceback.format_exc())
         message, status_code = e.response()
         return jsonify(error_response(message)), status_code

@@ -227,6 +227,11 @@ class Assignment(db.Model):
     pipeline_image = Column(Text(length=2 ** 14), nullable=True, index=True)
     autograde_enabled: bool = Column(Boolean, default=True)
 
+    # Shell autograde
+    shell_autograde_enabled: bool = Column(Boolean, default=False)
+    shell_autograde_repo: str = Column(Text(512), default="")
+    shell_autograde_exercise_path: str = Column(Text(512), default="")
+
     # IDE
     ide_enabled: bool = Column(Boolean, default=True)
     theia_image_id: str = Column(String(length=default_id_length), ForeignKey("theia_image.id"), default=None)

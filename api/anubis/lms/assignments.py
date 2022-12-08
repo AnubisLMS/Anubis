@@ -320,11 +320,12 @@ def fill_user_assignment_data(user_id: str, assignment_data: dict[str, Any]):
     assignment_data["due_date"] = str(due_date)
 
 
-def get_active_assignments() -> list[Assignment]:
+def get_active_assignments(*filters) -> list[Assignment]:
     return Assignment.query.filter(
         Assignment.release_date < datetime.now(),
         Assignment.due_date > datetime.now(),
         Assignment.hidden == False,
+        *filters
     ).all()
 
 

@@ -1,7 +1,6 @@
+import re
 import string
 import traceback
-
-from parse import parse
 
 from anubis.github.api import github_graphql, github_rest
 from anubis.models import Assignment, AssignmentRepo, Submission, SubmissionBuild, SubmissionTestResult, User, db
@@ -10,9 +9,22 @@ from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
 
 
-def parse_github_url(repo_url: str) -> tuple[str, str]:
-    org, repo = parse("https://github.com/{}/{}", repo_url)
+def _split_github_object_org_repo(object_str: str, object_re: re.Pattern) -> tuple[str, str] | None:
+    if object_str is None:
+        return None
+    m = object_re.match(object_str)
+    if m is None:
+        return
+    org, repo = m.groups()
     return org, repo
+
+
+def split_github_repo_path(repo_path: str | None) -> tuple[str, str] | None:
+    return _split_github_object_org_repo(repo_path, re.compile(r'([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)'))
+
+
+def split_github_repo_url(repo_url: str | None) -> tuple[str, str] | None:
+    return _split_github_object_org_repo(repo_url, re.compile(r'https://github.com/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)'))
 
 
 def get_github_template_ids(template_repo: str, github_org: str):
@@ -96,6 +108,11 @@ def list_collaborators(github_org: str, repo_name: str) -> list[str]:
             method="get"
         )
     ]
+
+
+def get_github_repo_default_branch(github_org: str, repo_name: str) -> str:
+    repo_information = github_rest(f'/repos/{github_org}/{repo_name}')
+    return repo_information.get('default_branch', 'main')
 
 
 def get_github_safe_assignment_name(assignment: Assignment) -> str:
@@ -184,7 +201,7 @@ def delete_assignment_repo(user: User, assignment: Assignment, commit: bool = Tr
         ).delete()
 
         # Parse out github org and repo_name from url before deletion
-        github_org, repo_name = parse_github_url(repo.repo_url)
+        github_org, repo_name = split_github_repo_url(repo.repo_url)
 
         # Delete the repo
         logger.info(f'Deleting assignment repo db record')
@@ -471,7 +488,7 @@ def create_assignment_github_repo(
 
 def verify_collaborators_assignment_repo(assignment_repo: AssignmentRepo):
     # Get github org and repo name from the url of the assignment
-    github_org, repo_name = parse_github_url(assignment_repo.repo_url)
+    github_org, repo_name = split_github_repo_url(assignment_repo.repo_url)
 
     # Get repo owner's github username
     github_username: str = assignment_repo.owner.github_username
