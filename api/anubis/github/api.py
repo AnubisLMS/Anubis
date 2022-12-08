@@ -42,7 +42,7 @@ def github_rest(url, body=None, method: str = "get", api_domain: str = "api.gith
             r: requests.Response = req_function(url, headers=headers, json=body)
         else:
             r: requests.Response = req_function(url, headers=headers)
-        is_json = 'application/json' in r.headers.get('Content-Type')
+        is_json = 'Content-Type' in r.headers and 'application/json' in r.headers.get('Content-Type')
         if is_json:
             if r.status_code == 204:
                 return dict()

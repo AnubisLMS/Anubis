@@ -40,7 +40,7 @@ def get_github_template_ids(template_repo: str, github_org: str):
       }
     }
     """
-    github_template_owner, github_template_name = split_github_repo_url(template_repo)
+    github_template_owner, github_template_name = split_github_repo_path(template_repo)
 
     return github_graphql(
         id_query,
