@@ -1,10 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Callable
 
-import googleapiclient.discovery
-
 from anubis.constants import REAPER_TXT
-from anubis.google.service import build_google_service
 from anubis.lms.assignments import get_active_assignments
 from anubis.lms.courses import get_course_users
 from anubis.models import Assignment, Course, User
