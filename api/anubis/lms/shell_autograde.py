@@ -40,7 +40,7 @@ def get_shell_assignment_remote_exercise_names(assignment: Assignment) -> list[s
     # Split assignment repo name
     org, repo = split_shell_autograde_repo(assignment)
 
-    assignment_name_re = re.compile(r"^\s*name='([a-zA-Z0-9 _-]+)'.*$", re.MULTILINE)
+    assignment_name_re = re.compile(r"^\s*name=['\"]([a-zA-Z0-9 _-]+)['\"].*$", re.MULTILINE)
     default_branch = get_github_repo_default_branch(org, repo)
     exercise_py_response: bytes = github_rest(
         f'/{org}/{repo}/{default_branch}/{assignment.shell_autograde_exercise_path}',
