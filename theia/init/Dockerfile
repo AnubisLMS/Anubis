@@ -1,7 +1,7 @@
 FROM debian:bullseye-slim
 
 # Create out directory
-VOLUME /out
+VOLUME /home/anubis/
 
 # Only dependency is git
 RUN set -ex; \

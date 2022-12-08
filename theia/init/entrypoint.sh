@@ -7,7 +7,7 @@ echo "this is changing"
 fix_permissions() {
     # Fix permissions
     echo "fixing permissions"
-    chown -R 1001:1001 /out
+    chown -R 1001:1001 /home/anubis
 }
 
 fix_permissions
@@ -29,7 +29,7 @@ set +e
 
 # Clone
 set -x
-cd /out
+cd /home/anubis
 git clone ${GIT_REPO}
 set +x
 

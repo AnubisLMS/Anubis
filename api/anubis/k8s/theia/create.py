@@ -7,6 +7,7 @@ from anubis.constants import THEIA_DEFAULT_OPTIONS, WEBTOP_DEFAULT_OPTIONS
 from anubis.github.parse import parse_github_repo_name
 from anubis.k8s.pvc.get import get_user_pvc
 from anubis.k8s.theia.get import get_theia_pod_name
+from anubis.lms.shell_autograde import get_exercise_py_text
 from anubis.models import TheiaSession, Assignment
 from anubis.utils.auth.token import create_token
 from anubis.utils.data import is_debug
@@ -65,7 +66,6 @@ def create_theia_k8s_pod_pvc(
         admin = False
         autosave = False
         credentials = False
-        privileged = False
         persistent_storage = True
 
     # Put assignment name in theia container environment
@@ -142,8 +142,8 @@ def create_theia_k8s_pod_pvc(
     theia_volume_name = f"{netid}-{theia_session.id[:6]}-ide"
 
     # Volume Mounts
-    theia_volume_mounts = []
-    autosave_volume_mounts = []
+    ide_volume_mounts: list[k8s.V1VolumeMount] = []
+    autosave_volume_mounts: list[k8s.V1VolumeMount] = []
 
     # If persistent storage is enabled for this assignment, then we should create a pvc
     if persistent_storage:
@@ -217,7 +217,7 @@ def create_theia_k8s_pod_pvc(
 
     # Initialize theia volume mounts array with
     # the project volume mount
-    theia_volume_mounts.append(
+    ide_volume_mounts.append(
         k8s.V1VolumeMount(
             mount_path="/home/anubis",
             name=theia_volume_name,
@@ -239,12 +239,7 @@ def create_theia_k8s_pod_pvc(
             # Add extra env if there is any
             *init_extra_env,
         ],
-        volume_mounts=[
-            k8s.V1VolumeMount(
-                mount_path="/out",
-                name=theia_volume_name,
-            )
-        ],
+        volume_mounts=[*ide_volume_mounts],
     )
 
     ##################################################################################
@@ -297,7 +292,7 @@ def create_theia_k8s_pod_pvc(
         certs_volume_mount = k8s.V1VolumeMount(name="dockerd-certs", mount_path="/certs")
 
         pod_volumes.append(certs_volume)
-        theia_volume_mounts.append(certs_volume_mount)
+        ide_volume_mounts.append(certs_volume_mount)
 
         theia_extra_env.append(k8s.V1EnvVar(name="ANUBIS_RUN_DOCKERD", value="1"))
 
@@ -317,7 +312,7 @@ def create_theia_k8s_pod_pvc(
             ),
             # Add the shared certs volume
             volume_mounts=[
-                *theia_volume_mounts,
+                *ide_volume_mounts,
             ],
         )
 
@@ -342,9 +337,10 @@ def create_theia_k8s_pod_pvc(
             env=[
                 *autosave_extra_env,
                 k8s.V1EnvVar(name="TOKEN", value=submission_token),
+                k8s.V1EnvVar(name="EXERCISE_PY", value=get_exercise_py_text(theia_session.assignment)),
             ],
             volume_mounts=[
-                *theia_volume_mounts,
+                *ide_volume_mounts,
             ],
         )
 
@@ -419,7 +415,7 @@ def create_theia_k8s_pod_pvc(
                 ),
             )
         )
-        theia_volume_mounts.append(
+        ide_volume_mounts.append(
             k8s.V1VolumeMount(
                 mount_path="/docker",
                 name="docker-config",
@@ -435,7 +431,7 @@ def create_theia_k8s_pod_pvc(
                 )
             )
         )
-        theia_volume_mounts.append(
+        ide_volume_mounts.append(
             k8s.V1VolumeMount(
                 mount_path="/dev/shm",
                 name="dshm",
@@ -486,7 +482,7 @@ def create_theia_k8s_pod_pvc(
         ),
         # setup the shared volume where the student
         # repo exists.
-        volume_mounts=theia_volume_mounts,
+        volume_mounts=ide_volume_mounts,
         # Startup probe is the way that kubernetes can
         # check to see if the theia has started correctly.
         # The pod will not be marked as ready until the
