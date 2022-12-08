@@ -6,6 +6,7 @@ from anubis.models import Assignment, AssignmentTest, db
 from anubis.utils.config import get_config_str
 from anubis.utils.data import with_context, req_assert
 from anubis.utils.logging import verbose_call, logger
+from anubis.utils.redis import create_redis_lock
 
 
 def split_shell_autograde_repo(assignment: Assignment) -> tuple[str, str]:
@@ -81,9 +82,9 @@ def set_hidden_local_assignment_test_from_remote_exercises(
 @verbose_call()
 @with_context
 def autograde_shell_assignment_sync(assignment: Assignment):
-    # lock = create_redis_lock(f'assignment-shell-sync-{assignment.id}', auto_release_time=10.0)
-    # if not lock.acquire(blocking=False):
-    #     return
+    lock = create_redis_lock(f'assignment-shell-sync-{assignment.id}', auto_release_time=10.0)
+    if not lock.acquire(blocking=False):
+        return
 
     # Calculate remote exercise names from what is on github
     remote_exercise_names: set[str] = set(get_shell_assignment_remote_exercise_names(assignment))
