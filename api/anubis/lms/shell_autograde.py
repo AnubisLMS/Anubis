@@ -43,6 +43,8 @@ def get_exercise_py_text(assignment: Assignment) -> str:
     )
     exercise_py_txt = exercise_py_response.decode('ascii', errors='ignore')
 
+    logger.debug(f'exercise_py_txt={exercise_py_txt}')
+
     return exercise_py_txt
 
 

@@ -4,7 +4,7 @@ from typing import Any
 
 import requests
 
-from anubis.utils.logging import logger
+from anubis.utils.logging import logger, verbose_call
 
 
 def get_github_token() -> str | None:
@@ -18,7 +18,7 @@ def get_github_token() -> str | None:
 
     return token
 
-
+@verbose_call()
 def github_rest(url, body=None, method: str = "get", api_domain: str = "api.github.com", accept: str = "application/vnd.github.v3+json") -> dict | bytes | None:
     # Get the github api token
     token = get_github_token()

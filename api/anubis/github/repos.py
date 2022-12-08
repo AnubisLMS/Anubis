@@ -7,7 +7,7 @@ from anubis.models import Assignment, AssignmentRepo, Submission, SubmissionBuil
 from anubis.rpc.safety_nets import create_repo_safety_net
 from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
-
+import json
 
 def _split_github_object_org_repo(object_str: str, object_re: re.Pattern) -> tuple[str, str] | None:
     if object_str is None:
@@ -112,6 +112,7 @@ def list_collaborators(github_org: str, repo_name: str) -> list[str]:
 
 def get_github_repo_default_branch(github_org: str, repo_name: str) -> str:
     repo_information = github_rest(f'/repos/{github_org}/{repo_name}')
+    logger.debug(f'repo_information = {json.dumps(repo_information, indent=2)}')
     return repo_information.get('default_branch', 'main')
 
 

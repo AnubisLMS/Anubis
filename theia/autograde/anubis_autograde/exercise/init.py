@@ -1,13 +1,21 @@
 import argparse
 import traceback
+import sys
+import os
 
 from anubis_autograde.exercise.get import set_exercises
 from anubis_autograde.logging import log
 
 
 def init_exercises(args: argparse.Namespace):
+    if '' in sys.path:
+        sys.path.remove('')
+
     try:
-        module_name = args.exercise_module[:-3] if args.exercise_module.endswith('.py') else args.exercise_module
+        module_path = args.exercise_module[:-3] if args.exercise_module.endswith('.py') else args.exercise_module
+        module_directory = os.path.dirname(module_path)
+        module_name = os.path.basename(module_path)
+        sys.path.append(module_directory)
         exercise_module = __import__(module_name)
     except Exception as e:
         log.error(traceback.format_exc())

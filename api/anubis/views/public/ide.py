@@ -144,6 +144,7 @@ def public_ide_initialize(assignment: Assignment):
         resources=resources,
         admin=is_admin,
         credentials=is_admin,
+        autograde=assignment.shell_autograde_enabled,
     )
 
     return success_response({

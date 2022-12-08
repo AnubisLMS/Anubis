@@ -11,10 +11,15 @@ RUN set -eux; \
 
 VOLUME /home/anubis
 
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 COPY supervisord.conf /supervisord.conf
-COPY anubis_autograde /opt/app/autograde
+COPY . /opt/anubis/anubis_autograde
+
+RUN set -eux; \
+    pip3 install --no-cache-dir /opt/anubis/anubis_autograde; \
+    rm -rf /opt/anubis/anubis_autograde
 
 USER anubis
-ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]
+CMD ["/docker-entrypoint.sh"]
 
 
