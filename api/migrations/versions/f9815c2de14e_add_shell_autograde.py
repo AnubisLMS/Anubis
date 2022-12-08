@@ -38,6 +38,10 @@ def upgrade():
             nullable=True,
         ),
     )
+
+    conn = op.get_bind()
+    with conn.begin():
+        conn.execute('UPDATE `assignment` set `shell_autograde_enabled` = 0;')
     # ### end Alembic commands ###
 
 
