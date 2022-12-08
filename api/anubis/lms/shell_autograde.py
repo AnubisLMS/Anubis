@@ -31,16 +31,10 @@ def verify_shell_autograde_exercise_path_allowed(assignment: Assignment) -> bool
     return exercise_path_re.match(assignment.shell_autograde_exercise_path) is not None
 
 
-@verbose_call()
-def get_shell_assignment_remote_exercise_names(assignment: Assignment) -> list[str] | None:
-    # Verify basics
-    req_assert(verify_shell_autograde_exercise_path_allowed(assignment))
-    req_assert(verify_shell_exercise_repo_allowed(assignment))
-
+def get_exercise_py_text(assignment: Assignment) -> str:
     # Split assignment repo name
     org, repo = split_shell_autograde_repo(assignment)
 
-    assignment_name_re = re.compile(r"^\s*name=['\"]([a-zA-Z0-9 _-]+)['\"].*$", re.MULTILINE)
     default_branch = get_github_repo_default_branch(org, repo)
     exercise_py_response: bytes = github_rest(
         f'/{org}/{repo}/{default_branch}/{assignment.shell_autograde_exercise_path}',
@@ -49,6 +43,19 @@ def get_shell_assignment_remote_exercise_names(assignment: Assignment) -> list[s
     )
     exercise_py_txt = exercise_py_response.decode('ascii', errors='ignore')
 
+    return exercise_py_txt
+
+
+@verbose_call()
+def get_shell_assignment_remote_exercise_names(assignment: Assignment) -> list[str] | None:
+    # Verify basics
+    req_assert(verify_shell_autograde_exercise_path_allowed(assignment))
+    req_assert(verify_shell_exercise_repo_allowed(assignment))
+
+
+    exercise_py_txt = get_exercise_py_text(assignment)
+
+    assignment_name_re = re.compile(r"^\s*name=['\"]([a-zA-Z0-9 _-]+)['\"].*$", re.MULTILINE)
     exercise_name_match: list[str] = assignment_name_re.findall(exercise_py_txt)
     if len(exercise_name_match) == 0:
         logger.warning(f'Could not find assignment names based off of re {assignment.id=} {exercise_name_match=}')
