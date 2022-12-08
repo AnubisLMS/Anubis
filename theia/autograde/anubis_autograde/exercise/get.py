@@ -99,7 +99,7 @@ def get_user_state() -> UserState:
     user_exercise_name: str = request.form.get('exercise', default='').strip()
     user_command: str = request.form.get('command', default='')
     user_output: str = request.form.get('output', default='')
-    user_cwd: str = request.form.get('cwd', default='/home/anubis')
+    user_cwd: str = request.form.get('cwd', default='/home/anubis')  # TODO verify valid path before this reached prod
     user_env: str = request.form.get('env', default='')
 
     user_state = UserState(

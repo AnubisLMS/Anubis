@@ -100,6 +100,9 @@ def verify_filesystem_conditions(exercise: Exercise, user_state: UserState):
         filesystem_condition: FileSystemCondition
         path = expand_path(filesystem_condition.path)
 
+        if not path.startswith('/'):
+            path = os.path.join(user_state.cwd, path)
+
         exists = os.path.exists(path)
         isdir = os.path.isdir(path)
 
