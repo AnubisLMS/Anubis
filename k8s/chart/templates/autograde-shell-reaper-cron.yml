@@ -1,0 +1,35 @@
+{{- if and .Values.autograde_shell_reaper.enable (not .Values.debug) }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "chart.fullname" . }}-autograde-shell-reaper
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: autograde-shell-reaper
+spec:
+  schedule: {{ .Values.autograde_shell_reaper.schedule | quote }}
+  suspend: {{ .Values.autograde_shell_reaper.suspend }}
+  concurrencyPolicy: Replace
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "chart.selectorLabels" . | nindent 8 }}
+        component: autograde-shell-reaper
+    spec:
+      ttlSecondsAfterFinished: 120
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: {{ include "chart.fullname" . }}-email
+          restartPolicy: Never
+          containers:
+            - name: autograde-shell-reaper
+              image: "{{ .Values.api.image }}:{{ .Values.tag }}"
+              imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+              command: [ "python3", "anubis/jobs/autograde_shell_reaper.py" ]
+              env:
+              - name: "JOB"
+                value: "1"
+              {{- include "api.env" . | nindent 14 }}
+{{- end }}

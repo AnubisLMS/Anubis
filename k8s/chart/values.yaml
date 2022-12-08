@@ -168,6 +168,11 @@ email:
   suspend: false
   schedule: "*/5 * * * *"
   secretName: google-gmail-creds
+
+autograde_shell_reaper:
+  enable: true
+  suspend: false
+  schedule: "* * * * *"
 ###############################################################################
 
 
