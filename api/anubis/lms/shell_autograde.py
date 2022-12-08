@@ -13,6 +13,10 @@ def split_shell_autograde_repo(assignment: Assignment) -> tuple[str, str]:
     return split_github_repo_path(assignment.shell_autograde_repo)
 
 
+def verify_shell_exercise_repo_format(assignment: Assignment) -> bool:
+    return split_shell_autograde_repo(assignment) is not None
+
+
 def verify_shell_exercise_repo_allowed(assignment: Assignment) -> bool:
     allowed_orgs: list[str] = get_config_str('AUTOGRADE_SHELL_ALLOWED_ORGS', '').split(',')
     split_org_repo = split_shell_autograde_repo(assignment)

@@ -10,8 +10,12 @@ from anubis.github.repos import delete_assignment_repo
 from anubis.lms.assignments import assignment_sync, delete_assignment, delete_assignment_repos
 from anubis.lms.courses import assert_course_context, course_context, is_course_superuser
 from anubis.lms.questions import get_assigned_questions
-from anubis.lms.shell_autograde import verify_shell_autograde_exercise_path_allowed, verify_shell_exercise_repo_allowed, \
+from anubis.lms.shell_autograde import (
+    verify_shell_autograde_exercise_path_allowed,
+    verify_shell_exercise_repo_allowed,
+    verify_shell_exercise_repo_format,
     autograde_shell_assignment_sync
+)
 from anubis.models import Assignment, AssignmentRepo, AssignmentTest, SubmissionTestResult, User, db
 from anubis.rpc.enqueue import enqueue_make_shared_assignment
 from anubis.utils.auth.http import require_admin
@@ -426,8 +430,12 @@ def admin_assignments_save(assignment: dict):
 
     # Verify basics
     req_assert(
-        verify_shell_exercise_repo_allowed(db_assignment),
+        verify_shell_exercise_repo_format(db_assignment),
         message='Shell Assignment Repo is in invalid form. Please use form "<github org>/<github repo>"'
+    )
+    req_assert(
+        verify_shell_exercise_repo_allowed(db_assignment),
+        message='Shell Assignment Repo is in not in a valid github organization/user. Please reach out to support'
     )
     req_assert(
         verify_shell_autograde_exercise_path_allowed(db_assignment),
