@@ -1,4 +1,4 @@
-{{- if and (not .Values.debug) .Values.discord_bot.enable }}
+{{- if .Values.discord_bot.enable }}
 
 apiVersion: apps/v1
 kind: Deployment

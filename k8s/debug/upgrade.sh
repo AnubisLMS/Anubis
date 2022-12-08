@@ -21,7 +21,7 @@ helm upgrade \
      --set "theia.proxy.domain=ide.localhost" \
      --set "rollingUpdates=false" \
      --set "domain=localhost" \
-     --set "discordbot.replicas=0" \
+     --set "discord_bot.replicas=0" \
      --set "reaper.suspend=true" \
      --set "visuals.suspend=true" \
      --set "backup.suspend=true" \
