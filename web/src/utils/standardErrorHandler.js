@@ -3,5 +3,5 @@ export default (enqueueSnackbar) => (error) => {
     window.location = '/api/public/auth/login';
     return;
   }
-  enqueueSnackbar(error.toString(), {variant: 'error'});
+  enqueueSnackbar(error.toString(), {variant: 'error', persist: false});
 };

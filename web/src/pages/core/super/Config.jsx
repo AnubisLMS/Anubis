@@ -124,13 +124,14 @@ export default function Config() {
 
   const addItem = () => {
     setConfig((prev) => {
-      prev.push({
+      const newThing = new Array(...prev);
+      newThing.push({
         id: `id${prev.length}`,
         key: 'key',
         value: 'value',
         action: 'edit',
       });
-      return [...prev];
+      return newThing;
     });
   };
 
