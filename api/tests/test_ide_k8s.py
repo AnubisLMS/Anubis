@@ -71,7 +71,7 @@ def test_playground_k8s():
         assert init_container.image == 'registry.digitalocean.com/anubis/theia-init'
         assert init_container.name == 'theia-init'
         assert len(init_container.volume_mounts) == 1
-        assert init_container.volume_mounts[0].mount_path == '/out'
+        assert init_container.volume_mounts[0].mount_path == '/home/anubis'
         assert init_container.volume_mounts[0].name == f'ide-volume-{s.netid}'
 
         theia_container: V1Container = None
@@ -208,7 +208,7 @@ def test_assignment_ide_k8s():
         assert init_container.image == 'registry.digitalocean.com/anubis/theia-init'
         assert init_container.name == 'theia-init'
         assert len(init_container.volume_mounts) == 1
-        assert init_container.volume_mounts[0].mount_path == '/out'
+        assert init_container.volume_mounts[0].mount_path == '/home/anubis'
 
         theia_container: V1Container = None
         autosave_container: V1Container = None
