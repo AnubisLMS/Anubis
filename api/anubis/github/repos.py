@@ -1,3 +1,4 @@
+import json
 import re
 import string
 import traceback
@@ -7,7 +8,7 @@ from anubis.models import Assignment, AssignmentRepo, Submission, SubmissionBuil
 from anubis.rpc.safety_nets import create_repo_safety_net
 from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
-import json
+
 
 def _split_github_object_org_repo(object_str: str, object_re: re.Pattern) -> tuple[str, str] | None:
     if object_str is None:
@@ -38,10 +39,8 @@ def get_github_template_ids(template_repo: str, github_org: str):
         id
       }
     }
-        """
-
-    p = parse("{}/{}", template_repo)
-    github_template_owner, github_template_name = p
+    """
+    github_template_owner, github_template_name = split_github_repo_url(template_repo)
 
     return github_graphql(
         id_query,
