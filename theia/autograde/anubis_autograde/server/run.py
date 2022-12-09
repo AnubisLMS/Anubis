@@ -34,6 +34,7 @@ def run_server(args: argparse.Namespace):
     init_server_logging()
     init_exercises(args)
     init_bashrc(args)
+
     if args.debug:
         host, port = args.bind.split(':')
         exercise_module = args.exercise_module \

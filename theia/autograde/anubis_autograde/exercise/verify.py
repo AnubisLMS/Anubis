@@ -2,6 +2,8 @@ import os
 import traceback
 import typing
 
+from flask import current_app
+
 from anubis_autograde.exercise.find import find_exercise
 from anubis_autograde.exercise.get import get_exercises
 from anubis_autograde.logging import log
@@ -103,6 +105,14 @@ def verify_filesystem_conditions(exercise: Exercise, user_state: UserState):
 
         if not path.startswith('/'):
             path = os.path.join(user_state.cwd, path)
+
+        debug = current_app.debug
+
+        if not debug and (
+            (not path.startswith('/home/anubis/')) or
+            ('..' in path)
+        ):
+            raise RejectionException('Current working dir not allowed')
 
         exists = os.path.exists(path)
         isdir = os.path.isdir(path)
