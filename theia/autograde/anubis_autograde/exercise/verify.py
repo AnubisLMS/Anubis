@@ -1,5 +1,6 @@
 import os
 import traceback
+import typing
 
 from anubis_autograde.exercise.find import find_exercise
 from anubis_autograde.exercise.get import get_exercises
@@ -13,7 +14,7 @@ def _r(
     user_state: UserState,
     condition: str,
     default_message: str,
-    item: Exercise | FileSystemCondition | EnvVarCondition = None
+    item: typing.Union[Exercise, FileSystemCondition, EnvVarCondition] = None
 ):
     """
     :param exercise: current exercise
