@@ -232,7 +232,7 @@ def init_submissions(submissions):
 
     # Init models
     for submission in submissions:
-        init_submission(submission, commit=False, verbose=False)
+        init_submission(submission, db_commit=False, verbose=False)
     db.session.commit()
 
     for submission in submissions:

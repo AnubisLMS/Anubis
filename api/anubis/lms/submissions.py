@@ -209,7 +209,7 @@ def reject_late_submission(submission: Submission):
     db.session.add(submission)
 
 
-def init_submission(submission: Submission, commit: bool = True, verbose: bool = True):
+def init_submission(submission: Submission, db_commit: bool = True, verbose: bool = True):
     """
     Create adjacent submission models.
 
@@ -225,7 +225,7 @@ def init_submission(submission: Submission, commit: bool = True, verbose: bool =
     if submission.build is not None:
         SubmissionBuild.query.filter_by(submission_id=submission.id).delete()
 
-    if commit:
+    if db_commit:
         # Commit deletions (if necessary)
         db.session.commit()
 
@@ -247,7 +247,7 @@ def init_submission(submission: Submission, commit: bool = True, verbose: bool =
     submission.errors = None
     db.session.add(submission)
 
-    if commit:
+    if db_commit:
         # Commit new models
         db.session.commit()
 

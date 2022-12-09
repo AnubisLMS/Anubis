@@ -496,7 +496,7 @@ class Submission(db.Model):
     # Foreign Keys
     owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), index=True, nullable=True)
     assignment_id: str = Column(String(length=default_id_length), ForeignKey(Assignment.id), index=True, nullable=False)
-    assignment_repo_id: str = Column(String(length=default_id_length), ForeignKey(AssignmentRepo.id), nullable=False)
+    assignment_repo_id: str = Column(String(length=default_id_length), ForeignKey(AssignmentRepo.id), nullable=True)
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)

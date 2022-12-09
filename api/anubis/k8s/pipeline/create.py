@@ -61,7 +61,7 @@ def create_submission_pipeline(submission_id: str):
     # If the build field is not present, then
     # we need to initialize the submission.
     if submission.build is None:
-        init_submission(submission, commit=True)
+        init_submission(submission, db_commit=True)
 
     submission.processed = False
     submission.state = "Initializing Pipeline"

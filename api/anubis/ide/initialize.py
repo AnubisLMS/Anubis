@@ -1,6 +1,7 @@
 from kubernetes import config, client
 
 from anubis.k8s.theia.create import create_theia_k8s_pod_pvc
+from anubis.lms.shell_autograde import create_shell_autograde_ide_submission
 from anubis.models import TheiaSession, db
 from anubis.utils.auth.user import current_user
 from anubis.utils.config import get_config_int
@@ -163,6 +164,10 @@ def initialize_ide(
         autograde=autograde,
     )
     db.session.add(session)
+
+    if autograde:
+        create_shell_autograde_ide_submission(session)
+
     db.session.commit()
 
     # Send kube resource initialization rpc job

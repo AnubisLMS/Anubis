@@ -2,8 +2,11 @@ import re
 
 from anubis.github.api import github_rest
 from anubis.github.repos import split_github_repo_path, get_github_repo_default_branch
-from anubis.models import Assignment, AssignmentTest, db
+from anubis.lms.submissions import init_submission
+from anubis.models import Assignment, AssignmentTest, TheiaSession, Submission, db
+from anubis.models.id import default_id_factory
 from anubis.utils.config import get_config_str
+from anubis.utils.data import rand
 from anubis.utils.data import with_context, req_assert
 from anubis.utils.logging import verbose_call, logger
 from anubis.utils.redis import create_redis_lock
@@ -59,7 +62,6 @@ def get_shell_assignment_remote_exercise_names(assignment: Assignment) -> list[s
     # Verify basics
     req_assert(verify_shell_autograde_exercise_path_allowed(assignment))
     req_assert(verify_shell_exercise_repo_allowed(assignment))
-
 
     exercise_py_txt = get_exercise_py_text(assignment)
 
@@ -129,3 +131,18 @@ def autograde_shell_assignment_sync(assignment: Assignment):
     set_hidden_local_assignment_test_from_remote_exercises(assignment, unhide_exercise_names, hidden=False)
     set_hidden_local_assignment_test_from_remote_exercises(assignment, hide_exercise_names, hidden=True)
     create_new_assignment_test_from_remote_exercises(assignment, create_exercise_names)
+
+
+def create_shell_autograde_ide_submission(theia_session: TheiaSession) -> Submission:
+    submission = Submission(
+        id=default_id_factory(),
+        owner_id=theia_session.owner_id,
+        assignment_id=theia_session.assignment_id,
+        assignment_repo_id=None,
+        commit=rand(128),
+        state="IDE Running",
+    )
+    theia_session.submission_id = submission.id
+    db.session.add(submission)
+    init_submission(submission, db_commit=True)
+    return submission

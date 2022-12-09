@@ -324,11 +324,7 @@ def create_theia_k8s_pod_pvc(
     if theia_session.autograde:
 
         # Submission may not be created. Skip handling this for now
-        if theia_session.submission_id is not None:
-            submission = theia_session.submission
-            submission_token = submission.token
-        else:
-            submission_token = 'ABC'
+        submission = theia_session.submission
 
         autograde_container = k8s.V1Container(
             name="autograde",
@@ -336,7 +332,8 @@ def create_theia_k8s_pod_pvc(
             image_pull_policy="IfNotPresent",
             env=[
                 *autosave_extra_env,
-                k8s.V1EnvVar(name="TOKEN", value=submission_token),
+                k8s.V1EnvVar(name="TOKEN", value=submission.token),
+                k8s.V1EnvVar(name="SUBMISSION_ID", value=submission.id),
                 k8s.V1EnvVar(name="EXERCISE_PY", value=get_exercise_py_text(theia_session.assignment)),
             ],
             volume_mounts=[
