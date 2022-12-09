@@ -12,3 +12,7 @@ pip-tools
 # Python testing framework
 pytest
 coverage
+
+# anubis_autograde
+termcolor
+colorama
