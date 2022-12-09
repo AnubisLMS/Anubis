@@ -39,7 +39,7 @@ setup(
     description="CLI component to the Anubis autograder.",
     entry_points={
         'console_scripts': [
-            'anubis-autograde=anubis_autograde.cli:main',
+            'anubis-autograde=anubis_autograde.__main__:main',
         ],
     },
     install_requires=requirements,

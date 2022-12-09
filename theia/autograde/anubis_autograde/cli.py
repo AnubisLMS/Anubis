@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 
 from anubis_autograde.exercise.run import run_exercise_init
 from anubis_autograde.logging import init_logging

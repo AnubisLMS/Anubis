@@ -8,8 +8,6 @@ from anubis_autograde.logging import log
 
 
 def init_exercises(args: argparse.Namespace):
-    if '' in sys.path:
-        sys.path.remove('')
 
     try:
         module_path = args.exercise_module[:-3] if args.exercise_module.endswith('.py') else args.exercise_module
