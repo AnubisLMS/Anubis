@@ -6,7 +6,7 @@ import gunicorn.app.base
 from anubis_autograde.exercise.init import init_exercises
 from anubis_autograde.server.app import app
 from anubis_autograde.shell.bashrc import init_bashrc
-
+from anubis_autograde.exercise.pipeline import initialize_submission_status
 
 class _StandaloneApplication(gunicorn.app.base.BaseApplication):
     def __init__(self, _app, options=None):
@@ -35,6 +35,13 @@ def run_server(args: argparse.Namespace):
     init_exercises(args)
     init_bashrc(args)
 
+    app.config['SUBMISSION_ID'] = args.submission_id
+    app.config['TOKEN'] = args.token
+    app.config['DEBUGe'] = args.debug
+
+    with app.app_context():
+        initialize_submission_status()
+
     if args.debug:
         host, port = args.bind.split(':')
         exercise_module = args.exercise_module \
@@ -50,4 +57,4 @@ def run_server(args: argparse.Namespace):
                 'capture-output':           True,
                 'enable-stdio-inheritance': True,
             }
-            ).run()
+        ).run()

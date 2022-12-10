@@ -5,7 +5,7 @@ import string
 import typing
 
 import jinja2
-from flask import Response, make_response
+from flask import Response, make_response, current_app
 from termcolor import colored as _colored
 
 
@@ -71,6 +71,16 @@ def complete_reject(func):
         if is_all_complete():
             return f'This assignment is complete. ' \
                    f'You can use the reset command to replay.', 200
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def skip_if_debug(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if current_app.debug:
+            return
         return func(*args, **kwargs)
 
     return wrapper

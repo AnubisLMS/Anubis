@@ -549,7 +549,7 @@ class Submission(db.Model):
 
         # Add connected models
         data = self.data
-        data["repo"] = self.repo.repo_url
+        data["repo"] = self.repo.repo_url if self.repo is not None else None
         data["tests"] = get_assignment_tests(self, only_visible=True)
         data["build"] = self.build.data if self.build is not None else None
 

@@ -139,7 +139,7 @@ def create_shell_autograde_ide_submission(theia_session: TheiaSession) -> Submis
         owner_id=theia_session.owner_id,
         assignment_id=theia_session.assignment_id,
         assignment_repo_id=None,
-        commit=rand(128),
+        commit='fake-' + rand(40-5),
         state="IDE Running",
     )
     theia_session.submission_id = submission.id

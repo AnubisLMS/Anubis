@@ -189,7 +189,7 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
 @pipeline.route("/report/state/<string:submission_id>", methods=["POST"])
 @check_submission_token
 @json_endpoint(required_fields=[("state", str)])
-def pipeline_report_state(submission: Submission, state: str, **kwargs):
+def pipeline_report_state(submission: Submission, state: str, **__):
     """
     When a submission pipeline wants to report a state, it
     hits this endpoint. If there is a ?processed=1 in the

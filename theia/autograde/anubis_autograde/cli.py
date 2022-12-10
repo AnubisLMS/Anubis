@@ -31,6 +31,7 @@ def make_parser() -> argparse.ArgumentParser:
     parser_server = subparsers.add_parser('server', help='run autograde server')
     parser_server.add_argument('--bind', default='0.0.0.0:5003', help='Address to bind gunicorn server to')
     parser_server.add_argument('--token', default=None, help='')
+    parser_server.add_argument('--submission_id', default=None, help='')
     parser_server.add_argument('--netid', default=None, help='')
     parser_server.add_argument('--test', action='store_true')
     parser_server.add_argument('--prod', action='store_true', help='Enables production mode. This will overwrite the ')
