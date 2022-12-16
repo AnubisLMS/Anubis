@@ -32,20 +32,19 @@ def _send_assignment_condition_email_notifications(
     reference_type: str
 ):
     for assignment in recent_assignments:
+        logger.info(f'{assignment=}')
         course: Course = assignment.course
         students: list[User] = get_course_users(course)
 
-        if not assignment.email_notifications_enabled:
-            logger.info(f'Skipping assignment reference_type={reference_type} '
-                        f'assignment_id={assignment.id} course_id={assignment.course_id}')
-            continue
+        logger.info(f'Inspecting assignment {reference_type=} {assignment.name=} {assignment.course.course_code=}')
 
-        logger.info(f'Inspecting assignment reference_type={reference_type} '
-                    f'assignment_id={assignment.id} course_id={assignment.course_id} ')
+        if not assignment.email_notifications_enabled:
+            logger.info(f'Skipping assignment {reference_type=} {assignment.name=} {assignment.course.course_code=}')
+            continue
 
         if not condition(assignment):
             logger.info(f'Condition not met for assignment, skipping')
-            return
+            continue
 
         else:
             logger.info(f'Condition met, sending emails')

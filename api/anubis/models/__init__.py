@@ -258,6 +258,11 @@ class Assignment(db.Model):
     tests = relationship("AssignmentTest", cascade="all,delete", backref="assignment")
     repos = relationship("AssignmentRepo", cascade="all,delete", backref="assignment")
 
+    def __repr__(self):
+        name = self.name
+        course_code = self.course.course_code
+        return f'<Assignment id={self.id} {name=} {course_code=}>'
+
     @property
     def data(self):
         return {
