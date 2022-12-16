@@ -87,7 +87,7 @@ export default function Questions({assignment_id}) {
     axios.post(`/api/public/questions/save/${assignment_id}`, {questions}).then((resp) => {
       const data = standardStatusHandler(resp, enqueueSnackbar);
       if (data?.questions) {
-        setQuestions(data.questions);
+        setQuestions([...data.questions]);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
   };
@@ -139,6 +139,11 @@ export default function Questions({assignment_id}) {
               question={selectedQuestion(selectedQuestionId)}
               updateResponse={updateResponse(selectedQuestionId)}
               saveResponse={saveResponse}
+              // commands={[{ // commands is array of key bindings.
+              //   name: 'save', // name for the key binding.
+              //   bindKey: {win: 'Ctrl-s', mac: 'Command-s'}, // key combination used for the command.
+              //   exec: saveResponse, // function to execute when keys are pressed.
+              // }]}
             />
             <DialogActions>
               <Button
