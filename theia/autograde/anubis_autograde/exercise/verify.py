@@ -32,7 +32,7 @@ def _r(
     if item is None:
         item = exercise
 
-    exercise_fail_message: str | None = getattr(item, f'{condition}_fail_message')
+    exercise_fail_message: str | None = getattr(item, f'{condition}_fail_message') or getattr(item, 'fail_message')
     if exercise_fail_message is None:
         raise RejectionException(default_message)
 
