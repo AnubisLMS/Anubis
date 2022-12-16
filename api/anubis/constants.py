@@ -47,6 +47,10 @@ EMAIL_FROM = "noreply@anubis-lms.io"
 GOOGLE_GMAIL_CREDS_SECRET = "google-gmail-creds"
 GOOGLE_GMAIL_CREDS_SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
+# Google Calendar variables
+GOOGLE_CALENDAR_CREDS_SECRET = "google-calendar-creds"
+GOOGLE_CALENDAR_SCOPES = ['https://www.googleapis.com/auth/calendar']
+
 
 REAPER_TXT = """
 
