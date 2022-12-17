@@ -25,7 +25,7 @@ def verify_shell_exercise_repo_format(assignment: Assignment) -> bool:
 def verify_shell_exercise_repo_allowed(assignment: Assignment) -> bool:
     if assignment.shell_autograde_repo == '' or assignment.shell_autograde_repo is None:
         return True
-    allowed_orgs: list[str] = get_config_str('AUTOGRADE_SHELL_ALLOWED_ORGS', '').split(',')
+    allowed_orgs: list[str] = get_config_str('AUTOGRADE_SHELL_ALLOWED_ORGS', 'AnubisLMS').split(',')
     split_org_repo = split_shell_autograde_repo(assignment)
     if split_org_repo is None:
         return False
@@ -36,7 +36,7 @@ def verify_shell_exercise_repo_allowed(assignment: Assignment) -> bool:
 def verify_shell_autograde_exercise_path_allowed(assignment: Assignment) -> bool:
     if assignment.shell_autograde_exercise_path == '' or assignment.shell_autograde_exercise_path is None:
         return True
-    exercise_path_re = re.compile(r'^([a-zA-Z0-9 _-]+)/exercise.py$')
+    exercise_path_re = re.compile(r'^([a-zA-Z0-9\s_/-]+)/exercise.py$')
     return exercise_path_re.match(assignment.shell_autograde_exercise_path) is not None
 
 

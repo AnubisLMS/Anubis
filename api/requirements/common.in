@@ -18,6 +18,8 @@ python-dateutil
 python-dotenv
 python-magic==0.4.18
 pottery
+colorama
+termcolor
 redis
 rq
 sqlalchemy-json

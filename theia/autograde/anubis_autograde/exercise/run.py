@@ -61,7 +61,7 @@ exercises: typing.List[Exercise] = [
     ),
 ]
 """
-                                    )
+)
 
 
 def run_exercise_init(_: argparse.Namespace):

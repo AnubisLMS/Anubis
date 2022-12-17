@@ -8,7 +8,8 @@ from anubis_autograde.exercise.find import find_exercise
 from anubis_autograde.exercise.get import get_exercises
 from anubis_autograde.logging import log
 from anubis_autograde.models import UserState, Exercise, FileSystemCondition, ExistState, EnvVarCondition
-from anubis_autograde.utils import RejectionException, expand_path, colorize_render
+from anubis_autograde.utils import expand_path, colorize_render
+from anubis_autograde.exceptions import RejectionException
 
 
 def _r(

@@ -8,6 +8,8 @@ import jinja2
 from flask import Response, make_response, current_app
 from termcolor import colored as _colored
 
+from anubis_autograde.exceptions import RejectionException
+
 
 def expand_path(path: str) -> str:
     path = os.path.expanduser(path)
@@ -19,8 +21,13 @@ def expand_path(path: str) -> str:
 
 def remove_unprintable(s: typing.Union[str, bytes]) -> str:
     valid: set[int] = set(ord(c) for c in string.printable)
-    return ''.join(chr(c) for c in s if (c if isinstance(c, int) else ord(c)) in valid)
-
+    ss: list[str] = []
+    for c in s:
+        if isinstance(c, int) and c in valid:
+            ss.append(chr(c))
+        elif isinstance(c, str) and ord(c) in valid:
+            ss.append(c)
+    return ''.join(ss)
 
 def text_response(func):
     @functools.wraps(func)
@@ -84,13 +91,6 @@ def skip_if_debug(func):
         return func(*args, **kwargs)
 
     return wrapper
-
-
-class RejectionException(Exception):
-    def __init__(self, msg: str, status_code: int = 406):
-        self.msg = msg
-        self.status_code = status_code
-        super(RejectionException, self).__init__(msg)
 
 
 def colorize_render(

@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Blueprint
 
 from anubis_autograde.exercise.get import (
     get_exercises,
@@ -13,10 +13,10 @@ from anubis_autograde.exercise.get import (
 from anubis_autograde.exercise.verify import run_exercise
 from anubis_autograde.utils import text_response, reject_handler, complete_reject, colorize_render
 
-app = Flask(__name__)
+views = Blueprint('views', __name__)
 
 
-@app.get('/start')
+@views.get('/start')
 @text_response
 def start():
     message = get_start_message()
@@ -28,7 +28,7 @@ def start():
     return message
 
 
-@app.get('/current')
+@views.get('/current')
 @text_response
 @complete_reject
 def current():
@@ -36,14 +36,14 @@ def current():
     return str(index)
 
 
-@app.get('/reset')
+@views.get('/reset')
 @text_response
 def reset():
     index = reset_exercises()
     return str(index)
 
 
-@app.get('/status')
+@views.get('/status')
 @text_response
 def status():
     _, current_exercise = get_active_exercise()
@@ -55,14 +55,14 @@ def status():
     return output.removesuffix('\n')
 
 
-@app.get('/hint')
+@views.get('/hint')
 @text_response
 @complete_reject
 def hint():
     return get_active_exercise_hint()
 
 
-@app.post('/submit')
+@views.post('/submit')
 @text_response
 @reject_handler
 @complete_reject

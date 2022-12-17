@@ -30,7 +30,7 @@ def get_active_exercise_hint() -> str:
 
 
 def get_exercises() -> typing.List[Exercise]:
-    return _exercises
+    return _exercises or []
 
 
 def get_start_message() -> str:
