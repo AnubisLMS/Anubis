@@ -5,7 +5,6 @@ import googleapiclient.discovery
 
 from anubis.utils.data import is_debug
 from anubis.utils.logging import logger
-from anubis.utils.config import get_config_bool
 from anubis.utils.google.service import build_google_service
 from anubis.constants import GOOGLE_CALENDAR_SCOPES, GOOGLE_CALENDAR_CREDS_SECRET
 
@@ -30,7 +29,7 @@ def add_event(
       event:       The event to be added
 
     Returns:
-      Link to the added event.
+      The identifier of the added event
     """
 
     service = get_calendar_service()
@@ -39,7 +38,7 @@ def add_event(
 
     try:
         event = service.events().insert(calendarId=calendar_id, body=event).execute()
-        return event.get('htmlLink')
+        return event.get('id')
     except Exception as e:
         logger.error(traceback.format_exc())
         if raise_:
