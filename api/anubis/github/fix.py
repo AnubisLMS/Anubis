@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+import sqlalchemy.exc
 from sqlalchemy.sql import or_
 
 from anubis.github.api import github_graphql
@@ -126,18 +127,22 @@ def fix_github_missing_submissions(org_name: str):
                     submission = Submission.query.filter(Submission.commit == commit).first()
                     if submission is None:
                         print(f"Found missing submission {user.netid=} {assignment=} {commit=}")
-                        submission = Submission(
-                            commit=commit,
-                            owner=user,
-                            assignment=assignment,
-                            repo=repo,
-                            state="Waiting for resources...",
-                        )
-                        db.session.add(submission)
-                        db.session.commit()
-                        init_submission(submission)
-                        if submission.assignment.autograde_enabled:
-                            enqueue_autograde_pipeline(submission.id)
+                        try:
+                            submission = Submission(
+                                commit=commit,
+                                owner=user,
+                                assignment=assignment,
+                                repo=repo,
+                                state="Waiting for resources...",
+                            )
+                            db.session.add(submission)
+                            db.session.commit()
+                            init_submission(submission)
+                            if submission.assignment.autograde_enabled:
+                                enqueue_autograde_pipeline(submission.id)
+                        except sqlalchemy.exc.IntegrityError:
+                            db.session.rollback()
+                            logger.warning(f'Failed to create submission that already exists {user.netid=} {assignment=} {commit=}')
             except TypeError as e:
                 logger.warning(f'Failed to parse commit objects for repo - {e} - {str(repo)}')
 
