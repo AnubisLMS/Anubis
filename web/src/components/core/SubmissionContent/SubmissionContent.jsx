@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import React from 'react';
+import React, {Fragment} from 'react';
 import RadialChart from 'react-vis/dist/radial-chart';
 import {useStyles} from './SubmissionContent.styles';
 import useTheme from '@mui/material/styles/useTheme';
@@ -46,12 +46,16 @@ const SubmissionContent = ({children, submission}) => {
           height={55}/>
         <Box className={classes.statusContainer}>
           <Typography className={classes.statusText}>
-            {status.all.processing ? 'Tests Processing' : (
-              <React.Fragment>
-                {status.all.passed === submission.tests.length + 1 ?
-                  'All Tests Successful' : status.all.failed === submission.tests.length + 1 ?
-                    'All Tests Failed' : 'Some Tests where not Successful'}
-              </React.Fragment>
+            {!submission.commit.startsWith('fake-') && (
+              <Fragment>
+                {status.all.processing ? 'Tests Processing' : (
+                  <React.Fragment>
+                    {status.all.passed === submission.tests.length + 1 ?
+                      'All Tests Successful' : status.all.failed === submission.tests.length + 1 ?
+                        'All Tests Failed' : 'Some Tests where not Successful'}
+                  </React.Fragment>
+                )}
+              </Fragment>
             )}
           </Typography>
           <Typography className={classes.statusDescriptionText}>

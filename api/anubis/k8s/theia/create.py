@@ -34,6 +34,12 @@ def create_theia_k8s_pod_pvc(
     # Construct the theia pod name
     pod_name = get_theia_pod_name(theia_session)
 
+    # Extra labels to be applied to the pod
+    pod_labels_extra = {}
+
+    # Anything extra in the pod spec to be added
+    pod_spec_extra = {}
+
     # list of container objects
     pod_containers = []
 
@@ -339,7 +345,18 @@ def create_theia_k8s_pod_pvc(
             volume_mounts=[
                 *ide_volume_mounts,
             ],
+
+            # Add startup probe to make sure that the bashrc is generated before IDE can be accessed.
+            # This ensures that any shell in IDE can only exist after bashrc is created.
+            startup_probe=k8s.V1Probe(
+                _exec=k8s.V1ExecAction(command=['stat', '/home/anubis/.bashrc']),
+                failure_threshold=60,
+                period_seconds=1,
+                initial_delay_seconds=0,
+            )
         )
+
+        pod_labels_extra["shell-autograde"] = 'true'
 
         pod_containers.append(autograde_container)
 
@@ -513,11 +530,6 @@ def create_theia_k8s_pod_pvc(
     pod_containers.append(theia_container)
     pod_containers.append(autosave_container)
 
-    # Extra labels to be applied to the pod
-    extra_labels = {}
-
-    # Anything extra in the pod spec to be added
-    spec_extra = {}
 
     # If network locked, then set the network policy to student
     # and dns to 1.1.1.1
@@ -526,19 +538,19 @@ def create_theia_k8s_pod_pvc(
         # This label will enable the student network policy to be
         # applied to this container. The gist of this policy is that
         # students will only be able to connect to github.
-        extra_labels["network-policy"] = theia_session.network_policy or "os-student"
+        pod_labels_extra["network-policy"] = theia_session.network_policy or "os-student"
 
         # set up the pod DNS to be pointed to cloudflare 1.1.1.1 instead
         # of the internal kubernetes dns.
-        spec_extra["dns_policy"] = "None"
-        spec_extra["dns_config"] = k8s.V1PodDNSConfig(nameservers=["1.1.1.1"])
+        pod_spec_extra["dns_policy"] = "None"
+        pod_spec_extra["dns_config"] = k8s.V1PodDNSConfig(nameservers=["1.1.1.1"])
 
     # If the network is not locked, then we still need to apply
     # the admin policy. The gist of this policy is that the pod
     # can only connect to the api within the cluster, and anything
     # outside of the cluster.
     else:
-        extra_labels["network-policy"] = "admin"
+        pod_labels_extra["network-policy"] = "admin"
 
     # Create pod object
     pod = k8s.V1Pod(
@@ -550,7 +562,7 @@ def create_theia_k8s_pod_pvc(
                 "role":                   "theia-session",
                 "netid":                  netid,
                 "session":                theia_session.id,
-                **extra_labels,
+                **pod_labels_extra,
             },
         ),
         spec=k8s.V1PodSpec(
@@ -572,7 +584,7 @@ def create_theia_k8s_pod_pvc(
             automount_service_account_token=False,
             # Add any extra things in the spec (depending on the
             # options set for the session)
-            **spec_extra,
+            **pod_spec_extra,
         ),
     )
 

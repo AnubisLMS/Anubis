@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {Fragment, useEffect, useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 import clsx from 'clsx';
@@ -129,31 +129,36 @@ const Assignment = () => {
                 variant={'contained'}
                 className={classes.ideButton}
                 onClick={() => setSelectedTheia(assignment)}
-                disabled={!assignment.has_repo}
+                disabled={assignment.github_repo_required && !assignment.has_repo}
               >
                 <LaunchIcon className={classes.launchIcon}/>
                 Open Anubis Cloud IDE
               </Button>
-              {assignment.has_repo ? (
-                <Button
-                  color={'primary'}
-                  variant={'contained'}
-                  className={classes.repoButton}
-                  href={assignment.repo_url}
-                  component="a"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  View Repo
-                </Button>
-              ) : (
-                <Button onClick={createAssignmentRepo} className={classes.repoButton}>
-                  {runAssignmentPolling ? (
-                    <CircularProgress size={24}/>
-                  ) : 'Create Repo'}
-                </Button>
+              {assignment.github_repo_required && (
+                <Fragment>
+                  {
+                    assignment.has_repo ? (
+                      <Button
+                        color={'primary'}
+                        variant={'contained'}
+                        className={classes.repoButton}
+                        href={assignment.repo_url}
+                        component="a"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                      View Repo
+                      </Button>
+                    ) : (
+                      <Button onClick={createAssignmentRepo} className={classes.repoButton}>
+                        {runAssignmentPolling ? (
+                          <CircularProgress size={24}/>
+                        ) : 'Create Repo'}
+                      </Button>
+                    )
+                  }
+                </Fragment>
               )}
-
             </Box>
           </Box>
           <Divider/>
@@ -236,6 +241,7 @@ const Assignment = () => {
                   key={`${submission.submission_name}-${index}`}
                   assignmentDue={submission.assignment_due}
                   assignmentName={submission.assignment_name}
+                  id={submission.id}
                   commit={submission.commit}
                   processed={submission.processed}
                   tests={submission.tests}

@@ -36,7 +36,7 @@ def reap_stale_submissions():
     Submission.query.filter(
         Submission.last_updated < datetime.now() - timedelta(minutes=60),
         Submission.processed == False,
-        Submission.state != 'regrading',
+        ~Submission.state.in_(['regrading', "Assignment running in IDE."]),
     ).update({
         'processed': True,
         'state':     "Reaped after timeout",

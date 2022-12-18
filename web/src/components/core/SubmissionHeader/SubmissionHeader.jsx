@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Fragment} from 'react';
 
 import {Box} from '@mui/material';
 import {Typography} from '@mui/material';
@@ -14,6 +14,7 @@ import Button from '@mui/material/Button';
 const SubmissionHeader = ({
   assignment_name,
   timestamp,
+  id,
   commit,
   on_time,
   state,
@@ -27,8 +28,12 @@ const SubmissionHeader = ({
     <Box className = {classes.submissionSummaryContainer}>
       <Box className={classes.dataContainer}>
         <Typography className={classes.assignmentName}>{assignment_name}</Typography>
-        <Typography className={classes.textLabel}>{'Submission: '}</Typography>
-        <Typography className={classes.textContent}>{commit.substring(0, 20)}</Typography>
+        {!commit.startsWith('fake-') && (
+          <Fragment>
+            <Typography className={classes.textLabel}>{'Submission: '}</Typography>
+            <Typography className={classes.textContent}>{commit.substring(0, 20)}</Typography>
+          </Fragment>
+        )}
         <Typography className={classes.textLabel}>{'Submitted: '}</Typography>
         <Typography className={classes.textContent}>
           {new Date(timestamp).toLocaleDateString('en-US', DATE_OPTIONS)}
@@ -39,16 +44,18 @@ const SubmissionHeader = ({
         </Typography>
       </Box>
       <Box className={classes.dataContainer}>
-        <Button
-          variant={'contained'}
-          color={'primary'}
-          startIcon={<RefreshIcon/>}
-          className={clsx(classes.dataItem)}
-          disabled={!processed}
-          onClick={regrade}
-        >
-          Regrade
-        </Button>
+        {!commit.startsWith('fake-') && (
+          <Button
+            variant={'contained'}
+            color={'primary'}
+            startIcon={<RefreshIcon/>}
+            className={clsx(classes.dataItem)}
+            disabled={!processed}
+            onClick={regrade}
+          >
+            Regrade
+          </Button>
+        )}
         <Typography className={clsx(classes.dataItem, classes.circleIcon, on_time ? classes.success : classes.error)}>
           { on_time ? <CheckCircleIcon/> : <CancelIcon/>}
         </Typography>

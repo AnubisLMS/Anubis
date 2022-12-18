@@ -14,9 +14,11 @@ helm upgrade \
      --set "debug=true" \
      --set "api.replicas=1" \
      --set "web.replicas=1" \
-     --set "pipeline_api.replicas=1" \
+     --set "pipeline.api.replicas=1" \
+     --set "pipeline.poller.replicas=1" \
      --set "rpc.replicas=1" \
      --set "theia.proxy.replicas=1" \
+     --set "theia.poller.replicas=1" \
      --set "api.datacenter=false" \
      --set "theia.proxy.domain=ide.localhost" \
      --set "rollingUpdates=false" \

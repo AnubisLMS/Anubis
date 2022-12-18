@@ -9,6 +9,7 @@ import {useStyles} from './SubmissionItem.styles';
 const SubmissionItem = ({
   assignmentDue,
   assignmentName,
+  id,
   commit,
   processed,
   tests,
@@ -21,9 +22,9 @@ const SubmissionItem = ({
       showStatus={true}
       statusColor={processed ? 'green' : 'red'}
       title={assignmentName}
-      subTitle={commit.substring(0, 15)}
+      subTitle={!commit.startsWith('fake-') ? commit.substring(0, 15) : ''}
       titleIcon={<AssessmentIcon/>}
-      link={`/submission?commit=${commit}`}
+      link={`/submission/${id}`}
     >
       <Typography>
         {`${tests.filter((test) => test.result.passed).length}/${tests.length} Tests Passed`}

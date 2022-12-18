@@ -12,6 +12,7 @@ import {useStyles, useAnimations} from './SubmissionRow.styles';
 const SubmissionRow = ({
   assignmentDue,
   assignment_name,
+  id,
   commit,
   processed,
   tests,
@@ -26,7 +27,7 @@ const SubmissionRow = ({
   return (
     <Box
       className={classes.root}
-      onClick={() => history.push(`/submission?commit=${commit}`)}
+      onClick={() => history.push(`/submission/${id}`)}
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
@@ -53,7 +54,9 @@ const SubmissionRow = ({
               animate={isOpen ? 'expanded' : 'closed'}
               variants={variants.commitContainer}
             >
-              <Typography className={classes.commit}>{commit.substring(0, 20)}</Typography>
+              {!commit.startsWith && (
+                <Typography className={classes.commit}>{commit.substring(0, 20)}</Typography>
+              )}
             </Box>
           }
         </Box>

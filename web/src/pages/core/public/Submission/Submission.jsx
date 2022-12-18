@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
+import {useParams} from 'react-router-dom';
 
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -16,7 +17,7 @@ import SubmissionTestExpanded from '../../../../components/core/SubmissionTestEx
 import {submissionUpdateSubscribe} from '../../../../constant';
 
 const regrade = (
-  {commit, submission, setSubmission, setStep, setErrorStop},
+  {submission, setSubmission, setStep, setErrorStop},
   continueSubscribe,
   enqueueSnackbar,
 ) => () => {
@@ -25,7 +26,7 @@ const regrade = (
   }
 
   axios
-    .get(`/api/public/submissions/regrade/${commit}`)
+    .get(`/api/public/submissions/regrade/${submission.commit}`)
     .then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
@@ -53,7 +54,7 @@ export default function Submission() {
   const [errorStop, setErrorStop] = useState(false);
   const [modalTest, setModalTest] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const commit = query.get('commit');
+  const {submissionId} = useParams();
 
   const continueSubscribe = () => setTimeout(() => {
     if (step < submissionUpdateSubscribe) {
@@ -63,7 +64,7 @@ export default function Submission() {
 
   React.useEffect(() => {
     axios.get(
-      `/api/public/submissions/get/${commit}`,
+      `/api/public/submissions/get/${submissionId}`,
     ).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (!data) {
@@ -164,7 +165,7 @@ export default function Submission() {
         <Box className={classes.headerContainer}>
           <SubmissionHeader
             regrade={regrade(
-              {commit, submission, setSubmission, setStep, setErrorStop},
+              {submission, setSubmission, setStep, setErrorStop},
               continueSubscribe,
               enqueueSnackbar,
             )}
@@ -180,11 +181,13 @@ export default function Submission() {
                 expandModal={() => expandModal(pipelineLogTest)}
               />
             )}
-            <SubmissionTest
-              test={buildTest}
-              processing={submission.processing}
-              expandModal={() => expandModal(buildTest)}
-            />
+            {!submission.commit.startsWith('fake-') && (
+              <SubmissionTest
+                test={buildTest}
+                processing={submission.processing}
+                expandModal={() => expandModal(buildTest)}
+              />
+            )}
             {submission?.tests && submission.tests.map((test, index) => (
               <SubmissionTest
                 key={index}

@@ -25,7 +25,7 @@ def verify_shell_exercise_repo_format(assignment: Assignment) -> bool:
 def verify_shell_exercise_repo_allowed(assignment: Assignment) -> bool:
     if assignment.shell_autograde_repo == '' or assignment.shell_autograde_repo is None:
         return True
-    allowed_orgs: list[str] = get_config_str('AUTOGRADE_SHELL_ALLOWED_ORGS', 'AnubisLMS').split(',')
+    allowed_orgs: list[str] = get_config_str('AUTOGRADE_SHELL_ALLOWED_ORGS', 'AnubisLMS,jepst').split(',')
     split_org_repo = split_shell_autograde_repo(assignment)
     if split_org_repo is None:
         return False
@@ -140,9 +140,16 @@ def create_shell_autograde_ide_submission(theia_session: TheiaSession) -> Submis
         assignment_id=theia_session.assignment_id,
         assignment_repo_id=None,
         commit='fake-' + rand(40-5),
-        state="IDE Running",
+        state="Assignment running in IDE.",
     )
     theia_session.submission_id = submission.id
     db.session.add(submission)
     init_submission(submission, db_commit=True)
     return submission
+
+
+def close_shell_autograde_ide_submission(theia_session: TheiaSession):
+    submission = theia_session.submission
+    submission.state = "Assignment running in IDE."
+    submission.processed = True
+    db.session.add(submission)

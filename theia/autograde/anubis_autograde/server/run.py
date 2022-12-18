@@ -1,11 +1,12 @@
 import argparse
-import logging
 
 import gunicorn.app.base
 from flask import Flask
 
+from anubis_autograde.exercise.get import get_exercises
 from anubis_autograde.exercise.init import init_exercises
 from anubis_autograde.exercise.pipeline import initialize_submission_status
+from anubis_autograde.logging import init_server_logging, log
 from anubis_autograde.server.views import views
 from anubis_autograde.shell.bashrc import init_bashrc
 
@@ -29,14 +30,19 @@ class _StandaloneApplication(gunicorn.app.base.BaseApplication):
 def create_app(args: argparse.Namespace, skip_exercises: bool = False) -> Flask:
     app = Flask(__name__)
 
-    init_server_logging(app)
-    init_bashrc(args)
     if not skip_exercises:
+        log.info(f'Loading exercises')
         init_exercises(args)
 
     app.config['SUBMISSION_ID'] = args.submission_id
     app.config['TOKEN'] = args.token
-    app.config['DEBUGe'] = args.debug
+    app.config['DEBUG'] = args.debug
+    app.config['PROD'] = args.prod
+
+    log.info(f'{args.submission_id=}')
+    log.info(f'{args.token=}')
+    log.info(f'{args.debug=}')
+    log.info(f'{args.prod=}')
 
     if args.prod:
         with app.app_context():
@@ -44,13 +50,10 @@ def create_app(args: argparse.Namespace, skip_exercises: bool = False) -> Flask:
 
     app.register_blueprint(views)
 
+    init_server_logging(app)
+    init_bashrc(args)
+
     return app
-
-
-def init_server_logging(app: Flask):
-    gunicorn_logger = logging.getLogger('gunicorn.error')
-    app.logger.handlers = gunicorn_logger.handlers
-    app.logger.setLevel(gunicorn_logger.level)
 
 
 def run_server(args: argparse.Namespace):

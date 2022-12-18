@@ -29,6 +29,7 @@ def remove_unprintable(s: typing.Union[str, bytes]) -> str:
             ss.append(c)
     return ''.join(ss)
 
+
 def text_response(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs) -> Response:
@@ -93,6 +94,16 @@ def skip_if_debug(func):
     return wrapper
 
 
+def skip_if_not_prod(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if not current_app.config['PROD']:
+            return
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 def colorize_render(
     s: str,
     termcolor_args: tuple = ('cyan',),
@@ -100,3 +111,7 @@ def colorize_render(
 ) -> str:
     colored = _colored(s, *termcolor_args)
     return jinja2.Template(colored).render(**kwargs)
+
+
+def json_safe_dict(d: dict):
+    return d

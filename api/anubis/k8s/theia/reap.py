@@ -129,6 +129,11 @@ def reap_theia_session(theia_session: TheiaSession, commit: bool = True):
     # and active to False.
     mark_session_ended(theia_session)
 
+    if theia_session.submission_id:
+        from anubis.lms.shell_autograde import close_shell_autograde_ide_submission
+
+        close_shell_autograde_ide_submission(theia_session)
+
     # Commit the changes to the database entry
     if commit:
         db.session.commit()

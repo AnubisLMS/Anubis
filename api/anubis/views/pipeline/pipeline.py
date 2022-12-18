@@ -13,7 +13,7 @@ from anubis.utils.pipeline.decorators import check_submission_token
 pipeline = Blueprint("pipeline", __name__, url_prefix="/pipeline")
 
 
-@pipeline.route("/report/panic/<string:submission_id>", methods=["POST"])
+@pipeline.post("/report/panic/<string:submission_id>")
 @check_submission_token
 @json_response
 def pipeline_report_panic(submission: Submission):
@@ -59,7 +59,7 @@ def pipeline_report_panic(submission: Submission):
     return success_response("Panic successfully reported")
 
 
-@pipeline.route("/report/build/<string:submission_id>", methods=["POST"])
+@pipeline.post("/report/build/<string:submission_id>")
 @check_submission_token
 @json_endpoint([("stdout", str), ("passed", bool)])
 def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **_):
@@ -112,7 +112,7 @@ def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **_
     return success_response("Build successfully reported.")
 
 
-@pipeline.route("/report/test/<string:submission_id>", methods=["POST"])
+@pipeline.post("/report/test/<string:submission_id>")
 @check_submission_token
 @json_endpoint([("test_name", str), ("passed", bool), ("message", str), ('output_type', str), ("output", str)])
 def pipeline_report_test(submission: Submission, test_name: str, passed: bool, message: str, output_type: str,
@@ -186,7 +186,7 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
     return success_response("Test data successfully added.")
 
 
-@pipeline.route("/report/state/<string:submission_id>", methods=["POST"])
+@pipeline.post("/report/state/<string:submission_id>")
 @check_submission_token
 @json_endpoint(required_fields=[("state", str)])
 def pipeline_report_state(submission: Submission, state: str, **__):

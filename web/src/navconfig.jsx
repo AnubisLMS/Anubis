@@ -28,9 +28,9 @@ import Visuals from './pages/core/public/Visuals/Visuals';
 import Lectures from './pages/core/public/Lectures/Lectures';
 import Playgrounds from './pages/core/public/Playgrounds/Playgrounds';
 import PrivacyPolicy from './pages/core/public/PrivacyPolicy';
-
 import Assignment from './pages/core/public/Assignment/Assignment';
 import Course from './pages/core/public/Course/Course';
+
 import AdminUsers from './pages/core/admin/Users';
 import AdminUser from './pages/core/admin/User';
 import AdminCourse from './pages/core/admin/Course';
@@ -212,7 +212,7 @@ export const super_nav = [
 export const not_shown_nav = [
   {
     id: 'Submission',
-    path: '/submission',
+    path: '/submission/:submissionId',
     Page: Submission,
   },
   {
