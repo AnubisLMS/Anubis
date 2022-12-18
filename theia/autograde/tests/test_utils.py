@@ -9,6 +9,7 @@ from anubis_autograde.utils import (
     expand_path,
     remove_unprintable,
     text_response,
+    colorize_render,
 )
 
 
@@ -60,3 +61,7 @@ class TestUtils:
         assert r.status_code == 400
         assert r.content_type == 'text/plain'
         assert r.data == b'abc123\n'
+
+    def test_colorize_render(self):
+        assert colorize_render('test') == '\x1b[36mtest\x1b[0m'
+        assert colorize_render('test', termcolor_args=('red',)) == '\x1b[31mtest\x1b[0m'
