@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 from pathlib import Path
 
 import pytest
@@ -28,8 +29,9 @@ def exercise_py(pytester, parser) -> Path:
 
 
 @pytest.fixture()
-def exercise(exercise_py):
+def exercise(pytester, exercise_py):
     os.chdir(exercise_py.parent)
+    sys.path.insert(0, str(pytester.path))
     import exercise
     assert exercise
     return exercise
