@@ -120,19 +120,6 @@ def fix_github_missing_submissions(org_name: str):
             if user is None:
                 continue
 
-            # Check for broken submissions
-            submissions = []
-            for submission in Submission.query.filter(Submission.assignment_repo_id == repo.id).all():
-                if submission is None:
-                    continue
-                if submission.owner_id != user.id:
-                    print(f"found broken submission {submission.id}")
-                    submission.owner_id = repo.owner_id
-                    submissions.append(submission.id)
-            db.session.commit()
-            for sid in submissions:
-                enqueue_autograde_pipeline(sid)
-
             # Check for missing submissions
             try:
                 for commit in map(lambda x: x["node"]["oid"], ref["target"]["history"]["edges"]):
@@ -149,7 +136,8 @@ def fix_github_missing_submissions(org_name: str):
                         db.session.add(submission)
                         db.session.commit()
                         init_submission(submission)
-                        enqueue_autograde_pipeline(submission.id)
+                        if submission.assignment.autograde_enabled:
+                            enqueue_autograde_pipeline(submission.id)
             except TypeError as e:
                 logger.warning(f'Failed to parse commit objects for repo - {e} - {str(repo)}')
 
@@ -158,13 +146,13 @@ def fix_github_missing_submissions(org_name: str):
                 if r.owner_id != user.id:
                     print(f"fixing broken repo owner {r.id}")
                     r.owner_id = user.id
-                    submissions = []
+                    enqueue_submission_pipelines = []
                     for submission in Submission.query.filter(Submission.assignment_repo_id == r.id).all():
                         submission.owner_id = user.id
-                        submissions.append(submission.id)
+                        enqueue_submission_pipelines.append(submission.id)
 
                     db.session.commit()
-                    for sid in submissions:
+                    for sid in enqueue_submission_pipelines:
                         enqueue_autograde_pipeline(sid)
 
             if repo:
