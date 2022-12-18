@@ -79,7 +79,7 @@ def regrade_submission(submission: Submission | str, queue: str = "default") -> 
     return success_response({"message": "regrade started"})
 
 
-@cache.memoize(timeout=300, unless=is_debug, source_check=True)
+@cache.memoize(timeout=3, unless=is_debug, source_check=True)
 def get_submissions(
     user_id=None,
     course_id=None,
