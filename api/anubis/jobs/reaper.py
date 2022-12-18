@@ -17,7 +17,7 @@ from anubis.models import (
 from anubis.rpc.enqueue import enqueue_autograde_pipeline, enqueue_ide_reap_stale, enqueue_pipeline_reap_stale
 from anubis.utils.data import with_context
 from anubis.utils.logging import logger
-
+from anubis.constants import SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE
 
 def reap_stale_submissions():
     """
@@ -36,7 +36,7 @@ def reap_stale_submissions():
     Submission.query.filter(
         Submission.last_updated < datetime.now() - timedelta(minutes=60),
         Submission.processed == False,
-        ~Submission.state.in_(['regrading', "Assignment running in IDE."]),
+        ~Submission.state.in_(['regrading', SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE]),
     ).update({
         'processed': True,
         'state':     "Reaped after timeout",

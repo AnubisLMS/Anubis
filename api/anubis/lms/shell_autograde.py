@@ -10,7 +10,7 @@ from anubis.utils.data import rand
 from anubis.utils.data import with_context, req_assert
 from anubis.utils.logging import verbose_call, logger
 from anubis.utils.redis import create_redis_lock
-
+from anubis.constants import SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE
 
 def split_shell_autograde_repo(assignment: Assignment) -> tuple[str, str]:
     return split_github_repo_path(assignment.shell_autograde_repo)
@@ -140,16 +140,16 @@ def create_shell_autograde_ide_submission(theia_session: TheiaSession) -> Submis
         assignment_id=theia_session.assignment_id,
         assignment_repo_id=None,
         commit='fake-' + rand(40-5),
-        state="Assignment running in IDE.",
+        state=SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE,
     )
     theia_session.submission_id = submission.id
     db.session.add(submission)
-    init_submission(submission, db_commit=True)
+    init_submission(submission, db_commit=True, state=submission.state)
     return submission
 
 
 def close_shell_autograde_ide_submission(theia_session: TheiaSession):
     submission = theia_session.submission
-    submission.state = "Assignment running in IDE."
+    submission.state = SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE
     submission.processed = True
     db.session.add(submission)

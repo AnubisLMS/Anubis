@@ -5,9 +5,9 @@ import requests
 from flask import current_app
 from retry import retry
 
+from anubis_autograde.logging import log
 from anubis_autograde.models import Exercise, UserState
 from anubis_autograde.utils import colorize_render, skip_if_not_prod
-from anubis_autograde.logging import log
 
 pipeline_url: str = 'http://anubis-pipeline-api:5000'
 
@@ -32,7 +32,7 @@ def _pipeline_api_request(endpoint: str, body: dict, query: dict = None):
 def initialize_submission_status():
     _pipeline_api_request(
         'pipeline/report/state',
-        {'state': 'Assignment running in IDE.'},
+        {'state': "Assignment run in IDE."},
         {'processed': '0'}
     )
 

@@ -453,11 +453,11 @@ def create_assignment_github_repo(
     try:
         for repo in repos:
 
-            # If repo has not been configured
-            if not repo.ta_configured:
+            # Get user github username
+            team_slug = repo.assignment.course.github_ta_team_slug
 
-                # Get user github username
-                team_slug = repo.assignment.course.github_ta_team_slug
+            # If repo has not been configured
+            if not repo.ta_configured and team_slug is not None and team_slug != '':
 
                 for i in range(3):
                     # Use github REST api to add the ta team as a collaborator

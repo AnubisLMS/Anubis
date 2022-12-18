@@ -210,7 +210,7 @@ def reject_late_submission(submission: Submission):
     db.session.add(submission)
 
 
-def init_submission(submission: Submission, db_commit: bool = True, verbose: bool = True):
+def init_submission(submission: Submission, db_commit: bool = True, state: str = "Waiting for resources...", verbose: bool = True):
     """
     Create adjacent submission models.
 
@@ -244,7 +244,7 @@ def init_submission(submission: Submission, db_commit: bool = True, verbose: boo
 
     submission.accepted = True
     submission.processed = False
-    submission.state = "Waiting for resources..."
+    submission.state = state
     submission.errors = None
     db.session.add(submission)
 
@@ -261,7 +261,7 @@ def get_latest_user_submissions(assignment: Assignment, user: User, limit: int =
 
 
 def fix_submissions_for_autograde_disabled_assignment(assignment: Assignment):
-    if assignment.autograde_enabled:
+    if assignment.autograde_enabled or assignment.shell_autograde_enabled:
         logger.warning(f'Skipping autograde disabled fix for assignment {assignment=}')
         return
 
