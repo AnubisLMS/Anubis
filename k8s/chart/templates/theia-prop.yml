@@ -11,6 +11,7 @@ metadata:
   labels:
     {{- include "chart.labels" . | nindent 4 }}
     component: theia-prop
+    tag: {{ .Values.tag | quote }}
 spec:
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
@@ -26,6 +27,7 @@ spec:
       labels:
         {{- include "chart.selectorLabels" . | nindent 8 }}
         name: theia-prop
+        tag: {{ .Values.tag | quote }}
     spec:
       containers:
       {{- range .Values.theia.prop.images }}
