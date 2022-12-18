@@ -59,7 +59,7 @@ def public_webhook():
     )
 
     # Load the basics from the webhook
-    repo_url, repo_name, pusher_username, commit, before, ref = parse_webhook(request.json)
+    repo_url, repo_name, pusher_username, commit, before, ref, default_branch = parse_webhook(request.json)
 
     # Attempt to find records for the relevant models
     assignment = Assignment.query.filter(Assignment.unique_code.in_(repo_name.split("-"))).first()
@@ -133,8 +133,8 @@ def public_webhook():
         repo = check_repo(assignment, repo_url, user, netid)
 
     req_assert(
-        ref == "refs/heads/master" or ref == "refs/heads/main",
-        message="not a push to master or main",
+        ref == f"refs/heads/{default_branch}",
+        message="not a push to default branch",
     )
 
     # Try to find a submission matching the commit
