@@ -11,6 +11,7 @@ Table of Contents
    introduction
    writing_an_assignment
    example_configuration
+   creating_assignment_on_anubis
 
 .. toctree::
    :maxdepth: 1
