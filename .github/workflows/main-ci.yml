@@ -70,15 +70,15 @@ jobs:
       with:
         path: |
           **/venv
-        key: ${{ runner.os }}-venv-${{ hashFiles('**/theia/autograde/requirements.txt') }}-${{ hashFiles('**/theia/autograde/requirements_dev.txt') }}
+        key: ${{ runner.os }}-venv-${{ hashFiles('**/theia/autograde/requirements.txt') }}${{ hashFiles('**/theia/autograde/requirements_dev.txt') }}
     - name: Install dependencies
       run: |
         set -ex
         python -m venv venv
-        if [ -f requirements/dev.txt ]; then ./venv/bin/pip install -r requirements.txt -r requirements_dev.txt; fi
+        ./venv/bin/pip install -r requirements.txt -r requirements_dev.txt
       if: steps.cache-venv.outputs.cache-hit != 'true'
     - name: Pytest
-      run: pytest
+      run: venv/bin/pytest
   test-web:
     name: Test web
     runs-on: ubuntu-latest
