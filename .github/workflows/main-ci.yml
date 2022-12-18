@@ -58,7 +58,7 @@ jobs:
         working-directory: theia/autograde/
     strategy:
       matrix:
-        python-version: [ '3.7', '3.8', '3.9', '3.10', '3.11' ]
+        python-version: [ '3.7', '3.10' ]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -70,7 +70,7 @@ jobs:
       with:
         path: |
           **/venv
-        key: ${{ runner.os }}-venv-${{ hashFiles('**/theia/autograde/requirements.txt') }}${{ hashFiles('**/theia/autograde/requirements_dev.txt') }}
+        key: ${{ runner.os }}-venv-${{ matrix.python-version }}-${{ hashFiles('**/theia/autograde/requirements.txt') }}${{ hashFiles('**/theia/autograde/requirements_dev.txt') }}
     - name: Install dependencies
       run: |
         set -ex
@@ -78,7 +78,7 @@ jobs:
         ./venv/bin/pip install -r requirements.txt -r requirements_dev.txt
       if: steps.cache-venv.outputs.cache-hit != 'true'
     - name: Pytest
-      run: venv/bin/pytest
+      run: env PYTHONPATH=$(pwd) venv/bin/pytest
   test-web:
     name: Test web
     runs-on: ubuntu-latest
