@@ -7,6 +7,7 @@ from anubis.github.fix import fix_github_missing_submissions, fix_github_broken_
 from anubis.lms.assignments import get_recent_assignments
 from anubis.lms.courses import get_active_courses
 from anubis.lms.students import get_students
+from anubis.lms.submissions import fix_submissions_for_autograde_disabled_assignment
 from anubis.lms.submissions import init_submission
 from anubis.models import (
     db,
@@ -124,6 +125,11 @@ def update_student_lists():
     get_students(None)
 
 
+def reap_autograde_disabled_submissions():
+    for assignment in get_recent_assignments(autograde_enabled=False):
+        fix_submissions_for_autograde_disabled_assignment(assignment)
+
+
 @with_context
 def reap():
     # Enqueue a job to reap stale ide k8s resources
@@ -143,6 +149,9 @@ def reap():
 
     # Update student lists
     update_student_lists()
+
+    # Fix any submissions for autograde disabled assignments
+    reap_autograde_disabled_submissions()
 
 
 if __name__ == "__main__":

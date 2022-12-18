@@ -47,6 +47,8 @@ EMAIL_FROM = "noreply@anubis-lms.io"
 GOOGLE_GMAIL_CREDS_SECRET = "google-gmail-creds"
 GOOGLE_GMAIL_CREDS_SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
+AUTOGRADE_DISABLED_MESSAGE = "autograde disabled for this assignment"
+
 
 REAPER_TXT = """
 

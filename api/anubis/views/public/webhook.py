@@ -13,6 +13,7 @@ from anubis.utils.data import is_debug, req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_response
 from anubis.utils.logging import logger
+from anubis.constants import AUTOGRADE_DISABLED_MESSAGE
 
 webhook = Blueprint("public-webhook", __name__, url_prefix="/public/webhook")
 
@@ -165,22 +166,20 @@ def public_webhook():
     # the submission will stay in a "dangling" state
     req_assert(user is not None, message="dangling submission")
 
+    # Check that the current assignment is still accepting submissions
+    if not assignment.accept_late and datetime.now() < get_assignment_due_date(user, assignment, grace=True):
+        reject_late_submission(submission)
+
     # If the github username is not found, create a dangling submission
-    if assignment.autograde_enabled:
-
-        # Check that the current assignment is still accepting submissions
-        if not assignment.accept_late and datetime.now() < get_assignment_due_date(user, assignment, grace=True):
-            reject_late_submission(submission)
-
-    else:
+    if not assignment.autograde_enabled:
         submission.processed = True
-        submission.accepted = False
-        submission.state = "autograde disabled for this assignment"
+        submission.accepted = True
+        submission.state = AUTOGRADE_DISABLED_MESSAGE
 
     db.session.commit()
 
     # If the submission was accepted, then enqueue the job
-    if submission.accepted and user is not None:
+    if assignment.autograde_enabled and submission.accepted and user is not None:
         enqueue_autograde_pipeline(submission.id)
 
     # Delete cached submissions

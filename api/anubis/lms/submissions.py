@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from anubis.constants import AUTOGRADE_DISABLED_MESSAGE
 from anubis.lms.assignments import get_assignment_due_date
 from anubis.models import (
     Assignment,
@@ -257,3 +258,16 @@ def get_latest_user_submissions(assignment: Assignment, user: User, limit: int =
         Submission.assignment_id == assignment.id,
         Submission.owner_id == user.id,
     ).order_by(Submission.created.desc()).limit(limit).all()
+
+
+def fix_submissions_for_autograde_disabled_assignment(assignment: Assignment):
+    if assignment.autograde_enabled:
+        logger.warning(f'Skipping autograde disabled fix for assignment {assignment=}')
+        return
+
+    logger.info(f'Fixing autograde disabled submissions for {assignment=}')
+    Submission.query.filter(Submission.assignment_id == assignment.id).update({
+        'processed': True,
+        'state': AUTOGRADE_DISABLED_MESSAGE
+    })
+    db.session.commit()

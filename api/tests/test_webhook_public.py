@@ -12,7 +12,7 @@ def pp(data: dict):
     print(json.dumps(data, indent=2))
 
 
-def gen_webhook(name, code, username, after=None, before=None, ref="refs/heads/master", org="os3224"):
+def gen_webhook(name, code, username, after=None, before=None, ref="refs/heads/main", org="os3224", default_branch="main"):
     if after is None:
         after = gen_rand(40)
 
@@ -24,6 +24,7 @@ def gen_webhook(name, code, username, after=None, before=None, ref="refs/heads/m
         "repository": {
             "url": f"https://github.com/{org}/{name}-{code}-{username}",
             "name": f"{name}-{code}-{username}",
+            "default_branch": default_branch
         },
         "pusher": {
             "name": f"{username}",
@@ -106,8 +107,8 @@ def do_webhook_tests_user(netid):
     assert r["data"] is None
     assert r["error"] == "assignment not found"
 
-    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, user_netid, ref="abc123")).json()
-    assert r["error"] == "not a push to master or main"
+    r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, user_netid, ref="refs/heads/abc123")).json()
+    assert r["error"] == "not a push to default branch"
 
     r = post_webhook(gen_webhook(assignment_name, assignment_unique_code, gen_rand(6))).json()
     assert r["error"] == "dangling submission"
