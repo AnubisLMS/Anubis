@@ -1,7 +1,5 @@
 FROM node:16-alpine
 
-ARG REACT_APP_GIT_TAG=latest
-ENV REACT_APP_GIT_TAG=${REACT_APP_GIT_TAG}
 
 # This disables webpack source maps from being created in the build step
 ENV GENERATE_SOURCEMAP=false
@@ -9,6 +7,10 @@ ENV GENERATE_SOURCEMAP=false
 WORKDIR /opt/app
 COPY package.json yarn.lock /opt/app/
 RUN yarn install --frozen-lockfile
+
+ARG REACT_APP_GIT_TAG=latest
+ENV REACT_APP_GIT_TAG=${REACT_APP_GIT_TAG}
+
 COPY . .
 RUN set -eux; \
     yarn run build; \
