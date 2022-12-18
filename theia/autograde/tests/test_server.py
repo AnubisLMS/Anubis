@@ -5,7 +5,7 @@ import pytest
 from werkzeug.test import TestResponse
 
 from anubis_autograde.exercise.get import get_active_exercise
-
+import typing
 
 @dataclass
 class Response:
@@ -16,7 +16,7 @@ class Response:
     env: str = ''
 
     dir_: Path = None
-    file_: dict[Path, str] = None
+    file_: typing.Dict[Path, str] = None
 
 
 @pytest.fixture()

@@ -52,7 +52,7 @@ def status():
     for exercise in get_exercises():
         line_start = '  ' if exercise != current_exercise else arrow
         output += f'{line_start} {exercise.name}\n'
-    return output.removesuffix('\n')
+    return output.rstrip('\n')
 
 
 @views.get('/hint')
