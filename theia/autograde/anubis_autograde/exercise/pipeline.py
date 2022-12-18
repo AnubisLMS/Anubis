@@ -24,7 +24,7 @@ def _pipeline_api_request(endpoint: str, body: dict, query: dict = None):
         json=body,
         timeout=5,
     )
-    log.info(f'{response.text=}')
+    log.info(f'response.text = {response.text}')
     assert response.status_code == 200
 
 
