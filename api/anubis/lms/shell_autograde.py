@@ -144,7 +144,7 @@ def create_shell_autograde_ide_submission(theia_session: TheiaSession) -> Submis
     )
     theia_session.submission_id = submission.id
     db.session.add(submission)
-    init_submission(submission, db_commit=True, state=submission.state)
+    init_submission(submission, db_commit=True, state=SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE)
     return submission
 
 
