@@ -1,10 +1,12 @@
+import string
 from datetime import datetime, timedelta
 from typing import Any
-import string
 
 from sqlalchemy import or_
 
 from anubis.github.repos import create_assignment_group_repo, delete_assignment_repo
+from anubis.github.repos import verify_collaborators_assignment
+from anubis.lms.autograde import autograde
 from anubis.lms.courses import (
     assert_course_admin,
     get_user_course_ids,
@@ -34,7 +36,7 @@ from anubis.utils.cache import cache
 from anubis.utils.config import get_config_int
 from anubis.utils.data import is_debug
 from anubis.utils.data import req_assert
-from anubis.github.repos import verify_collaborators_assignment
+from anubis.utils.logging import logger
 
 
 @cache.memoize(timeout=30, unless=is_debug)
@@ -111,21 +113,21 @@ def get_all_assignments(course_ids: set[str], admin_course_ids: set[str]) -> lis
     # Get the assignment objects that should be visible to this user.
     regular_course_assignments = (
         Assignment.query.join(Course)
-            .filter(
+        .filter(
             Course.id.in_(list(course_ids.difference(admin_course_ids))),
             Assignment.release_date <= datetime.now(),
             Assignment.hidden == False,
         )
-            .all()
+        .all()
     )
 
     # Get the assignment objects that should be visible to this user.
     admin_course_assignments = (
         Assignment.query.join(Course)
-            .filter(
+        .filter(
             Course.id.in_(list(admin_course_ids)),
         )
-            .all()
+        .all()
     )
 
     # Add all the assignment objects to the running list
@@ -261,11 +263,11 @@ def assignment_sync(assignment_data: dict) -> tuple[dict | str, bool]:
         # Find if the assignment test exists
         assignment_test = (
             AssignmentTest.query.join(Assignment)
-                .filter(
+            .filter(
                 Assignment.id == assignment.id,
                 AssignmentTest.name == test_name,
             )
-                .first()
+            .first()
         )
 
         # Create the assignment test if it did not already exist
@@ -282,7 +284,7 @@ def assignment_sync(assignment_data: dict) -> tuple[dict | str, bool]:
         accepted, ignored, rejected = ingest_questions(assignment_data["questions"], assignment)
         question_message = {
             "accepted": accepted,
-            "ignored": ignored,
+            "ignored":  ignored,
             "rejected": rejected,
         }
 
@@ -303,6 +305,13 @@ def fill_user_assignment_data(user_id: str, assignment_data: dict[str, Any]):
         ).count()
         > 0
     )
+
+    assignment_data['complete'] = False
+    if best_submission_id := autograde(user_id, assignment_id):
+        submission = Submission.query.filter(Submission.id == best_submission_id).first()
+        logger.debug(f'{submission=}')
+        logger.debug(f'{submission.test_results=}')
+        assignment_data['complete'] = all(map(lambda test: test.passed == True, submission.test_results))
 
     repo = AssignmentRepo.query.filter(
         AssignmentRepo.owner_id == user_id,
@@ -518,7 +527,7 @@ def make_shared_assignment(assignment_id: str, group_netids: list[list[str]]) ->
 
     return {
         "groups": [[user.netid for user in group] for group in groups],
-        "repos": [repo.data for repo in all_repos],
+        "repos":  [repo.data for repo in all_repos],
     }
 
 
@@ -570,5 +579,3 @@ def verify_active_assignment_github_repo_collaborators():
 
     for assignment in active_assignments:
         verify_collaborators_assignment(assignment)
-
-

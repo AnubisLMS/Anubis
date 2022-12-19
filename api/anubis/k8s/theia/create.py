@@ -358,6 +358,13 @@ def create_theia_k8s_pod_pvc(
 
         pod_labels_extra["shell-autograde"] = 'true'
 
+        theia_extra_env.append(
+            k8s.V1EnvVar(
+                name="ANUBIS_SHELL_AUTOGRADE",
+                value="1",
+            )
+        )
+
         pod_containers.append(autograde_container)
 
     ##################################################################################

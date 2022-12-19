@@ -191,6 +191,12 @@ def run_eject_function(exercise: Exercise, user_state: UserState):
 
 def run_exercise(user_state: UserState) -> Exercise:
     exercise = verify_exercise(user_state)
+
+    # Log
+    log.info(f'exercise = {exercise}')
+    log.info(f'user_state = {user_state}')
+
+    # Make sure previous exercises are complete
     verify_required(exercise, user_state)
 
     # If eject function specified, then run that and return

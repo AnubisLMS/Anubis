@@ -266,25 +266,26 @@ class Assignment(db.Model):
     @property
     def data(self):
         return {
-            "id":                   self.id,
-            "name":                 self.name,
-            "due_date":             str(self.due_date),
-            "past_due":             self.due_date < datetime.now(),
-            "hidden":               self.hidden,
-            "accept_late":          self.accept_late,
-            "autograde_enabled":    self.autograde_enabled,
-            "hide_due_date":        self.hide_due_date,
-            "course":               self.course.data,
-            "description":          self.description,
-            "visible_to_students":  not self.hidden and (datetime.now() > self.release_date),
-            "ide_active":           self.due_date + timedelta(days=3 * 7) > datetime.now(),
-            "tests":                [t.data for t in self.tests if t.hidden is False],
+            "id":                      self.id,
+            "name":                    self.name,
+            "due_date":                str(self.due_date),
+            "past_due":                self.due_date < datetime.now(),
+            "hidden":                  self.hidden,
+            "accept_late":             self.accept_late,
+            "autograde_enabled":       self.autograde_enabled,
+            "hide_due_date":           self.hide_due_date,
+            "course":                  self.course.data,
+            "description":             self.description,
+            "visible_to_students":     not self.hidden and (datetime.now() > self.release_date),
+            "ide_active":              self.due_date + timedelta(days=3 * 7) > datetime.now(),
+            "tests":                   [t.data for t in self.tests if t.hidden is False],
             # IDE
-            "ide_enabled":          self.ide_enabled,
-            "autosave":             self.theia_options.get("autosave", True),
-            "persistent_storage":   self.theia_options.get("persistent_storage", False),
+            "ide_enabled":             self.ide_enabled,
+            "autosave":                self.theia_options.get("autosave", True),
+            "persistent_storage":      self.theia_options.get("persistent_storage", False),
             # Github
-            "github_repo_required": self.github_repo_required,
+            "github_repo_required":    self.github_repo_required,
+            "shell_autograde_enabled": self.shell_autograde_enabled,
         }
 
     @property

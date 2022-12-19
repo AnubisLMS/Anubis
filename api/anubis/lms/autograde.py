@@ -17,7 +17,7 @@ def _get_assignment_test_count(assignment_id) -> int:
     ).count()
 
 
-@cache.memoize(timeout=5 * 60, unless=is_debug, source_check=True, forced_update=is_job)
+@cache.memoize(timeout=5, unless=is_debug, source_check=True, forced_update=is_job)
 def autograde(student_id, assignment_id, max_time: datetime = None):
     """
     Get the stats for a specific student on a specific assignment.
@@ -59,7 +59,7 @@ def autograde(student_id, assignment_id, max_time: datetime = None):
         Submission.query.filter(
             Submission.assignment_id == assignment_id,
             Submission.owner_id == student_id,
-            Submission.processed == True,
+            # Submission.processed == True,
             Submission.accepted == True,
             *submission_filters
         )

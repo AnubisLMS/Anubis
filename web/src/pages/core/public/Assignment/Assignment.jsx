@@ -175,17 +175,37 @@ const Assignment = () => {
                   </Box>
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Box className={
-                    clsx(classes.overviewItem, assignment.has_submission ? classes.colorGreen : classes.colorRed)
-                  }>
-                    <Typography className={classes.overviewItemTitle}>SUBMITTED</Typography>
-                    <Box className={classes.overviewItemSubtitle}>
-                      {!assignment.has_submission ? <CancelIcon/> : <CheckCircleIcon/>}
-                      <Typography className={classes.overviewItemSubtitleText}>
-                        {!assignment.has_submission ? 'No Submission' : 'Sucessfully Submitted'}
-                      </Typography>
+                  {assignment.shell_autograde_enabled ? (
+                    <Box className={
+                      clsx(classes.overviewItem, !assignment.has_submission ? classes.colorRed : (
+                        assignment.complete ? classes.colorGreen : classes.colorOrange
+                      ))
+                    }>
+                      <Typography className={classes.overviewItemTitle}>SUBMITTED</Typography>
+                      <Box className={classes.overviewItemSubtitle}>
+                        {assignment.complete ? <CheckCircleIcon/> : <CancelIcon/>}
+                        <Typography className={classes.overviewItemSubtitleText}>
+                          <Fragment>
+                            {assignment.complete ? 'Complete' : 'Incomplete'}
+                          </Fragment>
+                        </Typography>
+                      </Box>
                     </Box>
-                  </Box>
+                  ) : (
+                    <Box className={
+                      clsx(classes.overviewItem, assignment.has_submission ? classes.colorGreen : classes.colorRed)
+                    }>
+                      <Typography className={classes.overviewItemTitle}>SUBMITTED</Typography>
+                      <Box className={classes.overviewItemSubtitle}>
+                        {!assignment.has_submission ? <CancelIcon/> : <CheckCircleIcon/>}
+                        <Typography className={classes.overviewItemSubtitleText}>
+                          <Fragment>
+                            {!assignment.has_submission ? 'No Submission' : 'Sucessfully Submitted'}
+                          </Fragment>
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Box className={

@@ -9,6 +9,8 @@ from anubis_autograde.logging import log
 bashrc_template = jinja2.Template("""
 #!/bin/bash
 
+[[ $- == *i* ]] || return
+
 GRADE_URL=http://localhost:5003
 EXERCISES=(
 {% for exercise in exercises %}
@@ -48,6 +50,7 @@ check_exercise() {
     ENVIRONMENT=$(env | base64 --ignore-garbage)
     COMMAND=$(cat /tmp/command 2>&1)
     OUTPUT=$(cat /tmp/output 2>&1)
+    [ "$COMMAND" = '__vsc_original_prompt_command=$PROMPT_COMMAND' ] && return
     [ "$COMMAND" = "start_message" ] && return
     [ "$COMMAND" = "status" ] && return
     [ "$COMMAND" = "hint" ] && return

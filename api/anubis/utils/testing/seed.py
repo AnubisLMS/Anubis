@@ -85,7 +85,7 @@ def create_assignment(
     i=0,
     do_submissions=True,
     do_repos=False,
-    submission_count=30,
+    submission_count=5,
     **kwargs,
 ):
     logger.info(f'creating {course.name} assignment {i}')
@@ -384,7 +384,7 @@ def seed():
 
     # OS test course
     logger.info('creating os students')
-    intro_to_os_students = create_students(50) + [
+    intro_to_os_students = create_students(10) + [
         superuser,
         professor_user,
         ta_user,
@@ -435,6 +435,20 @@ def seed():
         do_repos=True,
         github_repo_required=True,
     )
+    os_assignment4, _, _, _ = create_assignment(
+        intro_to_os_course,
+        intro_to_os_students,
+        xv6_image,
+        i=4,
+        do_submissions=False,
+        do_repos=False,
+        github_repo_required=False,
+        shell_autograde_enabled=True,
+        shell_autograde_repo='jepst/BashExercises1122',
+        shell_autograde_exercise_path='sample/exercise.py',
+    )
+    os_assignment4.theia_options['autosave'] = False
+    os_assignment4.theia_options['persistent_storage'] = False
     logger.info('init submissions assignment 0')
     init_submissions(os_submissions0)
     assign_questions(os_assignment0)
@@ -455,7 +469,7 @@ def seed():
 
     # MMDS test course
     logger.info('creating mmds student')
-    mmds_students = create_students(50)
+    mmds_students = create_students(10)
 
     logger.info('adding mmds course')
     mmds_course = create_course(
