@@ -352,7 +352,10 @@ def get_recent_assignments(
     filters = []
 
     if autograde_enabled:
-        filters.append(Assignment.autograde_enabled == autograde_enabled)
+        filters.append(or_(
+            Assignment.autograde_enabled == autograde_enabled,
+            Assignment.shell_autograde_enabled == autograde_enabled,
+        ))
 
     if delta is None:
         autograde_recalculate_days = get_config_int("AUTOGRADE_RECALCULATE_DAYS", default=60)

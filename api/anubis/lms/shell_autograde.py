@@ -103,6 +103,10 @@ def set_hidden_local_assignment_test_from_remote_exercises(
 @verbose_call()
 @with_context
 def autograde_shell_assignment_sync(assignment: Assignment):
+    if not assignment.shell_autograde_enabled:
+        logger.warning(f'Skipping shell autograde sync for {assignment=}')
+        return
+
     lock = create_redis_lock(f'assignment-shell-sync-{assignment.id}', auto_release_time=10.0)
     if not lock.acquire(blocking=False):
         return
