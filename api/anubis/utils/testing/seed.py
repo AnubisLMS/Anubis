@@ -461,6 +461,7 @@ def seed():
     logger.info('init submissions assignment 3')
     init_submissions(os_submissions3)
     assign_questions(os_assignment3)
+    assign_questions(os_assignment4)
 
     logger.info('adding course tas + profs')
     ta = TAForCourse(owner=ta_user, course=intro_to_os_course)
