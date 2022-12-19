@@ -79,6 +79,8 @@ preexec_invoke_exec () {
     [ "$BASH_COMMAND" = "status" ] && return
     [ "$BASH_COMMAND" = "hint" ] && return
     [ "$BASH_COMMAND" = "reset" ] && return
+    [ "$BASH_COMMAND" = "set_ps1" ] && return
+    [ "$BASH_COMMAND" = "return" ] && return
 
     exec 1>&3
     rm -f /tmp/output /tmp/command
