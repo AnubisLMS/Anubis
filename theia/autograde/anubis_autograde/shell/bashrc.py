@@ -57,6 +57,11 @@ check_exercise() {
     [ "$COMMAND" = "reset" ] && return
     [ "$COMMAND" = "set_ps1" ] && return
     [ "$COMMAND" = "" ] && return
+    
+    if (( $EXERCISE_INDEX == -1 )); then
+        return
+    fi
+    
     STATUS_CODE=$(curl ${GRADE_URL}/submit \\
         --output /dev/stderr --write-out "%{http_code}" \\
         --data "exercise=${EXERCISE}" \\

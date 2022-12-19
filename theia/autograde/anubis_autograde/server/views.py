@@ -18,9 +18,10 @@ views = Blueprint('views', __name__)
 
 @views.get('/start')
 @text_response
+@complete_reject
 def start():
     message = get_start_message()
-    _, exercise = get_active_exercise()
+    i, exercise = get_active_exercise()
     if exercise.start_message is not None:
         if len(message) > 1:
             message += '\n'
@@ -30,7 +31,6 @@ def start():
 
 @views.get('/current')
 @text_response
-@complete_reject
 def current():
     index, _ = get_active_exercise()
     return str(index)
