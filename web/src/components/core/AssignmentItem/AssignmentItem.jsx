@@ -16,6 +16,8 @@ const AssignmentItem = ({
   submitted,
   dueDate,
   visible_to_students,
+  complete,
+  shellAutograde,
 }) => {
   const history = useHistory();
   const classes = useStyles();
@@ -29,9 +31,19 @@ const AssignmentItem = ({
         <Tooltip title={'Not visible to students.'}><VisibilityOff className={classes.red}/></Tooltip>}
       link={`/courses/assignment?assignmentId=${id}`}
     >
-      <Typography className={submitted ? classes.green : classes.red}>
-        {submitted ? 'Submitted' : 'Not Submitted'}
-      </Typography>
+      {shellAutograde ? (
+        <Typography className={!submitted ? classes.red : (
+          complete ? classes.green : classes.orange
+        )}>
+          {!submitted ? 'Not Started' : (
+            complete ? 'Complete' : 'Incomplete'
+          )}
+        </Typography>
+      ) : (
+        <Typography className={submitted ? classes.green : classes.red}>
+          {submitted ? 'Submitted' : 'Not Started'}
+        </Typography>
+      )}
       <Typography>Due Date: {dueDate}</Typography>
       <Button
         color={'primary'}

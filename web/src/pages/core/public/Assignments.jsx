@@ -2,9 +2,6 @@ import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import {useSnackbar} from 'notistack';
 
-import Box from '@mui/material/Box';
-import makeStyles from '@mui/styles/makeStyles';
-
 import useQuery from '../../../hooks/useQuery';
 import AssignmentItem from '../../../components/core/AssignmentItem/AssignmentItem';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
@@ -80,6 +77,8 @@ const Assignments = () => {
           course={assignment.course}
           submitted={assignment.has_submission}
           visible_to_students={assignment.visible_to_students}
+          complete={assignment.complete}
+          shellAutograde={assignment.shell_autograde_enabled}
         />
       ))}
     </StandardLayout>
