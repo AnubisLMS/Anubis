@@ -87,6 +87,7 @@ export default function Submissions() {
                 <SubmissionItem
                   assignmentDue={row.assignmentDue}
                   assignmentName={row.assignment_name}
+                  id={row.id}
                   commit={row.commit}
                   processed={row.processed}
                   tests={row.tests}
