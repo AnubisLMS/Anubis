@@ -79,6 +79,8 @@ const Dashboard = () => {
           submitted={assignment.has_submission}
           dueDate={assignment.due_date}
           visible_to_students={assignment.visible_to_students}
+          complete={assignment.complete}
+          shellAutograde={assignment.shell_autograde_enabled}
         />
       ))}
     </StandardLayout>

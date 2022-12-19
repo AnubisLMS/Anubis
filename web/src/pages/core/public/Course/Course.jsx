@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 
@@ -53,7 +53,7 @@ const Course = () => {
             <Box className={classes.headerLeft}>
               <Box className={classes.iconOuterCircle}>
                 <Box className={classes.iconInnerCircle}>
-                  <SchoolIcon />
+                  <SchoolIcon/>
                 </Box>
               </Box>
               <Box className={classes.headerText}>
@@ -66,8 +66,8 @@ const Course = () => {
               </Box>
             </Box>
           </Box>
-          <Divider />
-          <Box className = {classes.content}>
+          <Divider/>
+          <Box className={classes.content}>
             <Typography className={classes.sectionHeader}>
               Instructors / Teaching Assistants
             </Typography>
@@ -79,8 +79,8 @@ const Course = () => {
                 </Typography>
               ))}
             </Box>
-            <br />
-            <br />
+            <br/>
+            <br/>
             <Typography className={classes.sectionHeader}>
               Assignments
             </Typography>
@@ -93,6 +93,8 @@ const Course = () => {
                 course={assignment.course}
                 submitted={assignment.has_submission}
                 visible_to_students={assignment.visible_to_students}
+                complete={assignment.complete}
+                shellAutograde={assignment.shell_autograde_enabled}
               />
             ))}
           </Box>
