@@ -1,0 +1,78 @@
+{{- if and .Values.reaper.enable (not .Values.debug) }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "chart.fullname" . }}-calendar_update
+  labels:
+      {{- include "chart.labels" . | nindent 4 }}
+    component: calendar_update
+  {{- if .Values.imagePullSecret }}
+imagePullSecrets:
+  - name: {{ .Values.imagePullSecret }}
+  {{- end }}
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "chart.fullname" . }}-calendar_update
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: calendar_update
+rules:
+  - apiGroups: [ "" ]
+    resources: [ "secrets" ]
+    verbs: [ "get", "list", "patch" ]
+    resourceNames: [ "{{ .Values.calendar_update.secretName }}" ]
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "chart.fullname" . }}-calendar_update
+  labels:
+      {{- include "chart.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "chart.fullname" . }}-calendar_update
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "chart.fullname" . }}-calendar_update
+    namespace: anubis
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "chart.fullname" . }}-calendar_update
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: calendar_update
+spec:
+  schedule: {{ .Values.calendar_update.schedule | quote }}
+  suspend: {{ .Values.calendar_update.suspend }}
+  concurrencyPolicy: Replace
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "chart.selectorLabels" . | nindent 8 }}
+        component: calendar_update
+    spec:
+      ttlSecondsAfterFinished: 120
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: {{ include "chart.fullname" . }}-calendar_update
+          restartPolicy: Never
+          containers:
+            - name: calendar_update
+              image: "{{ .Values.api.image }}:{{ .Values.tag }}"
+              imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+              command: [ "python3", "anubis/jobs/daily_calendar_update.py" ]
+              env:
+              - name: "JOB"
+                value: "1"
+              {{- include "api.env" . | nindent 14 }}
+{{- end }}
