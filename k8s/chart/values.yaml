@@ -137,6 +137,11 @@ autograde_docs:
 
 ###############################################################################
 # Cron Jobs
+calendar_update:
+  enable: true
+  suspend: false
+  schedule: "0 0 * * *" # Midnight
+
 reaper:
   enable: true
   suspend: false
