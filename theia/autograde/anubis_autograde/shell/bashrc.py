@@ -76,26 +76,22 @@ check_exercise() {
     echo -n > /tmp/output > /tmp/command
     set_ps1
 }
-PROMPT_COMMAND="check_exercise"
 
-preexec_invoke_exec () {
-    [ "$BASH_COMMAND" = "$PROMPT_COMMAND" ] && return
-    [ "$BASH_COMMAND" = "start_message" ] && return
-    [ "$BASH_COMMAND" = "status" ] && return
-    [ "$BASH_COMMAND" = "hint" ] && return
-    [ "$BASH_COMMAND" = "reset" ] && return
-    [ "$BASH_COMMAND" = "set_ps1" ] && return
-    [ "$BASH_COMMAND" = "return" ] && return
-
-    exec 1>&3
-    rm -f /tmp/output /tmp/command
-    echo "$BASH_COMMAND" > /tmp/command
-    exec > >(tee /tmp/output)
+jrun() {
+    case "$1" in
+        "start_message"|"status"|"hint"|"reset"|"set_ps1"|"return")
+            eval "$1"
+            return
+            ;;
+        *)
+            echo "$1" > /tmp/command
+            eval "$1" > >(tee /tmp/output)
+            check_exercise
+            ;;
+    esac
 }
 
 rm -f /tmp/output
-exec 3>&1
-trap 'preexec_invoke_exec' DEBUG
 
 set_ps1
 start_message
