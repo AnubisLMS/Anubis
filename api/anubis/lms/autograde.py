@@ -124,7 +124,7 @@ def autograde_submission_result_wrapper(
 
     else:
         submission = Submission.query.filter(Submission.id == submission_id).first()
-        repo_path = parse("https://github.com/{}", submission.repo.repo_url)[0]
+        repo_path = parse("https://github.com/{}", submission.repo.repo_url)[0] if submission.repo else None
         best_count = sum(map(lambda x: 1 if x.passed else 0, submission.test_results))
         late = "past due" if assignment.due_date < submission.created else "on time"
         late = "past grace" if assignment.grace_date < submission.created else late

@@ -167,7 +167,7 @@ def public_webhook():
     req_assert(user is not None, message="dangling submission")
 
     # Check that the current assignment is still accepting submissions
-    if not assignment.accept_late and datetime.now() < get_assignment_due_date(user, assignment, grace=True):
+    if not assignment.accept_late and datetime.now() < get_assignment_due_date(user.id, assignment.id, grace=True):
         reject_late_submission(submission)
 
     # If the github username is not found, create a dangling submission

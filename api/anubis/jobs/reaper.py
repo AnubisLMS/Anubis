@@ -12,6 +12,7 @@ from anubis.lms.submissions import init_submission
 from anubis.models import (
     db,
     Submission,
+    SubmissionBuild,
     Course,
 )
 from anubis.rpc.enqueue import enqueue_autograde_pipeline, enqueue_ide_reap_stale, enqueue_pipeline_reap_stale
@@ -130,6 +131,18 @@ def reap_autograde_disabled_submissions():
         fix_submissions_for_autograde_disabled_assignment(assignment)
 
 
+def reap_shell_autograde_builds():
+    for assignment in get_recent_assignments(autograde_enabled=True):
+        if not assignment.shell_autograde_enabled:
+            continue
+        for submission in Submission.query.filter(Submission.assignment_id == assignment.id).all():
+            SubmissionBuild.query.filter(SubmissionBuild.submission_id == submission.id).update({
+                'passed': True,
+                'stdout': ''
+            })
+        db.session.commit()
+
+
 @with_context
 def reap():
     # Enqueue a job to reap stale ide k8s resources
@@ -152,6 +165,9 @@ def reap():
 
     # Fix any submissions for autograde disabled assignments
     reap_autograde_disabled_submissions()
+
+    # set builds to passed for shell autograde assignments
+    reap_shell_autograde_builds()
 
 
 if __name__ == "__main__":
