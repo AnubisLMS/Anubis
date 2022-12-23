@@ -89,17 +89,17 @@ spec:
     - ipBlock:
         cidr: 0.0.0.0/0
         except:
-          - 10.0.0.0/8
-          - 192.168.0.0/16
-          - 172.16.0.0/12
-          - 169.254.169.254/32  # Hosting Provider Metadata IP
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+        - 169.254.169.254/32  # Hosting Provider Metadata IP
   - to:
     - podSelector:
         matchLabels:
           {{- include "chart.selectorLabels" . | nindent 10 }}
           component: api
     ports:
-      - port: 5000
+    - port: 5000
   - to:
     - namespaceSelector: {}
       podSelector:
@@ -117,35 +117,49 @@ metadata:
   name: shell-autograde-ide
   namespace: {{ .Release.Namespace }}
   labels:
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
+    {{- include "chart.labels" . | nindent 4 }}
 spec:
   podSelector:
     matchLabels:
-      shell-autograde: 'true'
+      network-policy: shell-autograde-student
   policyTypes:
+  - Ingress
   - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          {{- include "chart.selectorLabels" . | nindent 10 }}
+          component: proxy
+    ports:
+    - protocol: TCP
+      port: 5000
+    - protocol: UDP
+      port: 5000
   egress:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+        - 169.254.169.254/32  # Hosting Provider Metadata IP
+  - to:
+    - podSelector:
+        matchLabels:
+          {{- include "chart.selectorLabels" . | nindent 10 }}
+          component: pipeline-api
+    ports:
+    - port: 5000
   - to:
     - namespaceSelector: {}
       podSelector:
         matchLabels:
           k8s-app: kube-dns
     ports:
-      - protocol: TCP
-        port: 53
-      - protocol: UDP
-        port: 53
-
-  - to:
-    # Pipeline API
-    - podSelector:
-        matchLabels:
-          {{- include "chart.selectorLabels" . | nindent 10 }}
-          component: pipeline-api
-    ports:
-      - protocol: TCP
-        port: 5000
+    - port: 53
+      protocol: UDP
 
 ---
 
