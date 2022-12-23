@@ -97,6 +97,13 @@ spec:
     - podSelector:
         matchLabels:
           {{- include "chart.selectorLabels" . | nindent 10 }}
+          component: pipeline-api
+    ports:
+    - port: 5000
+  - to:
+    - podSelector:
+        matchLabels:
+          {{- include "chart.selectorLabels" . | nindent 10 }}
           component: api
     ports:
     - port: 5000
