@@ -553,16 +553,16 @@ def create_theia_k8s_pod_pvc(
     # If network locked, then set the network policy to student
     # and dns to 1.1.1.1
     if theia_session.network_locked:
-
         # This label will enable the student network policy to be
         # applied to this container. The gist of this policy is that
         # students will only be able to connect to github.
         pod_labels_extra["network-policy"] = theia_session.network_policy or "os-student"
 
-        # set up the pod DNS to be pointed to cloudflare 1.1.1.1 instead
-        # of the internal kubernetes dns.
-        pod_spec_extra["dns_policy"] = "None"
-        pod_spec_extra["dns_config"] = k8s.V1PodDNSConfig(nameservers=["1.1.1.1"])
+        if theia_session.network_policy == "os-student":
+            # set up the pod DNS to be pointed to cloudflare 1.1.1.1 instead
+            # of the internal kubernetes dns.
+            pod_spec_extra["dns_policy"] = "None"
+            pod_spec_extra["dns_config"] = k8s.V1PodDNSConfig(nameservers=["1.1.1.1"])
 
     # If the network is not locked, then we still need to apply
     # the admin policy. The gist of this policy is that the pod
