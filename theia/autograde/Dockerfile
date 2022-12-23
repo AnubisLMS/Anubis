@@ -10,6 +10,7 @@ RUN set -eux; \
     chown anubis:anubis /opt/anubis
 
 VOLUME /home/anubis
+VOLUME /log
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 COPY supervisord.conf /supervisord.conf

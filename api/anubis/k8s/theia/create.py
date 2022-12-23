@@ -51,6 +51,10 @@ def create_theia_k8s_pod_pvc(
     theia_extra_env: list[k8s.V1EnvVar] = []
     init_extra_env: list[k8s.V1EnvVar] = []
 
+    shared_log_volume = k8s.V1Volume(name="log", empty_dir={})
+    shared_log_volume_mount = k8s.V1VolumeMount(name="log", mount_path="/log")
+    pod_volumes.append(shared_log_volume)
+
     # Get the set repo url for this session. If the assignment has github repos disabled,
     # then default to an empty string.
     repo_url = theia_session.repo_url or ""
@@ -287,7 +291,10 @@ def create_theia_k8s_pod_pvc(
             run_as_user=1001,
         ),
         # Add the shared volume mount to /home/project
-        volume_mounts=autosave_volume_mounts,
+        volume_mounts=[
+            shared_log_volume_mount,
+            *autosave_volume_mounts
+        ],
     )
 
     ##################################################################################
@@ -318,6 +325,7 @@ def create_theia_k8s_pod_pvc(
             ),
             # Add the shared certs volume
             volume_mounts=[
+                shared_log_volume_mount,
                 *ide_volume_mounts,
             ],
         )
@@ -343,6 +351,7 @@ def create_theia_k8s_pod_pvc(
                 k8s.V1EnvVar(name="EXERCISE_PY", value=get_exercise_py_text(theia_session.assignment)),
             ],
             volume_mounts=[
+                shared_log_volume_mount,
                 *ide_volume_mounts,
             ],
 
@@ -503,7 +512,10 @@ def create_theia_k8s_pod_pvc(
         ),
         # setup the shared volume where the student
         # repo exists.
-        volume_mounts=ide_volume_mounts,
+        volume_mounts=[
+            shared_log_volume_mount,
+            *ide_volume_mounts
+        ],
         # Startup probe is the way that kubernetes can
         # check to see if the theia has started correctly.
         # The pod will not be marked as ready until the
