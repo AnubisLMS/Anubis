@@ -1,4 +1,5 @@
 import argparse
+import traceback
 
 import gunicorn.app.base
 from flask import Flask
@@ -46,7 +47,10 @@ def create_app(args: argparse.Namespace, skip_exercises: bool = False) -> Flask:
 
     if args.prod:
         with app.app_context():
-            initialize_submission_status()
+            try:
+                initialize_submission_status()
+            except Exception as e:
+                log.error(traceback.format_exc()  + f'\nFailed to call {initialize_submission_status} Exception={e}')
 
     app.register_blueprint(views)
 
