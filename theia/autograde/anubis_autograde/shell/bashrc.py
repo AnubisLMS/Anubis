@@ -91,6 +91,7 @@ jrun() {
     esac
 }
 
+export PATH=${HOME}/bin:${PATH}
 rm -f /tmp/output
 
 set_ps1
