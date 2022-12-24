@@ -668,10 +668,12 @@ class TheiaImage(db.Model):
             "public":      self.public,
             "default_tag": self.default_tag,
             "webtop":      self.webtop,
-            "tags":        list(sorted(
-                [tag.data for tag in self.tags],
-                key=lambda tag_data: tag_data['title']
-            )),
+            "tags":        list(
+                sorted(
+                    [tag.data for tag in self.tags],
+                    key=lambda tag_data: tag_data['title']
+                )
+            ),
         }
 
 
@@ -723,8 +725,8 @@ class TheiaSession(db.Model):
 
     # IDE settings
     resources = Column(JSON, default=lambda: {})
-    network_policy: str = Column(String(length=128), default="os-student")
-    network_locked: bool = Column(Boolean, default=True)
+    network_policy: str = Column(String(length=128), default=THEIA_DEFAULT_OPTIONS['network_policy'])
+    network_dns_locked: bool = Column(Boolean, default=THEIA_DEFAULT_OPTIONS["network_dns_locked"])
     autosave: bool = Column(Boolean, default=True)
     credentials: bool = Column(Boolean, default=False)
     persistent_storage: bool = Column(Boolean, default=False)
@@ -777,7 +779,8 @@ class TheiaSession(db.Model):
             "repo_url":           self.repo_url,
             "autosave":           self.autosave,
             "credentials":        self.credentials,
-            "network_locked":     self.network_locked,
+            "network_policy":     self.network_policy,
+            "network_dns_locked": self.network_dns_locked,
             "persistent_storage": self.persistent_storage,
         }
 

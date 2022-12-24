@@ -3,7 +3,12 @@ import json
 
 from kubernetes import client as k8s, config as k8s_config
 
-from anubis.constants import THEIA_DEFAULT_OPTIONS, WEBTOP_DEFAULT_OPTIONS
+from anubis.constants import (
+    THEIA_DEFAULT_OPTIONS,
+    WEBTOP_DEFAULT_OPTIONS,
+    THEIA_VALID_NETWORK_POLICIES,
+    THEIA_DEFAULT_NETWORK_POLICY
+)
 from anubis.github.parse import parse_github_repo_name
 from anubis.k8s.pvc.get import get_user_pvc
 from anubis.k8s.theia.get import get_theia_pod_name
@@ -549,27 +554,25 @@ def create_theia_k8s_pod_pvc(
     pod_containers.append(theia_container)
     pod_containers.append(autosave_container)
 
+    # All IDEs must have a network policy attached to them. This section reads the network
+    # policy specified for the IDE, and verifies it is in the set of acceptable network policy
+    # names ( defined in anubis/constants.py ). If the policy is not valid, fallback to the default.
+    network_policy = theia_session.network_policy \
+        if theia_session.network_policy in THEIA_VALID_NETWORK_POLICIES \
+        else THEIA_DEFAULT_NETWORK_POLICY
+
+    # This label will enable the student network policy to be
+    # applied to this container. The gist of this policy is that
+    # students will only be able to connect to github.
+    pod_labels_extra["network-policy"] = network_policy
 
     # If network locked, then set the network policy to student
     # and dns to 1.1.1.1
-    if theia_session.network_locked:
-        # This label will enable the student network policy to be
-        # applied to this container. The gist of this policy is that
-        # students will only be able to connect to github.
-        pod_labels_extra["network-policy"] = theia_session.network_policy or "os-student"
-
-        if theia_session.network_policy == "os-student":
-            # set up the pod DNS to be pointed to cloudflare 1.1.1.1 instead
-            # of the internal kubernetes dns.
-            pod_spec_extra["dns_policy"] = "None"
-            pod_spec_extra["dns_config"] = k8s.V1PodDNSConfig(nameservers=["1.1.1.1"])
-
-    # If the network is not locked, then we still need to apply
-    # the admin policy. The gist of this policy is that the pod
-    # can only connect to the api within the cluster, and anything
-    # outside of the cluster.
-    else:
-        pod_labels_extra["network-policy"] = "admin"
+    if theia_session.network_dns_locked:
+        # set up the pod DNS to be pointed to cloudflare 1.1.1.1 instead
+        # of the internal kubernetes dns.
+        pod_spec_extra["dns_policy"] = "None"
+        pod_spec_extra["dns_config"] = k8s.V1PodDNSConfig(nameservers=["1.1.1.1"])
 
     # Create pod object
     pod = k8s.V1Pod(
