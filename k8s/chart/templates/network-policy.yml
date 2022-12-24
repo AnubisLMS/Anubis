@@ -52,7 +52,6 @@ spec:
     - {protocol: UDP, port: 8010}
 
   egress:
-
   # Allow out to the internet (not to rest of cluster)
   - to:
     - ipBlock:
@@ -109,6 +108,7 @@ spec:
     - {protocol: UDP, port: 8009}
     - {protocol: TCP, port: 8010}
     - {protocol: UDP, port: 8010}
+
   egress:
   - to:
     - ipBlock:
@@ -156,7 +156,6 @@ spec:
   - Ingress
   - Egress
   ingress:
-
   # IDE Proxy -> IDE
   - from:
     - podSelector:
@@ -170,7 +169,6 @@ spec:
       port: 5000
 
   egress:
-
   # Kubernetes System DNS
   - to:
       - namespaceSelector: { }
@@ -180,7 +178,6 @@ spec:
     ports:
       - { protocol: TCP, port: 53 }
       - { protocol: UDP, port: 53 }
-
   # Default allow public addresses
   - to:
     - ipBlock:
@@ -190,7 +187,6 @@ spec:
         - 192.168.0.0/16
         - 172.16.0.0/12
         - 169.254.169.254/32  # Hosting Provider Metadata IP
-
   # Allow to pipeline-api
   - to:
     - podSelector:
@@ -217,7 +213,6 @@ spec:
   - Ingress
   - Egress
   egress:
-
   # Kubernetes System DNS
   - to:
     - namespaceSelector: {}
@@ -227,7 +222,6 @@ spec:
     ports:
     - {protocol: TCP, port: 53}
     - {protocol: UDP, port: 53}
-
   # Pipeline API
   - to:
     - podSelector:
@@ -236,8 +230,7 @@ spec:
           component: pipeline-api
     ports:
     - {protocol: TCP, port: 5000}
-
-  # Github IP Addresses
+  # GitHub IP Addresses
   - to:
     - ipBlock:
         cidr: 192.30.252.0/22
@@ -309,7 +302,6 @@ spec:
         cidr: 18.231.104.233/32
     - ipBlock:
         cidr: 18.228.167.86/32
-
     ports:
     - {protocol: TCP, port: 443} // HTTPS
     - {protocol: TCP, port: 22}  // SSH
