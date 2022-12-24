@@ -132,9 +132,11 @@ def reap_autograde_disabled_submissions():
 
 
 def reap_shell_autograde_builds():
+    logger.info(f'reap_shell_autograde_builds')
     for assignment in get_recent_assignments(autograde_enabled=True):
         if not assignment.shell_autograde_enabled:
             continue
+        logger.info(f'reap_shell_autograde_builds {assignment=}')
         for submission in Submission.query.filter(Submission.assignment_id == assignment.id).all():
             SubmissionBuild.query.filter(SubmissionBuild.submission_id == submission.id).update({
                 'passed': True,
