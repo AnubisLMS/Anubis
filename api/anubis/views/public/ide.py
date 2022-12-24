@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from flask import Blueprint, request
 
-from anubis.constants import THEIA_DEFAULT_OPTIONS
+from anubis.constants import THEIA_DEFAULT_OPTIONS, THEIA_DEFAULT_NETWORK_POLICY, THEIA_ADMIN_NETWORK_POLICY
 from anubis.ide.conditions import assert_theia_sessions_enabled
 from anubis.ide.get import get_n_available_sessions
 from anubis.ide.initialize import initialize_ide
@@ -119,7 +119,8 @@ def public_ide_initialize(assignment: Assignment):
     logger.debug(f'persistent_storage = {persistent_storage}')
 
     # Figure out options from assignment
-    network_policy = options.get("network_policy", "os-student")
+    network_dns_locked = True
+    network_policy = options.get("network_policy", THEIA_DEFAULT_NETWORK_POLICY)
     resources = options.get(
         "resources",
         THEIA_DEFAULT_OPTIONS['resources'],
@@ -128,7 +129,8 @@ def public_ide_initialize(assignment: Assignment):
 
     # If course admin, then give admin network policy
     if is_admin:
-        network_policy = 'admin'
+        network_dns_locked = False
+        network_policy = THEIA_ADMIN_NETWORK_POLICY
 
     # Create the theia session with the proper settings
     session: TheiaSession = initialize_ide(
@@ -137,8 +139,8 @@ def public_ide_initialize(assignment: Assignment):
         course_id=assignment.course_id,
         repo_url=repo_url,
         playground=False,
-        network_locked=not is_admin,
         network_policy=network_policy,
+        network_dns_locked=network_dns_locked,
         persistent_storage=persistent_storage,
         autosave=autosave,
         resources=resources,

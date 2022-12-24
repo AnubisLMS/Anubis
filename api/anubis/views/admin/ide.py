@@ -3,6 +3,7 @@ from datetime import datetime
 
 from flask import Blueprint
 
+from anubis.constants import THEIA_ADMIN_NETWORK_POLICY
 from anubis.ide.initialize import initialize_ide
 from anubis.k8s.theia.reap import reap_theia_sessions_in_course
 from anubis.lms.courses import course_context
@@ -40,8 +41,8 @@ def admin_ide_admin_settings():
                 # Options
                 "admin": True,
                 "docker": True,
-                "network_locked": False,
-                "network_policy": "admin",
+                "network_dns_locked": False,
+                "network_policy": THEIA_ADMIN_NETWORK_POLICY,
                 "resources": '{"limits": {"cpu": "2", "memory": "2Gi"}, "requests": {"cpu": "1", "memory": "500Mi"}}',
                 "autosave": True,
                 "credentials": True,
@@ -82,8 +83,8 @@ def admin_ide_initialize_custom(settings: dict, **_):
     image = settings.get("image", dict())
     repo_url = settings.get("repo_url", "https://github.com/os3224/anubis-assignment-tests")
     resources_str = settings.get("resources", '{"limits":{"cpu":"4","memory":"4Gi"}}')
-    network_locked = settings.get("network_locked", False)
-    network_policy = settings.get("network_policy", "admin")
+    network_dns_locked = settings.get("network_dns_locked", False)
+    network_policy = settings.get("network_policy", THEIA_ADMIN_NETWORK_POLICY)
     autosave = settings.get("autosave", True)
     admin = settings.get("admin", True)
     credentials = settings.get("credentials", True)
@@ -120,7 +121,7 @@ def admin_ide_initialize_custom(settings: dict, **_):
         repo_url=repo_url,
         # Options
         admin=admin,
-        network_locked=network_locked,
+        network_dns_locked=network_dns_locked,
         network_policy=network_policy,
         autosave=autosave,
         resources=resources,

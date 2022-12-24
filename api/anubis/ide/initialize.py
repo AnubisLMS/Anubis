@@ -1,5 +1,6 @@
 from kubernetes import config, client
 
+from anubis.constants import THEIA_DEFAULT_NETWORK_POLICY
 from anubis.k8s.theia.create import create_theia_k8s_pod_pvc
 from anubis.lms.shell_autograde import create_shell_autograde_ide_submission
 from anubis.models import TheiaSession, db
@@ -126,8 +127,8 @@ def initialize_ide(
     course_id: str = None,
     repo_url: str = "",
     playground: bool = False,
-    network_locked: bool = True,
-    network_policy: str = "os-student",
+    network_policy: str = THEIA_DEFAULT_NETWORK_POLICY,
+    network_dns_locked: bool = True,
     autosave: bool = True,
     autograde: bool = False,
     persistent_storage: bool = True,
@@ -152,8 +153,8 @@ def initialize_ide(
         course_id=course_id,
         repo_url=repo_url,
         playground=playground,
-        network_locked=network_locked,
         network_policy=network_policy,
+        network_dns_locked=network_dns_locked,
         persistent_storage=persistent_storage,
         autosave=autosave,
         resources=resources,

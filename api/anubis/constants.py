@@ -1,6 +1,7 @@
 # Standard IDE variables
 THEIA_DEFAULT_NETWORK_POLICY: str = "student"
-THEIA_VALID_NETWORK_POLICIES: set[str] = {THEIA_DEFAULT_NETWORK_POLICY, 'admin', 'shell-autograde-student'}
+THEIA_ADMIN_NETWORK_POLICY: str = "admin"
+THEIA_VALID_NETWORK_POLICIES: set[str] = {THEIA_DEFAULT_NETWORK_POLICY, THEIA_ADMIN_NETWORK_POLICY, 'shell-autograde-student'}
 THEIA_DEFAULT_OPTIONS = {
     "autosave": True,
     "persistent_storage": False,
