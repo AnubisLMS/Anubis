@@ -66,6 +66,10 @@ def create_theia_k8s_pod_pvc(
     repo_name = parse_github_repo_name(repo_url)
     webtop = theia_session.image.webtop
 
+    # Figure out which uid to use
+    default_theia_user_id = 1001
+    theia_user_id = default_theia_user_id if not webtop else 0
+
     # Get the theia session options
     if not theia_session.image.webtop:
         limits = theia_session.resources.get("limits", THEIA_DEFAULT_OPTIONS['resources']['limits'])
@@ -350,7 +354,7 @@ def create_theia_k8s_pod_pvc(
             image="registry.digitalocean.com/anubis/theia-autograde",
             image_pull_policy="IfNotPresent",
             env=[
-                *autosave_extra_env,
+                k8s.V1EnvVar(name="NETID", value=netid),
                 k8s.V1EnvVar(name="TOKEN", value=submission.token),
                 k8s.V1EnvVar(name="SUBMISSION_ID", value=submission.id),
                 k8s.V1EnvVar(name="EXERCISE_PY", value=get_exercise_py_text(theia_session.assignment)),
@@ -367,10 +371,15 @@ def create_theia_k8s_pod_pvc(
                 failure_threshold=60,
                 period_seconds=1,
                 initial_delay_seconds=0,
-            )
+            ),
+            security_context=k8s.V1SecurityContext(
+                allow_privilege_escalation=False,
+                privileged=False,
+                run_as_user=default_theia_user_id,
+            ),
         )
 
-        pod_labels_extra["shell-autograde"] = 'true'
+        pod_labels_extra["shell-autograde"] = 'ON'
 
         theia_extra_env.append(
             k8s.V1EnvVar(
@@ -432,11 +441,6 @@ def create_theia_k8s_pod_pvc(
                 value=theia_session.course.course_code,
             )
         )
-
-    # Figure out which uid to use
-    theia_user_id = 1001
-    if webtop:
-        theia_user_id = 0
 
     # If privileged, add docker config file to pod as a volume
     if admin and include_docker_secret:

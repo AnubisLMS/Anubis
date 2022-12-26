@@ -449,6 +449,8 @@ def seed():
     )
     os_assignment4.theia_options['autosave'] = False
     os_assignment4.theia_options['persistent_storage'] = False
+    os_assignment4.theia_options['network_policy'] = 'shell-autograde-student'
+    os_assignment4.theia_options['network_dns_locked'] = False
     logger.info('init submissions assignment 0')
     init_submissions(os_submissions0)
     assign_questions(os_assignment0)

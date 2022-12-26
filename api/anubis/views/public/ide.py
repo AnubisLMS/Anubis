@@ -109,11 +109,11 @@ def public_ide_initialize(assignment: Assignment):
         repo_url = repo.repo_url
 
     # Create the theia options from the assignment default
-    options = copy.deepcopy(assignment.theia_options)
+    options: dict = copy.deepcopy(assignment.theia_options)
 
     # Figure out options from user values
-    autosave = request.json.get("autosave", True)
-    persistent_storage = request.json.get("persistent_storage", False)
+    autosave = request.json.get("autosave", options.get("autosave", True))
+    persistent_storage = request.json.get("persistent_storage", options.get("persistent_storage", False))
 
     logger.debug(f'autosave = {autosave}')
     logger.debug(f'persistent_storage = {persistent_storage}')
