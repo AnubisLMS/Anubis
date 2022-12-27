@@ -4,7 +4,7 @@ import os
 import string
 import subprocess
 import traceback
-import multiprocessing
+import multiprocessing.pool
 import typing
 
 from flask import Flask, Response, request, make_response
