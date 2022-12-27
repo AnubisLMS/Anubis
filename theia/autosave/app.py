@@ -114,7 +114,7 @@ if ADMIN:
         try:
             r = subprocess.run(
                 ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.clone=clone', 'clone', repo_url, netid],
-                cwd=os.path.join(path, netid),
+                cwd=path,
                 timeout=5,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
