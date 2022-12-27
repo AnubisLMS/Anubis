@@ -4,6 +4,8 @@ import os
 import string
 import subprocess
 import traceback
+import multiprocessing
+import typing
 
 from flask import Flask, Response, request, make_response
 
@@ -103,50 +105,51 @@ def index():
 
 
 if ADMIN:
+
+    def _clone_repo(path: str, assignment_name: str, repo: dict) -> typing.Tuple[bool, str]:
+        repo_url: str = repo['url']
+        repo_base = repo_url.removeprefix('https://github.com/')
+        netid: str = repo['netid']
+
+        try:
+            r = subprocess.run(
+                ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.clone=clone', 'clone', repo_url, netid],
+                cwd=os.path.join(path, netid),
+                timeout=5,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+            if r.returncode != 0:
+                print(r.stdout)
+                return False, 'Failed to clone {} for {}'.format(repo_base, netid)
+        except subprocess.TimeoutExpired:
+            print(traceback.format_exc())
+            return False, 'Failed to clone {} for {} Timeout'.format(repo_base, netid)
+        return True, '{:<12} :: {:<32} -> {}/{}'.format(netid, repo_base, assignment_name, netid)
+
+
     @app.route('/clone', methods=['POST'])
     def clone():
         assignment_name: str = request.json['assignment_name']
         repos: list = request.json['repos']
-        path: str = request.json['path']
-
-        if not path.startswith('/home/anubis/'):
-            response = make_response(
-                'You can only clone student repos under /home/anubis/\n',
-            )
-            response.headers = {'Content-Type': 'text/plain'}
-            return response
+        netids: list[str] = request.json['netids']
+        path: str = '/home/anubis/'
 
         assignment_name = relatively_safe_filename(assignment_name)
 
         os.makedirs(os.path.join(path, assignment_name), exist_ok=True)
         path = os.path.join(path, assignment_name)
 
-        succeeded = []
-        failed = []
+        if len(netids) > 0:
+            repos = [repo for repo in repos if repo['netid'] in set(netids)]
 
-        for repo in repos:
-            repo_url: str = repo['url']
-            repo_base = repo_url.removeprefix('https://github.com/')
-            netid: str = repo['netid']
+        with multiprocessing.pool.Pool(8) as pool:
+            r = pool.starmap(_clone_repo, [
+                (path, assignment_name, repo) for repo in repos
+            ])
 
-            try:
-                r = subprocess.run(
-                    ['git', '-c', 'core.hooksPath=/dev/null', '-c', 'alias.clone=clone', 'clone', repo_url, netid],
-                    cwd=path,
-                    timeout=5,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                )
-                if r.returncode != 0:
-                    failed.append('Failed to clone {} for {}'.format(repo_base, netid))
-                    print(r.stdout)
-                    continue
-            except subprocess.TimeoutExpired:
-                failed.append('Failed to clone {} for {} Timeout'.format(repo_base, netid))
-                print(traceback.format_exc())
-                continue
-
-            succeeded.append('{:<12} :: {:<32} -> {}/{}'.format(netid, repo_base, assignment_name, netid))
+        succeeded = [message for success, message in r if success is True]
+        failed = [message for success, message in r if success is False]
 
         return text_response(
             'Succeeded:\n' + '\n'.join(succeeded) + '\nFailed:\n' + '\n'.join(failed)
