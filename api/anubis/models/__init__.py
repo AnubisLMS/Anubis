@@ -346,7 +346,8 @@ class AssignmentTest(db.Model):
     assignment_id: str = Column(String(length=default_id_length), ForeignKey(Assignment.id))
 
     # Fields
-    name = Column(Text(length=2 ** 14), index=True)
+    name: str = Column(Text(length=2 ** 14), index=True)
+    order: int = Column(Integer, index=True, default=0)
     hidden: bool = Column(Boolean, default=False)
     points: int = Column(Integer, default=10)
 

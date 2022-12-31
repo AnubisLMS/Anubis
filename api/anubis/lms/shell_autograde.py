@@ -1,9 +1,10 @@
 import re
+from anubis.lms.submissions import get_latest_user_submissions
 
 from anubis.github.api import github_rest
 from anubis.github.repos import split_github_repo_path, get_github_repo_default_branch
 from anubis.lms.submissions import init_submission
-from anubis.models import Assignment, AssignmentTest, TheiaSession, Submission, db
+from anubis.models import Assignment, AssignmentTest, TheiaSession, Submission, User, db
 from anubis.models.id import default_id_factory
 from anubis.utils.config import get_config_str
 from anubis.utils.data import rand
@@ -137,7 +138,16 @@ def autograde_shell_assignment_sync(assignment: Assignment):
     create_new_assignment_test_from_remote_exercises(assignment, create_exercise_names)
 
 
+def resume_submission(submission: Submission, assignment: Assignment, owner: User) -> str | None:
+    latest_submissions = get_latest_user_submissions(assignment, owner, limit=3)
+    submission.build.passed = True
+    submission.build.stdout = ''
+    return ''
+
+
 def create_shell_autograde_ide_submission(theia_session: TheiaSession) -> Submission:
+    assignment: Assignment = Assignment.query.filter(Assignment.id == theia_session.assignment_id).first()
+    owner: User = User.query.filter(User.id == theia_session.owner_id).first()
     submission = Submission(
         id=default_id_factory(),
         owner_id=theia_session.owner_id,
@@ -149,8 +159,7 @@ def create_shell_autograde_ide_submission(theia_session: TheiaSession) -> Submis
     theia_session.submission_id = submission.id
     db.session.add(submission)
     init_submission(submission, db_commit=True, state=SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE)
-    submission.build.passed = True
-    submission.build.stdout = ''
+    resume_submission(submission, assignment, owner)
     db.session.commit()
     return submission
 
