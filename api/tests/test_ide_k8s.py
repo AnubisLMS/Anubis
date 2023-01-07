@@ -319,7 +319,7 @@ def test_shell_assignment_ide_k8s():
     assert pod.metadata.name == f'theia-{s.netid}-{ide_id}'
 
     assert pod.spec.hostname == 'anubis-ide'
-    assert pod.spec.dns_config
+    assert pod.spec.dns_config is None
 
     ###########################################
     # Verify init container
