@@ -11,7 +11,7 @@ imagePullPolicy: "Always"
 imagePullSecret: "anubis"
 tag: "latest"
 revisionHistoryLimit: 3
-
+offSemester: true
 
 ###############################################################################
 # Deployments with Services
@@ -179,7 +179,7 @@ autograde_shell_reaper:
 ###############################################################################
 # RPC Pools
 rpc:
-  replicas: 3
+  replicas: 1
   queues: ["default", "theia", "regrade"]
 ###############################################################################
 

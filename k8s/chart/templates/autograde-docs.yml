@@ -11,7 +11,7 @@ spec:
     matchLabels:
       {{- include "chart.selectorLabels" . | nindent 6 }}
       component: theia-autograde-docs
-  replicas: {{ .Values.marketing.replicas }}
+  replicas: {{- if not .Values.offSemester }}{{ .Values.marketing.replicas }}{{- else }} 1{{- end }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if .Values.rollingUpdates }}
   strategy:

@@ -52,7 +52,7 @@ metadata:
     {{- include "chart.labels" . | nindent 4 }}
     component: pipeline-poller
 spec:
-  replicas: {{ .Values.pipeline.poller.replicas }}
+  replicas: {{- if not .Values.offSemester }}{{ .Values.pipeline.poller.replicas }}{{- else }} 1{{- end }}
   {{- if .Values.rollingUpdates }}
   strategy:
     type: RollingUpdate

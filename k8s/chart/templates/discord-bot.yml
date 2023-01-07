@@ -13,7 +13,7 @@ spec:
     matchLabels:
       {{- include "chart.selectorLabels" . | nindent 6 }}
       component: discord-bot
-  replicas: {{ .Values.discord_bot.replicas }}
+  replicas: {{- if not .Values.offSemester }}{{ .Values.discord_bot.replicas }}{{- else }} 1{{- end }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if .Values.rollingUpdates }}
   strategy:

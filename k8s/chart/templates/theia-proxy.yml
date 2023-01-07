@@ -8,7 +8,7 @@ metadata:
     {{- include "chart.labels" . | nindent 4 }}
     component: proxy
 spec:
-  replicas: {{ .Values.theia.proxy.replicas }}
+  replicas: {{- if not .Values.offSemester }}{{ .Values.theia.proxy.replicas }}{{- else }} 1{{- end }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if .Values.rollingUpdates }}
   strategy:

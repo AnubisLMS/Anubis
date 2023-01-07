@@ -1,4 +1,4 @@
-{{- if .Values.hpa.enable }}
+{{- if and .Values.hpa.enable (not .Values.offSemester) }}
 {{- if not .Values.debug }}
 
 apiVersion: autoscaling/v2beta2

@@ -53,7 +53,7 @@ metadata:
     {{- include "chart.labels" . | nindent 4 }}
     component: poller
 spec:
-  replicas: {{ .Values.theia.poller.replicas }}
+  replicas: {{- if not .Values.offSemester }}{{ .Values.theia.poller.replicas }}{{- else }} 1{{- end }}
   {{- if .Values.rollingUpdates }}
   strategy:
     type: RollingUpdate
