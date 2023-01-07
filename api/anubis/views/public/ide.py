@@ -119,7 +119,7 @@ def public_ide_initialize(assignment: Assignment):
     logger.debug(f'persistent_storage = {persistent_storage}')
 
     # Figure out options from assignment
-    network_dns_locked = True
+    network_dns_locked = options.get("network_dns_locked", True)
     network_policy = options.get("network_policy", THEIA_DEFAULT_NETWORK_POLICY)
     resources = options.get(
         "resources",
