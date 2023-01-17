@@ -77,6 +77,7 @@ helm repo update
 
 # Create the anubis namespace
 kubectl create namespace anubis
+kubectl config set-context --current --namespace=
 
 # Create a minimal mariadb deployment in a mariadb namespace. On
 # prod, the mariadb is in a seperate namespace, so we do the same

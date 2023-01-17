@@ -80,6 +80,11 @@ push: build
 	docker compose push $(DOCKER_COMPOSE_PUSH_SERVICES)
 	env GIT_TAG=latest docker compose push $(DOCKER_COMPOSE_PUSH_SERVICES)
 
+.PHONY: pull            # Pull images from registry.digitalocean.com (requires vpn)
+pull:
+	#docker compose pull $(DOCKER_COMPOSE_PUSH_SERVICES)
+	env GIT_TAG=latest docker compose pull $(DOCKER_COMPOSE_PUSH_SERVICES)
+
 .PHONY: debug           # Start the cluster in debug mode
 debug:
 	docker compose up -d $(DEBUG_PERSISTENT_SERVICES)
