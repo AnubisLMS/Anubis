@@ -9,12 +9,6 @@ from anubis.github.repos import get_student_assignment_repo_name
 from anubis.ide.reap import mark_session_ended
 from anubis.lms.questions import assign_questions
 from anubis.models import (
-    ForumPost,
-    ForumPostComment,
-    ForumCategory,
-    ForumPostInCategory,
-    ForumPostViewed,
-    ForumPostUpvote,
     Assignment,
     AssignmentQuestion,
     AssignmentRepo,
@@ -267,59 +261,6 @@ def init_submissions(submissions):
                     test_result.message = "Test failed"
                     test_result.output_type = "diff"
                     test_result.output = rand_diff()
-
-
-def init_forums(course: Course):
-    student1 = User.query.join(InCourse).join(Course).filter(Course.id == course.id).first()
-    student2 = User.query.join(InCourse).join(Course).filter(Course.id == course.id).offset(1).first()
-    for i in range(3):
-        post = ForumPost(
-            owner_id=student1.id,
-            course_id=course.id,
-            visible_to_students=True,
-            pinned=False,
-            anonymous=False,
-            title=f'post title {i}',
-            content=f'post content {i}',
-        )
-        db.session.add(post)
-
-        category = ForumCategory(
-            name=f"Category {i}",
-            course=course,
-        )
-        db.session.add(category)
-
-        in_category = ForumPostInCategory(
-            post=post,
-            category=category,
-        )
-        db.session.add(in_category)
-
-        upvote = ForumPostUpvote(owner=student2, post=post)
-        db.session.add(upvote)
-
-        viewed1 = ForumPostViewed(owner=student1, post=post)
-        viewed2 = ForumPostViewed(owner=student2, post=post)
-        db.session.add_all([viewed1, viewed2])
-
-        comments: list[ForumPostComment] = []
-        for k in range(3):
-            comment = ForumPostComment(
-                id=default_id_factory(),
-                owner_id=student2.id,
-                post=post,
-                parent_id=None,
-                approved_by_id=None,
-                anonymous=False,
-                thread_start=False,
-                content=f'comment content {k}'
-            )
-            comments.append(comment)
-        comments[2].thread_start = True
-        comments[1].parent_id = comments[2].id
-        comments[0].parent_id = comments[2].id
-        db.session.add_all(comments)
 
 
 @with_context
