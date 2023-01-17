@@ -34,3 +34,18 @@ def init_exercises(args: argparse.Namespace):
     log.info(f'loaded exercises exercises={exercises}')
     log.debug(f'start_message={start_message}')
     log.debug(f'end_message={end_message}')
+
+    resume = args.resume
+    if resume:
+        log.info(f'resume = {resume}')
+
+        contains_resume = any(exercise.name == resume for exercise in exercises)
+        if not contains_resume:
+            log.warning(f'loaded exercises does not contain resume={resume}. resetting to beginning.')
+            return
+
+        for exercise in exercises:
+            exercise.complete = True
+            if exercise.name == resume:
+                break
+

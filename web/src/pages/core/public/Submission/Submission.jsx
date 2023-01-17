@@ -75,9 +75,7 @@ export default function Submission() {
 
       // sort all the tests in Alpha Order
       newSubmission.tests.sort(function(a, b) {
-        const nameA = a.test.name.toUpperCase();
-        const nameB = b.test.name.toUpperCase();
-        return (nameA > nameB) ? 1 : (nameA < nameB) ? -1 : 0;
+        return a.test.order > b.test.order;
       });
 
       setSubmission(newSubmission);

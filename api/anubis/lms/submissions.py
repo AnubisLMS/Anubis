@@ -231,7 +231,9 @@ def init_submission(submission: Submission, db_commit: bool = True, state: str =
         db.session.commit()
 
     # Find tests for the current assignment
-    tests = AssignmentTest.query.filter_by(assignment_id=submission.assignment_id).all()
+    tests = AssignmentTest.query.filter(
+        AssignmentTest.assignment_id == submission.assignment_id
+    ).order_by(AssignmentTest.order.asc()).all()
 
     if verbose:
         logger.debug("found tests: {}".format(list(map(lambda x: x.data, tests))))
@@ -253,10 +255,12 @@ def init_submission(submission: Submission, db_commit: bool = True, state: str =
         db.session.commit()
 
 
-def get_latest_user_submissions(assignment: Assignment, user: User, limit: int = 3) -> list[Submission]:
-    return Submission.query.join(User).join(Assignment).filter(
+def get_latest_user_submissions(assignment: Assignment, user: User, limit: int = 3, filter: list = None) -> list[Submission]:
+    filter = filter or []
+    return Submission.query.filter(
         Submission.assignment_id == assignment.id,
         Submission.owner_id == user.id,
+        *filter
     ).order_by(Submission.created.desc()).limit(limit).all()
 
 
@@ -271,3 +275,27 @@ def fix_submissions_for_autograde_disabled_assignment(assignment: Assignment):
         'state': AUTOGRADE_DISABLED_MESSAGE
     })
     db.session.commit()
+
+
+def get_submission_tests(submission: Submission, only_visible=False):
+    """
+    Get a list of dictionaries of the matching Test, and TestResult
+    for the current submission.
+
+    :return:
+    """
+
+    # Construct query for
+    query = SubmissionTestResult.query.join(AssignmentTest).filter(
+        SubmissionTestResult.submission_id == submission.id,
+    ).order_by(AssignmentTest.order)
+
+    # If only get visible tests, apply extra filter
+    if only_visible:
+        query.filter(AssignmentTest.hidden == False)
+
+    # Query for matching AssignmentTests, and TestResults
+    tests = query.all()
+
+    # Convert to dictionary data
+    return [{"test": result.assignment_test.data, "result": result.data} for result in tests]

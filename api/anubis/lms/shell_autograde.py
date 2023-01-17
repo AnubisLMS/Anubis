@@ -1,17 +1,18 @@
 import re
-from anubis.lms.submissions import get_latest_user_submissions
 
+from anubis.constants import SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE
 from anubis.github.api import github_rest
 from anubis.github.repos import split_github_repo_path, get_github_repo_default_branch
+from anubis.lms.submissions import get_latest_user_submissions
 from anubis.lms.submissions import init_submission
-from anubis.models import Assignment, AssignmentTest, TheiaSession, Submission, User, db
+from anubis.models import Assignment, AssignmentTest, TheiaSession, Submission, SubmissionTestResult, db
 from anubis.models.id import default_id_factory
 from anubis.utils.config import get_config_str
 from anubis.utils.data import rand
 from anubis.utils.data import with_context, req_assert
 from anubis.utils.logging import verbose_call, logger
 from anubis.utils.redis import create_redis_lock
-from anubis.constants import SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE
+
 
 def split_shell_autograde_repo(assignment: Assignment) -> tuple[str, str]:
     return split_github_repo_path(assignment.shell_autograde_repo)
@@ -102,6 +103,14 @@ def set_hidden_local_assignment_test_from_remote_exercises(
 
 
 @verbose_call()
+def set_assignment_test_order(
+    remote_exercise_names: list[str],
+):
+    for index, exercise_name in enumerate(remote_exercise_names):
+        AssignmentTest.query.filter(AssignmentTest.name == exercise_name).update({'order': index})
+    db.session.commit()
+
+@verbose_call()
 @with_context
 def autograde_shell_assignment_sync(assignment: Assignment):
     if not assignment.shell_autograde_enabled:
@@ -113,7 +122,8 @@ def autograde_shell_assignment_sync(assignment: Assignment):
         return
 
     # Calculate remote exercise names from what is on github
-    remote_exercise_names: set[str] = set(get_shell_assignment_remote_exercise_names(assignment))
+    remote_exercise_names_ordered: list[str] = get_shell_assignment_remote_exercise_names(assignment)
+    remote_exercise_names: set[str] = set(remote_exercise_names_ordered)
 
     # Calculate local names based off what is in the db
     local_visible_assignment_test_names: set[str] = {at.name for at in assignment.tests if at.hidden is False}
@@ -136,30 +146,70 @@ def autograde_shell_assignment_sync(assignment: Assignment):
     set_hidden_local_assignment_test_from_remote_exercises(assignment, unhide_exercise_names, hidden=False)
     set_hidden_local_assignment_test_from_remote_exercises(assignment, hide_exercise_names, hidden=True)
     create_new_assignment_test_from_remote_exercises(assignment, create_exercise_names)
+    set_assignment_test_order(remote_exercise_names_ordered)
 
 
-def resume_submission(submission: Submission, assignment: Assignment, owner: User) -> str | None:
-    latest_submissions = get_latest_user_submissions(assignment, owner, limit=3)
-    submission.build.passed = True
-    submission.build.stdout = ''
-    return ''
+def get_submission_test_results_map(submission: Submission) -> dict[str, SubmissionTestResult]:
+    submission_test_results: list[SubmissionTestResult] = SubmissionTestResult.query.join(AssignmentTest).filter(
+        SubmissionTestResult.submission_id == submission.id,
+    ).order_by(AssignmentTest.order).all()
+    return {
+        submission_test_result.assignment_test.name: submission_test_result
+        for submission_test_result in submission_test_results
+    }
+
+
+def resume_submission(submission: Submission) -> str:
+    latest_submissions = get_latest_user_submissions(submission.assignment, submission.owner, limit=1, filter=[
+        Submission.id != submission.id
+    ])
+    if len(latest_submissions) != 1:
+        logger.info(f'skipping resume, no latest')
+        return ''
+
+    latest_submission: Submission = latest_submissions[0]
+    logger.info(f'{latest_submission=}')
+
+    assert latest_submission.id != submission.id
+
+    last_submission_test_results: dict[str, SubmissionTestResult] = get_submission_test_results_map(latest_submission)
+    current_submission_test_results: dict[str, SubmissionTestResult] = get_submission_test_results_map(submission)
+
+    logger.info(f'{last_submission_test_results=}')
+    logger.info(f'{current_submission_test_results=}')
+
+    resume_test_name, resume_test_order = '', -1
+    for current_test_name, current_submission_test_result in current_submission_test_results.items():
+        last_submission_test_result = last_submission_test_results.get(current_test_name, None)
+        if last_submission_test_result is None or not last_submission_test_result.passed:
+            continue
+
+        current_submission_test_result.passed = last_submission_test_result.passed
+        current_submission_test_result.output = last_submission_test_result.output
+        current_submission_test_result.output_type = last_submission_test_result.output_type
+        current_submission_test_result.message = last_submission_test_result.message
+
+        current_test_order = current_submission_test_result.assignment_test.order
+        if current_submission_test_result.passed and current_test_order > resume_test_order:
+            resume_test_name, resume_test_order = current_test_name, current_test_order
+
+    return resume_test_name
 
 
 def create_shell_autograde_ide_submission(theia_session: TheiaSession) -> Submission:
-    assignment: Assignment = Assignment.query.filter(Assignment.id == theia_session.assignment_id).first()
-    owner: User = User.query.filter(User.id == theia_session.owner_id).first()
     submission = Submission(
         id=default_id_factory(),
         owner_id=theia_session.owner_id,
         assignment_id=theia_session.assignment_id,
         assignment_repo_id=None,
-        commit='fake-' + rand(40-5),
+        commit='fake-' + rand(40 - 5),
         state=SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE,
     )
     theia_session.submission_id = submission.id
     db.session.add(submission)
     init_submission(submission, db_commit=True, state=SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE)
-    resume_submission(submission, assignment, owner)
+    submission.build.passed = True
+    submission.build.stdout = ''
     db.session.commit()
     return submission
 

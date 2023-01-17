@@ -137,12 +137,13 @@ def initialize_ide(
     admin: bool = False,
     credentials: bool = False,
     docker: bool = False,
+    owner_id: str = None
 ) -> TheiaSession:
     from anubis.rpc.enqueue import enqueue_ide_initialize
 
     # Create a new session
     session = TheiaSession(
-        owner_id=current_user.id,
+        owner_id=owner_id or current_user.id,
         active=True,
         state="Initializing",
         # Required

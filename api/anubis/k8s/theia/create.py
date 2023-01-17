@@ -12,7 +12,7 @@ from anubis.constants import (
 from anubis.github.parse import parse_github_repo_name
 from anubis.k8s.pvc.get import get_user_pvc
 from anubis.k8s.theia.get import get_theia_pod_name
-from anubis.lms.shell_autograde import get_exercise_py_text
+from anubis.lms.shell_autograde import get_exercise_py_text, resume_submission
 from anubis.models import TheiaSession, Assignment
 from anubis.utils.auth.token import create_token
 from anubis.utils.data import is_debug
@@ -358,6 +358,7 @@ def create_theia_k8s_pod_pvc(
                 k8s.V1EnvVar(name="TOKEN", value=submission.token),
                 k8s.V1EnvVar(name="SUBMISSION_ID", value=submission.id),
                 k8s.V1EnvVar(name="EXERCISE_PY", value=get_exercise_py_text(theia_session.assignment)),
+                k8s.V1EnvVar(name="RESUME", value=resume_submission(submission)),
             ],
             volume_mounts=[
                 shared_log_volume_mount,

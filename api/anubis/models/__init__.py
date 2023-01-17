@@ -266,6 +266,7 @@ class Assignment(db.Model):
 
     @property
     def data(self):
+        from anubis.lms.assignments import get_assignment_tests
         return {
             "id":                      self.id,
             "name":                    self.name,
@@ -279,7 +280,7 @@ class Assignment(db.Model):
             "description":             self.description,
             "visible_to_students":     not self.hidden and (datetime.now() > self.release_date),
             "ide_active":              self.due_date + timedelta(days=3 * 7) > datetime.now(),
-            "tests":                   [t.data for t in self.tests if t.hidden is False],
+            "tests":                   get_assignment_tests(self, visible_only=True),
             # IDE
             "ide_enabled":             self.ide_enabled,
             "autosave":                self.theia_options.get("autosave", True),
@@ -291,8 +292,9 @@ class Assignment(db.Model):
 
     @property
     def full_data(self):
+        from anubis.lms.assignments import get_assignment_tests
         data = self.data
-        data["tests"] = [t.data for t in self.tests]
+        data["tests"] = get_assignment_tests(self, visible_only=False)
         return data
 
 
@@ -353,7 +355,7 @@ class AssignmentTest(db.Model):
 
     @property
     def data(self):
-        return {"id": self.id, "name": self.name, "hidden": self.hidden, "points": self.points}
+        return {"id": self.id, "name": self.name, "hidden": self.hidden, "points": self.points, "order": self.order}
 
 
 class AssignmentQuestion(db.Model):
@@ -548,23 +550,23 @@ class Submission(db.Model):
 
     @property
     def full_data(self):
-        from anubis.lms.assignments import get_assignment_tests
+        from anubis.lms.submissions import get_submission_tests
 
         # Add connected models
         data = self.data
         data["repo"] = self.repo.repo_url if self.repo is not None else None
-        data["tests"] = get_assignment_tests(self, only_visible=True)
+        data["tests"] = get_submission_tests(self, only_visible=True)
         data["build"] = self.build.data if self.build is not None else None
 
         return data
 
     @property
     def admin_data(self):
-        from anubis.lms.assignments import get_assignment_tests
+        from anubis.lms.submissions import get_submission_tests
 
         data = self.full_data
         data["pipeline_log"] = self.pipeline_log
-        data["tests"] = get_assignment_tests(self, only_visible=False)
+        data["tests"] = get_submission_tests(self, only_visible=False)
 
         return data
 
@@ -606,12 +608,13 @@ class SubmissionTestResult(db.Model):
             "last_updated": str(self.last_updated),
         }
 
+    def __repr__(self):
+        return str(self)
+
     def __str__(self):
-        return "testname: {}\nerrors: {}\npassed: {}\n".format(
-            self.testname,
-            self.errors,
-            self.passed,
-        )
+        name = self.assignment_test.name
+        passed = self.passed
+        return f"<SubmissionTestResult {name=} {passed=}>"
 
 
 class SubmissionBuild(db.Model):

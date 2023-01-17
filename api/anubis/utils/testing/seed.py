@@ -129,8 +129,19 @@ def create_assignment(
         db.session.add(assignment_question)
 
     tests = []
-    for i in range(random.randint(3, 5)):
-        tests.append(AssignmentTest(id=default_id_factory(), name=f"test {i}", assignment_id=assignment.id))
+
+    if not kwargs.get('shell_autograde_enabled', False):
+        n = 0
+        for i in range(random.randint(3, 5)):
+            tests.append(AssignmentTest(id=default_id_factory(), name=f"test {i}", assignment_id=assignment.id, order=n))
+            n += 1
+    else:
+        tests = [
+            AssignmentTest(id=default_id_factory(), name='helloworld', assignment_id=assignment.id, order=0),
+            AssignmentTest(id=default_id_factory(), name='mkdir exercise1', assignment_id=assignment.id, order=1),
+            AssignmentTest(id=default_id_factory(), name='cd exercise1', assignment_id=assignment.id, order=2),
+            AssignmentTest(id=default_id_factory(), name='pipe hello world', assignment_id=assignment.id, order=3),
+        ]
 
     submissions = []
     repos = []

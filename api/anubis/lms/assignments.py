@@ -534,30 +534,6 @@ def make_shared_assignment(assignment_id: str, group_netids: list[list[str]]) ->
     }
 
 
-def get_assignment_tests(submission: Submission, only_visible=False):
-    """
-    Get a list of dictionaries of the matching Test, and TestResult
-    for the current submission.
-
-    :return:
-    """
-
-    # Construct query for
-    query = SubmissionTestResult.query.join(AssignmentTest).filter(
-        SubmissionTestResult.submission_id == submission.id,
-    )
-
-    # If only get visible tests, apply extra filter
-    if only_visible:
-        query.filter(AssignmentTest.hidden == False)
-
-    # Query for matching AssignmentTests, and TestResults
-    tests = query.all()
-
-    # Convert to dictionary data
-    return [{"test": result.assignment_test.data, "result": result.data} for result in tests]
-
-
 def clean_assignment_name(assignment: Assignment) -> str:
     """
     Create short clean assignment name for places that require trimming
@@ -582,3 +558,12 @@ def verify_active_assignment_github_repo_collaborators():
 
     for assignment in active_assignments:
         verify_collaborators_assignment(assignment)
+
+
+def get_assignment_tests(assignment: Assignment, visible_only: bool = True):
+    if visible_only:
+        tests = (t.data for t in assignment.tests if t.hidden is False)
+    else:
+        tests = (t.data for t in assignment.tests)
+
+    return list(sorted(tests, key=lambda v: v['order']))

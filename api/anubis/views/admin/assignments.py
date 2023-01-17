@@ -7,7 +7,7 @@ from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
 
 from anubis.github.repos import delete_assignment_repo
-from anubis.lms.assignments import assignment_sync, delete_assignment, delete_assignment_repos
+from anubis.lms.assignments import assignment_sync, delete_assignment, delete_assignment_repos, get_assignment_tests
 from anubis.lms.courses import assert_course_context, course_context, is_course_superuser
 from anubis.lms.questions import get_assigned_questions
 from anubis.lms.shell_autograde import (
@@ -210,7 +210,7 @@ def admin_assignments_get_id(assignment: Assignment):
     return success_response(
         {
             "assignment": assignment_data,
-            "tests":      [test.data for test in assignment.tests],
+            "tests":      get_assignment_tests(assignment, visible_only=False),
         }
     )
 
