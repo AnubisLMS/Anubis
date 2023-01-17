@@ -1,3 +1,5 @@
+{{- if not .Values.debug }}
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -303,3 +305,5 @@ spec:
       - port: 443 # HTTPS
       - port: 22  # SSH
 ---
+
+{{- end }}

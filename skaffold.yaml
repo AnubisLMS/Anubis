@@ -1,0 +1,43 @@
+apiVersion: skaffold/v3
+kind: Config
+metadata:
+  name: anubis
+build:
+  artifacts:
+  - image: registry.digitalocean.com/anubis/api
+    context: api
+    docker:
+      dockerfile: Dockerfile
+deploy:
+  helm:
+    releases:
+    - name: anubis
+      chartPath: k8s/chart
+      namespace: anubis
+      valuesFiles:
+      - k8s/chart/values.yaml
+      setValues:
+        imagePullPolicy: IfNotPresent
+        elasticsearch.storageClassName: standard
+        debug: true
+        api.replicas: 1
+        web.replicas: 1
+        pipeline.api.replicas: 1
+        pipeline.poller.replicas: 1
+        rpc.replicas: 1
+        theia.proxy.replicas: 1
+        theia.poller.replicas: 1
+        api.datacenter: false
+        theia.proxy.domain: ide.localhost
+        rollingUpdates: false
+        domain: localhost
+        discord_bot.replicas: 0
+        reaper.suspend: true
+        visuals.suspend: true
+        backup.suspend: true
+        autograde_recalculate.suspend: true
+        daily_cleanup.suspend: true
+        theia.prop.enable: false
+        marketing.enable: false
+        tag: latest
+      version: v2.0.0

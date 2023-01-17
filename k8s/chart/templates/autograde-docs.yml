@@ -1,4 +1,4 @@
-{{- if .Values.autograde_docs.enable }}
+{{- if and .Values.autograde_docs.enable (not .Values.debug) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

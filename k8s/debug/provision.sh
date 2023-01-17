@@ -139,4 +139,4 @@ fi
 
 # Run the debug.sh script to build, then install all the stuff
 # for anubis.
-exec ./debug/restart.sh
+#exec ./debug/restart.sh
