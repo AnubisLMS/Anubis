@@ -12,6 +12,7 @@ from anubis_autograde.exercise.get import (
 )
 from anubis_autograde.exercise.verify import run_exercise
 from anubis_autograde.utils import text_response, reject_handler, complete_reject, colorize_render
+from anubis_autograde.exercise.init import call_exercise_init
 
 views = Blueprint('views', __name__)
 
@@ -39,6 +40,7 @@ def current():
 @views.get('/reset')
 @text_response
 def reset():
+    call_exercise_init()
     index = reset_exercises()
     return str(index)
 

@@ -60,6 +60,20 @@ exercises: typing.List[Exercise] = [
         ]
     ),
 ]
+
+
+def init():
+    \"\"\"
+    This function is called when the exercise is initialized, and when 
+    the reset function is typed by the student. It is *not* called when
+    the an assignment IDE is resumed from a previous submission.
+    
+    This is where you should park any and all of your initialization logic 
+    for the assignment. Drop files, clear directories it is all up to you.
+    
+    Be careful to write resilient code here.  
+    \"\"\"
+    pass
 """
 )
 

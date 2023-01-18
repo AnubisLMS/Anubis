@@ -40,11 +40,13 @@ def create_app(args: argparse.Namespace, skip_exercises: bool = False) -> Flask:
     app.config['TOKEN'] = args.token
     app.config['DEBUG'] = args.debug
     app.config['PROD'] = args.prod
+    app.config['RESUME'] = args.resume
 
     log.info(f'submission_id = {args.submission_id}')
     log.info(f'token = {args.token}')
     log.info(f'debug = {args.debug}')
     log.info(f'prod = {args.prod}')
+    log.info(f'resume = {args.resume}')
 
     if args.prod:
         with app.app_context():
