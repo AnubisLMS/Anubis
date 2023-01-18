@@ -4,12 +4,13 @@ import traceback
 import gunicorn.app.base
 from flask import Flask
 
-from anubis_autograde.exercise.get import get_exercises
+from anubis_autograde.exercise.get import get_exercises, get_end_message, get_start_message
 from anubis_autograde.exercise.init import init_exercises
 from anubis_autograde.exercise.pipeline import initialize_submission_status
 from anubis_autograde.logging import init_server_logging, log
 from anubis_autograde.server.views import views
 from anubis_autograde.shell.bashrc import init_bashrc
+from anubis_autograde.models import Exercise
 
 
 class _StandaloneApplication(gunicorn.app.base.BaseApplication):
@@ -64,6 +65,9 @@ def run_server(args: argparse.Namespace):
     app = create_app(args)
 
     if args.spot_check:
+        assert isinstance(get_start_message(), str)
+        assert isinstance(get_end_message(), str)
+        assert all(isinstance(exercise, Exercise) for exercise in get_exercises())
         log.info(f'Spot check passed')
         exit(0)
 
