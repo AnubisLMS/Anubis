@@ -63,6 +63,10 @@ def create_app(args: argparse.Namespace, skip_exercises: bool = False) -> Flask:
 def run_server(args: argparse.Namespace):
     app = create_app(args)
 
+    if args.spot_check:
+        log.info(f'Spot check passed')
+        exit(0)
+
     if args.debug:
         host, port = args.bind.split(':')
         exercise_module = args.exercise_module \

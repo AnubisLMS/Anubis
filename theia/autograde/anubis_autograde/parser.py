@@ -27,12 +27,12 @@ def make_parser() -> argparse.ArgumentParser:
     # server
     parser_server = subparsers.add_parser('server', help='run autograde server')
     parser_server.add_argument('--bind', default='0.0.0.0:5003', help='Address to bind gunicorn server to')
-    parser_server.add_argument('--token', default=None, help='')
-    parser_server.add_argument('--submission_id', default=None, help='')
-    parser_server.add_argument('--netid', default=None, help='')
-    parser_server.add_argument('--resume', default=None, help='')
-    parser_server.add_argument('--test', action='store_true')
+    parser_server.add_argument('--token', default=None, help='autograder token used in production')
+    parser_server.add_argument('--submission_id', default=None, help='Anubis submission id used in production')
+    parser_server.add_argument('--netid', default=None, help='Netid of student used in production')
+    parser_server.add_argument('--resume', default=None, help='Exercise to resume to')
     parser_server.add_argument('--prod', action='store_true', help='Enables production mode. This will overwrite the ')
+    parser_server.add_argument('--spot_check', action='store_true', help='Spot check exercise.py. (Exit after initialization)')
     parser_server.add_argument('exercise_module')
     parser_server.set_defaults(func=run_server)
 
