@@ -5,6 +5,7 @@ from anubis.models import (
     AssignmentQuestion,
     AssignmentRepo,
     AssignmentTest,
+    ReservedIDETime,
     Course,
     InCourse,
     LateException,
@@ -25,6 +26,7 @@ from anubis.models import (
 
 def clear_database():
     # Yeet
+    ReservedIDETime.query.delete()
     LateException.query.delete()
     TheiaSession.query.delete()
     AssignedQuestionResponse.query.delete()

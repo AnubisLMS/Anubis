@@ -22,14 +22,14 @@ RUN set -eux;  \
     env USER=root find /opt/app -depth \
     \( \
     \( -type d -a \( -name test -o -name tests -o -name idle_test \) \) \
-    -o \( -type f -a \( -name "*.pyc" -o -name "*.pyo" -o -name "*.a" \) \) \
-    \) -exec rm -rf "{}" + ; \
+    -o \( -type f -a \( -name '*.pyc' -o -name '*.pyo' -o -name '*.a' \) \) \
+    \) -exec rm -rf '{}' + ; \
     \
     env USER=root find /usr/local -depth \
     \( \
     \( -type d -a \( -name test -o -name tests -o -name idle_test \) \) \
-    -o \( -type f -a \( -name "*.pyc" -o -name "*.pyo" -o -name "*.a" \) \) \
-    \) -exec rm -rf "{}" + ; \
+    -o \( -type f -a \( -name '*.pyc' -o -name '*.pyo' -o -name '*.a' \) \) \
+    \) -exec rm -rf '{}' + ; \
     rm -rf /usr/share/doc; \
     rm -rf /usr/lib/gcc; \
     rm -rf /usr/local/share/.cache; \
@@ -44,4 +44,4 @@ ARG GIT_TAG=latest
 ENV GIT_TAG=${GIT_TAG}
 
 USER nobody
-CMD python3 -m gunicorn -b 0.0.0.0:5000 anubis.app:create_app()
+CMD ./docker-entrypoint.sh

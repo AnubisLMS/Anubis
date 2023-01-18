@@ -1,0 +1,33 @@
+{{- if .Values.reserve.enable }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "chart.fullname" . }}-reserve-reaper
+  labels:
+    {{- include "chart.selectorLabels" . | nindent 4 }}
+    component: reserve
+spec:
+  schedule: {{ .Values.reserve.schedule | quote }}
+  suspend: {{ .Values.reserve.suspend }}
+  concurrencyPolicy: Replace
+  failedJobsHistoryLimit: 6
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "chart.selectorLabels" . | nindent 8 }}
+        component: reserve
+    spec:
+      backoffLimit: 5
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: reaper
+            image: "{{ .Values.api.image }}:{{ .Values.tag }}"
+            imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+            command: ["python3", "anubis/jobs/reserve_reaper.py"]
+            env:
+            - name: "JOB"
+              value: "1"
+            {{- include "api.env" . | nindent 12 }}
+{{- end }}

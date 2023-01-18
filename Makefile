@@ -111,10 +111,7 @@ mindebug:
 .PHONY: mkdebug         # Start minikube debug
 mkdebug:
 	./k8s/debug/provision.sh
-
-.PHONY: mkrestart       # Rebuild and Restart mkdebug
-mkrestart:
-	./k8s/debug/restart.sh
+	env $(shell mk docker-env | nice grep -P 'export' | cut -d' ' -f2 | xargs) make build
 
 apirun:
 	make -C api run

@@ -1,17 +1,15 @@
-import copy
 from datetime import datetime, timedelta
 
 from flask import Blueprint, request
 
-from anubis.constants import THEIA_DEFAULT_OPTIONS, THEIA_DEFAULT_NETWORK_POLICY, THEIA_ADMIN_NETWORK_POLICY
 from anubis.ide.conditions import assert_theia_sessions_enabled
 from anubis.ide.get import get_n_available_sessions
-from anubis.ide.initialize import initialize_ide
+from anubis.ide.initialize import initialize_ide_for_assignment
 from anubis.ide.poll import theia_poll_ide
 from anubis.ide.redirect import theia_redirect_url
 from anubis.lms.assignments import get_assignment_due_date
 from anubis.lms.courses import is_course_admin
-from anubis.models import Assignment, AssignmentRepo, TheiaSession, db
+from anubis.models import Assignment, TheiaSession, db
 from anubis.rpc.enqueue import enqueue_ide_stop
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
@@ -19,7 +17,6 @@ from anubis.utils.cache import cache
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_response, load_from_id
-from anubis.utils.logging import logger
 
 ide_ = Blueprint("public-ide", __name__, url_prefix="/public/ide")
 
@@ -83,71 +80,8 @@ def public_ide_initialize(assignment: Assignment):
         if due_date + timedelta(days=3 * 7) <= datetime.now():
             return error_response("Assignment due date passed over 3 weeks ago. IDEs are disabled.")
 
-    # If github repos are enabled for this assignment, then we will
-    # need to get the repo url.
-    repo_url: str = ""
-    if assignment.github_repo_required:
-        # Make sure github username is set
-        req_assert(
-            current_user.github_username is not None,
-            message="Please link your github account github account on profile page.",
-        )
-
-        # Make sure we have a repo we can use
-        repo: AssignmentRepo = AssignmentRepo.query.filter(
-            AssignmentRepo.owner_id == current_user.id,
-            AssignmentRepo.assignment_id == assignment.id,
-        ).first()
-
-        # Verify that the repo exists
-        req_assert(
-            repo is not None,
-            message="Anubis can not find your assignment repo. "
-                    "Please make sure your github username is set and is correct.",
-        )
-        # Update the repo url
-        repo_url = repo.repo_url
-
-    # Create the theia options from the assignment default
-    options: dict = copy.deepcopy(assignment.theia_options)
-
-    # Figure out options from user values
-    autosave = request.json.get("autosave", options.get("autosave", True))
-    persistent_storage = request.json.get("persistent_storage", options.get("persistent_storage", False))
-
-    logger.debug(f'autosave = {autosave}')
-    logger.debug(f'persistent_storage = {persistent_storage}')
-
-    # Figure out options from assignment
-    network_dns_locked = options.get("network_dns_locked", True)
-    network_policy = options.get("network_policy", THEIA_DEFAULT_NETWORK_POLICY)
-    resources = options.get(
-        "resources",
-        THEIA_DEFAULT_OPTIONS['resources'],
-    )
-    persistent_storage = options.get('persistent_storage', False) and persistent_storage
-
-    # If course admin, then give admin network policy
-    if is_admin:
-        network_dns_locked = False
-        network_policy = THEIA_ADMIN_NETWORK_POLICY
-
-    # Create the theia session with the proper settings
-    session: TheiaSession = initialize_ide(
-        image_id=assignment.theia_image_id,
-        assignment_id=assignment.id,
-        course_id=assignment.course_id,
-        repo_url=repo_url,
-        playground=False,
-        network_policy=network_policy,
-        network_dns_locked=network_dns_locked,
-        persistent_storage=persistent_storage,
-        autosave=autosave,
-        resources=resources,
-        admin=is_admin,
-        credentials=is_admin,
-        autograde=assignment.shell_autograde_enabled,
-    )
+    # Initialize IDE for assignment
+    session = initialize_ide_for_assignment(current_user, assignment, user_options=request.json)
 
     return success_response({
         "active":  session.active,

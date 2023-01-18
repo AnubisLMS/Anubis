@@ -121,6 +121,13 @@ class Course(db.Model):
     lecture_notes = relationship("LectureNotes", cascade="all,delete", backref="course")
     static_files = relationship("StaticFile", cascade="all,delete", backref="course")
     theia_sessions = relationship("TheiaSession", cascade="all,delete", backref="course")
+    reserved_ide_times = relationship("ReservedIDETime", cascade="all,delete", backref="course")
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return f'<Course {self.name}>'
 
     @property
     def total_assignments(self):
@@ -249,6 +256,8 @@ class Assignment(db.Model):
     late_exceptions = relationship("LateException", cascade="all,delete", backref="assignment")
     tests = relationship("AssignmentTest", cascade="all,delete", backref="assignment")
     repos = relationship("AssignmentRepo", cascade="all,delete", backref="assignment")
+    reserved_ide_times = relationship("ReservedIDETime", cascade="all,delete", backref="assignment")
+
 
     def __repr__(self):
         name = self.name
@@ -969,4 +978,33 @@ class EmailEvent(db.Model):
             "body":           self.body,
             "created":        str(self.created),
             "last_updated":   str(self.last_updated),
+        }
+
+
+class ReservedIDETime(db.Model):
+    __tablename__ = "reserved_ide_time"
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
+
+    id: str = default_id()
+
+    course_id: str = Column(String(length=default_id_length), ForeignKey(Course.id))
+    assignment_id: str = Column(String(length=default_id_length), ForeignKey(Assignment.id))
+
+    start: datetime = Column(DateTime, default=lambda: datetime.now() + timedelta(weeks=1) - timedelta(hours=1))
+    end: datetime = Column(DateTime, default=lambda: datetime.now() + timedelta(weeks=1))
+
+    # Timestamps
+    created: datetime = Column(DateTime, default=datetime.now)
+    last_updated: datetime = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    @property
+    def data(self):
+        return {
+            'id': self.id,
+            'course_id': self.course_id,
+            'assignment_id': self.assignment_id,
+            'schedule': self.schedule,
+            'end': str(self.end),
+            'created': str(self.created),
+            'last_updated': str(self.last_updated),
         }

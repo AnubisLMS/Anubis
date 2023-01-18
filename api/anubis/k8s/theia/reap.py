@@ -9,6 +9,7 @@ from anubis.lms.courses import get_active_courses, get_course_admin_ids
 from anubis.models import TheiaSession, db, Course
 from anubis.utils.config import get_config_int
 from anubis.utils.logging import logger
+from anubis.lms.reserve import get_active_reserved_sessions
 
 
 def reap_stale_theia_sessions(*_):
@@ -95,9 +96,8 @@ def reap_old_theia_sessions(theia_pods: k8s.V1PodList):
         if theia_session is None:
             continue
 
-        # If the session is younger than 6 hours old, continue
         if datetime.now() <= theia_session.created + theia_stale_timeout:
-            logger.info(f"NOT reaping session {theia_session.id}")
+            logger.info(f"NOT reaping session {theia_session.id}: age ok")
             continue
 
         # Reap the session
@@ -349,10 +349,14 @@ def reap_stale_theia_k8s_resources(theia_pods: k8s.V1PodList):
     for active_db_session in active_db_sessions:
         active_db_ids.add(active_db_session.id)
 
-    # Figure out which ones don't match
-    # and need to be updated.
-    stale_pods_ids = active_pod_ids - active_db_ids
-    stale_db_ids = active_db_ids - active_pod_ids
+    # Figure out reserved session IDs
+    reserved_sessions = get_active_reserved_sessions()
+    reserved_session_ids = set(reserved_session.id for reserved_session in reserved_sessions)
+
+    # Figure out which ones don't match and need to be updated.
+    # (not including sessions reserved)
+    stale_pods_ids = active_pod_ids - active_db_ids - reserved_session_ids
+    stale_db_ids = active_db_ids - active_pod_ids - reserved_session_ids
 
     # Log which stale pods we need to clean up
     if len(stale_pods_ids) > 0:
