@@ -998,12 +998,18 @@ class ReservedIDETime(db.Model):
     last_updated: datetime = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     @property
+    def active(self):
+        now = datetime.now()
+        return (self.start < now + timedelta(hours=1)) and (self.end > now)
+
+    @property
     def data(self):
         return {
             'id': self.id,
-            'course_id': self.course_id,
-            'assignment_id': self.assignment_id,
-            'schedule': self.schedule,
+            'course': self.course.data,
+            'assignment': self.assignment.data,
+            'active': self.active,
+            'start': str(self.start),
             'end': str(self.end),
             'created': str(self.created),
             'last_updated': str(self.last_updated),

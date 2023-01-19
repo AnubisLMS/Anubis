@@ -15,6 +15,7 @@ import TimelineIcon from '@mui/icons-material/Timeline';
 import ImportContactsIcon from '@mui/icons-material/ImportContacts';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import EmailIcon from '@mui/icons-material/Email';
+import EventIcon from '@mui/icons-material/Event';
 
 import Dashboard from './pages/core/public/Dashboard/Dashboard';
 import Courses from './pages/core/public/Courses/Courses';
@@ -31,6 +32,7 @@ import PrivacyPolicy from './pages/core/public/PrivacyPolicy';
 import Assignment from './pages/core/public/Assignment/Assignment';
 import Course from './pages/core/public/Course/Course';
 
+import AdminReservations from './pages/core/admin/Reservations';
 import AdminUsers from './pages/core/admin/Users';
 import AdminUser from './pages/core/admin/User';
 import AdminCourse from './pages/core/admin/Course';
@@ -54,6 +56,7 @@ import SuperIDEImages from './pages/core/super/IDEImages';
 import EmailTemplates from './pages/core/super/EmailTemplates';
 import SuperPlaygrounds from './pages/core/super/Playgrounds';
 import SuperUsers from './pages/core/super/Users';
+import Reservations from './pages/core/admin/Reservations';
 
 
 export const footer_nav = [
@@ -173,6 +176,12 @@ export const admin_nav = [
     icon: <AttachFileIcon/>,
     path: '/admin/static',
     Page: AdminStatic,
+  },
+  {
+    id: 'Reservations',
+    icon: <EventIcon/>,
+    path: '/admin/reservations',
+    Page: AdminReservations,
   },
 ];
 
