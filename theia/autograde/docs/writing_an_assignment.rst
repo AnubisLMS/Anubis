@@ -113,6 +113,51 @@ whether or not the exercise should be marked as completed.
       )
     ]
 
+Initialization of student workspace
+===================================
+
+.. WARNING::
+    Be careful with any initialization code you write. There are significantly fewer guard rails protecting you.
+
+Most assignments will need some level of initialization of the workspace. This can be clearing directories, dropping
+files, setting git settings etc... For this, we have a special function ``init`` in the ``exercise.py`` that is called
+to initialize the workspace.
+
+This ``init`` function is called when the exercise is initialized, and when the reset function is typed by the student.
+It is *not* called when the an assignment IDE is resumed from a previous submission.
+
+.. code-block:: python
+   :caption: ``init`` function example
+
+    def init():
+       """
+       This function is called when the exercise is initialized, and when
+       the reset function is typed by the student. It is *not* called when
+       the an assignment IDE is resumed from a previous submission.
+
+       This is where you should park any and all of your initialization logic
+       for the assignment. Drop files, clear directories it is all up to you.
+
+       Be careful to write resilient code here.
+       """
+       import shutil
+       import pathlib
+
+       exercise1_directory = pathlib.Path('exercise1')
+
+       # Clear if the directory exists (ie: reset)
+       if exercise1_directory.exists():
+           shutil.rmtree(exercise1_directory)
+
+       # Create directory
+       exercise1_directory.mkdir(
+           parents=True,
+           exist_ok=True,
+       )
+
+       # ...
+
+
 Debugging Exercises
 ===================
 
