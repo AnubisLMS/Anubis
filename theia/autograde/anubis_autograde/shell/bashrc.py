@@ -27,6 +27,7 @@ start_message() {
 reset() {
     EXERCISE_INDEX=$(curl ${GRADE_URL}/reset -s)
     set_ps1
+    start_message
 }
 
 status() {
