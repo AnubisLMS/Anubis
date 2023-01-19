@@ -195,6 +195,7 @@ def initialize_ide(
 
 def initialize_ide_for_assignment(user: User, assignment: Assignment, user_options: dict = None) -> TheiaSession:
     user_options = user_options or {}
+
     # If the user requesting this IDE is a course admin (ta/professor/superuser), then there
     # are a few places we handle things differently.
     is_admin = is_course_admin(assignment.course_id, user.id)
@@ -230,6 +231,9 @@ def initialize_ide_for_assignment(user: User, assignment: Assignment, user_optio
     # Figure out options from user values
     autosave = user_options.get("autosave", options.get("autosave", True))
     persistent_storage = user_options.get("persistent_storage", options.get("persistent_storage", False))
+
+    print(user_options)
+    print(options)
 
     logger.debug(f'autosave = {autosave}')
     logger.debug(f'persistent_storage = {persistent_storage}')

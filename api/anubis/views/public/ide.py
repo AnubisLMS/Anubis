@@ -80,8 +80,17 @@ def public_ide_initialize(assignment: Assignment):
         if due_date + timedelta(days=3 * 7) <= datetime.now():
             return error_response("Assignment due date passed over 3 weeks ago. IDEs are disabled.")
 
+    user_options = dict()
+    if request.is_json:
+        user_options = dict(**request.json)
+        print(f"{request.json=}")
+
     # Initialize IDE for assignment
-    session = initialize_ide_for_assignment(current_user, assignment, user_options=request.json)
+    session = initialize_ide_for_assignment(
+        current_user,
+        assignment,
+        user_options=user_options,
+    )
 
     return success_response({
         "active":  session.active,

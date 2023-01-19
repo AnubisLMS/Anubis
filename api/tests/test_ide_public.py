@@ -19,11 +19,25 @@ def test_ide_public():
     assert active is False
 
     s.post(f"/public/ide/initialize/{assignment_id}", should_fail=True)
+    s.post_json(f"/public/ide/initialize/{assignment_id}", json={'autograde': True}, should_fail=True)
 
     create_repo(s, assignment_id)
 
-    resp = s.post(f"/public/ide/initialize/{assignment_id}", json={})
+    resp = s.post_json(f"/public/ide/initialize/{assignment_id}", json={})
+    s.get(f'/public/ide/stop/{resp["session"]["id"]}')
     assert resp["session"] is not None
+    assert resp["active"]
+
+    resp = s.post_json(f"/public/ide/initialize/{assignment_id}", json={'autosave': True})
+    s.get(f'/public/ide/stop/{resp["session"]["id"]}')
+    assert resp["session"] is not None
+    assert resp["session"]["autosave"]
+    assert resp["active"]
+
+    resp = s.post_json(f"/public/ide/initialize/{assignment_id}", json={'autosave': False})
+    # s.get(f'/public/ide/stop/{resp["session"]["id"]}')
+    assert resp["session"] is not None
+    assert not resp["session"]["autosave"]
     assert resp["active"]
     session_id = resp["session"]["id"]
 
