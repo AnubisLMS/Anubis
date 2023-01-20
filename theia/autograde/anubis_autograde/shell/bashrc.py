@@ -87,7 +87,7 @@ jrun() {
             ;;
         *)
             echo "$1" > /tmp/command
-            eval "$1" > >(tee /tmp/output)
+            eval "$1" > >(tee /tmp/output) 2>&1
             check_exercise
             ;;
     esac
