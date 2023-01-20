@@ -13,23 +13,33 @@ pipeline_url: str = 'http://anubis-pipeline-api:5000'
 
 
 @retry(tries=3)
-def _pipeline_api_request(endpoint: str, body: dict, query: dict = None):
+def _pipeline_api_request(endpoint: str, body: dict = None, query: dict = None, method: str = 'post'):
     url = f'{pipeline_url}/{endpoint}/{current_app.config["SUBMISSION_ID"]}'
     log.info(f'pipeline request: {url}')
     query = query or dict()
-    response = requests.post(
-        url,
-        params={'token': current_app.config["TOKEN"], **query},
-        headers={'Content-Type': 'application/json'},
-        json=body,
-        timeout=5,
-    )
+    query = {'token': current_app.config["TOKEN"], **query}
+    if method == 'post':
+        response = requests.post(
+            url,
+            params=query,
+            headers={'Content-Type': 'application/json'},
+            json=body,
+            timeout=5,
+        )
+    elif method == 'get':
+        response = requests.get(
+            url,
+            params=query,
+            timeout=5,
+        )
+    else:
+        raise
     log.info(f'response.text = {response.text}')
     assert response.status_code == 200
 
 
 @skip_if_not_prod
-def initialize_submission_status():
+def pipeline_initialize_submission_status():
     _pipeline_api_request(
         'pipeline/report/state',
         {'state': "Assignment run in IDE."},
@@ -38,7 +48,7 @@ def initialize_submission_status():
 
 
 @skip_if_not_prod
-def finalize_submission_status():
+def pipeline_finalize_submission_status():
     _pipeline_api_request(
         'pipeline/report/state',
         {'state': 'Submitted!'},
@@ -47,7 +57,15 @@ def finalize_submission_status():
 
 
 @skip_if_not_prod
-def forward_exercise_status(
+def pipeline_reset_submission_status():
+    _pipeline_api_request(
+        'pipeline/reset',
+        method='get'
+    )
+
+
+@skip_if_not_prod
+def pipeline_forward_exercise_status(
     exercise: Exercise,
     user_state: UserState,
 ):

@@ -9,6 +9,7 @@ from anubis.utils.http import success_response
 from anubis.utils.http.decorators import json_endpoint, json_response
 from anubis.utils.logging import logger
 from anubis.utils.pipeline.decorators import check_submission_token
+from anubis.lms.submissions import init_submission
 
 pipeline = Blueprint("pipeline", __name__, url_prefix="/pipeline")
 
@@ -268,3 +269,21 @@ def pipeline_report_state(submission: Submission, state: str, **__):
     db.session.commit()
 
     return success_response("State successfully updated.")
+
+
+@pipeline.get("/reset/<string:submission_id>")
+@check_submission_token
+@json_response
+def pipeline_reset(submission: Submission):
+    """
+    Reset a submission to base state. Quite useful for live autograder to be
+    able to reset on the fly.
+
+    :param submission:
+    :return:
+    """
+
+    # Resets submission to base state
+    init_submission(submission, db_commit=True)
+
+    return success_response("Reset")

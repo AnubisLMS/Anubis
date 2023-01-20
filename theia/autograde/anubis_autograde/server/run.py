@@ -6,7 +6,7 @@ from flask import Flask
 
 from anubis_autograde.exercise.get import get_exercises, get_end_message, get_start_message
 from anubis_autograde.exercise.init import init_exercises
-from anubis_autograde.exercise.pipeline import initialize_submission_status
+from anubis_autograde.exercise.pipeline import pipeline_initialize_submission_status
 from anubis_autograde.logging import init_server_logging, log
 from anubis_autograde.server.views import views
 from anubis_autograde.shell.bashrc import init_bashrc
@@ -51,9 +51,9 @@ def create_app(args: argparse.Namespace, skip_exercises: bool = False) -> Flask:
     if args.prod:
         with app.app_context():
             try:
-                initialize_submission_status()
+                pipeline_initialize_submission_status()
             except Exception as e:
-                log.error(traceback.format_exc()  + f'\nFailed to call {initialize_submission_status} Exception={e}')
+                log.error(traceback.format_exc() + f'\nFailed to call {pipeline_initialize_submission_status} Exception={e}')
 
     app.register_blueprint(views)
 

@@ -10,7 +10,7 @@ from anubis_autograde.logging import log
 from anubis_autograde.models import UserState, Exercise, FileSystemCondition, ExistState, EnvVarCondition
 from anubis_autograde.utils import expand_path, colorize_render
 from anubis_autograde.exceptions import RejectionException
-from anubis_autograde.exercise.pipeline import forward_exercise_status
+from anubis_autograde.exercise.pipeline import pipeline_forward_exercise_status
 
 
 def _r(
@@ -212,6 +212,6 @@ def run_exercise(user_state: UserState) -> Exercise:
 
     exercise.complete = True
 
-    forward_exercise_status(exercise, user_state)
+    pipeline_forward_exercise_status(exercise, user_state)
 
     return exercise
