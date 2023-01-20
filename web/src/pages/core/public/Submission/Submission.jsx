@@ -2,11 +2,11 @@ import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 import {useParams} from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import {useStyles} from './Submission.styles';
-import useQuery from '../../../../hooks/useQuery';
 import {translateSubmission} from '../../../../utils/submission';
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';
@@ -15,6 +15,10 @@ import SubmissionHeader from '../../../../components/core/SubmissionHeader/Submi
 import SubmissionTest from '../../../../components/core/SubmissionTest/SubmissionTest';
 import SubmissionTestExpanded from '../../../../components/core/SubmissionTestExpanded/SubmissionTestExpanded';
 import {submissionUpdateSubscribe} from '../../../../constant';
+import clsx from 'clsx';
+import Button from '@mui/material/Button';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import standardErrorHandler from '../../../../utils/standardErrorHandler';
 
 const regrade = (
   {submission, setSubmission, setStep, setErrorStop},
@@ -47,11 +51,10 @@ const regrade = (
 
 export default function Submission() {
   const classes = useStyles();
-  const query = useQuery();
+  const history = useHistory();
   const {enqueueSnackbar} = useSnackbar();
   const [step, setStep] = useState(0);
   const [submission, setSubmission] = useState(null);
-  const [errorStop, setErrorStop] = useState(false);
   const [modalTest, setModalTest] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const {submissionId} = useParams();
@@ -80,12 +83,6 @@ export default function Submission() {
 
       setSubmission(newSubmission);
 
-      if (newSubmission.error || newSubmission.build.passed === false) {
-        setErrorStop(true);
-        return;
-      }
-
-      setErrorStop(false);
 
       if (!submission) {
         return continueSubscribe();
@@ -95,7 +92,6 @@ export default function Submission() {
         if (newSubmission.build.passed === true) {
           enqueueSnackbar('Build passed', {variant: 'success'});
         } else if (newSubmission.build.passed === false) {
-          setErrorStop(true);
           return enqueueSnackbar('Build failed', {variant: 'error'});
         }
       }
@@ -160,10 +156,31 @@ export default function Submission() {
   return (
     <StandardLayout>
       <Grid container className={classes.root}>
+        {!!submission?.pipeline_log && (
+          <Box sx={{m: 1}}>
+            <Button
+              variant={'contained'}
+              color={'error'}
+              startIcon={<DeleteForeverIcon/>}
+              className={clsx(classes.dataItem)}
+              onClick={() => {
+                axios.delete(`/api/admin/submissions/delete/${submission?.id}`).then((response) => {
+                  const data = standardStatusHandler(response, enqueueSnackbar);
+                  if (data) {
+                    history.go(-1);
+                  }
+                }).catch(standardErrorHandler(enqueueSnackbar));
+              }}
+            >
+              Delete
+            </Button>
+          </Box>
+        )}
         <Box className={classes.headerContainer}>
           <SubmissionHeader
+            admin={!!submission?.pipeline_log}
             regrade={regrade(
-              {submission, setSubmission, setStep, setErrorStop},
+              {submission, setSubmission, setStep},
               continueSubscribe,
               enqueueSnackbar,
             )}

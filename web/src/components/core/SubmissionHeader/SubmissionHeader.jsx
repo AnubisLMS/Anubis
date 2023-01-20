@@ -14,7 +14,6 @@ import Button from '@mui/material/Button';
 const SubmissionHeader = ({
   assignment_name,
   timestamp,
-  id,
   commit,
   on_time,
   state,
