@@ -33,6 +33,7 @@ const Assignment = () => {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
 
+  const [reset, setReset] = useState(0);
   const [assignment, setAssignment] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [selectedTheia, setSelectedTheia] = useState(null);
@@ -52,7 +53,7 @@ const Assignment = () => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       setSubmissions(data.submissions.map(translateSubmission));
     }).catch(standardErrorHandler(enqueueSnackbar));
-  }, []);
+  }, [reset]);
 
   useEffect(() => {
     axios.get(`/api/public/assignments/get/${assignmentId}`).then((response) => {
@@ -98,7 +99,7 @@ const Assignment = () => {
 
   return (
     <StandardLayout>
-      <IDEDialog selectedTheia={selectedTheia} setSelectedTheia={setSelectedTheia}/>
+      <IDEDialog selectedTheia={selectedTheia} setSelectedTheia={setSelectedTheia} reload={() => setReset(reset+1)}/>
       {assignment && (
         <Box className={classes.root}>
           <Box position="sticky" top={42} className={classes.header}>

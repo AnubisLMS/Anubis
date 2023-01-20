@@ -109,7 +109,9 @@ const pollSession = (id, state, enqueueSnackbar, n = 0) => () => {
 };
 
 const startSession = (state, enqueueSnackbar) => () => {
-  const {autosaveEnabled, persistentStorage, setSession, session, selectedTheia, setLoading, setShowStop} = state;
+  const {
+    autosaveEnabled, persistentStorage, setSession, session, selectedTheia, setLoading, setShowStop, reload,
+  } = state;
   if (session) {
     const a = document.createElement('a');
     a.setAttribute('href', session.redirect_url);
@@ -128,6 +130,9 @@ const startSession = (state, enqueueSnackbar) => () => {
       setShowStop(false);
       setSession(data.session);
       pollSession(data.session.id, state, enqueueSnackbar)();
+      if (reload) {
+        reload();
+      }
     } else {
       setLoading(false);
     }
@@ -135,7 +140,7 @@ const startSession = (state, enqueueSnackbar) => () => {
 };
 
 const stopSession = (state, enqueueSnackbar) => () => {
-  const {session, setAutosaveEnabled, setSession, setLoading, setSessionState, setShowStop} = state;
+  const {session, setAutosaveEnabled, setSession, setLoading, setSessionState, setShowStop, reload} = state;
   if (!session) {
     return;
   }
@@ -147,12 +152,15 @@ const stopSession = (state, enqueueSnackbar) => () => {
       setSessionState('Stopped');
       setSession(null);
       setAutosaveEnabled(true);
+      if (reload) {
+        reload();
+      }
     }
     setLoading(false);
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
-export default function IDEDialog({selectedTheia, setSelectedTheia}) {
+export default function IDEDialog({selectedTheia, setSelectedTheia, reload = null}) {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [sessionsAvailable, setSessionsAvailable] = useState(null);
@@ -232,6 +240,7 @@ export default function IDEDialog({selectedTheia, setSelectedTheia}) {
     showPersistentStorage, setShowPersistentStorage,
     showAutosave, setShowAutosave,
     showStop, setShowStop,
+    reload,
   };
 
   return (

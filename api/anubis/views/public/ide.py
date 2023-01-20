@@ -186,7 +186,7 @@ def public_ide_stop(theia_session_id: str) -> dict[str, str]:
     enqueue_ide_stop(theia_session.id)
 
     # Clear poll cache
-    cache.delete_memoized(theia_poll_ide, theia_session_id, current_user.id)
+    # cache.delete_memoized(theia_poll_ide, theia_session_id, current_user.id)
 
     # Pass back the status
     return success_response(
