@@ -9,10 +9,10 @@ DOCKER_COMPOSE_PUSH_SERVICES := \
 	theia-proxy theia-dockerd theia-autograde-docs
 
 # K8S
-K8S_RESTART_DEPLOYMENTS := \
-	anubis-api anubis-web anubis-pipeline-api anubis-pipeline-poller anubis-theia-proxy \
-	anubis-rpc-default anubis-rpc-theia anubis-rpc-regrade \
-	anubis-theia-poller anubis-discord-bot anubis-theia-autograde-docs
+#K8S_RESTART_DEPLOYMENTS := \
+#	anubis-api anubis-web anubis-pipeline-api anubis-pipeline-poller anubis-theia-proxy \
+#	anubis-rpc-default anubis-rpc-theia anubis-rpc-regrade \
+#	anubis-theia-poller anubis-discord-bot anubis-theia-autograde-docs
 
 # To tag docker images
 GIT_TAG ?= $(shell git log -1 --pretty=%h)
@@ -56,12 +56,12 @@ upgrade:
 .PHONY: restart         # Restart Anubis k8s cluster
 restart:
 	kubectl rollout restart -n anubis deploy \
-		$(K8S_RESTART_DEPLOYMENTS)
+		$(shell kubectl get deploy -n anubis -l app.kubernetes.io/name=anubis -o jsonpath='{.items[*].metadata.name}')
 
 .PHONY: scalezero       # Scale all services to zero replicas (sometimes necessary for maintenance)
 scalezero:
 	kubectl scale deploy -n anubis --replicas 0 \
-		$(K8S_RESTART_DEPLOYMENTS)
+		$(shell kubectl get deploy -n anubis -l app.kubernetes.io/name=anubis -o jsonpath='{.items[*].metadata.name}')
 
 .PHONY: deploy          # Deploy Anubis k8s cluster
 deploy: build push upgrade
@@ -131,5 +131,5 @@ yeetdb:
 	docker compose up -d --force-recreate db
 
 theia-%:
-	docker compose build $@
+	docker compose pull $@
 
