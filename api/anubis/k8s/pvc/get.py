@@ -6,21 +6,21 @@ from anubis.utils.config import get_config_str
 
 def get_pvc_size(owner: User, theia_session: TheiaSession = None) -> str:
     if owner.is_anubis_developer:
-        return get_config_str('DEVELOPER_VOLUME_SIZE', '4Gi')
+        return get_config_str("DEVELOPER_VOLUME_SIZE", "4Gi")
 
     # Get home volume size from config
     if theia_session is not None and theia_session.playground:
         if theia_session.image.webtop:
-            volume_size = get_config_str('WEBTOP_VOLUME_SIZE', '500Mi')
+            volume_size = get_config_str("WEBTOP_VOLUME_SIZE", "500Mi")
         else:
-            volume_size = get_config_str('PLAYGROUND_VOLUME_SIZE', '100Mi')
+            volume_size = get_config_str("PLAYGROUND_VOLUME_SIZE", "100Mi")
     else:
-        volume_size = get_config_str('THEIA_VOLUME_SIZE', '100Mi')
+        volume_size = get_config_str("THEIA_VOLUME_SIZE", "100Mi")
 
     return volume_size
 
 
-def get_pvc_name(user: User, theia_session: TheiaSession = None) -> str:
+def get_pvc_name(user: User, theia_session: TheiaSession | None = None) -> str:
     if theia_session is not None and theia_session.persistent_storage is False:
         return f"{user.netid}-{theia_session.id[:6]}-ide"
 
@@ -28,7 +28,7 @@ def get_pvc_name(user: User, theia_session: TheiaSession = None) -> str:
     return f"ide-volume-{user.netid}"
 
 
-def get_user_pvc(user: User, theia_session: TheiaSession = None) -> tuple[str, k8s.V1PersistentVolumeClaim]:
+def get_user_pvc(user: User, theia_session: TheiaSession | None = None) -> tuple[str, k8s.V1PersistentVolumeClaim]:
     volume_size = get_pvc_size(user, theia_session)
     netid = user.netid
 
@@ -48,8 +48,8 @@ def get_user_pvc(user: User, theia_session: TheiaSession = None) -> tuple[str, k
             name=theia_volume_name,
             labels={
                 "app.kubernetes.io/name": "anubis",
-                "role":                   "session-storage",
-                "netid":                  netid,
+                "role": "session-storage",
+                "netid": netid,
             },
         ),
         spec=k8s.V1PersistentVolumeClaimSpec(
