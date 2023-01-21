@@ -176,6 +176,7 @@ def verify_env_var_conditions(exercise: Exercise, user_state: UserState):
 
 def run_eject_function(exercise: Exercise, user_state: UserState):
     log.info(f'Running eject function for exercise={exercise} user_state={user_state}')
+    complete = False
     try:
         complete = exercise.eject_function(exercise, user_state)
 
@@ -184,9 +185,12 @@ def run_eject_function(exercise: Exercise, user_state: UserState):
             log.error(f'return of eject_function for {exercise.name} was not bool complete={complete}')
             return
 
-        exercise.complete = complete
     except Exception:
         log.error(f'{traceback.format_exc()}\neject_function for {exercise.name} threw error')
+
+    if not complete:
+        raise _r(exercise, user_state, 'eject_function', 'Sorry your command does not seem right.')
+
 
 
 def run_exercise(user_state: UserState) -> Exercise:
@@ -202,7 +206,6 @@ def run_exercise(user_state: UserState) -> Exercise:
     # If eject function specified, then run that and return
     if exercise.eject_function is not None:
         run_eject_function(exercise, user_state)
-        return exercise
 
     verify_command_regex(exercise, user_state)
     verify_output_regex(exercise, user_state)
