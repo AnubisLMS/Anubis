@@ -269,6 +269,7 @@ def pipeline_report_state(submission: Submission, state: str, **__):
     db.session.commit()
 
     return success_response("State successfully updated.")
+from anubis.constants import SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE
 
 
 @pipeline.get("/reset/<string:submission_id>")
@@ -283,7 +284,13 @@ def pipeline_reset(submission: Submission):
     :return:
     """
 
+    extra = {}
+
+    # If the submission is a shell autograde, preserve the state message
+    if submission.state == SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE:
+        extra['state'] = SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE
+
     # Resets submission to base state
-    init_submission(submission, db_commit=True)
+    init_submission(submission, db_commit=True, **extra)
 
     return success_response("Reset")
