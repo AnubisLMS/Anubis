@@ -502,7 +502,7 @@ def admin_course_remove_professor_id(user_id: str):
 
 @courses_.route("/batch/students", methods=["POST"])
 @require_admin()
-@json_endpoint(required_fields=[("students", list[dict]), ("create_pvc", bool)])
+@json_endpoint(required_fields=[("students", list), ("create_pvc", bool)])
 def admin_course_batch_students(students: list[dict], create_pvc: bool):
     """
     Batch add students to a course.
@@ -523,23 +523,21 @@ def admin_course_batch_students(students: list[dict], create_pvc: bool):
 
     for student in students:
         # Get the user object for the student
-        user: User | None = User.query.filter(User.netid == student["netid"]).first()
+        user: User= User.query.filter(User.netid == student["netid"]).first()
+
 
         # If the user doesnt exist we create one
-        if user is None:
-
-            [first_name, last_name] = student.get("name", "John Doe").split(" ")
-            user: User = User(
+        if not user:
+            user = User(
                 netid=student["netid"],
-                first_name=first_name,
-                last_name=last_name,
+                name=student.get("name", "John Doe"),
             )
             db.session.add(user)
 
         # Add student to the course
         if student not in students_in_course:
             student = InCourse(
-                owner_id=student.id,
+                owner_id=user.id,
                 course_id=course_context.id,
             )
             db.session.add(student)
