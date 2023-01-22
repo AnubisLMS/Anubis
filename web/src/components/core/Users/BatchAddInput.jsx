@@ -1,7 +1,8 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import Typography from '@mui/material/Typography';
 import makeStyles from '@mui/styles/makeStyles';
 import AceEditor from 'react-ace';
+import 'ace-builds/src-noconflict/mode-json';
 
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -42,7 +43,7 @@ export default function BatchAddInput({isOpen, onAdd}) {
   const [error, setError] = useState(false);
   const [createPVC, setCreatePVC] = useState(false);
 
-  useEffect(() =>{
+  useEffect(() => {
     if (input !== '') {
       try {
         JSON.parse(input);
@@ -66,6 +67,7 @@ export default function BatchAddInput({isOpen, onAdd}) {
 
         <AceEditor
           theme="monokai"
+          mode="json"
           onChange={setInput}
           value={input}
         />
@@ -76,7 +78,7 @@ export default function BatchAddInput({isOpen, onAdd}) {
         )}
         <DialogActions className={classes.actions}>
           <Box className={classes.checkbox}>
-            <Checkbox value={createPVC} onChange={setCreatePVC}/>
+            <Checkbox value={createPVC} onChange={(_, v) => setCreatePVC(v)}/>
             <p>
               Create PVC for each student
             </p>
@@ -86,10 +88,7 @@ export default function BatchAddInput({isOpen, onAdd}) {
             color="primary"
             disabled={error}
             className={classes.saveButton}
-            onClick={() => onAdd({
-              students: JSON.parse(input),
-              create_pvc: createPVC,
-            })}
+            onClick={() => onAdd(JSON.parse(input), createPVC)}
           >
             Add Students
           </Button>

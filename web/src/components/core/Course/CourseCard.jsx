@@ -46,11 +46,12 @@ export default function CourseCard({course, _disabled, editableFields, updateFie
   }, []);
 
 
-  const onBatchAddStudents = ({students, create_pvc}) => {
+  const onBatchAddStudents = (students, create_pvc) => {
+    console.log('students', students, create_pvc);
     setIsBatchModalOpen(false);
-    axios.post(
-      '/api/admin/courses/batch/students', {students: students, create_pvc: create_pvc})
-      .catch(standardErrorHandler(enqueueSnackbar));
+    axios.post('/api/admin/courses/batch/students', {students: students, create_pvc: create_pvc}).then((response) => {
+      standardStatusHandler(response, enqueueSnackbar);
+    }).catch(standardErrorHandler(enqueueSnackbar));
   };
 
   return (

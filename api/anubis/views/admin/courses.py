@@ -6,7 +6,7 @@ from anubis.k8s.pvc.get import get_user_pvc
 from anubis.lms.courses import assert_course_superuser, course_context, valid_join_code
 from anubis.models import Course, InCourse, ProfessorForCourse, TAForCourse, User, db
 from anubis.models.id import default_id_factory
-from anubis.rpc.enqueue import enqueue_bulk_create_user
+from anubis.rpc.enqueue import enqueue_bulk_create_students
 from anubis.utils.auth.http import require_admin, require_superuser
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert, row2dict
@@ -520,6 +520,8 @@ def admin_course_batch_students(students: list[dict], create_pvc: bool):
     req_assert(is_valid, message=error_msg)
 
     # Enqueue operation to happen in rpc
-    enqueue_bulk_create_user(course_context.id, students, create_pvc)
+    enqueue_bulk_create_students(course_context.id, students, create_pvc)
 
-    return success_response({"status": "Students added to course"})
+    return success_response({
+        "status": "Students added to course"
+    })
