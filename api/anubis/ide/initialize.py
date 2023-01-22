@@ -232,9 +232,6 @@ def initialize_ide_for_assignment(user: User, assignment: Assignment, user_optio
     autosave = user_options.get("autosave", options.get("autosave", True))
     persistent_storage = user_options.get("persistent_storage", options.get("persistent_storage", False))
 
-    print(user_options)
-    print(options)
-
     logger.debug(f'autosave = {autosave}')
     logger.debug(f'persistent_storage = {persistent_storage}')
 
