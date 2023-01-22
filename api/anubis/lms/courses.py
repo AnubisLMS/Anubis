@@ -334,7 +334,7 @@ def valid_join_code(join_code: str) -> bool:
     return all(c in valid_chars for c in join_code)
 
 
-@cache.memoize(timeout=60, unless=is_debug)
+@cache.memoize(timeout=5, unless=is_debug)
 def get_courses(netid: str) -> list[dict[str, Any]]:
     """
     Get all classes a given netid is in
