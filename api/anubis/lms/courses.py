@@ -772,6 +772,9 @@ def bulk_create_students(course_id: Course, students: list[dict[str, str]], crea
             )
             db.session.add(student)
 
+    # Commit changes
+    db.session.commit()
+
     # Create pvc
     if create_pvc:
         for user in students_in_course:
