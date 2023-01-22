@@ -402,7 +402,11 @@ def delete_assignment_questions(assignment: Assignment):
     :return:
     """
     AssignedQuestionResponse.query.filter(
-        AssignedStudentQuestion.assignment_id == assignment.id,
+        AssignedQuestionResponse.assigned_question_id.in_(
+            db.session.query(AssignedStudentQuestion.id).filter(
+                AssignedStudentQuestion.assignment_id == assignment.id
+            ).subquery()
+        ),
     ).delete(synchronize_session=False)
     AssignedStudentQuestion.query.filter(
         AssignedStudentQuestion.assignment_id == assignment.id

@@ -87,3 +87,7 @@ def test_assignment_delete(add_questions, assign_questions, add_responses):
         assert save['status'] == 'Response Saved'
 
     superuser.delete(f'/admin/assignments/delete/{assignment_id}')
+
+    assignments = superuser.get(f'/admin/assignments/list')['assignments']
+    for assignment_ in assignments:
+        assert assignment_['id'] != assignment_id
