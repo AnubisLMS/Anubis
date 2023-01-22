@@ -1,19 +1,18 @@
 from flask import Blueprint
-from requests import request
 from sqlalchemy.exc import DataError, IntegrityError
 
+from anubis.github.team import add_github_team_member, remote_github_team_member
+from anubis.k8s.pvc.get import get_user_pvc
 from anubis.lms.courses import assert_course_superuser, course_context, valid_join_code
 from anubis.models import Course, InCourse, ProfessorForCourse, TAForCourse, User, db
+from anubis.models.id import default_id_factory
+from anubis.rpc.enqueue import enqueue_bulk_create_user
 from anubis.utils.auth.http import require_admin, require_superuser
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert, row2dict
+from anubis.utils.data import verify_data_shape
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_endpoint, json_response
-from anubis.k8s.pvc.get import get_user_pvc
-from anubis.rpc.enqueue import enqueue_create_pvc_user
-from anubis.github.team import add_github_team_member, remote_github_team_member
-from anubis.utils.data import verify_data_shape
-from anubis.utils.logging import logger
 
 courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
 
@@ -162,9 +161,9 @@ def admin_course_list_students():
         {
             "users": [
                 {
-                    "id": user.id,
-                    "netid": user.netid,
-                    "name": user.name,
+                    "id":              user.id,
+                    "netid":           user.netid,
+                    "name":            user.name,
                     "github_username": user.github_username,
                 }
                 for user in students
@@ -197,9 +196,9 @@ def admin_course_list_tas():
         {
             "users": [
                 {
-                    "id": user.id,
-                    "netid": user.netid,
-                    "name": user.name,
+                    "id":              user.id,
+                    "netid":           user.netid,
+                    "name":            user.name,
                     "github_username": user.github_username,
                 }
                 for user in tas
@@ -232,9 +231,9 @@ def admin_course_list_professors():
         {
             "users": [
                 {
-                    "id": user.id,
-                    "netid": user.netid,
-                    "name": user.name,
+                    "id":              user.id,
+                    "netid":           user.netid,
+                    "name":            user.name,
                     "github_username": user.github_username,
                 }
                 for user in professors
@@ -313,7 +312,7 @@ def admin_course_remove_student_id(user_id: str):
     # Return the status
     return success_response(
         {
-            "status": "Student removed from course",
+            "status":  "Student removed from course",
             "variant": "warning",
         }
     )
@@ -408,7 +407,7 @@ def admin_course_remove_ta_id(user_id: str):
     # Return the status
     return success_response(
         {
-            "status": "TA removed from course",
+            "status":  "TA removed from course",
             "variant": "warning",
         }
     )
@@ -497,7 +496,7 @@ def admin_course_remove_professor_id(user_id: str):
     # Return the status
     return success_response(
         {
-            "status": "Professor removed from course",
+            "status":  "Professor removed from course",
             "variant": "warning",
         }
     )
@@ -511,52 +510,16 @@ def admin_course_batch_students(students: list[dict], create_pvc: bool):
     Batch add students to a course.
 
     :param students: A list of students to add to the course
-    :param create_pvc: Whether or not to create PVCs for the students
+    :param create_pvc: Whether to create PVCs for the students
 
     :return:
     """
 
-    # Get all students already in the course
-    students_in_course: list[User] = (
-        User.query.join(InCourse)
-        .filter(
-            InCourse.course_id == course_context.id,
-        )
-        .all()
-    )
+    # Verify the shape of the student data
+    is_valid, error_msg = verify_data_shape(students, [{"netid": str, "name": str}])
+    req_assert(is_valid, message=error_msg)
 
-    for student in students:
-        # Verify the shape of the student data
-        is_valid, _ = verify_data_shape(student, {"netid": str})
-        req_assert(is_valid, message="invalid json student data")
-
-        # Get the user object for the student
-        user: User= User.query.filter(User.netid == student["netid"]).first()
-
-        # If the user doesnt exist we create one
-        if not user:
-            user = User(
-                netid=student["netid"],
-                name=student.get("name", "John Doe"),
-            )
-            db.session.add(user)
-            db.session.commit()
-
-        # Add student to the course
-        if student not in students_in_course:
-            student = InCourse(
-                owner_id=user.id,
-                course_id=course_context.id,
-            )
-            db.session.add(student)
-            db.session.commit()
-
-
-        if create_pvc:
-            _, pvc = get_user_pvc(
-                user=user,
-            )
-            # Enqueue job to create pvc for user
-            enqueue_create_pvc_user(user, pvc)
+    # Enqueue operation to happen in rpc
+    enqueue_bulk_create_user(course_context.id, students, create_pvc)
 
     return success_response({"status": "Students added to course"})

@@ -14,8 +14,8 @@ from anubis.github.repos import create_assignment_github_repo
 from anubis.ide.initialize import initialize_theia_session
 from anubis.k8s.pipeline.create import create_submission_pipeline
 from anubis.k8s.pipeline.reap import reap_pipeline_jobs
-from anubis.k8s.pvc.reap import reap_user_pvc
 from anubis.k8s.pvc.create import create_user_pvc
+from anubis.k8s.pvc.reap import reap_user_pvc
 from anubis.k8s.theia.reap import reap_stale_theia_sessions
 from anubis.k8s.theia.reap import reap_theia_session_by_id
 from anubis.lms.assignments import make_shared_assignment
@@ -116,6 +116,7 @@ def enqueue_create_pvc_user(*args):
     """Enqueue create pvc for user"""
     rpc_enqueue(create_user_pvc, queue='default', args=args)
 
+
 def enqueue_bulk_autograde(*args):
     """Enqueue bulk autograde of assignment"""
     rpc_enqueue(bulk_autograde, queue="regrade", args=args)
@@ -129,3 +130,8 @@ def enqueue_bulk_regrade_assignment(*args):
 def enqueue_bulk_regrade_submissions(*args):
     """Enqueue bulk autograde of assignment"""
     rpc_enqueue(bulk_regrade_submissions, queue="regrade", args=args)
+
+
+def enqueue_bulk_create_user(*args):
+    """Enqueue create users for course"""
+    rpc_enqueue(create_user_pvc, queue='default', args=args)

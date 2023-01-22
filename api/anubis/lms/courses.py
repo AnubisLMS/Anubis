@@ -9,6 +9,8 @@ from typing import Any
 from flask import g, request
 from werkzeug.local import LocalProxy
 
+from anubis.k8s.pvc.create import create_user_pvc
+from anubis.k8s.pvc.get import get_user_pvc
 from anubis.models import (
     AssignedStudentQuestion,
     Assignment,
@@ -27,6 +29,7 @@ from anubis.models import (
     User,
     db,
 )
+from anubis.models.id import default_id_factory
 from anubis.utils.auth.user import current_user
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug
@@ -725,6 +728,59 @@ def is_course_archived(course: str | Course) -> bool:
         if course is None:
             return False
     return 'Archive' in course.name
+
+
+def bulk_create_students(course_id: Course, students: list[dict[str, str]], create_pvc: bool = False):
+    # Grab list of all netids
+    netids = list(student['netid'] for student in students)
+
+    # Get all students already in the course
+    students_in_course: list[User] = list(
+        User.query.join(InCourse)
+        .filter(InCourse.course_id == course_id)
+        .all()
+    )
+    student_netids_in_course: set[str] = set(user.netid for user in students_in_course)
+
+    # Get list of students in list that already exist in Anubis
+    students_that_exist: list[User] = User.query.filter(User.netid.in_(netids)).all()
+    student_netids_that_exist: set[str] = set(user.netid for user in students_that_exist)
+    student_db_ids: dict[str, str] = {user.netid: user.id for user in students_that_exist}
+
+    # Create student entries
+    for student in students:
+        netid, name = student['netid'], student['name']
+
+        # If the user doesn't exist we create one
+        if netid not in student_netids_that_exist:
+            logger.info(f'Create User {netid}')
+            user = User(
+                id=default_id_factory(),
+                netid=student["netid"],
+                name=student.get("name", "John Doe"),
+            )
+            db.session.add(user)
+            students_in_course.append(user)
+            student_db_ids[netid] = user.id
+
+        # Add student to the course
+        if netid not in student_netids_in_course:
+            logger.info(f'Create InCourse {netid}')
+            student = InCourse(
+                owner_id=student_db_ids[netid],
+                course_id=course_id,
+            )
+            db.session.add(student)
+
+    # Create pvc
+    if create_pvc:
+        for user in students_in_course:
+            logger.info(f'Create PVC {user.netid}')
+            _, pvc = get_user_pvc(
+                user=user,
+            )
+            # Enqueue job to create pvc for user
+            create_user_pvc(user, pvc)
 
 
 course_context: Course = LocalProxy(get_course_context)
