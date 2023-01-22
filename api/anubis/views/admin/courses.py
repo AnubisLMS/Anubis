@@ -1,4 +1,5 @@
 from flask import Blueprint
+from requests import request
 from sqlalchemy.exc import DataError, IntegrityError
 
 from anubis.lms.courses import assert_course_superuser, course_context, valid_join_code
@@ -11,6 +12,8 @@ from anubis.utils.http.decorators import json_endpoint, json_response
 from anubis.k8s.pvc.get import get_user_pvc
 from anubis.rpc.enqueue import enqueue_create_pvc_user
 from anubis.github.team import add_github_team_member, remote_github_team_member
+from anubis.utils.data import verify_data_shape
+from anubis.utils.logging import logger
 
 courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
 
@@ -512,6 +515,7 @@ def admin_course_batch_students(students: list[dict], create_pvc: bool):
 
     :return:
     """
+
     # Get all students already in the course
     students_in_course: list[User] = (
         User.query.join(InCourse)
@@ -522,9 +526,12 @@ def admin_course_batch_students(students: list[dict], create_pvc: bool):
     )
 
     for student in students:
+        # Verify the shape of the student data
+        is_valid, _ = verify_data_shape(student, {"netid": str})
+        req_assert(is_valid, message="invalid json student data")
+
         # Get the user object for the student
         user: User= User.query.filter(User.netid == student["netid"]).first()
-
 
         # If the user doesnt exist we create one
         if not user:
@@ -533,6 +540,7 @@ def admin_course_batch_students(students: list[dict], create_pvc: bool):
                 name=student.get("name", "John Doe"),
             )
             db.session.add(user)
+            db.session.commit()
 
         # Add student to the course
         if student not in students_in_course:
@@ -541,8 +549,8 @@ def admin_course_batch_students(students: list[dict], create_pvc: bool):
                 course_id=course_context.id,
             )
             db.session.add(student)
+            db.session.commit()
 
-        db.session.commit()
 
         if create_pvc:
             _, pvc = get_user_pvc(
