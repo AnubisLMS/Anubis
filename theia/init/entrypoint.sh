@@ -10,6 +10,12 @@ fix_permissions() {
     chown -R 1001:1001 /home/anubis
 }
 
+init_home() {
+    # make .anubis
+    mkdir -p /home/anubis/.anubis
+}
+
+init_home
 fix_permissions
 
 if [ ! "${GIT_REPO}" ]; then
