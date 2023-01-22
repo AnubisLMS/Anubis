@@ -105,7 +105,7 @@ export default function Questions({assignment_id}) {
     return (
       <Box className={classes.emptyQuestions}>
         <Typography className={classes.emptyQuestionsText}>
-          Oh no! There are no questions for this assignment.
+          There are no questions for this assignment.
         </Typography>
       </Box>
     );
