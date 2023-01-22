@@ -63,6 +63,7 @@ def admin_questions_add_unique_code(assignment_id: str):
     return success_response(
         {
             "status": "Question added",
+            "question": aq.full_data,
         }
     )
 
@@ -244,7 +245,10 @@ def admin_questions_update(assignment_question_id: str, question: dict):
     db.session.commit()
 
     # Pass back status
-    return success_response({"status": "Question updated"})
+    return success_response({
+        "status": "Question updated",
+        "question": db_assignment_question.full_data,
+    })
 
 
 @questions.route("/get-assignments/<string:assignment_id>")

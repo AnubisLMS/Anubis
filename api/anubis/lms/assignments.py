@@ -401,16 +401,15 @@ def delete_assignment_questions(assignment: Assignment):
     :param assignment:
     :return:
     """
-    assigned_question_ids = db.session.query(AssignmentQuestion.id).filter(
-        AssignmentQuestion.assignment_id == assignment.id
-    )
     AssignedQuestionResponse.query.filter(
-        AssignedQuestionResponse.assigned_question_id.in_(assigned_question_ids.subquery())
+        AssignedStudentQuestion.assignment_id == assignment.id,
     ).delete(synchronize_session=False)
-    AssignedStudentQuestion.query.filter(AssignedStudentQuestion.assignment_id == assignment.id).delete(
-        synchronize_session=False
-    )
-    AssignmentQuestion.query.filter(AssignmentQuestion.assignment_id == assignment.id).delete(synchronize_session=False)
+    AssignedStudentQuestion.query.filter(
+        AssignedStudentQuestion.assignment_id == assignment.id
+    ).delete(synchronize_session=False)
+    AssignmentQuestion.query.filter(
+        AssignmentQuestion.assignment_id == assignment.id
+    ).delete(synchronize_session=False)
 
 
 def delete_assignment_repos(assignment: Assignment) -> None:
@@ -431,8 +430,8 @@ def delete_assignment(assignment: Assignment) -> None:
     # Delete theia sessions
     TheiaSession.query.filter(TheiaSession.assignment_id == assignment.id).delete(synchronize_session=False)
 
-    delete_assignment_submissions(assignment)
     delete_assignment_questions(assignment)
+    delete_assignment_submissions(assignment)
     delete_assignment_repos(assignment)
 
     # Delete assignment tests
