@@ -1,3 +1,4 @@
+import typing
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -5,7 +6,7 @@ import pytest
 from werkzeug.test import TestResponse
 
 from anubis_autograde.exercise.get import get_active_exercise
-import typing
+
 
 @dataclass
 class Response:
@@ -51,7 +52,7 @@ def sample_answers(pytester, exercise):
     ]
 
 
-def _submit(request, client, exercise, sample_answers) -> int:
+def _submit(request, client, exercise, sample_answers, response_include='Congrats!') -> int:
     for i in range(request.param + 1):
         # Create dirs if necessary
         if sample_answers[i].dir_:
@@ -67,18 +68,24 @@ def _submit(request, client, exercise, sample_answers) -> int:
         # Make sure cwd exists
         Path(sample_answers[i].cwd).mkdir(exist_ok=True)
         response: TestResponse = client.post('/submit', data=asdict(sample_answers[i]))
-        assert 'Congrats!' in response.text
-        if i == len(sample_answers) - 1:
-            assert exercise.end_message in response.text
-            assert get_active_exercise()[0] == -1
-        else:
-            assert get_active_exercise()[0] == i + 1
+        assert response_include in response.text
+        if response_include == 'Congrats!':
+            if i == len(sample_answers) - 1:
+                assert exercise.end_message in response.text
+                assert get_active_exercise()[0] == -1
+            else:
+                assert get_active_exercise()[0] == i + 1
     return request.param
 
 
 @pytest.fixture(params=[0, 1, 2])  # , pytest.param(3, marks=pytest.mark.skip)
 def submit(pytester, request, client, exercise, sample_answers) -> int:
     return _submit(request, client, exercise, sample_answers)
+
+
+# @pytest.fixture(params=[0, 1, 2])  # , pytest.param(3, marks=pytest.mark.skip)
+# def submit_out_of_order(pytester, request, client, exercise, sample_answers) -> int:
+#     return _submit(request, client, exercise, sample_answers[1:-1:-1], response_include='Required exercise not complete')
 
 
 @pytest.fixture(params=[3])
@@ -102,6 +109,7 @@ def submit_wrong(pytester, request, client, exercise, sample_answers):
             assert exercise.exercises[0].start_message in response.text
         if i >= exercise.exercises[0].fail_to_assignment_start_message_count:
             assert exercise.start_message in response.text
+
 
 class TestServer:
     def test_status(self, exercise, client):
@@ -128,6 +136,9 @@ class TestServer:
 
     def test_submit(self, submit):
         pass
+
+    # def test_submit_out_of_order(self, submit_out_of_order):
+    #     pass
 
     def test_server_complete(self, complete):
         pass

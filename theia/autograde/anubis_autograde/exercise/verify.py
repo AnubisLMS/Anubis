@@ -183,12 +183,11 @@ def run_eject_function(exercise: Exercise, user_state: UserState):
         # Verify that the return value for the eject function is actually a bool
         if not isinstance(complete, bool):
             log.error(f'return of eject_function for {exercise.name} was not bool complete={complete}')
-            return
 
     except Exception:
         log.error(f'{traceback.format_exc()}\neject_function for {exercise.name} threw error')
 
-    if not complete:
+    if complete is not True:
         raise _r(exercise, user_state, 'eject_function', 'Sorry your command does not seem right.')
 
 
