@@ -28,6 +28,10 @@ spec:
         {{- include "chart.selectorLabels" . | nindent 8 }}
         component: discord-bot
     spec:
+      {{- if and .Values.nodeSelector (not .Values.debug) }}
+      nodeSelector:
+        {{ .Values.nodeSelector }}
+      {{- end }}
       containers:
       - name: discord-bot
         image: "{{ .Values.api.image }}:{{ .Values.tag }}"

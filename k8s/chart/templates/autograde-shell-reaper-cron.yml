@@ -21,6 +21,10 @@ spec:
       backoffLimit: 1
       template:
         spec:
+          {{- if and .Values.nodeSelector (not .Values.debug) }}
+          nodeSelector:
+            {{ .Values.nodeSelector }}
+          {{- end }}
           serviceAccountName: {{ include "chart.fullname" . }}-email
           restartPolicy: Never
           containers:

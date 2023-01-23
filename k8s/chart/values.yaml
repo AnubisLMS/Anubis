@@ -13,6 +13,10 @@ tag: "latest"
 revisionHistoryLimit: 3
 offSemester: false
 
+nodeSelector:
+  doks.digitalocean.com/node-pool: pool-mfdxypigt
+ideNodeSelector: doks.digitalocean.com/node-pool=pool-upp9zbisp
+
 ###############################################################################
 # Deployments with Services
 
@@ -184,7 +188,7 @@ reserve:
 ###############################################################################
 # RPC Pools
 rpc:
-  replicas: 1
+  replicas: 3
   queues: ["default", "theia", "regrade"]
 ###############################################################################
 

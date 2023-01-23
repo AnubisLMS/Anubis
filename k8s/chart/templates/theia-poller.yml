@@ -71,6 +71,10 @@ spec:
         {{- include "chart.selectorLabels" . | nindent 8 }}
         component: poller
     spec:
+      {{- if and .Values.nodeSelector (not .Values.debug) }}
+      nodeSelector:
+        {{ .Values.nodeSelector }}
+      {{- end }}
       serviceAccountName: theia-poller
       containers:
       - name: poller

@@ -70,6 +70,10 @@ spec:
         {{- include "chart.selectorLabels" . | nindent 8 }}
         component: pipeline-poller
     spec:
+      {{- if and .Values.nodeSelector (not .Values.debug) }}
+      nodeSelector:
+        {{ .Values.nodeSelector }}
+      {{- end }}
       serviceAccountName: pipeline-poller
       containers:
       - name: poller

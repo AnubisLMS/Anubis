@@ -13,6 +13,7 @@ class EnvConfig(object):
         self.REDIS_PASS = os.environ.get("REDIS_PASS", default="anubis")
         self.DOMAIN = os.environ.get("DOMAIN", default="localhost")
         self.SENTRY_DSN = os.environ.get("SENTRY_DSN", default=None)
+        self.IDE_NODE_SELECTOR = os.environ.get("IDE_NODE_SELECTOR", default=None)
 
         if not self.MINDEBUG:
             # sqlalchemy

@@ -19,6 +19,10 @@ spec:
     spec:
       template:
         spec:
+          {{- if and .Values.nodeSelector (not .Values.debug) }}
+          nodeSelector:
+            {{ .Values.nodeSelector }}
+          {{- end }}
           restartPolicy: Never
           containers:
           - name: reaper

@@ -142,4 +142,8 @@ API env
       key: sentry-dsn
 - name: "IMAGE_PULL_POLICY"
   value: {{ $.Values.imagePullPolicy | quote }}
+{{- if and .Values.ideNodeSelector (not .Values.debug) }}
+- name: "IDE_NODE_SELECTOR"
+  value: {{ .Values.nodeSelector | quote }}
+{{- end }}
 {{- end }}

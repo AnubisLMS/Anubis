@@ -26,6 +26,10 @@ spec:
         {{- include "chart.selectorLabels" . | nindent 8 }}
         component: cli-docs
     spec:
+      {{- if and .Values.nodeSelector (not .Values.debug) }}
+      nodeSelector:
+        {{ .Values.nodeSelector }}
+      {{- end }}
       dnsPolicy: ClusterFirst
       containers:
       - name: web

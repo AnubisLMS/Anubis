@@ -11,7 +11,7 @@ from anubis.constants import (
 )
 from anubis.github.parse import parse_github_repo_name
 from anubis.k8s.pvc.get import get_user_pvc
-from anubis.k8s.theia.get import get_theia_pod_name
+from anubis.k8s.theia.get import get_theia_pod_name, get_theia_node_selector
 from anubis.lms.shell_autograde import get_exercise_py_text, resume_submission
 from anubis.models import TheiaSession, Assignment
 from anubis.utils.auth.token import create_token
@@ -64,7 +64,7 @@ def create_theia_k8s_pod_pvc(
     # then default to an empty string.
     repo_url = theia_session.repo_url or ""
     repo_name = parse_github_repo_name(repo_url)
-    webtop = theia_session.image.webtop
+    webtop = theia_session.image.webtop if theia_session.image else False
 
     # Figure out which uid to use
     default_theia_user_id = 1001
@@ -597,6 +597,8 @@ def create_theia_k8s_pod_pvc(
             # IDEs will be theia@anubis-ide instead of some ugly
             # container hash.
             hostname="anubis-ide",
+            # set node selector
+            node_selector=get_theia_node_selector(),
             # set the init container
             init_containers=[init_container],
             # set the containers list

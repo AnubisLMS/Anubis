@@ -20,6 +20,10 @@ spec:
       backoffLimit: 5
       template:
         spec:
+          {{- if and .Values.nodeSelector (not .Values.debug) }}
+          nodeSelector:
+            {{ .Values.nodeSelector }}
+          {{- end }}
           restartPolicy: Never
           containers:
           - name: reaper

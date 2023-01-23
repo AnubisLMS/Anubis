@@ -25,6 +25,10 @@ spec:
         {{- include "chart.labels" . | nindent 8 }}
         component: api
     spec:
+      {{- if and .Values.nodeSelector (not .Values.debug) }}
+      nodeSelector:
+        {{ .Values.nodeSelector }}
+      {{- end }}
       containers:
       - name: api
         image: "{{ .Values.api.image }}:{{ .Values.tag }}"
