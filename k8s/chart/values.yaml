@@ -192,7 +192,7 @@ rpc:
 ###############################################################################
 # Horizontal Pod Autoscaling
 hpa:
-  enable: false
+  enable: true
   rpc:
   - name: rpc-default
   - name: rpc-theia
