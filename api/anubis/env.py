@@ -9,6 +9,8 @@ class EnvConfig(object):
         self.JOB = os.environ.get("JOB", default="0") == "1"
         self.SECRET_KEY = os.environ.get("SECRET_KEY", default="DEBUG")
         self.DB_HOST = os.environ.get("DB_HOST", "db")
+        self.REDIS_HOST = os.environ.get("REDIS_HOST", "redis-master")
+        self.REDIS_PASS = os.environ.get("REDIS_PASS", default="anubis")
         self.DOMAIN = os.environ.get("DOMAIN", default="localhost")
         self.SENTRY_DSN = os.environ.get("SENTRY_DSN", default=None)
 
@@ -25,8 +27,8 @@ class EnvConfig(object):
 
             # cache
             self.CACHE_TYPE = "RedisCache"
-            self.CACHE_REDIS_HOST = os.environ.get("REDIS_HOST", default="redis-master")
-            self.CACHE_REDIS_PASSWORD = os.environ.get("REDIS_PASS", default="anubis")
+            self.CACHE_REDIS_HOST = self.REDIS_HOST
+            self.CACHE_REDIS_PASSWORD = self.REDIS_PASS
 
         # MINDEBUG
         else:

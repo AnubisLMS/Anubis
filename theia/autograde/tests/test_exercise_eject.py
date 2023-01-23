@@ -1,10 +1,11 @@
+from dataclasses import asdict, dataclass
+
 import pytest
 
-from anubis_autograde.exercise.init import set_exercises
 from anubis_autograde.exercise.get import get_active_exercise
-from anubis_autograde.exercise.verify import run_exercise
-from anubis_autograde.models import Exercise, UserState
-from dataclasses import asdict, dataclass
+from anubis_autograde.exercise.init import set_exercises
+from anubis_autograde.models import Exercise
+
 
 @dataclass
 class Response:
@@ -13,6 +14,7 @@ class Response:
     output: str = ''
     cwd: str = '/home/anubis'
     env: str = ''
+
 
 def eject_with_raise(_, __):
     raise RuntimeError('AAAAAAAAAAA')
