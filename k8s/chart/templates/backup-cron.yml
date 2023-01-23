@@ -20,7 +20,7 @@ spec:
         spec:
           {{- if and .Values.nodeSelector (not .Values.debug) }}
           nodeSelector:
-            {{ .Values.nodeSelector }}
+            {{ .Values.nodeSelector | toYaml }}
           {{- end }}
           restartPolicy: Never
           securityContext:
