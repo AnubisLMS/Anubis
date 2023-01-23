@@ -3,6 +3,7 @@ import traceback
 from datetime import datetime, timedelta
 
 from anubis.constants import REAPER_TXT
+from anubis.constants import SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE
 from anubis.github.fix import fix_github_missing_submissions, fix_github_broken_repos
 from anubis.lms.assignments import get_recent_assignments
 from anubis.lms.courses import get_active_courses
@@ -15,10 +16,10 @@ from anubis.models import (
     SubmissionBuild,
     Course,
 )
-from anubis.rpc.enqueue import enqueue_autograde_pipeline, enqueue_ide_reap_stale, enqueue_pipeline_reap_stale
+from anubis.rpc.enqueue import enqueue_autograde_pipeline, enqueue_pipeline_reap_stale
 from anubis.utils.data import with_context
 from anubis.utils.logging import logger
-from anubis.constants import SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE
+
 
 def reap_stale_submissions():
     """
@@ -147,9 +148,6 @@ def reap_shell_autograde_builds():
 
 @with_context
 def reap():
-    # Enqueue a job to reap stale ide k8s resources
-    enqueue_ide_reap_stale()
-
     # Enqueue a job to reap stale pipeline k8s resources
     enqueue_pipeline_reap_stale()
 
