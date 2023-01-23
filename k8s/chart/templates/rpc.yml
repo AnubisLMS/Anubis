@@ -61,7 +61,7 @@ spec:
     matchLabels:
       {{- include "chart.selectorLabels" $ | nindent 6 }}
       component: rpc-{{ . }}
-  replicas: {{- if not $.Values.offSemester }}{{ $.Values.rpc.replicas }}{{- else }} 1{{- end }}
+  replicas: {{- if not $.Values.offSemester }} {{ $.Values.rpc.replicas }}{{- else }} 1{{- end }}
   revisionHistoryLimit: {{ $.Values.revisionHistoryLimit }}
   {{- if $.Values.rollingUpdates }}
   strategy:
