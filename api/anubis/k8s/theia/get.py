@@ -38,13 +38,11 @@ def get_theia_pod_name(theia_session: TheiaSession) -> str:
     return f"theia-{theia_session.owner.netid}-{theia_session.id}"
 
 
-def get_theia_node_selector() -> k8s.V1NodeSelector | None:
+def get_theia_node_selector() -> dict | None:
     if env.IDE_NODE_SELECTOR is None:
-        return k8s.V1NodeSelector([])
+        return dict()
 
-    return k8s.V1NodeSelector([
-        k8s.V1NodeSelectorTerm(k8s.V1NodeSelectorRequirement(
-            term.split('=')[0], 'In', [term.split('=')[1]]
-        ))
+    return {
+        term.split('=')[0]: term.split('=')[1]
         for term in env.IDE_NODE_SELECTOR.split(',')
-    ])
+    }
