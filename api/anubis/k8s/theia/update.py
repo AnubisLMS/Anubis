@@ -5,7 +5,6 @@ from kubernetes import client as k8s
 
 from anubis.k8s.theia.create import create_k8s_resources_for_ide
 from anubis.k8s.theia.get import get_theia_pod_name
-from anubis.k8s.theia.reap import reap_theia_session_k8s_resources
 from anubis.lms.theia import get_active_theia_sessions
 from anubis.models import TheiaSession, db
 from anubis.utils.logging import logger
@@ -106,6 +105,7 @@ def update_theia_session(session: TheiaSession):
 
         try:
             # Delete existing k8s resources for session
+            from anubis.k8s.theia.reap import reap_theia_session_k8s_resources
             reap_theia_session_k8s_resources(session.id)
         except k8s.exceptions.ApiException as e:
             logger.error(f'Failed to delete aged out session {e} {session}\n{traceback.format_exc()}')
