@@ -109,16 +109,17 @@ def update_theia_session(session: TheiaSession):
             reap_theia_session_k8s_resources(session.id)
         except k8s.exceptions.ApiException as e:
             logger.error(f'Failed to delete aged out session {e} {session}\n{traceback.format_exc()}')
+            return
 
         try:
             # Re-create theia session
             create_k8s_resources_for_ide(session)
-
-            # Commit changes to session.k8s_requested
-            db.session.commit()
         except k8s.exceptions.ApiException as e:
             logger.error(f'Failed to re-create aged out session {e} {session}\n{traceback.format_exc()}')
+            return
 
+        # Commit changes to session.k8s_requested
+        db.session.commit()
         return
 
     # Update the session state from the pod status
