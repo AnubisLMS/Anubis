@@ -21,8 +21,9 @@ from anubis.utils.config import get_config_int
 from anubis.utils.data import req_assert
 from anubis.utils.logging import logger
 from anubis.k8s.theia.create import create_k8s_resources_for_ide
+from anubis.utils.exceptions import send_alert_email_on_error
 
-
+@send_alert_email_on_error
 def initialize_theia_session(theia_session_id: str):
     """
     Create the kube resources for a theia session. Will update

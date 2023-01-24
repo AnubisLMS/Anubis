@@ -1,4 +1,6 @@
+import functools
 import traceback
+from datetime import date, datetime
 
 from flask import Flask, jsonify
 
@@ -91,3 +93,49 @@ def add_app_exception_handlers(app: Flask):
         logger.error(traceback.format_exc())
         message, status_code = e.response()
         return jsonify(error_response(message)), status_code
+
+
+def send_alert_email_on_error(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            from anubis.utils.email.event import send_email_event
+            from anubis.utils.config import get_config_str
+            from anubis.models import User
+            from anubis.env import env
+
+            # If not prod, skip
+            if env.DEBUG or env.MINDEBUG:
+                raise e
+
+            # Get admin netid from config
+            admin_netid: str = get_config_str('ADMIN_NETID', None)
+            if admin_netid is None:
+                raise e
+
+            # Get admin user
+            user: User = User.query.filter(User.netid == admin_netid).first()
+            if user is None:
+                raise e
+
+            # Get full function name
+            function_name: str = f'{func.__module__}.{func.__qualname__}'
+
+            # Send email event
+            send_email_event(
+                user,
+                reference_id=function_name,
+                reference_type=f'{date.today()} error',  # Limit to one per day using this
+                template_key=f'error',
+                context={
+                    'traceback':     traceback.format_exc(),
+                    'function_name': function_name,
+                    'datetime':      datetime.now()
+                }
+            )
+
+            raise e
+
+    return wrapper
