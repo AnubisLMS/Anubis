@@ -1,8 +1,11 @@
 import traceback
+from datetime import datetime, timedelta
 
 from kubernetes import client as k8s
 
+from anubis.k8s.theia.create import create_k8s_resources_for_ide
 from anubis.k8s.theia.get import get_theia_pod_name
+from anubis.k8s.theia.reap import reap_theia_session_k8s_resources
 from anubis.lms.theia import get_active_theia_sessions
 from anubis.models import TheiaSession, db
 from anubis.utils.logging import logger
@@ -70,6 +73,9 @@ def update_theia_session(session: TheiaSession):
     # Get the name of the pod
     pod_name = get_theia_pod_name(session)
 
+    # Get age of session
+    age: timedelta = datetime.now() - session.created
+
     try:
         # If the pod has not been created yet, then a 404 will be thrown.
         # Skip logging if that is the case.
@@ -91,6 +97,29 @@ def update_theia_session(session: TheiaSession):
         # Error
         logger.error(traceback.format_exc())
         logger.error("continuing")
+
+    # Consider pod aged out if it has been 3 minutes without passing
+    if age > timedelta(minutes=3) and pod.status.phase != 'Running':
+
+        # Mark k8s_requested as False before deleting
+        session.k8s_requested = False
+
+        try:
+            # Delete existing k8s resources for session
+            reap_theia_session_k8s_resources(session.id)
+        except k8s.exceptions.ApiException as e:
+            logger.error(f'Failed to delete aged out session {e} {session}\n{traceback.format_exc()}')
+
+        try:
+            # Re-create theia session
+            create_k8s_resources_for_ide(session)
+
+            # Commit changes to session.k8s_requested
+            db.session.commit()
+        except k8s.exceptions.ApiException as e:
+            logger.error(f'Failed to re-create aged out session {e} {session}\n{traceback.format_exc()}')
+
+        return
 
     # Update the session state from the pod status
     if pod.status.phase == "Pending":

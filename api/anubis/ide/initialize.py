@@ -1,13 +1,12 @@
 import copy
 
-from kubernetes import config, client
+from kubernetes import config as k8s_config
 
 from anubis.constants import (
     THEIA_DEFAULT_OPTIONS,
     THEIA_DEFAULT_NETWORK_POLICY,
     THEIA_ADMIN_NETWORK_POLICY,
 )
-from anubis.k8s.theia.create import create_theia_k8s_pod_pvc
 from anubis.lms.courses import is_course_admin
 from anubis.lms.shell_autograde import create_shell_autograde_ide_submission
 from anubis.models import (
@@ -21,6 +20,7 @@ from anubis.utils.auth.user import current_user
 from anubis.utils.config import get_config_int
 from anubis.utils.data import req_assert
 from anubis.utils.logging import logger
+from anubis.k8s.theia.create import create_k8s_resources_for_ide
 
 
 def initialize_theia_session(theia_session_id: str):
@@ -43,8 +43,7 @@ def initialize_theia_session(theia_session_id: str):
     """
 
     # Load the kubernetes incluster config
-    config.load_incluster_config()
-    v1 = client.CoreV1Api()
+    k8s_config.load_incluster_config()
 
     # Log the initialization event
     logger.info(
@@ -97,35 +96,8 @@ def initialize_theia_session(theia_session_id: str):
         extra={"submission": theia_session.data},
     )
 
-    # Create pod, and pvc object from the options specified for the
-    # theia session.
-    pod, pvc = create_theia_k8s_pod_pvc(theia_session)
-
-    # Log the creation of the pod
-    logger.info("creating theia pod: " + pod.to_str())
-
-    # If a pvc is necessary (for persistent volume assignments)
-    if pvc is not None:
-        # Create the PVC if it did not already exist
-        try:
-            # This function will throw a 404 client.exceptions.ApiException
-            # if the pvc does not exist
-            v1.read_namespaced_persistent_volume_claim(namespace="anubis", name=pvc.metadata.name)
-            logger.info(f"PVC for user already exists: {pvc.metadata.name}")
-
-        # Catch the exception thrown if the pvc does not exist
-        except client.exceptions.ApiException:
-            logger.info(f"PVC for user does not exist (Creating): {pvc.metadata.name}")
-            v1.create_namespaced_persistent_volume_claim(namespace="anubis", body=pvc)
-
-    # Send the pod to the kubernetes api. Ask to create
-    # these resources under the anubis namespace. These actions are by default
-    # backgrounded. That means that these functions will almost certainly return
-    # before the resources have actually been created and initialized.
-    v1.create_namespaced_pod(namespace="anubis", body=pod)
-
-    # Mark theia session as k8s resources requested
-    theia_session.k8s_requested = True
+    # Create session resources
+    create_k8s_resources_for_ide(theia_session)
 
     # Commit any and all changes that have been made
     # in the database up to this point.

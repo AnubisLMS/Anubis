@@ -10,12 +10,38 @@ from anubis.constants import (
     THEIA_DEFAULT_NETWORK_POLICY
 )
 from anubis.github.parse import parse_github_repo_name
+from anubis.k8s.pvc.create import create_user_pvc
 from anubis.k8s.pvc.get import get_user_pvc
 from anubis.k8s.theia.get import get_theia_pod_name, get_theia_node_selector
 from anubis.lms.shell_autograde import get_exercise_py_text, resume_submission
 from anubis.models import TheiaSession, Assignment
 from anubis.utils.auth.token import create_token
 from anubis.utils.data import is_debug
+from anubis.utils.logging import logger
+
+
+def create_k8s_resources_for_ide(theia_session: TheiaSession):
+    k8s_config.load_incluster_config()
+    v1 = k8s.CoreV1Api()
+
+    # Create pod, and pvc object from the options specified for the
+    # theia session.
+    pod, pvc = create_theia_k8s_pod_pvc(theia_session)
+
+    # Log the creation of the pod
+    logger.info("creating theia pod: " + pod.to_str())
+
+    # If a pvc is necessary (for persistent volume assignments)
+    create_user_pvc(theia_session.user, pvc)
+
+    # Send the pod to the kubernetes api. Ask to create
+    # these resources under the anubis namespace. These actions are by default
+    # backgrounded. That means that these functions will almost certainly return
+    # before the resources have actually been created and initialized.
+    v1.create_namespaced_pod(namespace="anubis", body=pod)
+
+    # Mark theia session as k8s resources requested
+    theia_session.k8s_requested = True
 
 
 def create_theia_k8s_pod_pvc(
@@ -345,7 +371,6 @@ def create_theia_k8s_pod_pvc(
     # AUTOGRADE CONTAINER
 
     if theia_session.autograde:
-
         # Submission may not be created. Skip handling this for now
         submission = theia_session.submission
 

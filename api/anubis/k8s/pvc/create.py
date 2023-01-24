@@ -13,6 +13,10 @@ def create_user_pvc(user: User | str, pvc: k8s.V1PersistentVolumeClaim):
 
     :return: None
     """
+
+    if pvc is None:
+        return
+
     config.load_incluster_config()
     v1 = k8s.CoreV1Api()
 
