@@ -144,6 +144,6 @@ API env
   value: {{ $.Values.imagePullPolicy | quote }}
 {{- if and .Values.ideNodeSelector (not .Values.debug) }}
 - name: "IDE_NODE_SELECTOR"
-  value: {{ .Values.nodeSelector | quote }}
+  value: {{ .Values.ideNodeSelector | quote }}
 {{- end }}
 {{- end }}
