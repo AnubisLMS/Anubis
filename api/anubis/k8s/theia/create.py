@@ -32,7 +32,7 @@ def create_k8s_resources_for_ide(theia_session: TheiaSession):
     logger.info("creating theia pod: " + pod.to_str())
 
     # If a pvc is necessary (for persistent volume assignments)
-    create_user_pvc(theia_session.user, pvc)
+    create_user_pvc(theia_session.owner, pvc)
 
     # Send the pod to the kubernetes api. Ask to create
     # these resources under the anubis namespace. These actions are by default
