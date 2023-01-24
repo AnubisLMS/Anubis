@@ -161,6 +161,11 @@ autograde_reaper:
   suspend: false
   schedule: "*/30 * * * *"
 
+ide_reaper:
+  enable: true
+  suspend: false
+  schedule: "* * * * *"
+
 backup:
   enable: true
   suspend: false

@@ -1,5 +1,5 @@
 
-{{- if .Values.reaper.enable }}
+{{- if .Values.ide_reaper.enable }}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -8,8 +8,8 @@ metadata:
     {{- include "chart.selectorLabels" . | nindent 4 }}
     component: reaper
 spec:
-  schedule: {{ .Values.reaper.schedule | quote }}
-  suspend: {{ .Values.reaper.suspend }}
+  schedule: {{ .Values.ide_reaper.schedule | quote }}
+  suspend: {{ .Values.ide_reaper.suspend }}
   concurrencyPolicy: Replace
   jobTemplate:
     metadata:
