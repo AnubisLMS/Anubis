@@ -96,6 +96,7 @@ def update_theia_session(session: TheiaSession):
         # Error
         logger.error(traceback.format_exc())
         logger.error("continuing")
+        return
 
     # Consider pod aged out if it has been 3 minutes without passing
     if age > timedelta(minutes=3) and pod.status.phase != 'Running':
