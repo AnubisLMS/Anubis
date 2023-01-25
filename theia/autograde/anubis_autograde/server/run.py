@@ -43,7 +43,6 @@ def create_app(args: argparse.Namespace, skip_exercises: bool = False) -> Flask:
     app.config['RESUME'] = args.resume
 
     log.info(f'submission_id = {args.submission_id}')
-    log.info(f'token = {args.token}')
     log.info(f'debug = {args.debug}')
     log.info(f'prod = {args.prod}')
     log.info(f'resume = {args.resume}')
