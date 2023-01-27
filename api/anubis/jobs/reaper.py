@@ -83,6 +83,8 @@ def reap_github():
 
     :return:
     """
+    # Attempt to fix any broken github repo permissions
+    fix_github_broken_repos()
 
     # Pull all courses
     courses: list[Course] = get_active_courses()
@@ -105,9 +107,6 @@ def reap_github():
             logger.error(traceback.format_exc())
             logger.error('continuing')
             continue
-
-    # Attempt to fix any broken github repo permissions
-    fix_github_broken_repos()
 
 
 def update_student_lists():
