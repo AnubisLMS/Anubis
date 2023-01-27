@@ -86,27 +86,27 @@ def reap_github():
     # Attempt to fix any broken github repo permissions
     fix_github_broken_repos()
 
-    # # Pull all courses
-    # courses: list[Course] = get_active_courses()
-    #
-    # # Iterate over all course attempting to fix issues
-    # # on each github org.
-    # for course in courses:
-    #     # Get the org_name from the matches values
-    #     org_name = course.github_org
-    #
-    #     if org_name is None or org_name == '':
-    #         logger.warning(f'skipping fix_github_missing_submissions for course: {course.course_code}')
-    #         continue
-    #
-    #     # Attempt to fix any broken or lost repos for the course org.
-    #     try:
-    #         fix_github_missing_submissions(org_name)
-    #     except Exception as e:
-    #         logger.error('reaper.reap_broken_repos failed', org_name, e)
-    #         logger.error(traceback.format_exc())
-    #         logger.error('continuing')
-    #         continue
+    # Pull all courses
+    courses: list[Course] = get_active_courses()
+
+    # Iterate over all course attempting to fix issues
+    # on each github org.
+    for course in courses:
+        # Get the org_name from the matches values
+        org_name = course.github_org
+
+        if org_name is None or org_name == '':
+            logger.warning(f'skipping fix_github_missing_submissions for course: {course.course_code}')
+            continue
+
+        # Attempt to fix any broken or lost repos for the course org.
+        try:
+            fix_github_missing_submissions(org_name)
+        except Exception as e:
+            logger.error('reaper.reap_broken_repos failed', org_name, e)
+            logger.error(traceback.format_exc())
+            logger.error('continuing')
+            continue
 
 
 def update_student_lists():
@@ -147,26 +147,26 @@ def reap_shell_autograde_builds():
 
 @with_context
 def reap():
-    # # Enqueue a job to reap stale pipeline k8s resources
-    # enqueue_pipeline_reap_stale()
-    #
-    # # Reap the stale submissions
-    # reap_stale_submissions()
+    # Enqueue a job to reap stale pipeline k8s resources
+    enqueue_pipeline_reap_stale()
+
+    # Reap the stale submissions
+    reap_stale_submissions()
 
     # Reap broken repos
     reap_github()
 
-    # # Reap broken submissions in recent assignments
-    # reap_recent_assignments()
-    #
-    # # Update student lists
-    # update_student_lists()
-    #
-    # # Fix any submissions for autograde disabled assignments
-    # reap_autograde_disabled_submissions()
-    #
-    # # set builds to passed for shell autograde assignments
-    # reap_shell_autograde_builds()
+    # Reap broken submissions in recent assignments
+    reap_recent_assignments()
+
+    # Update student lists
+    update_student_lists()
+
+    # Fix any submissions for autograde disabled assignments
+    reap_autograde_disabled_submissions()
+
+    # set builds to passed for shell autograde assignments
+    reap_shell_autograde_builds()
 
 
 if __name__ == "__main__":
