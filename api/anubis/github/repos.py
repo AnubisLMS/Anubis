@@ -79,7 +79,7 @@ def create_repo_from_template(owner_id: str, template_repo_id: str, repo_name: s
     )
 
 
-def add_team(github_org: str, repo_name: str, team_slug: str):
+def add_team(github_org: str, repo_name: str, team_slug: str) -> dict | bytes | None:
     return github_rest(
         f"/orgs/{github_org}/teams/{team_slug}/repos/{github_org}/{repo_name}",
         {
@@ -89,7 +89,7 @@ def add_team(github_org: str, repo_name: str, team_slug: str):
     )
 
 
-def add_collaborator(github_org: str, repo_name: str, github_username: str):
+def add_collaborator(github_org: str, repo_name: str, github_username: str) -> dict | bytes | None:
     return github_rest(
         f"/repos/{github_org}/{repo_name}/collaborators/{github_username}",
         {
@@ -422,6 +422,9 @@ def create_assignment_github_repo(
                     # Use github REST api to add the student as a collaborator
                     # to the repo.
                     data = add_collaborator(github_org, new_repo_name, collaborator)
+                    if not isinstance(data, dict):
+                        logger.error(f'github API request probably failed data = {data}')
+                        continue
 
                     # Sometimes it takes a moment before we are able to add collaborators to
                     # the repo. The message in the response will be Not Found in this situation.
@@ -463,6 +466,9 @@ def create_assignment_github_repo(
                     # Use github REST api to add the ta team as a collaborator
                     # to the repo.
                     data = add_team(github_org, new_repo_name, team_slug)
+                    if not isinstance(data, dict):
+                        logger.error(f'github API request probably failed data = {data}')
+                        continue
 
                     # Sometimes it takes a moment before we are able to add collaborators to
                     # the repo. The message in the response will be Not Found in this situation.
