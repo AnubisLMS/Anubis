@@ -262,6 +262,7 @@ const Assignment = () => {
                   key={`${submission.submission_name}-${index}`}
                   assignmentDue={submission.assignment_due}
                   assignmentName={submission.assignment_name}
+                  accepted={submission.accepted}
                   id={submission.id}
                   commit={submission.commit}
                   processed={submission.processed}

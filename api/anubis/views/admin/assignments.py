@@ -17,7 +17,7 @@ from anubis.lms.shell_autograde import (
     autograde_shell_assignment_sync
 )
 from anubis.models import Assignment, AssignmentRepo, AssignmentTest, SubmissionTestResult, User, db
-from anubis.rpc.enqueue import enqueue_make_shared_assignment
+from anubis.rpc.enqueue import enqueue_make_shared_assignment, enqueue_recalculate_late
 from anubis.utils.auth.http import require_admin
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import rand, req_assert, row2dict
@@ -506,4 +506,21 @@ def admin_assignments_shell_sync(assignment: Assignment):
     # Return
     return success_response({
         'status': 'Exercises synced. See "Edit Tests" page to see current tests.'
+    })
+
+
+@assignments.get("/recalculate-late/<string:id>")
+@require_admin(unless_debug=True)
+@json_response
+@load_from_id(Assignment)
+def admin_recalculate_late(assignment: Assignment):
+    """
+    :return:
+    """
+
+    enqueue_recalculate_late(assignment.id)
+
+    # Return
+    return success_response({
+        'status': 'Enqueued recalculate'
     })

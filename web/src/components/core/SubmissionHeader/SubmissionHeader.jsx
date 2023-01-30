@@ -9,6 +9,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import clsx from 'clsx';
 import {useStyles} from './SubmissionHeader.styles';
 import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
 
 
 const SubmissionHeader = ({
@@ -19,6 +20,7 @@ const SubmissionHeader = ({
   state,
   processed,
   regrade,
+  accepted,
 })=> {
   const classes = useStyles();
   const DATE_OPTIONS = {weekday: 'long', year: 'numeric', month: 'short', day: 'numeric'};
@@ -58,9 +60,17 @@ const SubmissionHeader = ({
         <Typography className={clsx(classes.dataItem, classes.circleIcon, on_time ? classes.success : classes.error)}>
           { on_time ? <CheckCircleIcon/> : <CancelIcon/>}
         </Typography>
-        <Typography className={clsx(classes.submittedStatus, on_time ? classes.success : classes.error)}>
-          { on_time ? 'Submitted On Time' : 'Submitted Late'}
-        </Typography>
+        {accepted ? (
+          <Typography className={clsx(classes.submittedStatus, on_time ? classes.success : classes.error)}>
+            { on_time ? 'Submitted On Time' : 'Submitted Late'}
+          </Typography>
+        ) : (
+          <Tooltip title={'This assignment does not accept late submissions'}>
+            <Typography className={clsx(classes.submittedStatus, classes.error)}>
+              Not Accepted
+            </Typography>
+          </Tooltip>
+        )}
       </Box>
     </Box>
   );

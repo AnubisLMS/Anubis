@@ -258,7 +258,6 @@ class Assignment(db.Model):
     repos = relationship("AssignmentRepo", cascade="all,delete", backref="assignment")
     reserved_ide_times = relationship("ReservedIDETime", cascade="all,delete", backref="assignment")
 
-
     def __repr__(self):
         name = self.name
         course_code = self.course.course_code
@@ -540,6 +539,7 @@ class Submission(db.Model):
             "assignment_name": self.assignment.name,
             "assignment_due":  str(self.assignment.due_date),
             "course_code":     self.assignment.course.course_code,
+            "accepted":        self.accepted,
             "commit":          self.commit,
             "processed":       self.processed,
             "state":           self.state,
@@ -1005,12 +1005,12 @@ class ReservedIDETime(db.Model):
     @property
     def data(self):
         return {
-            'id': self.id,
-            'course': self.course.data,
-            'assignment': self.assignment.data,
-            'active': self.active,
-            'start': str(self.start),
-            'end': str(self.end),
-            'created': str(self.created),
+            'id':           self.id,
+            'course':       self.course.data,
+            'assignment':   self.assignment.data,
+            'active':       self.active,
+            'start':        str(self.start),
+            'end':          str(self.end),
+            'created':      str(self.created),
             'last_updated': str(self.last_updated),
         }

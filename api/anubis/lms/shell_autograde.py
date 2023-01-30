@@ -1,5 +1,5 @@
 import re
-
+from datetime import datetime
 from anubis.constants import SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE
 from anubis.github.api import github_rest
 from anubis.github.repos import split_github_repo_path, get_github_repo_default_branch
@@ -12,6 +12,7 @@ from anubis.utils.data import rand
 from anubis.utils.data import with_context, req_assert
 from anubis.utils.logging import verbose_call, logger
 from anubis.utils.redis import create_redis_lock
+from anubis.lms.assignments import get_assignment_due_date
 
 
 def split_shell_autograde_repo(assignment: Assignment) -> tuple[str, str]:
@@ -197,10 +198,23 @@ def resume_submission(submission: Submission) -> str:
 
 
 def create_shell_autograde_ide_submission(theia_session: TheiaSession) -> Submission:
+    assignment: Assignment = Assignment.query.filter(Assignment.id == theia_session.assignment_id).first()
+
+    accepted = True
+    if not assignment.accept_late:
+        # Figure out if the current submission is late
+        late = theia_session.created < get_assignment_due_date(
+            theia_session.owner_id,
+            theia_session.assignment_id,
+        )
+        # accepted is if not late
+        accepted = not late
+
     submission = Submission(
         id=default_id_factory(),
+        accepted=accepted,
         owner_id=theia_session.owner_id,
-        assignment_id=theia_session.assignment_id,
+        assignment_id=assignment.id,
         assignment_repo_id=None,
         commit='fake-' + rand(40 - 5),
         state=SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE,

@@ -22,7 +22,7 @@ from anubis.lms.assignments import make_shared_assignment
 from anubis.lms.autograde import bulk_autograde
 from anubis.lms.questions import assign_missing_questions
 from anubis.lms.regrade import bulk_regrade_assignment
-from anubis.lms.submissions import bulk_regrade_submissions
+from anubis.lms.submissions import bulk_regrade_submissions, recalculate_late
 from anubis.lms.courses import bulk_create_students
 from anubis.utils.data import with_context
 from anubis.utils.testing.seed import seed
@@ -136,3 +136,10 @@ def enqueue_bulk_regrade_submissions(*args):
 def enqueue_bulk_create_students(*args):
     """Enqueue create users for course"""
     rpc_enqueue(bulk_create_students, queue='default', args=args)
+
+
+def enqueue_recalculate_late(*args):
+    """Enqueue recalculate late for assignment"""
+    rpc_enqueue(recalculate_late, queue='default', args=args)
+
+

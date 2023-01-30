@@ -136,6 +136,25 @@ def get_submissions(
     return [s.full_data for s in submissions], all_total
 
 
+def recalculate_late(assignment_id: str):
+    assignment: Assignment = Assignment.query.filter(
+        Assignment.id == assignment_id
+    ).first()
+
+    # Get all students in the class
+    students: list[User] = User.query.join(InCourse).filter(
+        InCourse.course_id == assignment.course_id
+    ).all()
+
+    logger.info(f'Recalculating late submissions for {assignment}')
+
+    for student in students:
+        logger.info(f'Recalculating late submissions for {student}')
+
+        # Recalculate late for student
+        recalculate_late_submissions(student, assignment)
+
+
 def recalculate_late_submissions(student: User, assignment: Assignment):
     """
     Recalculate the submissions that need to be
@@ -151,29 +170,40 @@ def recalculate_late_submissions(student: User, assignment: Assignment):
     due_date = get_assignment_due_date(student.id, assignment.id, grace=True)
 
     # Get the submissions that need to be rejected
-    s_reject = Submission.query.filter(
+    reject_query = Submission.query.filter(
         Submission.created > due_date,
         Submission.accepted == True,
         Submission.assignment_id == assignment.id,
         Submission.owner_id == student.id,
-    ).all()
+    )
 
     # Get the submissions that need to be accepted
-    s_accept = Submission.query.filter(
+    accept_query = Submission.query.filter(
         Submission.created < due_date,
         Submission.accepted == False,
         Submission.assignment_id == assignment.id,
         Submission.owner_id == student.id,
-    ).all()
+    )
 
-    # Go through, and reset and enqueue regrade
-    s_accept_ids = list(map(lambda x: x.id, s_accept))
-    for chunk in split_chunks(s_accept_ids, 32):
-        rpc_enqueue(bulk_regrade_submissions, "regrade", args=[chunk])
+    logger.debug(f'found {reject_query.count()} {accept_query.count()} to flip for {student}')
 
-    # Reject the submissions that need to be updated
-    for submission in s_reject:
-        reject_late_submission(submission)
+    # Update rows, set accepted accordingly
+    accept_query.update({'accepted': True})
+    reject_query.update({'accepted': False})
+
+    # Only reset/regrade of autograde turned on for assignment
+    if assignment.autograde_enabled:
+        s_accept = accept_query.all()
+        s_reject = reject_query.all()
+
+        # Go through, and reset and enqueue regrade
+        s_accept_ids = list(map(lambda x: x.id, s_accept))
+        for chunk in split_chunks(s_accept_ids, 32):
+            rpc_enqueue(bulk_regrade_submissions, "regrade", args=[chunk])
+
+        # Reject the submissions that need to be updated
+        for submission in s_reject:
+            reject_late_submission(submission)
 
     # Commit the changes
     db.session.commit()
