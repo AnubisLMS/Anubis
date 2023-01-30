@@ -206,6 +206,7 @@ def create_shell_autograde_ide_submission(theia_session: TheiaSession) -> Submis
         late = theia_session.created < get_assignment_due_date(
             theia_session.owner_id,
             theia_session.assignment_id,
+            grace=True,
         )
         # accepted is if not late
         accepted = not late
