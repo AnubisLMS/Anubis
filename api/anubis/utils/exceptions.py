@@ -101,31 +101,13 @@ def send_alert_email_on_error(func):
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            from anubis.utils.email.event import send_email_event
-            from anubis.utils.config import get_config_str
-            from anubis.models import User
-            from anubis.env import env
-
-            # If not prod, skip
-            if env.DEBUG or env.MINDEBUG:
-                raise e
-
-            # Get admin netid from config
-            admin_netid: str = get_config_str('ADMIN_NETID', None)
-            if admin_netid is None:
-                raise e
-
-            # Get admin user
-            user: User = User.query.filter(User.netid == admin_netid).first()
-            if user is None:
-                raise e
+            from anubis.utils.email.event import send_email_event_admin
 
             # Get full function name
             function_name: str = f'{func.__module__}.{func.__qualname__}'
 
             # Send email event
-            send_email_event(
-                user,
+            send_email_event_admin(
                 reference_id=function_name,
                 reference_type=f'{date.today()} error',  # Limit to one per day using this
                 template_key=f'error',
