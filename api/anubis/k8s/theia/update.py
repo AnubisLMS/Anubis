@@ -1,3 +1,4 @@
+import json
 import traceback
 from datetime import datetime, timedelta
 
@@ -147,6 +148,23 @@ def update_theia_session(session: TheiaSession):
 
             # 0/10 nodes are available: 10 Insufficient cpu, 2 Insufficient memory.
             if 'FailedScheduling' in event.reason and 'Insufficient' in event.message:
+                from anubis.utils.email.event import send_email_event_admin
+
+                # limit 1 per hour
+                now = datetime.now().replace(hour=0, second=0, microsecond=0)
+                send_email_event_admin(
+                    "scaleup",
+                    f"{now} scaleup",
+                    'scaleup',
+                    context={
+                        'age':     age,
+                        'now':     datetime.now(),
+                        'session': json.dumps(session.data, indent=2),
+                        'event':   str(event.to_str()),
+                        'pod':     str(pod.metadata.name),
+                    }
+                )
+
                 scaling = True
                 continue
 

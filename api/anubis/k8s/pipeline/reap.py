@@ -73,9 +73,6 @@ def reap_pipeline_jobs():
     :return: number of active jobs
     """
 
-    # Get the batch v1 object so we can query for active k8s jobs
-    batch_v1 = client.BatchV1Api()
-
     # Get all pipeline jobs in the anubis namespace
     jobs = get_active_pipeline_jobs()
 
