@@ -26,6 +26,10 @@ rules:
 - apiGroups: [""]
   resources: ["events"]
   verbs: ["get", "list"]
+- apiGroups: [""]
+  resourceNames: ["google-gmail-creds"]
+  resources: ["secrets"]
+  verbs: ["get", "patch"]
 ---
 
 kind: RoleBinding
