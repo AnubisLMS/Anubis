@@ -7,6 +7,7 @@ from kubernetes import client as k8s
 from anubis.k8s.theia.create import create_k8s_resources_for_ide
 from anubis.k8s.theia.get import get_theia_pod_name
 from anubis.lms.theia import get_active_theia_sessions
+from anubis.lms.reserve import is_session_reserved
 from anubis.models import TheiaSession, db
 from anubis.utils.logging import logger
 from anubis.utils.redis import create_redis_lock
@@ -100,8 +101,11 @@ def update_theia_session(session: TheiaSession):
     # Get age of session
     age: timedelta = datetime.now() - convert_to_local(pod.metadata.creation_timestamp)
 
-    # Consider pod aged out if it has been 3 minutes without passing
-    if age > timedelta(minutes=5) and pod.status.phase != 'Running':
+    # Figure out if session is reserved
+    reserved = is_session_reserved(session)
+
+    # Consider pod aged out if it has been n minutes without passing
+    if age > timedelta(minutes=5 if not reserved else 15) and pod.status.phase != 'Running':
 
         # Mark k8s_requested as False before deleting
         session.k8s_requested = False
