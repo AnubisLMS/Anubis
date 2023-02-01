@@ -1,9 +1,9 @@
 import functools
+import urllib.parse
 from datetime import datetime, timedelta
 from hashlib import sha512
 from json import dumps
-from os import environ, urandom
-import urllib.parse
+from os import urandom
 
 from flask import Response, has_app_context, has_request_context
 
@@ -361,5 +361,3 @@ def form_url(
 
     # (addressing scheme, network location, path, query, fragment identifier)
     return urllib.parse.urlunsplit((scheme, domain, path, query, fragment))
-
-

@@ -10,7 +10,7 @@ from anubis.lms.theia import get_active_theia_sessions
 from anubis.models import TheiaSession, db
 from anubis.utils.logging import logger
 from anubis.utils.redis import create_redis_lock
-
+from anubis.utils.datetime import convert_to_local
 
 def update_theia_pod_cluster_addresses(theia_pods: k8s.V1PodList):
     """
@@ -73,9 +73,6 @@ def update_theia_session(session: TheiaSession):
     # Get the name of the pod
     pod_name = get_theia_pod_name(session)
 
-    # Get age of session
-    age: timedelta = datetime.now() - session.created
-
     try:
         # If the pod has not been created yet, then a 404 will be thrown.
         # Skip logging if that is the case.
@@ -99,8 +96,12 @@ def update_theia_session(session: TheiaSession):
         logger.error("continuing")
         return
 
+
+    # Get age of session
+    age: timedelta = datetime.now() - convert_to_local(pod.metadata.creation_timestamp)
+
     # Consider pod aged out if it has been 3 minutes without passing
-    if age > timedelta(minutes=3) and pod.status.phase != 'Running':
+    if age > timedelta(minutes=5) and pod.status.phase != 'Running':
 
         # Mark k8s_requested as False before deleting
         session.k8s_requested = False
