@@ -165,6 +165,7 @@ def admin_course_list_students():
                     "netid":           user.netid,
                     "name":            user.name,
                     "github_username": user.github_username,
+                    "is_superuser":    user.is_superuser,
                 }
                 for user in students
             ]
