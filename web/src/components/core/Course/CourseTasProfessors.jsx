@@ -16,6 +16,7 @@ import AddIcon from '@mui/icons-material/Add';
 
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
+import useAdmins from '../../../hooks/useAdmin';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -44,17 +45,8 @@ export default function CourseTasProfessors({base}) {
   const {enqueueSnackbar} = useSnackbar();
   const [users, setUsers] = useState([]);
   const [selected, setSelected] = useState(null);
-  const [tas, setTas] = useState([]);
   const [reset, setReset] = useState(0);
-
-  React.useEffect(() => {
-    axios.get(`/api/admin/courses/list/${base}s`).then((response) => {
-      const data = standardStatusHandler(response, enqueueSnackbar);
-      if (data?.users) {
-        setTas(data.users);
-      }
-    }).catch(standardErrorHandler(enqueueSnackbar));
-  }, [reset]);
+  const tas = useAdmins(base, reset);
 
   React.useEffect(() => {
     axios.get(`/api/admin/students/list/basic`).then((response) => {
