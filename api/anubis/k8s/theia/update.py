@@ -156,10 +156,9 @@ def update_theia_session(session: TheiaSession):
                 from anubis.utils.email.event import send_email_event_admin
 
                 # limit 1 per hour
-                now = datetime.now().replace(hour=0, second=0, microsecond=0)
                 send_email_event_admin(
                     "scaleup",
-                    f"{now} scaleup",
+                    "scaleup",
                     'scaleup',
                     context={
                         'age':     age,

@@ -2,7 +2,7 @@ import traceback
 
 import jinja2
 from googleapiclient.errors import Error
-
+from datetime import datetime
 from anubis.constants import EMAIL_FROM
 from anubis.utils.google.gmail import send_message
 from anubis.models import db, User, EmailTemplate, EmailEvent
@@ -28,10 +28,13 @@ def send_email_event_admin(
         logger.warning(f'Admin user not found')
         return
 
+    # Limit message to one per hour
+    now = datetime.now().replace(minute=0, second=0, microsecond=0)
+
     # Send email event
     send_email_event(
         user,
-        reference_id=reference_id,
+        reference_id=f'{reference_id} {now}',
         reference_type=reference_type,
         template_key=template_key,
         context=context,

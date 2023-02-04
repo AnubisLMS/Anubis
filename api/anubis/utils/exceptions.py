@@ -109,8 +109,8 @@ def send_alert_email_on_error(func):
             # Send email event
             send_email_event_admin(
                 reference_id=function_name,
-                reference_type=f'{date.today()} error',  # Limit to one per day using this
-                template_key=f'error',
+                reference_type='error',  # Limit to one per day using this
+                template_key='error',
                 context={
                     'traceback':     traceback.format_exc(),
                     'function_name': function_name,
