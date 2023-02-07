@@ -89,6 +89,7 @@ export default function Submissions() {
                   assignmentName={row.assignment_name}
                   id={row.id}
                   commit={row.commit}
+                  accepted={row.accepted}
                   processed={row.processed}
                   tests={row.tests}
                   timeStamp={row.timeStamp}
