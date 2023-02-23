@@ -41,7 +41,7 @@ export default function RepoCommandDialog({repos = [], assignment = {}}) {
     filteredRepos.sort((a, b) => (a.name < b.name) ? -1 : 1);
     if (group >= 0) {
       filteredRepos = filteredRepos.filter((repo) => !repo.ownedByAdmin);
-      const workloadPerTA = Math.ceil(filteredRepos.length / tas.length);
+      const workloadPerTA = filteredRepos.length / tas.length;
       const start = workloadPerTA * group;
       filteredRepos = filteredRepos.slice(start, start + workloadPerTA);
     }
