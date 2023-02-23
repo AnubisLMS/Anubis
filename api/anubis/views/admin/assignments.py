@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import parse
 from dateutil.parser import parse as dateparse
 from flask import Blueprint
+from sqlalchemy import and_, func
 from sqlalchemy.exc import DataError, IntegrityError
 
 from anubis.github.repos import delete_assignment_repo
@@ -14,13 +15,14 @@ from anubis.lms.shell_autograde import (
     verify_shell_autograde_exercise_path_allowed,
     verify_shell_exercise_repo_allowed,
     verify_shell_exercise_repo_format,
-    autograde_shell_assignment_sync
+    autograde_shell_assignment_sync,
 )
-from anubis.models import Assignment, AssignmentRepo, AssignmentTest, SubmissionTestResult, User, db
+from anubis.models import Assignment, AssignmentRepo, AssignmentTest, Submission, SubmissionTestResult, User, db
 from anubis.rpc.enqueue import enqueue_make_shared_assignment, enqueue_recalculate_late
 from anubis.utils.auth.http import require_admin
 from anubis.utils.auth.user import current_user
-from anubis.utils.data import rand, req_assert, row2dict
+from anubis.utils.cache import cache
+from anubis.utils.data import is_debug, rand, req_assert, row2dict
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_endpoint, json_response, load_from_id
 from anubis.utils.logging import logger
@@ -84,6 +86,61 @@ def admin_assignments_reset_repos_id(assignment: Assignment):
     )
 
 
+@cache.memoize(timeout=120, unless=is_debug)
+def list_repos_with_latest_commit(assignment_id: int) -> list[AssignmentRepo]:
+    """
+    Calculate the latest accepted submissions for a given assignment,
+    and return their corresponding assignment repos.
+
+    This only has a single query that might take some time.
+    So we lightly cache it just in case.
+
+    :return: A list a AssignmentRepo's
+    """
+    # Use a subquery to find the maximum time when the latest accepted submission
+    # for each assignment repo, respectively.
+    latest_submissions_subq = (
+        Submission.query.filter(Submission.assignment_id == assignment_id, Submission.accepted == True)
+        .with_entities(
+            Submission.assignment_repo_id,
+            Submission.accepted,
+            func.max(Submission.created).label("created"),
+        )
+        .group_by(Submission.assignment_repo_id)
+        .subquery("subq")
+    )
+
+    # Given the time the latest submissions are created, join AssignmentRepo (automatically by sqlalchemy)
+    # with the information on their corresponding latest submission.
+    submissions = Submission.query.join(
+        latest_submissions_subq,
+        and_(
+            Submission.assignment_repo_id == latest_submissions_subq.c.assignment_repo_id,
+            Submission.created == latest_submissions_subq.c.created,
+        ),
+    ).subquery("subq")
+    
+    repos = AssignmentRepo.query.join(
+    # Join here so that we can access owner.name
+        AssignmentRepo.owner
+    # Do an outerjoin so that repos without submissions also get listed.
+    # This also allows access to the latest submission via the main query's result.
+    ).outerjoin(submissions).with_entities(
+        AssignmentRepo.id,
+        AssignmentRepo.repo_url,
+        AssignmentRepo.netid,
+        AssignmentRepo.owner_id,
+        User.name.label("owner_name"),
+        submissions.c.commit.label("commit"),
+    # Because this gets outer joined with the latest submissions, the assignment.id contraint
+    # we applied for the submissions need to be reapplied here.
+    ).filter(
+        AssignmentRepo.assignment_id == assignment_id
+    )
+
+    return repos.all()
+
+
 @assignments.get("/repos/<string:id>")
 @require_admin()
 @load_from_id(Assignment, verify_owner=False)
@@ -97,9 +154,7 @@ def admin_assignments_repos_id(assignment: Assignment):
 
     assert_course_context(assignment)
 
-    repos = AssignmentRepo.query.filter(
-        AssignmentRepo.assignment_id == assignment.id,
-    ).all()
+    repos = list_repos_with_latest_commit(assignment.id)
 
     def get_ssh_url(url):
         r = parse.parse("https://github.com/{}", url)
@@ -110,13 +165,14 @@ def admin_assignments_repos_id(assignment: Assignment):
     return success_response(
         {
             "assignment": assignment.full_data,
-            "repos":      [
+            "repos": [
                 {
-                    "id":    repo.id,
-                    "url":   repo.repo_url,
-                    "ssh":   get_ssh_url(repo.repo_url),
+                    "id": repo.id,
+                    "url": repo.repo_url,
+                    "ssh": get_ssh_url(repo.repo_url),
                     "netid": repo.netid,
-                    "name":  repo.owner.name if repo.owner_id is not None else "N/A",
+                    "name": repo.owner_name if repo.owner_id is not None else "N/A",
+                    "commit": repo.commit,
                 }
                 for repo in repos
             ],
