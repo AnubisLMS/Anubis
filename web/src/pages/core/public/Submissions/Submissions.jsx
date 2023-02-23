@@ -12,7 +12,17 @@ import ListHeader from '../../../../components/shared/ListHeader/ListHeader';
 import Divider from '../../../../components/shared/Divider/Divider';
 import ListPagination from '../../../../components/shared/ListPagination/ListPagination';
 
-function translateSubmission({id, assignment_name, assignment_due, commit, processed, state, created, tests, accepted}) {
+function translateSubmission({
+  id,
+  assignment_name,
+  assignment_due,
+  commit,
+  processed,
+  state,
+  created,
+  tests,
+  accepted,
+}) {
   return {
     assignment_name, assignment_due, commit, created, tests,
     id, accepted, assignmentDue: new Date(assignment_due), state: state,
