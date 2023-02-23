@@ -22,7 +22,7 @@ import downloadTextFile from '../../../utils/downloadTextFile';
 export default function RepoCommandDialog({repos = [], assignment = {}}) {
   const [open, setOpen] = React.useState(false);
   const [http, setHttp] = React.useState(false);
-  const [verbose, setVerbose] = React.useState(false);
+  const [verbose, setVerbose] = React.useState(true);
   // We assume that the group is unset when group=-1
   const [group, setGroup] = React.useState(-1);
   const tas = useAdmin('ta');
