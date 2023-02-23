@@ -25,6 +25,7 @@ class EnvConfig(object):
                 "DATABASE_URI",
                 default="mysql+pymysql://anubis:anubis@{}/anubis".format(self.DB_HOST),
             )
+            # self.SQLALCHEMY_ECHO = True
 
             # cache
             self.CACHE_TYPE = "RedisCache"

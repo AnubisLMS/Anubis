@@ -2,7 +2,8 @@ import string
 from datetime import datetime, timedelta
 from typing import Any
 
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
+from flask_sqlalchemy import get_debug_queries
 
 from anubis.github.repos import create_assignment_group_repo, delete_assignment_repo
 from anubis.github.repos import verify_collaborators_assignment
@@ -351,7 +352,7 @@ def get_recent_assignments(
 
     filters = []
 
-    if autograde_enabled:
+    if isinstance(autograde_enabled, bool):
         filters.append(or_(
             Assignment.autograde_enabled == autograde_enabled,
             Assignment.shell_autograde_enabled == autograde_enabled,
@@ -365,8 +366,11 @@ def get_recent_assignments(
         autograde_recalculate_duration = delta
 
     recent_assignments = Assignment.query.filter(
-        Assignment.due_date > datetime.now() - autograde_recalculate_duration,
-        Assignment.due_date < datetime.now() + autograde_recalculate_duration,
+        and_(
+            Assignment.due_date > (datetime.now() - autograde_recalculate_duration),
+            Assignment.due_date < (datetime.now() + autograde_recalculate_duration),
+        )
+    ).filter(
         *filters,
     ).all()
 

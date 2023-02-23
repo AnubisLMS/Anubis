@@ -1,13 +1,16 @@
+import logging
 from datetime import datetime
 
 from parse import parse
+from sqlalchemy.sql import func, select
 
 from anubis.env import env
 from anubis.lms.students import get_students_in_class
-from anubis.models import Assignment, AssignmentTest, Submission
+from anubis.models import db, Assignment, AssignmentTest, Submission, SubmissionTestResult
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, is_job
 from anubis.utils.http import error_response
+from anubis.utils.logging import logger
 
 
 @cache.memoize(timeout=60, unless=is_debug, source_check=True)
@@ -67,8 +70,13 @@ def autograde(student_id, assignment_id, max_time: datetime = None):
             .all()
     ):
 
+        # Make a map to weed out duplicates
+        results = dict()
+        for result in submission.test_results:
+            results[result.assignment_test_id] = results.get(result.assignment_test_id, result.passed)
+
         # Calculate the number of tests that passed in this submission
-        correct_count = sum(map(lambda result: 1 if result.passed else 0, submission.test_results))
+        correct_count = sum(map(lambda passed: 1 if passed else 0, results.values()))
 
         # If the number of passed tests in this assignment is as good
         # or better as the best seen so far, update the running best.
@@ -197,4 +205,60 @@ def bulk_autograde(assignment_id, netids=None, offset=0, limit=20):
 
     return bests
 
+
+def reap_assignment_double_deliveries(assignment: Assignment):
+    if not (assignment.autograde_enabled or assignment.shell_autograde_enabled):
+        return
+
+    # Get the max number of assignment tests that can be passed
+    # so we can stop early if we find a submission that has all
+    # tests passing
+    max_correct = _get_assignment_test_count(assignment.id)
+
+    # Iterate over all submissions for this student, tracking
+    # the best submission so far (based on number of tests passed).
+    # We start from the oldest submission and move to the newest.
+    for submission in (
+        db.session.query(Submission)
+            .filter(Submission.id.in_(
+                select(SubmissionTestResult.submission_id)
+                .select_from(SubmissionTestResult)
+                .join(Submission)
+                .where(Submission.assignment_id == assignment.id)
+                .group_by(Submission.id)
+                .having(func.count(SubmissionTestResult.id) > max_correct)
+            ))
+            .all()
+    ):
+        logger.info(f'Found {submission} {len(submission.test_results)}/{max_correct}')
+
+        # Make a map of duplicates
+        test_result: dict[str, list[SubmissionTestResult]] = dict()
+        for result in submission.test_results:
+            if result.assignment_test_id not in test_result:
+                test_result[result.assignment_test_id] = [result]
+            else:
+                test_result[result.assignment_test_id].append(result)
+
+        # Go through each set of duplicate tests
+        for results in test_result.values():
+
+            # If duplicates dont exist, skip
+            if len(results) == 1:
+                continue
+
+            # Select SubmissionTestResult to save
+            selected_result = results[0]
+            for result in results:
+                if result.passed is True:
+                    selected_result = result
+                    break
+
+            # Figure out which results to drop
+            delete_test_ids = {test.id for test in results}.difference({selected_result.id})
+            logger.info(f'Dropping {delete_test_ids}')
+
+            # Drop results
+            SubmissionTestResult.query.filter(SubmissionTestResult.id.in_(delete_test_ids)).delete()
+            db.session.commit()
 

@@ -528,7 +528,7 @@ class Submission(db.Model):
         backref="submission",
         lazy=False,
     )
-    test_results = relationship("SubmissionTestResult", cascade="all,delete", backref="submission", lazy=False)
+    test_results: list['SubmissionTestResult'] = relationship("SubmissionTestResult", cascade="all,delete", backref="submission", lazy=False)
     repo = relationship(AssignmentRepo, backref="submissions")
     theia_session = relationship('TheiaSession', cascade='all,delete', backref='submission', lazy=True)
 
