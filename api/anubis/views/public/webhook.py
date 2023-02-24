@@ -173,7 +173,6 @@ def public_webhook():
     # If the github username is not found, create a dangling submission
     if not assignment.autograde_enabled:
         submission.processed = True
-        submission.accepted = True
         submission.state = AUTOGRADE_DISABLED_MESSAGE
 
     db.session.commit()
