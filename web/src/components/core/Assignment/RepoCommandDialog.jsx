@@ -22,6 +22,7 @@ import downloadTextFile from '../../../utils/downloadTextFile';
 export default function RepoCommandDialog({repos = [], assignment = {}}) {
   const [open, setOpen] = React.useState(false);
   const [http, setHttp] = React.useState(false);
+  const [withCommit, setWithCommit] = React.useState(true);
   const [verbose, setVerbose] = React.useState(true);
   // We assume that the group is unset when group=-1
   const [group, setGroup] = React.useState(-1);
@@ -55,13 +56,20 @@ export default function RepoCommandDialog({repos = [], assignment = {}}) {
     const assignmentDir = assignment.name.replaceAll(' ', '_');
     const repoDir = (netid, name) => netid + (verbose ? `_${name?.replaceAll(' ', '_')}` : '');
     const ownerInfoCmd = `echo '${filteredRepos.map((repo)=>`${repo.netid} ${repo.name}`).join('\\n')}' > students\n`;
-    const cloneCmds = filteredRepos.map(({url, ssh, netid, name}) =>
-      `git clone '${http ? url : ssh}' '${repoDir(netid, name)}'`).join('\n');
+    const cloneCmds = filteredRepos.map(({url, ssh, netid, name, commit}) => {
+      const uri = http ? url : ssh;
+      const dir = repoDir(netid, name);
+      let cmd = `git clone '${uri}' '${dir}'`;
+      if (withCommit && commit !== undefined) {
+        cmd += ` && git -C ${dir} checkout '${commit}'`;
+      }
+      return cmd;
+    }).join('\n');
     return `mkdir -p '${assignmentDir}'\n` +
       `cd '${assignmentDir}'\n` +
       (verbose ? ownerInfoCmd : '') +
       cloneCmds;
-  }, [http, assignment, filteredRepos, verbose]);
+  }, [http, assignment, filteredRepos, verbose, withCommit]);
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -92,6 +100,17 @@ export default function RepoCommandDialog({repos = [], assignment = {}}) {
                 />
               }
               label={http ? 'http' : 'ssh'}
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={withCommit}
+                  onChange={() => setWithCommit(!withCommit)}
+                  name="withCommit"
+                  color="primary"
+                />
+              }
+              label={withCommit ? 'checkout latest accepted commit' : 'just clone'}
             />
             <FormControlLabel
               control={
