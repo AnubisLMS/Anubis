@@ -1,8 +1,14 @@
+import math
 import random
+from datetime import timedelta
 
 import pytest
+from utils import Session, permission_test, with_context
 
-from utils import Session, permission_test
+from anubis.lms.submissions import fix_submissions_for_autograde_disabled_assignment
+from anubis.models import Assignment, Submission, db
+from anubis.models.id import default_id_factory
+from anubis.utils.testing.seed import rand_commit
 
 sample_sync = {
     "name":           "CS-UY 3224 TEST ADMIN",
@@ -91,3 +97,51 @@ def test_assignment_delete(add_questions, assign_questions, add_responses):
     assignments = superuser.get(f'/admin/assignments/list')['assignments']
     for assignment_ in assignments:
         assert assignment_['id'] != assignment_id
+
+@with_context
+def test_fix_late_autograde_disabled_assignments(caplog):
+    assignment = Assignment.query.filter(Assignment.name == "CS-UY 3224 Assignment 3")
+    assignment.update(
+        {
+            "accept_late": False,
+            "autograde_enabled": False,
+        }
+    )
+    assignment = assignment.first()
+    assert assignment is not None
+
+    # All test submissions will be created using this submission's owner
+    ref_submission: Submission = Submission.query.filter(Submission.assignment_id == assignment.id).first()
+    assert ref_submission is not None
+
+    def create_submission(late: bool, accepted: bool):
+        created = assignment.grace_date
+        if late:
+            created += timedelta(hours=math.sqrt(5))
+        else:
+            created -= timedelta(hours=math.sqrt(5))
+
+        return Submission(
+            id=default_id_factory(),
+            commit=rand_commit(),
+            state="Waiting for resources...",
+            owner=ref_submission.owner,
+            assignment_id=assignment.id,
+            created=created,
+            accepted=accepted,
+        )
+
+    late_accepted = create_submission(late=True, accepted=True)
+    late_not_accepted = create_submission(late=True, accepted=False)
+    ontime_accepted = create_submission(late=False, accepted=True)
+    ontime_not_accepted = create_submission(late=False, accepted=False)
+
+    fix_submissions_for_autograde_disabled_assignment(assignment)
+
+    assert len(caplog.records) == 2
+    assert "Fixed 1 falsely accepted" in caplog.records[1].msg
+
+    assert late_not_accepted.accepted == False
+    assert late_accepted.accepted == False
+    assert ontime_accepted.accepted == True
+    assert ontime_not_accepted.accepted == False
