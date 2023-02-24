@@ -40,6 +40,7 @@ jobs:
     - name: Background API
       run: |
         set -ex
+        docker run -itd -p 6379:6379 redis redis-server --requirepass anubis
         env MINDEBUG=1 MIGRATE=1 ./venv/bin/python3 dev.py &
     - name: Test with pytest
       run: |
