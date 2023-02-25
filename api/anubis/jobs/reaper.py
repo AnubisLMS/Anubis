@@ -176,6 +176,9 @@ def reap():
     # set builds to passed for shell autograde assignments
     reap_shell_autograde_builds()
 
+    # update cache for latest commits
+    reap_latest_assignment_commits()
+
 
 if __name__ == "__main__":
     print(REAPER_TXT)
