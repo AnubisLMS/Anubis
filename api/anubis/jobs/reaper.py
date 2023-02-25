@@ -10,6 +10,7 @@ from anubis.lms.courses import get_active_courses
 from anubis.lms.students import get_students
 from anubis.lms.submissions import fix_submissions_for_autograde_disabled_assignment
 from anubis.lms.submissions import init_submission
+from anubis.lms.repos import list_repos_with_latest_commit
 from anubis.models import (
     db,
     Submission,
@@ -143,6 +144,13 @@ def reap_shell_autograde_builds():
                 'stdout': ''
             })
         db.session.commit()
+
+
+def reap_latest_assignment_commits():
+    assignments = get_recent_assignments()
+
+    for assignment in assignments:
+        list_repos_with_latest_commit(assignment.id)
 
 
 @with_context
