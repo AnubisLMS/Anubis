@@ -11,20 +11,7 @@ RUN set -eux; \
     mkdir -p /opt/anubis; \
     chmod 755 /opt/anubis; \
     chown anubis:anubis /opt/anubis; \
-    apt autoremove -y; \
-    env USER=root find /opt/anubis -depth \
-    \( \
-    \( -type d -a \( -name test -o -name tests -o -name idle_test \) \) \
-    -o \( -type f -a \( -name '*.pyc' -o -name '*.pyo' -o -name '*.a' \) \) \
-    \) -exec rm -rf '{}' + ; \
-    \
-    env USER=root find /usr/local -depth \
-    \( \
-    \( -type d -a \( -name test -o -name tests -o -name idle_test \) \) \
-    -o \( -type f -a \( -name '*.pyc' -o -name '*.pyo' -o -name '*.a' \) \) \
-    \) -exec rm -rf '{}' + ; \
     rm -rf /usr/share/doc; \
-    rm -rf /usr/lib/gcc; \
     rm -rf /usr/local/share/.cache; \
     rm -rf /var/cache/apt/*; \
     rm -rf /var/lib/apt/lists/*
