@@ -371,16 +371,14 @@ def reap_stale_theia_k8s_resources(theia_pods: k8s.V1PodList):
 
     # Reap theia sessions
 
-    # for stale_pod_id in stale_pods_ids:
-    #     if stale_pod_id in reserved_session_ids:
-    #         continue
-    #     logger.info(f'Reaping stale pod session-id: {stale_pod_id}')
-    #     reap_theia_session_by_id(stale_pod_id)
-    #
-    # # Update database entries
-    # TheiaSession.query.filter(
-    #     TheiaSession.id.in_(list(stale_db_ids.difference(reserved_session_ids))),
-    # ).update({TheiaSession.active: False}, False)
-    #
-    # # Commit any and all changes to the database
-    # db.session.commit()
+    for stale_pod_id in stale_pods_ids:
+        logger.info(f'Reaping stale pod session-id: {stale_pod_id}')
+        reap_theia_session_by_id(stale_pod_id)
+
+    # Update database entries
+    TheiaSession.query.filter(
+        TheiaSession.id.in_(list(stale_db_ids.difference(reserved_session_ids))),
+    ).update({TheiaSession.active: False}, False)
+
+    # Commit any and all changes to the database
+    db.session.commit()
