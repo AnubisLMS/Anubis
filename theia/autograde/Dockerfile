@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 COPY requirements.txt /requirements.txt
 RUN set -eux; \
-    useradd -D -m --user-group --uid 1001 --gid 1001 anubis; \
+    useradd -m --user-group --uid 1001 anubis; \
     apt update;  \
     apt install -y --no-install-recommends git bash g++; \
     pip3 install --no-cache-dir -r /requirements.txt; \
