@@ -358,8 +358,8 @@ def reap_stale_theia_k8s_resources(theia_pods: k8s.V1PodList):
 
     # Figure out which ones don't match and need to be updated.
     # (not including sessions reserved)
-    stale_pods_ids = active_pod_ids - active_db_ids
-    stale_db_ids = active_db_ids - active_pod_ids
+    stale_pods_ids = active_pod_ids.difference(active_db_ids)
+    stale_db_ids = active_db_ids.difference(active_pod_ids)
 
     # Log which stale pods we need to clean up
     if len(stale_pods_ids) > 0:
@@ -372,6 +372,8 @@ def reap_stale_theia_k8s_resources(theia_pods: k8s.V1PodList):
     # Reap theia sessions
 
     for stale_pod_id in stale_pods_ids:
+        if stale_pod_id in reserved_session_ids:
+            continue
         logger.info(f'Reaping stale pod session-id: {stale_pod_id}')
         reap_theia_session_by_id(stale_pod_id)
 
