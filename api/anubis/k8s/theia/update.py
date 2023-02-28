@@ -105,7 +105,7 @@ def update_theia_session(session: TheiaSession):
     reserved = is_session_reserved(session)
 
     # Consider pod aged out if it has been n minutes without passing
-    if age > timedelta(minutes=5 if not reserved else 15) and pod.status.phase != 'Running':
+    if not reserved and age > timedelta(minutes=5) and pod.status.phase != 'Running':
 
         # Mark k8s_requested as False before deleting
         session.k8s_requested = False
