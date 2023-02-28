@@ -1,13 +1,33 @@
-FROM python:3.10-alpine
+FROM python:3.10-slim-bullseye
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 COPY requirements.txt /requirements.txt
 RUN set -eux; \
-    adduser -D -u 1001 -h /home/anubis anubis; \
-    apk add --update --no-cache git bash; \
+    useradd -M anubis; \
+    apt update;  \
+    apt install -y --no-install-recommends git bash g++; \
     pip3 install --no-cache-dir -r /requirements.txt; \
-    mkdir /opt/anubis; \
+    mkdir -p /opt/anubis; \
     chmod 755 /opt/anubis; \
-    chown anubis:anubis /opt/anubis
+    chown anubis:anubis /opt/anubis; \
+    apt autoremove -y; \
+    env USER=root find /opt/anubis -depth \
+    \( \
+    \( -type d -a \( -name test -o -name tests -o -name idle_test \) \) \
+    -o \( -type f -a \( -name '*.pyc' -o -name '*.pyo' -o -name '*.a' \) \) \
+    \) -exec rm -rf '{}' + ; \
+    \
+    env USER=root find /usr/local -depth \
+    \( \
+    \( -type d -a \( -name test -o -name tests -o -name idle_test \) \) \
+    -o \( -type f -a \( -name '*.pyc' -o -name '*.pyo' -o -name '*.a' \) \) \
+    \) -exec rm -rf '{}' + ; \
+    rm -rf /usr/share/doc; \
+    rm -rf /usr/lib/gcc; \
+    rm -rf /usr/local/share/.cache; \
+    rm -rf /var/cache/apt/*; \
+    rm -rf /var/lib/apt/lists/*
 
 VOLUME /home/anubis
 VOLUME /log
