@@ -12,8 +12,8 @@ const data = {
   title: 'Interested in security at Anubis?',
   content: 'Come to hack night at the OSIRIS Lab (370 Jay Street, floor 10 room 66) March 9th at 6PM. The creator ' +
     'of Anubis and will be giving ' +
-    'a presentation on container security and securing Anubis. Come learn how you secure a modern, large scale ' +
-    'distributed system with literally hundreds of users.',
+    'a presentation on container security and how it applies to Anubis. Come learn how you secure a modern, ' +
+    'large scale distributed system with hundreds of active users who all have a shell.',
   action: {
     href: 'https://discord.gg/GEYtaATJHs',
     label: 'OSIRIS discord',
