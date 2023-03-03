@@ -235,7 +235,7 @@ def close_shell_autograde_ide_submission(theia_session: TheiaSession):
     submission.state = SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE
     submission.processed = True
     for test_result in submission.test_results:
-        if test_result.passed is None or test_result.passed is False:
+        if test_result.passed is None:
             test_result.passed = False
             test_result.message = 'Not Done'
             test_result.output = 'Not Done'
