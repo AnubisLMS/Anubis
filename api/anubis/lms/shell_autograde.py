@@ -1,8 +1,9 @@
 import re
-from datetime import datetime
+
 from anubis.constants import SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE
 from anubis.github.api import github_rest
 from anubis.github.repos import split_github_repo_path, get_github_repo_default_branch
+from anubis.lms.assignments import get_assignment_due_date
 from anubis.lms.submissions import get_latest_user_submissions
 from anubis.lms.submissions import init_submission
 from anubis.models import Assignment, AssignmentTest, TheiaSession, Submission, SubmissionTestResult, db
@@ -12,7 +13,6 @@ from anubis.utils.data import rand
 from anubis.utils.data import with_context, req_assert
 from anubis.utils.logging import verbose_call, logger
 from anubis.utils.redis import create_redis_lock
-from anubis.lms.assignments import get_assignment_due_date
 
 
 def split_shell_autograde_repo(assignment: Assignment) -> tuple[str, str]:
@@ -110,6 +110,7 @@ def set_assignment_test_order(
     for index, exercise_name in enumerate(remote_exercise_names):
         AssignmentTest.query.filter(AssignmentTest.name == exercise_name).update({'order': index})
     db.session.commit()
+
 
 @verbose_call()
 @with_context
@@ -230,7 +231,13 @@ def create_shell_autograde_ide_submission(theia_session: TheiaSession) -> Submis
 
 
 def close_shell_autograde_ide_submission(theia_session: TheiaSession):
-    submission = theia_session.submission
+    submission: Submission = theia_session.submission
     submission.state = SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE
     submission.processed = True
+    for test_result in submission.test_results:
+        if test_result.passed is None or test_result.passed is False:
+            test_result.passed = False
+            test_result.message = 'Not Done'
+            test_result.output = 'Not Done'
+            db.session.add(test_result)
     db.session.add(submission)
