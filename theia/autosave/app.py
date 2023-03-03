@@ -151,6 +151,8 @@ if ADMIN:
         succeeded = [message for success, message in r if success is True]
         failed = [message for success, message in r if success is False]
 
-        return text_response(
-            'Succeeded:\n' + '\n'.join(succeeded) + '\nFailed:\n' + '\n'.join(failed)
-        )
+        message = 'Succeeded:\n' + '\n'.join(succeeded)
+        if len(failed) > 0:
+            message += '\nFailed:\n' + '\n'.join(failed)
+
+        return text_response(message)
