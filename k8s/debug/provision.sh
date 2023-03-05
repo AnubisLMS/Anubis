@@ -43,11 +43,10 @@ fi
 # automatically just by specifying something in the spec. How this isn't
 # just a part of the v1 job spec is a wonder to me.
 minikube start \
-         --feature-gates=TTLAfterFinished=true \
          --ports=80:80,443:443 \
          --cpus=${CPUS} \
          --memory=${MEM} \
-         --kubernetes-version=v1.21.5
+         --kubernetes-version=v1.26.1
 
 # Give the cluster a second
 sleep 1
@@ -63,15 +62,23 @@ fi
 echo 'Adding traefik ingress label to minikube node...'
 kubectl label node minikube traefik=ingress --overwrite
 
+# Add the external chart repositories
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add traefik https://traefik.github.io/charts
+helm repo update
+
 # Install a basic traefik configuration. This was pretty much entirely
 # pulled from the traefik documentation somewhere around traefik v2.1.
 echo 'Adding traefik resources...'
-kubectl create ns traefik
-kubectl apply -f ./debug/traefik.yaml
-
-# Add the external chart repositories
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo update
+helm upgrade --install traefik traefik/traefik \
+  --set 'hostNetwork=true' \
+  --set 'service.type=ClusterIP' \
+  --set 'globalArguments=null' \
+  --set 'log.general.level=DEBUG' \
+  --set 'ports.web.port=80' \
+  --set 'ports.websecure.port=443' \
+  --create-namespace \
+  --namespace traefik
 
 # Create the anubis namespace
 kubectl create namespace anubis
