@@ -332,21 +332,16 @@ def reap_stale_theia_k8s_resources(theia_pods: k8s.V1PodList):
     ).all()
 
     # Print the course-less ides to the screen
-    print("no-course ides", no_course_db_active_sessions, sep=" :: ")
+    logger.info(f"no-course ides {no_course_db_active_sessions=}")
 
     # Add the no-course theia sessions to the active db sessions list
     active_db_sessions.extend(no_course_db_active_sessions)
 
     # Build set of active pod session ids
-    active_pod_ids = set()
-    for pod in theia_pods.items:
-        active_pod_ids.add(pod.metadata.labels["session"])
-    print('active_pod_ids', active_pod_ids)
+    active_pod_ids = set(pod.metadata.labels["session"] for pod in theia_pods.items)
 
     # Build set of active db session ids
-    active_db_ids = set()
-    for active_db_session in active_db_sessions:
-        active_db_ids.add(active_db_session.id)
+    active_db_ids = set(active_db_session.id for active_db_session in active_db_sessions)
 
     # Figure out reserved session IDs
     reserved_sessions = get_active_reserved_sessions()
@@ -354,7 +349,9 @@ def reap_stale_theia_k8s_resources(theia_pods: k8s.V1PodList):
 
     # Union with reserved
     active_db_ids = active_db_ids.union(reserved_session_ids)
-    print('active_db_ids', active_db_ids)
+    active_pod_ids = active_pod_ids.union(reserved_session_ids)
+    logger.info(f'{len(active_db_ids)} {active_db_ids=}')
+    logger.info(f'{len(active_pod_ids)} {active_pod_ids=}')
 
     # Figure out which ones don't match and need to be updated.
     # (not including sessions reserved)
@@ -362,12 +359,10 @@ def reap_stale_theia_k8s_resources(theia_pods: k8s.V1PodList):
     stale_db_ids = active_db_ids.difference(active_pod_ids)
 
     # Log which stale pods we need to clean up
-    if len(stale_pods_ids) > 0:
-        logger.info("Found stale theia pods to reap: {}".format(str(list(stale_pods_ids))))
+    logger.info("Found stale theia pods to reap: {}".format(str(list(stale_pods_ids))))
 
     # Log the stale database entries we need to cleanup
-    if len(stale_db_ids) > 0:
-        logger.info("Found stale theia database entries: {}".format(str(list(stale_db_ids))))
+    logger.info("Found stale theia database entries: {}".format(str(list(stale_db_ids))))
 
     # Reap theia sessions
 
