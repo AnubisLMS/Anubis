@@ -273,7 +273,11 @@ def reap_stale_theia_k8s_resources(theia_pods: k8s.V1PodList):
     # Get list of all courses
     courses: list[Course] = get_active_courses()
 
+    # List of sessions that are marked active in db
     active_db_sessions: list[TheiaSession] = []
+
+    # now
+    now = datetime.now()
 
     # Iterate over all courses
     for course in courses:
@@ -300,7 +304,7 @@ def reap_stale_theia_k8s_resources(theia_pods: k8s.V1PodList):
             # Filter out admin users (only students in the course)
             ~TheiaSession.owner_id.in_(course_admin_ids),
             # Filter for sessions that have had a proxy in the last 10 minutes
-            TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=standard_theia_timeout),
+            TheiaSession.last_proxy >= now - timedelta(minutes=standard_theia_timeout),
         ).all()
 
         # Get a list of the admin (professor/ta) theia sessions that are active
@@ -308,7 +312,7 @@ def reap_stale_theia_k8s_resources(theia_pods: k8s.V1PodList):
             # Filter for admin users (only professors+tas)
             TheiaSession.owner_id.in_(course_admin_ids),
             # Filter for sessions that have had a proxy in the last 60 minutes
-            TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=admin_theia_timeout),
+            TheiaSession.last_proxy >= now - timedelta(minutes=admin_theia_timeout),
         ).all()
 
         # Build list of all the active theia ides (in the database)
@@ -328,7 +332,7 @@ def reap_stale_theia_k8s_resources(theia_pods: k8s.V1PodList):
         # Course-less theia session
         TheiaSession.course_id == None,
         # Filter for sessions that have had a proxy in the last 10 minutes
-        TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=standard_theia_timeout),
+        TheiaSession.last_proxy >= now - timedelta(minutes=standard_theia_timeout),
     ).all()
 
     # Print the course-less ides to the screen
