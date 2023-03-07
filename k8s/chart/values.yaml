@@ -138,7 +138,7 @@ autograde_reaper:
 ide_reaper:
   enable: true
   suspend: false
-  schedule: "*/5 * * * *"
+  schedule: "* * * * *"
 
 backup:
   enable: true
