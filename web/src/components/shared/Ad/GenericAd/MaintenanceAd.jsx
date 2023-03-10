@@ -21,39 +21,42 @@ const data = {
 };
 
 export default function GenericAd() {
-  return (
-    <Zoom in>
-      <Alert
-        severity={data.severity}
-        variant="outlined"
-        sx={{mt: 2, mb: 2}}
-        action={
-          <React.Fragment>
-            {data.action && (
-              <Button
-                sx={{m: 2}}
-                variant={'contained'}
-                color={'primary'}
-                startIcon={<ExitToAppIcon/>}
-                href={data.action.href}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {data.action.label}
-              </Button>
-            )}
-          </React.Fragment>
-        }
-      >
-        <AlertTitle sx={{fontSize: 22}}>
-          <strong>
-            {data.title}
-          </strong>
-        </AlertTitle>
-        <Typography variant={'body1'}>
-          {data.content}
-        </Typography>
-      </Alert>
-    </Zoom>
-  );
+  return <dev/>;
 }
+// export default function GenericAd() {
+//   return (
+//     <Zoom in>
+//       <Alert
+//         severity={data.severity}
+//         variant="outlined"
+//         sx={{mt: 2, mb: 2}}
+//         action={
+//           <React.Fragment>
+//             {data.action && (
+//               <Button
+//                 sx={{m: 2}}
+//                 variant={'contained'}
+//                 color={'primary'}
+//                 startIcon={<ExitToAppIcon/>}
+//                 href={data.action.href}
+//                 target="_blank"
+//                 rel="noreferrer"
+//               >
+//                 {data.action.label}
+//               </Button>
+//             )}
+//           </React.Fragment>
+//         }
+//       >
+//         <AlertTitle sx={{fontSize: 22}}>
+//           <strong>
+//             {data.title}
+//           </strong>
+//         </AlertTitle>
+//         <Typography variant={'body1'}>
+//           {data.content}
+//         </Typography>
+//       </Alert>
+//     </Zoom>
+//   );
+// }
