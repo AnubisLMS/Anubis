@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 
 // import MaintenanceAd from '../../../../components/shared/Ad/MaintenanceAd/MaintenanceAd';
-import GenericAd from '../../../../components/shared/Ad/GenericAd/MaintenanceAd';
+import GenericAd from '../../../../components/shared/Ad/GenericAd/GenericAd';
 import ListHeader from '../../../../components/shared/ListHeader/ListHeader';
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';

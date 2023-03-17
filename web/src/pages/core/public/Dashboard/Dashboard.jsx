@@ -5,7 +5,7 @@ import {useSnackbar} from 'notistack';
 import Box from '@mui/material/Box';
 
 // import MaintenanceAd from '../../../../components/shared/Ad/MaintenanceAd/MaintenanceAd';
-import GenericAd from '../../../../components/shared/Ad/GenericAd/MaintenanceAd';
+import GenericAd from '../../../../components/shared/Ad/GenericAd/GenericAd';
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../../utils/standardErrorHandler';
