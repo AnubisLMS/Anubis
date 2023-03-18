@@ -34,6 +34,7 @@ spec:
       - name: {{ .name }}
         image: {{ .image }}
         imagePullPolicy: Always
-        command: ['sh', '-c', 'while true; do sleep 3600; done']
+        command: ['sh', '-c']
+        args: ['while true; do sleep 3600; done']
       {{- end }}
 {{- end }}
