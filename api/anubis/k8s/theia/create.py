@@ -336,10 +336,13 @@ def create_theia_k8s_pod_pvc(
     # DOCKERD CONTAINER
 
     if theia_session.docker:
-        certs_volume = k8s.V1Volume(name="dockerd-certs", empty_dir={})
+        docker_certs_volume = k8s.V1Volume(name="dockerd-certs", empty_dir={})
+        docker_plugin_volume = k8s.V1Volume(name="dockerd-plugin", empty_dir={})
         certs_volume_mount = k8s.V1VolumeMount(name="dockerd-certs", mount_path="/certs")
+        docker_plugin_volume_mount = k8s.V1VolumeMount(name="dockerd-plugin", mount_path="/run/docker/plugins/")
 
-        pod_volumes.append(certs_volume)
+        pod_volumes.append(docker_certs_volume)
+        pod_volumes.append(docker_plugin_volume)
         ide_volume_mounts.append(certs_volume_mount)
 
         theia_extra_env.append(k8s.V1EnvVar(name="ANUBIS_RUN_DOCKERD", value="1"))
@@ -361,11 +364,31 @@ def create_theia_k8s_pod_pvc(
             # Add the shared certs volume
             volume_mounts=[
                 shared_log_volume_mount,
+                docker_plugin_volume_mount,
                 *ide_volume_mounts,
             ],
         )
 
+        dockerd_authz_container = k8s.V1Container(
+            name="dockerd-authz",
+            image="registry.digitalocean.com/anubis/anubis-authz",
+            image_pull_policy="IfNotPresent",
+            # Add a security context to disable privilege escalation
+            security_context=k8s.V1SecurityContext(
+                allow_privilege_escalation=False,
+                run_as_non_root=True,
+                run_as_user=1001,
+                privileged=False,
+            ),
+            # Add the shared certs volume
+            volume_mounts=[
+                shared_log_volume_mount,
+                docker_plugin_volume_mount,
+            ],
+        )
+
         pod_containers.append(dockerd_container)
+        pod_containers.append(dockerd_authz_container)
 
     ##################################################################################
     # AUTOGRADE CONTAINER

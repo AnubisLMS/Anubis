@@ -22,6 +22,7 @@ from anubis.models import (
     TheiaImage,
     TheiaImageTag,
     User,
+    Config,
     db,
 )
 from anubis.models.id import default_id_factory
@@ -441,6 +442,11 @@ def seed():
     logger.info('init mmds submissions')
     init_submissions(mmds_submissions)
     assign_questions(mmds_assignment)
+
+    playground_dockerd_config = Config.query.filter_by(key='PLAYGROUND_DOCKERD')
+    if playground_dockerd_config is None:
+        playground_dockerd_config = Config(key='PLAYGROUND_DOCKERD', value='ON')
+        db.session.add(playground_dockerd_config)
 
     logger.info('committing')
     db.session.commit()
