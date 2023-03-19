@@ -10,8 +10,8 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 const data = {
   severity: 'warning',
   title: 'Maintenance incoming',
-  content: 'Anubis will be unavailable briefly Saturday the 18th for about an hour starting at 11PM while we do ' +
-    'some minor cluster updates (2023-03-18 23:00:00 EDT - 2023-03-19 00:00:00 EDT).',
+  content: 'Anubis will be unavailable briefly Sunday the 19th for about an hour starting at 11PM while we do ' +
+    'some minor cluster updates (2023-03-19 23:00:00 EDT - 2023-03-20 00:00:00 EDT).',
   // action: {
   //   href: 'https://discord.gg/GEYtaATJHs',
   //   label: 'OSIRIS discord',
