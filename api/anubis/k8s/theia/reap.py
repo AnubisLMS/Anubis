@@ -66,6 +66,7 @@ def reap_theia_session_k8s_resources(theia_session_id: str):
         label_selector="app.kubernetes.io/name=anubis,role=theia-session,session={}".format(
             theia_session_id,
         ),
+        grace_period_seconds=0,
         propagation_policy="Background",
     )
 
