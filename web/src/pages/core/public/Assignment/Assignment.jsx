@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {Fragment, useEffect, useState} from 'react';
 import {useSnackbar} from 'notistack';
 import axios from 'axios';
 import clsx from 'clsx';
@@ -33,6 +33,7 @@ const Assignment = () => {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
 
+  const [reset, setReset] = useState(0);
   const [assignment, setAssignment] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [selectedTheia, setSelectedTheia] = useState(null);
@@ -52,7 +53,7 @@ const Assignment = () => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       setSubmissions(data.submissions.map(translateSubmission));
     }).catch(standardErrorHandler(enqueueSnackbar));
-  }, []);
+  }, [reset]);
 
   useEffect(() => {
     axios.get(`/api/public/assignments/get/${assignmentId}`).then((response) => {
@@ -98,7 +99,7 @@ const Assignment = () => {
 
   return (
     <StandardLayout>
-      <IDEDialog selectedTheia={selectedTheia} setSelectedTheia={setSelectedTheia}/>
+      <IDEDialog selectedTheia={selectedTheia} setSelectedTheia={setSelectedTheia} reload={() => setReset(reset+1)}/>
       {assignment && (
         <Box className={classes.root}>
           <Box position="sticky" top={42} className={classes.header}>
@@ -129,31 +130,36 @@ const Assignment = () => {
                 variant={'contained'}
                 className={classes.ideButton}
                 onClick={() => setSelectedTheia(assignment)}
-                disabled={!assignment.has_repo}
+                disabled={assignment.github_repo_required && !assignment.has_repo}
               >
                 <LaunchIcon className={classes.launchIcon}/>
                 Open Anubis Cloud IDE
               </Button>
-              {assignment.has_repo ? (
-                <Button
-                  color={'primary'}
-                  variant={'contained'}
-                  className={classes.repoButton}
-                  href={assignment.repo_url}
-                  component="a"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  View Repo
-                </Button>
-              ) : (
-                <Button onClick={createAssignmentRepo} className={classes.repoButton}>
-                  {runAssignmentPolling ? (
-                    <CircularProgress size={24}/>
-                  ) : 'Create Repo'}
-                </Button>
+              {assignment.github_repo_required && (
+                <Fragment>
+                  {
+                    assignment.has_repo ? (
+                      <Button
+                        color={'primary'}
+                        variant={'contained'}
+                        className={classes.repoButton}
+                        href={assignment.repo_url}
+                        component="a"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                      View Repo
+                      </Button>
+                    ) : (
+                      <Button onClick={createAssignmentRepo} className={classes.repoButton}>
+                        {runAssignmentPolling ? (
+                          <CircularProgress size={24}/>
+                        ) : 'Create Repo'}
+                      </Button>
+                    )
+                  }
+                </Fragment>
               )}
-
             </Box>
           </Box>
           <Divider/>
@@ -170,17 +176,37 @@ const Assignment = () => {
                   </Box>
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Box className={
-                    clsx(classes.overviewItem, assignment.has_submission ? classes.colorGreen : classes.colorRed)
-                  }>
-                    <Typography className={classes.overviewItemTitle}>SUBMITTED</Typography>
-                    <Box className={classes.overviewItemSubtitle}>
-                      {!assignment.has_submission ? <CancelIcon/> : <CheckCircleIcon/>}
-                      <Typography className={classes.overviewItemSubtitleText}>
-                        {!assignment.has_submission ? 'No Submission' : 'Sucessfully Submitted'}
-                      </Typography>
+                  {assignment.shell_autograde_enabled ? (
+                    <Box className={
+                      clsx(classes.overviewItem, !assignment.has_submission ? classes.colorRed : (
+                        assignment.complete ? classes.colorGreen : classes.colorOrange
+                      ))
+                    }>
+                      <Typography className={classes.overviewItemTitle}>SUBMITTED</Typography>
+                      <Box className={classes.overviewItemSubtitle}>
+                        {assignment.complete ? <CheckCircleIcon/> : <CancelIcon/>}
+                        <Typography className={classes.overviewItemSubtitleText}>
+                          <Fragment>
+                            {assignment.complete ? 'Complete' : 'Incomplete'}
+                          </Fragment>
+                        </Typography>
+                      </Box>
                     </Box>
-                  </Box>
+                  ) : (
+                    <Box className={
+                      clsx(classes.overviewItem, assignment.has_submission ? classes.colorGreen : classes.colorRed)
+                    }>
+                      <Typography className={classes.overviewItemTitle}>SUBMITTED</Typography>
+                      <Box className={classes.overviewItemSubtitle}>
+                        {!assignment.has_submission ? <CancelIcon/> : <CheckCircleIcon/>}
+                        <Typography className={classes.overviewItemSubtitleText}>
+                          <Fragment>
+                            {!assignment.has_submission ? 'No Submission' : 'Sucessfully Submitted'}
+                          </Fragment>
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Box className={
@@ -236,6 +262,8 @@ const Assignment = () => {
                   key={`${submission.submission_name}-${index}`}
                   assignmentDue={submission.assignment_due}
                   assignmentName={submission.assignment_name}
+                  accepted={submission.accepted}
+                  id={submission.id}
                   commit={submission.commit}
                   processed={submission.processed}
                   tests={submission.tests}

@@ -1,19 +1,47 @@
 import traceback
 
-import googleapiclient.discovery
 import jinja2
 from googleapiclient.errors import Error
-
-
+from datetime import datetime
 from anubis.constants import EMAIL_FROM
+from anubis.utils.google.gmail import send_message
 from anubis.models import db, User, EmailTemplate, EmailEvent
-from anubis.google.gmail import send_message
 from anubis.utils.email.smtp import create_message
 from anubis.utils.logging import logger
+from anubis.utils.config import get_config_str
+
+
+def send_email_event_admin(
+    reference_id: str,
+    reference_type: str,
+    template_key: str,
+    context: dict,
+):
+    admin_netid: str = get_config_str('ADMIN_NETID', None)
+    if admin_netid is None:
+        logger.warning(f'ADMIN_NETID not set')
+        return
+
+    # Get admin user
+    user: User = User.query.filter(User.netid == admin_netid).first()
+    if user is None:
+        logger.warning(f'Admin user not found')
+        return
+
+    # Limit message to one per hour
+    now = datetime.now().replace(minute=0, second=0, microsecond=0)
+
+    # Send email event
+    send_email_event(
+        user,
+        reference_id=f'{reference_id} {now}',
+        reference_type=reference_type,
+        template_key=template_key,
+        context=context,
+    )
 
 
 def send_email_event(
-    service: googleapiclient.discovery.Resource,
     user: User,
     reference_id: str,
     reference_type: str,
@@ -55,7 +83,7 @@ def send_email_event(
 
     # Send email
     try:
-        success = send_message(service, message) is not False
+        success = send_message(message) is not False
     except Error as e:
         logger.error(f'Failed to send email!\nerror={e}\n\n{traceback.format_exc()}\nemail={message}')
         return
@@ -71,4 +99,3 @@ def send_email_event(
         )
         db.session.add(event)
         db.session.commit()
-

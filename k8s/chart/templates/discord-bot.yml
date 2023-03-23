@@ -1,4 +1,4 @@
-{{- if .Values.discordbot.enable }}
+{{- if and .Values.discord_bot.enable (not .Values.debug) }}
 
 apiVersion: apps/v1
 kind: Deployment
@@ -13,7 +13,7 @@ spec:
     matchLabels:
       {{- include "chart.selectorLabels" . | nindent 6 }}
       component: discord-bot
-  replicas: {{ .Values.discordbot.replicas }}
+  replicas: {{- if not .Values.offSemester }} {{ .Values.discord_bot.replicas }}{{- else }} 1{{- end }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if .Values.rollingUpdates }}
   strategy:
@@ -28,6 +28,10 @@ spec:
         {{- include "chart.selectorLabels" . | nindent 8 }}
         component: discord-bot
     spec:
+      {{- if and .Values.nodeSelector (not .Values.debug) }}
+      nodeSelector:
+        {{ .Values.nodeSelector | toYaml }}
+      {{- end }}
       containers:
       - name: discord-bot
         image: "{{ .Values.api.image }}:{{ .Values.tag }}"
@@ -38,7 +42,7 @@ spec:
             cpu: 100m
             memory: 100Mi
           limits:
-            cpu: 2
+            cpu: 2000m
             memory: 500Mi
         env:
         - name: "DISCORD_BOT_TOKEN"

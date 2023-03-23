@@ -9,6 +9,7 @@ from anubis.lms.courses import get_active_courses, get_course_admin_ids
 from anubis.models import TheiaSession, db, Course
 from anubis.utils.config import get_config_int
 from anubis.utils.logging import logger
+from anubis.lms.reserve import get_active_reserved_sessions
 
 
 def reap_stale_theia_sessions(*_):
@@ -95,9 +96,8 @@ def reap_old_theia_sessions(theia_pods: k8s.V1PodList):
         if theia_session is None:
             continue
 
-        # If the session is younger than 6 hours old, continue
         if datetime.now() <= theia_session.created + theia_stale_timeout:
-            logger.info(f"NOT reaping session {theia_session.id}")
+            logger.info(f"NOT reaping session {theia_session.id}: age ok")
             continue
 
         # Reap the session
@@ -128,6 +128,11 @@ def reap_theia_session(theia_session: TheiaSession, commit: bool = True):
     # Update the database entry for the session. set the end time,
     # and active to False.
     mark_session_ended(theia_session)
+
+    if theia_session.submission_id:
+        from anubis.lms.shell_autograde import close_shell_autograde_ide_submission
+
+        close_shell_autograde_ide_submission(theia_session)
 
     # Commit the changes to the database entry
     if commit:
@@ -268,7 +273,11 @@ def reap_stale_theia_k8s_resources(theia_pods: k8s.V1PodList):
     # Get list of all courses
     courses: list[Course] = get_active_courses()
 
+    # List of sessions that are marked active in db
     active_db_sessions: list[TheiaSession] = []
+
+    # now
+    now = datetime.now()
 
     # Iterate over all courses
     for course in courses:
@@ -295,7 +304,7 @@ def reap_stale_theia_k8s_resources(theia_pods: k8s.V1PodList):
             # Filter out admin users (only students in the course)
             ~TheiaSession.owner_id.in_(course_admin_ids),
             # Filter for sessions that have had a proxy in the last 10 minutes
-            TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=standard_theia_timeout),
+            TheiaSession.last_proxy >= now - timedelta(minutes=standard_theia_timeout),
         ).all()
 
         # Get a list of the admin (professor/ta) theia sessions that are active
@@ -303,7 +312,7 @@ def reap_stale_theia_k8s_resources(theia_pods: k8s.V1PodList):
             # Filter for admin users (only professors+tas)
             TheiaSession.owner_id.in_(course_admin_ids),
             # Filter for sessions that have had a proxy in the last 60 minutes
-            TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=admin_theia_timeout),
+            TheiaSession.last_proxy >= now - timedelta(minutes=admin_theia_timeout),
         ).all()
 
         # Build list of all the active theia ides (in the database)
@@ -323,48 +332,51 @@ def reap_stale_theia_k8s_resources(theia_pods: k8s.V1PodList):
         # Course-less theia session
         TheiaSession.course_id == None,
         # Filter for sessions that have had a proxy in the last 10 minutes
-        TheiaSession.last_proxy >= datetime.now() - timedelta(minutes=standard_theia_timeout),
+        TheiaSession.last_proxy >= now - timedelta(minutes=standard_theia_timeout),
     ).all()
 
     # Print the course-less ides to the screen
-    print("no-course ides", no_course_db_active_sessions, sep=" :: ")
+    logger.info(f"no-course ides {no_course_db_active_sessions=}")
 
     # Add the no-course theia sessions to the active db sessions list
     active_db_sessions.extend(no_course_db_active_sessions)
 
-    print("active_db_sessions", active_db_sessions)
-
     # Build set of active pod session ids
-    active_pod_ids = set()
-    for pod in theia_pods.items:
-        active_pod_ids.add(pod.metadata.labels["session"])
+    active_pod_ids = set(pod.metadata.labels["session"] for pod in theia_pods.items)
 
     # Build set of active db session ids
-    active_db_ids = set()
-    for active_db_session in active_db_sessions:
-        active_db_ids.add(active_db_session.id)
+    active_db_ids = set(active_db_session.id for active_db_session in active_db_sessions)
 
-    # Figure out which ones don't match
-    # and need to be updated.
-    stale_pods_ids = active_pod_ids - active_db_ids
-    stale_db_ids = active_db_ids - active_pod_ids
+    # Figure out reserved session IDs
+    reserved_sessions = get_active_reserved_sessions()
+    reserved_session_ids = set(reserved_session.id for reserved_session in reserved_sessions)
+
+    # Union with reserved
+    active_db_ids = active_db_ids.union(reserved_session_ids)
+    active_pod_ids = active_pod_ids.union(reserved_session_ids)
+    logger.info(f'{len(active_db_ids)} {active_db_ids=}')
+    logger.info(f'{len(active_pod_ids)} {active_pod_ids=}')
+
+    # Figure out which ones don't match and need to be updated.
+    # (not including sessions reserved)
+    stale_pods_ids = active_pod_ids.difference(active_db_ids)
+    stale_db_ids = active_db_ids.difference(active_pod_ids)
 
     # Log which stale pods we need to clean up
-    if len(stale_pods_ids) > 0:
-        logger.info("Found stale theia pods to reap: {}".format(str(list(stale_pods_ids))))
+    logger.info("Found stale theia pods to reap: {}".format(str(list(stale_pods_ids))))
 
     # Log the stale database entries we need to cleanup
-    if len(stale_db_ids) > 0:
-        logger.info("Found stale theia database entries: {}".format(str(list(stale_db_ids))))
+    logger.info("Found stale theia database entries: {}".format(str(list(stale_db_ids))))
 
     # Reap theia sessions
 
     for stale_pod_id in stale_pods_ids:
+        logger.info(f'Reaping stale pod session-id: {stale_pod_id}')
         reap_theia_session_by_id(stale_pod_id)
 
     # Update database entries
     TheiaSession.query.filter(
-        TheiaSession.id.in_(list(stale_db_ids)),
+        TheiaSession.id.in_(list(stale_db_ids.difference(reserved_session_ids))),
     ).update({TheiaSession.active: False}, False)
 
     # Commit any and all changes to the database

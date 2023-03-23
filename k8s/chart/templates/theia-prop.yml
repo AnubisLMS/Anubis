@@ -11,6 +11,7 @@ metadata:
   labels:
     {{- include "chart.labels" . | nindent 4 }}
     component: theia-prop
+    tag: {{ .Values.tag | quote }}
 spec:
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
@@ -26,12 +27,14 @@ spec:
       labels:
         {{- include "chart.selectorLabels" . | nindent 8 }}
         name: theia-prop
+        tag: {{ .Values.tag | quote }}
     spec:
       containers:
       {{- range .Values.theia.prop.images }}
       - name: {{ .name }}
         image: {{ .image }}
         imagePullPolicy: Always
-        command: ['sh', '-c', 'while true; do sleep 3600; done']
+        command: ['sh', '-c']
+        args: ['while true; do sleep 3600; done']
       {{- end }}
 {{- end }}

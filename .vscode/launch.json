@@ -1,0 +1,94 @@
+{
+    "configurations": [
+        {
+       
+            "name": "Kubernetes: Run/Debug",
+            "type": "cloudcode.kubernetes",
+            "request": "launch",
+            "skaffoldConfig": "${workspaceFolder}/skaffold.yaml",
+            "watch": true,
+            "cleanUp": true,
+            "portForward": true,
+            "imageRegistry": "registry.digitalocean.com",
+            "debug": [
+                {
+                    "image": "registry.digitalocean.com/anubis/api",
+                    "containerName": "db-migrate",
+                    "sourceFileMap": {
+                        "${workspaceFolder}/api": "/opt/app"
+                    }
+                },
+                {
+                    "image": "registry.digitalocean.com/anubis/api",
+                    "containerName": "api",
+                    "sourceFileMap": {
+                        "${workspaceFolder}/api": "/opt/app"
+                    }
+                },
+                {
+                    "image": "registry.digitalocean.com/anubis/api",
+                    "containerName": "poller",
+                    "sourceFileMap": {
+                        "${workspaceFolder}/api": "/opt/app"
+                    }
+                },
+                {
+                    "image": "registry.digitalocean.com/anubis/api",
+                    "containerName": "anubis-rpc-default",
+                    "sourceFileMap": {
+                        "${workspaceFolder}/api": "/opt/app"
+                    }
+                },
+                {
+                    "image": "registry.digitalocean.com/anubis/api",
+                    "containerName": "anubis-rpc-regrade",
+                    "sourceFileMap": {
+                        "${workspaceFolder}/api": "/opt/app"
+                    }
+                },
+                {
+                    "image": "registry.digitalocean.com/anubis/api",
+                    "containerName": "poller",
+                    "sourceFileMap": {
+                        "${workspaceFolder}/api": "/opt/app"
+                    }
+                },
+                {
+                    "image": "registry.digitalocean.com/anubis/api",
+                    "containerName": "anubis-rpc-theia",
+                    "sourceFileMap": {
+                        "${workspaceFolder}/api": "/opt/app"
+                    }
+                },
+                {
+                    "image": "registry.digitalocean.com/anubis/api",
+                    "containerName": "discord-bot",
+                    "sourceFileMap": {
+                        "${workspaceFolder}/api": "/opt/app"
+                    }
+                },
+                {
+                    "image": "registry.digitalocean.com/anubis/api",
+                    "containerName": "pipeline-api",
+                    "sourceFileMap": {
+                        "${workspaceFolder}/api": "/opt/app"
+                    }
+                },
+                {
+                    "image": "registry.digitalocean.com/anubis/api",
+                    "containerName": "discord-bot",
+                    "sourceFileMap": {
+                        "${workspaceFolder}/api": "/opt/app"
+                    }
+                },
+                {
+                    "image": "registry.digitalocean.com/anubis/api",
+                    "containerName": "poller",
+                    "sourceFileMap": {
+                        "${workspaceFolder}/api": "/opt/app"
+                    }
+                }
+            ]
+        }
+    ]
+}

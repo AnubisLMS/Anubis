@@ -13,6 +13,8 @@ def register_admin_views(app):
     from anubis.views.admin.static import static
     from anubis.views.admin.students import students_
     from anubis.views.admin.visuals import visuals_
+    from anubis.views.admin.reserve import reserve_
+    from anubis.views.admin.submissions import submissions_
 
     views = [
         ide,
@@ -29,6 +31,8 @@ def register_admin_views(app):
         dangling,
         late_exceptions_,
         lectures_,
+        reserve_,
+        submissions_,
     ]
 
     for view in views:

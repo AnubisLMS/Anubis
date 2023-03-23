@@ -1,4 +1,4 @@
-{{- if .Values.hpa.enable }}
+{{- if and .Values.hpa.enable (not .Values.offSemester) }}
 {{- if not .Values.debug }}
 
 apiVersion: autoscaling/v2beta2
@@ -21,7 +21,7 @@ spec:
     kind: Deployment
     name: {{ include "chart.fullname" . }}-api
   minReplicas: {{ .Values.api.replicas }}
-  maxReplicas: 5
+  maxReplicas: 16
   metrics:
   - type: Resource
     resource:
@@ -51,7 +51,7 @@ spec:
     kind: Deployment
     name: {{ include "chart.fullname" . }}-web
   minReplicas: {{ .Values.web.replicas }}
-  maxReplicas: 5
+  maxReplicas: 8
   metrics:
   - type: Resource
     resource:
@@ -81,14 +81,14 @@ spec:
     kind: Deployment
     name: {{ include "chart.fullname" . }}-theia-proxy
   minReplicas: {{ .Values.theia.proxy.replicas }}
-  maxReplicas: 15
+  maxReplicas: 32
   metrics:
   - type: Resource
     resource:
       name: memory
       target:
         type: Utilization
-        averageUtilization: 70
+        averageUtilization: 80
 
 ---
 {{- range .Values.hpa.rpc }}
@@ -105,7 +105,7 @@ spec:
     kind: Deployment
     name: {{ include "chart.fullname" $ }}-{{ .name }}
   minReplicas: {{ $.Values.rpc.replicas }}
-  maxReplicas: 10
+  maxReplicas: 16
   metrics:
   - type: Resource
     resource:

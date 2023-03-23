@@ -12,7 +12,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 
-import {Diff, Hunk, markEdits, parseDiff, tokenize} from 'react-diff-view';
+import {Diff, Hunk, markEdits, markWord, parseDiff, tokenize} from 'react-diff-view';
 import 'react-diff-view/style/index.css';
 
 import {useStyles} from './SubmissionTestExpanded.styles';
@@ -52,7 +52,11 @@ export default function SubmissionTestExpanded({
     if (!diffs) return [];
     return diffs.map((diff) => tokenize(diff.hunks, {
       hightlight: false,
-      enhancers: [markEdits(diffs[0].hunks, {type: 'block'})],
+      enhancers: [
+        markEdits(diffs[0].hunks, {type: 'block'}),
+        markWord('\0', 'NUL', '␀'),
+        markWord('\r', 'CR', '␍'),
+      ],
     }));
   }, [diffs]);
 

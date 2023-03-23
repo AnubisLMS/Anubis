@@ -4,7 +4,7 @@ from typing import Any
 
 import requests
 
-from anubis.utils.logging import logger
+from anubis.utils.logging import logger, verbose_call
 
 
 def get_github_token() -> str | None:
@@ -18,15 +18,15 @@ def get_github_token() -> str | None:
 
     return token
 
-
-def github_rest(url, body=None, method: str = "get"):
+@verbose_call()
+def github_rest(url, body=None, method: str = "get", api_domain: str = "api.github.com", accept: str = "application/vnd.github.v3+json") -> dict | bytes | None:
     # Get the github api token
     token = get_github_token()
 
-    url = "https://api.github.com" + url
+    url = f'https://{api_domain}' + url
     headers = {
-        "Accept": "application/vnd.github.v3+json",
-        "Authorization": "token %s" % token,
+        "Accept": accept,
+        "Authorization": f"token {token}",
     }
 
     req_function = {
@@ -39,12 +39,16 @@ def github_rest(url, body=None, method: str = "get"):
     r = None
     try:
         if body is not None:
-            r = req_function(url, headers=headers, json=body)
+            r: requests.Response = req_function(url, headers=headers, json=body)
         else:
-            r = req_function(url, headers=headers)
-        if r.status_code == 204:
-            return dict()
-        return r.json()
+            r: requests.Response = req_function(url, headers=headers)
+        is_json = 'Content-Type' in r.headers and 'application/json' in r.headers.get('Content-Type')
+        if is_json:
+            if r.status_code == 204:
+                return dict()
+            return r.json()
+        else:
+            return r.content
     except Exception as e:
         if r is not None and isinstance(r, requests.Response):
             logger.error(str(r))

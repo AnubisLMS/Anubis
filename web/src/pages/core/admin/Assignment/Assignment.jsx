@@ -12,6 +12,7 @@ import ManagementIDEDialog from '../../../../components/core/AdminIDE/Management
 import AssignmentCard from '../../../../components/core/Assignment/AssignmentCard';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';
 import {nonStupidDatetimeFormat} from '../../../../utils/datetime';
+import standardErrorHandler from '../../../../utils/standardErrorHandler';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -21,6 +22,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const editableFields = [
+  {title: 'Assignment Controls'},
   {field: 'name', label: 'Assignment Name'},
   {field: 'github_template', label: 'Github Template (ex: AnubisLMS/xv6)'},
   {field: 'theia_image', label: 'IDE Docker Image'},
@@ -37,6 +39,17 @@ const editableFields = [
   {field: 'release_date', label: 'Release Date', type: 'datetime'},
   {field: 'due_date', label: 'Due Date', type: 'datetime'},
   {field: 'grace_date', label: 'Grace Date', type: 'datetime'},
+  {divider: true},
+  {title: 'Beta Settings'},
+  {field: 'shell_autograde_repo', label: 'Shell Autograde Repo (ex: os3224/exercises)'},
+  {field: 'shell_autograde_exercise_path', label: 'Shell Exercise Path (ex: subdirectory/exercise.py)'},
+  {field: 'shell_autograde_enabled', label: 'Shell Autograde Enabled', type: 'boolean'},
+  {button: 'Sync Exercise Github', onClick: (enqueueSnackbar, assignmentId) => () => {
+    axios.get(`/api/admin/assignments/shell/sync/${assignmentId}`).then((response) => {
+      standardStatusHandler(response, enqueueSnackbar);
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  }},
+  {divider: true},
 ];
 
 export default function Assignment() {
@@ -58,7 +71,7 @@ export default function Assignment() {
         }
         setAssignment(data.assignment);
       }
-    }).catch((error) => enqueueSnackbar(error.toString(), {variant: 'error'}));
+    }).catch(standardErrorHandler(enqueueSnackbar));
   }, [reset]);
 
   const updateField = (id, field, toggle = false, datetime = false, json = false) => (e) => {

@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function QuestionEditor({question, updateResponse, saveResponse}) {
+export default function QuestionEditor({question, updateResponse, saveResponse, commands}) {
   const classes = useStyles();
   const [showSolution, setShowSolution] = useState(false);
   const response = question?.response?.text ?? '';
@@ -84,11 +84,7 @@ export default function QuestionEditor({question, updateResponse, saveResponse})
           theme="monokai"
           value={response}
           onChange={updateResponse}
-          commands={[{ // commands is array of key bindings.
-            name: 'save', // name for the key binding.
-            bindKey: {win: 'Ctrl-s', mac: 'Command-s'}, // key combination used for the command.
-            exec: saveResponse, // function to execute when keys are pressed.
-          }]}
+          commands={commands}
         />
       )}
     </Box>

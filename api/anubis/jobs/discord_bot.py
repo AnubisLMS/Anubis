@@ -136,8 +136,8 @@ def generate_ide_report(day=None, mobile: bool = False) -> discord.Embed | Image
         [
             [
                 index,
-                human_readable_timedelta(now - ide.created),
-                human_readable_timedelta(now - ide.last_proxy),
+                human_readable_timedelta(now - (ide.created if ide.created is not None else now)),
+                human_readable_timedelta(now - (ide.last_proxy if ide.last_proxy is not None else now)),
             ]
             for index, ide in enumerate(active_ides)
         ],

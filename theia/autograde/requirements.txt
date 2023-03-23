@@ -1,0 +1,7 @@
+flask
+supervisor
+gunicorn
+colorama
+termcolor
+requests
+retry

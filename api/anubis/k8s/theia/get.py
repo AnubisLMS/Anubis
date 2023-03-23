@@ -1,6 +1,7 @@
 from kubernetes import client as k8s
 
 from anubis.models import TheiaSession
+from anubis.env import env
 
 
 def list_theia_pods() -> k8s.V1PodList:
@@ -35,3 +36,13 @@ def active_theia_pod_count() -> int:
 
 def get_theia_pod_name(theia_session: TheiaSession) -> str:
     return f"theia-{theia_session.owner.netid}-{theia_session.id}"
+
+
+def get_theia_node_selector() -> dict | None:
+    if env.IDE_NODE_SELECTOR is None:
+        return dict()
+
+    return {
+        term.split('=')[0]: term.split('=')[1]
+        for term in env.IDE_NODE_SELECTOR.split(',')
+    }

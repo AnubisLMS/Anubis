@@ -14,6 +14,7 @@ def parse_webhook(webhook):
     # Load the basics from the webhook
     repo_url = webhook["repository"]["url"]
     repo_name = webhook["repository"]["name"]
+    default_branch = webhook["repository"]["default_branch"]
     pusher_username = webhook["pusher"]["name"]
     commit = webhook["after"]
     before = webhook["before"]
@@ -26,6 +27,7 @@ def parse_webhook(webhook):
         commit,
         before,
         ref,
+        default_branch
     )
 
 

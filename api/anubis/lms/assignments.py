@@ -1,10 +1,13 @@
+import string
 from datetime import datetime, timedelta
 from typing import Any
-import string
 
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
+from flask_sqlalchemy import get_debug_queries
 
 from anubis.github.repos import create_assignment_group_repo, delete_assignment_repo
+from anubis.github.repos import verify_collaborators_assignment
+from anubis.lms.autograde import autograde
 from anubis.lms.courses import (
     assert_course_admin,
     get_user_course_ids,
@@ -34,6 +37,7 @@ from anubis.utils.cache import cache
 from anubis.utils.config import get_config_int
 from anubis.utils.data import is_debug
 from anubis.utils.data import req_assert
+from anubis.utils.logging import logger
 
 
 @cache.memoize(timeout=30, unless=is_debug)
@@ -110,21 +114,21 @@ def get_all_assignments(course_ids: set[str], admin_course_ids: set[str]) -> lis
     # Get the assignment objects that should be visible to this user.
     regular_course_assignments = (
         Assignment.query.join(Course)
-            .filter(
+        .filter(
             Course.id.in_(list(course_ids.difference(admin_course_ids))),
             Assignment.release_date <= datetime.now(),
             Assignment.hidden == False,
         )
-            .all()
+        .all()
     )
 
     # Get the assignment objects that should be visible to this user.
     admin_course_assignments = (
         Assignment.query.join(Course)
-            .filter(
+        .filter(
             Course.id.in_(list(admin_course_ids)),
         )
-            .all()
+        .all()
     )
 
     # Add all the assignment objects to the running list
@@ -134,7 +138,7 @@ def get_all_assignments(course_ids: set[str], admin_course_ids: set[str]) -> lis
     return assignments
 
 
-@cache.memoize(timeout=10, unless=is_debug, source_check=True)
+@cache.memoize(timeout=5, unless=is_debug, source_check=True)
 def get_assignments(netid: str, course_id=None) -> list[dict[str, Any]] | None:
     """
     Get all the current assignments for a netid. Optionally specify a course_id
@@ -260,11 +264,11 @@ def assignment_sync(assignment_data: dict) -> tuple[dict | str, bool]:
         # Find if the assignment test exists
         assignment_test = (
             AssignmentTest.query.join(Assignment)
-                .filter(
+            .filter(
                 Assignment.id == assignment.id,
                 AssignmentTest.name == test_name,
             )
-                .first()
+            .first()
         )
 
         # Create the assignment test if it did not already exist
@@ -281,7 +285,7 @@ def assignment_sync(assignment_data: dict) -> tuple[dict | str, bool]:
         accepted, ignored, rejected = ingest_questions(assignment_data["questions"], assignment)
         question_message = {
             "accepted": accepted,
-            "ignored": ignored,
+            "ignored":  ignored,
             "rejected": rejected,
         }
 
@@ -303,6 +307,13 @@ def fill_user_assignment_data(user_id: str, assignment_data: dict[str, Any]):
         > 0
     )
 
+    assignment_data['complete'] = False
+    if best_submission_id := autograde(user_id, assignment_id):
+        submission = Submission.query.filter(Submission.id == best_submission_id).first()
+        logger.debug(f'{submission=}')
+        logger.debug(f'{submission.test_results=}')
+        assignment_data['complete'] = all(map(lambda test: test.passed == True, submission.test_results))
+
     repo = AssignmentRepo.query.filter(
         AssignmentRepo.owner_id == user_id,
         AssignmentRepo.assignment_id == assignment_id,
@@ -319,11 +330,12 @@ def fill_user_assignment_data(user_id: str, assignment_data: dict[str, Any]):
     assignment_data["due_date"] = str(due_date)
 
 
-def get_active_assignment() -> list[Assignment]:
+def get_active_assignments(*filters) -> list[Assignment]:
     return Assignment.query.filter(
         Assignment.release_date < datetime.now(),
         Assignment.due_date > datetime.now(),
         Assignment.hidden == False,
+        *filters
     ).all()
 
 
@@ -340,8 +352,11 @@ def get_recent_assignments(
 
     filters = []
 
-    if autograde_enabled:
-        filters.append(Assignment.autograde_enabled == autograde_enabled)
+    if isinstance(autograde_enabled, bool):
+        filters.append(or_(
+            Assignment.autograde_enabled == autograde_enabled,
+            Assignment.shell_autograde_enabled == autograde_enabled,
+        ))
 
     if delta is None:
         autograde_recalculate_days = get_config_int("AUTOGRADE_RECALCULATE_DAYS", default=60)
@@ -351,8 +366,11 @@ def get_recent_assignments(
         autograde_recalculate_duration = delta
 
     recent_assignments = Assignment.query.filter(
-        Assignment.due_date > datetime.now() - autograde_recalculate_duration,
-        Assignment.due_date < datetime.now() + autograde_recalculate_duration,
+        and_(
+            Assignment.due_date > (datetime.now() - autograde_recalculate_duration),
+            Assignment.due_date < (datetime.now() + autograde_recalculate_duration),
+        )
+    ).filter(
         *filters,
     ).all()
 
@@ -387,16 +405,19 @@ def delete_assignment_questions(assignment: Assignment):
     :param assignment:
     :return:
     """
-    assigned_question_ids = db.session.query(AssignmentQuestion.id).filter(
-        AssignmentQuestion.assignment_id == assignment.id
-    )
     AssignedQuestionResponse.query.filter(
-        AssignedQuestionResponse.assigned_question_id.in_(assigned_question_ids.subquery())
+        AssignedQuestionResponse.assigned_question_id.in_(
+            db.session.query(AssignedStudentQuestion.id).filter(
+                AssignedStudentQuestion.assignment_id == assignment.id
+            ).subquery()
+        ),
     ).delete(synchronize_session=False)
-    AssignedStudentQuestion.query.filter(AssignedStudentQuestion.assignment_id == assignment.id).delete(
-        synchronize_session=False
-    )
-    AssignmentQuestion.query.filter(AssignmentQuestion.assignment_id == assignment.id).delete(synchronize_session=False)
+    AssignedStudentQuestion.query.filter(
+        AssignedStudentQuestion.assignment_id == assignment.id
+    ).delete(synchronize_session=False)
+    AssignmentQuestion.query.filter(
+        AssignmentQuestion.assignment_id == assignment.id
+    ).delete(synchronize_session=False)
 
 
 def delete_assignment_repos(assignment: Assignment) -> None:
@@ -413,15 +434,16 @@ def delete_assignment(assignment: Assignment) -> None:
     :param assignment:
     :return:
     """
-    delete_assignment_submissions(assignment)
+
+    # Delete theia sessions
+    TheiaSession.query.filter(TheiaSession.assignment_id == assignment.id).delete(synchronize_session=False)
+
     delete_assignment_questions(assignment)
+    delete_assignment_submissions(assignment)
     delete_assignment_repos(assignment)
 
     # Delete assignment tests
     AssignmentTest.query.filter(AssignmentTest.assignment_id == assignment.id).delete(synchronize_session=False)
-
-    # Delete theia sessions
-    TheiaSession.query.filter(TheiaSession.assignment_id == assignment.id).delete(synchronize_session=False)
 
     # Delete assignment
     Assignment.query.filter(Assignment.id == assignment.id).delete(synchronize_session=False)
@@ -515,32 +537,8 @@ def make_shared_assignment(assignment_id: str, group_netids: list[list[str]]) ->
 
     return {
         "groups": [[user.netid for user in group] for group in groups],
-        "repos": [repo.data for repo in all_repos],
+        "repos":  [repo.data for repo in all_repos],
     }
-
-
-def get_assignment_tests(submission: Submission, only_visible=False):
-    """
-    Get a list of dictionaries of the matching Test, and TestResult
-    for the current submission.
-
-    :return:
-    """
-
-    # Construct query for
-    query = SubmissionTestResult.query.join(AssignmentTest).filter(
-        SubmissionTestResult.submission_id == submission.id,
-    )
-
-    # If only get visible tests, apply extra filter
-    if only_visible:
-        query.filter(AssignmentTest.hidden == False)
-
-    # Query for matching AssignmentTests, and TestResults
-    tests = query.all()
-
-    # Convert to dictionary data
-    return [{"test": result.assignment_test.data, "result": result.data} for result in tests]
 
 
 def clean_assignment_name(assignment: Assignment) -> str:
@@ -557,3 +555,22 @@ def clean_assignment_name(assignment: Assignment) -> str:
     return ''.join(c for c in assignment_name if c in valid_charset)
 
 
+def verify_active_assignment_github_repo_collaborators():
+    """
+    Go through each github repo for each
+
+    :return:
+    """
+    active_assignments = get_active_assignments()
+
+    for assignment in active_assignments:
+        verify_collaborators_assignment(assignment)
+
+
+def get_assignment_tests(assignment: Assignment, visible_only: bool = True):
+    if visible_only:
+        tests = (t.data for t in assignment.tests if t.hidden is False)
+    else:
+        tests = (t.data for t in assignment.tests)
+
+    return list(sorted(tests, key=lambda v: v['order']))

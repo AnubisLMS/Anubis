@@ -1,8 +1,6 @@
 name: "Anubis Code Scanning"
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:

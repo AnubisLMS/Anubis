@@ -10,7 +10,7 @@ spec:
     matchLabels:
       {{- include "chart.selectorLabels" . | nindent 6 }}
       component: api
-  replicas: {{ .Values.api.replicas }}
+  replicas: {{- if not .Values.offSemester }} {{ .Values.api.replicas }}{{- else }} 1{{- end }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if .Values.rollingUpdates }}
   strategy:
@@ -25,6 +25,10 @@ spec:
         {{- include "chart.labels" . | nindent 8 }}
         component: api
     spec:
+      {{- if and .Values.nodeSelector (not .Values.debug) }}
+      nodeSelector:
+        {{ .Values.nodeSelector | toYaml }}
+      {{- end }}
       containers:
       - name: api
         image: "{{ .Values.api.image }}:{{ .Values.tag }}"

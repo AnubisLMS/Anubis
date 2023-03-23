@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://anubis.osiris.services/">
+  <a href="https://about.anubis-lms.io/">
     <img
       alt="Anubis"
       src="https://raw.githubusercontent.com/AnubisLMS/Anubis/master/docs/design-tex/figures/anubis-icon-1.png"

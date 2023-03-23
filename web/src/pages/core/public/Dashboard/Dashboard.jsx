@@ -4,16 +4,16 @@ import {useSnackbar} from 'notistack';
 
 import Box from '@mui/material/Box';
 
+// import MaintenanceAd from '../../../../components/shared/Ad/MaintenanceAd/MaintenanceAd';
+import GenericAd from '../../../../components/shared/Ad/GenericAd/GenericAd';
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';
 import standardStatusHandler from '../../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../../utils/standardErrorHandler';
 import {useStyles} from './Dashboard.styles';
 import useQuery from '../../../../hooks/useQuery';
-
 import CourseItem from '../../../../components/core/CourseItem/CourseItem';
 import AssignmentItem from '../../../../components/core/AssignmentItem/AssignmentItem';
 import SectionHeader from '../../../../components/shared/SectionHeader/SectionHeader';
-// import HiringAd from '../../../../components/shared/Ad/HiringAd/HiringAd';
 
 const Dashboard = () => {
   const query = useQuery();
@@ -47,7 +47,8 @@ const Dashboard = () => {
     <StandardLayout>
       <SectionHeader isPage title='Anubis LMS Dashboard'/>
       <Box className={classes.divider}/>
-      {/* <HiringAd/> */}
+      {/* <MaintenanceAd/>*/}
+      <GenericAd/>
       <SectionHeader
         title='Courses'
         linkText='View All Courses'
@@ -80,6 +81,8 @@ const Dashboard = () => {
           submitted={assignment.has_submission}
           dueDate={assignment.due_date}
           visible_to_students={assignment.visible_to_students}
+          complete={assignment.complete}
+          shellAutograde={assignment.shell_autograde_enabled}
         />
       ))}
     </StandardLayout>

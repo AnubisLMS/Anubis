@@ -1,9 +1,9 @@
 from anubis.constants import REAPER_TXT
 from anubis.lms.assignments import get_recent_assignments
-from anubis.lms.autograde import bulk_autograde
+from anubis.lms.autograde import bulk_autograde, reap_assignment_double_deliveries
 from anubis.utils.data import with_context
-from anubis.utils.visuals.assignments import get_assignment_sundial
 from anubis.utils.logging import logger
+from anubis.utils.visuals.assignments import get_assignment_sundial
 
 
 def autograde_recalculate():
@@ -33,9 +33,18 @@ def autograde_recalculate():
         get_assignment_sundial(assignment.id)
 
 
+def autograde_cleanup_doubles():
+    recent_assignments = get_recent_assignments(autograde_enabled=True)
+
+    for assignment in recent_assignments:
+        reap_assignment_double_deliveries(assignment)
+
+
 @with_context
 def reap():
     autograde_recalculate()
+
+    autograde_cleanup_doubles()
 
 
 if __name__ == "__main__":

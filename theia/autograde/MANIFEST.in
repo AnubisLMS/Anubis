@@ -1,0 +1,2 @@
+recursive-include autograde *.py *.sh *.yml Dockerfile
+include requirements.txt

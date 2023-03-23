@@ -9,11 +9,12 @@ from anubis.utils.http import success_response
 from anubis.utils.http.decorators import json_endpoint, json_response
 from anubis.utils.logging import logger
 from anubis.utils.pipeline.decorators import check_submission_token
+from anubis.lms.submissions import init_submission
 
 pipeline = Blueprint("pipeline", __name__, url_prefix="/pipeline")
 
 
-@pipeline.route("/report/panic/<string:submission_id>", methods=["POST"])
+@pipeline.post("/report/panic/<string:submission_id>")
 @check_submission_token
 @json_response
 def pipeline_report_panic(submission: Submission):
@@ -59,7 +60,7 @@ def pipeline_report_panic(submission: Submission):
     return success_response("Panic successfully reported")
 
 
-@pipeline.route("/report/build/<string:submission_id>", methods=["POST"])
+@pipeline.post("/report/build/<string:submission_id>")
 @check_submission_token
 @json_endpoint([("stdout", str), ("passed", bool)])
 def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **_):
@@ -112,7 +113,7 @@ def pipeline_report_build(submission: Submission, stdout: str, passed: bool, **_
     return success_response("Build successfully reported.")
 
 
-@pipeline.route("/report/test/<string:submission_id>", methods=["POST"])
+@pipeline.post("/report/test/<string:submission_id>")
 @check_submission_token
 @json_endpoint([("test_name", str), ("passed", bool), ("message", str), ('output_type', str), ("output", str)])
 def pipeline_report_test(submission: Submission, test_name: str, passed: bool, message: str, output_type: str,
@@ -186,10 +187,10 @@ def pipeline_report_test(submission: Submission, test_name: str, passed: bool, m
     return success_response("Test data successfully added.")
 
 
-@pipeline.route("/report/state/<string:submission_id>", methods=["POST"])
+@pipeline.post("/report/state/<string:submission_id>")
 @check_submission_token
 @json_endpoint(required_fields=[("state", str)])
-def pipeline_report_state(submission: Submission, state: str, **kwargs):
+def pipeline_report_state(submission: Submission, state: str, **__):
     """
     When a submission pipeline wants to report a state, it
     hits this endpoint. If there is a ?processed=1 in the
@@ -268,3 +269,28 @@ def pipeline_report_state(submission: Submission, state: str, **kwargs):
     db.session.commit()
 
     return success_response("State successfully updated.")
+from anubis.constants import SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE
+
+
+@pipeline.get("/reset/<string:submission_id>")
+@check_submission_token
+@json_response
+def pipeline_reset(submission: Submission):
+    """
+    Reset a submission to base state. Quite useful for live autograder to be
+    able to reset on the fly.
+
+    :param submission:
+    :return:
+    """
+
+    extra = {}
+
+    # If the submission is a shell autograde, preserve the state message
+    if submission.state == SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE:
+        extra['state'] = SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE
+
+    # Resets submission to base state
+    init_submission(submission, db_commit=True, **extra)
+
+    return success_response("Reset")

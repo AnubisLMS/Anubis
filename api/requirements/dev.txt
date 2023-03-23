@@ -8,11 +8,11 @@ aiohttp==3.8.3
     # via
     #   -r requirements/common.txt
     #   discord-py
-aiosignal==1.2.0
+aiosignal==1.3.1
     # via
     #   -r requirements/common.txt
     #   aiohttp
-alembic==1.8.1
+alembic==1.9.2
     # via
     #   -r requirements/common.txt
     #   flask-migrate
@@ -21,29 +21,29 @@ async-timeout==4.0.2
     #   -r requirements/common.txt
     #   aiohttp
     #   redis
-attrs==22.1.0
+attrs==22.2.0
     # via
     #   -r requirements/common.txt
     #   aiohttp
     #   pytest
-black==22.10.0
+black==22.12.0
     # via -r requirements/dev.in
 blinker==1.5
     # via
     #   -r requirements/common.txt
     #   sentry-sdk
-build==0.8.0
+build==0.10.0
     # via pip-tools
 cachelib==0.9.0
     # via
     #   -r requirements/common.txt
     #   flask-caching
     #   flask-oauthlib
-cachetools==5.2.0
+cachetools==5.2.1
     # via
     #   -r requirements/common.txt
     #   google-auth
-certifi==2022.9.24
+certifi==2022.12.7
     # via
     #   -r requirements/common.txt
     #   kubernetes
@@ -65,31 +65,40 @@ click==8.1.3
     #   flask
     #   pip-tools
     #   rq
+colorama==0.4.6
+    # via
+    #   -r requirements/common.txt
+    #   -r requirements/dev.in
 commonmark==0.9.1
     # via
     #   -r requirements/common.txt
     #   rich
-contourpy==1.0.5
+contourpy==1.0.7
     # via
     #   -r requirements/common.txt
     #   matplotlib
-coverage==6.5.0
+coverage==7.0.5
     # via -r requirements/dev.in
-cryptography==38.0.1
+cryptography==39.0.0
     # via -r requirements/common.txt
 cycler==0.11.0
     # via
     #   -r requirements/common.txt
     #   matplotlib
+decorator==5.1.1
+    # via
+    #   -r requirements/common.txt
+    #   retry
 deprecated==1.2.13
     # via
     #   -r requirements/common.txt
     #   limits
-    #   redis
-discord-py==2.0.1
+discord-py==2.1.0
     # via -r requirements/common.txt
-docker==6.0.0
+docker==6.0.1
     # via -r requirements/common.txt
+exceptiongroup==1.1.0
+    # via pytest
 flask==2.2.2
     # via
     #   -r requirements/common.txt
@@ -99,11 +108,11 @@ flask==2.2.2
     #   flask-oauthlib
     #   flask-sqlalchemy
     #   sentry-sdk
-flask-caching==2.0.1
+flask-caching==2.0.2
     # via -r requirements/common.txt
-flask-limiter==2.6.3
+flask-limiter==3.1.0
     # via -r requirements/common.txt
-flask-migrate==3.1.0
+flask-migrate==4.0.2
     # via -r requirements/common.txt
 flask-oauthlib==0.9.6
     # via -r requirements/common.txt
@@ -115,18 +124,18 @@ fonttools==4.38.0
     # via
     #   -r requirements/common.txt
     #   matplotlib
-frozenlist==1.3.1
+frozenlist==1.3.3
     # via
     #   -r requirements/common.txt
     #   aiohttp
     #   aiosignal
-google-api-core==2.10.2
+google-api-core==2.11.0
     # via
     #   -r requirements/common.txt
     #   google-api-python-client
-google-api-python-client==2.65.0
+google-api-python-client==2.73.0
     # via -r requirements/common.txt
-google-auth==2.13.0
+google-auth==2.16.0
     # via
     #   -r requirements/common.txt
     #   google-api-core
@@ -138,19 +147,19 @@ google-auth-httplib2==0.1.0
     # via
     #   -r requirements/common.txt
     #   google-api-python-client
-google-auth-oauthlib==0.6.0
+google-auth-oauthlib==0.8.0
     # via -r requirements/common.txt
-googleapis-common-protos==1.56.4
+googleapis-common-protos==1.58.0
     # via
     #   -r requirements/common.txt
     #   google-api-core
-greenlet==1.1.3.post0
+greenlet==2.0.1
     # via
     #   -r requirements/common.txt
     #   sqlalchemy
 gunicorn==20.1.0
     # via -r requirements/common.txt
-httplib2==0.20.4
+httplib2==0.21.0
     # via
     #   -r requirements/common.txt
     #   google-api-python-client
@@ -160,9 +169,9 @@ idna==3.4
     #   -r requirements/common.txt
     #   requests
     #   yarl
-iniconfig==1.1.1
+iniconfig==2.0.0
     # via pytest
-isort==5.10.1
+isort==5.11.4
     # via -r requirements/dev.in
 itsdangerous==2.1.2
     # via
@@ -176,36 +185,36 @@ kiwisolver==1.4.4
     # via
     #   -r requirements/common.txt
     #   matplotlib
-kubernetes==24.2.0
+kubernetes==25.3.0
     # via -r requirements/common.txt
-limits==2.7.1
+limits==3.1.6
     # via
     #   -r requirements/common.txt
     #   flask-limiter
-mako==1.2.3
+mako==1.2.4
     # via
     #   -r requirements/common.txt
     #   alembic
-markupsafe==2.1.1
+markupsafe==2.1.2
     # via
     #   -r requirements/common.txt
     #   jinja2
     #   mako
     #   werkzeug
-matplotlib==3.6.1
+matplotlib==3.6.3
     # via -r requirements/common.txt
 mmh3==3.0.0
     # via
     #   -r requirements/common.txt
     #   pottery
-multidict==6.0.2
+multidict==6.0.4
     # via
     #   -r requirements/common.txt
     #   aiohttp
     #   yarl
 mypy-extensions==0.4.3
     # via black
-numpy==1.23.4
+numpy==1.24.1
     # via
     #   -r requirements/common.txt
     #   contourpy
@@ -216,7 +225,11 @@ oauthlib==2.1.0
     #   -r requirements/common.txt
     #   flask-oauthlib
     #   requests-oauthlib
-packaging==21.3
+ordered-set==4.1.0
+    # via
+    #   -r requirements/common.txt
+    #   flask-limiter
+packaging==23.0
     # via
     #   -r requirements/common.txt
     #   build
@@ -224,34 +237,33 @@ packaging==21.3
     #   limits
     #   matplotlib
     #   pytest
-    #   redis
-pandas==1.5.1
+pandas==1.5.3
     # via -r requirements/common.txt
 parse==1.19.0
     # via -r requirements/common.txt
-pathspec==0.10.1
+pathspec==0.10.3
     # via black
-pep517==0.13.0
-    # via build
-pillow==9.2.0
+pillow==9.4.0
     # via
     #   -r requirements/common.txt
     #   matplotlib
-pip-tools==6.9.0
+pip-tools==6.12.1
     # via -r requirements/dev.in
-platformdirs==2.5.2
+platformdirs==2.6.2
     # via black
 pluggy==1.0.0
     # via pytest
 pottery==3.0.0
     # via -r requirements/common.txt
-protobuf==4.21.8
+protobuf==4.21.12
     # via
     #   -r requirements/common.txt
     #   google-api-core
     #   googleapis-common-protos
 py==1.11.0
-    # via pytest
+    # via
+    #   -r requirements/common.txt
+    #   retry
 pyasn1==0.4.8
     # via
     #   -r requirements/common.txt
@@ -265,7 +277,7 @@ pycparser==2.21
     # via
     #   -r requirements/common.txt
     #   cffi
-pygments==2.13.0
+pygments==2.14.0
     # via
     #   -r requirements/common.txt
     #   rich
@@ -278,8 +290,9 @@ pyparsing==3.0.9
     #   -r requirements/common.txt
     #   httplib2
     #   matplotlib
-    #   packaging
-pytest==7.1.3
+pyproject-hooks==1.0.0
+    # via build
+pytest==7.2.1
     # via -r requirements/dev.in
 python-dateutil==2.8.2
     # via
@@ -287,11 +300,11 @@ python-dateutil==2.8.2
     #   kubernetes
     #   matplotlib
     #   pandas
-python-dotenv==0.21.0
+python-dotenv==0.21.1
     # via -r requirements/common.txt
 python-magic==0.4.18
     # via -r requirements/common.txt
-pytz==2022.5
+pytz==2022.7.1
     # via
     #   -r requirements/common.txt
     #   pandas
@@ -299,12 +312,12 @@ pyyaml==6.0
     # via
     #   -r requirements/common.txt
     #   kubernetes
-redis==4.3.4
+redis==4.4.2
     # via
     #   -r requirements/common.txt
     #   pottery
     #   rq
-requests==2.28.1
+requests==2.28.2
     # via
     #   -r requirements/common.txt
     #   docker
@@ -317,17 +330,19 @@ requests-oauthlib==1.1.0
     #   flask-oauthlib
     #   google-auth-oauthlib
     #   kubernetes
+retry==0.9.2
+    # via -r requirements/common.txt
 rich==12.6.0
     # via
     #   -r requirements/common.txt
     #   flask-limiter
-rq==1.11.1
+rq==1.12.0
     # via -r requirements/common.txt
 rsa==4.9
     # via
     #   -r requirements/common.txt
     #   google-auth
-sentry-sdk[flask]==1.10.1
+sentry-sdk[flask]==1.13.0
     # via -r requirements/common.txt
 six==1.16.0
     # via
@@ -337,7 +352,7 @@ six==1.16.0
     #   kubernetes
     #   python-dateutil
     #   sqlalchemy-json
-sqlalchemy==1.4.42
+sqlalchemy==1.4.46
     # via
     #   -r requirements/common.txt
     #   alembic
@@ -347,6 +362,10 @@ sqlalchemy-json==0.5.0
     # via -r requirements/common.txt
 tabulate==0.9.0
     # via -r requirements/common.txt
+termcolor==2.2.0
+    # via
+    #   -r requirements/common.txt
+    #   -r requirements/dev.in
 tomli==2.0.1
     # via
     #   black
@@ -362,14 +381,14 @@ uritemplate==4.1.1
     # via
     #   -r requirements/common.txt
     #   google-api-python-client
-urllib3==1.26.12
+urllib3==1.26.14
     # via
     #   -r requirements/common.txt
     #   docker
     #   kubernetes
     #   requests
     #   sentry-sdk
-websocket-client==1.4.1
+websocket-client==1.4.2
     # via
     #   -r requirements/common.txt
     #   docker
@@ -378,13 +397,13 @@ werkzeug==2.2.2
     # via
     #   -r requirements/common.txt
     #   flask
-wheel==0.37.1
+wheel==0.38.4
     # via pip-tools
 wrapt==1.14.1
     # via
     #   -r requirements/common.txt
     #   deprecated
-yarl==1.8.1
+yarl==1.8.2
     # via
     #   -r requirements/common.txt
     #   aiohttp

@@ -1,8 +1,9 @@
 import functools
+import urllib.parse
 from datetime import datetime, timedelta
 from hashlib import sha512
 from json import dumps
-from os import environ, urandom
+from os import urandom
 
 from flask import Response, has_app_context, has_request_context
 
@@ -38,9 +39,6 @@ def jsonify(data, status_code=200):
     res = Response(dumps(data))
     res.status_code = status_code
     res.headers["Content-Type"] = "application/json"
-    res.headers["Access-Control-Allow-Origin"] = (
-        "https://nyu.cool" if not environ.get("DEBUG", False) else "https://localhost"
-    )
     return res
 
 
@@ -90,7 +88,7 @@ def verify_data_shape(data, shape, path=None) -> tuple[bool, str | None]:
         if isinstance(data, _t):
             return (True, None) if shape == _t else (False, path)
 
-    if isinstance(data, dict):  # Verify dict keys
+    if isinstance(shape, dict):  # Verify dict keys
         for s_key, s_value in shape.items():
 
             # Verify key is included
@@ -140,7 +138,7 @@ def verify_data_shape(data, shape, path=None) -> tuple[bool, str | None]:
 
                     # If we have a type specified in the list,
                     # we should iterate, then recurse on the
-                    # elements of the data. Otherwise there's
+                    # elements of the data. Otherwise, there's
                     # nothing to do.
                     if len(s_value) == 1:
                         s_value = s_value[0]
@@ -163,6 +161,20 @@ def verify_data_shape(data, shape, path=None) -> tuple[bool, str | None]:
                     False,
                     path + ".[" + s_key + "]" if s_value is list else path + "." + s_key + "",
                 )
+
+    elif isinstance(shape, list):
+        if len(shape) == 0:
+            if isinstance(data, list):
+                return True, None
+            else:
+                return False, ''
+
+        else:
+            s_value = shape[0]
+            for index, item in enumerate(data):
+                p, e = verify_data_shape(item, s_value, path=f'.[{index}]')
+                if p is False:
+                    return p, e
 
     return True, None
 
@@ -333,3 +345,19 @@ def req_assert(*expressions, message: str = "invalid", status_code: int = 200):
     """
     if not all(expressions):
         raise AssertError(message, status_code)
+
+
+def form_url(
+    domain: str,
+    path: str,
+    scheme: str = 'https',
+    query: str = '',
+    fragment: str = '',
+):
+    """
+
+    :return:
+    """
+
+    # (addressing scheme, network location, path, query, fragment identifier)
+    return urllib.parse.urlunsplit((scheme, domain, path, query, fragment))

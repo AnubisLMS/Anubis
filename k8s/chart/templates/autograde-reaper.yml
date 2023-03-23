@@ -20,6 +20,10 @@ spec:
     spec:
       template:
         spec:
+          {{- if and .Values.nodeSelector (not .Values.debug) }}
+          nodeSelector:
+            {{ .Values.nodeSelector | toYaml }}
+          {{- end }}
           restartPolicy: Never
           containers:
           - name: autograde-reaper

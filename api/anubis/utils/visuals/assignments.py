@@ -3,7 +3,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from anubis.lms.assignments import get_assignment_tests
+from anubis.lms.submissions import get_submission_tests
 from anubis.lms.autograde import bulk_autograde
 from anubis.models import Assignment, AssignmentTest, Submission, TheiaSession, User, db
 from anubis.utils.cache import cache
@@ -167,7 +167,7 @@ def get_assignment_history(assignment_id, netid):
         tests_passed = sum(
             map(
                 lambda test: (1 if test["result"]["passed"] else 0),
-                get_assignment_tests(db_submission),
+                get_submission_tests(db_submission),
             )
         )
 

@@ -13,6 +13,7 @@ from anubis.utils.data import is_debug, req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_response
 from anubis.utils.logging import logger
+from anubis.constants import AUTOGRADE_DISABLED_MESSAGE
 
 webhook = Blueprint("public-webhook", __name__, url_prefix="/public/webhook")
 
@@ -59,7 +60,7 @@ def public_webhook():
     )
 
     # Load the basics from the webhook
-    repo_url, repo_name, pusher_username, commit, before, ref = parse_webhook(request.json)
+    repo_url, repo_name, pusher_username, commit, before, ref, default_branch = parse_webhook(request.json)
 
     # Attempt to find records for the relevant models
     assignment = Assignment.query.filter(Assignment.unique_code.in_(repo_name.split("-"))).first()
@@ -133,8 +134,8 @@ def public_webhook():
         repo = check_repo(assignment, repo_url, user, netid)
 
     req_assert(
-        ref == "refs/heads/master" or ref == "refs/heads/main",
-        message="not a push to master or main",
+        ref == f"refs/heads/{default_branch}",
+        message="not a push to default branch",
     )
 
     # Try to find a submission matching the commit
@@ -165,22 +166,19 @@ def public_webhook():
     # the submission will stay in a "dangling" state
     req_assert(user is not None, message="dangling submission")
 
+    # Check that the current assignment is still accepting submissions
+    if not assignment.accept_late and datetime.now() > get_assignment_due_date(user.id, assignment.id, grace=True):
+        reject_late_submission(submission)
+
     # If the github username is not found, create a dangling submission
-    if assignment.autograde_enabled:
-
-        # Check that the current assignment is still accepting submissions
-        if not assignment.accept_late and datetime.now() < get_assignment_due_date(user, assignment, grace=True):
-            reject_late_submission(submission)
-
-    else:
+    if not assignment.autograde_enabled:
         submission.processed = True
-        submission.accepted = False
-        submission.state = "autograde disabled for this assignment"
+        submission.state = AUTOGRADE_DISABLED_MESSAGE
 
     db.session.commit()
 
     # If the submission was accepted, then enqueue the job
-    if submission.accepted and user is not None:
+    if assignment.autograde_enabled and submission.accepted and user is not None:
         enqueue_autograde_pipeline(submission.id)
 
     # Delete cached submissions

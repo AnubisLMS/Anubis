@@ -1,4 +1,4 @@
-{{- if and .Values.clidocs.enable (not .Values.debug) }}
+{{- if and .Values.cli_docs.enable (not .Values.debug) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -11,7 +11,7 @@ spec:
     matchLabels:
       {{- include "chart.selectorLabels" . | nindent 6 }}
       component: cli-docs
-  replicas: {{ .Values.marketing.replicas }}
+  replicas: {{- if not .Values.offSemester }} {{ .Values.marketing.replicas }}{{- else }} 1{{- end }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if .Values.rollingUpdates }}
   strategy:
@@ -26,10 +26,14 @@ spec:
         {{- include "chart.selectorLabels" . | nindent 8 }}
         component: cli-docs
     spec:
+      {{- if and .Values.nodeSelector (not .Values.debug) }}
+      nodeSelector:
+        {{ .Values.nodeSelector | toYaml }}
+      {{- end }}
       dnsPolicy: ClusterFirst
       containers:
       - name: web
-        image: "{{ .Values.clidocs.image }}:latest"
+        image: "{{ .Values.cli_docs.image }}:latest"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
           requests:
@@ -40,26 +44,26 @@ spec:
             memory: 500Mi
         ports:
         - name: web
-          containerPort: 8080
+          containerPort: {{ .Values.cli_docs.port }}
         {{- if .Values.healthChecks }}
         startupProbe:
           httpGet:
             path: /
-            port: 8080
+            port: {{ .Values.cli_docs.port }}
           initialDelaySeconds: 1
           periodSeconds: 1
           failureThreshold: 60
         livenessProbe:
           httpGet:
             path: /
-            port: 8080
+            port: {{ .Values.cli_docs.port }}
           initialDelaySeconds: 60
           failureThreshold: 10
           periodSeconds: 60
         readinessProbe:
           httpGet:
             path: /
-            port: 8080
+            port: {{ .Values.cli_docs.port }}
           initialDelaySeconds: 3
           periodSeconds: 3
           failureThreshold: 1

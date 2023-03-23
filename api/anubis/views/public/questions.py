@@ -68,7 +68,8 @@ def public_questions_save(assignment_id: str, questions: list):
 
     req_assert(len(questions) > 0, message='Provide at least one question response.')
 
-    shape_good, shape_error = verify_data_shape(questions, [{"questions": dict, "response": dict, "id": str}])
+    print(questions)
+    shape_good, shape_error = verify_data_shape(questions, [{"question": dict, "response": {'text': str}, "id": str}])
     req_assert(shape_good, message=shape_error)
 
     assigned_questions: list[AssignedStudentQuestion] = AssignedStudentQuestion.query.filter(
@@ -132,5 +133,5 @@ def public_questions_save(assignment_id: str, questions: list):
 
     return success_response({
         "questions": get_assigned_questions(assignment_id, current_user.id),
-        "status": "Response Saved",
+        "status":    "Response Saved",
     })

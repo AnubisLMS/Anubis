@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Fragment} from 'react';
 
 import {Box} from '@mui/material';
 import {Typography} from '@mui/material';
@@ -9,6 +9,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import clsx from 'clsx';
 import {useStyles} from './SubmissionHeader.styles';
 import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
 
 
 const SubmissionHeader = ({
@@ -19,6 +20,7 @@ const SubmissionHeader = ({
   state,
   processed,
   regrade,
+  accepted,
 })=> {
   const classes = useStyles();
   const DATE_OPTIONS = {weekday: 'long', year: 'numeric', month: 'short', day: 'numeric'};
@@ -27,8 +29,12 @@ const SubmissionHeader = ({
     <Box className = {classes.submissionSummaryContainer}>
       <Box className={classes.dataContainer}>
         <Typography className={classes.assignmentName}>{assignment_name}</Typography>
-        <Typography className={classes.textLabel}>{'Submission: '}</Typography>
-        <Typography className={classes.textContent}>{commit.substring(0, 20)}</Typography>
+        {!commit.startsWith('fake-') && (
+          <Fragment>
+            <Typography className={classes.textLabel}>{'Submission: '}</Typography>
+            <Typography className={classes.textContent}>{commit.substring(0, 20)}</Typography>
+          </Fragment>
+        )}
         <Typography className={classes.textLabel}>{'Submitted: '}</Typography>
         <Typography className={classes.textContent}>
           {new Date(timestamp).toLocaleDateString('en-US', DATE_OPTIONS)}
@@ -39,22 +45,32 @@ const SubmissionHeader = ({
         </Typography>
       </Box>
       <Box className={classes.dataContainer}>
-        <Button
-          variant={'contained'}
-          color={'primary'}
-          startIcon={<RefreshIcon/>}
-          className={clsx(classes.dataItem)}
-          disabled={!processed}
-          onClick={regrade}
-        >
-          Regrade
-        </Button>
+        {!commit.startsWith('fake-') && (
+          <Button
+            variant={'contained'}
+            color={'primary'}
+            startIcon={<RefreshIcon/>}
+            className={clsx(classes.dataItem)}
+            disabled={!processed}
+            onClick={regrade}
+          >
+            Regrade
+          </Button>
+        )}
         <Typography className={clsx(classes.dataItem, classes.circleIcon, on_time ? classes.success : classes.error)}>
           { on_time ? <CheckCircleIcon/> : <CancelIcon/>}
         </Typography>
-        <Typography className={clsx(classes.submittedStatus, on_time ? classes.success : classes.error)}>
-          { on_time ? 'Submitted On Time' : 'Submitted Late'}
-        </Typography>
+        {accepted ? (
+          <Typography className={clsx(classes.submittedStatus, on_time ? classes.success : classes.error)}>
+            { on_time ? 'Submitted On Time' : 'Submitted Late'}
+          </Typography>
+        ) : (
+          <Tooltip title={'This assignment does not accept late submissions'}>
+            <Typography className={clsx(classes.submittedStatus, classes.error)}>
+              Not Accepted
+            </Typography>
+          </Tooltip>
+        )}
       </Box>
     </Box>
   );

@@ -56,7 +56,7 @@ export default function Questions({assignment_id}) {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [questions, setQuestions] = useState([]);
-  const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const [selectedQuestionId, setSelectedQuestionId] = useState(null);
 
   React.useEffect(() => {
     axios.get(`/api/public/questions/get/${assignment_id}`).then((response) => {
@@ -67,11 +67,10 @@ export default function Questions({assignment_id}) {
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, []);
 
-  const updateResponse = (question) => (value) => {
+  const updateResponse = (questionId) => (value) => {
     setQuestions((prev) => {
       for (const item of prev) {
-        console.log(item, question);
-        if (item.id === question.id) {
+        if (item.id === questionId) {
           if (!item.response) {
             item.response = {text: value};
           } else {
@@ -87,17 +86,26 @@ export default function Questions({assignment_id}) {
   const saveResponse = () => {
     axios.post(`/api/public/questions/save/${assignment_id}`, {questions}).then((resp) => {
       const data = standardStatusHandler(resp, enqueueSnackbar);
-      if (data.questions) {
-        setQuestions(data.questions);
+      if (data?.questions) {
+        setQuestions([...data.questions]);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
+  };
+
+  const selectedQuestion = (id) => {
+    for (const item of questions) {
+      if (item.id === id) {
+        return item;
+      }
+    }
+    return {};
   };
 
   if (questions.length === 0) {
     return (
       <Box className={classes.emptyQuestions}>
         <Typography className={classes.emptyQuestionsText}>
-          Oh no! There are no questions for this assignment.
+          There are no questions for this assignment.
         </Typography>
       </Box>
     );
@@ -110,27 +118,32 @@ export default function Questions({assignment_id}) {
           key={index}
           question={question}
           onClick={() => {
-            setSelectedQuestion(question);
+            setSelectedQuestionId(question.id);
           }}
         />
       ))}
-      <Dialog open={!!selectedQuestion} onClose={() => {
+      <Dialog open={!!selectedQuestionId} onClose={() => {
         saveResponse();
-        setSelectedQuestion(null);
+        setSelectedQuestionId(null);
       }} maxWidth={'lg'}>
-        {selectedQuestion && (
+        {selectedQuestionId && (
           <Box sx={{ml: 2, mr: 2}}>
             <ReactMarkdownWithHtml
               className={classes.markdown}
               remarkPlugins={[gfm]}
               allowDangerousHtml
             >
-              {selectedQuestion.question}
+              {selectedQuestion(selectedQuestionId).question}
             </ReactMarkdownWithHtml>
             <QuestionEditor
-              question={selectedQuestion}
-              updateResponse={updateResponse(selectedQuestion)}
+              question={selectedQuestion(selectedQuestionId)}
+              updateResponse={updateResponse(selectedQuestionId)}
               saveResponse={saveResponse}
+              // commands={[{ // commands is array of key bindings.
+              //   name: 'save', // name for the key binding.
+              //   bindKey: {win: 'Ctrl-s', mac: 'Command-s'}, // key combination used for the command.
+              //   exec: saveResponse, // function to execute when keys are pressed.
+              // }]}
             />
             <DialogActions>
               <Button
@@ -141,7 +154,7 @@ export default function Questions({assignment_id}) {
               >
                 Save
               </Button>
-              {selectedQuestion?.question?.solution ? (
+              {selectedQuestion(selectedQuestionId)?.question?.solution ? (
                 <Button
                   variant={'contained'}
                   color={'primary'}

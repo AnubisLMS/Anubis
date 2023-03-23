@@ -7,9 +7,15 @@ echo "this is changing"
 fix_permissions() {
     # Fix permissions
     echo "fixing permissions"
-    chown -R 1001:1001 /out
+    chown -R 1001:1001 /home/anubis
 }
 
+init_home() {
+    # make .anubis
+    mkdir -p /home/anubis/.anubis
+}
+
+init_home
 fix_permissions
 
 if [ ! "${GIT_REPO}" ]; then
@@ -29,7 +35,7 @@ set +e
 
 # Clone
 set -x
-cd /out
+cd /home/anubis
 git clone ${GIT_REPO}
 set +x
 

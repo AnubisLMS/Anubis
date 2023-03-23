@@ -1,14 +1,18 @@
 from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
 
+from anubis.github.team import add_github_team_member, remote_github_team_member
+from anubis.k8s.pvc.get import get_user_pvc
 from anubis.lms.courses import assert_course_superuser, course_context, valid_join_code
 from anubis.models import Course, InCourse, ProfessorForCourse, TAForCourse, User, db
+from anubis.models.id import default_id_factory
+from anubis.rpc.enqueue import enqueue_bulk_create_students
 from anubis.utils.auth.http import require_admin, require_superuser
 from anubis.utils.auth.user import current_user
 from anubis.utils.data import req_assert, row2dict
+from anubis.utils.data import verify_data_shape
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_endpoint, json_response
-from anubis.github.team import add_github_team_member, remote_github_team_member
 
 courses_ = Blueprint("admin-courses", __name__, url_prefix="/admin/courses")
 
@@ -146,10 +150,10 @@ def admin_course_list_students():
     # Get all the students in the current course context
     students = (
         User.query.join(InCourse)
-            .filter(
+        .filter(
             InCourse.course_id == course_context.id,
         )
-            .all()
+        .all()
     )
 
     # Return the list of basic user information about the tas
@@ -157,10 +161,11 @@ def admin_course_list_students():
         {
             "users": [
                 {
-                    "id": user.id,
-                    "netid": user.netid,
-                    "name": user.name,
+                    "id":              user.id,
+                    "netid":           user.netid,
+                    "name":            user.name,
                     "github_username": user.github_username,
+                    "is_superuser":    user.is_superuser,
                 }
                 for user in students
             ]
@@ -181,10 +186,10 @@ def admin_course_list_tas():
     # Get all the TAs in the current course context
     tas = (
         User.query.join(TAForCourse)
-            .filter(
+        .filter(
             TAForCourse.course_id == course_context.id,
         )
-            .all()
+        .all()
     )
 
     # Return the list of basic user information about the tas
@@ -192,9 +197,9 @@ def admin_course_list_tas():
         {
             "users": [
                 {
-                    "id": user.id,
-                    "netid": user.netid,
-                    "name": user.name,
+                    "id":              user.id,
+                    "netid":           user.netid,
+                    "name":            user.name,
                     "github_username": user.github_username,
                 }
                 for user in tas
@@ -216,10 +221,10 @@ def admin_course_list_professors():
     # Get all the professors within the current course context
     professors = (
         User.query.join(ProfessorForCourse)
-            .filter(
+        .filter(
             ProfessorForCourse.course_id == course_context.id,
         )
-            .all()
+        .all()
     )
 
     # Return the list of basic user information about the professors
@@ -227,9 +232,9 @@ def admin_course_list_professors():
         {
             "users": [
                 {
-                    "id": user.id,
-                    "netid": user.netid,
-                    "name": user.name,
+                    "id":              user.id,
+                    "netid":           user.netid,
+                    "name":            user.name,
                     "github_username": user.github_username,
                 }
                 for user in professors
@@ -308,7 +313,7 @@ def admin_course_remove_student_id(user_id: str):
     # Return the status
     return success_response(
         {
-            "status": "Student removed from course",
+            "status":  "Student removed from course",
             "variant": "warning",
         }
     )
@@ -359,11 +364,7 @@ def admin_course_make_ta_id(user_id: str):
     db.session.add(ta)
     db.session.commit()
 
-    add_github_team_member(
-        course_context.github_org,
-        course_context.github_ta_team_slug,
-        other.github_username
-    )
+    add_github_team_member(course_context.github_org, course_context.github_ta_team_slug, other.github_username)
 
     # Return the status
     return success_response({"status": "TA added to course"})
@@ -402,16 +403,12 @@ def admin_course_remove_ta_id(user_id: str):
     # Commit the delete
     db.session.commit()
 
-    remote_github_team_member(
-        course_context.github_org,
-        course_context.github_ta_team_slug,
-        other.github_username
-    )
+    remote_github_team_member(course_context.github_org, course_context.github_ta_team_slug, other.github_username)
 
     # Return the status
     return success_response(
         {
-            "status": "TA removed from course",
+            "status":  "TA removed from course",
             "variant": "warning",
         }
     )
@@ -463,11 +460,7 @@ def admin_course_make_professor_id(user_id: str):
     db.session.add(prof)
     db.session.commit()
 
-    add_github_team_member(
-        course_context.github_org,
-        course_context.github_ta_team_slug,
-        other.github_username
-    )
+    add_github_team_member(course_context.github_org, course_context.github_ta_team_slug, other.github_username)
 
     # Return the status
     return success_response({"status": "Professor added to course"})
@@ -499,16 +492,37 @@ def admin_course_remove_professor_id(user_id: str):
     # Commit the delete
     db.session.commit()
 
-    remote_github_team_member(
-        course_context.github_org,
-        course_context.github_ta_team_slug,
-        other.github_username
-    )
+    remote_github_team_member(course_context.github_org, course_context.github_ta_team_slug, other.github_username)
 
     # Return the status
     return success_response(
         {
-            "status": "Professor removed from course",
+            "status":  "Professor removed from course",
             "variant": "warning",
         }
     )
+
+
+@courses_.route("/batch/students", methods=["POST"])
+@require_admin()
+@json_endpoint(required_fields=[("students", list), ("create_pvc", bool)])
+def admin_course_batch_students(students: list[dict], create_pvc: bool):
+    """
+    Batch add students to a course.
+
+    :param students: A list of students to add to the course
+    :param create_pvc: Whether to create PVCs for the students
+
+    :return:
+    """
+
+    # Verify the shape of the student data
+    is_valid, error_msg = verify_data_shape(students, [{"netid": str, "name": str}])
+    req_assert(is_valid, message=error_msg)
+
+    # Enqueue operation to happen in rpc
+    enqueue_bulk_create_students(course_context.id, students, create_pvc)
+
+    return success_response({
+        "status": "Students added to course"
+    })

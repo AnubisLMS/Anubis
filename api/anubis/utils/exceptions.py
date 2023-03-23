@@ -1,9 +1,18 @@
+import functools
 import traceback
+from datetime import date, datetime
 
 from flask import Flask, jsonify
 
 
-class AssertError(Exception):
+class AnubisError(Exception):
+    """
+    Generic Anubis error
+    """
+    pass
+
+
+class AssertError(AnubisError):
     """
     This exception should be raised when an assertion
     fails in the request.
@@ -18,7 +27,7 @@ class AssertError(Exception):
         return self._message, self._status_code
 
 
-class AuthenticationError(Exception):
+class AuthenticationError(AnubisError):
     """
     This exception should be raised if a request
     lacks the proper authentication fow whatever
@@ -30,7 +39,7 @@ class AuthenticationError(Exception):
     """
 
 
-class LackCourseContext(Exception):
+class LackCourseContext(AnubisError):
     """
     Most of the admin actions require there to
     be a course context to be set. This exception
@@ -43,7 +52,7 @@ class LackCourseContext(Exception):
     """
 
 
-class GoogleCredentialsException(Exception):
+class GoogleCredentialsException(AnubisError):
     """
     This is raised when the google credentials are
     invalid in any way. This is not something that
@@ -79,6 +88,36 @@ def add_app_exception_handlers(app: Flask):
 
     @app.errorhandler(AssertError)
     def handle_assertion_error(e: AssertError):
+        from anubis.models import db
+        db.session.rollback()
         logger.error(traceback.format_exc())
         message, status_code = e.response()
         return jsonify(error_response(message)), status_code
+
+
+def send_alert_email_on_error(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            from anubis.utils.email.event import send_email_event_admin
+
+            # Get full function name
+            function_name: str = f'{func.__module__}.{func.__qualname__}'
+
+            # Send email event
+            send_email_event_admin(
+                reference_id=function_name,
+                reference_type='error',  # Limit to one per day using this
+                template_key='error',
+                context={
+                    'traceback':     traceback.format_exc(),
+                    'function_name': function_name,
+                    'datetime':      datetime.now()
+                }
+            )
+
+            raise e
+
+    return wrapper

@@ -102,7 +102,10 @@ services:
 
   web:
     image: registry.digitalocean.com/anubis/web:${GIT_TAG:-latest}
-    build: ./web
+    build:
+      context: ./web
+      args:
+        GIT_TAG: "${GIT_TAG:-latest}"
 
   web-dev:
     image: node:16-alpine
@@ -113,6 +116,8 @@ services:
       NODE_ENV: development
       REACT_APP_DEV: dev
       DANGEROUSLY_DISABLE_HOST_CHECK: 'true'
+      REACT_APP_GIT_TAG: "${GIT_TAG:-latest}"
+      WDS_SOCKET_PORT: "80"
     volumes:
       - ./web:/opt/app
     labels:
@@ -168,6 +173,12 @@ services:
   theia-autograde:
     image: registry.digitalocean.com/anubis/theia-autograde:${GIT_TAG:-latest}
     build: theia/autograde
+
+  theia-autograde-docs:
+    image: registry.digitalocean.com/anubis/theia-autograde-docs:${GIT_TAG:-latest}
+    build:
+      dockerfile: Dockerfile-docs
+      context: theia/autograde
 
   theia-base-38:
     image: registry.digitalocean.com/anubis/theia-base:python-3.8

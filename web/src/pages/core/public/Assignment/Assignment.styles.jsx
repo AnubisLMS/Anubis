@@ -95,6 +95,9 @@ export const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     marginTop: theme.spacing(1),
   },
+  colorOrange: {
+    color: theme.palette.color.orange,
+  },
   colorGreen: {
     color: theme.palette.color.green,
   },

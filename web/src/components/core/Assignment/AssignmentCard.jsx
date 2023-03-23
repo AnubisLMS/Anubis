@@ -19,6 +19,7 @@ import CardActions from '@mui/material/CardActions';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
+import Divider from '@mui/material/Divider';
 import Autocomplete from '@mui/lab/Autocomplete';
 
 import SaveIcon from '@mui/icons-material/Save';
@@ -56,6 +57,9 @@ const useStyles = makeStyles((theme) => ({
   },
   input: {
     width: 42,
+  },
+  divider: {
+    backgroundColor: '#999',
   },
 }));
 
@@ -97,6 +101,8 @@ export default function AssignmentCard({assignment, editableFields, updateField,
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [reset]);
 
+  let customGridCount = 0;
+
   return (
     <React.Fragment>
       <RegradeWarning
@@ -108,7 +114,45 @@ export default function AssignmentCard({assignment, editableFields, updateField,
       <Card className={classes.card}>
         <CardContent>
           <Grid container spacing={2}>
-            {editableFields.map(({field, label, disabled = false, type = 'string'}) => {
+            {editableFields.map(({
+              field, label, disabled = false, type = 'string',
+              divider = false,
+              title = null,
+              button = null, onClick = null,
+            }) => {
+              if (divider) {
+                return (
+                  <Grid item xs={12} key={`divider-${customGridCount++}`}>
+                    <Divider sx={{backgroundColor: '#999'}}/>
+                  </Grid>
+                );
+              }
+
+              if (title !== null) {
+                return (
+                  <Grid item xs={12} key={`title-${customGridCount++}`}>
+                    <Typography variant={'h5'}>
+                      {title}
+                    </Typography>
+                  </Grid>
+                );
+              }
+
+              if (button !== null && onClick !== null) {
+                return (
+                  <Grid item xs={12} lg={6} key={`title-${customGridCount++}`}>
+                    <Button
+                      color={'primary'}
+                      variant={'contained'}
+                      sx={{m: 1}}
+                      onClick={onClick(enqueueSnackbar, assignment.id)}
+                    >
+                      {button}
+                    </Button>
+                  </Grid>
+                );
+              }
+
               // Based on Label
               switch (field) {
               case 'theia_image':

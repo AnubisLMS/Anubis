@@ -4,10 +4,11 @@ const Knex = require("knex");
 const jwt = require("jsonwebtoken");
 const Cookie = require("universal-cookie");
 const urlparse = require("url-parse");
-const LRU = require("lru-cache");
+const luxon = require("luxon");
 
 const SECRET_KEY = process.env.SECRET_KEY ?? 'DEBUG';
 const DEBUG = process.env.DEBUG === '1';
+const MAX_PROXY_PORT = 8010;
 
 /**
  * Least Recently Used Cache for ip address lookups. Creating an
@@ -123,23 +124,13 @@ const initialize = (req, res, url, query) => {
   res.end('redirecting...')
 };
 
-function changeTimezone(date, ianatz) {
-  // suppose the date is 12:00 UTC
-  var invdate = new Date(date.toLocaleString('en-US', {
-    timeZone: ianatz
-  }));
-
-  // then invdate will be 07:00 in Toronto
-  // and the diff is 5 hours
-  var diff = date.getTime() - invdate.getTime();
-
-  // so 12:00 in Toronto is 17:00 UTC
-  return new Date(date.getTime() - diff); // needs to subtract
-
+function getNow() {
+  const date = luxon.DateTime.local();
+  return `${date.year}-${date.month}-${date.day} ${date.hour}:${date.minute}:${date.second}`;
 }
 
 const updateProxyTime = session_id => {
-  const now = changeTimezone(new Date(), 'America/New_York');
+  const now = getNow();
   knex('theia_session')
     .where({id: session_id})
     .update({last_proxy: now})
@@ -150,9 +141,11 @@ const updateProxyTime = session_id => {
 var proxyServer = http.createServer(function (req, res) {
   let {url, token, query, port} = parse_req(req);
   log_req(req, url);
-  
-  if ((req.headers?.host ?? '').startsWith('ide8000.'))
-    port = 8000;
+
+  for (let _port = 8000; _port <= MAX_PROXY_PORT; ++_port) {
+    if ((req.headers?.host ?? '').startsWith(`ide${_port}.`))
+      port = _port;
+  }
 
   switch (url.pathname) {
     case '/initialize':
@@ -168,13 +161,13 @@ var proxyServer = http.createServer(function (req, res) {
     default:
       if (token === null) {
         res.writeHead(302, {location: '/'});
-        res.end('Please start an ide at https://anubis.osiris.services and click go to ide.');
+        res.end('Please start an ide at https://anubis-lms.io/ and click go to ide.');
         return;
       }
 
-      if (port !== 5000 && (port < 8000 || port > 8010)) {
+      if (port !== 5000 && (port < 8000 || port > MAX_PROXY_PORT)) {
         res.writeHead(400)
-        res.end('Only valid proxy ports are 8000-8010');
+        res.end(`Only valid proxy ports are 8000-${MAX_PROXY_PORT}`);
         return;
       }
 
@@ -186,7 +179,7 @@ var proxyServer = http.createServer(function (req, res) {
         res.writeHead(302, {location: '/?error=' +
             'Unable%20to%20connect%20you%20to%20your%20IDE.%20' +
             'Please%20try%20stopping%20and%20starting%20a%20new%20IDE.'});
-        res.end('Please start an ide at https://anubis.osiris.services and click go to ide.');
+        res.end('Please start an ide at https://anubis-lms.io/ and click go to ide.');
       })
   }
 });

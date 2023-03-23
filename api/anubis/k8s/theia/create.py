@@ -3,13 +3,45 @@ import json
 
 from kubernetes import client as k8s, config as k8s_config
 
-from anubis.constants import THEIA_DEFAULT_OPTIONS, WEBTOP_DEFAULT_OPTIONS
+from anubis.constants import (
+    THEIA_DEFAULT_OPTIONS,
+    WEBTOP_DEFAULT_OPTIONS,
+    THEIA_VALID_NETWORK_POLICIES,
+    THEIA_DEFAULT_NETWORK_POLICY
+)
 from anubis.github.parse import parse_github_repo_name
+from anubis.k8s.pvc.create import create_user_pvc
 from anubis.k8s.pvc.get import get_user_pvc
-from anubis.k8s.theia.get import get_theia_pod_name
+from anubis.k8s.theia.get import get_theia_pod_name, get_theia_node_selector
+from anubis.lms.shell_autograde import get_exercise_py_text, resume_submission
 from anubis.models import TheiaSession, Assignment
 from anubis.utils.auth.token import create_token
 from anubis.utils.data import is_debug
+from anubis.utils.logging import logger
+
+
+def create_k8s_resources_for_ide(theia_session: TheiaSession):
+    k8s_config.load_incluster_config()
+    v1 = k8s.CoreV1Api()
+
+    # Create pod, and pvc object from the options specified for the
+    # theia session.
+    pod, pvc = create_theia_k8s_pod_pvc(theia_session)
+
+    # Log the creation of the pod
+    logger.info("creating theia pod: " + pod.to_str())
+
+    # If a pvc is necessary (for persistent volume assignments)
+    create_user_pvc(theia_session.owner, pvc)
+
+    # Send the pod to the kubernetes api. Ask to create
+    # these resources under the anubis namespace. These actions are by default
+    # backgrounded. That means that these functions will almost certainly return
+    # before the resources have actually been created and initialized.
+    v1.create_namespaced_pod(namespace="anubis", body=pod)
+
+    # Mark theia session as k8s resources requested
+    theia_session.k8s_requested = True
 
 
 def create_theia_k8s_pod_pvc(
@@ -33,6 +65,12 @@ def create_theia_k8s_pod_pvc(
     # Construct the theia pod name
     pod_name = get_theia_pod_name(theia_session)
 
+    # Extra labels to be applied to the pod
+    pod_labels_extra = {}
+
+    # Anything extra in the pod spec to be added
+    pod_spec_extra = {}
+
     # list of container objects
     pod_containers = []
 
@@ -44,11 +82,19 @@ def create_theia_k8s_pod_pvc(
     theia_extra_env: list[k8s.V1EnvVar] = []
     init_extra_env: list[k8s.V1EnvVar] = []
 
+    shared_log_volume = k8s.V1Volume(name="log", empty_dir={})
+    shared_log_volume_mount = k8s.V1VolumeMount(name="log", mount_path="/log")
+    pod_volumes.append(shared_log_volume)
+
     # Get the set repo url for this session. If the assignment has github repos disabled,
     # then default to an empty string.
     repo_url = theia_session.repo_url or ""
     repo_name = parse_github_repo_name(repo_url)
-    webtop = theia_session.image.webtop
+    webtop = theia_session.image.webtop if theia_session.image else False
+
+    # Figure out which uid to use
+    default_theia_user_id = 1001
+    theia_user_id = default_theia_user_id if not webtop else 0
 
     # Get the theia session options
     if not theia_session.image.webtop:
@@ -65,7 +111,6 @@ def create_theia_k8s_pod_pvc(
         admin = False
         autosave = False
         credentials = False
-        privileged = False
         persistent_storage = True
 
     # Put assignment name in theia container environment
@@ -142,8 +187,8 @@ def create_theia_k8s_pod_pvc(
     theia_volume_name = f"{netid}-{theia_session.id[:6]}-ide"
 
     # Volume Mounts
-    theia_volume_mounts = []
-    autosave_volume_mounts = []
+    ide_volume_mounts: list[k8s.V1VolumeMount] = []
+    autosave_volume_mounts: list[k8s.V1VolumeMount] = []
 
     # If persistent storage is enabled for this assignment, then we should create a pvc
     if persistent_storage:
@@ -217,7 +262,7 @@ def create_theia_k8s_pod_pvc(
 
     # Initialize theia volume mounts array with
     # the project volume mount
-    theia_volume_mounts.append(
+    ide_volume_mounts.append(
         k8s.V1VolumeMount(
             mount_path="/home/anubis",
             name=theia_volume_name,
@@ -239,12 +284,7 @@ def create_theia_k8s_pod_pvc(
             # Add extra env if there is any
             *init_extra_env,
         ],
-        volume_mounts=[
-            k8s.V1VolumeMount(
-                mount_path="/out",
-                name=theia_volume_name,
-            )
-        ],
+        volume_mounts=[*ide_volume_mounts],
     )
 
     ##################################################################################
@@ -286,18 +326,24 @@ def create_theia_k8s_pod_pvc(
             run_as_user=1001,
         ),
         # Add the shared volume mount to /home/project
-        volume_mounts=autosave_volume_mounts,
+        volume_mounts=[
+            shared_log_volume_mount,
+            *autosave_volume_mounts
+        ],
     )
 
     ##################################################################################
     # DOCKERD CONTAINER
 
     if theia_session.docker:
-        certs_volume = k8s.V1Volume(name="dockerd-certs", empty_dir={})
+        docker_certs_volume = k8s.V1Volume(name="dockerd-certs", empty_dir={})
+        docker_plugin_volume = k8s.V1Volume(name="dockerd-plugin", empty_dir={})
         certs_volume_mount = k8s.V1VolumeMount(name="dockerd-certs", mount_path="/certs")
+        docker_plugin_volume_mount = k8s.V1VolumeMount(name="dockerd-plugin", mount_path="/run/docker/plugins/")
 
-        pod_volumes.append(certs_volume)
-        theia_volume_mounts.append(certs_volume_mount)
+        pod_volumes.append(docker_certs_volume)
+        pod_volumes.append(docker_plugin_volume)
+        ide_volume_mounts.append(certs_volume_mount)
 
         theia_extra_env.append(k8s.V1EnvVar(name="ANUBIS_RUN_DOCKERD", value="1"))
 
@@ -317,32 +363,78 @@ def create_theia_k8s_pod_pvc(
             ),
             # Add the shared certs volume
             volume_mounts=[
-                *theia_volume_mounts,
+                shared_log_volume_mount,
+                docker_plugin_volume_mount,
+                *ide_volume_mounts,
+            ],
+        )
+
+        dockerd_authz_container = k8s.V1Container(
+            name="dockerd-authz",
+            image="registry.digitalocean.com/anubis/anubis-authz",
+            image_pull_policy="IfNotPresent",
+            # Add a security context to disable privilege escalation
+            security_context=k8s.V1SecurityContext(
+                allow_privilege_escalation=False,
+                run_as_non_root=True,
+                run_as_user=1001,
+                privileged=False,
+            ),
+            # Add the shared certs volume
+            volume_mounts=[
+                shared_log_volume_mount,
+                docker_plugin_volume_mount,
             ],
         )
 
         pod_containers.append(dockerd_container)
+        pod_containers.append(dockerd_authz_container)
 
     ##################################################################################
     # AUTOGRADE CONTAINER
 
     if theia_session.autograde:
-
         # Submission may not be created. Skip handling this for now
-        if theia_session.submission_id is not None:
-            submission = theia_session.submission
-            submission_token = submission.token
-        else:
-            submission_token = 'ABC'
+        submission = theia_session.submission
 
         autograde_container = k8s.V1Container(
             name="autograde",
             image="registry.digitalocean.com/anubis/theia-autograde",
             image_pull_policy="IfNotPresent",
             env=[
-                *autosave_extra_env,
-                k8s.V1EnvVar(name="TOKEN", value=submission_token),
+                k8s.V1EnvVar(name="NETID", value=netid),
+                k8s.V1EnvVar(name="TOKEN", value=submission.token),
+                k8s.V1EnvVar(name="SUBMISSION_ID", value=submission.id),
+                k8s.V1EnvVar(name="EXERCISE_PY", value=get_exercise_py_text(theia_session.assignment)),
+                k8s.V1EnvVar(name="RESUME", value=resume_submission(submission)),
             ],
+            volume_mounts=[
+                shared_log_volume_mount,
+                *ide_volume_mounts,
+            ],
+
+            # Add startup probe to make sure that the bashrc is generated before IDE can be accessed.
+            # This ensures that any shell in IDE can only exist after bashrc is created.
+            startup_probe=k8s.V1Probe(
+                _exec=k8s.V1ExecAction(command=['stat', '/home/anubis/.bashrc']),
+                failure_threshold=60,
+                period_seconds=1,
+                initial_delay_seconds=0,
+            ),
+            security_context=k8s.V1SecurityContext(
+                allow_privilege_escalation=False,
+                privileged=False,
+                run_as_user=default_theia_user_id,
+            ),
+        )
+
+        pod_labels_extra["shell-autograde"] = 'ON'
+
+        theia_extra_env.append(
+            k8s.V1EnvVar(
+                name="ANUBIS_SHELL_AUTOGRADE",
+                value="1",
+            )
         )
 
         pod_containers.append(autograde_container)
@@ -399,11 +491,6 @@ def create_theia_k8s_pod_pvc(
             )
         )
 
-    # Figure out which uid to use
-    theia_user_id = 1001
-    if webtop:
-        theia_user_id = 0
-
     # If privileged, add docker config file to pod as a volume
     if admin and include_docker_secret:
         pod_volumes.append(
@@ -416,7 +503,7 @@ def create_theia_k8s_pod_pvc(
                 ),
             )
         )
-        theia_volume_mounts.append(
+        ide_volume_mounts.append(
             k8s.V1VolumeMount(
                 mount_path="/docker",
                 name="docker-config",
@@ -432,7 +519,7 @@ def create_theia_k8s_pod_pvc(
                 )
             )
         )
-        theia_volume_mounts.append(
+        ide_volume_mounts.append(
             k8s.V1VolumeMount(
                 mount_path="/dev/shm",
                 name="dshm",
@@ -483,7 +570,10 @@ def create_theia_k8s_pod_pvc(
         ),
         # setup the shared volume where the student
         # repo exists.
-        volume_mounts=theia_volume_mounts,
+        volume_mounts=[
+            shared_log_volume_mount,
+            *ide_volume_mounts
+        ],
         # Startup probe is the way that kubernetes can
         # check to see if the theia has started correctly.
         # The pod will not be marked as ready until the
@@ -517,32 +607,25 @@ def create_theia_k8s_pod_pvc(
     pod_containers.append(theia_container)
     pod_containers.append(autosave_container)
 
-    # Extra labels to be applied to the pod
-    extra_labels = {}
+    # All IDEs must have a network policy attached to them. This section reads the network
+    # policy specified for the IDE, and verifies it is in the set of acceptable network policy
+    # names ( defined in anubis/constants.py ). If the policy is not valid, fallback to the default.
+    network_policy = theia_session.network_policy \
+        if theia_session.network_policy in THEIA_VALID_NETWORK_POLICIES \
+        else THEIA_DEFAULT_NETWORK_POLICY
 
-    # Anything extra in the pod spec to be added
-    spec_extra = {}
+    # This label will enable the student network policy to be
+    # applied to this container. The gist of this policy is that
+    # students will only be able to connect to github.
+    pod_labels_extra["network-policy"] = network_policy
 
     # If network locked, then set the network policy to student
     # and dns to 1.1.1.1
-    if theia_session.network_locked:
-
-        # This label will enable the student network policy to be
-        # applied to this container. The gist of this policy is that
-        # students will only be able to connect to github.
-        extra_labels["network-policy"] = theia_session.network_policy or "os-student"
-
+    if theia_session.network_dns_locked:
         # set up the pod DNS to be pointed to cloudflare 1.1.1.1 instead
         # of the internal kubernetes dns.
-        spec_extra["dns_policy"] = "None"
-        spec_extra["dns_config"] = k8s.V1PodDNSConfig(nameservers=["1.1.1.1"])
-
-    # If the network is not locked, then we still need to apply
-    # the admin policy. The gist of this policy is that the pod
-    # can only connect to the api within the cluster, and anything
-    # outside of the cluster.
-    else:
-        extra_labels["network-policy"] = "admin"
+        pod_spec_extra["dns_policy"] = "None"
+        pod_spec_extra["dns_config"] = k8s.V1PodDNSConfig(nameservers=["1.1.1.1"])
 
     # Create pod object
     pod = k8s.V1Pod(
@@ -554,7 +637,7 @@ def create_theia_k8s_pod_pvc(
                 "role":                   "theia-session",
                 "netid":                  netid,
                 "session":                theia_session.id,
-                **extra_labels,
+                **pod_labels_extra,
             },
         ),
         spec=k8s.V1PodSpec(
@@ -562,6 +645,8 @@ def create_theia_k8s_pod_pvc(
             # IDEs will be theia@anubis-ide instead of some ugly
             # container hash.
             hostname="anubis-ide",
+            # set node selector
+            node_selector=get_theia_node_selector(),
             # set the init container
             init_containers=[init_container],
             # set the containers list
@@ -576,7 +661,7 @@ def create_theia_k8s_pod_pvc(
             automount_service_account_token=False,
             # Add any extra things in the spec (depending on the
             # options set for the session)
-            **spec_extra,
+            **pod_spec_extra,
         ),
     )
 

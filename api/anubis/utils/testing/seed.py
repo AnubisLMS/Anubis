@@ -9,12 +9,6 @@ from anubis.github.repos import get_student_assignment_repo_name
 from anubis.ide.reap import mark_session_ended
 from anubis.lms.questions import assign_questions
 from anubis.models import (
-    ForumPost,
-    ForumPostComment,
-    ForumCategory,
-    ForumPostInCategory,
-    ForumPostViewed,
-    ForumPostUpvote,
     Assignment,
     AssignmentQuestion,
     AssignmentRepo,
@@ -28,6 +22,7 @@ from anubis.models import (
     TheiaImage,
     TheiaImageTag,
     User,
+    Config,
     db,
 )
 from anubis.models.id import default_id_factory
@@ -85,7 +80,7 @@ def create_assignment(
     i=0,
     do_submissions=True,
     do_repos=False,
-    submission_count=30,
+    submission_count=5,
     **kwargs,
 ):
     logger.info(f'creating {course.name} assignment {i}')
@@ -129,8 +124,19 @@ def create_assignment(
         db.session.add(assignment_question)
 
     tests = []
-    for i in range(random.randint(3, 5)):
-        tests.append(AssignmentTest(id=default_id_factory(), name=f"test {i}", assignment_id=assignment.id))
+
+    if not kwargs.get('shell_autograde_enabled', False):
+        n = 0
+        for i in range(random.randint(3, 5)):
+            tests.append(AssignmentTest(id=default_id_factory(), name=f"test {i}", assignment_id=assignment.id, order=n))
+            n += 1
+    else:
+        tests = [
+            AssignmentTest(id=default_id_factory(), name='helloworld', assignment_id=assignment.id, order=0),
+            AssignmentTest(id=default_id_factory(), name='mkdir exercise1', assignment_id=assignment.id, order=1),
+            AssignmentTest(id=default_id_factory(), name='cd exercise1', assignment_id=assignment.id, order=2),
+            AssignmentTest(id=default_id_factory(), name='pipe hello world', assignment_id=assignment.id, order=3),
+        ]
 
     submissions = []
     repos = []
@@ -232,7 +238,7 @@ def init_submissions(submissions):
 
     # Init models
     for submission in submissions:
-        init_submission(submission, commit=False, verbose=False)
+        init_submission(submission, db_commit=False, verbose=False)
     db.session.commit()
 
     for submission in submissions:
@@ -256,59 +262,6 @@ def init_submissions(submissions):
                     test_result.message = "Test failed"
                     test_result.output_type = "diff"
                     test_result.output = rand_diff()
-
-
-def init_forums(course: Course):
-    student1 = User.query.join(InCourse).join(Course).filter(Course.id == course.id).first()
-    student2 = User.query.join(InCourse).join(Course).filter(Course.id == course.id).offset(1).first()
-    for i in range(3):
-        post = ForumPost(
-            owner_id=student1.id,
-            course_id=course.id,
-            visible_to_students=True,
-            pinned=False,
-            anonymous=False,
-            title=f'post title {i}',
-            content=f'post content {i}',
-        )
-        db.session.add(post)
-
-        category = ForumCategory(
-            name=f"Category {i}",
-            course=course,
-        )
-        db.session.add(category)
-
-        in_category = ForumPostInCategory(
-            post=post,
-            category=category,
-        )
-        db.session.add(in_category)
-
-        upvote = ForumPostUpvote(owner=student2, post=post)
-        db.session.add(upvote)
-
-        viewed1 = ForumPostViewed(owner=student1, post=post)
-        viewed2 = ForumPostViewed(owner=student2, post=post)
-        db.session.add_all([viewed1, viewed2])
-
-        comments: list[ForumPostComment] = []
-        for k in range(3):
-            comment = ForumPostComment(
-                id=default_id_factory(),
-                owner_id=student2.id,
-                post=post,
-                parent_id=None,
-                approved_by_id=None,
-                anonymous=False,
-                thread_start=False,
-                content=f'comment content {k}'
-            )
-            comments.append(comment)
-        comments[2].thread_start = True
-        comments[1].parent_id = comments[2].id
-        comments[0].parent_id = comments[2].id
-        db.session.add_all(comments)
 
 
 @with_context
@@ -384,7 +337,7 @@ def seed():
 
     # OS test course
     logger.info('creating os students')
-    intro_to_os_students = create_students(50) + [
+    intro_to_os_students = create_students(10) + [
         superuser,
         professor_user,
         ta_user,
@@ -435,6 +388,22 @@ def seed():
         do_repos=True,
         github_repo_required=True,
     )
+    os_assignment4, _, _, _ = create_assignment(
+        intro_to_os_course,
+        intro_to_os_students,
+        xv6_image,
+        i=4,
+        do_submissions=False,
+        do_repos=False,
+        github_repo_required=False,
+        shell_autograde_enabled=True,
+        shell_autograde_repo='jepst/BashExercises1122',
+        shell_autograde_exercise_path='sample/exercise.py',
+    )
+    os_assignment4.theia_options['autosave'] = False
+    os_assignment4.theia_options['persistent_storage'] = False
+    os_assignment4.theia_options['network_policy'] = 'shell-autograde-student'
+    os_assignment4.theia_options['network_dns_locked'] = False
     logger.info('init submissions assignment 0')
     init_submissions(os_submissions0)
     assign_questions(os_assignment0)
@@ -447,6 +416,7 @@ def seed():
     logger.info('init submissions assignment 3')
     init_submissions(os_submissions3)
     assign_questions(os_assignment3)
+    assign_questions(os_assignment4)
 
     logger.info('adding course tas + profs')
     ta = TAForCourse(owner=ta_user, course=intro_to_os_course)
@@ -455,7 +425,7 @@ def seed():
 
     # MMDS test course
     logger.info('creating mmds student')
-    mmds_students = create_students(50)
+    mmds_students = create_students(10)
 
     logger.info('adding mmds course')
     mmds_course = create_course(
@@ -472,6 +442,11 @@ def seed():
     logger.info('init mmds submissions')
     init_submissions(mmds_submissions)
     assign_questions(mmds_assignment)
+
+    playground_dockerd_config = Config.query.filter_by(key='PLAYGROUND_DOCKERD')
+    if playground_dockerd_config is None:
+        playground_dockerd_config = Config(key='PLAYGROUND_DOCKERD', value='ON')
+        db.session.add(playground_dockerd_config)
 
     logger.info('committing')
     db.session.commit()

@@ -1,13 +1,17 @@
+import json
 import traceback
+from datetime import datetime, timedelta
 
 from kubernetes import client as k8s
 
+from anubis.k8s.theia.create import create_k8s_resources_for_ide
 from anubis.k8s.theia.get import get_theia_pod_name
 from anubis.lms.theia import get_active_theia_sessions
+from anubis.lms.reserve import is_session_reserved
 from anubis.models import TheiaSession, db
 from anubis.utils.logging import logger
 from anubis.utils.redis import create_redis_lock
-
+from anubis.utils.datetime import convert_to_local
 
 def update_theia_pod_cluster_addresses(theia_pods: k8s.V1PodList):
     """
@@ -91,35 +95,99 @@ def update_theia_session(session: TheiaSession):
         # Error
         logger.error(traceback.format_exc())
         logger.error("continuing")
+        return
+
+
+    # Get age of session
+    age: timedelta = datetime.now() - convert_to_local(pod.metadata.creation_timestamp)
+
+    # Figure out if session is reserved
+    reserved = is_session_reserved(session)
+
+    # Consider pod aged out if it has been n minutes without passing
+    if not reserved and age > timedelta(minutes=5) and pod.status.phase != 'Running':
+
+        # Mark k8s_requested as False before deleting
+        session.k8s_requested = False
+
+        try:
+            # Delete existing k8s resources for session
+            from anubis.k8s.theia.reap import reap_theia_session_k8s_resources
+            reap_theia_session_k8s_resources(session.id)
+        except k8s.exceptions.ApiException as e:
+            logger.error(f'Failed to delete aged out session {e} {session}\n{traceback.format_exc()}')
+            return
+
+        try:
+            # Re-create theia session
+            create_k8s_resources_for_ide(session)
+        except k8s.exceptions.ApiException as e:
+            logger.error(f'Failed to re-create aged out session {e} {session}\n{traceback.format_exc()}')
+            return
+
+        # Commit changes to session.k8s_requested
+        db.session.commit()
+        return
 
     # Update the session state from the pod status
     if pod.status.phase == "Pending":
 
         # Boolean to indicate if volume has attached
         volume_attached: bool = False
+        scheduled: bool = False
+        scaling: bool = False
+
+        # Get event list for ide pod
+        events: k8s.CoreV1Eventlist = v1.list_namespaced_event(
+            "anubis", field_selector=f"involvedObject.name={pod_name}"
+        )
+
+        # Iterate through events
+        for event in events.items:
+            event: k8s.CoreV1Event
+
+            # If scheduled, then there will be a "Scheduled" event
+            if 'Scheduled' in event.reason:
+                scheduled = True
+                continue
+
+            # 0/10 nodes are available: 10 Insufficient cpu, 2 Insufficient memory.
+            if 'FailedScheduling' in event.reason and 'Insufficient' in event.message:
+                from anubis.utils.email.event import send_email_event_admin
+
+                # limit 1 per hour
+                send_email_event_admin(
+                    "scaleup",
+                    "scaleup",
+                    'scaleup',
+                    context={
+                        'age':     age,
+                        'now':     datetime.now(),
+                        'session': json.dumps(session.data, indent=2),
+                        'event':   str(event.to_str()),
+                        'pod':     str(pod.metadata.name),
+                    }
+                )
+
+                scaling = True
+                continue
+
+            # attachdetach-controller starts success messages like
+            # this when volume has attached
+            if "AttachVolume.Attach succeeded" in event.message:
+                volume_attached = True
+                break
+
+        if not scheduled and scaling:
+            session.state = "We are adding more servers to handle your IDE. Give us a minute..."
 
         # If storage volume needs to be attached, we should check
         # in the events for the pod if it has been attached.
-        if session.persistent_storage:
-            # Get event list for ide pod
-            events: k8s.CoreV1Eventlist = v1.list_namespaced_event(
-                "anubis", field_selector=f"involvedObject.name={pod_name}"
-            )
-
-            # Iterate through events
-            for event in events.items:
-                event: k8s.CoreV1Event
-
-                # attachdetach-controller starts success messages like
-                # this when volume has attached
-                if "AttachVolume.Attach succeeded" in event.message:
-                    volume_attached = True
-                    break
-
-        # If we are expecting a volume, but it has not been attached, then
-        # we should set the status message to state such
-        if session.persistent_storage and not volume_attached:
-            session.state = "Waiting for Persistent Volume to attach..."
+        elif scheduled and session.persistent_storage:
+            # If we are expecting a volume, but it has not been attached, then
+            # we should set the status message to state such
+            if session.persistent_storage and not volume_attached:
+                session.state = "Waiting for Persistent Volume to attach..."
 
         # State that the ide server has not yet started
         else:

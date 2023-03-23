@@ -1,9 +1,9 @@
 from datetime import datetime
 
+from anubis.constants import AUTOGRADE_DISABLED_MESSAGE
 from anubis.lms.assignments import get_assignment_due_date
 from anubis.models import (
     Assignment,
-    AssignmentRepo,
     AssignmentTest,
     Course,
     InCourse,
@@ -79,7 +79,7 @@ def regrade_submission(submission: Submission | str, queue: str = "default") -> 
     return success_response({"message": "regrade started"})
 
 
-@cache.memoize(timeout=300, unless=is_debug, source_check=True)
+@cache.memoize(timeout=3, unless=is_debug, source_check=True)
 def get_submissions(
     user_id=None,
     course_id=None,
@@ -136,6 +136,25 @@ def get_submissions(
     return [s.full_data for s in submissions], all_total
 
 
+def recalculate_late(assignment_id: str):
+    assignment: Assignment = Assignment.query.filter(
+        Assignment.id == assignment_id
+    ).first()
+
+    # Get all students in the class
+    students: list[User] = User.query.join(InCourse).filter(
+        InCourse.course_id == assignment.course_id
+    ).all()
+
+    logger.info(f'Recalculating late submissions for {assignment}')
+
+    for student in students:
+        logger.info(f'Recalculating late submissions for {student}')
+
+        # Recalculate late for student
+        recalculate_late_submissions(student, assignment)
+
+
 def recalculate_late_submissions(student: User, assignment: Assignment):
     """
     Recalculate the submissions that need to be
@@ -148,28 +167,43 @@ def recalculate_late_submissions(student: User, assignment: Assignment):
     from anubis.rpc.enqueue import rpc_enqueue
 
     # Get the due date for this student
-    due_date = get_assignment_due_date(student, assignment, grace=True)
+    due_date = get_assignment_due_date(student.id, assignment.id, grace=True)
 
     # Get the submissions that need to be rejected
-    s_reject = Submission.query.filter(
+    reject_query = Submission.query.filter(
         Submission.created > due_date,
         Submission.accepted == True,
-    ).all()
+        Submission.assignment_id == assignment.id,
+        Submission.owner_id == student.id,
+    )
 
     # Get the submissions that need to be accepted
-    s_accept = Submission.query.filter(
+    accept_query = Submission.query.filter(
         Submission.created < due_date,
         Submission.accepted == False,
-    ).all()
+        Submission.assignment_id == assignment.id,
+        Submission.owner_id == student.id,
+    )
 
-    # Go through, and reset and enqueue regrade
-    s_accept_ids = list(map(lambda x: x.id, s_accept))
-    for chunk in split_chunks(s_accept_ids, 32):
-        rpc_enqueue(bulk_regrade_submissions, "regrade", args=[chunk])
+    logger.debug(f'found {reject_query.count()} {accept_query.count()} to flip for {student}')
 
-    # Reject the submissions that need to be updated
-    for submission in s_reject:
-        reject_late_submission(submission)
+    # Update rows, set accepted accordingly
+    accept_query.update({'accepted': True})
+    reject_query.update({'accepted': False})
+
+    # Only reset/regrade of autograde turned on for assignment
+    if assignment.autograde_enabled:
+        s_accept = accept_query.all()
+        s_reject = reject_query.all()
+
+        # Go through, and reset and enqueue regrade
+        s_accept_ids = list(map(lambda x: x.id, s_accept))
+        for chunk in split_chunks(s_accept_ids, 32):
+            rpc_enqueue(bulk_regrade_submissions, "regrade", args=[chunk])
+
+        # Reject the submissions that need to be updated
+        for submission in s_reject:
+            reject_late_submission(submission)
 
     # Commit the changes
     db.session.commit()
@@ -206,7 +240,7 @@ def reject_late_submission(submission: Submission):
     db.session.add(submission)
 
 
-def init_submission(submission: Submission, commit: bool = True, verbose: bool = True):
+def init_submission(submission: Submission, db_commit: bool = True, state: str = "Waiting for resources...", verbose: bool = True):
     """
     Create adjacent submission models.
 
@@ -222,12 +256,14 @@ def init_submission(submission: Submission, commit: bool = True, verbose: bool =
     if submission.build is not None:
         SubmissionBuild.query.filter_by(submission_id=submission.id).delete()
 
-    if commit:
+    if db_commit:
         # Commit deletions (if necessary)
         db.session.commit()
 
     # Find tests for the current assignment
-    tests = AssignmentTest.query.filter_by(assignment_id=submission.assignment_id).all()
+    tests = AssignmentTest.query.filter(
+        AssignmentTest.assignment_id == submission.assignment_id
+    ).order_by(AssignmentTest.order.asc()).all()
 
     if verbose:
         logger.debug("found tests: {}".format(list(map(lambda x: x.data, tests))))
@@ -240,17 +276,74 @@ def init_submission(submission: Submission, commit: bool = True, verbose: bool =
 
     submission.accepted = True
     submission.processed = False
-    submission.state = "Waiting for resources..."
+    submission.state = state
     submission.errors = None
     db.session.add(submission)
 
-    if commit:
+    if db_commit:
         # Commit new models
         db.session.commit()
 
 
-def get_latest_user_submissions(assignment: Assignment, user: User, limit: int = 3) -> list[Submission]:
-    return Submission.query.join(User).join(Assignment).filter(
+def get_latest_user_submissions(assignment: Assignment, user: User, limit: int = 3, filter: list = None) -> list[Submission]:
+    filter = filter or []
+    return Submission.query.filter(
         Submission.assignment_id == assignment.id,
         Submission.owner_id == user.id,
+        *filter
     ).order_by(Submission.created.desc()).limit(limit).all()
+
+
+def fix_submissions_for_autograde_disabled_assignment(assignment: Assignment):
+    if assignment.autograde_enabled or assignment.shell_autograde_enabled:
+        logger.warning(f'Skipping autograde disabled fix for assignment {assignment=}')
+        return
+
+    logger.info(f'Fixing autograde disabled submissions for {assignment=}')
+    Submission.query.filter(Submission.assignment_id == assignment.id).update({
+        'processed': True,
+        'state': AUTOGRADE_DISABLED_MESSAGE
+    })
+    db.session.commit()
+
+    if not assignment.accept_late:
+        count = 0
+        # Crudely filter out submissions to be fixed
+        submissions: list[Submission] = Submission.query.filter(
+            Submission.accepted == True,
+            Submission.created > assignment.grace_date,
+            Submission.assignment_id == assignment.id,
+        # Order submissions by user so we get cache locality
+        ).order_by(Submission.owner_id)
+        for submission in submissions:
+            # Querying due dates on all these submissions is going to create quite a few roundtrips
+            # to the database, so having get_assignment_due_date cached is somewhat helpful.
+            if submission.created > get_assignment_due_date(submission.owner_id, assignment.id, grace=True):
+                count += 1
+                submission.accepted = False
+        db.session.commit()
+        logger.info(f'Fixed {count} falsely accepted past-grace submissions for {assignment=}')
+
+
+def get_submission_tests(submission: Submission, only_visible=False):
+    """
+    Get a list of dictionaries of the matching Test, and TestResult
+    for the current submission.
+
+    :return:
+    """
+
+    # Construct query for
+    query = SubmissionTestResult.query.join(AssignmentTest).filter(
+        SubmissionTestResult.submission_id == submission.id,
+    ).order_by(AssignmentTest.order)
+
+    # If only get visible tests, apply extra filter
+    if only_visible:
+        query.filter(AssignmentTest.hidden == False)
+
+    # Query for matching AssignmentTests, and TestResults
+    tests = query.all()
+
+    # Convert to dictionary data
+    return [{"test": result.assignment_test.data, "result": result.data} for result in tests]

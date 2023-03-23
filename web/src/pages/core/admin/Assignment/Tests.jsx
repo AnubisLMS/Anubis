@@ -130,10 +130,13 @@ export default function Tests() {
         <Grid item/>
         <Grid item xs={10}>
           <Grid container spacing={2}>
-            {tests.map(({id, name, hidden}, index) => (
+            {tests.map(({id, order, name, hidden}, index) => (
               <Grid item xs={12} md={6} key={`question-${index}`}>
                 <Card>
                   <CardContent>
+                    <Typography variant={'body2'}>
+                      {order}
+                    </Typography>
                     <Typography variant={'h6'}>
                       {name}
                     </Typography>

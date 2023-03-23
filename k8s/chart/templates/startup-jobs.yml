@@ -12,6 +12,10 @@ spec:
   ttlSecondsAfterFinished: 30
   template:
     spec:
+      {{- if and .Values.nodeSelector (not .Values.debug) }}
+      nodeSelector:
+        {{ .Values.nodeSelector | toYaml }}
+      {{- end }}
       restartPolicy: Never
       containers:
       - name: db-migrate
@@ -36,6 +40,10 @@ spec:
   ttlSecondsAfterFinished: 30
   template:
     spec:
+      {{- if and .Values.nodeSelector (not .Values.debug) }}
+      nodeSelector:
+        {{ .Values.nodeSelector | toYaml }}
+      {{- end }}
       restartPolicy: Never
       containers:
       - name: visuals

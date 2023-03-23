@@ -1,25 +1,33 @@
-FROM python:3.10-alpine
+FROM python:3.10-slim-bullseye
 
+ENV DEBIAN_FRONTEND=noninteractive
+
+COPY requirements.txt /requirements.txt
 RUN set -eux; \
-    adduser -D -u 1001 -h /home/theia anubis; \
-    apk add --update --no-cache git bash; \
-    pip3 install --no-cache-dir flask supervisor gunicorn
+    useradd -m --user-group --uid 1001 anubis; \
+    apt update;  \
+    apt install -y --no-install-recommends git bash g++; \
+    pip3 install --no-cache-dir -r /requirements.txt; \
+    mkdir -p /opt/anubis; \
+    chmod 755 /opt/anubis; \
+    chown anubis:anubis /opt/anubis; \
+    rm -rf /usr/share/doc; \
+    rm -rf /usr/local/share/.cache; \
+    rm -rf /var/cache/apt/*; \
+    rm -rf /var/lib/apt/lists/*
 
-USER anubis
-RUN set -eux; \
-    git config --global user.email anubis@anubis-lms.io; \
-    git config --global user.name anubis-robot; \
-    git config --global credential.store helper; \
-    git config --global credential.helper 'store --file ~/.git-credentials'; \
-    git config --global core.hooksPath /dev/null
-USER root
+VOLUME /home/anubis
+VOLUME /log
 
-VOLUME /home/project
-
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 COPY supervisord.conf /supervisord.conf
-COPY app.py /app.py
+COPY . /opt/anubis/anubis_autograde
+
+RUN set -eux; \
+    pip3 install --no-cache-dir /opt/anubis/anubis_autograde; \
+    rm -rf /opt/anubis/anubis_autograde
 
 USER anubis
-ENTRYPOINT ["supervisord", "--nodaemon", "-c", "/supervisord.conf"]
+CMD ["/docker-entrypoint.sh"]
 
 

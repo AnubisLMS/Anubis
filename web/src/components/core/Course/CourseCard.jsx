@@ -20,6 +20,8 @@ import AuthContext from '../../../context/AuthContext';
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 
+import BatchAddInput from '../Users/BatchAddInput';
+
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -32,6 +34,8 @@ export default function CourseCard({course, _disabled, editableFields, updateFie
   const {enqueueSnackbar} = useSnackbar();
   const [images, setImages] = useState([]);
 
+  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+
   React.useEffect(() => {
     axios.get(`/api/admin/ide/images/list`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
@@ -41,9 +45,20 @@ export default function CourseCard({course, _disabled, editableFields, updateFie
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, []);
 
+
+  const onBatchAddStudents = (students, create_pvc) => {
+    console.log('students', students, create_pvc);
+    setIsBatchModalOpen(false);
+    axios.post('/api/admin/courses/batch/students', {students: students, create_pvc: create_pvc}).then((response) => {
+      standardStatusHandler(response, enqueueSnackbar);
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  };
+
   return (
     <Card>
       <CardContent>
+
+        <BatchAddInput onAdd={onBatchAddStudents} isOpen={isBatchModalOpen}/>
         <Grid container spacing={2}>
           {editableFields.map(({field, label, type = 'text', disabled = false}) => {
             switch (field) {
@@ -120,6 +135,17 @@ export default function CourseCard({course, _disabled, editableFields, updateFie
                 to={`/admin/course/students`}
               >
                 Edit Students
+              </Button>
+              <Button
+                size={'small'}
+                startIcon={<EditIcon/>}
+                color={'secondary'}
+                variant={'contained'}
+                className={classes.button}
+                onClick={() => setIsBatchModalOpen(true)}
+              >
+                { /** [TODO] Implement Batch Add Students */}
+                Batch Add Students
               </Button>
               <Button
                 size={'small'}

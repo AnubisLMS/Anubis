@@ -17,6 +17,7 @@ RUN set -eux; \
     sed -i 's/rootless/anubis/' /etc/subuid /etc/subgid;
 
 VOLUME /certs
+VOLUME /log
 
 COPY supervisord.conf /
 COPY dockerd.sh /anubis/

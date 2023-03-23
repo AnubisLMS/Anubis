@@ -13,6 +13,7 @@ RUN git config --global user.email anubis@anubis-lms.io \
 USER root
 
 VOLUME /home/project
+VOLUME /log
 
 COPY supervisord.conf /supervisord.conf
 COPY autosave-loop.sh /autosave-loop.sh

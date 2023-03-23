@@ -26,6 +26,10 @@ rules:
 - apiGroups: [""]
   resources: ["events"]
   verbs: ["get", "list"]
+- apiGroups: [""]
+  resourceNames: ["google-gmail-creds"]
+  resources: ["secrets"]
+  verbs: ["get", "patch"]
 ---
 
 kind: RoleBinding
@@ -53,7 +57,7 @@ metadata:
     {{- include "chart.labels" . | nindent 4 }}
     component: poller
 spec:
-  replicas: {{ .Values.theia.poller.replicas }}
+  replicas: {{- if not .Values.offSemester }} {{ .Values.theia.poller.replicas }}{{- else }} 1{{- end }}
   {{- if .Values.rollingUpdates }}
   strategy:
     type: RollingUpdate
@@ -71,6 +75,10 @@ spec:
         {{- include "chart.selectorLabels" . | nindent 8 }}
         component: poller
     spec:
+      {{- if and .Values.nodeSelector (not .Values.debug) }}
+      nodeSelector:
+        {{ .Values.nodeSelector | toYaml }}
+      {{- end }}
       serviceAccountName: theia-poller
       containers:
       - name: poller

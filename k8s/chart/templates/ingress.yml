@@ -37,6 +37,19 @@ spec:
       - "/docs"
 ---
 
+# Strip prefix /autograde
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-autograde
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+spec:
+  stripPrefix:
+    prefixes:
+      - "/autograde"
+---
+
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
@@ -93,16 +106,17 @@ spec:
   {{- end }}
 ---
 
-# Public Ingress Route anubis.osiris.services/ide/
+{{- range untilStep (.Values.theia.proxy.portMin | int) (add .Values.theia.proxy.portMax 1 | int) 1 }}
+# Public Ingress Route ide8000.anubis-lms.io/
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: ingress.route.theia.public
+  name: ingress.route.anubis.theia-proxy-{{ . }}.public
   labels:
-    {{- include "chart.labels" . | nindent 4 }}
+    {{- include "chart.labels" $ | nindent 4 }}
     component: proxy
 spec:
-  {{- if .Values.debug }}
+  {{- if $.Values.debug }}
   entryPoints:
     - web
   {{- else }}
@@ -111,22 +125,23 @@ spec:
   {{- end }}
   routes:
   - kind: Rule
-    match: Host(`{{ .Values.domain }}`) && PathPrefix(`/ide/`)
+    match: Host(`{{ $.Values.domain }}`) && PathPrefix(`/ide/`)
     middlewares:
     - name: strip-ide
     services:
-    - name: {{ include "chart.fullname" . }}-theia-proxy
+    - name: {{ include "chart.fullname" $ }}-theia-proxy
       port: 5000
   - kind: Rule
-    match: Host(`ide8000.{{ .Values.domain }}`)
+    match: Host(`ide{{ . }}.{{ $.Values.domain }}`)
     services:
-    - name: {{ include "chart.fullname" . }}-theia-proxy
+    - name: {{ include "chart.fullname" $ }}-theia-proxy
       port: 5000
-  {{- if not .Values.debug }}
+  {{- if not $.Values.debug }}
   tls:
     certResolver: le
   {{- end }}
 ---
+{{- end }}
 
 # Public Ingress Route /*
 apiVersion: traefik.containo.us/v1alpha1
@@ -186,6 +201,36 @@ spec:
   {{- end }}
 ---
 
+# Public Ingress Route /*
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingress.route.anubis.theia-autograde-docs
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: theia-autograde-docs
+spec:
+  {{- if .Values.debug }}
+  entryPoints:
+    - web
+  {{- else }}
+  entryPoints:
+    - websecure
+  {{- end }}
+  routes:
+  - kind: Rule
+    match: Host(`{{ .Values.domain }}`) && PathPrefix(`/autograde`)
+    middlewares:
+    - name: strip-autograde
+    services:
+    - name: {{ include "chart.fullname" . }}-theia-autograde-docs
+      port: 8080
+  {{- if not .Values.debug }}
+  tls:
+    certResolver: le
+  {{- end }}
+---
+
 # For the anubis-lms.io redirect when we deploy that
 {{- if not .Values.debug }}
 # Redirect with domain replacement
@@ -195,9 +240,8 @@ metadata:
   name: redirect-to-new
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: anubis
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
+    {{- include "chart.labels" . | nindent 4 }}
+    component: proxy
 spec:
   redirectRegex:
     regex: ^https://anubis.osiris.services/(.*)
@@ -206,13 +250,11 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: ingress.route.redirect.public
+  name: ingress.route.anubis.redirect.public
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: theia
+    {{- include "chart.labels" . | nindent 4 }}
     component: proxy
-    heritage: {{ .Release.Service | quote }}
-    release: {{ .Release.Name | quote }}
 spec:
   entryPoints:
     - websecure

@@ -1,0 +1,99 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+/* for details on setup look here https://github.com/apache/arrow/pull/9876/commits
+
+TODO somehow chrome and safari messup the logo, maybe make it smaller not clear yet..
+*/
+
+/* Customizing with theme CSS variables */
+
+:root {
+    --pst-color-active-navigation: 215, 70, 51;
+    --pst-color-link-hover: 215, 70, 51;
+    --pst-color-headerlink: 215, 70, 51;
+    /* Use normal text color (like h3, ..) instead of primary color */
+    --pst-color-h1: var(--color-text-base);
+    --pst-color-h2: var(--color-text-base);
+    /* Use softer blue from bootstrap's default info color */
+    --pst-color-info: 23, 162, 184;
+    --pst-header-height: 0px;
+}
+
+code {
+    color: rgb(215, 70, 51);
+}
+
+
+/* Ensure the logo is properly displayed */
+.navbar-brand {
+    /* height: auto;
+    width: auto; */
+    height: 200px;
+    width: 200px;
+    max-height: 15vh;
+    max-width: 100%;
+}
+
+/* Limit the max height of the sidebar navigation section. Because in our
+custimized template, there is more content above the navigation, i.e.
+larger logo: if we don't decrease the max-height, it will overlap with
+the footer. */
+
+/* @media (min-width:720px) {
+  @supports (position:-webkit-sticky) or (position:sticky) {
+    .bd-links {
+      max-height: calc(100vh - 18rem)
+    }
+  }
+} */
+
+.footer {
+    text-align: center;
+}
+
+
+/* Fix table text wrapping in RTD theme,
+ * see https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
+ */
+
+@media screen {
+    table.docutils td {
+        /* !important prevents the common CSS stylesheets from overriding
+          this as on RTD they are loaded after this stylesheet */
+        white-space: normal !important;
+    }
+}
+
+/* Newlines (\a) and spaces (\20) before each parameter */
+.sig-param::before {
+    content: "\a\20\20\20\20";
+    white-space: pre;
+}
+
+/* Newline after the last parameter (so the closing bracket is on a new line) */
+dt em.sig-param:last-of-type::after {
+    content: "\a";
+    white-space: pre;
+}
+
+/* To have blue background of width of the block (instead of width of content) */
+dl.class > dt:first-of-type {
+    display: block !important;
+}

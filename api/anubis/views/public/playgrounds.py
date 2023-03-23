@@ -1,13 +1,19 @@
 from flask import Blueprint, request
 
+from anubis.constants import (
+    DEVELOPER_DEFAULT_IMAGE,
+    DEVELOPER_DEFAULT_OPTIONS,
+    AUTOGRADE_IDE_DEFAULT_IMAGE,
+    THEIA_DEFAULT_NETWORK_POLICY,
+)
 from anubis.ide.conditions import assert_theia_sessions_enabled
 from anubis.ide.initialize import initialize_ide
 from anubis.models import TheiaSession, TheiaImage, TheiaImageTag
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
+from anubis.utils.config import get_config_bool
 from anubis.utils.http import success_response, req_assert
 from anubis.utils.http.decorators import json_response, load_from_id
-from anubis.constants import DEVELOPER_DEFAULT_IMAGE, DEVELOPER_DEFAULT_OPTIONS, AUTOGRADE_IDE_DEFAULT_IMAGE
 
 playgrounds_ = Blueprint("public-playgrounds", __name__, url_prefix="/public/playgrounds")
 
@@ -48,7 +54,12 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
     # If there was an existing session for this assignment found, skip
     # the initialization, and return the active session information.
     if active_session is not None:
-        return success_response({"active": active_session.active, "session": active_session.data})
+        return success_response(
+            {
+                "active":  active_session.active,
+                "session": active_session.data,
+            }
+        )
 
     # Assert that new ide starts are allowed. If they are not, then
     # we return a status message to the user saying they are not able
@@ -60,7 +71,7 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
 
     # Default to not setting
     resources = dict()
-    docker = False
+    docker = get_config_bool('PLAYGROUND_DOCKERD', default=False)
     autograde = False
 
     # If the person launching is a developer, then add the extra stuff
@@ -81,8 +92,8 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
         course_id=None,
         repo_url="",
         playground=True,
-        network_locked=True,
-        network_policy="os-student",
+        network_dns_locked=True,
+        network_policy=THEIA_DEFAULT_NETWORK_POLICY,
         persistent_storage=True,
         autosave=False,
         autograde=autograde,
@@ -95,9 +106,9 @@ def public_playgrounds_initialize(theia_image: TheiaImage):
     # Redirect to proxy
     return success_response(
         {
-            "active": session.active,
+            "active":  session.active,
             "session": session.data,
-            "status": status,
+            "status":  status,
         }
     )
 
@@ -126,7 +137,7 @@ def public_playgrounds_active():
     # If they do have a session, then pass back True
     return success_response(
         {
-            "active": True,
+            "active":  True,
             "session": session.data,
         }
     )
@@ -144,9 +155,13 @@ def public_playgrounds_images():
 
     images: list[TheiaImage] = TheiaImage.query.filter(TheiaImage.public == True).all()
 
-    return success_response({
-        "images": list(sorted(
-            [image.data for image in images],
-            key=lambda image_data: image_data['title']
-        ))
-    })
+    return success_response(
+        {
+            "images": list(
+                sorted(
+                    [image.data for image in images],
+                    key=lambda image_data: image_data['title']
+                )
+            )
+        }
+    )

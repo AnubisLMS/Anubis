@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import deferred, relationship, InstrumentedAttribute
+from sqlalchemy.orm import scoped_session, deferred, relationship, InstrumentedAttribute
 from sqlalchemy.sql.schema import Column, ForeignKey
 
 from anubis.constants import THEIA_DEFAULT_OPTIONS, DB_COLLATION, DB_CHARSET
@@ -15,6 +15,7 @@ from anubis.models.sqltypes import String, Text, DateTime, Boolean, JSON, Intege
 from anubis.utils.data import human_readable_timedelta
 
 db = SQLAlchemy()
+db.session: scoped_session
 
 
 class Config(db.Model):
@@ -62,13 +63,6 @@ class User(db.Model):
     submissions = relationship("Submission", backref="owner")
     theia_sessions = relationship("TheiaSession", backref="owner")
     late_exceptions = relationship("LateException", backref="user")
-    forum_posts = relationship("ForumPost", backref="owner")
-    forum_comments = relationship("ForumPostComment", backref="owner", foreign_keys="ForumPostComment.owner_id")
-    forum_approved_comments = relationship(
-        "ForumPostComment", backref="approved_by", foreign_keys="ForumPostComment.approved_by_id"
-    )
-    forum_upvotes = relationship("ForumPostUpvote", backref="owner")
-    forum_posts_viewed = relationship("ForumPostViewed", backref="owner")
 
     @property
     def data(self):
@@ -127,8 +121,13 @@ class Course(db.Model):
     lecture_notes = relationship("LectureNotes", cascade="all,delete", backref="course")
     static_files = relationship("StaticFile", cascade="all,delete", backref="course")
     theia_sessions = relationship("TheiaSession", cascade="all,delete", backref="course")
-    forum_posts = relationship("ForumPost", backref="course")
-    forum_categories = relationship("ForumCategory", backref="course")
+    reserved_ide_times = relationship("ReservedIDETime", cascade="all,delete", backref="course")
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return f'<Course {self.name}>'
 
     @property
     def total_assignments(self):
@@ -227,6 +226,11 @@ class Assignment(db.Model):
     pipeline_image = Column(Text(length=2 ** 14), nullable=True, index=True)
     autograde_enabled: bool = Column(Boolean, default=True)
 
+    # Shell autograde
+    shell_autograde_enabled: bool = Column(Boolean, default=False)
+    shell_autograde_repo: str = Column(Text(512), default="")
+    shell_autograde_exercise_path: str = Column(Text(512), default="")
+
     # IDE
     ide_enabled: bool = Column(Boolean, default=True)
     theia_image_id: str = Column(String(length=default_id_length), ForeignKey("theia_image.id"), default=None)
@@ -252,35 +256,44 @@ class Assignment(db.Model):
     late_exceptions = relationship("LateException", cascade="all,delete", backref="assignment")
     tests = relationship("AssignmentTest", cascade="all,delete", backref="assignment")
     repos = relationship("AssignmentRepo", cascade="all,delete", backref="assignment")
+    reserved_ide_times = relationship("ReservedIDETime", cascade="all,delete", backref="assignment")
+
+    def __repr__(self):
+        name = self.name
+        course_code = self.course.course_code
+        return f'<Assignment id={self.id} {name=} {course_code=}>'
 
     @property
     def data(self):
+        from anubis.lms.assignments import get_assignment_tests
         return {
-            "id":                   self.id,
-            "name":                 self.name,
-            "due_date":             str(self.due_date),
-            "past_due":             self.due_date < datetime.now(),
-            "hidden":               self.hidden,
-            "accept_late":          self.accept_late,
-            "autograde_enabled":    self.autograde_enabled,
-            "hide_due_date":        self.hide_due_date,
-            "course":               self.course.data,
-            "description":          self.description,
-            "visible_to_students":  not self.hidden and (datetime.now() > self.release_date),
-            "ide_active":           self.due_date + timedelta(days=3 * 7) > datetime.now(),
-            "tests":                [t.data for t in self.tests if t.hidden is False],
+            "id":                      self.id,
+            "name":                    self.name,
+            "due_date":                str(self.due_date),
+            "past_due":                self.due_date < datetime.now(),
+            "hidden":                  self.hidden,
+            "accept_late":             self.accept_late,
+            "autograde_enabled":       self.autograde_enabled,
+            "hide_due_date":           self.hide_due_date,
+            "course":                  self.course.data,
+            "description":             self.description,
+            "visible_to_students":     not self.hidden and (datetime.now() > self.release_date),
+            "ide_active":              self.due_date + timedelta(days=3 * 7) > datetime.now(),
+            "tests":                   get_assignment_tests(self, visible_only=True),
             # IDE
-            "ide_enabled":          self.ide_enabled,
-            "autosave":             self.theia_options.get("autosave", True),
-            "persistent_storage":   self.theia_options.get("persistent_storage", False),
+            "ide_enabled":             self.ide_enabled,
+            "autosave":                self.theia_options.get("autosave", True),
+            "persistent_storage":      self.theia_options.get("persistent_storage", False),
             # Github
-            "github_repo_required": self.github_repo_required,
+            "github_repo_required":    self.github_repo_required,
+            "shell_autograde_enabled": self.shell_autograde_enabled,
         }
 
     @property
     def full_data(self):
+        from anubis.lms.assignments import get_assignment_tests
         data = self.data
-        data["tests"] = [t.data for t in self.tests]
+        data["tests"] = get_assignment_tests(self, visible_only=False)
         return data
 
 
@@ -334,13 +347,14 @@ class AssignmentTest(db.Model):
     assignment_id: str = Column(String(length=default_id_length), ForeignKey(Assignment.id))
 
     # Fields
-    name = Column(Text(length=2 ** 14), index=True)
+    name: str = Column(Text(length=2 ** 14), index=True)
+    order: int = Column(Integer, index=True, default=0)
     hidden: bool = Column(Boolean, default=False)
     points: int = Column(Integer, default=10)
 
     @property
     def data(self):
-        return {"id": self.id, "name": self.name, "hidden": self.hidden, "points": self.points}
+        return {"id": self.id, "name": self.name, "hidden": self.hidden, "points": self.points, "order": self.order}
 
 
 class AssignmentQuestion(db.Model):
@@ -491,7 +505,7 @@ class Submission(db.Model):
     # Foreign Keys
     owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), index=True, nullable=True)
     assignment_id: str = Column(String(length=default_id_length), ForeignKey(Assignment.id), index=True, nullable=False)
-    assignment_repo_id: str = Column(String(length=default_id_length), ForeignKey(AssignmentRepo.id), nullable=False)
+    assignment_repo_id: str = Column(String(length=default_id_length), ForeignKey(AssignmentRepo.id), nullable=True)
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
@@ -514,7 +528,7 @@ class Submission(db.Model):
         backref="submission",
         lazy=False,
     )
-    test_results = relationship("SubmissionTestResult", cascade="all,delete", backref="submission", lazy=False)
+    test_results: list['SubmissionTestResult'] = relationship("SubmissionTestResult", cascade="all,delete", backref="submission", lazy=False)
     repo = relationship(AssignmentRepo, backref="submissions")
     theia_session = relationship('TheiaSession', cascade='all,delete', backref='submission', lazy=True)
 
@@ -525,6 +539,7 @@ class Submission(db.Model):
             "assignment_name": self.assignment.name,
             "assignment_due":  str(self.assignment.due_date),
             "course_code":     self.assignment.course.course_code,
+            "accepted":        self.accepted,
             "commit":          self.commit,
             "processed":       self.processed,
             "state":           self.state,
@@ -535,23 +550,23 @@ class Submission(db.Model):
 
     @property
     def full_data(self):
-        from anubis.lms.assignments import get_assignment_tests
+        from anubis.lms.submissions import get_submission_tests
 
         # Add connected models
         data = self.data
-        data["repo"] = self.repo.repo_url
-        data["tests"] = get_assignment_tests(self, only_visible=True)
+        data["repo"] = self.repo.repo_url if self.repo is not None else None
+        data["tests"] = get_submission_tests(self, only_visible=True)
         data["build"] = self.build.data if self.build is not None else None
 
         return data
 
     @property
     def admin_data(self):
-        from anubis.lms.assignments import get_assignment_tests
+        from anubis.lms.submissions import get_submission_tests
 
         data = self.full_data
         data["pipeline_log"] = self.pipeline_log
-        data["tests"] = get_assignment_tests(self, only_visible=False)
+        data["tests"] = get_submission_tests(self, only_visible=False)
 
         return data
 
@@ -593,12 +608,13 @@ class SubmissionTestResult(db.Model):
             "last_updated": str(self.last_updated),
         }
 
+    def __repr__(self):
+        return str(self)
+
     def __str__(self):
-        return "testname: {}\nerrors: {}\npassed: {}\n".format(
-            self.testname,
-            self.errors,
-            self.passed,
-        )
+        name = self.assignment_test.name
+        passed = self.passed
+        return f"<SubmissionTestResult {name=} {passed=}>"
 
 
 class SubmissionBuild(db.Model):
@@ -657,10 +673,12 @@ class TheiaImage(db.Model):
             "public":      self.public,
             "default_tag": self.default_tag,
             "webtop":      self.webtop,
-            "tags":        list(sorted(
-                [tag.data for tag in self.tags],
-                key=lambda tag_data: tag_data['title']
-            )),
+            "tags":        list(
+                sorted(
+                    [tag.data for tag in self.tags],
+                    key=lambda tag_data: tag_data['title']
+                )
+            ),
         }
 
 
@@ -712,8 +730,8 @@ class TheiaSession(db.Model):
 
     # IDE settings
     resources = Column(JSON, default=lambda: {})
-    network_policy: str = Column(String(length=128), default="os-student")
-    network_locked: bool = Column(Boolean, default=True)
+    network_policy: str = Column(String(length=128), default=THEIA_DEFAULT_OPTIONS['network_policy'])
+    network_dns_locked: bool = Column(Boolean, default=THEIA_DEFAULT_OPTIONS["network_dns_locked"])
     autosave: bool = Column(Boolean, default=True)
     credentials: bool = Column(Boolean, default=False)
     persistent_storage: bool = Column(Boolean, default=False)
@@ -766,7 +784,8 @@ class TheiaSession(db.Model):
             "repo_url":           self.repo_url,
             "autosave":           self.autosave,
             "credentials":        self.credentials,
-            "network_locked":     self.network_locked,
+            "network_policy":     self.network_policy,
+            "network_dns_locked": self.network_dns_locked,
             "persistent_storage": self.persistent_storage,
         }
 
@@ -903,201 +922,6 @@ class LectureNotes(db.Model):
         }
 
 
-class ForumPost(db.Model):
-    __tablename__ = "forum_post"
-    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
-
-    id = default_id()
-
-    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), nullable=False)
-    course_id: str = Column(String(length=default_id_length), ForeignKey(Course.id))
-    visible_to_students: bool = Column(Boolean, default=False)
-    pinned: bool = Column(Boolean, default=False)
-    anonymous: bool = Column(Boolean, default=False)
-    seen_count: int = Column(Integer, default=0)
-
-    # Content
-    title = Column(Text(length=1024))
-    content = deferred(Column(Text(length=2 ** 14)))
-
-    # Timestamps
-    created: datetime = Column(DateTime, default=datetime.now)
-    last_updated: datetime = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-
-    comments = relationship("ForumPostComment", cascade="all,delete", backref="post")
-    in_categories = relationship("ForumPostInCategory", cascade="all,delete", backref="post")
-    views = relationship("ForumPostViewed", cascade="all,delete", backref="post")
-    upvotes = relationship("ForumPostUpvote", cascade="all,delete", backref="post")
-
-    @property
-    def meta_data(self):
-        return {
-            "id":                  self.id,
-            "title":               self.title,
-            "anonymous":           self.anonymous,
-            "display_name":        "Anonymous" if self.anonymous else self.owner.name,
-            "course_id":           self.course_id,
-            "visible_to_students": self.visible_to_students,
-            "pinned":              self.pinned,
-            "seen_count":          self.seen_count,
-            "created":             str(self.created),
-            "last_updated":        str(self.last_updated),
-        }
-
-    @property
-    def data(self):
-        from anubis.lms.forum import get_post_comments_data
-
-        data = self.meta_data
-        data["title"] = self.title
-        data["content"] = self.content
-        data["comments"] = get_post_comments_data(self)
-        return data
-
-    @property
-    def admin_data(self):
-        data = self.data
-        data["display_name"] = self.owner.name
-        return data
-
-
-class ForumCategory(db.Model):
-    __tablename__ = "forum_category"
-    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
-
-    id = default_id()
-
-    name: str = Column(String(length=128))
-    course_id: str = Column(String(length=default_id_length), ForeignKey(Course.id))
-
-    # Timestamps
-    created: datetime = Column(DateTime, default=datetime.now)
-    last_updated: datetime = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-
-    in_category = relationship("ForumPostInCategory", cascade="all,delete", backref="category")
-
-    @property
-    def data(self):
-        return {
-            "id":           self.id,
-            "name":         self.name,
-            "course_id":    self.course_id,
-            "created":      str(self.created),
-            "last_updated": str(self.last_updated),
-        }
-
-
-class ForumPostInCategory(db.Model):
-    __tablename__ = "forum_post_in_category"
-    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
-
-    post_id: str = Column(String(length=default_id_length), ForeignKey(ForumPost.id), primary_key=True)
-    category_id: str = Column(String(length=default_id_length), ForeignKey(ForumCategory.id), primary_key=True)
-
-    # Timestamps
-    created: datetime = Column(DateTime, default=datetime.now)
-    last_updated: datetime = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-
-    @property
-    def data(self):
-        return {
-            "post_id":      self.post_id,
-            "category_id":  self.category_id,
-            "created":      str(self.created),
-            "last_updated": str(self.last_updated),
-        }
-
-
-class ForumPostViewed(db.Model):
-    __tablename__ = "forum_post_viewed"
-    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
-
-    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), primary_key=True)
-    post_id: str = Column(String(length=default_id_length), ForeignKey(ForumPost.id), primary_key=True)
-
-    # Timestamps
-    created: datetime = Column(DateTime, default=datetime.now)
-    last_updated: datetime = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-
-    @property
-    def data(self):
-        return {
-            "owner_id":     self.owner_id,
-            "post_id":      self.post_id,
-            "created":      str(self.created),
-            "last_updated": str(self.last_updated),
-        }
-
-
-class ForumPostComment(db.Model):
-    __tablename__ = "forum_post_comment"
-    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
-
-    id = default_id()
-
-    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), nullable=False)
-    post_id: str = Column(String(length=default_id_length), ForeignKey(ForumPost.id), nullable=False)
-    parent_id: str = Column(String(length=default_id_length), nullable=True)
-    approved_by_id: str = Column(String(length=default_id_length), ForeignKey(User.id), nullable=True)
-    anonymous: bool = Column(Boolean, default=False)
-    thread_start: bool = Column(Boolean, default=False)
-
-    content: str = deferred(Column(Text(length=2 ** 12)))
-
-    # Timestamps
-    created: datetime = Column(DateTime, default=datetime.now)
-    last_updated: datetime = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-
-    @property
-    def meta_data(self):
-        return {
-            "id":           self.id,
-            "anonymous":    self.anonymous,
-            "display_name": "Anonymous" if self.anonymous else self.owner.name,
-            "post_id":      self.post_id,
-            "parent_id":    self.parent_id,
-            "approved_by":  self.approved_by.name if self.approved_by_id is not None else None,
-            "thread_start": self.thread_start,
-            "created":      str(self.created),
-            "last_updated": str(self.last_updated),
-        }
-
-    @property
-    def data(self):
-        data = self.meta_data
-        data["content"] = self.content
-        return data
-
-    @property
-    def admin_data(self):
-        data = self.data
-        data["display_name"] = self.owner.name
-        return data
-
-
-class ForumPostUpvote(db.Model):
-    __tablename__ = "forum_post_upvote"
-    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
-
-    id = default_id()
-
-    owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), primary_key=True)
-    post_id: str = Column(String(length=default_id_length), ForeignKey(ForumPost.id), primary_key=True)
-
-    # Timestamps
-    created: datetime = Column(DateTime, default=datetime.now)
-    last_updated: datetime = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-
-    @property
-    def data(self):
-        return {
-            "owner_id":     self.owner_id,
-            "post_id":      self.post_id,
-            "created":      str(self.created),
-            "last_updated": str(self.last_updated),
-        }
-
-
 class EmailTemplate(db.Model):
     __tablename__ = "email_template"
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
@@ -1154,4 +978,39 @@ class EmailEvent(db.Model):
             "body":           self.body,
             "created":        str(self.created),
             "last_updated":   str(self.last_updated),
+        }
+
+
+class ReservedIDETime(db.Model):
+    __tablename__ = "reserved_ide_time"
+    __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
+
+    id: str = default_id()
+
+    course_id: str = Column(String(length=default_id_length), ForeignKey(Course.id))
+    assignment_id: str = Column(String(length=default_id_length), ForeignKey(Assignment.id))
+
+    start: datetime = Column(DateTime, default=lambda: datetime.now() + timedelta(weeks=1) - timedelta(hours=1))
+    end: datetime = Column(DateTime, default=lambda: datetime.now() + timedelta(weeks=1))
+
+    # Timestamps
+    created: datetime = Column(DateTime, default=datetime.now)
+    last_updated: datetime = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    @property
+    def active(self):
+        now = datetime.now()
+        return (self.start < now + timedelta(hours=1)) and (self.end > now)
+
+    @property
+    def data(self):
+        return {
+            'id':           self.id,
+            'course':       self.course.data,
+            'assignment':   self.assignment.data,
+            'active':       self.active,
+            'start':        str(self.start),
+            'end':          str(self.end),
+            'created':      str(self.created),
+            'last_updated': str(self.last_updated),
         }

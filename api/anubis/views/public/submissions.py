@@ -68,10 +68,10 @@ def public_submissions():
     return success_response({"submissions": submissions, "total": total, "user": perspective_of.data})
 
 
-@submissions_.route("/get/<string:commit>")
+@submissions_.route("/get/<string:submission_id>")
 @require_user()
 @json_response
-def public_submission(commit: str):
+def public_submission(submission_id: str):
     """
     Get submission data for a given commit.
 
@@ -80,7 +80,7 @@ def public_submission(commit: str):
     """
 
     # Build submission query
-    query = Submission.query.filter(Submission.commit == commit)
+    query = Submission.query.filter(Submission.id == submission_id)
 
     # Do query
     submission: Submission = query.first()

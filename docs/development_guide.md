@@ -68,7 +68,7 @@ auth: http://localhost:3000/api/admin/auth/token/student
 site: http://localhost:3000/
 ```
 
-When you click on the seed link, the api will run a [seed function](https://github.com/GusSand/Anubis/blob/master/api/anubis/rpc/seed.py#L33)
+When you click on the seed link, the api will run a [seed function](https://github.com/AnubisLMS/Anubis/blob/main/api/anubis/utils/testing/seed.py)
 that will initialize the database with some generated assignments, submissions and users of different permission levels.
 
 There are 4 main permission levels (which are course specific). The seed endpoint will create a user for
@@ -96,7 +96,7 @@ that this environment differs from prod (we will get into that later).
 You will need these things installed:
 
 - make
-- python 3.7 or above
+- python 3.10 or above
 - virtualenv 
 - nodejs 
 - yarn
@@ -193,6 +193,6 @@ The script that provisions minikube will also set the cluster resources to half 
 
 ## Further
 
-- Checkout the [project board](https://github.com/GusSand/Anubis/projects/1) to see what you can 
+- Checkout the [project board](https://github.com/AnubisLMS/Anubis/projects/1) to see what you can 
 contribute
 - Checkout the [design doc](./README.md) to see a detailed explanation of the internals of Anubis

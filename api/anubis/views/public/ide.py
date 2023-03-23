@@ -1,16 +1,15 @@
-import copy
 from datetime import datetime, timedelta
 
 from flask import Blueprint, request
 
-from anubis.constants import THEIA_DEFAULT_OPTIONS
 from anubis.ide.conditions import assert_theia_sessions_enabled
 from anubis.ide.get import get_n_available_sessions
-from anubis.ide.initialize import initialize_ide
+from anubis.ide.initialize import initialize_ide_for_assignment
 from anubis.ide.poll import theia_poll_ide
 from anubis.ide.redirect import theia_redirect_url
+from anubis.lms.assignments import get_assignment_due_date
 from anubis.lms.courses import is_course_admin
-from anubis.models import Assignment, AssignmentRepo, TheiaSession, db
+from anubis.models import Assignment, TheiaSession, db
 from anubis.rpc.enqueue import enqueue_ide_stop
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
@@ -18,7 +17,6 @@ from anubis.utils.cache import cache
 from anubis.utils.data import req_assert
 from anubis.utils.http import error_response, success_response
 from anubis.utils.http.decorators import json_response, load_from_id
-from anubis.utils.logging import logger
 
 ide_ = Blueprint("public-ide", __name__, url_prefix="/public/ide")
 
@@ -41,12 +39,12 @@ def public_ide_initialize(assignment: Assignment):
     # Check for existing active session
     active_session = (
         TheiaSession.query.join(Assignment)
-            .filter(
+        .filter(
             TheiaSession.owner_id == current_user.id,
             TheiaSession.assignment_id == assignment.id,
             TheiaSession.active,
         )
-            .first()
+        .first()
     )
 
     # If there was an existing session for this assignment found, skip
@@ -73,78 +71,31 @@ def public_ide_initialize(assignment: Assignment):
             message="Assignment has not been released",
         )
 
+        # Get due date for this assignment. There may be a LateException on record for this student.
+        # In that case, this function will pull the proper datetime.
+        due_date = get_assignment_due_date(current_user.id, assignment.id, grace=True)
+
         # If 3 weeks has passed since the assignment has been due, then we should not allow
         # new sessions to be created
-        if assignment.due_date + timedelta(days=3 * 7) <= datetime.now():
+        if due_date + timedelta(days=3 * 7) <= datetime.now():
             return error_response("Assignment due date passed over 3 weeks ago. IDEs are disabled.")
 
-    # If github repos are enabled for this assignment, then we will
-    # need to get the repo url.
-    repo_url: str = ""
-    if assignment.github_repo_required:
-        # Make sure github username is set
-        req_assert(
-            current_user.github_username is not None,
-            message="Please link your github account github account on profile page.",
-        )
+    user_options = dict()
+    if request.is_json:
+        user_options = dict(**request.json)
+        print(f"{request.json=}")
 
-        # Make sure we have a repo we can use
-        repo: AssignmentRepo = AssignmentRepo.query.filter(
-            AssignmentRepo.owner_id == current_user.id,
-            AssignmentRepo.assignment_id == assignment.id,
-        ).first()
-
-        # Verify that the repo exists
-        req_assert(
-            repo is not None,
-            message="Anubis can not find your assignment repo. "
-                    "Please make sure your github username is set and is correct.",
-        )
-        # Update the repo url
-        repo_url = repo.repo_url
-
-    # Create the theia options from the assignment default
-    options = copy.deepcopy(assignment.theia_options)
-
-    # Figure out options from user values
-    autosave = request.json.get("autosave", True)
-    persistent_storage = request.json.get("persistent_storage", False)
-
-    logger.debug(f'autosave = {autosave}')
-    logger.debug(f'persistent_storage = {persistent_storage}')
-
-    # Figure out options from assignment
-    network_policy = options.get("network_policy", "os-student")
-    resources = options.get(
-        "resources",
-        THEIA_DEFAULT_OPTIONS['resources'],
-    )
-    persistent_storage = options.get('persistent_storage', False) and persistent_storage
-
-    # If course admin, then give admin network policy
-    if is_admin:
-        network_policy = 'admin'
-
-    # Create the theia session with the proper settings
-    session: TheiaSession = initialize_ide(
-        image_id=assignment.theia_image_id,
-        assignment_id=assignment.id,
-        course_id=assignment.course_id,
-        repo_url=repo_url,
-        playground=False,
-        network_locked=not is_admin,
-        network_policy=network_policy,
-        persistent_storage=persistent_storage,
-        autosave=autosave,
-        resources=resources,
-        admin=is_admin,
-        credentials=is_admin,
+    # Initialize IDE for assignment
+    session = initialize_ide_for_assignment(
+        current_user,
+        assignment,
+        user_options=user_options,
     )
 
     return success_response({
-        "active": session.active,
+        "active":  session.active,
         "session": session.data,
-        "status": "Session created",
+        "status":  "Session created",
     })
 
 
@@ -196,7 +147,7 @@ def public_ide_active(assignment_id):
     # If they do have a session, then pass back True
     return success_response(
         {
-            "active": True,
+            "active":  True,
             "session": session.data,
         }
     )
@@ -235,12 +186,12 @@ def public_ide_stop(theia_session_id: str) -> dict[str, str]:
     enqueue_ide_stop(theia_session.id)
 
     # Clear poll cache
-    cache.delete_memoized(theia_poll_ide, theia_session_id, current_user.id)
+    # cache.delete_memoized(theia_poll_ide, theia_session_id, current_user.id)
 
     # Pass back the status
     return success_response(
         {
-            "status": "Session stopped.",
+            "status":  "Session stopped.",
             "variant": "warning",
         }
     )
@@ -272,7 +223,7 @@ def public_ide_poll(theia_session_id: str) -> dict[str, str]:
     status, variant = {
         "Running": ("Session is now ready.", "success"),
         # "Ended": ("Session ended.", "warning"),
-        "Failed": ("Session failed to start. Please try again.", "error"),
+        "Failed":  ("Session failed to start. Please try again.", "error"),
     }.get(session_state, (None, None))
 
     # Pass back the status and data
@@ -280,7 +231,7 @@ def public_ide_poll(theia_session_id: str) -> dict[str, str]:
         {
             "loading": loading,
             "session": session_data,
-            "status": status,
+            "status":  status,
             "variant": variant,
         }
     )

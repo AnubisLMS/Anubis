@@ -10,7 +10,7 @@ spec:
     matchLabels:
       {{- include "chart.selectorLabels" . | nindent 6 }}
       component: web
-  replicas: {{ .Values.web.replicas }}
+  replicas: {{- if not .Values.offSemester }} {{ .Values.web.replicas }}{{- else }} 1{{- end }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if .Values.rollingUpdates }}
   strategy:
@@ -25,6 +25,10 @@ spec:
         {{- include "chart.selectorLabels" . | nindent 8 }}
         component: web
     spec:
+      {{- if and .Values.nodeSelector (not .Values.debug) }}
+      nodeSelector:
+        {{ .Values.nodeSelector | toYaml }}
+      {{- end }}
       dnsPolicy: ClusterFirst
       containers:
       - name: web

@@ -27,7 +27,7 @@ def theia_list_all(user_id: str, limit: int = 10):
     return [theia_session.data for theia_session in theia_sessions]
 
 
-@cache.memoize(timeout=1, unless=is_debug)
+#@cache.memoize(timeout=0, unless=is_debug)
 def theia_poll_ide(theia_session_id: str, user_id: str) -> dict | None:
     """
     Check the status of a theia session. This is called
