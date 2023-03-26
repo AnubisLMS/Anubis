@@ -1,10 +1,8 @@
-use std::rc::Rc;
 
-use sqlx::Connection;
-use sqlx::mysql::MySqlPoolOptions;
-use sqlx::mysql::MySqlPool;
-use sqlx::mysql::MySql;
-use sqlx::pool::PoolConnection;
+use sqlx::{
+    mysql::{MySql, MySqlPool, MySqlPoolOptions, MySqlConnectOptions},
+    pool::PoolConnection,
+}
 use futures::executor::block_on;
 
 #[derive(Debug)]
@@ -21,12 +19,29 @@ pub struct AnubisDB {
 }
 
 impl AnubisDB {
-    pub fn new() -> AnubisDB {
+    pub fn new(
+        db_user: &str,
+        db_password: &str,
+        db_host: &str,
+        db_database: &str,
+        db_port: u16,
+        max_connections: u32,
+    ) -> AnubisDB {
+
+        // Create connect options
+        let options = MySqlConnectOptions::new()
+        .username(db_user)
+        .username(db_password)
+        .username(db_host)
+        .username(db_database);
+
+        // Create pool Result value
+        let pool = block_on(MySqlPoolOptions::new()
+        .max_connections(max_connections)
+        .connect_with(options));
+
         AnubisDB {
-            pool: block_on(MySqlPoolOptions::new()
-                .max_connections(5)
-                .connect("mysql://anubis:anubis@127.0.0.1/anubis"))
-                .expect("unable to connect to db")
+            pool: pool.expect("Unable to connect to db")
         }
     }
 

@@ -47,7 +47,7 @@ async fn main() {
 
     println!("i am not insane");
 
-    let args = cli::new1();
+    let args = cli::new();
     let db = database::AnubisDB::new(
         args.get_one::<String>("db_user").unwrap(),
         args.get_one::<String>("db_password").unwrap(),
