@@ -6,7 +6,7 @@ use tokio;
 use tracing;
 use tracing_subscriber;
 use hudsucker::{async_trait::async_trait, HttpHandler, HttpContext, RequestOrResponse, *};
-use hyper::{Body, Request};
+use hyper::{Body, Request, Method};
 
 #[derive(Clone)]
 pub struct MyHandler;
@@ -21,7 +21,14 @@ impl HttpHandler for MyHandler {
         println!("in {:?}", req);
         // let (parts, body) = req.into_parts();
         // RequestOrResponse::Request(Request::from_parts(parts, Body::from(body)))
-        req.into()
+        // req.into()
+        RequestOrResponse::Request(
+            Request::builder()
+            .method(Method::GET)
+            .uri("http://httpbin.org/ip")
+            .body(Body::empty())
+            .unwrap()
+        )
     }
 
     async fn handle_response(&mut self, _ctx: &HttpContext, res: Response<Body>) -> Response<Body> {
