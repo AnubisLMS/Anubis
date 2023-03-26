@@ -1,7 +1,18 @@
 {
     "configurations": [
         {
-       
+            "type": "lldb",
+            "request": "launch",
+            "name": "Cargo launch",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bins"
+                ]
+            },
+            "args": []
+        },
+        {
             "name": "Kubernetes: Run/Debug",
             "type": "cloudcode.kubernetes",
             "request": "launch",

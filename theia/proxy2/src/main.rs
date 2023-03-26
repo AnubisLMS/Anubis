@@ -1,5 +1,6 @@
 mod proxy;
 mod shutdown;
+mod database;
 
 use http::Response;
 use tokio;
@@ -19,9 +20,8 @@ impl HttpHandler for MyHandler {
         req: Request<Body>,
     ) -> RequestOrResponse {
         println!("in {:?}", req);
-        // let (parts, body) = req.into_parts();
-        // RequestOrResponse::Request(Request::from_parts(parts, Body::from(body)))
-        // req.into()
+        /* let (parts, body) = req.into_parts(); */
+
         RequestOrResponse::Request(
             Request::builder()
             .method(Method::GET)
@@ -42,9 +42,15 @@ async fn main() {
     tracing_subscriber::fmt::init();
 
     println!("i am not insane");
-    let proxy = proxy::new();
 
-    if let Err(e) = proxy.with_http_handler(MyHandler).build().start(shutdown::shutdown_sig()).await {
+    let proxy = proxy::new();
+    let server = proxy
+        .with_http_handler(MyHandler)
+        .build();
+
+    let db = database::AnubisDB::new();
+
+    if let Err(e) = server.start(shutdown::shutdown_sig()).await {
         tracing::error!("error {}", e);
     }
 }
