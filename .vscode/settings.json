@@ -5,5 +5,10 @@
         "editor.defaultFormatter": "matklad.rust-analyzer" //
     }, //
     "rust-analyzer.cargo.allFeatures": true, // For fun. Runs `cargo check --all-features`. You don't need this one.
-    "rust-analyzer.updates.channel": "nightly", // For fun. Enables the nightly updates channel for rust-analyzer since they ask nicely in their documentation. You don't need this one. You will be prompted to download the nightly install after save.
+    "rust-analyzer.updates.channel": "nightly",
+    "cSpell.words": [
+        "Cann",
+        "Cunniff",
+        "theia"
+    ], // For fun. Enables the nightly updates channel for rust-analyzer since they ask nicely in their documentation. You don't need this one. You will be prompted to download the nightly install after save.
 }

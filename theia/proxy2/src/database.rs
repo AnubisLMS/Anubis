@@ -14,6 +14,8 @@ pub struct User {
     name: String,
 }
 
+
+#[derive(Clone, Debug)]
 pub struct AnubisDB {
     pool: MySqlPool
 }

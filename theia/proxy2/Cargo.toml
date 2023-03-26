@@ -1,16 +1,21 @@
 [package]
-name = "proxy2"
-version = "0.1.0"
+name = "anubis-ide-proxy"
+version = "2.0.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+async-trait = "0.1.68"
+clap = { version = "4.1.13", features = ["derive", "cargo", "env"] }
 futures = "0.3.27"
+hmac = "0.12.1"
 http = "0.2.9"
 hudsucker = { version = "0.19.1", features = ["full"] }
 hyper = "0.14.25"
 hyper-rustls = "0.23.2"
+jwt = "0.16.0"
+sha2 = "0.10.6"
 sqlx = { version = "0.6.3", features = ["mysql", "runtime-tokio-rustls"]}
 # sqlx = { version = "0.7", features = ["mysql", "runtime-tokio", "tls-rustls"]}
 tokio = { version = "1.26.0", features = ["full"] }
