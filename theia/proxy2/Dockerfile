@@ -4,5 +4,6 @@ COPY . .
 RUN cargo build --release
 
 FROM debian:bullseye-slim
-COPY --from=builder /opt/app/target/anubis-ide-proxy /usr/local/bin/anubis-ide-proxy
+WORKDIR /opt/app
+COPY --from=builder /opt/app/target/release/anubis-ide-proxy /opt/app/anubis-ide-proxy
 CMD ["./anubis-ide-proxy"]

@@ -2,7 +2,7 @@
 use sqlx::{
     mysql::{MySql, MySqlPool, MySqlPoolOptions, MySqlConnectOptions},
     pool::PoolConnection,
-}
+};
 use futures::executor::block_on;
 
 #[derive(Debug)]
