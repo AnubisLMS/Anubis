@@ -1,11 +1,7 @@
 mod proxy;
-mod shutdown;
 mod database;
 
 use http::Response;
-use tokio;
-use tracing;
-use tracing_subscriber;
 use hudsucker::{async_trait::async_trait, HttpHandler, HttpContext, RequestOrResponse, *};
 use hyper::{Body, Request, Method};
 
@@ -43,14 +39,10 @@ async fn main() {
 
     println!("i am not insane");
 
-    let proxy = proxy::new();
-    let server = proxy
-        .with_http_handler(MyHandler)
-        .build();
-
+    let proxy = proxy::Proxy::new(MyHandler);
     let db = database::AnubisDB::new();
 
-    if let Err(e) = server.start(shutdown::shutdown_sig()).await {
-        tracing::error!("error {}", e);
-    }
+    let users = db.get_users();
+
+    println!("users: {:?}", users);
 }

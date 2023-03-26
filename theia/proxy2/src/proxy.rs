@@ -11,8 +11,8 @@ use hudsucker::{
     rustls::ServerConfig,
     RequestOrResponse,
 };
-use std::{net::SocketAddr, sync::Arc};
-
+use std::{net::SocketAddr, sync::Arc, rc::Rc};
+use futures::executor::block_on;
 
 pub struct NoCa;
 
@@ -33,11 +33,32 @@ impl HttpHandler for MyHandler {
     }
 }
 
-
-pub fn new() -> builder::ProxyBuilder<builder::WantsHandlers<hyper::client::HttpConnector, NoCa, MyHandler, NoopHandler>> {
-    return _Proxy::builder()
-        .with_addr(SocketAddr::from(([127, 0, 0, 1], 3000)))
-        .with_client(Client::new())
-        .with_ca(NoCa)
-        .with_http_handler(MyHandler);
+pub struct Proxy<T> where T: HttpHandler {
+    proxy: _Proxy<hyper::client::HttpConnector, NoCa, T, NoopHandler>,
 }
+
+impl<T> Proxy<T> where T: HttpHandler {
+    pub fn new(handler: T) -> Proxy<T> {
+        Proxy {
+            proxy: _Proxy::builder()
+            .with_addr(SocketAddr::from(([127, 0, 0, 1], 3000)))
+            .with_client(Client::new())
+            .with_ca(NoCa)
+            .with_http_handler(MyHandler)
+            .with_http_handler(handler)
+            .build()
+        }
+    }
+
+    pub fn start(self) {
+        if let Err(e) = block_on(self.proxy.start(Self::shutdown_sig())) {
+            tracing::error!("error {}", e);
+        }
+    }
+
+    async fn shutdown_sig() {
+        tokio::signal::ctrl_c().await.expect("abc");
+    }
+}
+
+

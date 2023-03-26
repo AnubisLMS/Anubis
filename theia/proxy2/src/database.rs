@@ -7,10 +7,11 @@ use sqlx::mysql::MySql;
 use sqlx::pool::PoolConnection;
 use futures::executor::block_on;
 
+#[derive(Debug)]
 #[derive(sqlx::FromRow)]
 pub struct User {
+    id: String,
     name: String,
-    id: i64,
 }
 
 pub struct AnubisDB {
@@ -22,20 +23,19 @@ impl AnubisDB {
         AnubisDB {
             pool: block_on(MySqlPoolOptions::new()
                 .max_connections(5)
-                .connect("mysql://anubis:anubis@localhost/anubis"))
+                .connect("mysql://anubis:anubis@127.0.0.1/anubis"))
                 .expect("unable to connect to db")
         }
     }
 
-    fn get_connection(self: Rc<Self>) -> PoolConnection<MySql> {
+    fn get_connection(self) -> PoolConnection<MySql> {
         let fut = self.pool.acquire();
         block_on(fut).expect("Could not acquire connection")
     }
 
-    pub fn get_users(self: Rc<Self>) -> Vec<User> {
+    pub fn get_users(self) -> Vec<User> {
         let mut conn = self.get_connection();
-        let mut stream = sqlx::query_as::<_, User>("SELECT * FROM user;")
-            .fetch_all(&mut conn);
+        let stream = sqlx::query_as::<_, User>("SELECT * FROM user;").fetch_all(&mut conn);
         block_on(stream).expect("Could not fetch users")
     }
 }
