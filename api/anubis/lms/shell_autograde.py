@@ -68,7 +68,7 @@ def get_shell_assignment_remote_exercise_names(assignment: Assignment) -> list[s
 
     exercise_py_txt = get_exercise_py_text(assignment)
 
-    assignment_name_re = re.compile(r"^\s*name=['\"]([a-zA-Z0-9 _-]+)['\"].*$", re.MULTILINE)
+    assignment_name_re = re.compile(r"^\s*name=['\"]([a-zA-Z0-9 :_-]+)['\"].*$", re.MULTILINE)
     exercise_name_match: list[str] = assignment_name_re.findall(exercise_py_txt)
     if len(exercise_name_match) == 0:
         logger.warning(f'Could not find assignment names based off of re {assignment.id=} {exercise_name_match=}')
