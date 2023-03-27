@@ -2,12 +2,12 @@ mod proxy;
 mod database;
 mod token;
 mod cli;
+mod error;
 
 use async_trait::async_trait;
 use http::{Request, Response};
 use hudsucker::{HttpHandler, HttpContext, RequestOrResponse};
 use hyper::{Body, Method};
-use std::env;
 
 #[derive(Clone)]
 pub struct MyHandler {

@@ -21,3 +21,5 @@ sqlx = { version = "0.6.3", features = ["mysql", "runtime-tokio-rustls"]}
 tokio = { version = "1.26.0", features = ["full"] }
 tracing = { version = "0.1.21", features = ["log"] }
 tracing-subscriber = "0.3.16"
+openssl-sys = "0.9.83"
+openssl = { version = "0.10.35", features = ["vendored"] }

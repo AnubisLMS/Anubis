@@ -1,9 +1,11 @@
+use crate::error::DBError;
 
 use sqlx::{
     mysql::{MySql, MySqlPool, MySqlPoolOptions, MySqlConnectOptions},
     pool::PoolConnection,
 };
 use futures::executor::block_on;
+
 
 #[derive(Debug)]
 #[derive(sqlx::FromRow)]
@@ -13,10 +15,19 @@ pub struct User {
 }
 
 
+#[derive(Debug)]
+#[derive(sqlx::FromRow)]
+pub struct IDESession {
+    id: String,
+    active: bool,
+    cluster_address: String,
+}
+
 #[derive(Clone, Debug)]
 pub struct AnubisDB {
     pool: MySqlPool
 }
+
 
 impl AnubisDB {
     pub fn new(
@@ -50,10 +61,17 @@ impl AnubisDB {
         block_on(fut).expect("Could not acquire connection")
     }
 
-    pub fn get_users(self) -> Vec<User> {
+    pub fn get_session(self, session_id: &str) -> Result<IDESession, DBError> {
         let mut conn = self.get_connection();
-        let stream = sqlx::query_as::<_, User>("SELECT * FROM user;").fetch_all(&mut conn);
-        block_on(stream).expect("Could not fetch users")
-    }
+        let stream = sqlx::query_as::<_, IDESession>("SELECT * FROM theia_session WHERE id = ? AND active = ?;")
+        .bind(session_id)
+        .bind(1)
+        .fetch_one(&mut conn);
+
+        match block_on(stream) {
+            Err(e) => Err(DBError{message: e.to_string()}),
+            Ok(v) => Ok(v),
+        }
+    }   
 }
 
