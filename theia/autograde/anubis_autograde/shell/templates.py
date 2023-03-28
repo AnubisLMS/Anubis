@@ -54,7 +54,7 @@ check_exercise() {
     [ "$COMMAND" = "set_ps1" ] && return
     [ "$COMMAND" = "" ] && return
     
-    if (( $EXERCISE_INDEX == -1 )); then
+    if [ "$EXERCISE_INDEX" = "-1" ]; then
         return
     fi
     
