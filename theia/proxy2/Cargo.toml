@@ -23,3 +23,4 @@ tracing = { version = "0.1.21", features = ["log"] }
 tracing-subscriber = "0.3.16"
 openssl-sys = "0.9.83"
 openssl = { version = "0.10.35", features = ["vendored"] }
+url = "2.3.1"

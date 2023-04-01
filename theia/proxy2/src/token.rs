@@ -24,7 +24,7 @@ impl AnubisJWT {
         }
     }
 
-    pub fn sign(self, data: &MapSxS) -> Result<String, JWTError> {
+    pub fn sign(&self, data: &MapSxS) -> Result<String, JWTError> {
         let header = Header {
             algorithm: AlgorithmType::Hs384,
             ..Default::default()
@@ -44,7 +44,7 @@ impl AnubisJWT {
         Ok(token.as_str().to_string())
     }
 
-    pub fn verify(self, data: String) -> Result<MapSxS, JWTError> {
+    pub fn verify(&self, data: &str) -> Result<MapSxS, JWTError> {
         let parsed: std::result::Result<_, jwt::Error> = data.verify_with_key(&self.key);
 
         let token: Token<Header, BTreeMap<String, String>, _> = match parsed {

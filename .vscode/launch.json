@@ -10,7 +10,9 @@
                     "--bins"
                 ]
             },
-            "args": []
+            "args": [
+                "--debug"
+            ]
         },
         {
             "name": "Kubernetes: Run/Debug",
