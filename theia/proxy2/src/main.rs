@@ -25,6 +25,8 @@ impl HttpHandler for MyHandler {
         println!("in {:?}", req);
         let (parts, body) = req.into_parts();
 
+        println!("{:?}", parts.uri);
+
         RequestOrResponse::Request(
             Request::builder()
             .method(Method::GET)
