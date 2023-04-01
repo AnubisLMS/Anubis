@@ -42,9 +42,9 @@ impl AnubisDB {
         // Create connect options
         let options = MySqlConnectOptions::new()
         .username(db_user)
-        .username(db_password)
-        .username(db_host)
-        .username(db_database);
+        .password(db_password)
+        .host(db_host)
+        .database(db_database);
 
         // Create pool Result value
         let pool = block_on(MySqlPoolOptions::new()
