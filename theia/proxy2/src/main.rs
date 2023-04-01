@@ -15,6 +15,15 @@ pub struct MyHandler {
     jwt: token::AnubisJWT,
 }
 
+fn pong() -> RequestOrResponse {
+    RequestOrResponse::Response(
+        Response::builder()
+        .header("Content-Type", "text/plain")
+        .body(Body::from("pong"))
+        .unwrap()
+    )
+}
+
 #[async_trait]
 impl HttpHandler for MyHandler {
     async fn handle_request(
@@ -25,7 +34,15 @@ impl HttpHandler for MyHandler {
         println!("in {:?}", req);
         let (parts, body) = req.into_parts();
 
-        println!("{:?}", parts.uri);
+        let path = parts.uri.path();
+        let query = parts.uri.query();
+        println!("{:?} {:?}", path, query);
+
+        match path {
+            "/ping" => return pong(),
+            "/initilize" => (),
+            _ => (),
+        }
 
         RequestOrResponse::Request(
             Request::builder()
