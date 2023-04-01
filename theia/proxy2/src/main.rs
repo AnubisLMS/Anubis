@@ -79,6 +79,10 @@ fn initialize(handler: &MyHandler, _ctx: &HttpContext, parts: request::Parts, bo
     )
 }
 
+fn proxy(handler: &MyHandler, _ctx: &HttpContext, parts: request::Parts, body: Body) -> RequestOrResponse {
+    pong_res()
+}
+
 #[async_trait]
 impl HttpHandler for MyHandler {
     async fn handle_request(
@@ -96,16 +100,8 @@ impl HttpHandler for MyHandler {
         match path {
             "/ping" => return pong_res(),
             "/initialize" => return initialize(self, _ctx, parts, body),
-            _ => (),
+            _ => return proxy(self, _ctx, parts, body),
         }
-
-        RequestOrResponse::Request(
-            Request::builder()
-            .method(Method::GET)
-            .uri("http://httpbin.org/ip")
-            .body(Body::empty())
-            .unwrap()
-        )
     }
 
     async fn handle_response(&mut self, _ctx: &HttpContext, res: Response<Body>) -> Response<Body> {
