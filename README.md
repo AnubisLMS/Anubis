@@ -106,7 +106,7 @@ we can start to both ask and answer some interesting questions about how well st
 
 ## How to contribute
 
-- Checkout the [project board](https://github.com/AnubisLMS/Anubis/projects/1) to see what you can 
+- Checkout the [project board](https://github.com/AnubisLMS/Anubis/projects) to see what you can 
 contribute
 - Checkout our [Development Guide](./docs/development_guide.md) to get up and running debugging Anubis
 - Checkout the [Contribution Guide](./.github/CONTRIBUTING.md) to see how to submit PRs and Issues
