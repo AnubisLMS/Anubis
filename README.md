@@ -44,7 +44,7 @@
 
 * [Design and Internals](#design-and-internals)
 * [Blog](#blog)
-* [What is this project?](#what-is-this-project?)
+* [What is this project?](#what-is-this-project)
   * [Autograding](#autograding)
   * [Anubis Cloud IDEs](#anubis-cloud-ides)
   * [Insights](#insights)
@@ -53,7 +53,7 @@
 * [License](#license)
 
 
-## Design and Internals 
+## Design and Internals
 
 Want to know how Anubis works internally? We have a 20+ page design doc that thoroughly explains how Anubis works 
 under [our docs](./docs). Don't worry, there are a lot of pictures :)
