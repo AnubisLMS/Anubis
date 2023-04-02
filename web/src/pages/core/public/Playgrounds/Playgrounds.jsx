@@ -10,7 +10,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 
-import AprilFools from '../../../../components/core/AprilFools/2023/AprilFools';
+// import AprilFools from '../../../../components/core/AprilFools/2023/AprilFools';
 // import MaintenanceAd from '../../../../components/shared/Ad/MaintenanceAd/MaintenanceAd';
 import GenericAd from '../../../../components/shared/Ad/GenericAd/GenericAd';
 import ListHeader from '../../../../components/shared/ListHeader/ListHeader';
@@ -233,7 +233,7 @@ export default function Playgrounds({imageId}) {
       <Box className={classes.divider}/>
       {/* <MaintenanceAd/>*/}
       <GenericAd/>
-      <AprilFools/>
+      {/* <AprilFools/>*/}
       <ListHeader sections={['Your Playground', sessionState || 'No Active IDE']}/>
       <Box className={classes.imageTagContainer}>
         <Grid container xs={12} spacing={2}>

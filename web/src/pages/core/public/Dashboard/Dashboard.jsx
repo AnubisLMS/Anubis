@@ -4,6 +4,7 @@ import {useSnackbar} from 'notistack';
 
 import Box from '@mui/material/Box';
 
+// import AprilFools from '../../../../components/core/AprilFools/2023/AprilFools';
 // import MaintenanceAd from '../../../../components/shared/Ad/MaintenanceAd/MaintenanceAd';
 import GenericAd from '../../../../components/shared/Ad/GenericAd/GenericAd';
 import StandardLayout from '../../../../components/shared/Layouts/StandardLayout';
@@ -14,7 +15,6 @@ import useQuery from '../../../../hooks/useQuery';
 import CourseItem from '../../../../components/core/CourseItem/CourseItem';
 import AssignmentItem from '../../../../components/core/AssignmentItem/AssignmentItem';
 import SectionHeader from '../../../../components/shared/SectionHeader/SectionHeader';
-import AprilFools from '../../../../components/core/AprilFools/2023/AprilFools';
 
 const Dashboard = () => {
   const query = useQuery();
@@ -47,7 +47,7 @@ const Dashboard = () => {
   return (
     <StandardLayout>
       <SectionHeader isPage title='Anubis LMS Dashboard'/>
-      <AprilFools/>
+      {/* <AprilFools/>*/}
       <Box className={classes.divider}/>
       {/* <MaintenanceAd/>*/}
       <GenericAd/>

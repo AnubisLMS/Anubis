@@ -70,7 +70,7 @@ export default function AprilFools() {
             <Grid item xs={12} md={8} xl={4}>
               <Grid container spacing={2} justifyContent={'center'} alignItems={'center'}>
                 <Grid item xs={12} md={6}>
-                  <img src={'/aprilfools/200w.gif'}/>
+                  <img src={'/aprilfools/200w.gif'} alt={'fig'}/>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Box sx={{p: 1, color: '#000', textAlign: 'center'}} class="rainbow rainbow_text_animated">
