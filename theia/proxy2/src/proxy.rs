@@ -40,7 +40,7 @@ pub struct Proxy<T> where T: HttpHandler {
 }
 
 impl<T> Proxy<T> where T: HttpHandler {
-    pub fn new(handler: T, host: &str, port: u16) -> Proxy<T> {
+    pub fn new(handler: T, host: &str, port: &u16) -> Proxy<T> {
         
         // Construct address for server to listen on
         let host_ip: Ipv4Addr = host.parse().expect("msg");

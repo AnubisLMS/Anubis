@@ -10,6 +10,7 @@ use async_trait::async_trait;
 use http::{Request, Response, request};
 use hudsucker::{HttpHandler, HttpContext, RequestOrResponse};
 use hyper::{Body, Method};
+use tracing;
 
 #[derive(Clone)]
 pub struct MyHandler {
@@ -80,6 +81,14 @@ fn initialize(handler: &MyHandler, _ctx: &HttpContext, parts: request::Parts, bo
 }
 
 fn proxy(handler: &MyHandler, _ctx: &HttpContext, parts: request::Parts, body: Body) -> RequestOrResponse {
+    if parts.headers.get("Cookies").is_some() {
+        return error_res();
+    }
+
+    let cookies = parse_query(parts.headers.get("Cookies").unwrap().to_str().unwrap_or_default());
+    tracing::info!("cookies = {:?}", cookies);
+
+
     pong_res()
 }
 
@@ -135,7 +144,7 @@ async fn main() {
     let proxy = proxy::Proxy::new(
         handler,
         args.get_one::<String>("host").unwrap(),
-        *args.get_one::<u16>("port").unwrap(),
+        args.get_one::<u16>("port").unwrap(),
     );
     proxy.start()
 }
