@@ -81,7 +81,7 @@ export const footer_nav = [
     Page: Playgrounds,
   },
   {
-    id: 'AprilFools',
+    id: 'Anubis NFT',
     icon: <img src={'/aprilfools/200w.gif'} style={{width: 22}} alt={'gif'}/>,
     path: '/aprilfools2023',
     Page: AprilFools,
