@@ -73,7 +73,7 @@ fn test_sign() {
 #[test]
 fn test_verify() {
     let _jwt = AnubisJWT::new("abc");
-    let claims = _jwt.verify(TEST_ABC_123_SIGNED.to_string()).expect("Could not verify token");
+    let claims = _jwt.verify(&TEST_ABC_123_SIGNED.to_string()).expect("Could not verify token");
     assert_eq!(claims.len(), 1);
     assert!(claims.get("abc").is_some());
     assert_eq!(claims.get("abc").expect("Could not get abc from claims"), "123");

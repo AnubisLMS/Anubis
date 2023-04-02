@@ -44,7 +44,7 @@ impl<T> Proxy<T> where T: HttpHandler {
         
         // Construct address for server to listen on
         let host_ip: Ipv4Addr = host.parse().expect("msg");
-        let address = SocketAddr::from((host_ip, port));
+        let address = SocketAddr::from((host_ip, port.clone()));
         
         Proxy {
             proxy: _Proxy::builder()
@@ -54,7 +54,7 @@ impl<T> Proxy<T> where T: HttpHandler {
                 .with_http_handler(MyHandler)
                 .with_http_handler(handler)
                 .build(),
-            port,
+            port: port.clone(),
             host: host_ip,
         }
     }
@@ -71,10 +71,11 @@ impl<T> Proxy<T> where T: HttpHandler {
 }
 
 
+
 #[test]
 fn test_proxy_create() {
     // Just make sure we can create a proxy server
-    let proxy = Proxy::new(NoopHandler::default(), "0.0.0.0", 3000);
+    let proxy = Proxy::new(NoopHandler::default(), "0.0.0.0", &3000);
     assert_eq!(proxy.host, Ipv4Addr::new(0, 0, 0, 0));
     assert_eq!(proxy.port, 3000);
 }

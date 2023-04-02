@@ -18,9 +18,9 @@ pub struct User {
 #[derive(Debug)]
 #[derive(sqlx::FromRow)]
 pub struct IDESession {
-    id: String,
-    active: bool,
-    cluster_address: String,
+    pub id: String,
+    pub active: bool,
+    pub cluster_address: String,
 }
 
 #[derive(Clone, Debug)]
@@ -44,7 +44,8 @@ impl AnubisDB {
         .username(db_user)
         .password(db_password)
         .host(db_host)
-        .database(db_database);
+        .database(db_database)
+        .port(db_port);
 
         // Create pool Result value
         let pool = block_on(MySqlPoolOptions::new()
@@ -56,12 +57,12 @@ impl AnubisDB {
         }
     }
 
-    fn get_connection(self) -> PoolConnection<MySql> {
+    fn get_connection(&self) -> PoolConnection<MySql> {
         let fut = self.pool.acquire();
         block_on(fut).expect("Could not acquire connection")
     }
 
-    pub fn get_session(self, session_id: &str) -> Result<IDESession, DBError> {
+    pub fn get_session(&self, session_id: &str) -> Result<IDESession, DBError> {
         let mut conn = self.get_connection();
         let stream = sqlx::query_as::<_, IDESession>("SELECT * FROM theia_session WHERE id = ? AND active = ?;")
         .bind(session_id)
