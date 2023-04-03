@@ -14,7 +14,6 @@ http = "0.2.9"
 hudsucker = { version = "0.19.1", features = ["full"] }
 hyper = "0.14.25"
 hyper-rustls = "0.23.2"
-jwt = "0.16.0"
 sha2 = "0.10.6"
 sqlx = { version = "0.6.3", features = ["mysql", "runtime-tokio-rustls"]}
 # sqlx = { version = "0.7", features = ["mysql", "runtime-tokio", "tls-rustls"]}
@@ -25,3 +24,5 @@ openssl-sys = "0.9.83"
 openssl = { version = "0.10.35", features = ["vendored"] }
 url = "2.3.1"
 cookie = { version = "0.17.0", features = ["percent-encode"] }
+jsonwebtoken = "8.3.0"
+serde = "1.0.159"

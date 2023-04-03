@@ -44,7 +44,7 @@ impl<T> Proxy<T> where T: HttpHandler {
         
         // Construct address for server to listen on
         let host_ip: Ipv4Addr = host.parse().expect("msg");
-        let address = SocketAddr::from((host_ip, port.clone()));
+        let address = SocketAddr::from((host_ip, *port));
         
         Proxy {
             proxy: _Proxy::builder()
@@ -54,7 +54,7 @@ impl<T> Proxy<T> where T: HttpHandler {
                 .with_http_handler(MyHandler)
                 .with_http_handler(handler)
                 .build(),
-            port: port.clone(),
+            port: *port,
             host: host_ip,
         }
     }

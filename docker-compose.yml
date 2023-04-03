@@ -156,7 +156,7 @@ services:
 
   theia-proxy:
     image: registry.digitalocean.com/anubis/theia-proxy:${GIT_TAG:-latest}
-    build: ./theia/proxy
+    build: ./theia/proxy2
 
   theia-init:
     image: registry.digitalocean.com/anubis/theia-init:${GIT_TAG:-latest}

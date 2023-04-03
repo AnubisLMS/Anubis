@@ -24,6 +24,6 @@ pub fn new() -> ArgMatches {
     .arg(Arg::new("secret_key").long("secret_key").env("SECRET_KEY").default_value("DEBUG"))
 
     // Debug
-    .arg(Arg::new("debug").short('d').long("debug").action(ArgAction::SetTrue).help("enable debugging"))
+    .arg(Arg::new("debug").short('d').long("debug").env("DEBUG").action(ArgAction::SetTrue).help("enable debugging"))
     .get_matches()
 }

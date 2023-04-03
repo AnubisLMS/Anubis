@@ -39,7 +39,10 @@ spec:
       - name: proxy
         image: "{{ .Values.theia.proxy.image }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
-        {{- if not .Values.debug}}
+        {{- if .Values.debug }} 
+        args: [ "--debug" ]
+        {{- end -}}
+        {{- if not .Values.debug }}
         resources:
           requests:
             cpu: 250m

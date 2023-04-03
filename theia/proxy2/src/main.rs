@@ -12,7 +12,8 @@ use hudsucker::{HttpHandler, HttpContext, RequestOrResponse, tokio_tungstenite::
 use hyper::{Body, Method};
 use tracing::{self, log::info, log::error};
 use cookie::{Cookie, time::Duration};
-
+use std::time::{SystemTime, UNIX_EPOCH};
+use std::convert::TryFrom;
 
 #[derive(Clone)]
 pub struct MyHandler {
@@ -22,8 +23,13 @@ pub struct MyHandler {
 }
 
 fn parse_query(s: &str) -> HashMap<String, String> {
-    let parsed_url = url::Url::parse(s).unwrap();
-    println!("{:?}", parsed_url);
+    let parsed_url: url::Url = match url::Url::parse(s) {
+        Err(e) => {
+            error!("Parsing url failed");
+            url::Url::parse("http://localhost/").unwrap()
+        },
+        Ok(v) => v,
+    };
     parsed_url.query_pairs().into_owned().collect()
 }
 
@@ -53,6 +59,7 @@ fn pong_res() -> RequestOrResponse {
     )
 }
 
+
 #[test]
 fn test_pong_res() {
     pong_res();
@@ -76,29 +83,42 @@ fn test_error_res() {
 }
 
 
-fn initialize(handler: &MyHandler, _ctx: &HttpContext, parts: request::Parts, body: Body) -> RequestOrResponse {
+fn initialize(handler: &MyHandler, parts: request::Parts, _body: Body) -> RequestOrResponse {
+    let uri = http::Uri::builder()
+        .scheme("http") // tmp
+        .authority("localhost") //  temp
+        .path_and_query(parts.uri.path_and_query().unwrap().to_string())
+        .build()
+        .unwrap();
+
     // Get query from request
-    let query = parse_query(parts.uri.query().unwrap());
+    let query = parse_query(&uri.to_string());
     if !query.contains_key("token") {
+        error!("token key not found in query {:?}", query);
         return error_res()
     }
 
     // Verify token
-    let query_token = match handler.jwt.verify(query.get("token").expect("No token")) {
-        Ok(v) => v,
-        Err(_) => return error_res(),
-    };
+    let query_token = query.get("token");
+    if query_token.is_none() {
+        error!("query token is None {:?}", query_token);
+        return error_res()
+    }
+    let query_token = handler.jwt.verify(query_token.unwrap());
+    if query_token.is_err() {
+        error!("unable to verify key {:?}", query_token);
+        return error_res()
+    }
+    let query_token = query_token.unwrap();
 
     // Figure out redirect domain
     let debug = handler.args.get_flag("debug");
     let domain = if debug { "localhost" } else { "anubis-lms.io" };
 
     // Create signed jwt
-    let jwt_content: BTreeMap<String, String> = BTreeMap::from([
-        ("netid".to_owned(), query_token.get("netid").unwrap().to_owned()),
-        ("session_id".to_owned(), query_token.get("session_id").unwrap().to_owned()),
-    ]);
-    let signed_token = match handler.jwt.sign(&jwt_content) {
+    let exp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+    let exp = exp + std::time::Duration::from_secs(6 * 3600).as_secs();
+    let signed_token = match handler.jwt.sign(&query_token.netid, &query_token.session_id, &usize::try_from(exp).unwrap()) {
         Ok(v) => v,
         Err(_) => return error_res(),
     };
@@ -121,13 +141,18 @@ fn initialize(handler: &MyHandler, _ctx: &HttpContext, parts: request::Parts, bo
 }
 
 
-fn proxy(handler: &MyHandler, _ctx: &HttpContext, parts: request::Parts, body: Body) -> RequestOrResponse {
+fn proxy(handler: &MyHandler, parts: request::Parts, body: Body) -> RequestOrResponse {
     if parts.headers.get("Cookies").is_some() {
         return error_res();
     }
 
     // parse cookies
-    let cookie_header = parts.headers.get("Cookies").unwrap().to_str().unwrap();
+    let cookie_header = parts.headers.get("Cookie");
+    if cookie_header.is_none() {
+        tracing::error!("no cookie");
+        return error_res()
+    }
+    let cookie_header = cookie_header.unwrap().to_str().unwrap();
     let mut unverified_ide_token: Option<cookie::Cookie> = None;
     for cookie in Cookie::split_parse_encoded(cookie_header) {
         let cookie = cookie.unwrap();
@@ -141,7 +166,7 @@ fn proxy(handler: &MyHandler, _ctx: &HttpContext, parts: request::Parts, body: B
     }
 
     // verify token
-    let unverified_ide_token = unverified_ide_token.unwrap().to_string();
+    let unverified_ide_token = unverified_ide_token.unwrap().value().to_string();
     let ide_token = handler.jwt.verify(&unverified_ide_token);
     if ide_token.is_err() {
         error!("unauth token {:?}", ide_token);
@@ -149,16 +174,8 @@ fn proxy(handler: &MyHandler, _ctx: &HttpContext, parts: request::Parts, body: B
     }
     let ide_token = ide_token.unwrap();
 
-    // get session id from token
-    let session_id = ide_token.get("session_id");
-    if session_id.is_none() {
-        error!("session_id missing from ide cookie {:?}", ide_token);
-        return error_res()
-    }
-    let session_id = session_id.unwrap();
-
     // get session from database
-    let session = handler.db.get_session(session_id);
+    let session = handler.db.get_session(&ide_token.session_id);
     if session.is_err() {
         error!("unable to get session from database {:?}", session);
         return error_res()
@@ -177,9 +194,10 @@ fn proxy(handler: &MyHandler, _ctx: &HttpContext, parts: request::Parts, body: B
         .build()
         .unwrap();
 
-    RequestOrResponse::Request(
-        Request::from_parts(new_parts, body)
-    )
+    let proxy_req = Request::from_parts(new_parts, body);
+    info!("going for proxy {:?}", proxy_req);
+
+    RequestOrResponse::Request(proxy_req)
 }
 
 
@@ -204,17 +222,17 @@ impl HttpHandler for MyHandler {
         _ctx: &HttpContext,
         req: Request<Body>,
     ) -> RequestOrResponse {
-        println!("in {:?}", req);
+        info!("in {:?}", req);
         let (parts, body) = req.into_parts();
 
         let path = parts.uri.path();
         let query = parts.uri.query();
-        println!("{:?} {:?}", path, query);
+        info!("{:?} {:?}", path, query);
 
         match path {
             "/ping" => return pong_res(),
-            "/initialize" => return initialize(self, _ctx, parts, body),
-            _ => return proxy(self, _ctx, parts, body),
+            "/initialize" => return initialize(self, parts, body),
+            _ => return proxy(self, parts, body),
         }
     }
 
@@ -230,8 +248,6 @@ impl HttpHandler for MyHandler {
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    println!("i am not insane");
-
     let args = cli::new();
     let db = database::AnubisDB::new(
         args.get_one::<String>("db_user").unwrap(),
@@ -243,16 +259,17 @@ async fn main() {
     );
     let jwt = token::AnubisJWT::new(args.get_one::<String>("secret_key").unwrap());
 
+    let host = args.get_one::<String>("host").unwrap().clone();
+    let port = *args.get_one::<u16>("port").unwrap();
+
     let handler = MyHandler{
         args, db, jwt,
     };
 
-    /* let host = args.get_one::<String>("host").unwrap();
-    let port = args.get_one::<u16>("port").unwrap(); */
-    /* let proxy = proxy::Proxy::new(
+    let proxy = proxy::Proxy::new(
         handler,
-        host.as_str(),
-        port,
+        &host,
+        &port,
     );
-    proxy.start() */
+    proxy.start()
 }

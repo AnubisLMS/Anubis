@@ -6,9 +6,17 @@ RUN set -eux; \
     update-ca-certificates
 
 WORKDIR /opt/app
-COPY . .
-RUN cargo build --target x86_64-unknown-linux-musl --release
+COPY Cargo.toml Cargo.lock /opt/app/
+RUN set -eux; \
+    mkdir -p src; \
+    echo 'fn main() {}' >> src/main.rs; \
+    cargo build --target x86_64-unknown-linux-musl --release; \
+    rm -rf src target
 
-FROM scratch
+COPY . .
+RUN set -eux; cargo build --target x86_64-unknown-linux-musl --release
+
+FROM alpine
+ENV RUST_BACKTRACE=1
 COPY --from=builder /opt/app/target/x86_64-unknown-linux-musl/release/anubis-ide-proxy /anubis-ide-proxy
-CMD ["/anubis-ide-proxy"]
+ENTRYPOINT ["/anubis-ide-proxy"]

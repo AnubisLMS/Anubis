@@ -39,6 +39,13 @@ impl AnubisDB {
         max_connections: u32,
     ) -> AnubisDB {
 
+        tracing::info!("Init Database");
+        tracing::info!("db_user         = {:?}", db_user);
+        tracing::info!("db_host         = {:?}", db_host);
+        tracing::info!("db_database     = {:?}", db_database);
+        tracing::info!("db_port         = {:?}", db_port);
+        tracing::info!("max_connections = {:?}", max_connections);
+
         // Create connect options
         let options = MySqlConnectOptions::new()
         .username(db_user)
