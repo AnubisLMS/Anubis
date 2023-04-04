@@ -12,8 +12,7 @@ use hudsucker::{HttpHandler, HttpContext, RequestOrResponse, tokio_tungstenite::
 use hyper::{Body, Method};
 use tracing::{self, log::info, log::error};
 use cookie::{Cookie, time::Duration};
-use std::time::{SystemTime, UNIX_EPOCH};
-use std::convert::TryFrom;
+
 
 #[derive(Clone)]
 pub struct MyHandler {
@@ -116,9 +115,7 @@ fn initialize(handler: &MyHandler, parts: request::Parts, _body: Body) -> Reques
     let domain = if debug { "localhost" } else { "anubis-lms.io" };
 
     // Create signed jwt
-    let exp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
-    let exp = exp + std::time::Duration::from_secs(6 * 3600).as_secs();
-    let signed_token = match handler.jwt.sign(&query_token.netid, &query_token.session_id, &usize::try_from(exp).unwrap()) {
+    let signed_token = match handler.jwt.sign(&query_token.netid, &query_token.session_id) {
         Ok(v) => v,
         Err(_) => return error_res(),
     };
