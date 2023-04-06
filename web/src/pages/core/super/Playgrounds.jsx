@@ -13,9 +13,12 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import Fab from '@mui/material/Fab';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import Tooltip from '@mui/material/Tooltip';
+import DoneIcon from '@mui/icons-material/Done';
+import ClearIcon from '@mui/icons-material/Clear';
 
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -82,6 +85,13 @@ const useColumns = (state, enqueueSnackbar) => ([
             Go To IDE
           </Button>
         )}
+      </React.Fragment>
+    ),
+  },
+  {
+    field: 'docker', headerName: 'Docker', width: 100, renderCell: ({row}) => (
+      <React.Fragment>
+        {row.docker ? <DoneIcon color={'primary'}/> : <ClearIcon color={'error'}/> }
       </React.Fragment>
     ),
   },
