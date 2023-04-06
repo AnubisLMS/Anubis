@@ -63,6 +63,13 @@ const useColumns = (state, enqueueSnackbar) => ([
   {field: 'created_delta', headerName: 'Age', width: 170},
   {field: 'last_proxy_delta', headerName: 'Last Ping', width: 170},
   {
+    field: 'docker', headerName: 'Docker', width: 100, renderCell: ({row}) => (
+      <React.Fragment>
+        {row.docker ? <DoneIcon color={'primary'}/> : <ClearIcon color={'error'}/> }
+      </React.Fragment>
+    ),
+  },
+  {
     field: 'redirect_url', headerName: 'Go To IDE', width: 120, renderCell: ({row}) => (
       <React.Fragment>
         {row.state === 'Running' && (
@@ -84,13 +91,6 @@ const useColumns = (state, enqueueSnackbar) => ([
             Go To IDE
           </Button>
         )}
-      </React.Fragment>
-    ),
-  },
-  {
-    field: 'docker', headerName: 'Docker', width: 100, renderCell: ({row}) => (
-      <React.Fragment>
-        {row.docker ? <DoneIcon color={'primary'}/> : <ClearIcon color={'error'}/> }
       </React.Fragment>
     ),
   },
