@@ -20,7 +20,6 @@ import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 
 
-
 const useStyles = makeStyles((theme) => ({
   paper: {
     height: 700,
