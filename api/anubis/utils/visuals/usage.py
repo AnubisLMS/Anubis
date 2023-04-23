@@ -1,3 +1,4 @@
+import itertools
 from datetime import datetime, timedelta
 
 from anubis.models import Assignment, Course, TheiaImage
@@ -45,7 +46,7 @@ def get_usage_plot(course_id: str) -> bytes | None:
 
     assignment_colors = {
         assignment.id: color
-        for assignment, color in zip(assignments, mcolors.TABLEAU_COLORS)
+        for assignment, color in zip(assignments, itertools.cycle(mcolors.TABLEAU_COLORS))
     }
 
     for key, group in ss:
