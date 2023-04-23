@@ -5,9 +5,10 @@ from anubis.utils.data import is_debug, is_job
 from anubis.utils.usage.users import get_platform_users
 from anubis.utils.visuals.files import convert_fig_bytes
 from anubis.utils.visuals.watermark import add_watermark
-
+from anubis.utils.logging import verbose_call
 
 @cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
+@verbose_call()
 def get_platform_users_plot(days: int, step: int = 1):
     import matplotlib.pyplot as plt
 

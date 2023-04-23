@@ -3,11 +3,12 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from anubis.lms.submissions import get_submission_tests
 from anubis.lms.autograde import bulk_autograde
+from anubis.lms.submissions import get_submission_tests
 from anubis.models import Assignment, AssignmentTest, Submission, TheiaSession, User, db
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, is_job
+from anubis.utils.logging import verbose_call
 from anubis.utils.visuals.queries import (
     assignment_test_fail_count_sql,
     assignment_test_fail_nosub_sql,
@@ -17,6 +18,7 @@ from anubis.utils.visuals.queries import (
 
 
 @cache.memoize(timeout=60, unless=is_debug)
+@verbose_call()
 def get_admin_assignment_visual_data(assignment_id: str) -> list[dict[str, Any]]:
     """
     Get the admin visual data for an assignment. Visual data is generated
@@ -34,7 +36,7 @@ def get_admin_assignment_visual_data(assignment_id: str) -> list[dict[str, Any]]
     for assignment_test in assignment_tests:
         response.append(
             {
-                "title": assignment_test.name,
+                "title":             assignment_test.name,
                 "pass_time_scatter": get_assignment_tests_pass_times(assignment_test),
                 "pass_count_radial": get_assignment_tests_pass_counts(assignment_test),
             }
@@ -58,7 +60,7 @@ def get_assignment_tests_pass_times(assignment_test: AssignmentTest):
     result = db.session.execute(
         time_to_pass_test_sql,
         {
-            "assignment_id": assignment_test.assignment_id,
+            "assignment_id":      assignment_test.assignment_id,
             "assignment_test_id": assignment_test.id,
         },
     )
@@ -95,7 +97,7 @@ def get_assignment_tests_pass_counts(assignment_test: AssignmentTest):
     result = db.session.execute(
         assignment_test_fail_nosub_sql,
         {
-            "assignment_id": assignment_test.assignment_id,
+            "assignment_id":      assignment_test.assignment_id,
             "assignment_test_id": assignment_test.id,
         },
     )
@@ -106,7 +108,7 @@ def get_assignment_tests_pass_counts(assignment_test: AssignmentTest):
     result = db.session.execute(
         assignment_test_fail_count_sql,
         {
-            "assignment_id": assignment_test.assignment_id,
+            "assignment_id":      assignment_test.assignment_id,
             "assignment_test_id": assignment_test.id,
         },
     )
@@ -117,7 +119,7 @@ def get_assignment_tests_pass_counts(assignment_test: AssignmentTest):
     result = db.session.execute(
         assignment_test_pass_count_sql,
         {
-            "assignment_id": assignment_test.assignment_id,
+            "assignment_id":      assignment_test.assignment_id,
             "assignment_test_id": assignment_test.id,
         },
     )
@@ -133,6 +135,7 @@ def get_assignment_tests_pass_counts(assignment_test: AssignmentTest):
 
 
 @cache.memoize(timeout=60, unless=is_debug, source_check=True)
+@verbose_call()
 def get_assignment_history(assignment_id, netid):
     """
 
@@ -153,8 +156,8 @@ def get_assignment_history(assignment_id, netid):
             Submission.assignment_id == assignment.id,
             Submission.owner_id == other.id,
         )
-            .order_by(Submission.created.desc())
-            .all()
+        .order_by(Submission.created.desc())
+        .all()
     )
 
     test_count = len(assignment.full_data["tests"])
@@ -173,8 +176,8 @@ def get_assignment_history(assignment_id, netid):
 
         test_results.append(
             {
-                "x": str(created),
-                "y": tests_passed,
+                "x":     str(created),
+                "y":     tests_passed,
                 "total": test_count,
                 "label": f"{tests_passed}/{test_count} tests passed",
             }
@@ -182,26 +185,27 @@ def get_assignment_history(assignment_id, netid):
 
         build_results.append(
             {
-                "x": str(created),
-                "y": build_passed,
+                "x":     str(created),
+                "y":     build_passed,
                 "label": "build passed" if build_passed == 1 else "build failed",
             }
         )
 
     return {
         "submissions": {
-            "test_results": test_results,
+            "test_results":  test_results,
             "build_results": build_results,
         },
-        "dates": {
+        "dates":       {
             "release_date": [{"x": str(assignment.release_date), "y": test_count}],
-            "due_date": [{"x": str(assignment.due_date), "y": test_count}],
-            "grace_date": [{"x": str(assignment.grace_date), "y": test_count}],
+            "due_date":     [{"x": str(assignment.due_date), "y": test_count}],
+            "grace_date":   [{"x": str(assignment.grace_date), "y": test_count}],
         },
     }
 
 
 @cache.memoize(timeout=-1, source_check=True, forced_update=is_job)
+@verbose_call()
 def get_assignment_sundial(assignment_id):
     """
     Get the sundial data for a specific assignment. The basic breakdown of
@@ -221,12 +225,12 @@ def get_assignment_sundial(assignment_id):
         "children": [
             # Build Passed
             {
-                "name": "build passed",
-                "hex": "#8b0eea",
+                "name":     "build passed",
+                "hex":      "#8b0eea",
                 "children": [
                     {
-                        "name": test.name,
-                        "hex": "#004080",
+                        "name":     test.name,
+                        "hex":      "#004080",
                         "children": [
                             # Test Passed
                             {"name": "passed", "hex": "#008000", "value": 0},
@@ -239,14 +243,14 @@ def get_assignment_sundial(assignment_id):
             },
             # Build Failed
             {
-                "name": "build failed",
-                "hex": "#f00",
+                "name":  "build failed",
+                "hex":   "#f00",
                 "value": 0,
             },
             # No Submission
             {
-                "name": "no submission",
-                "hex": "#808080",
+                "name":  "no submission",
+                "hex":   "#808080",
                 "value": 0,
             },
         ]

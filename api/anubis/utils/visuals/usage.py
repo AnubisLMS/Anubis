@@ -5,6 +5,7 @@ from anubis.models import Assignment, Course, TheiaImage
 from anubis.utils.cache import cache
 from anubis.utils.data import is_debug, is_job
 from anubis.utils.logging import logger
+from anubis.utils.logging import verbose_call
 from anubis.utils.usage.submissions import get_submissions
 from anubis.utils.usage.theia import get_theia_sessions
 from anubis.utils.usage.users import get_active_submission_users, get_active_theia_users
@@ -13,6 +14,7 @@ from anubis.utils.visuals.watermark import add_watermark
 
 
 @cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
+@verbose_call()
 def get_usage_plot(course_id: str) -> bytes | None:
     import matplotlib.colors as mcolors
     import matplotlib.pyplot as plt
@@ -103,6 +105,7 @@ def get_usage_plot(course_id: str) -> bytes | None:
 
 
 @cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
+@verbose_call()
 def get_usage_plot_playgrounds(start: datetime = None):
     import matplotlib.pyplot as plt
 
@@ -154,6 +157,7 @@ def get_usage_plot_playgrounds(start: datetime = None):
 
 
 @cache.memoize(timeout=-1, forced_update=is_job, unless=is_debug)
+@verbose_call()
 def get_usage_plot_active(days: int = 14, step: int = 1):
     import matplotlib.pyplot as plt
 
