@@ -431,7 +431,7 @@ def get_student_course_ids(user: User, default: str = None) -> list[str]:
     else:
         # Get all the courses the user is in
         in_courses = (
-            InCourse.query.join(Course)
+            InCourse.query
             .filter(
                 InCourse.owner_id == user.id,
             )
@@ -441,7 +441,7 @@ def get_student_course_ids(user: User, default: str = None) -> list[str]:
         # Build a list of course ids. If the user
         # specified a specific course, make a list
         # of only that course id.
-        course_ids = list(set(in_course.course.id for in_course in in_courses))
+        course_ids = list(set(in_course.course_id for in_course in in_courses))
 
     # If a default was specified, check
     if default is not None and default in course_ids:

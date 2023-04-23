@@ -113,9 +113,9 @@ def get_all_assignments(course_ids: set[str], admin_course_ids: set[str]) -> lis
 
     # Get the assignment objects that should be visible to this user.
     regular_course_assignments = (
-        Assignment.query.join(Course)
+        Assignment.query
         .filter(
-            Course.id.in_(list(course_ids.difference(admin_course_ids))),
+            Assignment.course_id.in_(list(course_ids.difference(admin_course_ids))),
             Assignment.release_date <= datetime.now(),
             Assignment.hidden == False,
         )
@@ -124,9 +124,9 @@ def get_all_assignments(course_ids: set[str], admin_course_ids: set[str]) -> lis
 
     # Get the assignment objects that should be visible to this user.
     admin_course_assignments = (
-        Assignment.query.join(Course)
+        Assignment.query
         .filter(
-            Course.id.in_(list(admin_course_ids)),
+            Assignment.course_id.in_(list(admin_course_ids)),
         )
         .all()
     )
