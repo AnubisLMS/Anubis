@@ -138,7 +138,7 @@ def get_all_assignments(course_ids: set[str], admin_course_ids: set[str]) -> lis
     return assignments
 
 
-@cache.memoize(timeout=5, unless=is_debug, source_check=True)
+@cache.memoize(timeout=60, unless=is_debug, source_check=True)
 def get_assignments(netid: str, course_id=None) -> list[dict[str, Any]] | None:
     """
     Get all the current assignments for a netid. Optionally specify a course_id
