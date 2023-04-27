@@ -55,7 +55,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function QuestionsCard({questions}) {
   const classes = useStyles();
-  const showSolutionBool = 'true';
   if (!questions || questions.length === 0) {
     return null;
   }
