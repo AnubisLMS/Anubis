@@ -48,11 +48,14 @@ const useStyles = makeStyles((theme) => ({
   icon: {
     marginRight: theme.spacing(1),
   },
+  subTitle: {
+    color: '#888888',
+  },
 }));
 
 export default function QuestionsCard({questions}) {
   const classes = useStyles();
-
+  const showSolutionBool = 'true';
   if (!questions || questions.length === 0) {
     return null;
   }
@@ -89,10 +92,24 @@ export default function QuestionsCard({questions}) {
 
               <AccordionDetails>
                 {/* Question content */}
-                <Grid container spacing={2} direction={'column'}>
-                  <QuestionEditor
-                    question={question}
-                  />
+                <Grid container spacing={2} direction={'row'} justifyContent={'center'} className={classes.padding1}>
+                  <Grid item sm={12} md={6}>
+                    <QuestionEditor
+                      question={question}
+                    />
+                  </Grid>
+                  <Grid item sm={12} md={6}>
+                    <Typography variant={'subtitle1'} className={classes.subTitle}>
+                      Example Solution
+                    </Typography>
+                    <ReactMarkdownWithHtml
+                      className={classes.markdown}
+                      remarkPlugins={[gfm]}
+                      allowDangerousHtml
+                    >
+                      {question.question.solution}
+                    </ReactMarkdownWithHtml>
+                  </Grid>
                 </Grid>
               </AccordionDetails>
             </Accordion>
