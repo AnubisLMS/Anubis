@@ -20,6 +20,7 @@ db.session: scoped_session
 
 class Config(db.Model):
     __tablename__ = "anubis_config"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # Fields
@@ -36,6 +37,7 @@ class Config(db.Model):
 
 class User(db.Model):
     __tablename__ = "user"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
@@ -89,6 +91,7 @@ class User(db.Model):
 
 class Course(db.Model):
     __tablename__ = "course"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
@@ -159,6 +162,7 @@ class Course(db.Model):
 
 class TAForCourse(db.Model):
     __tablename__ = "ta_for_course"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # Foreign Keys
@@ -175,6 +179,7 @@ class TAForCourse(db.Model):
 
 class ProfessorForCourse(db.Model):
     __tablename__ = "professor_for_course"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # Foreign Keys
@@ -191,6 +196,7 @@ class ProfessorForCourse(db.Model):
 
 class InCourse(db.Model):
     __tablename__ = "in_course"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # Foreign Keys
@@ -200,6 +206,7 @@ class InCourse(db.Model):
 
 class Assignment(db.Model):
     __tablename__ = "assignment"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
@@ -299,6 +306,7 @@ class Assignment(db.Model):
 
 class AssignmentRepo(db.Model):
     __tablename__ = "assignment_repo"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
@@ -338,6 +346,7 @@ class AssignmentRepo(db.Model):
 
 class AssignmentTest(db.Model):
     __tablename__ = "assignment_test"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
@@ -359,6 +368,7 @@ class AssignmentTest(db.Model):
 
 class AssignmentQuestion(db.Model):
     __tablename__ = "assignment_question"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
@@ -405,6 +415,7 @@ class AssignmentQuestion(db.Model):
 
 class AssignedStudentQuestion(db.Model):
     __tablename__ = "assigned_student_question"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
@@ -464,6 +475,7 @@ class AssignedStudentQuestion(db.Model):
 
 class AssignedQuestionResponse(db.Model):
     __tablename__ = "assigned_student_response"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
@@ -497,6 +509,7 @@ class AssignedQuestionResponse(db.Model):
 
 class Submission(db.Model):
     __tablename__ = "submission"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
@@ -518,7 +531,7 @@ class Submission(db.Model):
     errors = Column(JSON, default=None, nullable=True)
     token: str = Column(String(length=64), default=lambda: base64.b16encode(os.urandom(32)).decode())
     accepted: bool = Column(Boolean, default=True)
-    pipeline_log: str = deferred(Column(Text(length=2 ** 16)))
+    pipeline_log = deferred(Column(Text(length=2 ** 16)))
 
     # Relationships
     build = relationship(
@@ -573,6 +586,7 @@ class Submission(db.Model):
 
 class SubmissionTestResult(db.Model):
     __tablename__ = "submission_test_result"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
@@ -619,6 +633,7 @@ class SubmissionTestResult(db.Model):
 
 class SubmissionBuild(db.Model):
     __tablename__ = "submission_build"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
@@ -645,6 +660,7 @@ class SubmissionBuild(db.Model):
 
 class TheiaImage(db.Model):
     __tablename__ = "theia_image"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id = default_id()
@@ -684,6 +700,7 @@ class TheiaImage(db.Model):
 
 class TheiaImageTag(db.Model):
     __tablename__ = "theia_image_tag"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id = default_id()
@@ -708,6 +725,7 @@ class TheiaImageTag(db.Model):
 
 class TheiaSession(db.Model):
     __tablename__ = "theia_session"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     # id
@@ -792,6 +810,7 @@ class TheiaSession(db.Model):
 
 class TheiaPaste(db.Model):
     __tablename__ = "theia_paste"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id = default_id()
@@ -815,6 +834,7 @@ class TheiaPaste(db.Model):
 
 class StaticFile(db.Model):
     __tablename__ = "static_file"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id = default_id()
@@ -862,6 +882,7 @@ class StaticFile(db.Model):
 
 class LateException(db.Model):
     __tablename__ = "late_exception"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     owner_id: str = Column(String(length=default_id_length), ForeignKey(User.id), primary_key=True)
@@ -887,6 +908,7 @@ class LateException(db.Model):
 
 class LectureNotes(db.Model):
     __tablename__ = "lecture_notes"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id = default_id()
@@ -924,6 +946,7 @@ class LectureNotes(db.Model):
 
 class EmailTemplate(db.Model):
     __tablename__ = "email_template"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     key: str = Column(String(length=128), primary_key=True, index=True)
@@ -941,6 +964,7 @@ class EmailTemplate(db.Model):
 
 class EmailEvent(db.Model):
     __tablename__ = "email_event"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id: str = default_id()
@@ -983,6 +1007,7 @@ class EmailEvent(db.Model):
 
 class ReservedIDETime(db.Model):
     __tablename__ = "reserved_ide_time"
+    __allow_unmapped__ = True
     __table_args__ = {"mysql_charset": DB_CHARSET, "mysql_collate": DB_COLLATION}
 
     id: str = default_id()
