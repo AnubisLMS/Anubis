@@ -5,7 +5,7 @@ from anubis.models import User, db
 from anubis.utils.auth.http import require_superuser
 from anubis.utils.data import req_assert
 from anubis.utils.http import success_response
-from anubis.utils.http.decorators import json_response
+from anubis.utils.http.decorators import json_response, json_endpoint
 from anubis.rpc.enqueue import enqueue_reap_pvc_user
 
 students_ = Blueprint("super-students", __name__, url_prefix="/super/students")
@@ -93,13 +93,14 @@ def super_students_toggle_anubis_developer(id: str):
     else:
         return success_response({"status": f"{other.name} is no longer an anubis developer", "variant": "success"})
 
+
 @students_.delete("/pvc/<string:id>")
 @require_superuser()
 @json_response
 def super_students_delete_pvc(id: str):
     """
     Delete a user's existing Persistent Volume Claim (PVC). Requires current user to be superuser
-    to be able to make this change. 
+    to be able to make this change.
 
     :param id:
     :return:
@@ -115,5 +116,24 @@ def super_students_delete_pvc(id: str):
     return success_response({
         "status": f"Volume deletion scheduled for user: {other.netid}.",
         "variant": "warning"
+    })
+
+
+@students_.put("/add")
+@require_superuser()
+@json_endpoint([('netid', str), ('name', str)])
+def super_students_add(netid: str, name: str):
+    """
+    Add a user
+
+    :return:
+    """
+
+    user = User(netid=netid.strip(), name=name.strip())
+    db.session.add(user)
+    db.session.commit()
+
+    return success_response({
+        "status": f"Added student {netid}"
     })
 

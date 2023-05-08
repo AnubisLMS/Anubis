@@ -14,6 +14,13 @@ import Fab from '@mui/material/Fab';
 import Tooltip from '@mui/material/Tooltip';
 import Autocomplete from '@mui/lab/Autocomplete';
 import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Box from '@mui/material/Box';
 
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
@@ -143,6 +150,70 @@ const useColumns = (pageState, enqueueSnackbar) => () => ([
   },
 ]);
 
+
+function UserAdd({setReset}) {
+  const [open, setOpen] = React.useState(false);
+  const [netid, setNetid] = React.useState('');
+  const [name, setName] = React.useState('');
+  const {enqueueSnackbar} = useSnackbar();
+
+  const close = () => {
+    setOpen(false);
+    setNetid('');
+    setName('');
+    setReset((prev) => ++prev);
+  };
+
+  return (
+    <div>
+      <Button variant="contained" color={'primary'} onClick={() => setOpen(true)}>
+        Add Student
+      </Button>
+      <Dialog
+        fullScreen={fullScreen}
+        open={open}
+        onClose={close}
+        aria-labelledby="responsive-dialog-title"
+      >
+        <DialogTitle id="responsive-dialog-title">
+          Add Student
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{mt: 1, mb: 1}}>
+            <TextField
+              sx={{m: 0.5}}
+              label="NetID"
+              variant="outlined"
+              value={netid}
+              onChange={(e) => setNetid(e.target.value)}
+            />
+            <TextField
+              sx={{m: 0.5}}
+              label="Name"
+              variant="outlined"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button autoFocus variant={'contained'} color={'primary'} onClick={close}>
+            Cancel
+          </Button>
+          <Button variant={'contained'} color={'primary'} onClick={() => {
+            axios.put(`/api/super/students/add`, {netid, name}).then((response) => {
+              standardStatusHandler(response, enqueueSnackbar);
+              close();
+            }).catch(standardErrorHandler(enqueueSnackbar));
+          }}>
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
+}
+
 export default function Users() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
@@ -211,6 +282,7 @@ export default function Users() {
           User Management
         </Typography>
       </Grid>
+      <UserAdd setReset={setReset}/>
       <Grid item xs={12} md={4} key={'search'}>
         <Paper className={classes.paper}>
           <div className={classes.autocomplete}>
