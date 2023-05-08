@@ -224,7 +224,7 @@ def create_students(n=10) -> list[User]:
 
 def create_course(users, **kwargs):
     course_id = default_id_factory()
-    course = Course(id=course_id, join_code=kwargs['name'].lower().replace(' ', ''), **kwargs)
+    course = Course(id=course_id, join_code=kwargs['name'].lower().replace(' ', '_'), **kwargs)
     db.session.add(course)
 
     for user in users:
