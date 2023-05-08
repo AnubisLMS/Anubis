@@ -75,10 +75,10 @@ def public_ide_initialize(assignment: Assignment):
         # In that case, this function will pull the proper datetime.
         due_date = get_assignment_due_date(current_user.id, assignment.id, grace=True)
 
-        # If 3 weeks has passed since the assignment has been due, then we should not allow
+        # If 90 days has passed since the assignment has been due, then we should not allow
         # new sessions to be created
-        if due_date + timedelta(days=3 * 7) <= datetime.now():
-            return error_response("Assignment due date passed over 3 weeks ago. IDEs are disabled.")
+        if due_date + timedelta(days=90) <= datetime.now():
+            return error_response("Assignment due date passed over 90 days ago. IDEs are no longer available.")
 
     user_options = dict()
     if request.is_json:
