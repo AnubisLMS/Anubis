@@ -31,7 +31,7 @@ import Playgrounds from './pages/core/public/Playgrounds/Playgrounds';
 import PrivacyPolicy from './pages/core/public/PrivacyPolicy';
 import Assignment from './pages/core/public/Assignment/Assignment';
 import Course from './pages/core/public/Course/Course';
-import AprilFools from './pages/core/public/AprilFools';
+// import AprilFools from './pages/core/public/AprilFools';
 
 import AdminReservations from './pages/core/admin/Reservations';
 import AdminUsers from './pages/core/admin/Users';
@@ -80,12 +80,12 @@ export const footer_nav = [
     path: '/playgrounds',
     Page: Playgrounds,
   },
-  {
-    id: 'Anubis NFT',
-    icon: <img src={'/aprilfools/200w.gif'} style={{width: 22}} alt={'gif'}/>,
-    path: '/aprilfools2023',
-    Page: AprilFools,
-  },
+  // {
+  //   id: 'Anubis NFT',
+  //   icon: <img src={'/aprilfools/200w.gif'} style={{width: 22}} alt={'gif'}/>,
+  //   path: '/aprilfools2023',
+  //   Page: AprilFools,
+  // },
 ];
 
 export const public_nav = [
