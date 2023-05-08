@@ -18,6 +18,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
+import KillAllSessions from '../../../components/shared/KillAllSessions';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -27,9 +28,6 @@ const useStyles = makeStyles((theme) => ({
   },
   dataGrid: {
     height: '100%',
-  },
-  button: {
-    marginRight: theme.spacing(1),
   },
 }));
 
@@ -65,7 +63,7 @@ const useColumns = (state, enqueueSnackbar) => ([
   {
     field: 'docker', headerName: 'Docker', width: 100, renderCell: ({row}) => (
       <React.Fragment>
-        {row.docker ? <DoneIcon color={'primary'}/> : <ClearIcon color={'error'}/> }
+        {row.docker ? <DoneIcon color={'primary'}/> : <ClearIcon color={'error'}/>}
       </React.Fragment>
     ),
   },
@@ -109,6 +107,7 @@ const useColumns = (state, enqueueSnackbar) => ([
   },
 ]);
 
+
 export default function Playgrounds() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
@@ -142,7 +141,7 @@ export default function Playgrounds() {
   }, [sessions]);
 
   return (
-    <Grid container spacing={4} justifyContent={'center'} alignItems={'center'}>
+    <Grid container spacing={2} justifyContent={'center'} alignItems={'center'}>
       <Grid item xs={12}>
         <Typography variant="h6">
           Anubis
@@ -152,14 +151,9 @@ export default function Playgrounds() {
         </Typography>
       </Grid>
       <Grid item xs={12}>
-        <Button
-          variant={'contained'}
-          color={'error'}
-          className={classes.button}
-          onClick={stopAllSessions(state, enqueueSnackbar)}
-        >
-          Kill All Sessions
-        </Button>
+        <KillAllSessions state={state} stopAllSessions={stopAllSessions}/>
+      </Grid>
+      <Grid item xs={12}>
         <Tooltip title={'Reload session data'}>
           <Fab
             size={'small'}

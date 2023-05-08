@@ -18,9 +18,11 @@ import IconButton from '@mui/material/IconButton';
 import CheckIcon from '@mui/icons-material/Check';
 import CancelIcon from '@mui/icons-material/Cancel';
 
+
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 import ManagementIDEDialog from '../../../components/core/AdminIDE/ManagementIDEDialog';
+import KillAllSessions from '../../../components/shared/KillAllSessions';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -124,6 +126,7 @@ const useColumns = (state, enqueueSnackbar) => ([
   },
 ]);
 
+
 export default function Theia() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
@@ -157,7 +160,7 @@ export default function Theia() {
   }, [sessions]);
 
   return (
-    <Grid container spacing={4} justifyContent={'center'} alignItems={'center'}>
+    <Grid container spacing={2} justifyContent={'center'} alignItems={'center'}>
       <Grid item xs={12}>
         <Typography variant="h6">
           Anubis
@@ -170,14 +173,9 @@ export default function Theia() {
         <ManagementIDEDialog/>
       </Grid>
       <Grid item xs={12}>
-        <Button
-          variant={'contained'}
-          color={'error'}
-          className={classes.button}
-          onClick={stopAllSessions(state, enqueueSnackbar)}
-        >
-          Kill All Sessions
-        </Button>
+        <KillAllSessions state={state} stopAllSessions={stopAllSessions}/>
+      </Grid>
+      <Grid item xs={12}>
         <Tooltip title={'Reload session data'}>
           <Fab
             size={'small'}
