@@ -155,7 +155,7 @@ class Course(db.Model):
             "professor_display_name": self.professor_display_name,
             "total_assignments":      self.total_assignments,
             "open_assignment":        self.open_assignments,
-            "join_code":              self.id[:6],
+            "join_code":              self.join_code,
             "beta_ui_enabled":        self.beta_ui_enabled,
         }
 
