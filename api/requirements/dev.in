@@ -12,6 +12,7 @@ pip-tools
 # Python testing framework
 pytest
 coverage
+requests
 
 # anubis_autograde
 termcolor

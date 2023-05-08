@@ -31,6 +31,7 @@ redis
 retry
 rq
 sentry-sdk[flask]
+sqlalchemy<2
 sqlalchemy-json
 tabulate
 termcolor
