@@ -103,6 +103,7 @@ def create_user(permission: str = "superuser", add_to_os: bool = True) -> Tuple[
             )
         )
     db.session.commit()
+    db.session.flush()
 
     return netid, name, course.id
 

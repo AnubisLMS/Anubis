@@ -18,3 +18,11 @@ def test_courses_public():
     sn.get("/public/courses/get/12345", should_fail=True)
     course = sn.get(f"/public/courses/get/{id}")["course"]
     assert course
+
+
+def test_course_join():
+    s = Session("student", new=True, add_to_os=False)
+    s.get('/public/courses/join/intro_to_os')
+
+    courses = s.get('/public/courses/list')
+    assert len(courses) > 0
