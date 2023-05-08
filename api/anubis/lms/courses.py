@@ -327,7 +327,7 @@ def valid_join_code(join_code: str) -> bool:
     """
 
     # Create a valid charset from all ascii letters and numbers
-    valid_chars = set(string.ascii_letters + string.digits)
+    valid_chars = set(string.ascii_letters + string.digits + '-_')
 
     # Make sure the join code is 6 chars long, and
     # all the chars exist in the valid_chars set.
