@@ -1,0 +1,36 @@
+
+{{- if .Values.github_reaper.enable }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "chart.fullname" . }}-github-reaper
+  labels:
+    {{- include "chart.selectorLabels" . | nindent 4 }}
+    component: github-reaper
+spec:
+  schedule: {{ .Values.github_reaper.schedule | quote }}
+  suspend: {{ .Values.github_reaper.suspend }}
+  concurrencyPolicy: Replace
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "chart.selectorLabels" . | nindent 8 }}
+        component: github-reaper-job
+    spec:
+      template:
+        spec:
+          {{- if and .Values.nodeSelector (not .Values.debug) }}
+          nodeSelector:
+            {{ .Values.nodeSelector | toYaml }}
+          {{- end }}
+          restartPolicy: Never
+          containers:
+          - name: github-reaper
+            image: "{{ .Values.api.image }}:{{ .Values.tag }}"
+            imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+            command: ["python3", "anubis/jobs/github_reaper.py"]
+            env:
+            - name: "JOB"
+              value: "1"
+            {{- include "api.env" . | nindent 12 }}
+{{- end }}
