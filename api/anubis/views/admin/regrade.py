@@ -64,9 +64,9 @@ def admin_regrade_status(assignment: Assignment):
 @regrade.route("/status/student/<string:netid>")
 @require_admin()
 @json_response
-def admin_regrade_status(netid: str):
+def admin_regrade_status_student(netid: str):
     """
-    Get the autograde status for astudent. The status
+    Get the autograde status for a student. The status
     is some high level stats the proportion of submissions
     within the assignments for that student that have been processed
 
