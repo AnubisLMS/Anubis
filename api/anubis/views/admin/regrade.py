@@ -8,7 +8,7 @@ from anubis.lms.courses import assert_course_context
 from anubis.lms.submissions import bulk_regrade_submissions
 from anubis.lms.submissions import init_submission
 from anubis.models import Assignment, Submission, User
-from anubis.rpc.enqueue import enqueue_bulk_regrade_assignment
+from anubis.rpc.enqueue import enqueue_bulk_regrade_assignment, enqueue_bulk_regrade_submissions_of_student
 from anubis.rpc.enqueue import rpc_enqueue, enqueue_autograde_pipeline
 from anubis.utils.auth.http import require_admin
 from anubis.utils.cache import cache
@@ -192,6 +192,43 @@ def private_regrade_assignment(assignment_id):
 
     # Enqueue assignment regrade for rpc worker
     enqueue_bulk_regrade_assignment(assignment.id, hours, not_processed, processed, reaped, latest_only)
+
+    # Pass back the enqueued status
+    return success_response(
+        {
+            "status": f"Regrade enqueued.",
+        }
+    )
+
+@regrade.route("/student/<string:net_id>")
+@require_admin()
+@json_response
+def private_regrade_student_netid(netid: str):
+    """
+
+    :param assignment_id:
+    :param netid:
+    :return:
+    """
+
+     # Get the options for the regrade
+    hours = get_number_arg("hours", default_value=-1)
+    not_processed = get_number_arg("not_processed", default_value=-1)
+    processed = get_number_arg("processed", default_value=-1)
+    reaped = get_number_arg("reaped", default_value=-1)
+    latest_only = get_number_arg("latest_only", default_value=-1)
+
+    # Get the student
+    student: User = User.query.filter(User.netid == netid).first()
+
+    # Verify the student exists
+    req_assert(student is not None, message="student does not exist")
+
+    # Assert that the course exists
+    assert_course_context(student)
+
+    # Grade all submissions of student
+    enqueue_bulk_regrade_submissions_of_student(student.id, hours, not_processed, processed, reaped, latest_only)
 
     # Pass back the enqueued status
     return success_response(
