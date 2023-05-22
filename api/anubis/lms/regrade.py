@@ -35,7 +35,7 @@ def bulk_regrade_assignment_of_student(
         if reaped == 1:
             filters.append(Submission.state == "Reaped after timeout")
 
-    submissions = get_latest_user_submissions(user=user_id, filter=filters)
+    submissions = get_latest_user_submissions(user=user_id, limit=100, filter=filters)
 
     # Proceed to only filter submissions that are not past the assignment due date (including grace date)
     from anubis.lms.assignments import get_assignment_due_date
@@ -44,7 +44,7 @@ def bulk_regrade_assignment_of_student(
     # Split the submissions into bite sized chunks
     submission_ids = [s.id for s in submissions]
     submission_chunks = split_chunks(submission_ids, 100)
-    
+
     # Enqueue each chunk as a job for the rpc workers
     for chunk in submission_chunks:
         enqueue_bulk_regrade_submissions(chunk)
