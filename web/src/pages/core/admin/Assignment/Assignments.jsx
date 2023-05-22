@@ -78,6 +78,19 @@ export default function Assignments() {
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, [reset]);
 
+  React.useEffect(() => {
+    axios.get('/api/admin/students/list').then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data?.students) {
+        setStudents(data.students.map((student) => student.netid));
+      } else {
+        enqueueSnackbar('Unable to fetch students', {variant: 'error'});
+      }
+    }).catch((error) => {
+      enqueueSnackbar(error.toString(), {variant: 'error'});
+    });
+  }, [open]);
+
   const addAssignment = () => {
     axios.post('/api/admin/assignments/add').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
@@ -87,20 +100,22 @@ export default function Assignments() {
     }).catch(standardErrorHandler(enqueueSnackbar));
   };
 
-  // const autogradeAssignments = () => {
-  //   axios.post('/api/admin/autograde').then((response) => {
-  //     const data = standardStatusHandler(response, enqueueSnackbar);
-  //     // if (data.assignment) {
-  //     //   setReset((prev) => ++prev);
-  //     // }
+  const autogradeStudent = (net_id) => (params = {}) => {
+    axios.get(`/api/admin/regrade/student/${net_id}`, {params}).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data.session?.state === 'autograding') {
+        enqueueSnackbar('Autograding student', {variant: 'success'});
+        history.push(`/admin/autograde/${data.session.id}`);
+      }
+    }).catch((error) => {
+      console.log(error); standardErrorHandler(enqueueSnackbar);
+    });
+  };
 
-  //     if (data.session?.state === 'autograding') {
-  //       setLoading(true);
-  //       pollSession(data.session.id, state, enqueueSnackbar)();
-  //     }
-  //   }).catch(standardErrorHandler(enqueueSnackbar));
-  // };
-
+  const autograde = () => {
+    autogradeStudent(value)();
+    setOpen(false);
+  };
 
   return (
     <div className={classes.root}>
@@ -113,7 +128,7 @@ export default function Assignments() {
             Assignment Management
           </Typography>
         </Grid>
-        <Grid container className={classes.buttonGrid} spacing={2} justifyContent={'center'} alignItems={'center'} >
+        <Grid container className={classes.buttonGrid} spacing={2} justifyContent={'left'} alignItems={'center'} >
           <Grid item xs='auto'>
             <Button variant={'contained'} color={'primary'} onClick={addAssignment}>
               Add Assignment
@@ -175,7 +190,7 @@ export default function Assignments() {
         />
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleClose}>Autograde</Button>
+          <Button onClick={autograde}>Autograde</Button>
         </DialogActions>
       </Dialog>
     </div>
