@@ -293,6 +293,13 @@ def get_latest_user_submissions(assignment: Assignment, user: User, limit: int =
         *filter
     ).order_by(Submission.created.desc()).limit(limit).all()
 
+def get_latest_user_submissions_by_user(user: User, limit: int = 3, filter: list = None) -> list[Submission]:
+    filter = filter or []
+    return Submission.query.filter(
+        Submission.owner_id == user.id,
+        *filter
+    ).order_by(Submission.created.desc()).limit(limit).all()
+
 
 def fix_submissions_for_autograde_disabled_assignment(assignment: Assignment):
     if assignment.autograde_enabled or assignment.shell_autograde_enabled:
