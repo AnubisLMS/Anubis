@@ -285,19 +285,16 @@ def init_submission(submission: Submission, db_commit: bool = True, state: str =
         db.session.commit()
 
 
-def get_latest_user_submissions(assignment: Assignment, user: User, limit: int = 3, filter: list = None) -> list[Submission]:
+def get_latest_user_submissions(assignment: Assignment = None, user: User = None, limit: int = 3, filter: list = None) -> list[Submission]:
     filter = filter or []
-    return Submission.query.filter(
-        Submission.assignment_id == assignment.id,
-        Submission.owner_id == user.id,
-        *filter
-    ).order_by(Submission.created.desc()).limit(limit).all()
 
-def get_latest_user_submissions_by_user(user: User, limit: int = 3, filter: list = None) -> list[Submission]:
-    filter = filter or []
+    if(assignment is not None):
+        filter.append(Submission.assignment_id == assignment.id)
+    if(user is not None):
+        filter.append(Submission.owner_id == user.id)
+
     return Submission.query.filter(
-        Submission.owner_id == user.id,
-        *filter
+            *filter
     ).order_by(Submission.created.desc()).limit(limit).all()
 
 

@@ -3,8 +3,9 @@ from datetime import datetime, timedelta
 from anubis.lms.courses import get_course_users
 from anubis.models import Submission, Assignment
 from anubis.utils.data import with_context, split_chunks
+from anubis.lms.submissions import get_latest_user_submissions
+from anubis.rpc.enqueue import enqueue_bulk_regrade_submissions
 
-# Regrade all assignment based of a student with a user id
 @with_context
 def bulk_regrade_assignment_of_student(
     user_id: str,
@@ -14,11 +15,6 @@ def bulk_regrade_assignment_of_student(
     reaped: int = -1,
     latest_only: int = -1,
 ):
-    # Check if the user is a student
-    
-    # Fetch all submisions of a user
-    from anubis.lms.submissions import get_latest_user_submissions_by_user
-
     # Build a list of filters based on the options
     filters = []
     if latest_only <= 1:
@@ -39,14 +35,16 @@ def bulk_regrade_assignment_of_student(
         if reaped == 1:
             filters.append(Submission.state == "Reaped after timeout")
 
-    submissions = get_latest_user_submissions_by_user(user_id, filter=filters)
+    submissions = get_latest_user_submissions(user=user_id, filter=filters)
+
+    # Proceed to only filter submissions that are not past the assignment due date (including grace date)
+    from anubis.lms.assignments import get_assignment_due_date
+    submissions = [s for s in submissions if s.created < get_assignment_due_date(user_id, s.assignment_id, True)]
     
     # Split the submissions into bite sized chunks
     submission_ids = [s.id for s in submissions]
     submission_chunks = split_chunks(submission_ids, 100)
-
-    from anubis.rpc.enqueue import enqueue_bulk_regrade_submissions
-
+    
     # Enqueue each chunk as a job for the rpc workers
     for chunk in submission_chunks:
         enqueue_bulk_regrade_submissions(chunk)
@@ -61,7 +59,7 @@ def bulk_regrade_assignment(
     reaped: int = -1,
     latest_only: int = -1,
 ):
-    from anubis.lms.submissions import get_latest_user_submissions
+
 
     assignment: Assignment = Assignment.query.filter(
         Assignment.id == assignment_id,
@@ -103,8 +101,6 @@ def bulk_regrade_assignment(
     # Split the submissions into bite sized chunks
     submission_ids = [s.id for s in submissions]
     submission_chunks = split_chunks(submission_ids, 100)
-
-    from anubis.rpc.enqueue import enqueue_bulk_regrade_submissions
 
     # Enqueue each chunk as a job for the rpc workers
     for chunk in submission_chunks:
