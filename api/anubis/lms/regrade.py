@@ -3,8 +3,6 @@ from datetime import datetime, timedelta
 from anubis.lms.courses import get_course_users
 from anubis.models import Submission, Assignment
 from anubis.utils.data import with_context, split_chunks
-from anubis.lms.submissions import get_latest_user_submissions
-from anubis.rpc.enqueue import enqueue_bulk_regrade_submissions
 
 @with_context
 def bulk_regrade_assignment_of_student(
@@ -15,6 +13,7 @@ def bulk_regrade_assignment_of_student(
     reaped: int = -1,
     latest_only: int = -1,
 ):
+    
     # Build a list of filters based on the options
     filters = []
     if latest_only <= 1:
@@ -35,6 +34,7 @@ def bulk_regrade_assignment_of_student(
         if reaped == 1:
             filters.append(Submission.state == "Reaped after timeout")
 
+    from anubis.lms.submissions import get_latest_user_submissions
     submissions = get_latest_user_submissions(user=user_id, limit=100, filter=filters)
 
     # Proceed to only filter submissions that are not past the assignment due date (including grace date)
@@ -45,6 +45,7 @@ def bulk_regrade_assignment_of_student(
     submission_ids = [s.id for s in submissions]
     submission_chunks = split_chunks(submission_ids, 100)
 
+    from anubis.rpc.enqueue import enqueue_bulk_regrade_submissions
     # Enqueue each chunk as a job for the rpc workers
     for chunk in submission_chunks:
         enqueue_bulk_regrade_submissions(chunk)
@@ -65,6 +66,7 @@ def bulk_regrade_assignment(
         Assignment.id == assignment_id,
     ).first()
 
+    from anubis.lms.submissions import get_latest_user_submissions
     if latest_only > 1:
         users = get_course_users(assignment)
         submissions = []
@@ -102,6 +104,7 @@ def bulk_regrade_assignment(
     submission_ids = [s.id for s in submissions]
     submission_chunks = split_chunks(submission_ids, 100)
 
+    from anubis.rpc.enqueue import enqueue_bulk_regrade_submissions
     # Enqueue each chunk as a job for the rpc workers
     for chunk in submission_chunks:
         enqueue_bulk_regrade_submissions(chunk)
