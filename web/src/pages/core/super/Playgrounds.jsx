@@ -21,6 +21,7 @@ import standardErrorHandler from '../../../utils/standardErrorHandler';
 import KillAllSessions from '../../../components/shared/KillAllSessions';
 
 
+
 const useStyles = makeStyles((theme) => ({
   paper: {
     height: 700,
@@ -89,6 +90,13 @@ const useColumns = (state, enqueueSnackbar) => ([
             Go To IDE
           </Button>
         )}
+      </React.Fragment>
+    ),
+  },
+  {
+    field: 'docker', headerName: 'Docker', width: 100, renderCell: ({row}) => (
+      <React.Fragment>
+        {row.docker ? <DoneIcon color={'primary'}/> : <ClearIcon color={'error'}/> }
       </React.Fragment>
     ),
   },
