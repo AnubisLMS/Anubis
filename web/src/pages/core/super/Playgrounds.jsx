@@ -63,7 +63,7 @@ const useColumns = (state, enqueueSnackbar) => ([
   {
     field: 'docker', headerName: 'Docker', width: 100, renderCell: ({row}) => (
       <React.Fragment>
-        {row.docker ? <DoneIcon color={'primary'}/> : <ClearIcon color={'error'}/>}
+        {row.docker ? <DoneIcon color={'primary'}/> : <ClearIcon color={'error'}/> }
       </React.Fragment>
     ),
   },
@@ -89,13 +89,6 @@ const useColumns = (state, enqueueSnackbar) => ([
             Go To IDE
           </Button>
         )}
-      </React.Fragment>
-    ),
-  },
-  {
-    field: 'docker', headerName: 'Docker', width: 100, renderCell: ({row}) => (
-      <React.Fragment>
-        {row.docker ? <DoneIcon color={'primary'}/> : <ClearIcon color={'error'}/> }
       </React.Fragment>
     ),
   },
