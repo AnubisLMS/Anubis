@@ -200,14 +200,14 @@ def private_regrade_assignment(assignment_id):
         }
     )
 
-@regrade.route("/student/<string:net_id>")
+@regrade.route("/student/<string:netid>")
 @require_admin()
 @json_response
 def private_regrade_student_netid(netid: str):
     """
 
-    :param assignment_id:
-    :param netid:
+
+    :param net_id:
     :return:
     """
 
