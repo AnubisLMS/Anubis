@@ -21,7 +21,6 @@ import standardErrorHandler from '../../../utils/standardErrorHandler';
 import KillAllSessions from '../../../components/shared/KillAllSessions';
 
 
-
 const useStyles = makeStyles((theme) => ({
   paper: {
     height: 700,
