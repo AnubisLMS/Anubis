@@ -21,7 +21,7 @@ from anubis.k8s.theia.reap import reap_theia_session_by_id
 from anubis.lms.assignments import make_shared_assignment
 from anubis.lms.autograde import bulk_autograde
 from anubis.lms.questions import assign_missing_questions
-from anubis.lms.regrade import bulk_regrade_assignment
+from anubis.lms.regrade import bulk_regrade_assignment, bulk_regrade_assignment_of_student
 from anubis.lms.submissions import bulk_regrade_submissions, recalculate_late
 from anubis.lms.courses import bulk_create_students
 from anubis.utils.data import with_context
@@ -132,6 +132,9 @@ def enqueue_bulk_regrade_submissions(*args):
     """Enqueue bulk autograde of assignment"""
     rpc_enqueue(bulk_regrade_submissions, queue="regrade", args=args)
 
+def enqueue_bulk_regrade_submissions_of_student(*args):
+    """Enqueue bulk autograde submissions of a student"""
+    rpc_enqueue(bulk_regrade_assignment_of_student, queue="regrade", args=args)
 
 def enqueue_bulk_create_students(*args):
     """Enqueue create users for course"""
