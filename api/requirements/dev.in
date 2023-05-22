@@ -11,6 +11,7 @@ pip-tools
 
 # Python testing framework
 pytest
+pytest-timeout
 coverage
 requests
 
