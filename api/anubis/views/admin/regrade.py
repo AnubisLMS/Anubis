@@ -79,7 +79,7 @@ def admin_regrade_status_student(netid: str):
     # Verify the student exists
     req_assert(student is not None, message="student does not exist")
 
-    # Assert that the course exists
+    # Assert that admin making request is an admin for this student
     assert_course_context(student)
 
     # Get the number of submissions that are being processed
