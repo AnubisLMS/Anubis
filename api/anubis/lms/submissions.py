@@ -240,7 +240,8 @@ def reject_late_submission(submission: Submission):
     db.session.add(submission)
 
 
-def init_submission(submission: Submission, db_commit: bool = True, state: str = "Waiting for resources...", verbose: bool = True):
+def init_submission(submission: Submission, db_commit: bool = True, state: str = "Waiting for resources...",
+                    verbose: bool = True):
     """
     Create adjacent submission models.
 
@@ -285,16 +286,17 @@ def init_submission(submission: Submission, db_commit: bool = True, state: str =
         db.session.commit()
 
 
-def get_latest_user_submissions(assignment: Assignment = None, user: User = None, limit: int = 3, filter: list = None) -> list[Submission]:
+def get_latest_user_submissions(assignment: Assignment = None, user: User = None, limit: int = 3,
+                                filter: list = None) -> list[Submission]:
     filter = filter or []
 
-    if(assignment is not None):
+    if assignment is not None:
         filter.append(Submission.assignment_id == assignment.id)
-    if(user is not None):
+    if user is not None:
         filter.append(Submission.owner_id == user.id)
 
     return Submission.query.filter(
-            *filter
+        *filter
     ).order_by(Submission.created.desc()).limit(limit).all()
 
 
@@ -306,7 +308,7 @@ def fix_submissions_for_autograde_disabled_assignment(assignment: Assignment):
     logger.info(f'Fixing autograde disabled submissions for {assignment=}')
     Submission.query.filter(Submission.assignment_id == assignment.id).update({
         'processed': True,
-        'state': AUTOGRADE_DISABLED_MESSAGE
+        'state':     AUTOGRADE_DISABLED_MESSAGE
     })
     db.session.commit()
 
@@ -317,7 +319,7 @@ def fix_submissions_for_autograde_disabled_assignment(assignment: Assignment):
             Submission.accepted == True,
             Submission.created > assignment.grace_date,
             Submission.assignment_id == assignment.id,
-        # Order submissions by user so we get cache locality
+            # Order submissions by user so we get cache locality
         ).order_by(Submission.owner_id)
         for submission in submissions:
             # Querying due dates on all these submissions is going to create quite a few roundtrips
