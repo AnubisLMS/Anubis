@@ -247,14 +247,13 @@ def private_regrade_assignment(assignment_id):
     )
 
 
-@regrade.route("/student/<string:netid>")
+@regrade.route("/student/<string:id>")
 @require_admin()
+@load_from_id(User, verify_owner=False)
 @json_response
-def private_regrade_student_netid(netid: str):
+def admin_regrade_student_id(student: User):
     """
-
-
-    :param net_id:
+    :param student: student in question
     :return:
     """
 
@@ -264,9 +263,6 @@ def private_regrade_student_netid(netid: str):
     processed = get_number_arg("processed", default_value=-1)
     reaped = get_number_arg("reaped", default_value=-1)
     latest_only = get_number_arg("latest_only", default_value=-1)
-
-    # Get the student
-    student: User = User.query.filter(User.netid == netid).first()
 
     # Verify the student exists
     req_assert(student is not None, message="student does not exist")
