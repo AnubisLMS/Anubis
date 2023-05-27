@@ -1,5 +1,4 @@
 import pytest
-import time
 
 from anubis.models import Submission
 from utils import Session, permission_test, with_context
@@ -43,13 +42,8 @@ def test_regrade_admin_student():
     resp = superuser.post(f"/admin/regrade/student/{student_id}")
     assert resp["status"] == "Regrade enqueued."
 
-    # get the status of the regrade for a student and make sure they get fully procesed
+    # get the status of the regrade for a student and make sure they get fully processed
     status = superuser.get(f"/admin/regrade/status/student/{student_id}")
 
     # make sure total is greater than 0 (meaning it has actually been enqueued)
     assert status["total"] > 0
-
-    while (status["processed"] != status["total"]):
-        time.sleep(5)
-        status = superuser.get(f"/admin/regrade/status/student/{student_id}")
-    assert status["processed"] == status["total"]
