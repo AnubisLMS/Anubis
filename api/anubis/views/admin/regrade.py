@@ -247,7 +247,7 @@ def private_regrade_assignment(assignment_id):
     )
 
 
-@regrade.route("/student/<string:id>")
+@regrade.post("/student/<string:id>")
 @require_admin()
 @load_from_id(User, verify_owner=False)
 @json_response
