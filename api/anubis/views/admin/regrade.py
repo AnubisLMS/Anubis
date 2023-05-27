@@ -60,7 +60,7 @@ def admin_regrade_status(assignment: Assignment):
         }
     )
 
-# 
+
 @regrade.route("/status/student/<string:netid>")
 @require_admin()
 @json_response
@@ -105,6 +105,7 @@ def admin_regrade_status_student(netid: str):
             "total":      total,
         }
     )
+
 
 @regrade.route("/submission/<string:commit>")
 @require_admin()
@@ -245,6 +246,7 @@ def private_regrade_assignment(assignment_id):
         }
     )
 
+
 @regrade.route("/student/<string:netid>")
 @require_admin()
 @json_response
@@ -256,7 +258,7 @@ def private_regrade_student_netid(netid: str):
     :return:
     """
 
-     # Get the options for the regrade
+    # Get the options for the regrade
     hours = get_number_arg("hours", default_value=-1)
     not_processed = get_number_arg("not_processed", default_value=-1)
     processed = get_number_arg("processed", default_value=-1)
