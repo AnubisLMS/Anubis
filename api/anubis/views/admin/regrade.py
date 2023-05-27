@@ -207,7 +207,7 @@ def private_regrade_assignment(assignment_id):
     on the database. We basically need to load the entire submission
     history out of the database, reset each, then re-enqueue them
     for processing. This makes resetting a single assignment actually
-    very time consuming. For this we need to be a bit smart about how to
+    very time-consuming. For this we need to be a bit smart about how to
     handle this.
 
     We will split all submissions for the given assignment into
