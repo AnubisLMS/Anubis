@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
 
 from anubis.lms.courses import get_course_users
-from anubis.models import Submission, Assignment
+from anubis.models import User, Submission, Assignment
 from anubis.utils.data import with_context, split_chunks
+from anubis.lms.submissions import get_latest_user_submissions
+from anubis.lms.assignments import get_assignment_due_date
 
 
 def chunk_and_enqueue_regrade(submissions: list[Submission]):
@@ -56,12 +58,16 @@ def bulk_regrade_assignment_of_student(
     # Build a list of filters based on the options
     filters = regrade_filters(hours, not_processed, processed, reaped)
 
-    from anubis.lms.submissions import get_latest_user_submissions
-    submissions = get_latest_user_submissions(user=user_id, limit=100, filter=filters)
+    # Grab actual user
+    user: User = User.query.filter(User.id == user_id).first()
 
     # Proceed to only filter submissions that are not past the assignment due date (including grace date)
-    from anubis.lms.assignments import get_assignment_due_date
+    submissions = get_latest_user_submissions(user=user, limit=100, filter=filters)
     submissions = [s for s in submissions if s.created < get_assignment_due_date(user_id, s.assignment_id, True)]
+
+    if latest_only > 0:
+        # If only latest, just grab the front submission
+        submissions = submissions[0] if len(submissions) > 0 else []
 
     chunk_and_enqueue_regrade(submissions)
 
@@ -79,12 +85,11 @@ def bulk_regrade_assignment(
         Assignment.id == assignment_id,
     ).first()
 
-    from anubis.lms.submissions import get_latest_user_submissions
-    if latest_only > 1:
-        users = get_course_users(assignment)
+    if latest_only > 0:
         submissions = []
+        users = get_course_users(assignment)
         for user in users:
-            submissions.extend(get_latest_user_submissions(assignment, user))
+            submissions.extend(get_latest_user_submissions(assignment, user, limit=1))
 
     else:
         # Build a list of filters based on the options
