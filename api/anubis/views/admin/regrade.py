@@ -61,20 +61,19 @@ def admin_regrade_status(assignment: Assignment):
     )
 
 
-@regrade.route("/status/student/<string:netid>")
+@regrade.route("/status/student/<string:id>")
 @require_admin()
+@load_from_id(User, verify_owner=False)
 @json_response
-def admin_regrade_status_student(netid: str):
+def admin_regrade_status_student(student: User):
     """
     Get the autograde status for a student. The status
     is some high level stats the proportion of submissions
     within the assignments for that student that have been processed
 
-    :param netid:
+    :param student: student in question
     :return:
     """
-    # Get the student
-    student: User = User.query.filter(User.netid == netid).first()
 
     # Verify the student exists
     req_assert(student is not None, message="student does not exist")
