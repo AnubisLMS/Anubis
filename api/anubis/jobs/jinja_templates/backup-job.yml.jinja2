@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "ide-volume-backup-{{ netid }}-{{ backup_identifier }}"
+  labels:
+    backup: "{{ netid }}"
+    component: volume-backup
+  namespace: anubis
+spec:
+  ttlSecondsAfterFinished: {{ ttl }}
+  template:
+    spec:
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      containers:
+      - name: backup
+        image: registry.digitalocean.com/anubis/api:latest
+        command: ["bash", "-c", "set -ex && cd /mnt && tar czf {{ netid }}-volume.tar.gz {{netid }}-volume && echo '-mkdir {{ backup_host_path }}\nput {{ netid }}-volume.tar.gz {{ backup_host_path }}' | sftp -o StrictHostKeyChecking=no -i /root/.ssh/id_ed25519 -o UserKnownHostsFile=/dev/null {{ backup_host }}"]
+        volumeMounts:
+        - name: anubis-backup-creds
+          mountPath: "/root/.ssh"
+        - mountPath: "/mnt/{{ netid }}-volume"
+          name: ide-volume
+      volumes:
+      - name: anubis-backup-creds
+        secret:
+          secretName: "anubis-backup-creds"
+          defaultMode: 0600
+      - name: ide-volume
+        persistentVolumeClaim:
+          claimName: "ide-volume-{{ netid }}"
+      restartPolicy: Never
+  backoffLimit: 4

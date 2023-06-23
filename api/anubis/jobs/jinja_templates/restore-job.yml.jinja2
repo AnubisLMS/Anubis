@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "ide-volume-{{ netid }}"
+  namespace: anubis
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 300Mi
+  storageClassName: longhorn
+  volumeMode: Filesystem
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "ide-volume-restore-{{ netid }}-{{ backup_identifier }}"
+  labels:
+    backup: "{{ netid }}"
+    component: volume-restore
+  namespace: anubis
+spec:
+  ttlSecondsAfterFinished: {{ ttl }}
+  template:
+    spec:
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      containers:
+      - name: backup
+        image: registry.digitalocean.com/anubis/api:latest
+        command: ["bash", "-c", "set -ex && cd /mnt && if [ -f {{ netid }}-volume.tar.gz ]; then rm -f {{ netid }}-volume.tar.gz; fi && echo 'get {{ backup_host_path }}/{{ netid }}-volume.tar.gz' | sftp -o StrictHostKeyChecking=no -i /root/.ssh/id_ed25519 -o UserKnownHostsFile=/dev/null {{ backup_host }} && tar xzf {{ netid }}-volume.tar.gz && rm -f {{ netid }}-volume.tar.gz;"]
+        volumeMounts:
+        - name: anubis-backup-creds
+          mountPath: "/root/.ssh"
+        - mountPath: "/mnt/{{ netid }}-volume"
+          name: ide-volume
+      volumes:
+      - name: anubis-backup-creds
+        secret:
+          secretName: "anubis-backup-creds"
+          defaultMode: 0600
+      - name: ide-volume
+        persistentVolumeClaim:
+          claimName: "ide-volume-{{ netid }}"
+      restartPolicy: Never
+  backoffLimit: 4
