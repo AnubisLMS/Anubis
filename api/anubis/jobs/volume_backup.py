@@ -104,8 +104,12 @@ def initialize_gen(args):
     print(f"  {backup_host=}")
     print(f"  {backup_host_path=}")
 
-    backup_template = jinja2.Template(Path("backup-job.yml.jinja2").read_text())
-    restore_template = jinja2.Template(Path("restore-job.yml.jinja2").read_text())
+    backup_template = jinja2.Template(
+        Path("./jinja_templates/backup-job.yml.jinja2").read_text()
+    )
+    restore_template = jinja2.Template(
+        Path("./jinja_templates/restore-job.yml.jinja2").read_text()
+    )
 
     return (
         backup_template,
