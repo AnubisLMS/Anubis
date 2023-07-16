@@ -32,7 +32,7 @@ export default function Forum({user}) {
   const [selectedPost, setSelectedPost] = useState(undefined);
   const [selectedContent, setSelectedContent] = useState(undefined);
 
-  const [isDialogOpen, setIsDialogOpen] = useState(undefined);
+  const [isDialogOpen, setIsDialogOpen] = useState(true);
   const [dialogMode, setDialogMode] = useState('post');
 
   const [refreshPosts, setRefreshPosts] = useState(0);
@@ -108,7 +108,8 @@ export default function Forum({user}) {
   return (
     <StandardLayout>
       <CreateDialog
-        isOpen={isDialogOpen}
+        open={isDialogOpen}
+        setOpen={setIsDialogOpen}
         mode={dialogMode}
         handleCreatePost={handleCreatePost}
       />

@@ -1,0 +1,22 @@
+.DraftEditor-editorContainer {
+    height: 15rem;
+    padding: 0.8rem;
+    margin-bottom: 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+    height: 4px;
+    width: 6px;
+    scrollbar-color: white white;
+}
+
+::-webkit-scrollbar-thumb {
+    background: white;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: gray;
+}
