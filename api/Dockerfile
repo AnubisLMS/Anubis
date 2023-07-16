@@ -19,9 +19,9 @@ RUN set -eux;  \
     curl -LO "https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"; \
     echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check; \
     rm kubectl.sha256; \
-    mkdir -p /usr/bin/local; \
-    mv kubectl /usr/bin/local; \
-    chmod +x /usr/bin/local/kubectl; \
+    mkdir -p /usr/local/bin; \
+    mv kubectl /usr/local/bin; \
+    chmod +x /usr/local/bin/kubectl; \
     \
     pip3 install --no-cache-dir -r ./requirements.txt; \
     useradd -M anubis; \
