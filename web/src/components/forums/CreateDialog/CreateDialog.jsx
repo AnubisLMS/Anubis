@@ -1,21 +1,21 @@
 import React, {useState, useRef} from 'react';
-
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import Box from '@mui/material/Box';
-import Input from '@mui/material/Input';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Switch from '@mui/material/Switch';
+import {Dialog, DialogTitle, DialogContent, Box, Input, Typography, Button, Switch, IconButton} from '@mui/material';
 import EditorToolbar from './Toolbar/EditorToolbar';
-import {Editor, EditorState, RichUtils, convertToRaw} from 'draft-js';
+import {EditorState, RichUtils, convertToRaw} from 'draft-js';
+import Editor, {composeDecorators} from '@draft-js-plugins/editor';
+import createResizablePlugin from '@draft-js-plugins/resizeable';
+import createImagePlugin from '@draft-js-plugins/image';
 import CloseIcon from '@mui/icons-material/Close';
-import IconButton from '@mui/material/IconButton';
+import {useStyles} from './CreateDialog.styles';
 
 import 'draft-js/dist/Draft.css';
 import './TextEditor.css';
-import {useStyles} from './CreateDialog.styles';
+
+const resizeablePlugin = createResizablePlugin();
+const decorator = composeDecorators(
+  resizeablePlugin.decorator,
+);
+const imagePlugin = createImagePlugin({decorator});
 
 export default function CreateDialog({
   mode = 'post',
@@ -35,10 +35,11 @@ export default function CreateDialog({
 
   const [error, setError] = useState('');
   const validatePost = () => {
+    const content = JSON.stringify(convertToRaw(editorState.getCurrentContent()));
     if (title && content) {
       handleCreatePost({
         title: title,
-        content: JSON.stringify(convertToRaw(editorState.getCurrentContent())),
+        content: content,
         visible_to_students: isVisibleToStudents,
         anonymous: isAnonymous,
       });
@@ -59,6 +60,7 @@ export default function CreateDialog({
       isFullScreen
       open={open}
       classes={{paper: classes.root}}
+      onClose={() => setOpen(false)}
     >
       {error}
       <DialogTitle className={classes.titleContainer}>
@@ -72,10 +74,10 @@ export default function CreateDialog({
         </Box>
       </DialogTitle>
       <DialogContent sx={{padding: 0}}>
-        <Input inputProps={{className: classes.inputTitle}} fullWidth
+        <Input inputProps={{className: classes.inputTitle}} disableUnderline={true} fullWidth
           value={title} onChange={(e) => setTitle(e.target.value)} placeholder={'Put Title Here'} />
         <div className={classes.toolbarContainer}>
-          <EditorToolbar editorState={editorState} setEditorState={setEditorState}/>
+          <EditorToolbar editorState={editorState} setEditorState={setEditorState} imagePlugin={imagePlugin} />
         </div>
         <Editor
           ref={editor}
@@ -84,8 +86,9 @@ export default function CreateDialog({
           onChange={(editorState) => {
             setEditorState(editorState);
           }}
+          plugins={[imagePlugin, resizeablePlugin]}
         />
-        <Box display="flex" alignItems="center" justifyContent="flex-start" gap="20px" padding="10px">
+        <Box display="flex" alignItems="center" justifyContent="flex-start" gap="20px" padding="0px 10px">
           <div className={classes.switchContainer}>
             <p> Visibile to Students?</p>
             <Switch checked={isVisibleToStudents} onChange={() => setIsVisisbleToStudents(!isVisibleToStudents)}/>
