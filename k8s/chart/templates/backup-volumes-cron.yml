@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "chart.fullname" . }}-volume-backup
+  labels:
+      {{- include "chart.labels" . | nindent 4 }}
+    component: volume-backup
+{{- if .Values.imagePullSecret }}
+imagePullSecrets:
+  - name: {{ .Values.imagePullSecret }}
+{{- end }}
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "chart.fullname" . }}-volume-backup
+  labels:
+      {{- include "chart.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [ "v1" ]
+    resources: [ "PersistentVolumeClaim" ]
+    verbs: [ "get", "list", "create" ]
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "chart.fullname" . }}-volume-backup
+  labels:
+      {{- include "chart.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "chart.fullname" . }}-volume-backup
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "chart.fullname" . }}-volume-backup
+    namespace: anubis
+---
+
+{{- if .Values.backup.enable }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "chart.fullname" . }}-volume-backup
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: volume-backup
+spec:
+  schedule: {{ .Values.backup.volume_schedule | quote }}
+  concurrencyPolicy: Replace
+  suspend: {{ .Values.backup.suspend }}
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "chart.selectorLabels" . | nindent 8 }}
+        component: volume-backup
+    spec:
+      template:
+        spec:
+          {{- if and .Values.nodeSelector (not .Values.debug) }}
+          nodeSelector:
+            {{ .Values.nodeSelector | toYaml }}
+          {{- end }}
+          restartPolicy: Never
+          securityContext:
+            runAsUser: 1000
+          containers:
+          - name: backup
+            image: "{{ .Values.api.image }}:{{ .Values.tag }}"
+            imagePullPolicy: {{ .Values.imagePullPolicy }}
+            command:
+            - |
+              kubectl get pvc -n anubis | awk '/ide-volume/ {print "\""$1"\""}' | jq -s | tee /tmp/volumes.json
+            - ./anubis/jobs/volume_backup.py gen
+            - ./anubis/jobs/volume_backup.py backup --jobs 30 --wait 60 --yes
+            env:
+            {{- include "api.env" . | nindent 12 }}
+            volumeMounts:
+            - name: {{ .Values.backup.secretName }}
+              mountPath: "/home/anubis/.ssh"
+          volumes:
+          - name: {{ include "chart.fullname" . }}-backup-creds
+            secret:
+              secretName: {{ .Values.backup.secretName }}
+              defaultMode: 0644
+{{- end }}

@@ -6,11 +6,11 @@ from parse import parse
 from datetime import datetime
 import argparse
 from pathlib import Path
-from tqdm import tqdm
+# from tqdm import tqdm
 
-volumes = json.load(open("./volumes.json"))
+volumes = json.load(open("/tmp/volumes.json"))
 netids = [parse("ide-volume-{}", v)[0] for v in volumes]
-jobs_dir = Path("jobs/")
+jobs_dir = Path("/tmp/jobs/")
 now = datetime.now().strftime("%Y%m%d-%H%M%S")
 
 
@@ -176,7 +176,9 @@ def backup_restore(args, label: str):
     print(f"Using latest:")
     print(f"  {latest_dir=}")
     print(f"Starting jobs")
-    for index, job_file in tqdm(enumerate(job_files), total=len(job_files)):
+    total = len(job_files)
+    for index, job_file in enumerate(job_files):
+        print(f'{index} / {total}')
         cmd = f"kubectl apply -f {str(job_file)} --wait=false 1> /dev/null"
         os.system(cmd)
         if (index + 1) % args.jobs == 0:
@@ -203,6 +205,4 @@ def main() -> int | None:
 
 
 if __name__ == "__main__":
-    # TODO: add logging
-    # Do we need refactoring here? -> In terms of renaming main to something else
     main()
