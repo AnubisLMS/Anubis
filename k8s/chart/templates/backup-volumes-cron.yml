@@ -78,8 +78,8 @@ spec:
             args:
               - |
                 kubectl get pvc -n anubis | awk '/ide-volume/ {print "\""$1"\""}' | jq -s | tee /tmp/volumes.json
-                ./anubis/jobs/volume_backup.py gen
-                ./anubis/jobs/volume_backup.py backup --jobs 30 --wait 60 --yes
+                python3 ./anubis/jobs/volume_backup.py gen
+                python3 ./anubis/jobs/volume_backup.py backup --jobs 30 --wait 60 --yes
             env:
             {{- include "api.env" . | nindent 12 }}
             volumeMounts:
