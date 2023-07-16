@@ -5,6 +5,9 @@
   "dependencies": {
     "@date-io/core": "^1.3.6",
     "@date-io/date-fns": "^1.3.13",
+    "@draft-js-plugins/editor": "^4.1.3",
+    "@draft-js-plugins/image": "^4.1.3",
+    "@draft-js-plugins/resizeable": "^5.0.3",
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
     "@mui/icons-material": "^5.8.4",
@@ -31,6 +34,7 @@
     "react-device-detect": "^2.2.2",
     "react-diff-view": "^2.4.10",
     "react-dom": "^18.2.0",
+    "react-draft-wysiwyg": "^1.15.0",
     "react-markdown": "^5.0.2",
     "react-router-dom": "^5.1.2",
     "react-scripts": "^5.0.1",

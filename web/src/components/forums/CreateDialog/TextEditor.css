@@ -1,9 +1,10 @@
 .DraftEditor-editorContainer {
-    height: 15rem;
-    padding: 0.8rem;
+    height: 20rem;
+    padding: 1rem;
     margin-bottom: 10px;
     overflow-y: auto;
     overflow-x: hidden;
+    background-color: rgb(0, 0, 0, 0.1);
 }
 
 ::-webkit-scrollbar {

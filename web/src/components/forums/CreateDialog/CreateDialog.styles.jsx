@@ -7,12 +7,8 @@ export const useStyles = makeStyles((theme) => ({
   switchContainer: {
     display: 'flex',
     alignItems: 'center',
-  },
-  editorContainer: {
-    display: 'block',
-    height: '400px',
-    margin: theme.spacing(10),
-    padding: theme.spacing(1),
+    margin: theme.spacing(0),
+    padding: theme.spacing(0),
   },
   buttonIcon: {
     color: theme.palette.primary.main,
@@ -29,11 +25,11 @@ export const useStyles = makeStyles((theme) => ({
   titleContainer: {
     backgroundColor: `${theme.palette.primary.main}80`,
     padding: theme.spacing(1.5),
+    fontSize: '1rem',
   },
   inputTitle: {
     padding: theme.spacing(1.5, 1, 1.5, 1),
-    fontSize: '1rem',
-    borderBottom: '0', // Not working
+    fontSize: '2.25rem',
   },
 }));
 
