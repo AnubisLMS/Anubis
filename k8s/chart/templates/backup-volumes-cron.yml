@@ -18,9 +18,12 @@ metadata:
   labels:
       {{- include "chart.labels" . | nindent 4 }}
 rules:
-  - apiGroups: [ "v1" ]
-    resources: [ "PersistentVolumeClaim" ]
-    verbs: [ "get", "list", "create" ]
+- apiGroups: [ "" ]
+  resources: [ "PersistentVolumeClaim" ]
+  verbs: [ "get", "list", "create" ]
+- apiGroups: ["batch", "extensions"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "watch", "create", "delete"]
 ---
 
 kind: RoleBinding
@@ -59,6 +62,7 @@ spec:
     spec:
       template:
         spec:
+          serviceAccountName: {{ include "chart.fullname" . }}-volume-backup
           {{- if and .Values.nodeSelector (not .Values.debug) }}
           nodeSelector:
             {{ .Values.nodeSelector | toYaml }}
