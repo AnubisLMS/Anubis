@@ -19,7 +19,7 @@ metadata:
       {{- include "chart.labels" . | nindent 4 }}
 rules:
 - apiGroups: [ "" ]
-  resources: [ "PersistentVolumeClaim" ]
+  resources: [ "persistentvolumeclaims" ]
   verbs: [ "get", "list", "create" ]
 - apiGroups: ["batch", "extensions"]
   resources: ["jobs"]
