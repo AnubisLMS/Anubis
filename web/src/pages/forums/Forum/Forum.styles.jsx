@@ -38,6 +38,10 @@ export const useStyles = makeStyles((theme) => ({
     paddingTop: theme.spacing(1),
     paddingBottom: theme.spacing(1),
     borderRadius: '2px',
+    color: theme.palette.white,
+    '&:hover': {
+      color: theme.palette.primary.main,
+    },
   },
   postsContainer: {
     marginTop: theme.spacing(2),
