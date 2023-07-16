@@ -151,7 +151,7 @@ backup:
   enable: true
   suspend: false
   schedule: "0 */6 * * *" # 6 hours
-  volume_schedule: "0 * * * *" # Midnight
+  volume_schedule: "0 0 * * *" # Midnight
   secretName: anubis-backup-creds
 
 email:
