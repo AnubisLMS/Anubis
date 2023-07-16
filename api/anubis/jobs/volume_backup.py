@@ -8,6 +8,8 @@ import argparse
 from pathlib import Path
 # from tqdm import tqdm
 
+root = os.path.dirname(__file__)
+
 volumes = json.load(open("/tmp/volumes.json"))
 netids = [parse("ide-volume-{}", v)[0] for v in volumes]
 jobs_dir = Path("/tmp/jobs/")
@@ -105,10 +107,10 @@ def initialize_gen(args):
     print(f"  {backup_host_path=}")
 
     backup_template = jinja2.Template(
-        Path("./jinja_templates/backup-job.yml.jinja2").read_text()
+        (root / Path("jinja_templates/backup-job.yml.jinja2")).read_text()
     )
     restore_template = jinja2.Template(
-        Path("./jinja_templates/restore-job.yml.jinja2").read_text()
+        (root / Path("jinja_templates/restore-job.yml.jinja2")).read_text()
     )
 
     return (

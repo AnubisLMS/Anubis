@@ -12,7 +12,7 @@ COPY requirements/common.txt requirements.txt
 
 RUN set -eux;  \
     apt update; \
-    apt install -y make mariadb-client git tzdata gcc g++ libmagic-dev fonts-roboto curl; \
+    apt install -y make mariadb-client git tzdata gcc g++ libmagic-dev fonts-roboto curl jq; \
     \
     `# Download kubectl` \
     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"; \
