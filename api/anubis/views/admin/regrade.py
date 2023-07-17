@@ -60,6 +60,51 @@ def admin_regrade_status(assignment: Assignment):
         }
     )
 
+# 
+@regrade.route("/status/student/<string:netid>")
+@require_admin()
+@json_response
+def admin_regrade_status_student(netid: str):
+    """
+    Get the autograde status for a student. The status
+    is some high level stats the proportion of submissions
+    within the assignments for that student that have been processed
+
+    :param netid:
+    :return:
+    """
+    # Get the student
+    student: User = User.query.filter(User.netid == netid).first()
+
+    # Verify the student exists
+    req_assert(student is not None, message="student does not exist")
+
+    # Assert that the course exists
+    assert_course_context(student)
+
+    # Get the number of submissions that are being processed
+    processing = Submission.query.filter(
+        Submission.owner_id == student.id,
+        Submission.processed == False
+    ).count()
+
+    # Get the total number of submissions
+    total = Submission.query.filter(
+        Submission.owner_id == student.id,
+    ).count()
+
+    # Calculate the percent of submissions that have been processed
+    percent = math.ceil(((total - processing) / total) * 100) if total > 0 else 0
+
+    # Return the status
+    return success_response(
+        {
+            "percent":    f"{percent}% of submissions processed",
+            "processing": processing,
+            "processed":  total - processing,
+            "total":      total,
+        }
+    )
 
 @regrade.route("/status/student/<string:id>")
 @require_admin()
