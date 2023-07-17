@@ -134,3 +134,5 @@ yeetdb:
 theia-%:
 	$(DOCKER_COMPOSE) pull $@
 
+acme-backup:
+	kubectl exec -it -n traefik -c traefik $(kubectl get pods -n traefik -o json | jq '.items[0].metadata.name' -r) -- cat data/acme.json > ../acme-$(date +%F).json

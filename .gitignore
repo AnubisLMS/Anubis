@@ -13,3 +13,6 @@ api/seed.ipynb
 
 .DS_Store
 yarn-error.log
+
+acme.json
+acme*.json
