@@ -13,11 +13,6 @@ export const useStyles = makeStyles((theme) => ({
   buttonIcon: {
     color: theme.palette.primary.main,
   },
-  toolbarContainer: {
-    borderColor: theme.palette.white,
-    borderTop: theme.spacing(0.1) + ' solid',
-    borderBottom: theme.spacing(0.1) + ' solid',
-  },
   submit: {
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,

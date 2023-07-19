@@ -1,21 +1,8 @@
 import React, {useState, useRef} from 'react';
 import {Dialog, DialogTitle, DialogContent, Box, Input, Typography, Button, Switch, IconButton} from '@mui/material';
-import EditorToolbar from './Toolbar/EditorToolbar';
-import {EditorState, RichUtils, convertToRaw} from 'draft-js';
-import Editor, {composeDecorators} from '@draft-js-plugins/editor';
-import createResizablePlugin from '@draft-js-plugins/resizeable';
-import createImagePlugin from '@draft-js-plugins/image';
 import CloseIcon from '@mui/icons-material/Close';
 import {useStyles} from './CreateDialog.styles';
-
-import 'draft-js/dist/Draft.css';
-import './TextEditor.css';
-
-const resizeablePlugin = createResizablePlugin();
-const decorator = composeDecorators(
-  resizeablePlugin.decorator,
-);
-const imagePlugin = createImagePlugin({decorator});
+import RichTextEditor from '../RichTextEditor/RichTextEditor';
 
 export default function CreateDialog({
   mode = 'post',
@@ -25,17 +12,14 @@ export default function CreateDialog({
 }) {
   // MUI theme-based css styles
   const classes = useStyles();
-
+  let getContent;
   // Form Data
   const [title, setTitle] = useState('');
   const [isVisibleToStudents, setIsVisisbleToStudents] = useState(true);
   const [isAnonymous, setIsAnonymous] = useState(false);
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
-  const editor = useRef(null);
-
   const [error, setError] = useState('');
   const validatePost = () => {
-    const content = JSON.stringify(convertToRaw(editorState.getCurrentContent()));
+    const content = getContent();
     if (title && content) {
       handleCreatePost({
         title: title,
@@ -44,15 +28,6 @@ export default function CreateDialog({
         anonymous: isAnonymous,
       });
     };
-  };
-
-  const handleKeyCommand = (command) => {
-    const newState = RichUtils.handleKeyCommand(editorState, command);
-    if (newState) {
-      setEditorState(newState);
-      return true;
-    }
-    return false;
   };
 
   return (
@@ -76,25 +51,14 @@ export default function CreateDialog({
       <DialogContent sx={{padding: 0}}>
         <Input inputProps={{className: classes.inputTitle}} disableUnderline={true} fullWidth
           value={title} onChange={(e) => setTitle(e.target.value)} placeholder={'Put Title Here'} />
-        <div className={classes.toolbarContainer}>
-          <EditorToolbar editorState={editorState} setEditorState={setEditorState} imagePlugin={imagePlugin} />
-        </div>
-        <Editor
-          ref={editor}
-          handleKeyCommand={handleKeyCommand}
-          editorState={editorState}
-          onChange={(editorState) => {
-            setEditorState(editorState);
-          }}
-          plugins={[imagePlugin, resizeablePlugin]}
-        />
+        <RichTextEditor getContent={getContent}/>
         <Box display="flex" alignItems="center" justifyContent="flex-start" gap="20px" padding="0px 10px">
           <div className={classes.switchContainer}>
-            <p> Visibile to Students?</p>
+            <Typography> Visibile to Students?</Typography>
             <Switch checked={isVisibleToStudents} onChange={() => setIsVisisbleToStudents(!isVisibleToStudents)}/>
           </div>
           <div className={classes.switchContainer}>
-            <p>Anonymous?</p>
+            <Typography>Anonymous?</Typography>
             <Switch checked={isAnonymous} onChange={() => setIsAnonymous(!isAnonymous)}/>
           </div>
         </Box>
