@@ -1,0 +1,27 @@
+[role="textbox"].public-DraftEditor-content { /* This is only if the container is editable  */
+    height: 20rem;
+    padding: 1rem;
+    margin-bottom: 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: rgb(0, 0, 0, 0.1);
+}
+
+.DraftEditor-root {
+    width: 100%;
+}
+
+[role="textbox"].public-DraftEditor-content::-webkit-scrollbar {
+    height: 4px;
+    width: 6px;
+    scrollbar-color: white white;
+}
+
+[role="textbox"].public-DraftEditor-content::-webkit-scrollbar-thumb {
+    background: white;
+    border-radius: 10px;
+}
+
+[role="textbox"].public-DraftEditor-content::-webkit-scrollbar-track {
+    background: gray;
+}
