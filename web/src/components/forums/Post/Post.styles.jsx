@@ -38,18 +38,24 @@ export const useStyles = makeStyles((theme) => ({
   content: {
     width: '100%',
   },
+  infoToolbar: {
+    display: 'flex',
+    gap: theme.spacing(3),
+    alignItems: 'center',
+  },
   extraInfo: {
     marginTop: theme.spacing(2),
     width: '100%',
     display: 'flex',
     gap: theme.spacing(3),
     alignItems: 'center',
-    opacity: '.8',
+    justifyContent: 'space-between',
   },
   infoContainer: {
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(1),
+    opacity: '.8',
   },
   icon: {
     fontSize: '14px',
@@ -57,6 +63,22 @@ export const useStyles = makeStyles((theme) => ({
   commentListContainer: {
     paddingTop: theme.spacing(2),
     width: '100%',
+  },
+  addComment: {
+    height: '100%',
+    backgroundColor: theme.palette.primary.main,
+    paddingRight: theme.spacing(2),
+    paddingLeft: theme.spacing(2),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+    borderRadius: '15px',
+    color: theme.palette.white,
+    '&:hover': {
+      color: theme.palette.primary.main,
+    },
+  },
+  commentEditor: {
+    width: '500px',
   },
 }));
 
