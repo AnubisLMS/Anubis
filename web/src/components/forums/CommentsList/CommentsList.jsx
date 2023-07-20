@@ -2,10 +2,10 @@ import React, {useState} from 'react';
 
 import Box from '@mui/material/Box';
 import Comment from '../Comment/Comment';
-
+import Publisher from '../Publisher/Publisher';
 import {useStyles} from './CommentsList.styles';
 
-export default function CommentsList({comments}) {
+export default function CommentsList({comments, handleCreateComment}) {
   const classes = useStyles();
 
   const [isReplying, setIsReplying] = useState(false);
@@ -39,7 +39,8 @@ export default function CommentsList({comments}) {
               />
             ))}
             {isReplying &&
-              <input />
+              <Publisher mode="comment" setOpen={setIsReplying}
+                handlePublish={(comment) => handleCreateComment({...comment, comment_id: comment.id})}/>
             }
           </Box>
         }

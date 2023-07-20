@@ -12,6 +12,7 @@ import {useStyles} from './Comment.styles';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import {toRelativeDate} from '../../../utils/datetime';
+import RichTextEditor from '../Editor/RichTextEditor';
 
 export default function Comment({
   threadStart = false,
@@ -42,7 +43,7 @@ export default function Comment({
         </Typography>
       </Box>
       <Typography className={classes.content}>
-        {content}
+        <RichTextEditor content={content} readOnly={true} enableToolbar={false}/>
       </Typography>
       <Box className={classes.replyActions}>
         {hasReplies &&

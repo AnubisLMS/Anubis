@@ -7,7 +7,6 @@ export const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     borderLeft: `1px solid ${theme.palette.dark.blue['200']}`,
     paddingLeft: theme.spacing(1.5),
-    overflow: 'scroll',
   },
   replies: {
     display: 'flex',
