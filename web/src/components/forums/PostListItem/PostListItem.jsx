@@ -16,6 +16,7 @@ export default function PostListItem({
   title,
   category,
   user,
+  content,
   date,
   seenCount,
   seen = false,
@@ -35,7 +36,10 @@ export default function PostListItem({
         <Typography className={classes.title}>
           {title}
         </Typography>
-        <Box className={classes.error}>
+        <Typography variant="body2" className={classes.summary}>
+          {content}
+        </Typography>
+        <Box className={classes.dataSummary}>
           <Box className={classes.infoContainer}>
             <VisibilityIcon className={classes.icon} />
             <Typography>
