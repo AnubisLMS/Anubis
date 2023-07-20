@@ -9,8 +9,8 @@ import standardErrorHandler from '../../../utils/standardErrorHandler';
 import PostListItem from '../../../components/forums/PostListItem/PostListItem';
 import Post from '../../../components/forums/Post/Post';
 import CreateDialog from '../../../components/forums/CreateDialog/CreateDialog';
-
 import {useStyles} from './Forum.styles.jsx';
+import CreateIcon from '@mui/icons-material/Create';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -25,16 +25,29 @@ export default function Forum({user}) {
   const classes = useStyles();
 
   const [courses, setCourses] = useState(undefined);
-  const [selectedCourse, setSelectedCourse] = useState(undefined);
+  const [selectedCourse, setSelectedCourse] = useState(2);
   const [selectedCourseCode, setSelectedCourseCode] = useState('');
 
-  const [posts, setPosts] = useState(undefined);
+  const [posts, setPosts] = useState([{
+    title: 'Sample Post',
+    category: 'Sample Category',
+    content: {'blocks': [{'key': '4f5r7', 'text': 'dfgsdfgsddfsjfdfj', 'type': 'unstyled',
+      'depth': 0, 'inlineStyleRanges': [{'offset': 9, 'length': 8, 'style': 'BOLD'}],
+      'entityRanges': [], 'data': {}}], 'entityMap': {}},
+    display_name: 'Sample User',
+    created: 1689602823000,
+    seen_count: 0,
+    comments: [{display_name: 'Rami', children: [{display_name: 'Rami', children: [], content: {'blocks':
+    [{'key': '4f5r7',
+      'text': 'dfgsdfgsddfsjfdfj', 'type': 'unstyled',
+      'depth': 0, 'inlineStyleRanges': [{'offset': 9, 'length': 8, 'style': 'BOLD'}],
+      'entityRanges': [], 'data': {}}], 'entityMap': {}}}], content: {'blocks': [{'key': '4f5r7',
+      'text': 'dfgsdfgsddfsjfdfj', 'type': 'unstyled',
+      'depth': 0, 'inlineStyleRanges': [{'offset': 9, 'length': 8, 'style': 'BOLD'}],
+      'entityRanges': [], 'data': {}}], 'entityMap': {}}}],
+  }]);
   const [selectedPost, setSelectedPost] = useState(undefined);
-  const [selectedContent, setSelectedContent] = useState(undefined);
-
-  const [isDialogOpen, setIsDialogOpen] = useState(true);
-  const [dialogMode, setDialogMode] = useState('post');
-
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [refreshPosts, setRefreshPosts] = useState(0);
 
   const refresh = () => {
@@ -70,26 +83,21 @@ export default function Forum({user}) {
       .catch(standardErrorHandler(enqueueSnackbar));
   }, [selectedCourse, refreshPosts]);
 
-  useEffect(() => {
-    if (!selectedPost) {
-      return undefined;
-    }
+  // useEffect(() => {
+  //   if (!selectedPost) {
+  //     return undefined;
+  //   }
 
-    axios.get(`api/public/forums/post/${selectedPost.id}`)
-      .then((response) => {
-        const data = standardStatusHandler(response, enqueueSnackbar);
-        console.log(data.post);
-        if (data) {
-          setSelectedContent(data.post);
-        }
-      })
-      .catch(standardErrorHandler(enqueueSnackbar));
-  }, [selectedPost]);
-
-  const handleOpenDialog = (mode = 'post') => {
-    setDialogMode(mode);
-    setIsDialogOpen(true);
-  };
+  //   axios.get(`api/public/forums/post/${selectedPost.id}`)
+  //     .then((response) => {
+  //       const data = standardStatusHandler(response, enqueueSnackbar);
+  //       console.log(data.post);
+  //       if (data) {
+  //         setSelectedContent(data.post);
+  //       }
+  //     })
+  //     .catch(standardErrorHandler(enqueueSnackbar));
+  // }, [selectedPost]);
 
   const handleCourseSelect = (e) => {
     console.log(e.target.value);
@@ -97,6 +105,7 @@ export default function Forum({user}) {
   };
 
   const handleCreatePost = (post) => {
+    // console.log(post);
     axios.post(`/api/public/forums/post`, {...post, course_id: selectedCourse.id})
       .then(() => {
         setRefreshPosts(refreshPosts + 1);
@@ -105,12 +114,18 @@ export default function Forum({user}) {
       .catch(standardErrorHandler(enqueueSnackbar));
   };
 
+  const handleCreateComment = (comment) => {
+    axios.post(`/api/public/forums/comment`, {...comment, post_id: selectedPost.id, course_id: selectedCourse.id})
+      .then(() => {
+        // Need to refresh comments
+      })
+      .catch(standardErrorHandler(enqueueSnackbar));
+  };
   return (
     <StandardLayout>
       <CreateDialog
         open={isDialogOpen}
         setOpen={setIsDialogOpen}
-        mode={dialogMode}
         handleCreatePost={handleCreatePost}
       />
       <Box className={classes.controlsContainer}>
@@ -126,7 +141,6 @@ export default function Forum({user}) {
                 }}
                 value={selectedCourseCode}
                 onChange={handleCourseSelect}
-                disableUnderline
               >
                 {courses && courses.map((course, index) => (
                   <MenuItem
@@ -147,9 +161,10 @@ export default function Forum({user}) {
         </Box>
         <Button
           className={classes.newPostButton}
-          onClick={() => handleOpenDialog('post')}
+          onClick={() => setIsDialogOpen(true)}
         >
-          Create New Post
+          New Post
+          <CreateIcon className={classes.newPostIcon} />
         </Button>
       </Box>
       <Grid container className={classes.postsContainer}>
@@ -159,6 +174,7 @@ export default function Forum({user}) {
               key={`${post.title}-${index}`}
               title={post.title}
               category={post.category}
+              content={post.content?.blocks[0].text}
               user={post.display_name}
               date={post.created}
               seenCount={post.seen_count}
@@ -168,15 +184,16 @@ export default function Forum({user}) {
           ))}
         </Grid>
         <Grid item xs={9} className={classes.postContentContainer}>
-          {selectedContent && (
+          {selectedPost && (
             <Post
-              title={selectedContent.title}
-              content={selectedContent.content}
-              user={selectedContent.display_name}
-              seenCount={selectedContent.seen_count}
-              createdDate={selectedContent.created}
-              updatedDate={selectedContent.last_updated}
-              comments={selectedContent.comments}
+              title={selectedPost.title}
+              content={selectedPost.content}
+              user={selectedPost.display_name}
+              seenCount={selectedPost.seen_count}
+              createdDate={selectedPost.created}
+              updatedDate={selectedPost.last_updated}
+              comments={selectedPost.comments}
+              handleCreateComment={handleCreateComment}
             />
           )}
         </Grid>

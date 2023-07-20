@@ -63,5 +63,11 @@ export const useStyles = makeStyles((theme) => ({
     border: `1px solid ${theme.palette.dark.blue['200']}`,
     borderRadius: '0px 5px 5px 0px',
   },
+  newPostIcon: {
+    width: '1.2rem',
+    marginLeft: theme.spacing(1),
+    position: 'relative',
+    transform: 'translateY(-5%)',
+  },
 }));
 
