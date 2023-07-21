@@ -35,15 +35,10 @@ export default function EmbedImage({embedImage}) {
     closeModal();
   };
 
-  const uploadImage = (file) => {
+  const uploadImage = async (file) => {
     const data = new FormData();
     data.append('file', file);
-    axios.post(`/api/public/forums/image`, data)
-      .then((image_url) => {
-        // Wait for image url of uploaded image to be returned
-        return image_url.data;
-      })
-      .catch(standardErrorHandler(enqueueSnackbar));
+    return await axios.post(`/api/public/forums/image`, data);
   };
 
   const handleFileUpload = (e) => {
@@ -54,8 +49,11 @@ export default function EmbedImage({embedImage}) {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onloadend = () => {
-      const image_url = uploadImage(file);
-      embedImage(image_url);
+      uploadImage(file)
+        .then((image_url) => {
+          embedImage(image_url);
+        })
+        .catch(standardErrorHandler(enqueueSnackbar));
     };
     closeModal();
   };
