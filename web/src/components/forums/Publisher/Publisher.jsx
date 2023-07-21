@@ -1,5 +1,5 @@
-import React, {useState, useRef} from 'react';
-import {Dialog, DialogTitle, DialogContent, Box, Input, Typography, Button, Switch, IconButton} from '@mui/material';
+import React, {useState} from 'react';
+import {DialogTitle, DialogContent, Box, Input, Typography, Button, Switch, IconButton} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import {useStyles} from './Publisher.styles';
 import RichTextEditor from '../Editor/RichTextEditor';

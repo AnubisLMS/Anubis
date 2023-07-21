@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import axios from 'axios';
 import {useSnackbar} from 'notistack';
 
 import Box from '@mui/material/Box';
@@ -9,8 +8,6 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import {useStyles} from './Comment.styles';
-import standardErrorHandler from '../../../utils/standardErrorHandler';
-import standardStatusHandler from '../../../utils/standardStatusHandler';
 import {toRelativeDate} from '../../../utils/datetime';
 import RichTextEditor from '../Editor/RichTextEditor';
 
