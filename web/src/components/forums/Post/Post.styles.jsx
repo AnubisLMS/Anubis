@@ -46,6 +46,7 @@ export const useStyles = makeStyles((theme) => ({
   extraInfo: {
     marginTop: theme.spacing(2),
     width: '100%',
+    height: theme.spacing(5),
     display: 'flex',
     gap: theme.spacing(3),
     alignItems: 'center',
