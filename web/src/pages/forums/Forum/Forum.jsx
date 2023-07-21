@@ -47,6 +47,7 @@ export default function Forum({user}) {
       'entityRanges': [], 'data': {}}], 'entityMap': {}}}],
   }]);
   const [selectedPost, setSelectedPost] = useState(undefined);
+  const [refreshSelectedPost, setRefreshSelectedPost] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [refreshPosts, setRefreshPosts] = useState(0);
 
@@ -83,21 +84,27 @@ export default function Forum({user}) {
       .catch(standardErrorHandler(enqueueSnackbar));
   }, [selectedCourse, refreshPosts]);
 
-  // useEffect(() => {
-  //   if (!selectedPost) {
-  //     return undefined;
-  //   }
+  useEffect(() => {
+    if (!selectedPost) {
+      return undefined;
+    }
 
-  //   axios.get(`api/public/forums/post/${selectedPost.id}`)
-  //     .then((response) => {
-  //       const data = standardStatusHandler(response, enqueueSnackbar);
-  //       console.log(data.post);
-  //       if (data) {
-  //         setSelectedContent(data.post);
-  //       }
-  //     })
-  //     .catch(standardErrorHandler(enqueueSnackbar));
-  // }, [selectedPost]);
+    axios.get(`api/public/forums/post/${selectedPost.id}`)
+      .then((response) => {
+        const data = standardStatusHandler(response, enqueueSnackbar);
+        if (data) {
+          setSelectedPost(data.post);
+          // Find and update data in post array for consistency do this instead of wasting an api call
+          setPosts(posts.map((post) => {
+            if (post.id === data.post.id) {
+              return data.post;
+            }
+            return post;
+          }));
+        }
+      })
+      .catch(standardErrorHandler(enqueueSnackbar));
+  }, [refreshSelectedPost]);
 
   const handleCourseSelect = (e) => {
     console.log(e.target.value);
@@ -117,7 +124,7 @@ export default function Forum({user}) {
   const handleCreateComment = (comment) => {
     axios.post(`/api/public/forums/comment`, {...comment, post_id: selectedPost.id, course_id: selectedCourse.id})
       .then(() => {
-        // Need to refresh comments
+        setRefreshSelectedPost(refreshSelectedPost + 1);
       })
       .catch(standardErrorHandler(enqueueSnackbar));
   };
