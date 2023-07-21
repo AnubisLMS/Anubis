@@ -32,6 +32,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+/**
+ * Rich text editor used to display and publish data
+ * @param {Object} content - the content of the editor, use this when we need to solely display data
+ * @param {Function} setContent - the function to set the content of the editor, use this when we need to publish data
+ * @param {Function} setOpen - the function to set the open state of the editor, called when close button clicked
+ * @param {Boolean} readOnly - whether or not the editor is read only
+ * @param {Boolean} enableToolbar - whether or not to show the toolbar
+ * @returns {JSX.Element} - the rich text editor
+ */
 export default function RichTextEditor({content = null, setContent = null, setOpen = null, readOnly = false,
   enableToolbar = true}) {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
