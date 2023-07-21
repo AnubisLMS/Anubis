@@ -24,13 +24,13 @@ export const useStyles = makeStyles((theme) => ({
     width: '30px',
     height: '30px',
   },
-  user: {
+  User: {
 
   },
   whenPosted: {
     opacity: '.7',
   },
-  title: {
+  Title: {
     width: '100%',
     fontSize: '28px',
     fontWeight: '600',

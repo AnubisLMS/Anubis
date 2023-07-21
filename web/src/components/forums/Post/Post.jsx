@@ -38,19 +38,19 @@ export default function Post({
             {user[0]}
           </Typography>
         </Box>
-        <Typography className={classes.user}>
+        <Typography className={classes.User}>
           {user}
         </Typography>
         <Typography className={classes.whenPosted}>
           posted {toRelativeDate(new Date(createdDate))}
         </Typography>
       </Box>
-      <Typography className={classes.title}>
+      <Typography className={classes.Title}>
         {title}
       </Typography>
-      <Typography className={classes.content}>
+      <Box className={classes.content}>
         <RichTextEditor content={content} readOnly={true} enableToolbar={false}/>
-      </Typography>
+      </Box>
       <Box className={classes.extraInfo}>
         <Box className={classes.infoToolbar}>
           <Box className={classes.infoContainer}>

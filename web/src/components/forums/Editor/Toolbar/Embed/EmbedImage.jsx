@@ -38,7 +38,7 @@ export default function EmbedImage({embedImage}) {
   const uploadImage = (file) => {
     const data = new FormData();
     data.append('file', file);
-    axios.post(`/api/public/forums/post/image`, data)
+    axios.post(`/api/public/forums/image`, data)
       .then((image_url) => {
         // Wait for image url of uploaded image to be returned
         return image_url.data;
@@ -54,7 +54,7 @@ export default function EmbedImage({embedImage}) {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onloadend = () => {
-    //   const image_url = uploadImage(file);
+      const image_url = uploadImage(file);
       embedImage(image_url);
     };
     closeModal();
