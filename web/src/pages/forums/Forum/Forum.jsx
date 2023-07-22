@@ -95,12 +95,7 @@ export default function Forum({user}) {
         if (data) {
           setSelectedPost(data.post);
           // Find and update data in post array for consistency do this instead of wasting an api call
-          setPosts(posts.map((post) => {
-            if (post.id === data.post.id) {
-              return data.post;
-            }
-            return post;
-          }));
+          setPosts(posts.map((post) => post.id === data.post.id ? data.post : post));
         }
       })
       .catch(standardErrorHandler(enqueueSnackbar));
