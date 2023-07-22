@@ -91,7 +91,7 @@ export default function EmbedImage({embedImage}) {
                 type="text"
                 onChange={(e) => setImageURL(e.target.value)}
               />
-              <Button className={classes.button} variant="outlined" onClick={() => handleEmbedImage()}>
+              <Button className={classes.button} variant="outlined" onClick={handleEmbedImage}>
                 Embed
               </Button>
             </Box>
