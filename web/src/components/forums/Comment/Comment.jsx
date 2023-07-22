@@ -39,9 +39,9 @@ export default function Comment({
           {toRelativeDate(new Date(createdDate))}
         </Typography>
       </Box>
-      <Typography className={classes.content}>
+      <Box className={classes.content}>
         <RichTextEditor content={content} readOnly={true} enableToolbar={false}/>
-      </Typography>
+      </Box>
       <Box className={classes.replyActions}>
         {hasReplies &&
           <Box
