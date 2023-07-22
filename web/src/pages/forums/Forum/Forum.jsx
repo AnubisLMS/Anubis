@@ -47,13 +47,7 @@ export default function Forum({user}) {
       'entityRanges': [], 'data': {}}], 'entityMap': {}}}],
   }]);
   const [selectedPost, setSelectedPost] = useState(undefined);
-  const [refreshSelectedPost, setRefreshSelectedPost] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [refreshPosts, setRefreshPosts] = useState(0);
-
-  const refresh = () => {
-    setRefreshPosts(refreshPosts + 1);
-  };
 
   useEffect(() => {
     axios.get('api/public/courses/')
@@ -66,40 +60,47 @@ export default function Forum({user}) {
         }
       })
       .catch(standardErrorHandler(enqueueSnackbar));
+
+    setInterval(() => {
+      refreshPosts(false);
+    }, 15000);
   }, []);
 
   useEffect(() => {
     if (!selectedCourse) {
       return undefined;
     }
+    refreshPosts();
+  }, [selectedCourse]);
 
-    axios.get(`api/public/forums/course/${selectedCourse.id}`)
-      .then((response) => {
-        const data = standardStatusHandler(response, enqueueSnackbar);
-        if (data) {
-          setPosts(data.posts);
-          setSelectedPost(data.posts[0]);
-        }
-      })
-      .catch(standardErrorHandler(enqueueSnackbar));
-  }, [selectedCourse, refreshPosts]);
-
-  useEffect(() => {
-    if (!selectedPost) {
+  const refreshPosts = async (select_post = true) => {
+    if (!selectedCourse) {
+      standardErrorHandler(enqueueSnackbar)(new Error('No course selected'));
       return undefined;
     }
+    axios.get(`api/public/forums/course/${selectedCourse.id}`).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data) {
+        setPosts(data.posts);
+        if (select_post) setSelectedPost(data.posts[0]);
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  };
 
-    axios.get(`api/public/forums/post/${selectedPost.id}`)
-      .then((response) => {
-        const data = standardStatusHandler(response, enqueueSnackbar);
-        if (data) {
-          setSelectedPost(data.post);
-          // Find and update data in post array for consistency do this instead of wasting an api call
-          setPosts(posts.map((post) => post.id === data.post.id ? data.post : post));
-        }
-      })
-      .catch(standardErrorHandler(enqueueSnackbar));
-  }, [refreshSelectedPost]);
+  const refreshSelectedPost = async (post_id) => {
+    if (!selectedPost) {
+      standardErrorHandler(enqueueSnackbar)(new Error('No post selected'));
+      return undefined;
+    }
+    axios.get(`api/public/forums/post/${post_id}`).then((response) => {
+      const data = standardStatusHandler(response, enqueueSnackbar);
+      if (data) {
+        setSelectedPost(data.post);
+        // Find and update data in post array for consistency do this instead of wasting an api call
+        setPosts(posts.map((post) => post.id === data.post.id ? data.post : post));
+      }
+    }).catch(standardErrorHandler(enqueueSnackbar));
+  };
 
   const handleCourseSelect = (e) => {
     console.log(e.target.value);
@@ -110,7 +111,7 @@ export default function Forum({user}) {
     // console.log(post);
     axios.post(`/api/public/forums/post`, {...post, course_id: selectedCourse.id})
       .then(() => {
-        setRefreshPosts(refreshPosts + 1);
+        refreshPosts();
         setIsDialogOpen(false);
       })
       .catch(standardErrorHandler(enqueueSnackbar));
@@ -119,7 +120,7 @@ export default function Forum({user}) {
   const handleCreateComment = (comment) => {
     axios.post(`/api/public/forums/comment`, {...comment, post_id: selectedPost.id, course_id: selectedCourse.id})
       .then(() => {
-        setRefreshSelectedPost(refreshSelectedPost + 1);
+        refreshSelectedPost(selectedPost.id);
       })
       .catch(standardErrorHandler(enqueueSnackbar));
   };
@@ -156,7 +157,7 @@ export default function Forum({user}) {
             </Box>
           )}
           <Button
-            onClick={refresh}
+            onClick={refreshPosts}
           >
             <RefreshIcon />
           </Button>
