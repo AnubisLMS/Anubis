@@ -87,12 +87,12 @@ export default function Forum({user}) {
     }).catch(standardErrorHandler(enqueueSnackbar));
   };
 
-  const refreshSelectedPost = async (post_id) => {
+  const refreshSelectedPost = async () => {
     if (!selectedPost) {
       standardErrorHandler(enqueueSnackbar)(new Error('No post selected'));
       return undefined;
     }
-    axios.get(`api/public/forums/post/${post_id}`).then((response) => {
+    axios.get(`api/public/forums/post/${selectedPost.id}`).then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
       if (data) {
         setSelectedPost(data.post);
@@ -120,7 +120,7 @@ export default function Forum({user}) {
   const handleCreateComment = (comment) => {
     axios.post(`/api/public/forums/comment`, {...comment, post_id: selectedPost.id, course_id: selectedCourse.id})
       .then(() => {
-        refreshSelectedPost(selectedPost.id);
+        refreshSelectedPost();
       })
       .catch(standardErrorHandler(enqueueSnackbar));
   };
