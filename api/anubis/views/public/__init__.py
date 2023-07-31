@@ -13,6 +13,7 @@ def register_public_views(app):
     from anubis.views.public.visuals import visuals_
     from anubis.views.public.webhook import webhook
     from anubis.views.public.playgrounds import playgrounds_
+    from anubis.views.public.forum import forum_
 
     views = [
         auth_,
@@ -31,6 +32,7 @@ def register_public_views(app):
         visuals_,
         lectures_,
         playgrounds_,
+        forum_,
     ]
 
     for view in views:

@@ -101,7 +101,8 @@ def verify_in_course(course_id: str) -> Course:
         course: Course = Course.query.filter(Course.id == course_id).first()
     else:
         course: Course = Course.query.join(InCourse, InCourse.course_id == Course.id).filter(
-            InCourse.course_id == course_id, InCourse.owner_id == current_user.id
+            InCourse.course_id == course_id,
+            InCourse.owner_id == current_user.id,
         ).first()
     req_assert(course is not None, message='Course does not exist')
 

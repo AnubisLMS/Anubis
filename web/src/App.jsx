@@ -25,7 +25,6 @@ import theme from './theme/Theme';
 
 import AuthWrapper from './components/shared/AuthWrapper';
 import Main from './Main';
-import Forums from './containers/Forums/Forums';
 import Nav from './components/shared/Navigation/Nav';
 import Error from './components/shared/Error';
 import Footer from './components/shared/Footer';
@@ -140,7 +139,6 @@ export default function App() {
                           <Error/>
                           <div className={classes.main}>
                             <Main user={user}/>
-                            <Forums user={user}/>
                           </div>
                           <Footer/>
                         </main>

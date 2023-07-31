@@ -1250,21 +1250,6 @@
   dependencies:
     "@date-io/core" "^2.14.0"
 
-"@draft-js-plugins/alignment@^5.0.3":
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/@draft-js-plugins/alignment/-/alignment-5.0.3.tgz#25e133375accf3b34f9470a355568de95173d25f"
-  integrity sha512-Zw6AqI5mjqKLXPez+e9sKPQgsr+OZ9GJzJl4gsf02QLBzh5JHyzCRzcfB/eSVgJl4JJnudbG4cvdiWJny9AyCw==
-  dependencies:
-    "@draft-js-plugins/buttons" "^4.0.0"
-    "@draft-js-plugins/utils" "^4.0.0"
-
-"@draft-js-plugins/buttons@^4.0.0":
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/@draft-js-plugins/buttons/-/buttons-4.3.2.tgz#053e3ca3be345034f22c4ba040f97cf1a41f3aef"
-  integrity sha512-KEBp37yCfJDZamAcUHJE0Q1gH2voqt+DMPvzmI2Th6Xz0El/cdcOoAAgX3JPqDzWfd4sc7dDhm/77r9HmO8wIA==
-  dependencies:
-    clsx "^1.2.1"
-
 "@draft-js-plugins/editor@^4.1.3":
   version "4.1.3"
   resolved "https://registry.yarnpkg.com/@draft-js-plugins/editor/-/editor-4.1.3.tgz#460d70d3b639d17f4e1f15b7d180b8c8698b1ec1"
@@ -1284,11 +1269,6 @@
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/@draft-js-plugins/resizeable/-/resizeable-5.0.3.tgz#e4ff0a1b733bb1f6ce9a9aa32b5f2fca7c756f8e"
   integrity sha512-aqhIRIL17C+MqMrZJgNakVrbNTeVsiNtIQszP6VcoPiVPm9RUO12aQAX1c0MfVeKbh9qk0JwNpHglSGd9LIUeA==
-
-"@draft-js-plugins/utils@^4.0.0":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@draft-js-plugins/utils/-/utils-4.2.0.tgz#ee3c643c94d548fd9460541881a7554c5b077988"
-  integrity sha512-tQhf7a0S9ZDtOb0Mje5a+xTOT6LVDRv2LueEqqVdX4aI+oh0jjkAuP0oTiZBv6h7K9XSPgsQ08q9+kwHc3EyUg==
 
 "@emotion/babel-plugin@^11.7.1":
   version "11.9.2"

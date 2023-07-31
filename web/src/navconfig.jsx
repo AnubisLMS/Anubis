@@ -17,6 +17,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import EmailIcon from '@mui/icons-material/Email';
 import EventIcon from '@mui/icons-material/Event';
 
+// Public
 import Dashboard from './pages/core/public/Dashboard/Dashboard';
 import Courses from './pages/core/public/Courses/Courses';
 import Assignments from './pages/core/public/Assignments';
@@ -31,8 +32,9 @@ import Playgrounds from './pages/core/public/Playgrounds/Playgrounds';
 import PrivacyPolicy from './pages/core/public/PrivacyPolicy';
 import Assignment from './pages/core/public/Assignment/Assignment';
 import Course from './pages/core/public/Course/Course';
-// import AprilFools from './pages/core/public/AprilFools';
+import Forum from './pages/core/public/Forum/Forum';
 
+// Admin
 import AdminReservations from './pages/core/admin/Reservations';
 import AdminUsers from './pages/core/admin/Users';
 import AdminUser from './pages/core/admin/User';
@@ -103,6 +105,12 @@ export const public_nav = [
         icon: <SchoolIcon/>,
         path: '/courses',
         Page: Courses,
+      },
+      {
+        id: 'Forum',
+        icon: <SchoolIcon/>,
+        path: '/forum',
+        Page: Forum,
       },
       {
         id: 'Lectures',
