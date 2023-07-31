@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import axios from 'axios';
 import {useSnackbar} from 'notistack';
 
 import Box from '@mui/material/Box';
@@ -9,9 +8,8 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import {useStyles} from './Comment.styles';
-import standardErrorHandler from '../../../utils/standardErrorHandler';
-import standardStatusHandler from '../../../utils/standardStatusHandler';
 import {toRelativeDate} from '../../../utils/datetime';
+import RichTextEditor from '../Editor/RichTextEditor';
 
 export default function Comment({
   threadStart = false,
@@ -41,9 +39,9 @@ export default function Comment({
           {toRelativeDate(new Date(createdDate))}
         </Typography>
       </Box>
-      <Typography className={classes.content}>
-        {content}
-      </Typography>
+      <Box className={classes.content}>
+        <RichTextEditor content={content} readOnly={true} enableToolbar={false}/>
+      </Box>
       <Box className={classes.replyActions}>
         {hasReplies &&
           <Box

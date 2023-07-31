@@ -5,7 +5,6 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Box';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import QueryBuilderIcon from '@mui/icons-material/QueryBuilder';
-import PersonIcon from '@mui/icons-material/Person';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
 import {toRelativeDate} from '../../../utils/datetime';
@@ -16,6 +15,7 @@ export default function PostListItem({
   title,
   category,
   user,
+  content,
   date,
   seenCount,
   seen = false,
@@ -35,7 +35,10 @@ export default function PostListItem({
         <Typography className={classes.title}>
           {title}
         </Typography>
-        <Box className={classes.error}>
+        <Typography variant="body2" className={classes.summary}>
+          {content}
+        </Typography>
+        <Box className={classes.dataSummary}>
           <Box className={classes.infoContainer}>
             <VisibilityIcon className={classes.icon} />
             <Typography>

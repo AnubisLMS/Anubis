@@ -4,13 +4,14 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CommentIcon from '@mui/icons-material/Comment';
-import CreateIcon from '@mui/icons-material/Create';
+import Button from '@mui/material/Button';
 
 import Divider from '../../shared/Divider/Divider';
 import CommentsList from '../CommentsList/CommentsList';
 import {toRelativeDate} from '../../../utils/datetime';
-
+import RichTextEditor from '../Editor/RichTextEditor';
 import {useStyles} from './Post.styles';
+import Publisher from '../Publisher/Publisher';
 
 export default function Post({
   title,
@@ -20,8 +21,14 @@ export default function Post({
   createdDate,
   updatedDate,
   comments,
+  handleCreateComment,
 }) {
   const classes = useStyles();
+  const [commentPressed, setCommentPressed] = React.useState(false);
+
+  const closePublisher = () => {
+    setCommentPressed(false);
+  };
 
   return (
     <Box className={classes.root}>
@@ -31,42 +38,44 @@ export default function Post({
             {user[0]}
           </Typography>
         </Box>
-        <Typography className={classes.user}>
+        <Typography className={classes.User}>
           {user}
         </Typography>
         <Typography className={classes.whenPosted}>
-          posted on {toRelativeDate(new Date(createdDate))}
+          posted {toRelativeDate(new Date(createdDate))}
         </Typography>
       </Box>
-      <Typography className={classes.title}>
+      <Typography className={classes.Title}>
         {title}
       </Typography>
-      <Typography className={classes.content}>
-        {content}
-      </Typography>
+      <Box className={classes.content}>
+        <RichTextEditor content={content} readOnly={true} enableToolbar={false}/>
+      </Box>
       <Box className={classes.extraInfo}>
-        <Box className={classes.infoContainer}>
-          <VisibilityIcon className={classes.icon} />
-          <Typography>
-            {seenCount}
-          </Typography>
+        <Box className={classes.infoToolbar}>
+          <Box className={classes.infoContainer}>
+            <VisibilityIcon className={classes.icon} />
+            <Typography>
+              {seenCount}
+            </Typography>
+          </Box>
+          <Box className={classes.infoContainer}>
+            <CommentIcon className={classes.icon} />
+            <Typography>
+              {comments.length}
+            </Typography>
+          </Box>
         </Box>
-        <Box className={classes.infoContainer}>
-          <CommentIcon className={classes.icon} />
-          <Typography>
-            {comments.length}
-          </Typography>
-        </Box>
-        <Box className={classes.infoContainer}>
-          <CreateIcon className={classes.icon} />
-          <Typography>
-            {toRelativeDate(new Date(updatedDate))}
-          </Typography>
-        </Box>
+        {commentPressed ||
+        <Button className={classes.addComment} onClick={() => setCommentPressed(true)}>
+          Add Comment
+        </Button>
+        }
       </Box>
       <Divider />
+      {commentPressed && <Publisher mode='comment' handlePublish={handleCreateComment} setOpen={closePublisher}/>}
       <Box className={classes.commentListContainer}>
-        <CommentsList comments={comments}/>
+        <CommentsList comments={comments} handleCreateComment={handleCreateComment}/>
       </Box>
     </Box>
   );
