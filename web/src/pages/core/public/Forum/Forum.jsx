@@ -18,7 +18,6 @@ import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import Paper from '@mui/material/Paper';
 
 export default function Forum() {
   const {enqueueSnackbar} = useSnackbar();
@@ -41,7 +40,16 @@ export default function Forum() {
     created: 1689602823000,
     seen_count: 0,
     comments: [{
-      display_name: 'Rami', children: [{
+      display_name: 'Rami',
+      content: {
+        'blocks': [{
+          'key': '4f5r7',
+          'text': 'dfgsdfgsddfsjfdfj', 'type': 'unstyled',
+          'depth': 0, 'inlineStyleRanges': [{'offset': 9, 'length': 8, 'style': 'BOLD'}],
+          'entityRanges': [], 'data': {},
+        }], 'entityMap': {},
+      },
+      children: [{
         display_name: 'Rami', children: [], content: {
           'blocks':
             [{
@@ -51,14 +59,7 @@ export default function Forum() {
               'entityRanges': [], 'data': {},
             }], 'entityMap': {},
         },
-      }], content: {
-        'blocks': [{
-          'key': '4f5r7',
-          'text': 'dfgsdfgsddfsjfdfj', 'type': 'unstyled',
-          'depth': 0, 'inlineStyleRanges': [{'offset': 9, 'length': 8, 'style': 'BOLD'}],
-          'entityRanges': [], 'data': {},
-        }], 'entityMap': {},
-      },
+      }],
     }],
   }]);
   const [selectedPost, setSelectedPost] = useState(undefined);
@@ -79,12 +80,12 @@ export default function Forum() {
     // }, 15000);
   }, []);
 
-  // useEffect(() => {
-  //   if (!selectedCourse) {
-  //     return undefined;
-  //   }
-  //   refreshPosts();
-  // }, [selectedCourse]);
+  useEffect(() => {
+    if (!selectedCourse) {
+      return undefined;
+    }
+    refreshPosts();
+  }, [selectedCourse]);
 
   const refreshPosts = async (select_post = true) => {
     if (!selectedCourse) {
@@ -169,13 +170,13 @@ export default function Forum() {
                   // border: `1px solid ${theme.palette.dark.blue['200']}`,
                   // borderRadius: .5,
                 }}
-                value={selectedCourse?.course_code ?? ''}
+                value={selectedCourse}
                 onChange={handleCourseSelect}
               >
                 {courses && courses.map((course, index) => (
                   <MenuItem
                     key={`${course.name}-${index}`}
-                    value={course.course_code}
+                    value={course}
                   >
                     {course.course_code}
                   </MenuItem>

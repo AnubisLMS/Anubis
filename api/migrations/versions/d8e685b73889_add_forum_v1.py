@@ -90,7 +90,7 @@ def upgrade():
         ),
         sa.Column(
             "content",
-            mysql.TEXT(collation="utf8mb4_general_ci", length=16384),
+            mysql.JSON(),
             nullable=True,
         ),
         sa.Column("created", sa.DateTime(), nullable=True),
@@ -153,7 +153,7 @@ def upgrade():
         sa.Column("thread_start", sa.Boolean(), nullable=True),
         sa.Column(
             "content",
-            mysql.TEXT(collation="utf8mb4_general_ci", length=4096),
+            mysql.JSON(),
             nullable=True,
         ),
         sa.Column("created", sa.DateTime(), nullable=True),

@@ -4,17 +4,16 @@ import gzip
 import os
 from datetime import datetime, timedelta
 
+from anubis.constants import THEIA_DEFAULT_OPTIONS, DB_COLLATION, DB_CHARSET
+from anubis.models.id import default_id_length, default_id
+from anubis.models.sqltypes import String, Text, DateTime, Boolean, JSON, Integer
+from anubis.utils.data import human_readable_timedelta
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import scoped_session, deferred, relationship, InstrumentedAttribute
 from sqlalchemy.sql.schema import Column, ForeignKey
 
-from anubis.constants import THEIA_DEFAULT_OPTIONS, DB_COLLATION, DB_CHARSET
-from anubis.models.id import default_id_length, default_id
-from anubis.models.sqltypes import String, Text, DateTime, Boolean, JSON, Integer
-from anubis.utils.data import human_readable_timedelta
-
-db = SQLAlchemy()
+db = SQLAlchemy(session_options={"autoflush": False})
 db.session: scoped_session
 
 
@@ -550,7 +549,8 @@ class Submission(db.Model):
         backref="submission",
         lazy=False,
     )
-    test_results: list['SubmissionTestResult'] = relationship("SubmissionTestResult", cascade="all,delete", backref="submission", lazy=False)
+    test_results: list['SubmissionTestResult'] = relationship("SubmissionTestResult", cascade="all,delete",
+                                                              backref="submission", lazy=False)
     repo = relationship(AssignmentRepo, backref="submissions")
     theia_session = relationship('TheiaSession', cascade='all,delete', backref='submission', lazy=True)
 
@@ -1066,7 +1066,7 @@ class ForumPost(db.Model):
 
     # Content
     title = Column(Text(length=1024))
-    content = deferred(Column(Text(length=2 ** 14)))
+    content = deferred(Column(JSON, default=lambda: dict()))
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
@@ -1079,9 +1079,11 @@ class ForumPost(db.Model):
 
     @property
     def meta_data(self):
+        from anubis.lms.forum import get_post_comments_data
         return {
             "id":                  self.id,
             "title":               self.title,
+            "categories":          [],  # TODO
             "anonymous":           self.anonymous,
             "display_name":        "Anonymous" if self.anonymous else self.owner.name,
             "course_id":           self.course_id,
@@ -1090,6 +1092,7 @@ class ForumPost(db.Model):
             "seen_count":          self.seen_count,
             "created":             str(self.created),
             "last_updated":        str(self.last_updated),
+            "comments":            get_post_comments_data(self),  # TODO
         }
 
     @property
@@ -1194,7 +1197,7 @@ class ForumPostComment(db.Model):
     anonymous: bool = Column(Boolean, default=False)
     thread_start: bool = Column(Boolean, default=False)
 
-    content: str = deferred(Column(Text(length=2 ** 12)))
+    content: str = deferred(Column(JSON, default=lambda: dict()))
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
@@ -1249,4 +1252,3 @@ class ForumPostUpvote(db.Model):
             "created":      str(self.created),
             "last_updated": str(self.last_updated),
         }
-

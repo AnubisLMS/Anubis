@@ -2,6 +2,7 @@ import copy
 import math
 import random
 import string
+import sys
 from datetime import datetime, timedelta
 
 from anubis.constants import THEIA_DEFAULT_OPTIONS
@@ -89,8 +90,16 @@ def init_forums(course: Course):
             visible_to_students=True,
             pinned=False,
             anonymous=False,
-            title=f'post title {i}',
-            content=f'post content {i}',
+            title=f'POST POST POST {course.course_code}',
+            content={
+                'blocks':        [{
+                    'key':          '4f5r7',
+                    'text':         f'POST POST POST {course.course_code}',
+                    'type':         'unstyled',
+                    'depth':        0, 'inlineStyleRanges': [{'offset': 9, 'length': 8, 'style': 'BOLD'}],
+                    'entityRanges': [], 'data': {},
+                }], 'entityMap': {},
+            },
         )
         db.session.add(post)
 
@@ -115,22 +124,48 @@ def init_forums(course: Course):
 
         comments: list[ForumPostComment] = []
         for k in range(3):
-            comment = ForumPostComment(
-                id=default_id_factory(),
-                owner_id=student2.id,
-                post=post,
-                parent_id=None,
-                approved_by_id=None,
-                anonymous=False,
-                thread_start=False,
-                content=f'comment content {k}'
+            parent_id = default_id_factory()
+            comment0 = ForumPostComment(
+                id=parent_id, owner_id=student1.id, post=post,
+                parent_id=None, approved_by_id=None, anonymous=False, thread_start=True,
+                content={
+                    'blocks':    [{
+                        'key':               '4f5r7',
+                        'text':              f'COMMENT {k} 0',
+                        'type':              'unstyled',
+                        'depth':             0,
+                        'inlineStyleRanges': [{
+                            'offset': 9,
+                            'length': 8,
+                            'style':  'BOLD'}],
+                        'entityRanges':      [],
+                        'data':              {},
+                    }],
+                    'entityMap': {},
+                }
             )
-            comments.append(comment)
-        comments[2].thread_start = True
-        comments[1].parent_id = comments[2].id
-        comments[0].parent_id = comments[2].id
+            comment1 = ForumPostComment(
+                id=default_id_factory(), owner_id=student2.id, post=post,
+                parent_id=parent_id, approved_by_id=None, anonymous=False, thread_start=False,
+                content={
+                    'blocks':    [{
+                        'key':               '4f5r7',
+                        'text':              f'COMMENT {k} 1',
+                        'type':              'unstyled',
+                        'depth':             0,
+                        'inlineStyleRanges': [{
+                            'offset': 9,
+                            'length': 8,
+                            'style':  'BOLD'}],
+                        'entityRanges':      [],
+                        'data':              {},
+                    }],
+                    'entityMap': {},
+                }
+            )
+            comments.append(comment0)
+            comments.append(comment1)
         db.session.add_all(comments)
-
 
 
 def create_assignment(
@@ -188,7 +223,8 @@ def create_assignment(
     if not kwargs.get('shell_autograde_enabled', False):
         n = 0
         for i in range(random.randint(3, 5)):
-            tests.append(AssignmentTest(id=default_id_factory(), name=f"test {i}", assignment_id=assignment.id, order=n))
+            tests.append(
+                AssignmentTest(id=default_id_factory(), name=f"test {i}", assignment_id=assignment.id, order=n))
             n += 1
     else:
         tests = [
@@ -477,6 +513,7 @@ def seed():
     init_submissions(os_submissions3)
     assign_questions(os_assignment3)
     assign_questions(os_assignment4)
+    init_forums(intro_to_os_course)
 
     logger.info('adding course tas + profs')
     ta = TAForCourse(owner=ta_user, course=intro_to_os_course)
@@ -509,4 +546,7 @@ def seed():
         db.session.add(playground_dockerd_config)
 
     logger.info('committing')
+    db.session.commit()
+    init_forums(intro_to_os_course)
+    init_forums(mmds_course)
     db.session.commit()
