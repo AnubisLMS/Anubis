@@ -1,5 +1,5 @@
 from flask import Blueprint
-
+import json
 from anubis.lms.forum import (
     verify_post,
     verify_post_owner,
@@ -81,6 +81,8 @@ def public_post_forum_post(
     anonymous: bool,
 ):
     course = verify_in_course(course_id)
+
+    content: dict = json.loads(content)
 
     post = ForumPost(
         owner_id=current_user.id,

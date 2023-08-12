@@ -14,6 +14,7 @@ import {useStyles} from './Post.styles';
 import Publisher from '../Publisher/Publisher';
 
 export default function Post({
+  id,
   title,
   content,
   user,
@@ -26,12 +27,14 @@ export default function Post({
   const classes = useStyles();
   const [commentPressed, setCommentPressed] = React.useState(false);
 
+  console.log({content});
+
   const closePublisher = () => {
     setCommentPressed(false);
   };
 
   return (
-    <Box className={classes.root}>
+    <Box className={classes.root} key={id}>
       <Box className={classes.postInfoContainer}>
         <Box className={classes.profilePic}>
           <Typography>

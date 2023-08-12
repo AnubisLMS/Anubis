@@ -4,14 +4,15 @@ import gzip
 import os
 from datetime import datetime, timedelta
 
-from anubis.constants import THEIA_DEFAULT_OPTIONS, DB_COLLATION, DB_CHARSET
-from anubis.models.id import default_id_length, default_id
-from anubis.models.sqltypes import String, Text, DateTime, Boolean, JSON, Integer
-from anubis.utils.data import human_readable_timedelta
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import scoped_session, deferred, relationship, InstrumentedAttribute
 from sqlalchemy.sql.schema import Column, ForeignKey
+
+from anubis.constants import THEIA_DEFAULT_OPTIONS, DB_COLLATION, DB_CHARSET
+from anubis.models.id import default_id_length, default_id
+from anubis.models.sqltypes import String, Text, DateTime, Boolean, JSON, Integer
+from anubis.utils.data import human_readable_timedelta
 
 db = SQLAlchemy(session_options={"autoflush": False})
 db.session: scoped_session
@@ -1083,6 +1084,7 @@ class ForumPost(db.Model):
         return {
             "id":                  self.id,
             "title":               self.title,
+            "content":             self.content,
             "categories":          [],  # TODO
             "anonymous":           self.anonymous,
             "display_name":        "Anonymous" if self.anonymous else self.owner.name,

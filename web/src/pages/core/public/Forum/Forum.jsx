@@ -234,6 +234,7 @@ export default function Forum() {
         }}>
           {selectedPost && (
             <Post
+              key={selectedPost.id}
               title={selectedPost.title}
               content={selectedPost.content}
               user={selectedPost.display_name}
