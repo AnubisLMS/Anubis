@@ -185,12 +185,16 @@ export default function Forum() {
             </Box>
           )}
           <Button
+            variant={'contained'}
+            color={'primary'}
             onClick={refreshPosts}
           >
             <RefreshIcon/>
           </Button>
         </Box>
         <Button
+          variant={'contained'}
+          color={'primary'}
           onClick={() => setIsDialogOpen(true)}
         >
           New Post
