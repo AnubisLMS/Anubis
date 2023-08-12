@@ -63,7 +63,7 @@ export default function Publisher({
         }
         <Box display="flex" alignItems="center" justifyContent="flex-start" gap="20px" padding="0px 10px">
           <div className={classes.switchContainer}>
-            <Typography> Visibile to Students?</Typography>
+            <Typography>Visible to Students?</Typography>
             <Switch checked={isVisibleToStudents} onChange={() => setIsVisisbleToStudents(!isVisibleToStudents)}/>
           </div>
           <div className={classes.switchContainer}>

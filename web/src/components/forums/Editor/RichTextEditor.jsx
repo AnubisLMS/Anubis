@@ -1,5 +1,5 @@
-import React, {useState, useRef, useEffect} from 'react';
-import {EditorState, RichUtils, convertFromRaw, convertToRaw} from 'draft-js';
+import React, {useEffect, useRef, useState} from 'react';
+import {convertFromRaw, convertToRaw, EditorState, RichUtils} from 'draft-js';
 import Editor, {composeDecorators} from '@draft-js-plugins/editor';
 import createResizablePlugin from '@draft-js-plugins/resizeable';
 import EditorToolbar from './Toolbar/EditorToolbar';
@@ -41,8 +41,10 @@ const useStyles = makeStyles((theme) => ({
  * @param {Boolean} enableToolbar - whether or not to show the toolbar
  * @returns {JSX.Element} - the rich text editor
  */
-export default function RichTextEditor({content = null, setContent = null, setOpen = null, readOnly = false,
-  enableToolbar = true}) {
+export default function RichTextEditor({
+  content = null, setContent = null, setOpen = null, readOnly = false,
+  enableToolbar = true,
+}) {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const editor = useRef(null);
   const classes = useStyles();
@@ -68,15 +70,15 @@ export default function RichTextEditor({content = null, setContent = null, setOp
   return (
     <>
       {enableToolbar &&
-      <Box className={classes.toolbarContainer}>
-        <EditorToolbar editorState={editorState} setEditorState={setEditorState} imagePlugin={imagePlugin} />
-        {
-          setOpen &&
-          <IconButton onClick={() => setOpen(false)}>
-            <CloseIcon />
-          </IconButton>
-        }
-      </Box>
+        <Box className={classes.toolbarContainer}>
+          <EditorToolbar editorState={editorState} setEditorState={setEditorState} imagePlugin={imagePlugin}/>
+          {
+            setOpen &&
+            <IconButton onClick={() => setOpen(false)}>
+              <CloseIcon/>
+            </IconButton>
+          }
+        </Box>
       }
       <Editor
         ref={editor}

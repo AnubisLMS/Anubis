@@ -16,7 +16,6 @@ export default function CreateDialog({
 }) {
   // MUI theme-based css styles
   const classes = useStyles();
-  const [error, setError] = useState('');
 
   return (
     <Dialog
@@ -24,7 +23,6 @@ export default function CreateDialog({
       classes={{paper: classes.root}}
       onClose={() => setOpen(false)}
     >
-      {error}
       <Publisher mode={mode} setOpen={setOpen} handlePublish={handleCreatePost}/>
     </Dialog>
   );
