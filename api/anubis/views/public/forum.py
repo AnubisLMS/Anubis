@@ -177,6 +177,8 @@ def public_post_forum_post_comment(
     post: ForumPost = verify_post(post_id)
     verify_in_course(post.course_id)
 
+    content: dict = json.loads(content)
+
     comment = ForumPostComment(
         owner_id=current_user.id,
         post_id=post.id,

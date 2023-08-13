@@ -132,8 +132,14 @@ export default function Forum() {
   };
 
   const handleCreateComment = (comment) => {
-    axios.post(`/api/public/forum/comment`, {...comment, post_id: selectedPost.id, course_id: selectedCourse.id})
-      .then(() => {
+    const {parent_id = null} = comment;
+    const endpoint = parent_id ? `/api/public/forum/post/${selectedPost.id}/comment/${parent_id}` : `/api/public/forum/post/${selectedPost.id}/comment`;
+    axios.post(endpoint, {
+      content: comment?.content,
+      anonymous: comment?.anonymous,
+    })
+      .then((r) => {
+        standardStatusHandler(r, enqueueSnackbar);
         refreshSelectedPost();
       })
       .catch(standardErrorHandler(enqueueSnackbar));

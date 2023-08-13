@@ -57,26 +57,33 @@ export default function Post({
       <Box className={classes.extraInfo}>
         <Box className={classes.infoToolbar}>
           <Box className={classes.infoContainer}>
-            <VisibilityIcon className={classes.icon} />
+            <VisibilityIcon className={classes.icon}/>
             <Typography>
               {seenCount}
             </Typography>
           </Box>
           <Box className={classes.infoContainer}>
-            <CommentIcon className={classes.icon} />
+            <CommentIcon className={classes.icon}/>
             <Typography>
               {comments.length}
             </Typography>
           </Box>
         </Box>
         {commentPressed ||
-        <Button className={classes.addComment} onClick={() => setCommentPressed(true)}>
-          Add Comment
-        </Button>
+          <Button className={classes.addComment} onClick={() => setCommentPressed(true)}>
+            Add Comment
+          </Button>
         }
       </Box>
-      <Divider />
-      {commentPressed && <Publisher mode='comment' handlePublish={handleCreateComment} setOpen={closePublisher}/>}
+      <Divider/>
+      {commentPressed && (
+        <Publisher
+          mode='comment'
+          handlePublish={handleCreateComment}
+          setOpen={closePublisher}
+          onClose={() => setCommentPressed(false)}
+        />
+      )}
       <Box className={classes.commentListContainer}>
         <CommentsList comments={comments} handleCreateComment={handleCreateComment}/>
       </Box>

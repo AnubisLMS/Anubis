@@ -8,9 +8,8 @@ import {useStyles} from './CommentsList.styles';
 export default function CommentsList({comments, handleCreateComment}) {
   const classes = useStyles();
 
-  const [isReplying, setIsReplying] = useState(false);
-
   const Thread = ({hasChildren, comment}) => {
+    const [isReplying, setIsReplying] = useState(false);
     const [collapsed, setCollapsed] = useState(false);
 
     return (
@@ -23,27 +22,38 @@ export default function CommentsList({comments, handleCreateComment}) {
           createdDate={comment.created}
           hasReplies={comment.children.length > 0}
           replyCount={comment.children.length}
-          handleCollapse={() => setCollapsed(!collapsed)}
+          handleCollapse={() => setCollapsed(false)}
           isCollapsed={collapsed}
-          handleReply={() => setIsReplying(!isReplying)}
+          handleReply={() => {
+            console.log(isReplying, collapsed);
+            setCollapsed(false);
+            setIsReplying(true);
+          }}
         />
-        {(hasChildren && !collapsed) &&
-          <Box className={classes.replies}>
-            {comment.children.length > 0 && comment.children.map((childComment, index) => (
-              <Comment
-                key={`child-${childComment.display_name}-${index}`}
-                user={childComment.display_name}
-                content={childComment.content}
-                id={childComment.display_name}
-                createdDate={childComment.created}
-              />
-            ))}
-            {isReplying &&
-              <Publisher mode="comment" setOpen={setIsReplying}
-                handlePublish={(comment) => handleCreateComment({...comment, comment_id: comment.id})}/>
-            }
-          </Box>
-        }
+        <Box className={classes.replies}>
+          {(hasChildren && !collapsed) && comment.children.length > 0 && comment.children.map((childComment, index) => (
+            <Comment
+              key={`child-${childComment.display_name}-${index}`}
+              user={childComment.display_name}
+              content={childComment.content}
+              id={childComment.display_name}
+              createdDate={childComment.created}
+            />
+          ))
+          }
+          {isReplying && (
+            <Publisher
+              mode="comment"
+              setOpen={setIsReplying}
+              onClose={() => setIsReplying(false)}
+              handlePublish={(newComment) => handleCreateComment({
+                ...newComment,
+                comment_id: newComment.id,
+                parent_id: comment.id,
+              })}
+            />
+          )}
+        </Box>
       </Box>
     );
   };

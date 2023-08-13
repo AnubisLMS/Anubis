@@ -8,6 +8,7 @@ import {useSnackbar} from 'notistack';
 export default function Publisher({
   mode = 'post',
   setOpen,
+  onClose,
   handlePublish,
 }) {
   // MUI theme-based css styles
@@ -26,15 +27,17 @@ export default function Publisher({
       handlePublish({
         title: title,
         content: content,
-        visible_to_students: isVisibleToStudents,
+        // visible_to_students: isVisibleToStudents,
         anonymous: isAnonymous,
       });
+      if (onClose) onClose();
     } else if (content && !isPost) {
       handlePublish({
         content: content,
         anonymous: isAnonymous,
-        visible_to_students: isVisibleToStudents,
+        // visible_to_students: isVisibleToStudents,
       });
+      if (onClose) onClose();
     } else {
       enqueueSnackbar('Add content!', {variant: 'warning'});
     }
@@ -62,10 +65,10 @@ export default function Publisher({
           <RichTextEditor setContent={setContent} setOpen={setOpen}/>
         }
         <Box display="flex" alignItems="center" justifyContent="flex-start" gap="20px" padding="0px 10px">
-          <div className={classes.switchContainer}>
-            <Typography>Visible to Students?</Typography>
-            <Switch checked={isVisibleToStudents} onChange={() => setIsVisisbleToStudents(!isVisibleToStudents)}/>
-          </div>
+          {/* <div className={classes.switchContainer}>*/}
+          {/*  <Typography>Visible to Students?</Typography>*/}
+          {/*  <Switch checked={isVisibleToStudents} onChange={() => setIsVisisbleToStudents(!isVisibleToStudents)}/>*/}
+          {/* </div>*/}
           <div className={classes.switchContainer}>
             <Typography>Anonymous?</Typography>
             <Switch checked={isAnonymous} onChange={() => setIsAnonymous(!isAnonymous)}/>
