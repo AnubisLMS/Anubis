@@ -120,6 +120,8 @@ def public_patch_forum_post(
 ):
     post = verify_post_owner(post_id)
 
+    content: dict = json.loads(content)
+
     post.title = title
     post.content = content
     post.visible_to_students = visible_to_students
@@ -209,6 +211,8 @@ def public_patch_forum_post_comment(
     anonymous: bool,
 ):
     comment: ForumPostComment = verify_post_comment_owner(comment_id)
+
+    content: dict = json.loads(content)
 
     comment.content = content
     comment.anonymous = anonymous

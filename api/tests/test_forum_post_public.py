@@ -11,7 +11,7 @@ def test_post_create():
     data = s.post_json('/public/forum/post', json={
         'course_id': course_id,
         'title': 'title1',
-        'content': 'content1',
+        'content': '{"text": "content1"}',
         'visible_to_students': True,
         'anonymous': False,
     })
@@ -23,7 +23,7 @@ def test_post_create():
     data = s.get(f'/public/forum/post/{post1_id}')
     assert data
     assert data['post']['title'] == 'title1'
-    assert data['post']['content'] == 'content1'
+    assert data['post']['content'] == {"text": "content1"}
 
 
 def test_post_create_edit():
@@ -34,7 +34,7 @@ def test_post_create_edit():
     data = s.post_json('/public/forum/post', json={
         'course_id': course_id,
         'title': 'title1',
-        'content': 'content1',
+        'content': '{"text": "content1"}',
         'visible_to_students': True,
         'anonymous': False,
     })
@@ -46,24 +46,24 @@ def test_post_create_edit():
     data = s.get(f'/public/forum/post/{post1_id}')
     assert data
     assert data['post']['title'] == 'title1'
-    assert data['post']['content'] == 'content1'
+    assert data['post']['content'] == {"text": "content1"}
 
     # Edit post
     data = s.patch_json(f'/public/forum/post/{post1_id}', {
         'title': 'title2',
-        'content': 'content2',
+        'content': '{"text": "content2"}',
         'visible_to_students': True,
         'anonymous': False,
     })
     assert data
     assert data['post']['title'] == 'title2'
-    assert data['post']['content'] == 'content2'
+    assert data['post']['content'] == {"text": "content2"}
 
     # Get edited post
     data = s.get(f'/public/forum/post/{post1_id}')
     assert data
     assert data['post']['title'] == 'title2'
-    assert data['post']['content'] == 'content2'
+    assert data['post']['content'] == {"text": "content2"}
 
 
 def test_post_create_anon():
@@ -75,7 +75,7 @@ def test_post_create_anon():
     data = s.post_json('/public/forum/post', json={
         'course_id': course_id,
         'title': 'title1',
-        'content': 'content1',
+        'content': '{"text": "content1"}',
         'visible_to_students': True,
         'anonymous': True,
     })
@@ -87,7 +87,7 @@ def test_post_create_anon():
     data = s2.get(f'/public/forum/post/{post1_id}')
     assert data
     assert data['post']['title'] == 'title1'
-    assert data['post']['content'] == 'content1'
+    assert data['post']['content'] == {"text": "content1"}
     assert data['post']['display_name'] == 'Anonymous'
 
 
@@ -99,7 +99,7 @@ def test_post_delete():
     data = s.post_json('/public/forum/post', json={
         'course_id': course_id,
         'title': 'title3',
-        'content': 'content3',
+        'content': '{"text": "content1"}',
         'visible_to_students': True,
         'anonymous': False,
     })
@@ -111,7 +111,7 @@ def test_post_delete():
     data = s.get(f'/public/forum/post/{post1_id}')
     assert data
     assert data['post']['title'] == 'title3'
-    assert data['post']['content'] == 'content3'
+    assert data['post']['content'] == {"text": "content1"}
 
     # Delete post
     data = s.delete(f'/public/forum/post/{post1_id}')
