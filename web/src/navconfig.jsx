@@ -16,6 +16,7 @@ import ImportContactsIcon from '@mui/icons-material/ImportContacts';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import EmailIcon from '@mui/icons-material/Email';
 import EventIcon from '@mui/icons-material/Event';
+import ForumIcon from '@mui/icons-material/Forum';
 
 // Public
 import Dashboard from './pages/core/public/Dashboard/Dashboard';
@@ -108,7 +109,7 @@ export const public_nav = [
       },
       {
         id: 'Forum',
-        icon: <SchoolIcon/>,
+        icon: <ForumIcon/>,
         path: '/forum',
         Page: Forum,
       },
