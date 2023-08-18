@@ -133,7 +133,11 @@ export default function Forum() {
 
   const handleCreateComment = (comment) => {
     const {parent_id = null} = comment;
-    const endpoint = parent_id ? `/api/public/forum/post/${selectedPost.id}/comment/${parent_id}` : `/api/public/forum/post/${selectedPost.id}/comment`;
+    const endpoint = (
+      parent_id ?
+        `/api/public/forum/post/${selectedPost.id}/comment/${parent_id}` :
+        `/api/public/forum/post/${selectedPost.id}/comment`
+    );
     axios.post(endpoint, {
       content: comment?.content,
       anonymous: comment?.anonymous,
@@ -248,6 +252,7 @@ export default function Forum() {
               title={selectedPost.title}
               content={selectedPost.content}
               user={selectedPost.display_name}
+              ownedByMe={selectedPost.owned_by_me}
               seenCount={selectedPost.seen_count}
               createdDate={selectedPost.created}
               updatedDate={selectedPost.last_updated}

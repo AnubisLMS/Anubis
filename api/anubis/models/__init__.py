@@ -1081,12 +1081,14 @@ class ForumPost(db.Model):
     @property
     def meta_data(self):
         from anubis.lms.forum import get_post_comments_data
+        from anubis.utils.auth.user import current_user
         return {
             "id":                  self.id,
             "title":               self.title,
             "content":             self.content,
             "categories":          [],  # TODO
             "anonymous":           self.anonymous,
+            "owned_by_me":         self.owner_id == current_user.id,
             "display_name":        "Anonymous" if self.anonymous else self.owner.name,
             "course_id":           self.course_id,
             "visible_to_students": self.visible_to_students,
