@@ -117,7 +117,7 @@ export default function Forum() {
   };
 
   const handleCourseSelect = React.useCallback((e) => {
-    console.log(e.target.value);
+    // console.log(e.target.value);
     setSelectedCourse(e.target.value);
   }, []);
 
