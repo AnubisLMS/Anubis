@@ -133,7 +133,7 @@ export default function Forum() {
   const handleEditPost = React.useCallback((post) => {
     axios.patch(`/api/public/forum/post/${selectedPost.id}`, {...post})
       .then(() => {
-        refreshPosts();
+        refreshSelectedPost(false);
         setIsDialogOpen(false);
       })
       .catch(standardErrorHandler(enqueueSnackbar));
