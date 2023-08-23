@@ -156,7 +156,6 @@ export default function Forum() {
         setOpen={setIsDialogOpen}
         handleCreatePost={handleCreatePost}
       />
-
       <Box sx={{
         display: 'flex',
         alignItems: 'center',
@@ -258,6 +257,7 @@ export default function Forum() {
               updatedDate={selectedPost.last_updated}
               comments={selectedPost.comments}
               handleCreateComment={handleCreateComment}
+              handleEditPost={handleCreatePost}
             />
           )}
         </Grid>

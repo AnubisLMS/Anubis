@@ -15,7 +15,7 @@ import Publisher from '../Publisher/Publisher';
 import AuthContext from '../../../context/AuthContext';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-
+import CreateDialog from '../CreateDialog/CreateDialog';
 
 export default function Post({
   id,
@@ -28,11 +28,12 @@ export default function Post({
   updatedDate,
   comments,
   handleCreateComment,
+  handleEditPost,
 }) {
   const classes = useStyles();
   const [commentPressed, setCommentPressed] = React.useState(false);
-
-  console.log({user});
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  // console.log({user});
 
   const closePublisher = () => {
     setCommentPressed(false);
@@ -43,6 +44,13 @@ export default function Post({
       <AuthContext.Consumer>
         {(currentUser) => (
           <React.Fragment>
+            <CreateDialog
+              open={isDialogOpen}
+              setOpen={setIsDialogOpen}
+              title={title}
+              content={content}
+              handleCreatePost={handleEditPost}
+            />
             <Box className={classes.postInfoContainer}>
               <Box className={classes.profilePic}>
                 <Typography>
@@ -84,7 +92,7 @@ export default function Post({
                     color={'primary'}
                     sx={{mr: 1}}
                     startIcon={<EditIcon/>}
-                    // onClick={() => setCommentPressed(true)}
+                    onClick={() => setIsDialogOpen(true)}
                   >
                     Edit
                   </Button>

@@ -7,6 +7,8 @@ import {useSnackbar} from 'notistack';
 
 export default function Publisher({
   mode = 'post',
+  initalTitle = '',
+  initialContent = null,
   setOpen,
   onClose,
   handlePublish,
@@ -14,8 +16,8 @@ export default function Publisher({
   // MUI theme-based css styles
   const classes = useStyles();
   // Form Data
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState({});
+  const [title, setTitle] = useState(initalTitle);
+  const [content, setContent] = useState(initialContent ? initialContent : {});
   const [isVisibleToStudents, setIsVisisbleToStudents] = useState(true);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const {enqueueSnackbar} = useSnackbar();
@@ -61,8 +63,8 @@ export default function Publisher({
             value={title} onChange={(e) => setTitle(e.target.value)} placeholder={'Put Title Here'}/>
         }
         {isPost ?
-          <RichTextEditor setContent={setContent}/> :
-          <RichTextEditor setContent={setContent} setOpen={setOpen}/>
+          <RichTextEditor setContent={setContent} content={initialContent} /> :
+          <RichTextEditor setContent={setContent} content={initialContent} setOpen={setOpen}/>
         }
         <Box display="flex" alignItems="center" justifyContent="flex-start" gap="20px" padding="0px 10px">
           <div className={classes.switchContainer}>
