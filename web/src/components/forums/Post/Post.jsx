@@ -33,11 +33,15 @@ export default function Post({
   const classes = useStyles();
   const [commentPressed, setCommentPressed] = React.useState(false);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  // console.log({user});
 
-  const closePublisher = () => {
+  const closePublisher = React.useCallback(() => {
     setCommentPressed(false);
-  };
+  }, []);
+
+  const handleEdit = React.useCallback((post) => {
+    setIsDialogOpen(false);
+    handleEditPost(post);
+  }, [handleEditPost]);
 
   return (
     <Box className={classes.root} key={id}>
@@ -47,9 +51,11 @@ export default function Post({
             <CreateDialog
               open={isDialogOpen}
               setOpen={setIsDialogOpen}
-              title={title}
-              content={content}
-              handleCreatePost={handleEditPost}
+              initalTitle={title}
+              initialContent={content}
+              visibleToStudents={true}
+              anonymous={false}
+              handleCreatePost={handleEdit}
             />
             <Box className={classes.postInfoContainer}>
               <Box className={classes.profilePic}>

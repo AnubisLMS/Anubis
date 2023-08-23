@@ -11,10 +11,9 @@ export const useStyles = makeStyles((theme) => ({
 export default function CreateDialog({
   mode = 'post',
   open = false,
-  title = '',
-  content = null,
   setOpen,
   handleCreatePost,
+  ...rest
 }) {
   // MUI theme-based css styles
   const classes = useStyles();
@@ -26,10 +25,9 @@ export default function CreateDialog({
     >
       <Publisher
         mode={mode}
-        initalTitle={title}
-        initialContent={content}
         setOpen={setOpen}
         handlePublish={handleCreatePost}
+        {...rest}
       />
     </Dialog>
   );

@@ -116,22 +116,30 @@ export default function Forum() {
     }).catch(standardErrorHandler(enqueueSnackbar));
   };
 
-  const handleCourseSelect = (e) => {
+  const handleCourseSelect = React.useCallback((e) => {
     console.log(e.target.value);
     setSelectedCourse(e.target.value);
-  };
+  }, []);
 
-  const handleCreatePost = (post) => {
-    // console.log(post);
+  const handleCreatePost = React.useCallback((post) => {
     axios.post(`/api/public/forum/post`, {...post, course_id: selectedCourse.id})
       .then(() => {
         refreshPosts();
         setIsDialogOpen(false);
       })
       .catch(standardErrorHandler(enqueueSnackbar));
-  };
+  }, [selectedCourse]);
 
-  const handleCreateComment = (comment) => {
+  const handleEditPost = React.useCallback((post) => {
+    axios.patch(`/api/public/forum/post/${selectedPost.id}`, {...post})
+      .then(() => {
+        refreshPosts();
+        setIsDialogOpen(false);
+      })
+      .catch(standardErrorHandler(enqueueSnackbar));
+  }, [selectedPost]);
+
+  const handleCreateComment = React.useCallback((comment) => {
     const {parent_id = null} = comment;
     const endpoint = (
       parent_id ?
@@ -147,7 +155,7 @@ export default function Forum() {
         refreshSelectedPost();
       })
       .catch(standardErrorHandler(enqueueSnackbar));
-  };
+  }, []);
 
   return (
     <StandardLayout>
@@ -257,7 +265,7 @@ export default function Forum() {
               updatedDate={selectedPost.last_updated}
               comments={selectedPost.comments}
               handleCreateComment={handleCreateComment}
-              handleEditPost={handleCreatePost}
+              handleEditPost={handleEditPost}
             />
           )}
         </Grid>

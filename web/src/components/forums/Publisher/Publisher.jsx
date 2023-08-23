@@ -7,19 +7,21 @@ import {useSnackbar} from 'notistack';
 
 export default function Publisher({
   mode = 'post',
-  initalTitle = '',
-  initialContent = null,
   setOpen,
   onClose,
   handlePublish,
+  initalTitle = '',
+  initialContent = null,
+  visibleToStudents = true,
+  anonymous = false,
 }) {
   // MUI theme-based css styles
   const classes = useStyles();
   // Form Data
   const [title, setTitle] = useState(initalTitle);
   const [content, setContent] = useState(initialContent ? initialContent : {});
-  const [isVisibleToStudents, setIsVisisbleToStudents] = useState(true);
-  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [isVisibleToStudents, setIsVisisbleToStudents] = useState(visibleToStudents);
+  const [isAnonymous, setIsAnonymous] = useState(anonymous);
   const {enqueueSnackbar} = useSnackbar();
 
   const isPost = mode === 'post';
