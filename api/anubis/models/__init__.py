@@ -1209,12 +1209,14 @@ class ForumPostComment(db.Model):
 
     @property
     def meta_data(self):
+        from anubis.utils.auth.user import current_user
         return {
             "id":           self.id,
             "anonymous":    self.anonymous,
             "display_name": "Anonymous" if self.anonymous else self.owner.name,
             "post_id":      self.post_id,
             "parent_id":    self.parent_id,
+            "owned_by_me":  self.owner_id == current_user.id,
             "approved_by":  self.approved_by.name if self.approved_by_id is not None else None,
             "thread_start": self.thread_start,
             "created":      str(self.created),
