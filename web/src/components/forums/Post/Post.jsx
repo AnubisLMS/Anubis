@@ -28,6 +28,7 @@ export default function Post({
   updatedDate,
   comments,
   handleCreateComment,
+  handleEditComment,
   handleEditPost,
 }) {
   const classes = useStyles();
@@ -49,6 +50,7 @@ export default function Post({
         {(currentUser) => (
           <React.Fragment>
             <CreateDialog
+              mode={'edit_post'}
               open={isDialogOpen}
               setOpen={setIsDialogOpen}
               initalTitle={title}
@@ -125,7 +127,11 @@ export default function Post({
               />
             )}
             <Box className={classes.commentListContainer}>
-              <CommentsList comments={comments} handleCreateComment={handleCreateComment}/>
+              <CommentsList
+                comments={comments}
+                handleCreateComment={handleCreateComment}
+                handleEditComment={handleEditComment}
+              />
             </Box>
           </React.Fragment>
         )}

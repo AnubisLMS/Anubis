@@ -133,7 +133,7 @@ export default function Forum() {
   const handleEditPost = React.useCallback((post) => {
     axios.patch(`/api/public/forum/post/${selectedPost.id}`, {...post})
       .then(() => {
-        refreshSelectedPost(false);
+        refreshSelectedPost();
         setIsDialogOpen(false);
       })
       .catch(standardErrorHandler(enqueueSnackbar));
@@ -147,6 +147,18 @@ export default function Forum() {
         `/api/public/forum/post/${selectedPost.id}/comment`
     );
     axios.post(endpoint, {
+      content: comment?.content,
+      anonymous: comment?.anonymous,
+    })
+      .then((r) => {
+        standardStatusHandler(r, enqueueSnackbar);
+        refreshSelectedPost();
+      })
+      .catch(standardErrorHandler(enqueueSnackbar));
+  }, []);
+
+  const handleEditComment = React.useCallback((id, comment) => {
+    axios.patch(`/api/public/forum/post/comment/${id}`, {
       content: comment?.content,
       anonymous: comment?.anonymous,
     })
@@ -265,6 +277,7 @@ export default function Forum() {
               updatedDate={selectedPost.last_updated}
               comments={selectedPost.comments}
               handleCreateComment={handleCreateComment}
+              handleEditComment={handleEditComment}
               handleEditPost={handleEditPost}
             />
           )}

@@ -5,9 +5,8 @@ import Comment from '../Comment/Comment';
 import Publisher from '../Publisher/Publisher';
 import {useStyles} from './CommentsList.styles';
 
-export default function CommentsList({comments, handleCreateComment}) {
+export default function CommentsList({comments, handleCreateComment, handleEditComment}) {
   const classes = useStyles();
-
   const Thread = ({hasChildren, comment}) => {
     const [isReplying, setIsReplying] = useState(false);
     const [collapsed, setCollapsed] = useState(false);
@@ -22,6 +21,7 @@ export default function CommentsList({comments, handleCreateComment}) {
           createdDate={comment.created}
           hasReplies={comment.children.length > 0}
           replyCount={comment.children.length}
+          ownedByMe={comment.owned_by_me}
           handleCollapse={() => setCollapsed(false)}
           isCollapsed={collapsed}
           handleReply={() => {
@@ -29,6 +29,7 @@ export default function CommentsList({comments, handleCreateComment}) {
             setCollapsed(false);
             setIsReplying(true);
           }}
+          handleEditComment={handleEditComment}
         />
         <Box className={classes.replies}>
           {(hasChildren && !collapsed) && comment.children.length > 0 && comment.children.map((childComment, index) => (
