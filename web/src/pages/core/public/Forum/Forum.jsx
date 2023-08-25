@@ -167,7 +167,7 @@ export default function Forum() {
         refreshSelectedPost();
       })
       .catch(standardErrorHandler(enqueueSnackbar));
-  }, []);
+  }, [selectedPost]);
 
   return (
     <StandardLayout>
