@@ -5,6 +5,29 @@ import {useStyles} from './Publisher.styles';
 import RichTextEditor from '../Editor/RichTextEditor';
 import {useSnackbar} from 'notistack';
 
+const modes = {
+  'post': {
+    title: 'Create A New Post',
+    title_placeholder: 'Put Title Here',
+    submit: 'Post',
+  },
+  'edit_post': {
+    title: 'Edit Post',
+    title_placeholder: 'Put Title Here',
+    submit: 'Update',
+  },
+  'comment': {
+    title: 'Create A New Comment',
+    title_placeholder: '',
+    submit: 'Comment',
+  },
+  'edit_comment': {
+    title: 'Edit Comment',
+    title_placeholder: '',
+    submit: 'Update',
+  },
+};
+
 export default function Publisher({
   mode = 'post',
   setOpen,
@@ -24,7 +47,7 @@ export default function Publisher({
   const [isAnonymous, setIsAnonymous] = useState(anonymous);
   const {enqueueSnackbar} = useSnackbar();
 
-  const isPost = mode === 'post';
+  const isPost = mode === 'post' || mode==='edit_post';
 
   const validatePost = () => {
     if (title && content) {
@@ -52,7 +75,7 @@ export default function Publisher({
       {isPost &&
         <DialogTitle className={classes.titleContainer}>
           <Box display="flex" alignItems="center">
-            <Box flexGrow={1}>{isPost ? 'Create A New Post' : 'Create A New Comment'}</Box>
+            <Box flexGrow={1}>{modes[mode].title}</Box>
             <IconButton onClick={() => setOpen(false)}>
               <CloseIcon/>
             </IconButton>
@@ -62,7 +85,7 @@ export default function Publisher({
       <DialogContent sx={{padding: 0}}>
         {isPost &&
           <Input inputProps={{className: classes.inputTitle}} disableUnderline={true} fullWidth
-            value={title} onChange={(e) => setTitle(e.target.value)} placeholder={'Put Title Here'}/>
+            value={title} onChange={(e) => setTitle(e.target.value)} placeholder={modes[mode].title_placeholder}/>
         }
         {isPost ?
           <RichTextEditor setContent={setContent} content={initialContent} /> :
@@ -84,7 +107,7 @@ export default function Publisher({
         className={classes.submit}
         onClick={validatePost}
       >
-        {isPost ? 'Post' : 'Comment'}
+        {modes[mode].submit}
       </Button>
     </Box>
   );
