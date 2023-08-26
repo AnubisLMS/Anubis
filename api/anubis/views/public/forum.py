@@ -1,5 +1,7 @@
-from flask import Blueprint
 import json
+
+from flask import Blueprint
+
 from anubis.lms.forum import (
     verify_post,
     verify_post_owner,
@@ -11,13 +13,11 @@ from anubis.models import (
     ForumPost,
     ForumPostComment,
     ForumPostViewed,
-    StaticFile,
 )
-from flask import request
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.auth.user import verify_in_course
-from anubis.utils.http import success_response, error_response
+from anubis.utils.http import success_response
 from anubis.utils.http.decorators import json_response, json_endpoint, load_from_id
 from anubis.utils.http.files import process_file_upload
 
@@ -101,7 +101,7 @@ def public_post_forum_post(
     db.session.commit()
 
     return success_response({
-        'post': post.data,
+        'post':   post.data,
         'status': 'Posted',
     })
 
@@ -134,7 +134,7 @@ def public_patch_forum_post(
     db.session.commit()
 
     return success_response({
-        'post': post.data,
+        'post':   post.data,
         'status': 'Post updated',
     })
 
@@ -149,7 +149,7 @@ def public_delete_forum_post(post_id: str):
     db.session.commit()
 
     return success_response({
-        'status': 'Post deleted',
+        'status':  'Post deleted',
         'variant': 'warning'
     })
 
@@ -162,7 +162,7 @@ def public_get_forum_comment(comment: ForumPostComment):
     verify_in_course(comment.post.course_id)
     return success_response({
         'comment': comment.data,
-        'post': comment.post.meta_data,
+        'post':    comment.post.meta_data,
     })
 
 
@@ -196,9 +196,9 @@ def public_post_forum_post_comment(
     db.session.commit()
 
     return success_response({
-        'post': post.data,
+        'post':    post.data,
         'comment': comment.data,
-        'status': 'Comment posted',
+        'status':  'Comment posted',
     })
 
 
@@ -225,7 +225,7 @@ def public_patch_forum_post_comment(
 
     return success_response({
         'comment': comment.data,
-        'status': 'Comment updated',
+        'status':  'Comment updated',
     })
 
 
@@ -239,11 +239,9 @@ def public_delete_forum_post_comment(comment_id: str):
     db.session.commit()
 
     return success_response({
-        'status': 'Comment deleted',
+        'status':  'Comment deleted',
         'variant': 'warning',
     })
-
-
 
 
 @forum_.post('/image')
