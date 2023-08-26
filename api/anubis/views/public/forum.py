@@ -11,12 +11,15 @@ from anubis.models import (
     ForumPost,
     ForumPostComment,
     ForumPostViewed,
+    StaticFile,
 )
+from flask import request
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.user import current_user
 from anubis.utils.auth.user import verify_in_course
-from anubis.utils.http import success_response
+from anubis.utils.http import success_response, error_response
 from anubis.utils.http.decorators import json_response, json_endpoint, load_from_id
+from anubis.utils.http.files import process_file_upload
 
 forum_ = Blueprint("public-forum", __name__, url_prefix="/public/forum")
 
@@ -238,4 +241,16 @@ def public_delete_forum_post_comment(comment_id: str):
     return success_response({
         'status': 'Comment deleted',
         'variant': 'warning',
+    })
+
+
+
+
+@forum_.post('/image')
+@require_user()
+@json_response
+def public_post_forum_image():
+    image = process_file_upload()
+    return success_response({
+        'image_url': f'/api/public/static{image.path}',
     })

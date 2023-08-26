@@ -58,7 +58,7 @@ def make_blob_response(file: StaticFile) -> Response:
     return response
 
 
-def process_file_upload() -> StaticFile:
+def process_file_upload(course_id: str = None) -> StaticFile:
     # Create a path hash
     path = "/" + rand(16)
 
