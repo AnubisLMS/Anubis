@@ -155,7 +155,7 @@ export default function Forum() {
         refreshSelectedPost();
       })
       .catch(standardErrorHandler(enqueueSnackbar));
-  }, []);
+  }, [selectedPost]);
 
   const handleEditComment = React.useCallback((id, comment) => {
     axios.patch(`/api/public/forum/post/comment/${id}`, {
