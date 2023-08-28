@@ -98,6 +98,7 @@ export default function Post({
                   <Button
                     variant={'contained'}
                     color={'primary'}
+                    size={'small'}
                     sx={{mr: 1}}
                     startIcon={<EditIcon/>}
                     onClick={() => setIsDialogOpen(true)}
@@ -109,6 +110,7 @@ export default function Post({
                   <Button
                     variant={'contained'}
                     color={'primary'}
+                    size={'small'}
                     startIcon={<AddIcon/>}
                     onClick={() => setCommentPressed(true)}
                   >
