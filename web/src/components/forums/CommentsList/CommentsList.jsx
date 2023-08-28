@@ -22,10 +22,10 @@ export default function CommentsList({comments, handleCreateComment, handleEditC
           hasReplies={comment.children.length > 0}
           replyCount={comment.children.length}
           ownedByMe={comment.owned_by_me}
-          handleCollapse={() => setCollapsed(false)}
+          handleCollapse={() => setCollapsed(!collapsed)}
           isCollapsed={collapsed}
           handleReply={() => {
-            console.log(isReplying, collapsed);
+            // console.log(isReplying, collapsed);
             setCollapsed(false);
             setIsReplying(true);
           }}
