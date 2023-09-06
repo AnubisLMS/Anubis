@@ -108,12 +108,6 @@ export const public_nav = [
         Page: Courses,
       },
       {
-        id: 'Forum',
-        icon: <ForumIcon/>,
-        path: '/forum',
-        Page: Forum,
-      },
-      {
         id: 'Lectures',
         icon: <ImportContactsIcon/>,
         path: '/lectures',
@@ -161,6 +155,12 @@ export const admin_nav = [
     path: '/admin/course',
     Page: AdminCourse,
     exact: false,
+  },
+  {
+    id: 'Forum',
+    icon: <ForumIcon/>,
+    path: '/forum',
+    Page: Forum,
   },
   {
     id: 'Lectures',

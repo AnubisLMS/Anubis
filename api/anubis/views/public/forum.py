@@ -14,7 +14,7 @@ from anubis.models import (
     ForumPostComment,
     ForumPostViewed,
 )
-from anubis.utils.auth.http import require_user
+from anubis.utils.auth.http import require_user, require_admin
 from anubis.utils.auth.user import current_user
 from anubis.utils.auth.user import verify_in_course
 from anubis.utils.http import success_response
@@ -245,7 +245,7 @@ def public_delete_forum_post_comment(comment_id: str):
 
 
 @forum_.post('/image')
-@require_user()
+@require_admin()
 @json_response
 def public_post_forum_image():
     image = process_file_upload()
