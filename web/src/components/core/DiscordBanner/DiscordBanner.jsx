@@ -8,21 +8,7 @@ import standardStatusHandler from '../../../utils/standardStatusHandler';
 
 
 export default function DiscordBanner() {
-  const defaultInfo = {
-    'severity': 'info',
-    'title': 'Anubis Discord',
-    'content': 'Anubis was created by a single sophomore just like you, and is now run by students. ' +
-      'If you want to grow and work on something more rewarding ' +
-      'than your classes join our discord. Challenge yourself to do better.',
-    'action': {
-      'href': 'https://github.com/AnubisLMS/Anubis',
-      'label': 'Anubis Discord',
-    },
-  };
-
-  console.log(JSON.stringify(defaultInfo));
-
-  const [discordInfo, setDiscordInfo] = useState(defaultInfo);
+  const [discordInfo, setDiscordInfo] = useState(null);
   const {enqueueSnackbar} = useSnackbar();
 
 
