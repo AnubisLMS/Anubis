@@ -9,13 +9,26 @@ import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+
 
 import SaveIcon from '@mui/icons-material/Save';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 
+
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
+import ReactAce from 'react-ace';
+
+import 'ace-builds/src-noconflict/mode-java';
+import 'ace-builds/src-noconflict/theme-github';
+import 'ace-builds/src-noconflict/ext-language_tools';
+import Box from '@mui/material/Box';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -34,58 +47,16 @@ const saveConfig = (config, enqueueSnackbar) => {
   }).catch(standardErrorHandler(enqueueSnackbar));
 };
 
-const updateRow = (id, item, setConfig) => (e) => {
-  setConfig((prev) => {
-    for (const row of prev) {
-      if (row.id !== id) continue;
-      row[item] = e.target.value;
-    }
-    return [...prev];
-  });
-};
-
-const updateAction = (id, setConfig, enqueueSnackbar) => () => {
-  setConfig((prev) => {
-    for (const row of prev) {
-      if (row.id !== id) continue;
-      const action = row['action'];
-      row['action'] = (
-        action === 'edit' ? 'disabled' : 'edit'
-      );
-      if (row['action'] === 'disabled') {
-        saveConfig(prev, enqueueSnackbar);
-      }
-    }
-    return [...prev];
-  });
-};
-
-const useColumns = (config, setConfig, enqueueSnackbar) => ([
+const useColumns = (config, setConfig, setEdit) => ([
   {
     field: 'key',
     headerName: 'Key',
     width: 350,
-    renderCell: (params) => (
-      <TextField
-        fullWidth
-        disabled={params.row.action === 'disabled'}
-        value={params.row.key}
-        onChange={updateRow(params.row.id, 'key', setConfig)}
-      />
-    ),
   },
   {
     field: 'value',
     headerName: 'Value',
     width: 400,
-    renderCell: (params) => (
-      <TextField
-        fullWidth
-        disabled={params.row.action === 'disabled'}
-        value={params.row.value}
-        onChange={updateRow(params.row.id, 'value', setConfig)}
-      />
-    ),
   },
   {
     field: 'action',
@@ -96,8 +67,8 @@ const useColumns = (config, setConfig, enqueueSnackbar) => ([
         color={'primary'}
         variant={'contained'}
         size={'small'}
-        onClick={updateAction(params.row.id, setConfig, enqueueSnackbar)}
-        startIcon={params.row.action === 'edit' ? <SaveIcon/> : <EditIcon/>}
+        onClick={() => setEdit(params.row)}
+        startIcon={<EditIcon/>}
       >
         {params.row.action === 'edit' ? 'Save' : 'Edit'}
       </Button>
@@ -109,7 +80,9 @@ export default function Config() {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
   const [config, setConfig] = useState([]);
-  const columns = useColumns(config, setConfig, enqueueSnackbar);
+  const [edit, setEdit] = useState(null);
+
+  const columns = useColumns(config, setConfig, setEdit, enqueueSnackbar);
 
   React.useEffect(() => {
     axios.get('/api/super/config/list').then((response) => {
@@ -158,6 +131,65 @@ export default function Config() {
         </Grid>
         <Grid item xs={12}>
           <Paper className={classes.paper}>
+            <Dialog open={!!edit} onClose={() => setEdit(null)}>
+              {edit && (
+                <React.Fragment>
+                  <DialogTitle>Edit {edit.key}</DialogTitle>
+                  <DialogContent>
+                    <TextField
+                      autoFocus
+                      margin="dense"
+                      id="key"
+                      label="Key"
+                      fullWidth
+                      variant="standard"
+                      value={edit.key}
+                      onChange={(e) => setEdit((prev) => {
+                        prev.key = e.target.value;
+                        return {...prev};
+                      })}
+                    />
+                    <Box sx={{mt: 1}}>
+                      <Typography>
+                        Value
+                      </Typography>
+                      <ReactAce
+                        mode="json"
+                        theme="monokai"
+                        value={edit.value}
+                        maxLines={32}
+                        minLines={12}
+                        onChange={(v) => setEdit((prev) => {
+                          prev.value = v;
+                          return {...prev};
+                        })}
+                      />
+                    </Box>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button
+                      variant={'contained'}
+                      color={'primary'}
+                      onClick={() => setEdit(null)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant={'contained'}
+                      color={'primary'}
+                      autoFocus
+                      onClick={() => {
+                        setEdit(null);
+                        saveConfig(edit, enqueueSnackbar);
+                      }}
+                      startIcon={<SaveIcon/>}
+                    >
+                      Save
+                    </Button>
+                  </DialogActions>
+                </React.Fragment>
+              )}
+            </Dialog>
             <DataGrid
               rows={config}
               columns={columns}

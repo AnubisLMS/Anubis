@@ -2,7 +2,7 @@ from flask import Blueprint
 
 from anubis.models import Config, db
 from anubis.utils.auth.http import require_superuser
-from anubis.utils.http import success_response
+from anubis.utils.http import success_response, req_assert
 from anubis.utils.http.decorators import json_endpoint, json_response
 
 config_ = Blueprint("config", __name__, url_prefix="/super/config")
@@ -27,7 +27,7 @@ def config_list():
 
 @config_.route("/save", methods=["POST"])
 @require_superuser()
-@json_endpoint(required_fields=[("config", list)])
+@json_endpoint(required_fields=[("config", dict)])
 def config_add(config, **_):
     """
 
@@ -44,27 +44,24 @@ def config_add(config, **_):
     :return:
     """
 
-    # Iterate over all config items
-    for item in config:
 
-        # Get key and value
-        key = item.get("key", None)
-        value = item.get("value", None)
+    # Get key and value
+    key = config.get("key", None)
+    value = config.get("value", None)
 
-        # Make sure we actually got values
-        if key is None or value is None:
-            continue
+    # Make sure we actually got values
+    req_assert(key is not None and  value is not None, message='invalid config')
 
-        # Find config item in db
-        db_item = Config.query.filter(Config.key == key).first()
+    # Find config item in db
+    db_item = Config.query.filter(Config.key == key).first()
 
-        # Create the item if it didn't exist
-        if db_item is None:
-            db_item = Config(key=key, value=value)
+    # Create the item if it didn't exist
+    if db_item is None:
+        db_item = Config(key=key, value=value)
 
-        # Update the value
-        db_item.value = value
-        db.session.add(db_item)
+    # Update the value
+    db_item.value = value
+    db.session.add(db_item)
 
     # Commit the changes
     db.session.commit()
