@@ -10,20 +10,15 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 // const data = {
 //   severity: 'warning',
 //   title: 'Maintenance incoming',
-//   content: 'Anubis will be unavailable briefly Sunday the 2nd for about an hour (hopefully)
-//   starting at 11PM while ' +
-//     'we do some minor cluster updates (2023-04-02 23:00:00 EDT - 2023-04-03 00:00:00 EDT).
-//     If you have an IDE open ' +
-//     'at this time, you will be kicked off. Please plan accordingly',
-//   // action: {
-//   //   href: 'https://discord.gg/GEYtaATJHs',
-//   //   label: 'OSIRIS discord',
-//   // },
+//   content: 'Anubis will be unavailable briefly Sunday the 2nd for about an hour (hopefully) starting at 11PM while we do some minor cluster updates (2023-04-02 23:00:00 EDT - 2023-04-03 00:00:00 EDT) If you have an IDE open at this time, you will be kicked off. Please plan accordingly',
+//   action: {
+//     href: '',
+//     label: 'OSIRIS discord',
+//   },
 // };
-const data = false;
 
-export default function GenericAd() {
-  if (!data) {
+export default function GenericAd({data = false}) {
+  if (data === false) {
     return null;
   }
   return (
