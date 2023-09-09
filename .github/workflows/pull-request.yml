@@ -20,7 +20,7 @@ jobs:
       matrix:
         python-version: [ '3.10' ]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
@@ -59,7 +59,7 @@ jobs:
       matrix:
         node-version: [ 14.x ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
