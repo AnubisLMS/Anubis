@@ -1,6 +1,6 @@
 from utils import permission_test
 
-sample_config = [{"key": "MAX_IDES", "value": "75"}]
+sample_config = {"key": "MAX_IDES", "value": "75"}
 
 
 def test_config_admin():
