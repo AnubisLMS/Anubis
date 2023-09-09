@@ -15,7 +15,7 @@ export default function DiscordBanner() {
   useEffect(() => {
     axios.get('/api/public/info/discord').then((response) => {
       const data = standardStatusHandler(response, enqueueSnackbar);
-      if (data && data.length > 0) {
+      if (data) {
         setDiscordInfo(data);
       }
     }).catch(standardErrorHandler(enqueueSnackbar));
