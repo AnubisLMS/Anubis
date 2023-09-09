@@ -14,6 +14,7 @@ class EnvConfig(object):
         self.DOMAIN = os.environ.get("DOMAIN", default="localhost")
         self.SENTRY_DSN = os.environ.get("SENTRY_DSN", default=None)
         self.IDE_NODE_SELECTOR = os.environ.get("IDE_NODE_SELECTOR", default=None)
+        self.DISCORD_WEBHOOK = os.environ.get("DISCORD_WEBHOOK", default=None)
 
         if not self.MINDEBUG:
             # sqlalchemy

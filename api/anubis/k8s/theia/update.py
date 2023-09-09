@@ -154,6 +154,7 @@ def update_theia_session(session: TheiaSession):
             # 0/10 nodes are available: 10 Insufficient cpu, 2 Insufficient memory.
             if 'FailedScheduling' in event.reason and 'Insufficient' in event.message:
                 from anubis.utils.email.event import send_email_event_admin
+                from anubis.utils.discord.webhook import send_webhook
 
                 # limit 1 per hour
                 send_email_event_admin(
@@ -168,6 +169,9 @@ def update_theia_session(session: TheiaSession):
                         'pod':     str(pod.metadata.name),
                     }
                 )
+
+                # Send discord webhook
+                send_webhook(f"Scaleup triggered by IDE")
 
                 scaling = True
                 continue

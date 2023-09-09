@@ -545,6 +545,9 @@ def seed():
         playground_dockerd_config = Config(key='PLAYGROUND_DOCKERD', value='ON')
         db.session.add(playground_dockerd_config)
 
+    admin = Config(key='ADMIN_NETID', value='superuser')
+    db.session.add(admin)
+
     logger.info('committing')
     db.session.commit()
     init_forums(intro_to_os_course)

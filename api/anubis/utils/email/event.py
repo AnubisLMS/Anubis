@@ -9,6 +9,7 @@ from anubis.models import db, User, EmailTemplate, EmailEvent
 from anubis.utils.email.smtp import create_message
 from anubis.utils.logging import logger
 from anubis.utils.config import get_config_str
+from anubis.utils.auth.admin import get_admin_user
 
 
 def send_email_event_admin(
@@ -17,16 +18,8 @@ def send_email_event_admin(
     template_key: str,
     context: dict,
 ):
-    admin_netid: str = get_config_str('ADMIN_NETID', None)
-    if admin_netid is None:
-        logger.warning(f'ADMIN_NETID not set')
-        return
-
     # Get admin user
-    user: User = User.query.filter(User.netid == admin_netid).first()
-    if user is None:
-        logger.warning(f'Admin user not found')
-        return
+    user = get_admin_user()
 
     # Limit message to one per hour
     now = datetime.now().replace(minute=0, second=0, microsecond=0)
