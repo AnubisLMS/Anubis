@@ -135,6 +135,11 @@ API env
     secretKeyRef:
       name: api
       key: redis-password
+- name: "DISCORD_WEBHOOK"
+  valueFrom:
+    secretKeyRef:
+      name: api
+      key: discord-webhook
 - name: "SENTRY_DSN"
   valueFrom:
     secretKeyRef:
