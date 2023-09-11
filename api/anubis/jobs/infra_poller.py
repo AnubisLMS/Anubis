@@ -10,7 +10,7 @@ from anubis.lms.theia import check_cluster_ides
 def main():
     while True:
         check_cluster_ides()
-        time.sleep(1)
+        time.sleep(15)
 
 
 if __name__ == "__main__":
