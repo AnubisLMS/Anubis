@@ -24,7 +24,7 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       id: cache-venv  # name for referring later
       with:
         path: |
@@ -66,7 +66,7 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-#    - uses: actions/cache@v2
+#    - uses: actions/cache@v3
 #      id: cache-venv  # name for referring later
 #      with:
 #        path: |
