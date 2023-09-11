@@ -77,6 +77,7 @@ def send_email_event(
     # Send email
     try:
         success = send_message(message) is not False
+        # logger.info(f'Sent email {message}')
     except Error as e:
         logger.error(f'Failed to send email!\nerror={e}\n\n{traceback.format_exc()}\nemail={message}')
         return

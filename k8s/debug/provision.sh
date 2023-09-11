@@ -85,11 +85,13 @@ kubectl create namespace anubis
 kubectl config set-context --current --namespace=anubis
 
 # Create a minimal mariadb deployment in a mariadb namespace. On
-# prod, the mariadb is in a seperate namespace, so we do the same
+# prod, the mariadb is in a separate namespace, so we do the same
 # here.
 echo 'Adding mariadb'
 helm upgrade --install mariadb bitnami/mariadb \
     --set 'fullnameOverride=mariadb' \
+    --set 'image.repository=bitnami/mariadb' \
+    --set 'image.tag=10.6' \
     --set 'auth.rootPassword=anubis' \
     --set 'volumePermissions.enabled=true' \
     --set 'auth.username=anubis' \
@@ -114,6 +116,7 @@ kubectl create secret generic api \
     --from-literal=database-port=3306 \
     --from-literal=redis-password=anubis \
     --from-literal=discord-bot-token=anubis \
+    --from-literal=discord-webhook=anubis \
     --from-literal=secret-key=DEBUG \
     --from-literal=sentry-dsn='' \
     --namespace anubis

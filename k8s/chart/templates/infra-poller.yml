@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chart.fullname" . }}-infra-poller
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: infra-poller
+spec:
+  replicas: {{- if not .Values.offSemester }} {{ .Values.theia.poller.replicas }}{{- else }} 1{{- end }}
+  {{- if .Values.rollingUpdates }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "chart.selectorLabels" . | nindent 6 }}
+      component: infra-poller
+  template:
+    metadata:
+      labels:
+        {{- include "chart.selectorLabels" . | nindent 8 }}
+        component: infra-poller
+    spec:
+      {{- if and .Values.nodeSelector (not .Values.debug) }}
+      nodeSelector:
+        {{ .Values.nodeSelector | toYaml }}
+      {{- end }}
+      serviceAccountName: theia-poller
+      containers:
+      - name: poller
+        image: "{{ .Values.api.image }}:{{ .Values.tag }}"
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        args: ["python3", "/opt/app/anubis/jobs/infra_poller.py"]
+        {{- if not .Values.debug}}
+        resources:
+          requests:
+            cpu: 200m
+            memory: 250Mi
+          limits:
+            cpu: 1000m
+            memory: 500Mi
+        {{- end }}
+        env:
+        {{- include "api.env" . | nindent 8 }}
+
