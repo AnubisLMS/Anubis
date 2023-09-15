@@ -23,6 +23,7 @@ def parse_args() -> argparse.ArgumentParser:
 
     gen_parser = sub_parser.add_parser("gen")
     gen_parser.add_argument("--backup_host", default="s3.backup.anubis-lms.io")
+    gen_parser.add_argument("--backup_port", default=2222)
     gen_parser.add_argument(
         "--backup_host_path", default="/home/anubis/backups/volumes"
     )
@@ -89,6 +90,7 @@ def parse_args() -> argparse.ArgumentParser:
 
 def initialize_gen(args):
     backup_host = args.backup_host
+    backup_port = args.backup_port
     backup_host_path = Path(args.backup_host_path) / args.identifier
 
     jobs_identifier_dir = jobs_dir / args.identifier
@@ -120,6 +122,7 @@ def initialize_gen(args):
         restore_job_dir,
         {
             "backup_host": backup_host,
+            "backup_port": backup_port,
             "backup_host_path": backup_host_path,
             "backup_identifier": args.identifier,
             "ttl": args.ttl,

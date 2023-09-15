@@ -30,7 +30,7 @@ spec:
       containers:
       - name: backup
         image: registry.digitalocean.com/anubis/api:latest
-        command: ["bash", "-c", "set -ex && cd /mnt && if [ -f {{ netid }}-volume.tar.gz ]; then rm -f {{ netid }}-volume.tar.gz; fi && echo 'get {{ backup_host_path }}/{{ netid }}-volume.tar.gz' | sftp -o StrictHostKeyChecking=no -i /root/.ssh/id_ed25519 -o UserKnownHostsFile=/dev/null {{ backup_host }} && tar xzf {{ netid }}-volume.tar.gz && rm -f {{ netid }}-volume.tar.gz;"]
+        command: ["bash", "-c", "set -ex && cd /mnt && if [ -f {{ netid }}-volume.tar.gz ]; then rm -f {{ netid }}-volume.tar.gz; fi && echo 'get {{ backup_host_path }}/{{ netid }}-volume.tar.gz' | sftp -P {{ backup_port }} -o StrictHostKeyChecking=no -i /root/.ssh/id_ed25519 -o UserKnownHostsFile=/dev/null {{ backup_host }} && tar xzf {{ netid }}-volume.tar.gz && rm -f {{ netid }}-volume.tar.gz;"]
         volumeMounts:
         - name: anubis-backup-creds
           mountPath: "/root/.ssh"
