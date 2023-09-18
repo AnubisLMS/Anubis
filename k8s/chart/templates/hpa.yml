@@ -1,7 +1,7 @@
 {{- if and .Values.hpa.enable (not .Values.offSemester) }}
 {{- if not .Values.debug }}
 
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "chart.fullname" . }}-api
@@ -31,7 +31,7 @@ spec:
         averageUtilization: 100
 
 ---
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "chart.fullname" . }}-web
@@ -61,7 +61,7 @@ spec:
         averageUtilization: 100
 
 ---
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "chart.fullname" . }}-theia-proxy
@@ -92,7 +92,7 @@ spec:
 
 ---
 {{- range .Values.hpa.rpc }}
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "chart.fullname" $ }}-{{ .name }}
