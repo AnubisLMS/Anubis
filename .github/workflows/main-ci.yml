@@ -190,7 +190,7 @@ jobs:
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
       - name: Save DigitalOcean kubeconfig
-        run: doctl kubernetes cluster kubeconfig save anubis
+        run: doctl kubernetes cluster kubeconfig save anubis2
       - name: Helm upgrade
         run: make upgrade
       - name: Verify deployment

@@ -47,7 +47,7 @@ startup-links:
 
 .PHONY: context         # Grab kubectl and registry login from doctl
 context:
-	doctl kubernetes cluster kubeconfig save anubis --context anubis
+	doctl kubernetes cluster kubeconfig save anubis2 --context anubis
 	doctl registry login --context anubis
 
 .PHONY: upgrade         # Helm upgrade Anubis k8s cluster
