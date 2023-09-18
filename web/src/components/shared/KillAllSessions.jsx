@@ -25,7 +25,6 @@ export default function KillAllSessions({state, stopAllSessions}) {
         Kill All Sessions
       </Button>
       <Dialog
-        fullScreen
         open={open}
         onClose={close}
       >
