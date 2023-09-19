@@ -8,8 +8,9 @@ from anubis.utils.discord.webhook import send_webhook
 from anubis.utils.email.event import send_email_event_admin
 
 
-def get_active_theia_sessions() -> list[TheiaSession]:
-    theia_active_minutes_window: int = get_config_int('THEIA_ACTIVE_MINUTES_WINDOW', default=60 * 6)
+def get_active_theia_sessions(minutes: int = None) -> list[TheiaSession]:
+    if minutes is None:
+        theia_active_minutes_window: int = get_config_int('THEIA_ACTIVE_MINUTES_WINDOW', default=15)
 
     # Get all theia sessions within the last 10 minutes that are
     # active and don't have cluster_address
