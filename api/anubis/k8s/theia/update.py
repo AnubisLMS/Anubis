@@ -2,6 +2,7 @@ import json
 import traceback
 from datetime import datetime, timedelta
 
+import pottery
 from kubernetes import client as k8s
 
 from anubis.k8s.theia.create import create_k8s_resources_for_ide
@@ -45,7 +46,7 @@ def update_theia_pod_cluster_addresses(theia_pods: k8s.V1PodList):
 def update_all_theia_sessions():
     """
     Poll Database for sessions created within the last 10 minutes
-    if they are active and dont have a cluster_address.
+    if they are active and don't have a cluster_address.
 
     If the session is running match the pod to the cluster_address
 
@@ -56,15 +57,19 @@ def update_all_theia_sessions():
     for session in get_active_theia_sessions():
 
         # Synchronize session resource
-        lock = create_redis_lock(f'theia-session-{session.id}')
-        if not lock.acquire(blocking=False):
-            continue
+        try:
+            lock = create_redis_lock(f'theia-session-{session.id}')
+            if not lock.acquire(blocking=False):
+                continue
 
-        # Try to update the session info
-        update_theia_session(session)
+            # Try to update the session info
+            update_theia_session(session)
 
-        # Release lock
-        lock.release()
+            # Release lock
+            lock.release()
+        except pottery.exceptions.ReleaseUnlockedLock:
+            print(traceback.format_exc())
+            pass
 
 
 def update_theia_session(session: TheiaSession):
