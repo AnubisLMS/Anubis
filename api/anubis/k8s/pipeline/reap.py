@@ -1,6 +1,7 @@
 import traceback
 from datetime import datetime, timedelta
 
+import pottery
 import kubernetes
 from kubernetes import client
 
@@ -91,36 +92,39 @@ def reap_pipeline_jobs():
         # Read submission id from labels
         submission_id = job.metadata.labels['submission-id']
 
-        # Create a distributed lock for the submission job
-        lock = create_redis_lock(f'submission-job-{submission_id}')
-        if not lock.acquire(blocking=False):
-            continue
+        try:
+            # Create a distributed lock for the submission job
+            lock = create_redis_lock(f'submission-job-{submission_id}')
+            if not lock.acquire(blocking=False):
+                continue
 
-        # Log that we are inspecting the pipeline
-        logger.debug(f'inspecting pipeline: {job.metadata.name}')
+            # Log that we are inspecting the pipeline
+            logger.debug(f'inspecting pipeline: {job.metadata.name}')
 
-        # Get database record of the submission
-        submission: Submission = Submission.query.filter(
-            Submission.id == submission_id,
-        ).first()
-        if submission is None:
-            logger.error(f"submission from db not found {submission_id}")
-            continue
+            # Get database record of the submission
+            submission: Submission = Submission.query.filter(
+                Submission.id == submission_id,
+            ).first()
+            if submission is None:
+                logger.error(f"submission from db not found {submission_id}")
+                continue
 
-        # Calculate job created time
-        job_created = job.metadata.creation_timestamp.replace(tzinfo=None)
+            # Calculate job created time
+            job_created = job.metadata.creation_timestamp.replace(tzinfo=None)
 
-        # Delete the job if it is older than a few minutes
-        if datetime.utcnow() - job_created > timedelta(minutes=autograde_pipeline_timeout_minutes):
+            # Delete the job if it is older than a few minutes
+            if datetime.utcnow() - job_created > timedelta(minutes=autograde_pipeline_timeout_minutes):
 
-            # Attempt to delete the k8s job
-            reap_pipeline_job(job, submission)
+                # Attempt to delete the k8s job
+                reap_pipeline_job(job, submission)
 
-        # If the job has finished, and was marked as successful, then
-        # we can clean it up
-        elif job.status.succeeded is not None and job.status.succeeded >= 1:
+            # If the job has finished, and was marked as successful, then
+            # we can clean it up
+            elif job.status.succeeded is not None and job.status.succeeded >= 1:
 
-            # Attempt to delete the k8s job
-            reap_pipeline_job(job, submission)
+                # Attempt to delete the k8s job
+                reap_pipeline_job(job, submission)
 
-        lock.release()
+            lock.release()
+        except pottery.exceptions.ReleaseUnlockedLock:
+            print(traceback.format_exc())
