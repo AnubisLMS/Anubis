@@ -35,7 +35,7 @@ def public_submissions():
     assignment_id = request.args.get("assignmentId", default=None)
 
     # Get the limit and offset for submissions query
-    limit: int = get_number_arg("limit", default_value=100)
+    limit: int = get_number_arg("limit", default_value=30)
     offset: int = get_number_arg("offset", default_value=0)
 
     # Load current user
