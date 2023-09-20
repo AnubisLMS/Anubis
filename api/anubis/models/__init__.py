@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import scoped_session, deferred, relationship, InstrumentedAttribute
+from sqlalchemy.orm import scoped_session, deferred, undefer, relationship, InstrumentedAttribute
 from sqlalchemy.sql.schema import Column, ForeignKey
 
 from anubis.constants import THEIA_DEFAULT_OPTIONS, DB_COLLATION, DB_CHARSET
@@ -548,10 +548,10 @@ class Submission(db.Model):
         cascade="all,delete",
         uselist=False,
         backref="submission",
-        lazy=False,
+        lazy=True,
     )
     test_results: list['SubmissionTestResult'] = relationship("SubmissionTestResult", cascade="all,delete",
-                                                              backref="submission", lazy=False)
+                                                              backref="submission", lazy=True)
     repo = relationship(AssignmentRepo, backref="submissions")
     theia_session = relationship('TheiaSession', cascade='all,delete', backref='submission', lazy=True)
 
@@ -572,12 +572,16 @@ class Submission(db.Model):
         }
 
     @property
-    def full_data(self):
-        from anubis.lms.submissions import get_submission_tests
-
+    def partial_data(self):
         # Add connected models
         data = self.data
         data["repo"] = self.repo.repo_url if self.repo is not None else None
+        return data
+
+    @property
+    def full_data(self):
+        from anubis.lms.submissions import get_submission_tests
+        data = self.partial_data
         data["tests"] = get_submission_tests(self, only_visible=True)
         data["build"] = self.build.data if self.build is not None else None
 

@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from sqlalchemy.orm import undefer
+
 from anubis.constants import AUTOGRADE_DISABLED_MESSAGE
 from anubis.lms.assignments import get_assignment_due_date
 from anubis.models import (
@@ -131,9 +133,52 @@ def get_submissions(
     if offset is not None:
         query = query.offset(offset)
 
-    submissions = query.all()
+    submissions: list[Submission] = query.all()
+    sids: list[str] = [s.id for s in submissions]
+    aids: set[str] = {s.assignment_id for s in submissions}
 
-    return [s.full_data for s in submissions], all_total
+    assignment_tests: list[AssignmentTest] = (
+        AssignmentTest.query.filter(AssignmentTest.assignment_id.in_(aids))
+    ).all()
+
+    test_results: list[SubmissionTestResult] = (
+        SubmissionTestResult.query.join(AssignmentTest).filter(
+            SubmissionTestResult.submission_id.in_(sids),
+            AssignmentTest.hidden == False
+        ).order_by(AssignmentTest.order)
+        .options(undefer(SubmissionTestResult.output), undefer(SubmissionTestResult.message))
+    ).all()
+
+    builds: list[SubmissionBuild] = (
+        SubmissionBuild.query.filter(SubmissionBuild.submission_id.in_(sids))
+    ).all()
+
+    submission_assignment_tests: dict[str, dict] = {}
+    for assignment_test in assignment_tests:
+        atid = assignment_test.id
+        submission_assignment_tests[atid] = assignment_test.data
+
+    submission_test_results: dict[str, list[dict]] = {}
+    for test_result in test_results:
+        sid = test_result.submission_id
+        if sid not in submission_test_results:
+            submission_test_results[sid] = []
+        submission_test_results[sid].append({
+            "test":   submission_assignment_tests[test_result.assignment_test_id],
+            "result": test_result.data
+        })
+
+    submission_builds: dict[str, dict] = {}
+    for build in builds:
+        sid = build.submission_id
+        submission_builds[sid] = build.data
+
+    ss = [s.partial_data for s in submissions]
+    for s in ss:
+        s['tests'] = submission_test_results[s['id']]
+        s['build'] = submission_builds[s['id']]
+
+    return ss, all_total
 
 
 def recalculate_late(assignment_id: str):
