@@ -120,38 +120,56 @@ def generate_ide_report(day=None, mobile: bool = False) -> discord.Embed | Image
     eod = today.replace(hour=23, minute=59, second=59, microsecond=0)
     now = datetime.now().replace(microsecond=0)
 
-    total_ide_seconds = get_ide_seconds(TheiaSession.created < eod)
-    week_ide_seconds = get_ide_seconds(
-        TheiaSession.created < eod, TheiaSession.created > this_week
-    )
-    today_ide_seconds = get_ide_seconds(
-        TheiaSession.created < eod, TheiaSession.created > today
-    )
+    # total_ide_seconds = get_ide_seconds(TheiaSession.created < eod)
+    # week_ide_seconds = get_ide_seconds(
+    #     TheiaSession.created < eod, TheiaSession.created > this_week
+    # )
+    # today_ide_seconds = get_ide_seconds(
+    #     TheiaSession.created < eod, TheiaSession.created > today
+    # )
     active_ides: list[TheiaSession] = TheiaSession.query.filter(
         TheiaSession.active == True,
         TheiaSession.created < eod
     ).all()
 
+    state_to_letter = {
+        "Waiting for IDE to be scheduled...":         "W.K8S",
+        "Waiting for Persistent Volume to attach...": "W.PVC",
+        "Waiting for IDE server to start...":         "W.IDE",
+        "Failed":                                     "F",
+        "Running":                                    "R",
+        "Initializing":                               "I",
+    }
+
     data = tabulate(
         [
             [
-                index,
                 human_readable_timedelta(now - (ide.created if ide.created is not None else now)),
                 human_readable_timedelta(now - (ide.last_proxy if ide.last_proxy is not None else now)),
+                state_to_letter.get(ide.state, "U")
             ]
             for index, ide in enumerate(active_ides)
         ],
-        ("ID", "Age", "Last Proxy")
+        ("Age", "Heartbeat", "State")
+    )
+
+    state_table = tabulate(
+        [
+            [letter, state_message]
+            for state_message, letter in state_to_letter.items()
+        ],
+        ("Letter", "State")
     )
 
     report = (
-        "IDEs Active ({})\n{}\n\nIDE Time Served Today: {}\nIDE Time Served Last 7 Days: {}\nIDE Time Served Total: {}"
+        "IDEs Active ({})\n{}\n\n{}"
     ).format(
         len(active_ides),
         data,
-        human_readable_timedelta(today_ide_seconds),
-        human_readable_timedelta(week_ide_seconds),
-        human_readable_timedelta(total_ide_seconds)
+        state_table,
+        # human_readable_timedelta(today_ide_seconds),
+        # human_readable_timedelta(week_ide_seconds),
+        # human_readable_timedelta(total_ide_seconds)
     )
 
     print(report)
