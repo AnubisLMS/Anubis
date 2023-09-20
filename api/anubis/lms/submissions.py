@@ -175,8 +175,9 @@ def get_submissions(
 
     ss = [s.partial_data for s in submissions]
     for s in ss:
-        s['tests'] = submission_test_results[s['id']]
-        s['build'] = submission_builds[s['id']]
+        sid = s['id']
+        s['tests'] = submission_test_results.get(sid, [])
+        s['build'] = submission_builds.get(sid, None)
 
     return ss, all_total
 
