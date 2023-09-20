@@ -133,12 +133,12 @@ def generate_ide_report(day=None, mobile: bool = False) -> discord.Embed | Image
     ).all()
 
     state_to_letter = {
+        "Initializing":                               "I",
         "Waiting for IDE to be scheduled...":         "W.K8S",
         "Waiting for Persistent Volume to attach...": "W.PVC",
         "Waiting for IDE server to start...":         "W.IDE",
-        "Failed":                                     "F",
         "Running":                                    "R",
-        "Initializing":                               "I",
+        "Failed":                                     "F",
     }
 
     data = tabulate(
@@ -155,7 +155,7 @@ def generate_ide_report(day=None, mobile: bool = False) -> discord.Embed | Image
 
     state_table = tabulate(
         [
-            [letter, state_message]
+            [letter, state_message[:15]]
             for state_message, letter in state_to_letter.items()
         ],
         ("Letter", "State")
