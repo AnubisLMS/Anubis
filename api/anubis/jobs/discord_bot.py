@@ -102,6 +102,25 @@ def generate_active_plot(*args, **kwargs) -> BytesIO:
 
 
 @with_context
+def generate_health_report() -> discord.Embed:
+    from anubis.utils.healthcheck import healthcheck
+    status, status_code = healthcheck()
+
+    status_table = tabulate(
+        [
+            [k, v]
+            for k, v in status.items()
+        ],
+        ["Test", "Status"]
+    )
+
+    return discord.Embed(
+        title="Anubis Health",
+        description=f"```Status Code: {status_code}\n\n{status_table}```"
+    ).set_thumbnail(url=bot.user.avatar.url).set_author(name="Anubis Bot")
+
+
+@with_context
 def generate_ide_report(day=None, mobile: bool = False) -> discord.Embed | Image.Image:
     """
     Generate a report of the statuses of Anubis. The statuses are:
@@ -252,6 +271,26 @@ async def active_(ctx, days=14, step=1, *_):
             filename=f"anubis-active-14days-1step-{now.year}{now.month}{now.day}-{now.hour}{now.minute}{now.second}.png"
         )
     )
+
+
+@bot.command(
+    name="health", help="Anubis Healthcheck"
+)
+async def health_(ctx, *_):
+    """
+    Respond to `!report` command with a report of the statuses of Anubis
+
+    :return:
+    """
+    if ctx.author.is_on_mobile():
+        await ctx.send(
+            file=discord.File(
+                images_to_bytes(generate_health_report()),
+                filename="health.png"
+            )
+        )
+    else:
+        await ctx.send(embed=generate_health_report())
 
 
 @bot.command(
