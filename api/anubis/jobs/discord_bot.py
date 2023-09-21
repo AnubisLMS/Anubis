@@ -130,7 +130,7 @@ def generate_ide_report(day=None, mobile: bool = False) -> discord.Embed | Image
     active_ides: list[TheiaSession] = TheiaSession.query.filter(
         TheiaSession.active == True,
         TheiaSession.created < eod
-    ).all()
+    ).order_by(TheiaSession.created).all()
 
     state_to_letter = {
         "Initializing":                               "I",
@@ -155,8 +155,12 @@ def generate_ide_report(day=None, mobile: bool = False) -> discord.Embed | Image
 
     state_table = tabulate(
         [
-            [letter, state_message[:15]]
-            for state_message, letter in state_to_letter.items()
+            ["I", "Initializing"],
+            ["W.K8S", "Scheduling"],
+            ["W.PVC", "PVC"],
+            ["W.IDE", "IDE Start"],
+            ["R", "Running"],
+            ["F", "Failed"],
         ],
         ("Letter", "State")
     )
