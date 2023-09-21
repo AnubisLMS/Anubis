@@ -266,7 +266,7 @@ async def report_(ctx, platform="desktop", *args):
         await ctx.send(f"```{generate_report()}```")
 
 
-@bot.command(name="active", help="Get current active plot.")
+@bot.command(name="active", aliases=("a",), help="Get current active plot.")
 async def active_(ctx, days=14, step=1, *_):
     now = datetime.now().replace(microsecond=0)
     await ctx.send(
@@ -278,7 +278,7 @@ async def active_(ctx, days=14, step=1, *_):
 
 
 @bot.command(
-    name="health", help="Anubis Healthcheck"
+    name="health", aliases=("h",), help="Anubis Healthcheck"
 )
 async def health_(ctx, *_):
     """
@@ -298,7 +298,7 @@ async def health_(ctx, *_):
 
 
 @bot.command(
-    name="ide", help="Anubis ide usage report. Use !ide mobile for mobile-friendly version"
+    name="ide", aliases=("i",), help="Anubis ide usage report. Use !ide mobile for mobile-friendly version"
 )
 async def ides_(ctx, day=None, *_):
     """
