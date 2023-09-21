@@ -8,7 +8,6 @@ from anubis.utils.google.gmail import send_message
 from anubis.models import db, User, EmailTemplate, EmailEvent
 from anubis.utils.email.smtp import create_message
 from anubis.utils.logging import logger
-from anubis.utils.config import get_config_str
 from anubis.utils.auth.admin import get_admin_user
 
 
