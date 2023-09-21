@@ -219,15 +219,16 @@ def generate_ide_report(day=None, mobile: bool = False) -> discord.Embed | Image
 
 @with_context
 def generate_email_report(day: str = None) -> discord.Embed | Image.Image:
-    today = get_day(day)
+    today_start = get_day(day)
+    today_end = today_start.replace(hour=23, minute=59)
 
     report = ""
 
     emails_total: int = EmailEvent.query.count()
-    emails_today: int = EmailEvent.query.filter(EmailEvent.created > today).count()
+    emails_today: int = EmailEvent.query.filter(EmailEvent.created > today_start, EmailEvent.created < today_end).count()
 
     report += f"Emails Send Total: {emails_total}\n"
-    report += f"Emails Send Today: {emails_today}\n"
+    report += f"Emails Send {today_start}: {emails_today}\n"
 
     return discord.Embed(
         title="Email report",
