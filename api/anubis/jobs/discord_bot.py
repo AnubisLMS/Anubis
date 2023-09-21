@@ -102,7 +102,7 @@ def generate_active_plot(*args, **kwargs) -> BytesIO:
 
 
 @with_context
-def generate_health_report() -> discord.Embed:
+def generate_health_report(mobile: bool = False) -> discord.Embed | Image.Image:
     from anubis.utils.healthcheck import healthcheck
     status, status_code = healthcheck()
 
@@ -114,9 +114,13 @@ def generate_health_report() -> discord.Embed:
         ["Test", "Status"]
     )
 
+    report = f'Status Code: {status_code}\n\n{status_table}'
+
+    if mobile:
+        return to_image(report)
     return discord.Embed(
         title="Anubis Health",
-        description=f"```Status Code: {status_code}\n\n{status_table}```"
+        description=f"```{report}```"
     ).set_thumbnail(url=bot.user.avatar.url).set_author(name="Anubis Bot")
 
 
@@ -285,7 +289,7 @@ async def health_(ctx, *_):
     if ctx.author.is_on_mobile():
         await ctx.send(
             file=discord.File(
-                images_to_bytes(generate_health_report()),
+                images_to_bytes(generate_health_report(mobile=True)),
                 filename="health.png"
             )
         )
