@@ -18,6 +18,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import standardStatusHandler from '../../../utils/standardStatusHandler';
 import standardErrorHandler from '../../../utils/standardErrorHandler';
 import {nonStupidDatetimeFormat} from '../../../utils/datetime';
+import Box from '@mui/material/Box';
 
 const useStyles = makeStyles((theme) => ({
   datePicker: {
@@ -62,24 +63,28 @@ export default function LateExceptionAddCard({assignment, setReset}) {
   return (
     <Card>
       <CardContent>
-        <Autocomplete
-          getOptionLabel={(option) => option.netid}
-          renderInput={(params) => <TextField {...params} label="Student" variant="outlined"/>}
-          options={students}
-          onChange={(_, v) => setSelected(v)}
-        />
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <DesktopDateTimePicker
-            className={classes.datePicker}
-            margin="normal"
-            label="Due Date"
-            ampm={false}
-            inputFormat="yyyy-MM-dd hh:mm:ss a"
-            value={date}
-            onChange={(v) => setDate(v)}
-            renderInput={(params) => <TextField {...params} />}
+        <Box sx={{pt: 1, pb: 1}}>
+          <Autocomplete
+            getOptionLabel={(option) => option.netid}
+            renderInput={(params) => <TextField {...params} label="Student" variant="outlined"/>}
+            options={students}
+            onChange={(_, v) => setSelected(v)}
           />
-        </LocalizationProvider>
+        </Box>
+        <Box sx={{pt: 1}}>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DesktopDateTimePicker
+              className={classes.datePicker}
+              margin="normal"
+              label="Due Date"
+              ampm={false}
+              inputFormat="yyyy-MM-dd hh:mm:ss a"
+              value={date}
+              onChange={(v) => setDate(v)}
+              renderInput={(params) => <TextField {...params} />}
+            />
+          </LocalizationProvider>
+        </Box>
       </CardContent>
       <CardActions>
         <Button
