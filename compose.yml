@@ -126,7 +126,7 @@ services:
       - "traefik.http.routers.web-public.entrypoints=http,https"
 
   db:
-    image: mariadb:10.6
+    image: mariadb:10.6.14
     dns: [8.8.8.8]
     command:
       - "mysqld"
