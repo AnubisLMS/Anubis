@@ -85,6 +85,8 @@ theia:
       image: "registry.digitalocean.com/anubis/theia-admin"
     - name: "webtop-base-310"
       image: "registry.digitalocean.com/anubis/webtop-base:python-3.10"
+    - name: "theia-pincer"
+      image: "registry.digitalocean.com/anubis/theia-pincer"
 
 # Discord Bot
 discord_bot:
