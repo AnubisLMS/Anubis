@@ -2,6 +2,7 @@ import base64
 import copy
 import gzip
 import os
+import enum
 from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
@@ -11,8 +12,10 @@ from sqlalchemy.sql.schema import Column, ForeignKey
 
 from anubis.constants import THEIA_DEFAULT_OPTIONS, DB_COLLATION, DB_CHARSET
 from anubis.models.id import default_id_length, default_id
-from anubis.models.sqltypes import String, Text, DateTime, Boolean, JSON, Integer
+from anubis.models.sqltypes import String, Text, DateTime, Boolean, JSON, Integer, Enum
 from anubis.utils.data import human_readable_timedelta
+from anubis.models.enum import UserSource
+
 
 db = SQLAlchemy(session_options={"autoflush": False})
 db.session: scoped_session
@@ -52,6 +55,7 @@ class User(db.Model):
     disabled: bool = Column(Boolean, nullable=False, default=False)
     deadline_email_enabled: bool = Column(Boolean, nullable=False, default=True)
     release_email_enabled: bool = Column(Boolean, nullable=False, default=True)
+    source: int = Column(Enum(UserSource), nullable=False, default=UserSource.NYU)
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
@@ -86,6 +90,7 @@ class User(db.Model):
             "deadline_email_enabled": self.deadline_email_enabled,
             "release_email_enabled":  self.release_email_enabled,
             "created":                str(self.created),
+            "source":                 self.source,
             **get_user_permissions(self),
         }
 

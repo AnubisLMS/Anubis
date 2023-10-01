@@ -21,6 +21,7 @@ def Text(*args, **kwargs) -> mysql.TEXT:
     return mysql.TEXT(*args, collation=DB_COLLATION, **kwargs)
 
 
+Enum = sqlalchemy.sql.sqltypes.Enum
 DateTime = sqlalchemy.sql.sqltypes.DateTime
 Boolean = sqlalchemy.sql.sqltypes.Boolean
 JSON = sqlalchemy.sql.sqltypes.JSON
