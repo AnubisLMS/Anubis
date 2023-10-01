@@ -7,7 +7,7 @@ from flask import Blueprint, make_response, redirect, request
 from anubis.constants import NYU_DOMAIN
 from anubis.env import env
 from anubis.lms.courses import get_course_context
-from anubis.models import User, db
+from anubis.models import User, db, UserSource
 from anubis.utils.auth.http import require_user
 from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_GITHUB as github_provider
 from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_NYU as nyu_provider
@@ -90,7 +90,7 @@ def public_oauth():
 
     # Create the user if they do not already exist
     if user is None:
-        user = User(netid=netid, name=name)
+        user = User(netid=netid, name=name, source=UserSource.NYU)
         db.session.add(user)
         db.session.commit()
 
@@ -161,16 +161,48 @@ def public_github_oauth():
             headers=github_api_headers,
         ).json()
 
+        github_username = github_user_info["login"].strip()
+        name = github_user_info['name'].strip()
+        email = github_user_info['email'].strip()
+
         # If user exists
         if current_user is not None:
             # set github username and commit
-            current_user.github_username = github_user_info["login"].strip()
+            current_user.github_username = github_username
             db.session.add(current_user)
             db.session.commit()
 
-        # TODO Create new user for study
+        # Create new user for study
         else:
-            pass
+            # Check to see if user already exists in system. This sound fix anyone that already has an anubis NYU account
+            user = User.query.filter(User.github_username == github_username).first()
+
+            # If user didn't already exist, we need to create one
+            if user is None:
+
+                # Create user
+                user = User(
+                    netid=email,
+                    name=name,
+                    github_username=github_username,
+
+                    # Be sure to mark GITHUB source
+                    source=UserSource.GITHUB,
+                )
+
+                # Commit change
+                db.session.add(user)
+                db.session.commit()
+
+            # Make the response depending on if a next_url was specified
+            r = make_response(redirect(next_url))
+
+            # set the token cookie
+            token = create_token(user.netid)
+            r.set_cookie("token", token, httponly=True)
+
+            # Return rseponse
+            return r
 
         # Notify them with status
         return redirect(next_url)
