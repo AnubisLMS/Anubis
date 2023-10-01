@@ -14,7 +14,9 @@ from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_NYU as nyu_provider
 from anubis.utils.auth.token import create_token
 from anubis.utils.auth.user import current_user, get_current_user
 from anubis.utils.data import is_debug
-from anubis.utils.http import success_response
+from anubis.utils.http import success_response, get_string_arg
+from anubis.utils.exceptions import AuthenticationError
+from anubis.utils.config import get_config_str
 
 auth_ = Blueprint("public-auth", __name__, url_prefix="/public/auth")
 nyu_oauth_ = Blueprint("public-oauth", __name__, url_prefix="/public")
@@ -107,13 +109,27 @@ def public_oauth():
 
 
 @github_oauth_.route("/login")
-@require_user()
 def public_github_link():
+    if current_user is None:
+        user_access_code: str | None = get_string_arg('access_code', default_value=None)
+        real_access_code: str = get_config_str('GITHUB_STUDY_ACCESS_CODE', None)
+
+        # If either are not set, raise
+        if user_access_code is None or real_access_code is None:
+            raise AuthenticationError()
+
+        # If either are not strings
+        if not isinstance(user_access_code, str) or not isinstance(real_access_code, str):
+            raise AuthenticationError()
+
+        # If they don't match
+        if user_access_code != real_access_code:
+            raise AuthenticationError()
+
     return github_provider.authorize(callback="https://{}/api/public/github/oauth".format(env.DOMAIN))
 
 
 @github_oauth_.route("/oauth")
-@require_user()
 def public_github_oauth():
     """
     This is the endpoint Github OAuth sends the user to after
@@ -145,10 +161,16 @@ def public_github_oauth():
             headers=github_api_headers,
         ).json()
 
-        # set github username and commit
-        current_user.github_username = github_user_info["login"].strip()
-        db.session.add(current_user)
-        db.session.commit()
+        # If user exists
+        if current_user is not None:
+            # set github username and commit
+            current_user.github_username = github_user_info["login"].strip()
+            db.session.add(current_user)
+            db.session.commit()
+
+        # TODO Create new user for study
+        else:
+            pass
 
         # Notify them with status
         return redirect(next_url)
