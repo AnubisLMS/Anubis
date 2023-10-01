@@ -47,8 +47,8 @@ def error_response(error_message: str) -> dict:
     """
     return {
         "success": False,
-        "error": error_message,
-        "data": None,
+        "error":   error_message,
+        "data":    None,
     }
 
 
@@ -61,8 +61,8 @@ def success_response(data: dict | str | None) -> dict:
     """
     return {
         "success": True,
-        "error": None,
-        "data": data,
+        "error":   None,
+        "data":    data,
     }
 
 
@@ -101,6 +101,21 @@ def get_number_arg(arg_name: str = "number", default_value: int = 10, reject_neg
         # conversion was unsuccessful. In that case,
         # then we fallback to default
         return default_value
+
+
+def get_string_arg(arg_name: str = "arg", default_value: str = None) -> str | None:
+    """
+    Quick function for getting a string http query argument.
+
+    :param arg_name:
+    :param default_value:
+    :return:
+    """
+
+    # Get the query argument in string form
+    n_str: str = request.args.get(arg_name, default=default_value)
+
+    return n_str
 
 
 def get_request_file_stream(
