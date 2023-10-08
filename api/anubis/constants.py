@@ -59,6 +59,7 @@ GOOGLE_GMAIL_CREDS_SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
 AUTOGRADE_DISABLED_MESSAGE = "autograde disabled for this assignment"
 SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE = "Assignment run in IDE."
+SHELL_AUTOGRADE_SUBMISSION_NOT_DONE_MESSAGE = "Not Done"
 
 
 REAPER_TXT = """

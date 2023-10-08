@@ -101,6 +101,7 @@ def reap_old_theia_sessions(theia_pods: k8s.V1PodList):
             continue
 
         # Reap the session
+        logger.info(f"Reaping session {theia_session.id}: age bad")
         reap_theia_session(theia_session, commit=False)
 
         # Batch commits in size of 5
@@ -110,7 +111,7 @@ def reap_old_theia_sessions(theia_pods: k8s.V1PodList):
 
 def reap_theia_session(theia_session: TheiaSession, commit: bool = True):
     """
-    Reap the given theia session. This is a two step process where
+    Reap the given theia session. This is a two-step process where
     we first mark the k8s resources for deletion, then
     mark the database entry as ended and inactive.
 
