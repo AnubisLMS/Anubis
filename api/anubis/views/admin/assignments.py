@@ -413,7 +413,7 @@ def admin_assignments_save(assignment: dict):
             value = dateparse(value.replace("T", " ").replace("Z", "")).replace(microsecond=0)
 
         # If github.com is in what the user gave, remove it
-        if key in {"github_template", "shell_assignment_repo"} and value.startswith("https://github.com/"):
+        if key in {"github_template", "shell_assignment_repo"} and isinstance(value, str) and value.startswith("https://github.com/"):
             value = value.removeprefix('https://github.com/')
 
         if key == "theia_image":
