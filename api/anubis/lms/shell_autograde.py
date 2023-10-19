@@ -1,3 +1,4 @@
+from datetime import datetime
 import re
 
 from anubis.constants import SHELL_AUTOGRADE_SUBMISSION_STATE_MESSAGE, SHELL_AUTOGRADE_SUBMISSION_NOT_DONE_MESSAGE
@@ -356,6 +357,9 @@ def create_shell_autograde_ide_submission(theia_session: TheiaSession) -> Submis
     # on the due date of the assignment.
     accepted = True
     if not assignment.accept_late:
+        if theia_session.created is None:
+            theia_session.created = datetime.now()
+
         # Figure out if the current submission is late
         late = theia_session.created < get_assignment_due_date(
             theia_session.owner_id,

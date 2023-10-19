@@ -1,4 +1,5 @@
 import copy
+from datetime import datetime
 
 from kubernetes import config as k8s_config
 
@@ -22,6 +23,7 @@ from anubis.utils.data import req_assert
 from anubis.utils.logging import logger
 from anubis.k8s.theia.create import create_k8s_resources_for_ide
 from anubis.utils.exceptions import send_alert_email_on_error
+
 
 @send_alert_email_on_error
 def initialize_theia_session(theia_session_id: str):
@@ -151,6 +153,7 @@ def initialize_ide(
         credentials=credentials,
         docker=docker,
         autograde=autograde,
+        created=datetime.now(),
     )
     db.session.add(session)
 
