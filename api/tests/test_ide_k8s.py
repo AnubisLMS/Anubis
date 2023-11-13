@@ -87,7 +87,7 @@ def test_playground_k8s():
 
     # Check env
     theia_env = {env.name: env.value for env in theia_container.env}
-    assert theia_env == {'AUTOSAVE': 'OFF', 'REPO_NAME': ''}
+    assert theia_env == {'AUTOSAVE': 'OFF', 'REPO_NAME': '', 'NETID': s.netid}
 
     # Check ports
     theia_ports = {port.container_port for port in theia_container.ports}
