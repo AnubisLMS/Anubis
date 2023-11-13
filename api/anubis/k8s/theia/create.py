@@ -548,6 +548,8 @@ def create_theia_k8s_pod_pvc(
         image=f"{theia_image}:{theia_image_tag}",
         # Add environment
         env=[
+            # set netid for any extensions or add-ons that need it
+            k8s.V1EnvVar(name="NETID", value=netid),
             # set the AUTOSAVE environment variable to ON or OFF
             # depending on if autosave is enabled for the session.
             k8s.V1EnvVar(
