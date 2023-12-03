@@ -209,11 +209,24 @@ export default function Playgrounds({imageId}) {
     return (
       <Box className={!isSelected ? classes.image : clsx(classes.image, classes.selectedImage)}>
         <Box className={classes.imageHeader}>
-          <i
-            className={clsx(icon, isSelected ?
-              clsx(classes.icon, classes.opFull) :
-              clsx(classes.icon, classes.opLess))}
-            style={{fontSize: 32}}/>
+          {
+            icon === 'osiris' ? (
+              <Box sx={{ml: 1, mr: 1}}>
+                <img
+                  src="/OSIRIS_LOGO_MARK_COLOR.png"
+                  alt="osiris"
+                  height={30}
+                  style={isSelected ? null : {'-webkit-filter': 'grayscale(1)'}}
+                />
+              </Box>
+            ) : (
+              <i
+                className={clsx(icon, isSelected ?
+                  clsx(classes.icon, classes.opFull) :
+                  clsx(classes.icon, classes.opLess))}
+                style={{fontSize: 32}}/>
+            )
+          }
           <Typography className={isSelected ? classes.opFull : classes.opLess}>{title}</Typography>
         </Box>
       </Box>
