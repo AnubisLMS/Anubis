@@ -81,6 +81,8 @@ theia:
       image: "registry.digitalocean.com/anubis/theia-jepst"
     - name: "webtop-jepst"
       image: "registry.digitalocean.com/anubis/webtop-jepst"
+    - name: "webtop-osiris"
+      image: "registry.digitalocean.com/anubis/webtop-osiris"
     - name: "theia-admin"
       image: "registry.digitalocean.com/anubis/theia-admin"
     - name: "webtop-base-310"
