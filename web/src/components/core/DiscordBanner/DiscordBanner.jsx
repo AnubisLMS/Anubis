@@ -21,7 +21,7 @@ export default function DiscordBanner() {
     }).catch(standardErrorHandler(enqueueSnackbar));
   }, []);
 
-  if (discordInfo === null) {
+  if (discordInfo === null || Object.keys(discordInfo).length === 0) {
     return null;
   }
 
