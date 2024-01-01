@@ -11,7 +11,7 @@ imagePullPolicy: "Always"
 imagePullSecret: "anubis"
 tag: "latest"
 revisionHistoryLimit: 3
-offSemester: false
+offSemester: true
 
 nodeSelector:
   doks.digitalocean.com/node-pool: pool-mfdxypigt
@@ -154,8 +154,10 @@ ide_reaper:
 backup:
   enable: true
   suspend: false
-  schedule: "0 */6 * * *" # 6 hours
-  volume_schedule: "0 0 * * *" # Midnight
+  # schedule: "0 */6 * * *" # 6 hours
+  # volume_schedule: "0 0 * * *" # Midnight
+  schedule: "0 0 * * 0" # Midnight sunday
+  volume_schedule: "0 0 * * 0" # Midnight sunday
   secretName: anubis-backup-creds
 
 email:
