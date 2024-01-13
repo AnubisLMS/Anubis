@@ -55,7 +55,7 @@ class User(db.Model):
     disabled: bool = Column(Boolean, nullable=False, default=False)
     deadline_email_enabled: bool = Column(Boolean, nullable=False, default=True)
     release_email_enabled: bool = Column(Boolean, nullable=False, default=True)
-    source: int = Column(Enum(UserSource), nullable=False, default=UserSource.NYU)
+    source: UserSource = Column(Enum(UserSource), nullable=False, default=UserSource.NYU)
 
     # Timestamps
     created: datetime = Column(DateTime, default=datetime.now)
@@ -90,7 +90,7 @@ class User(db.Model):
             "deadline_email_enabled": self.deadline_email_enabled,
             "release_email_enabled":  self.release_email_enabled,
             "created":                str(self.created),
-            "source":                 self.source,
+            "source":                 self.source.name,
             **get_user_permissions(self),
         }
 
