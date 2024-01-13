@@ -88,6 +88,7 @@ const useColumns = (pageState, enqueueSnackbar) => () => ([
   {field: 'netid', headerName: 'netid'},
   {field: 'name', headerName: 'Name', width: 150},
   {field: 'github_username', headerName: 'Github Username', width: 200},
+  {field: 'source', headerName: 'Source', width: 100},
   {
     field: 'log_in_as',
     headerName: 'Log in as',
