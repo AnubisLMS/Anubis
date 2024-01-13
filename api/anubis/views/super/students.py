@@ -61,6 +61,41 @@ def super_students_toggle_superuser(id: str):
         return success_response({"status": f"{other.name} is no longer a superuser", "variant": "success"})
 
 
+@students_.route("/toggle-disabled/<string:id>")
+@require_superuser()
+@json_response
+def super_students_toggle_disabled(id: str):
+    """
+    Toggle disable a user.
+
+    :param id:
+    :return:
+    """
+
+    # Get the other user
+    other: User = User.query.filter(User.id == id).first()
+
+    # If the other user was not found, then stop
+    req_assert(other is not None, message="user does not exist")
+
+    # Assert that user being disabled is not a superuser
+    req_assert(not other.is_superuser, message="Cannot disable super user")
+
+    # Toggle the superuser field
+    other.disabled = not other.disabled
+
+    # Commit the change
+    db.session.commit()
+
+    # Pass back the status based on if the other is now disabled
+    if other.disabled:
+        return success_response({"status": f"{other.name} is now disabled", "variant": "warning"})
+
+    # Pass back the status based on if the other user is now no disabled
+    else:
+        return success_response({"status": f"{other.name} is now enabled", "variant": "success"})
+
+
 @students_.route("/toggle-anubis_developer/<string:id>")
 @require_superuser()
 @json_response

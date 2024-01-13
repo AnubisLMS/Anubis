@@ -55,7 +55,11 @@ const toggleField = (field) => (id, {setStudents, setEdits}, enqueueSnackbar) =>
       setStudents((students) => {
         for (const student of students) {
           if (student.id === id) {
-            student['is_' + field] = !student['is_' + field];
+            let field_label = field;
+            if (!(field_label in student)) {
+              field_label = 'is_' + field;
+            }
+            student[field_label] = !student[field_label];
           }
         }
         return students;
@@ -67,6 +71,7 @@ const toggleField = (field) => (id, {setStudents, setEdits}, enqueueSnackbar) =>
 
 const toggleSuperuser = toggleField('superuser');
 const toggleDeveloper = toggleField('anubis_developer');
+const toggleDisabled = toggleField('disabled');
 
 const useColumns = (pageState, enqueueSnackbar) => () => ([
   {
@@ -111,6 +116,20 @@ const useColumns = (pageState, enqueueSnackbar) => () => ([
         </Fab>
       </Tooltip>
     ),
+  },
+  {
+    field: 'disabled',
+    headerName: 'Disabled',
+    renderCell: (params) => (
+      <React.Fragment>
+        <Switch
+          checked={params.row.disabled}
+          color={'primary'}
+          onClick={toggleDisabled(params.row.id, pageState, enqueueSnackbar)}
+        />
+      </React.Fragment>
+    ),
+    width: 150,
   },
   {
     field: 'is_anubis_developer',

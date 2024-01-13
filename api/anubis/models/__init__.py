@@ -2,20 +2,18 @@ import base64
 import copy
 import gzip
 import os
-import enum
 from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import scoped_session, deferred, undefer, relationship, InstrumentedAttribute
+from sqlalchemy.orm import scoped_session, deferred, relationship, InstrumentedAttribute
 from sqlalchemy.sql.schema import Column, ForeignKey
 
 from anubis.constants import THEIA_DEFAULT_OPTIONS, DB_COLLATION, DB_CHARSET
+from anubis.models.enum import UserSource
 from anubis.models.id import default_id_length, default_id
 from anubis.models.sqltypes import String, Text, DateTime, Boolean, JSON, Integer, Enum
 from anubis.utils.data import human_readable_timedelta
-from anubis.models.enum import UserSource
-
 
 db = SQLAlchemy(session_options={"autoflush": False})
 db.session: scoped_session
@@ -91,6 +89,7 @@ class User(db.Model):
             "release_email_enabled":  self.release_email_enabled,
             "created":                str(self.created),
             "source":                 self.source.name,
+            "disabled":               self.disabled,
             **get_user_permissions(self),
         }
 
