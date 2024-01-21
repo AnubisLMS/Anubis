@@ -107,7 +107,7 @@ services:
         GIT_TAG: "${GIT_TAG:-latest}"
 
   web-dev:
-    image: node:16-alpine
+    image: node:18-alpine
     user: "${ANUBIS_UID:-1000}:${ANUBIS_UID:-1000}"
     working_dir: /opt/app
     command: sh -c 'yarn && yarn run start'

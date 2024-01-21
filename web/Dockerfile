@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:18-alpine
 
 
 # This disables webpack source maps from being created in the build step
@@ -15,7 +15,7 @@ RUN set -eux; \
     find /usr /home -depth -name '.cache' -exec 'rm' '-rf' '{}' ';'
 
 
-FROM node:16-alpine
+FROM node:18-alpine
 
 
 WORKDIR /opt/app
