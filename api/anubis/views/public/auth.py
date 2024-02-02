@@ -1,3 +1,4 @@
+import traceback
 from urllib.parse import urlunparse
 from urllib.parse import quote
 
@@ -8,7 +9,6 @@ from anubis.constants import NYU_DOMAIN
 from anubis.env import env
 from anubis.lms.courses import get_course_context
 from anubis.models import User, db, UserSource
-from anubis.utils.auth.http import require_user
 from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_GITHUB as github_provider
 from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_NYU as nyu_provider
 from anubis.utils.auth.token import create_token
@@ -17,6 +17,8 @@ from anubis.utils.data import is_debug
 from anubis.utils.http import success_response, get_string_arg
 from anubis.utils.exceptions import AuthenticationError
 from anubis.utils.config import get_config_str
+from anubis.utils.logging import logger
+
 
 auth_ = Blueprint("public-auth", __name__, url_prefix="/public/auth")
 nyu_oauth_ = Blueprint("public-oauth", __name__, url_prefix="/public")
@@ -201,12 +203,13 @@ def public_github_oauth():
             token = create_token(user.netid)
             r.set_cookie("token", token, httponly=True)
 
-            # Return rseponse
+            # Return response
             return r
 
         # Notify them with status
         return redirect(next_url)
-    except:
+    except Exception as e:
+        logger.error(traceback.format_exc())
         return redirect(next_url + '?error=Unable to set username')
 
 
