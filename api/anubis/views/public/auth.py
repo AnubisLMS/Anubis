@@ -2,6 +2,7 @@ import traceback
 from urllib.parse import urlunparse
 from urllib.parse import quote
 
+import json
 import requests
 from flask import Blueprint, make_response, redirect, request
 
@@ -163,9 +164,12 @@ def public_github_oauth():
             headers=github_api_headers,
         ).json()
 
+        # Display user info
+        logger.info(f'github_user_info = {json.dumps(github_user_info, indent=2)}')
+
+        # Get minimal information for setting username
         github_username = github_user_info["login"].strip()
         name = github_user_info['name'].strip()
-        email = github_user_info['email'].strip()
 
         # If user exists
         if current_user is not None:
@@ -181,6 +185,9 @@ def public_github_oauth():
 
             # If user didn't already exist, we need to create one
             if user is None:
+
+                # Grab email to use as netid
+                email = github_user_info['email'].strip()
 
                 # Create user
                 user = User(
