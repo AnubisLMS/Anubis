@@ -187,11 +187,11 @@ def public_github_oauth():
             if user is None:
 
                 # Grab email to use as netid
-                email = github_user_info['email'].strip()
+                github_netid = f"github{github_user_info['id']}"
 
                 # Create user
                 user = User(
-                    netid=email,
+                    netid=github_netid,
                     name=name,
                     github_username=github_username,
 
