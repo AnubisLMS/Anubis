@@ -169,7 +169,6 @@ def public_github_oauth():
 
         # Get minimal information for setting username
         github_username = github_user_info["login"].strip()
-        name = github_user_info['name'].strip()
 
         # If user exists
         if current_user is not None:
@@ -188,6 +187,7 @@ def public_github_oauth():
 
                 # Grab email to use as netid
                 github_netid = f"github{github_user_info['id']}"
+                name = github_user_info['name'].strip() if 'name' in github_user_info else github_netid
 
                 # Create user
                 user = User(
