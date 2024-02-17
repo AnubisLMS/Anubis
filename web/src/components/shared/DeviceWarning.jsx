@@ -1,5 +1,5 @@
 import React from 'react';
-import {browserName, isChrome, isDesktop, isFirefox, isTablet} from 'react-device-detect';
+import {browserName, isChrome, isEdgeChromium, isDesktop, isFirefox, isTablet} from 'react-device-detect';
 import {useSnackbar} from 'notistack';
 
 export default function DeviceWarning() {
@@ -7,11 +7,11 @@ export default function DeviceWarning() {
 
   React.useEffect(() => {
     const acceptDevice = isDesktop || isTablet;
-    const acceptBrowser = isChrome || isFirefox;
+    const acceptBrowser = isChrome || isFirefox || isEdgeChromium;
     if (!acceptBrowser) {
       enqueueSnackbar(`We noticed you are on ${browserName}. ` +
         'Some things may not work as intended. ' +
-        'Try Firefox or Chrome if you run into any issues!', {variant: 'warning'});
+        'Try Firefox, Chrome or Edge if you run into any issues!', {variant: 'warning'});
       return;
     }
     if (!acceptDevice) {
