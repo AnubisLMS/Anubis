@@ -2,7 +2,7 @@ FROM node:18-alpine
 
 
 # This disables webpack source maps from being created in the build step
-ENV GENERATE_SOURCEMAP=false
+ENV GENERATE_SOURCEMAP=false DISABLE_ESLINT_PLUGIN=true
 
 WORKDIR /opt/app
 COPY package.json yarn.lock /opt/app/

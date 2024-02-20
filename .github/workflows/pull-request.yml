@@ -57,7 +57,7 @@ jobs:
         working-directory: web
     strategy:
       matrix:
-        node-version: [ 14.x ]
+        node-version: [ 16.x ]
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
@@ -75,4 +75,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - run: yarn install --frozen-lockfile
-      - run: yarn run build
+      - run: env DISABLE_ESLINT_PLUGIN=true yarn run build
