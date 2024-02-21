@@ -81,14 +81,8 @@ export default function Submission() {
             <Grid item xs={12}>
               <QuestionsCard questions={questions}/>
             </Grid>
-            <Grid item xs={12} md={4}>
-              <SubmissionSummary submission={submission} regrade={null}/>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <SubmissionBuild build={submission?.build}/>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <SubmissionTests tests={submission?.tests}/>
+            <Grid item xs={12}>
+              <SubmissionTests submissionId={submission?.id}/>
             </Grid>
           </Grid>
         </Grid>
