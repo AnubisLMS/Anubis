@@ -91,13 +91,17 @@ echo 'Adding mariadb'
 helm upgrade --install mariadb bitnami/mariadb \
     --set 'fullnameOverride=mariadb' \
     --set 'image.repository=bitnami/mariadb' \
-    --set 'image.tag=10.6' \
+    --set 'image.tag=10.6.14' \
     --set 'auth.rootPassword=anubis' \
     --set 'volumePermissions.enabled=true' \
     --set 'auth.username=anubis' \
     --set 'auth.database=anubis' \
     --set 'auth.password=anubis' \
     --set 'architecture=standalone' \
+    --set 'primary.args[0]=/opt/bitnami/scripts/mariadb/run.sh' \
+    --set 'primary.args[1]=--max-allowed-packet=1073741824' \
+    --set 'primary.args[2]=--character-set-server=utf8mb4' \
+    --set 'primary.args[3]=--collation-server=utf8mb4_general_ci' \
     --namespace anubis
 
 # Install a minimal redis deployment
