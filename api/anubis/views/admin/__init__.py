@@ -15,6 +15,7 @@ def register_admin_views(app):
     from anubis.views.admin.visuals import visuals_
     from anubis.views.admin.reserve import reserve_
     from anubis.views.admin.submissions import submissions_
+    from anubis.views.admin.repo import repos_
 
     views = [
         ide,
@@ -33,6 +34,7 @@ def register_admin_views(app):
         lectures_,
         reserve_,
         submissions_,
+        repos_,
     ]
 
     for view in views:
