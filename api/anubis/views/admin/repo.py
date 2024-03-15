@@ -48,9 +48,11 @@ def admin_repos_delete(repo_id: str):
     assert_course_context(assignment)
     assert_course_context(student)
 
-
     # If the repo is shared, then student can not delete
     req_assert(not repo.shared, message="Repo is shared. Please reach out to Anubis support to delete/reset this repo.")
+
+    # save this now, or get a database error after the delete operation
+    assignment_id = repo.assignment_id
 
     # Delete the repo
     delete_assignment_repo(student, assignment)
@@ -59,7 +61,7 @@ def admin_repos_delete(repo_id: str):
     cache.delete_memoized(get_repos, student.id)
 
     # Clear cache entry
-    cache.delete_memoized(get_assignment_data, student.id, repo.assignment_id)
+    cache.delete_memoized(get_assignment_data, student.id, assignment_id)
 
     # Pass them back
     return success_response({"status": "Github Repo & Submissions deleted"})
