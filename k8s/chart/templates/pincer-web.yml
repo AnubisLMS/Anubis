@@ -1,0 +1,88 @@
+{{- if .Values.pincer.enable }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chart.fullname" . }}-pincer-web
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: pincer-web
+spec:
+  selector:
+    matchLabels:
+      {{- include "chart.selectorLabels" . | nindent 6 }}
+      component: pincer-web
+  replicas: {{- if not .Values.offSemester }} {{ .Values.pincer.replicas }}{{- else }} 1{{- end }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- if .Values.rollingUpdates }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- include "chart.selectorLabels" . | nindent 8 }}
+        component: pincer-web
+    spec:
+      {{- if and .Values.nodeSelector (not .Values.debug) }}
+      nodeSelector:
+        {{ .Values.nodeSelector | toYaml }}
+      {{- end }}
+      dnsPolicy: ClusterFirst
+      containers:
+      - name: web
+        image: "{{ .Values.pincer.image }}:latest"
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits:
+            cpu: 2000m
+            memory: 500Mi
+        ports:
+        - name: web
+          containerPort: 3000
+        {{- if .Values.healthChecks }}
+        startupProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 1
+          periodSeconds: 1
+          failureThreshold: 60
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 60
+          failureThreshold: 10
+          periodSeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 3
+          periodSeconds: 3
+          failureThreshold: 1
+        {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "chart.fullname" . }}-pincer-web
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: pincer-web
+spec:
+  selector:
+    {{- include "chart.selectorLabels" . | nindent 4 }}
+    component: pincer-web
+  ports:
+  - name: web
+    port: 8000
+    targetPort: 8000
+{{- end }}

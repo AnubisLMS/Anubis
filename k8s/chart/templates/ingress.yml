@@ -171,6 +171,34 @@ spec:
   {{- end }}
 ---
 
+# pincer Ingress Route /*
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingress.route.anubis.pincer-web
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+    component: pincer-web
+spec:
+  {{- if .Values.debug }}
+  entryPoints:
+    - web
+  {{- else }}
+  entryPoints:
+    - websecure
+  {{- end }}
+  routes:
+  - kind: Rule
+    match: Host(`{{ .Values.pincer.domain }}`)
+    services:
+    - name: {{ include "chart.fullname" . }}-pincer-web
+      port: 8000
+  {{- if not .Values.debug }}
+  tls:
+    certResolver: le
+  {{- end }}
+---
+
 # Public Ingress Route /*
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute

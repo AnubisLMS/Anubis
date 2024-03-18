@@ -102,6 +102,13 @@ marketing:
   tag: "latest"
   replicas: 1
 
+pincer:
+  enable: true
+  domain: "pincer.anubis-lms.io"
+  image: "registry.digitalocean.com/anubis/pincer"
+  tag: "latest"
+  replicas: 1
+
 cli_docs:
   enable: true
   image: "registry.digitalocean.com/anubis/docs"
