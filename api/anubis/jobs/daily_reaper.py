@@ -63,8 +63,12 @@ def reap_github_admin_teams():
 
             accounted_for_members.add(user.github_username)
 
+        unaccounted_for_members = set(members).difference(accounted_for_members)
+        logger.info(f'{members=}\n{accounted_for_members=}')
+        logger.info(f'members-accounted_for_members={unaccounted_for_members}')
+
         # Remove unaccounted for members
-        for github_username in set(members).difference(accounted_for_members):
+        for github_username in unaccounted_for_members:
             remote_github_team_member(course.github_org, course.github_ta_team_slug, github_username)
 
 

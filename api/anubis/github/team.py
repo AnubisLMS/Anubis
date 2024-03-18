@@ -4,7 +4,7 @@ from anubis.github.api import github_rest
 def list_github_team_members(org: str, team: str) -> list[str]:
     return [
         user['login']
-        for user in github_rest(f"/orgs/{org}/teams/{team}/members")
+        for user in github_rest(f"/orgs/{org}/teams/{team}/members?per_page=100")
         if 'login' in user
     ]
 
