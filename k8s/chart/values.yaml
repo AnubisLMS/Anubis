@@ -97,7 +97,8 @@ discord_bot:
 
 marketing:
   enable: true
-  domain: "anubis-lms.io"
+  domain: "about.anubis-lms.io"
+  port: 3000
   image: "registry.digitalocean.com/anubis/marketing-site"
   tag: "latest"
   replicas: 1
@@ -105,6 +106,7 @@ marketing:
 pincer:
   enable: true
   domain: "pincer.anubis-lms.io"
+  port: 8000
   image: "registry.digitalocean.com/anubis/pincer"
   tag: "latest"
   replicas: 1

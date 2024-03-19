@@ -40,11 +40,11 @@ spec:
             cpu: 100m
             memory: 200Mi
           limits:
-            cpu: 2
+            cpu: 2000m
             memory: 500Mi
         ports:
         - name: web
-          containerPort: 3000
+          containerPort: {{ .Values.marketing.port }}
         {{- if .Values.healthChecks }}
         startupProbe:
           httpGet:
@@ -83,6 +83,6 @@ spec:
     component: marketing-web
   ports:
   - name: web
-    port: 3000
-    targetPort: 3000
+    port: {{ .Values.marketing.port }}
+    targetPort: {{ .Values.marketing.port }}
 {{- end }}

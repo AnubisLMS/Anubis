@@ -164,7 +164,7 @@ spec:
     match: Host(`about.{{ .Values.marketing.domain }}`)
     services:
     - name: {{ include "chart.fullname" . }}-marketing-web
-      port: 3000
+      port: {{ .Values.marketing.port }}
   {{- if not .Values.debug }}
   tls:
     certResolver: le
@@ -192,7 +192,7 @@ spec:
     match: Host(`{{ .Values.pincer.domain }}`)
     services:
     - name: {{ include "chart.fullname" . }}-pincer-web
-      port: 8000
+      port: {{ .Values.pincer.port }}
   {{- if not .Values.debug }}
   tls:
     certResolver: le

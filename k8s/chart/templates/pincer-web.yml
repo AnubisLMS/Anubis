@@ -44,7 +44,7 @@ spec:
             memory: 500Mi
         ports:
         - name: web
-          containerPort: 3000
+          containerPort: {{ .Values.pincer.port }}
         {{- if .Values.healthChecks }}
         startupProbe:
           httpGet:
@@ -83,6 +83,6 @@ spec:
     component: pincer-web
   ports:
   - name: web
-    port: 8000
-    targetPort: 8000
+    port: {{ .Values.pincer.port }}
+    targetPort: {{ .Values.pincer.port }}
 {{- end }}
