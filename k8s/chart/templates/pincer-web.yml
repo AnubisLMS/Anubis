@@ -42,6 +42,22 @@ spec:
           limits:
             cpu: 2000m
             memory: 500Mi
+        env:
+          - name: "SUPABASE_URL"
+            valueFrom:
+              secretKeyRef:
+                name: pincer
+                key: supabase-url
+          - name: "SUPABASE_KEY"
+            valueFrom:
+              secretKeyRef:
+                name: pincer
+                key: supabase-key
+          - name: "OPENAI_API_KEY"
+            valueFrom:
+              secretKeyRef:
+                name: pincer
+                key: openai-api-key
         ports:
         - name: web
           containerPort: {{ .Values.pincer.port }}
