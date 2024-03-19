@@ -161,7 +161,7 @@ spec:
   {{- end }}
   routes:
   - kind: Rule
-    match: Host(`about.{{ .Values.marketing.domain }}`)
+    match: Host(`{{ .Values.marketing.domain }}`)
     services:
     - name: {{ include "chart.fullname" . }}-marketing-web
       port: {{ .Values.marketing.port }}
