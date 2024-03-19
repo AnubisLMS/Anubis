@@ -65,21 +65,21 @@ spec:
         startupProbe:
           httpGet:
             path: /
-            port: 3000
+            port: {{ .Values.pincer.port }}
           initialDelaySeconds: 1
           periodSeconds: 1
           failureThreshold: 60
         livenessProbe:
           httpGet:
             path: /
-            port: 3000
+            port: {{ .Values.pincer.port }}
           initialDelaySeconds: 60
           failureThreshold: 10
           periodSeconds: 60
         readinessProbe:
           httpGet:
             path: /
-            port: 3000
+            port: {{ .Values.pincer.port }}
           initialDelaySeconds: 3
           periodSeconds: 3
           failureThreshold: 1
