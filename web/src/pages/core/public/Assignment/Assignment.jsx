@@ -201,7 +201,7 @@ const Assignment = () => {
                         {!assignment.has_submission ? <CancelIcon/> : <CheckCircleIcon/>}
                         <Typography className={classes.overviewItemSubtitleText}>
                           <Fragment>
-                            {!assignment.has_submission ? 'No Submission' : 'Sucessfully Submitted'}
+                            {!assignment.has_submission ? 'No Submission' : 'Successfully Submitted'}
                           </Fragment>
                         </Typography>
                       </Box>
