@@ -22,6 +22,7 @@ export default function CreateDialog({
       open={open}
       classes={{paper: classes.root}}
       onClose={() => setOpen(false)}
+      maxWidth={'xl'}
     >
       <Publisher
         mode={mode}
@@ -32,4 +33,3 @@ export default function CreateDialog({
     </Dialog>
   );
 }
-
