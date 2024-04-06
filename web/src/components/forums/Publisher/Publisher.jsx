@@ -7,17 +7,17 @@ import {useSnackbar} from 'notistack';
 
 const modes = {
   'post': {
-    title: 'Create A New Post',
-    title_placeholder: 'Put Title Here',
+    title: 'Create Post',
+    title_placeholder: 'Title',
     submit: 'Post',
   },
   'edit_post': {
     title: 'Edit Post',
-    title_placeholder: 'Put Title Here',
+    title_placeholder: 'Title',
     submit: 'Update',
   },
   'comment': {
-    title: 'Create A New Comment',
+    title: 'Create Comment',
     title_placeholder: '',
     submit: 'Comment',
   },
