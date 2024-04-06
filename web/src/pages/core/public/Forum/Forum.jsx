@@ -194,13 +194,13 @@ export default function Forum() {
             <Box sx={{}}>
               <Select
                 sx={{
-                  pb: 1, pt: 1,
-                  pl: 2, pr: 2,
+                  pl: 1, pr: 2,
                   // border: `1px solid ${theme.palette.dark.blue['200']}`,
                   // borderRadius: .5,
                 }}
                 value={selectedCourse}
                 onChange={handleCourseSelect}
+                size={'small'}
               >
                 {courses && courses.map((course, index) => (
                   <MenuItem
