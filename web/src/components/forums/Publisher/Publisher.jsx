@@ -1,9 +1,11 @@
 import React, {useState} from 'react';
-import {Box, Button, DialogContent, DialogTitle, IconButton, Input, Switch, Typography} from '@mui/material';
+import {Box, Button, DialogContent, DialogTitle, IconButton, InputBase, Switch, Typography} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import {useStyles} from './Publisher.styles';
-import RichTextEditor from '../Editor/RichTextEditor';
 import {useSnackbar} from 'notistack';
+import MDEditor from '@uiw/react-md-editor';
+import rehypeSanitize from 'rehype-sanitize';
+import Divider from '@mui/material/Divider';
 
 const modes = {
   'post': {
