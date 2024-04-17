@@ -164,11 +164,19 @@ def super_students_add(netid: str, name: str):
     :return:
     """
 
+    user = User.query.filter(User.netid == netid.strip()).first()
+    if user is not None:
+        return success_response({
+            "status": f"Student already exists {netid}",
+            "user": user.data,
+        })
+
     user = User(netid=netid.strip(), name=name.strip())
     db.session.add(user)
     db.session.commit()
 
     return success_response({
-        "status": f"Added student {netid}"
+        "status": f"Added student {netid}",
+        "user": user.data,
     })
 
