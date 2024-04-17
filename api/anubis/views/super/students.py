@@ -2,11 +2,11 @@ from flask import Blueprint
 
 from anubis.lms.students import get_students
 from anubis.models import User, db
+from anubis.rpc.enqueue import enqueue_reap_pvc_user
 from anubis.utils.auth.http import require_superuser
 from anubis.utils.data import req_assert
 from anubis.utils.http import success_response
 from anubis.utils.http.decorators import json_response, json_endpoint
-from anubis.rpc.enqueue import enqueue_reap_pvc_user
 
 students_ = Blueprint("super-students", __name__, url_prefix="/super/students")
 
@@ -149,7 +149,7 @@ def super_students_delete_pvc(id: str):
     enqueue_reap_pvc_user(id)
 
     return success_response({
-        "status": f"Volume deletion scheduled for user: {other.netid}.",
+        "status":  f"Volume deletion scheduled for user: {other.netid}.",
         "variant": "warning"
     })
 
@@ -168,7 +168,7 @@ def super_students_add(netid: str, name: str):
     if user is not None:
         return success_response({
             "status": f"Student already exists {netid}",
-            "user": user.data,
+            "user":   user.data,
         })
 
     user = User(netid=netid.strip(), name=name.strip())
@@ -177,6 +177,5 @@ def super_students_add(netid: str, name: str):
 
     return success_response({
         "status": f"Added student {netid}",
-        "user": user.data,
+        "user":   user.data,
     })
-
