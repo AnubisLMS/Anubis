@@ -1,17 +1,34 @@
 use anyhow::Result;
-use axum::{extract::Path, http::StatusCode, response::Redirect, routing::get, Extension, Router};
+use axum::{
+    extract::{Path, Request},
+    http::StatusCode,
+    response::{IntoResponse, Redirect},
+    body::Body,
+    routing::get,
+    Extension, Router,
+    response::Response,
+};
 use axum_extra::extract::cookie::{Cookie, CookieJar};
+use hyper::upgrade::Upgraded;
+use hyper_util::rt::TokioIo;
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Validation};
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use sqlx::{mysql::MySqlPoolOptions, prelude::FromRow, MySqlPool};
+use tower_http::trace::{self, TraceLayer};
+use tracing::Level;
+use tokio::net::TcpStream;
 use std::{env::var, sync::Arc};
+use std::time::Duration;
 
-
+const PROXY_SERVER_PORT: u64 = 5000;
 const MAX_PROXY_PORT: u64 = 8010;
 const MAX_DB_CONNECTIONS: u32 = 50;
 const FAILED_REDIRECT_URL: &str = "https://anubis-lms.io/error";
+/// JWT expires in 6 hours
+const JWT_EXPIRATION: usize = 6 * 60 * 60;
 
+// Lazy static evaluation of environment variables
 lazy_static! {
     static ref DEBUG: bool = var("DEBUG").unwrap_or("false".to_string()).parse().unwrap();
     static ref SECRET_KEY: String = {
@@ -42,13 +59,17 @@ fn authenticate_jwt(token: &str) -> Result<Claims> {
     let validation = Validation::new(Algorithm::HS256);
     let decoded = decode::<Claims>(token, &key, &validation)?;
 
+    if decoded.claims.exp < JWT_EXPIRATION {
+        return Err(anyhow::anyhow!("Token expired"));
+    }
+
     Ok(decoded.claims)
 }
 
 fn create_jwt(session_id: &str, net_id: &str) -> Result<String> {
-    let key = EncodingKey::from_secret(SECRET_KEY.as_bytes()); 
+    let key = EncodingKey::from_secret(SECRET_KEY.as_bytes());
     let claims = Claims {
-        exp: 1000000000,
+        exp: JWT_EXPIRATION,
         session_id: session_id.to_string(),
         net_id: net_id.to_string(),
     };
@@ -58,18 +79,42 @@ fn create_jwt(session_id: &str, net_id: &str) -> Result<String> {
     Ok(token)
 }
 
-async fn ping() -> (StatusCode, String) {
+async fn update_last_proxy_time(session_id: &str, pool: &MySqlPool) -> Result<()> {
+    sqlx::query(
+        r#"
+        UPDATE theia_session
+        SET last_proxy = NOW()
+        WHERE id = $1
+        "#,
+    )
+    .bind(session_id)
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
+async fn ping(jar: CookieJar, Extension(pool): Extension<Arc<MySqlPool>>) -> (StatusCode, String) {
+    match jar.get("ide") {
+        Some(cookie) => match authenticate_jwt(cookie.value()) {
+            Ok(claims) => {
+                update_last_proxy_time(&claims.session_id, &pool).await.unwrap();
+            },
+            Err(_) => {}
+        },
+        None => {},
+    };
+
     (StatusCode::OK, "pong".to_string())
 }
 
-async fn initialize(jar: CookieJar) -> (StatusCode, CookieJar, Redirect, String) {
-    let failed_response = | reason: &str | {
-        return (
-            StatusCode::UNAUTHORIZED,
+async fn initialize(jar: CookieJar) -> impl IntoResponse {
+    let failed_response = |_reason: &str| {
+        (
+            StatusCode::PERMANENT_REDIRECT,
             jar.clone(),
-            Redirect::to(&FAILED_REDIRECT_URL),
-            reason.to_string()
-        );
+            Redirect::to(FAILED_REDIRECT_URL),
+        )
     };
 
     let token = match jar.get("ide") {
@@ -85,13 +130,15 @@ async fn initialize(jar: CookieJar) -> (StatusCode, CookieJar, Redirect, String)
     };
 
     let new_token = create_jwt(&token.session_id, &token.net_id).unwrap();
-    let new_jar = jar.add(Cookie::new("ide", new_token));
+    let mut ide_cookie = Cookie::new("ide", new_token);
+    ide_cookie.set_http_only(true);
+
+    let new_jar = jar.add(ide_cookie);
 
     (
-        StatusCode::OK,
+        StatusCode::PERMANENT_REDIRECT,
         new_jar,
         Redirect::to("https://anubis-lms.io/"),
-        "authorized".to_string(),
     )
 }
 
@@ -106,7 +153,7 @@ async fn get_cluster_address(pool: &MySqlPool, session_id: &str) -> Result<Strin
         SELECT cluster_address
         FROM theia_session
         WHERE id = $1 AND active = 1
-        "#
+        "#,
     )
     .bind(session_id)
     .fetch_optional(pool)
@@ -114,18 +161,24 @@ async fn get_cluster_address(pool: &MySqlPool, session_id: &str) -> Result<Strin
 
     match row {
         Some(session) => {
-
             if let Some(cluster_address) = session.cluster_address {
                 Ok(cluster_address)
             } else {
                 Err(anyhow::anyhow!("Cluster address not found"))
             }
-        },
+        }
         None => Err(anyhow::anyhow!("Session not found")),
     }
 }
 
-async fn handle(Path(path): Path<String>, Extension(pool): Extension<Arc<MySqlPool>>, jar: CookieJar) -> (StatusCode, String) {
+
+
+async fn handle(
+    Path(path): Path<String>,
+    Extension(pool): Extension<Arc<MySqlPool>>,
+    jar: CookieJar,
+    req: Request,
+) -> impl IntoResponse {
     let port = path.parse::<u64>().unwrap();
 
     if port > MAX_PROXY_PORT {
@@ -144,29 +197,99 @@ async fn handle(Path(path): Path<String>, Extension(pool): Extension<Arc<MySqlPo
         }
     };
 
-    let cluster_address = get_cluster_address(&pool, &token.session_id).await.map_err(|e| {
-        eprintln!("Error: {}", e);
-        (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error".to_string())
-    }).unwrap();
-    return (StatusCode::OK, "authorized".to_string());
+    let _cluster_address = get_cluster_address(&pool, &token.session_id)
+        .await
+        .map_err(|e| {
+            eprintln!("Error: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Internal server error".to_string(),
+            )
+        })
+        .unwrap();
+
+    proxy(req).await.unwrap();
+
+    (StatusCode::OK, "authorized".to_string())
+}
+
+async fn proxy(req: Request) -> Result<Response, hyper::Error> {
+    if let Some(host_addr) = req.uri().authority().map(|auth| auth.to_string()) {
+        tokio::task::spawn(async move {
+            match hyper::upgrade::on(req).await {
+                Ok(upgraded) => {
+                    if let Err(e) = tunnel(upgraded, host_addr).await {
+                        tracing::warn!("server io error: {}", e);
+                    };
+                }
+                Err(e) => tracing::warn!("upgrade error: {}", e),
+            }
+        });
+
+        Ok(Response::new(Body::empty()))
+    } else {
+        tracing::warn!("CONNECT host is not socket addr: {:?}", req.uri());
+        Ok((
+            StatusCode::BAD_REQUEST,
+            "CONNECT must be to a socket address",
+        )
+            .into_response())
+    }
+}
+
+async fn tunnel(upgraded: Upgraded, addr: String) -> std::io::Result<()> {
+    let mut server = TcpStream::connect(addr).await?;
+    let mut upgraded = TokioIo::new(upgraded);
+
+    let (from_client, from_server) =
+        tokio::io::copy_bidirectional(&mut upgraded, &mut server).await?;
+
+    tracing::debug!(
+        "client wrote {} bytes and received {} bytes",
+        from_client,
+        from_server
+    );
+
+    Ok(())
 }
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt()
+        .with_target(false)
+        .compact()
+        .init();
+
     let pool = MySqlPoolOptions::new()
         .max_connections(MAX_DB_CONNECTIONS)
-        .connect(&DB_URL).await.unwrap();
-
+        .acquire_timeout(Duration::from_secs(5))
+        .connect(&DB_URL)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to connect to database: {}", e);
+            panic!("Failed to connect to database");
+        }).map(|_| {
+            tracing::info!("Connected to database");
+        }).unwrap();
 
     let pool = Arc::new(pool);
 
     let app = Router::new()
         .route("/ping", get(ping))
-        .route("initialize", get(initialize))
-        .route("/handle/:port", get(handle))
-        .layer(Extension(pool));
+        .route("/initialize", get(initialize))
+        .route("/:port", get(handle))
+        .layer(Extension(pool))
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
+                .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
+                .on_failure(trace::DefaultOnFailure::new().level(Level::ERROR))
+                .on_request(trace::DefaultOnRequest::new().level(Level::INFO))
+                .on_response(trace::DefaultOnResponse::new().level(Level::INFO)),
+        );
 
+    tracing::info!("Server started on port {}", PROXY_SERVER_PORT);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:5000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", PROXY_SERVER_PORT)).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
