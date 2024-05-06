@@ -216,53 +216,6 @@ async fn handle(
     (StatusCode::OK, "authorized".to_string())
 }
 
-async fn proxy(req: Request) -> Result<Response> {
-    let authority = req.uri().authority().map(|auth| auth.to_string());
-
-    let host_addr = match authority {
-        Some(addr) => addr,
-        None => {
-            return Ok((
-                StatusCode::BAD_REQUEST,
-                "CONNECT must be to a socket address",
-            )
-                .into_response());
-        }
-    };
-
-    tokio::task::spawn(async move {
-        match hyper::upgrade::on(req).await {
-            Ok(upgraded) => {
-                let res = tunnel(upgraded, host_addr).await;
-
-                if let Err(e) = res {
-                    tracing::warn!("tunnel error: {}", e);
-                }
-            }
-            Err(e) => {
-                tracing::warn!("upgrade error: {}", e);
-            }
-        };
-    });
-
-    Ok(Response::new(Body::empty()))
-}
-
-async fn tunnel(upgraded: Upgraded, addr: String) -> anyhow::Result<()> {
-    let mut server = TcpStream::connect(addr).await?;
-    let mut upgraded = TokioIo::new(upgraded);
-
-    let (from_client, from_server) =
-        tokio::io::copy_bidirectional(&mut upgraded, &mut server).await?;
-
-    tracing::debug!(
-        "client wrote {} bytes and received {} bytes",
-        from_client,
-        from_server
-    );
-
-    Ok(())
-}
 
 #[tokio::main]
 async fn main() {
