@@ -212,7 +212,7 @@ async fn handle(
 
     let host = format!("ws://{}:{}", cluster_address, port);
 
-    ws.on_upgrade(move |socket| ws::forward(&host, ws));
+    ws.on_upgrade(move |socket| ws::forward(host, socket));
     (StatusCode::OK, "authorized".to_string())
 }
 

@@ -1,6 +1,4 @@
-use anyhow::Result;
 use axum::extract::ws::{CloseFrame, Message as AxumMessage, WebSocket};
-use axum::extract::WebSocketUpgrade;
 use futures_util::{SinkExt, StreamExt};
 use tokio_tungstenite::tungstenite;
 use tokio_tungstenite::{connect_async, tungstenite::protocol::Message as TsMessage};
@@ -68,7 +66,7 @@ impl WebSocketMessage {
     }
 }
 
-pub async fn forward(url: &str, client_ws: WebSocketUpgrade) {
+pub async fn forward(url: String, client_ws: WebSocket) {
     let server_ws = match connect_async(url).await {
         Ok((ws, _)) => ws,
         Err(e) => {
