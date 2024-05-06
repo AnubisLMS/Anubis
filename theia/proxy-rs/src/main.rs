@@ -1,12 +1,13 @@
+mod ws;
+
 use anyhow::Result;
 use axum::{
-    extract::{Path, Request},
-    http::StatusCode,
-    response::{IntoResponse, Redirect},
     body::Body,
+    extract::{Path, Request, WebSocketUpgrade},
+    http::StatusCode,
+    response::{IntoResponse, Redirect, Response},
     routing::get,
     Extension, Router,
-    response::Response,
 };
 use axum_extra::extract::cookie::{Cookie, CookieJar};
 use hyper::upgrade::Upgraded;
@@ -15,11 +16,11 @@ use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Validati
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use sqlx::{mysql::MySqlPoolOptions, prelude::FromRow, MySqlPool};
+use std::time::Duration;
+use std::{env::var, sync::Arc};
+use tokio::net::TcpStream;
 use tower_http::trace::{self, TraceLayer};
 use tracing::Level;
-use tokio::net::TcpStream;
-use std::{env::var, sync::Arc};
-use std::time::Duration;
 
 const PROXY_SERVER_PORT: u64 = 5000;
 const MAX_PROXY_PORT: u64 = 8010;
@@ -98,11 +99,13 @@ async fn ping(jar: CookieJar, Extension(pool): Extension<Arc<MySqlPool>>) -> (St
     match jar.get("ide") {
         Some(cookie) => match authenticate_jwt(cookie.value()) {
             Ok(claims) => {
-                update_last_proxy_time(&claims.session_id, &pool).await.unwrap();
-            },
+                update_last_proxy_time(&claims.session_id, &pool)
+                    .await
+                    .unwrap();
+            }
             Err(_) => {}
         },
-        None => {},
+        None => {}
     };
 
     (StatusCode::OK, "pong".to_string())
@@ -171,10 +174,9 @@ async fn get_cluster_address(pool: &MySqlPool, session_id: &str) -> Result<Strin
     }
 }
 
-
-
 async fn handle(
     Path(path): Path<String>,
+    ws: WebSocketUpgrade,
     Extension(pool): Extension<Arc<MySqlPool>>,
     jar: CookieJar,
     req: Request,
@@ -197,7 +199,7 @@ async fn handle(
         }
     };
 
-    let _cluster_address = get_cluster_address(&pool, &token.session_id)
+    let cluster_address = get_cluster_address(&pool, &token.session_id)
         .await
         .map_err(|e| {
             eprintln!("Error: {}", e);
@@ -208,36 +210,45 @@ async fn handle(
         })
         .unwrap();
 
-    proxy(req).await.unwrap();
+    let host = format!("ws://{}:{}", cluster_address, port);
 
+    ws.on_upgrade(move |socket| ws::forward(&host, ws));
     (StatusCode::OK, "authorized".to_string())
 }
 
-async fn proxy(req: Request) -> Result<Response, hyper::Error> {
-    if let Some(host_addr) = req.uri().authority().map(|auth| auth.to_string()) {
-        tokio::task::spawn(async move {
-            match hyper::upgrade::on(req).await {
-                Ok(upgraded) => {
-                    if let Err(e) = tunnel(upgraded, host_addr).await {
-                        tracing::warn!("server io error: {}", e);
-                    };
-                }
-                Err(e) => tracing::warn!("upgrade error: {}", e),
-            }
-        });
+async fn proxy(req: Request) -> Result<Response> {
+    let authority = req.uri().authority().map(|auth| auth.to_string());
 
-        Ok(Response::new(Body::empty()))
-    } else {
-        tracing::warn!("CONNECT host is not socket addr: {:?}", req.uri());
-        Ok((
-            StatusCode::BAD_REQUEST,
-            "CONNECT must be to a socket address",
-        )
-            .into_response())
-    }
+    let host_addr = match authority {
+        Some(addr) => addr,
+        None => {
+            return Ok((
+                StatusCode::BAD_REQUEST,
+                "CONNECT must be to a socket address",
+            )
+                .into_response());
+        }
+    };
+
+    tokio::task::spawn(async move {
+        match hyper::upgrade::on(req).await {
+            Ok(upgraded) => {
+                let res = tunnel(upgraded, host_addr).await;
+
+                if let Err(e) = res {
+                    tracing::warn!("tunnel error: {}", e);
+                }
+            }
+            Err(e) => {
+                tracing::warn!("upgrade error: {}", e);
+            }
+        };
+    });
+
+    Ok(Response::new(Body::empty()))
 }
 
-async fn tunnel(upgraded: Upgraded, addr: String) -> std::io::Result<()> {
+async fn tunnel(upgraded: Upgraded, addr: String) -> anyhow::Result<()> {
     let mut server = TcpStream::connect(addr).await?;
     let mut upgraded = TokioIo::new(upgraded);
 
@@ -268,9 +279,11 @@ async fn main() {
         .map_err(|e| {
             tracing::error!("Failed to connect to database: {}", e);
             panic!("Failed to connect to database");
-        }).map(|_| {
+        })
+        .map(|_| {
             tracing::info!("Connected to database");
-        }).unwrap();
+        })
+        .unwrap();
 
     let pool = Arc::new(pool);
 
@@ -290,6 +303,8 @@ async fn main() {
 
     tracing::info!("Server started on port {}", PROXY_SERVER_PORT);
 
-    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", PROXY_SERVER_PORT)).await.unwrap();
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", PROXY_SERVER_PORT))
+        .await
+        .unwrap();
     axum::serve(listener, app).await.unwrap();
 }
