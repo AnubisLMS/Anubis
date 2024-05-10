@@ -19,16 +19,11 @@ pub async fn get_cluster_address(pool: &MySqlPool, session_id: &str) -> Result<S
     .fetch_optional(pool)
     .await?;
 
-    match row {
-        Some(session) => {
-            if let Some(cluster_address) = session.cluster_address {
-                Ok(cluster_address)
-            } else {
-                Err(anyhow::anyhow!("cluster address not found"))
-            }
-        }
-        None => Err(anyhow::anyhow!("session not found")),
+    if let Some(row) = row {
+        return row.cluster_address.ok_or_else(|| anyhow::anyhow!("cluster address not found"));
     }
+
+    Err(anyhow::anyhow!("cluster_address not found"))
 }
 
 pub async fn update_last_proxy_time(session_id: &str, pool: &MySqlPool) -> Result<()> {
