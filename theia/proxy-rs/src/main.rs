@@ -96,17 +96,18 @@ fn create_jwt(session_id: &str, net_id: &str) -> Result<String> {
 }
 
 async fn ping(jar: CookieJar, Extension(pool): Extension<Arc<MySqlPool>>) -> (StatusCode, String) {
-    match jar.get("ide") {
-        Some(cookie) => match authenticate_jwt(cookie.value()) {
-            Ok(claims) => {
-                db::update_last_proxy_time(&claims.session_id, &pool)
-                    .await
-                    .unwrap();
-            }
-            Err(_) => {}
-        },
-        None => {}
-    };
+    // Asynchronously update the last proxy time for the session
+    // if the request contains a valid ide jwt cookie
+    if let Some(cookie) = jar.get("ide") {
+        authenticate_jwt(cookie.value()).ok().map(|claims| {
+            tokio::spawn(async move {
+                let result = db::update_last_proxy_time(&claims.session_id, &pool).await;
+                if let Err(e) = result {
+                    tracing::error!("failed to update last proxy time: {}", e);
+                }
+            });
+        });
+    }
 
     (StatusCode::OK, "pong".to_string())
 }
@@ -117,7 +118,7 @@ struct InitializeQueryParams {
 }
 
 async fn initialize(params: Query<InitializeQueryParams>, jar: CookieJar) -> impl IntoResponse {
-    let failed_response = |_reason: &str| {
+    let failed_response = {
         (
             StatusCode::PERMANENT_REDIRECT,
             jar.clone(),
@@ -129,19 +130,13 @@ async fn initialize(params: Query<InitializeQueryParams>, jar: CookieJar) -> imp
         Ok(claims) => claims,
         Err(err) => {
             tracing::error!("failed to authenticate jwt: {}", err);
-            return failed_response("Invalid token");
+            return failed_response;
         }
     };
 
     let new_token = create_jwt(&token.session_id, &token.net_id).unwrap();
     let ide_cookie = Cookie::new("ide", new_token);
-
     let new_jar = jar.add(ide_cookie);
-
-    let _domain = match *IS_DEBUG {
-        true => "localhost".to_string(),
-        false => "anubis-lms.io".to_string(),
-    };
 
     (
         StatusCode::PERMANENT_REDIRECT,
@@ -195,7 +190,7 @@ async fn handle(
     let cluster_address = db::get_cluster_address(&pool, &token.session_id)
         .await
         .map_err(|e| {
-            eprintln!("Error: {}", e);
+            tracing::error!("failed to get cluster address: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Internal server error".to_string(),
@@ -263,6 +258,7 @@ async fn main() -> Result<()> {
     let app = Router::new()
         .route("/ping", get(ping))
         .route("/initialize", get(initialize))
+        // Seems like we need to handle `/` and `/*` seperately ?
         .route("/", get(handle))
         .route("/*path", get(handle))
         .layer(Extension(pool))
@@ -276,8 +272,7 @@ async fn main() -> Result<()> {
                 .on_response(trace::DefaultOnResponse::new().level(Level::INFO)),
         );
 
-    tracing::info!("Server started on port {}", PROXY_SERVER_PORT);
-
+    tracing::info!("server started on port {}", PROXY_SERVER_PORT);
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", PROXY_SERVER_PORT))
         .await
         .unwrap();
