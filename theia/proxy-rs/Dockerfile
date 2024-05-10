@@ -16,8 +16,6 @@ WORKDIR /app
 
 COPY --from=builder /usr/src/app/target/release/proxy-rs /app/proxy-rs
 
-EXPOSE 5000
-
 USER app
 
 CMD ["./proxy-rs"]

@@ -78,6 +78,7 @@ helm upgrade --install traefik traefik/traefik \
   --set 'ports.web.port=80' \
   --set 'ports.websecure.port=443' \
   --create-namespace \
+  --version 27.0.2 \
   --namespace traefik
 
 # Create the anubis namespace
