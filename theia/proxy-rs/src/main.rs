@@ -1,29 +1,34 @@
+mod db;
+mod proxy;
 mod ws;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use axum::{
+    body::Body,
     extract::{Path, Query, Request, WebSocketUpgrade},
     http::StatusCode,
-    response::{IntoResponse, Redirect},
+    response::{IntoResponse, Redirect, Response},
     routing::get,
     Extension, Router,
 };
 use axum_extra::extract::cookie::{Cookie, CookieJar};
+use chrono::Utc;
+use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Validation};
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
-use sqlx::{mysql::MySqlPoolOptions, prelude::FromRow, MySqlPool};
+use sqlx::{mysql::MySqlPoolOptions, MySqlPool};
 use std::time::Duration;
 use std::{env::var, sync::Arc};
 use tower_http::trace::{self, TraceLayer};
 use tracing::Level;
 
 const PROXY_SERVER_PORT: u64 = 5000;
-const MAX_PROXY_PORT: u64 = 8010;
+// TODO: add back port range
+// const MAX_PROXY_PORT: u64 = 8010;
 const MAX_DB_CONNECTIONS: u32 = 50;
 const FAILED_REDIRECT_URL: &str = "https://anubis-lms.io/error";
-/// JWT expires in 6 hours
-const JWT_EXPIRATION: usize = 6 * 60 * 60;
+const JWT_EXPIRATION_HOURS: i64 = 6;
 
 // Lazy static evaluation of environment variables
 lazy_static! {
@@ -43,11 +48,17 @@ lazy_static! {
         let host = var("DB_HOST").unwrap_or("127.0.0.1".to_string());
         let port = var("DB_PORT").unwrap_or("3306".to_string());
         let user = String::from("anubis");
+        let database = String::from("anubis");
         let password = var("DB_PASSWORD").unwrap_or("anubis".to_string());
 
-        format!("mysql://{}:{}@{}:{}", user, password, host, port)
+        format!(
+            "mysql://{}:{}@{}:{}/{}",
+            user, password, host, port, database
+        )
     };
 }
+
+pub type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
@@ -62,17 +73,19 @@ fn authenticate_jwt(token: &str) -> Result<Claims> {
     let validation = Validation::new(Algorithm::HS256);
     let decoded = decode::<Claims>(token, &key, &validation)?;
 
-    if decoded.claims.exp < JWT_EXPIRATION {
-        return Err(anyhow::anyhow!("Token expired"));
-    }
-
     Ok(decoded.claims)
 }
 
 fn create_jwt(session_id: &str, net_id: &str) -> Result<String> {
     let key = EncodingKey::from_secret(SECRET_KEY.as_bytes());
+
+    let expiration = Utc::now()
+        .checked_add_signed(chrono::Duration::hours(JWT_EXPIRATION_HOURS))
+        .expect("valid timestamp")
+        .timestamp();
+
     let claims = Claims {
-        exp: JWT_EXPIRATION,
+        exp: expiration as usize,
         session_id: session_id.to_string(),
         net_id: net_id.to_string(),
     };
@@ -82,27 +95,11 @@ fn create_jwt(session_id: &str, net_id: &str) -> Result<String> {
     Ok(token)
 }
 
-async fn update_last_proxy_time(session_id: &str, pool: &MySqlPool) -> Result<()> {
-    sqlx::query(
-        r#"
-        UPDATE theia_session
-        SET last_proxy = NOW()
-        WHERE id = $1
-        "#,
-    )
-    .bind(session_id)
-    .execute(pool)
-    .await?;
-
-    Ok(())
-}
-
 async fn ping(jar: CookieJar, Extension(pool): Extension<Arc<MySqlPool>>) -> (StatusCode, String) {
-    tracing::info!("Ping");
     match jar.get("ide") {
         Some(cookie) => match authenticate_jwt(cookie.value()) {
             Ok(claims) => {
-                update_last_proxy_time(&claims.session_id, &pool)
+                db::update_last_proxy_time(&claims.session_id, &pool)
                     .await
                     .unwrap();
             }
@@ -137,8 +134,7 @@ async fn initialize(params: Query<InitializeQueryParams>, jar: CookieJar) -> imp
     };
 
     let new_token = create_jwt(&token.session_id, &token.net_id).unwrap();
-    let mut ide_cookie = Cookie::new("ide", new_token);
-    ide_cookie.set_http_only(true);
+    let ide_cookie = Cookie::new("ide", new_token);
 
     let new_jar = jar.add(ide_cookie);
 
@@ -154,60 +150,49 @@ async fn initialize(params: Query<InitializeQueryParams>, jar: CookieJar) -> imp
     )
 }
 
-#[derive(Deserialize, Serialize, FromRow)]
-struct TheiaSession {
-    cluster_address: Option<String>,
+#[derive(Debug)]
+pub struct Target {
+    pub host: String,
+    pub port: u16,
 }
 
-async fn get_cluster_address(pool: &MySqlPool, session_id: &str) -> Result<String> {
-    let row: Option<TheiaSession> = sqlx::query_as(
-        r#"
-        SELECT cluster_address
-        FROM theia_session
-        WHERE id = $1 AND active = 1
-        "#,
-    )
-    .bind(session_id)
-    .fetch_optional(pool)
-    .await?;
-
-    match row {
-        Some(session) => {
-            if let Some(cluster_address) = session.cluster_address {
-                Ok(cluster_address)
-            } else {
-                Err(anyhow::anyhow!("Cluster address not found"))
-            }
-        }
-        None => Err(anyhow::anyhow!("Session not found")),
-    }
+#[derive(Debug)]
+enum ProxyType {
+    Http,
+    WebSocket,
 }
 
+/// Handles generic incoming requests to be proxied to the coder server
+/// Depending on wether the upgrade websocket header is present
+/// the request will be proxied as a websocket or http request
 async fn handle(
-    ws: WebSocketUpgrade,
+    ws_upgrade: Option<WebSocketUpgrade>,
     Extension(pool): Extension<Arc<MySqlPool>>,
+    Extension(client): Extension<Arc<Client>>,
+    _path: Option<Path<String>>,
     jar: CookieJar,
-    _req: Request,
-) -> impl IntoResponse {
-    // let port = path.parse::<u64>().unwrap();
-
-    // if port > MAX_PROXY_PORT {
-    //     return (StatusCode::BAD_REQUEST, "Invalid port".to_string());
-    // }
+    req: Request,
+) -> Result<Response, (StatusCode, String)> {
+    let proxy_type = match ws_upgrade {
+        Some(_) => ProxyType::WebSocket,
+        None => ProxyType::Http,
+    };
 
     let token = match jar.get("ide") {
         Some(cookie) => match authenticate_jwt(cookie.value()) {
             Ok(claims) => claims,
-            Err(_) => {
-                return (StatusCode::UNAUTHORIZED, "Invalid token".to_string());
+            Err(err) => {
+                tracing::error!("failed to authenticate jwt: {}", err);
+                return Err((StatusCode::UNAUTHORIZED, "Invalid token".to_string()));
             }
         },
         None => {
-            return (StatusCode::UNAUTHORIZED, "No token provided".to_string());
+            tracing::error!("could not find jwt");
+            return Err((StatusCode::UNAUTHORIZED, "No token provided".to_string()));
         }
     };
 
-    let cluster_address = get_cluster_address(&pool, &token.session_id)
+    let cluster_address = db::get_cluster_address(&pool, &token.session_id)
         .await
         .map_err(|e| {
             eprintln!("Error: {}", e);
@@ -215,37 +200,73 @@ async fn handle(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Internal server error".to_string(),
             )
-        })
-        .unwrap();
+        })?;
 
-    let host = format!("ws://{}:{}", cluster_address, MAX_PROXY_PORT);
+    let target = Target {
+        host: cluster_address.clone(),
+        // TODO: handle port from the request path
+        port: 5000,
+    };
 
-    let _result = ws.on_upgrade(move |socket| ws::forward(host, socket));
+    tracing::debug!("proxying request to target: {:?}", target);
 
-    (StatusCode::OK, "authorized".to_string())
+    let result = match proxy_type {
+        ProxyType::Http => match proxy::proxy_req(client, req, target).await {
+            Ok(res) => res,
+            Err(err) => {
+                tracing::error!("failed to proxy http request: {}", err);
+                return Err((
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "failed to proxy http request".to_string(),
+                ));
+            }
+        },
+        ProxyType::WebSocket => {
+            if let Some(ws) = ws_upgrade {
+                // upgrade the connection to websocket and proxy the websocket request to the
+                // target host and port
+                ws.on_upgrade(move |socket| ws::forward(socket, target))
+            } else {
+                return Err((
+                    StatusCode::BAD_REQUEST,
+                    "no ws upgrade found for ws proxy request".to_string(),
+                ));
+            }
+        }
+    };
+
+    Ok(result)
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_target(false)
         .compact()
         .init();
 
-    let pool = MySqlPoolOptions::new()
-        .max_connections(MAX_DB_CONNECTIONS)
-        .acquire_timeout(Duration::from_secs(5))
-        .connect(&DB_URL)
-        .await
-        .unwrap();
+    let pool = Arc::new(
+        MySqlPoolOptions::new()
+            .max_connections(MAX_DB_CONNECTIONS)
+            .acquire_timeout(Duration::from_secs(5))
+            .connect(&DB_URL)
+            .await
+            .context("failed to connect to db")?,
+    );
 
-    let pool = Arc::new(pool);
+    // client used for proxying http requests
+    let client: Arc<Client> = Arc::new(
+        hyper_util::client::legacy::Client::<(), ()>::builder(TokioExecutor::new())
+            .build(HttpConnector::new()),
+    );
 
     let app = Router::new()
         .route("/ping", get(ping))
         .route("/initialize", get(initialize))
         .route("/", get(handle))
+        .route("/*path", get(handle))
         .layer(Extension(pool))
+        .layer(Extension(client))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
@@ -262,4 +283,6 @@ async fn main() {
         .unwrap();
 
     axum::serve(listener, app).await.unwrap();
+
+    Ok(())
 }

@@ -1,3 +1,4 @@
+use super::Target;
 use axum::extract::ws::{CloseFrame, Message as AxumMessage, WebSocket};
 use futures_util::{SinkExt, StreamExt};
 use tokio_tungstenite::tungstenite;
@@ -12,6 +13,11 @@ struct WebSocketMessage {
     message: WebSocketMessageType,
 }
 
+/// The incoming websocket upgrade connection is of type axum
+/// but the outgoing connection to the target server is of type tungstenite
+/// so we need to convert between the two message types
+///
+/// TODO: find a better way to handle this
 impl WebSocketMessage {
     fn tungstenite(message: TsMessage) -> Self {
         Self {
@@ -66,11 +72,12 @@ impl WebSocketMessage {
     }
 }
 
-pub async fn forward(url: String, client_ws: WebSocket) {
+pub async fn forward(client_ws: WebSocket, target: Target) {
+    let url = format!("ws://{}:{}", target.host, target.port);
     let server_ws = match connect_async(url).await {
         Ok((ws, _)) => ws,
         Err(e) => {
-            tracing::warn!("connect error: {}", e);
+            tracing::warn!("failed to connect to target websocket during proxy: {}", e);
             return;
         }
     };
@@ -86,12 +93,12 @@ pub async fn forward(url: String, client_ws: WebSocket) {
                         let message = WebSocketMessage::axum(message);
                         let res = server_write.send(message.into_tungstenite()).await;
                         if let Err(e) = res {
-                            tracing::warn!("client write error: {}", e);
+                            tracing::warn!("client ws write error: {}", e);
                             continue;
                         }
                     }
                     Err(e) => {
-                        tracing::warn!("client read error: {}", e);
+                        tracing::warn!("client ws read error: {}", e);
                         continue;
                     }
                 }
@@ -104,12 +111,12 @@ pub async fn forward(url: String, client_ws: WebSocket) {
                     let message = WebSocketMessage::tungstenite(message);
                     let res = client_write.send(message.into_axum()).await;
                     if let Err(e) = res {
-                        tracing::warn!("client write error: {}", e);
+                        tracing::warn!("server ws write error: {}", e);
                         continue;
                     }
                 }
                 Err(e) => {
-                    tracing::warn!("client read error: {}", e);
+                    tracing::warn!("server ws read error: {}", e);
                     continue;
                 }
             }
