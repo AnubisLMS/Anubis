@@ -2,10 +2,8 @@ from flask import Blueprint
 from sqlalchemy.exc import DataError, IntegrityError
 
 from anubis.github.team import add_github_team_member, remote_github_team_member
-from anubis.k8s.pvc.get import get_user_pvc
 from anubis.lms.courses import assert_course_superuser, course_context, valid_join_code
 from anubis.models import Course, InCourse, ProfessorForCourse, TAForCourse, User, db
-from anubis.models.id import default_id_factory
 from anubis.rpc.enqueue import enqueue_bulk_create_students
 from anubis.utils.auth.http import require_admin, require_superuser
 from anubis.utils.auth.user import current_user
