@@ -82,6 +82,10 @@ requirements: venv
 	pip-compile --quiet --upgrade requirements/common.in
 	pip-compile --quiet --upgrade requirements/dev.in
 
+.PHONY: clean               # remove venv
+clean:
+	rm -rf venv
+
 debug:
 	make -C .. debug
 yeetdb:

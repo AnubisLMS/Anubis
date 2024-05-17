@@ -118,6 +118,11 @@ mkdebug:
 mkrestart:
 	./k8s/debug/restart.sh
 
+.PHONY: clean           # Remove python and yarn modules
+clean:
+	make -C web clean
+	make -C api clean
+
 apirun:
 	make -C api run
 
