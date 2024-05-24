@@ -10,4 +10,4 @@ run: node_modules
 
 ,PHONY: clean
 clean:
-	rm -rf node_modules yarn.lock
+	rm -rf node_modules
