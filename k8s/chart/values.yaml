@@ -22,20 +22,20 @@ ideNodeSelector: doks.digitalocean.com/node-pool=pool-upp9zbisp
 
 # Main anubis api
 api:
-  replicas: 4
+  replicas: 1
   workers: 2
   gunicorn_options: "--capture-output --enable-stdio-inheritance --preload --timeout 30"
   image: "registry.digitalocean.com/anubis/api"
 
 # Anubis web static
 web:
-  replicas: 2
+  replicas: 1
   image: "registry.digitalocean.com/anubis/web"
 
 pipeline:
   # API for submission pipeline reporting
   api:
-    replicas: 2
+    replicas: 1
     workers: 1
 
   # API for submission pipeline reporting
@@ -48,11 +48,11 @@ theia:
 
   # theia-poller deployment
   poller:
-    replicas: 4
+    replicas: 1
 
   # theia-proxy deployment
   proxy:
-    replicas: 16
+    replicas: 1
     image: "registry.digitalocean.com/anubis/theia-proxy"
     tag: "latest"
     portMin: 8000
