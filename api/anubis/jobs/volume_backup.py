@@ -23,7 +23,7 @@ def parse_args() -> argparse.ArgumentParser:
 
     gen_parser = sub_parser.add_parser("gen")
     gen_parser.add_argument("--backup_host", default="s3.backup.anubis-lms.io")
-    gen_parser.add_argument("--backup_port", default=2222)
+    gen_parser.add_argument("--backup_port", default=22)
     gen_parser.add_argument(
         "--backup_host_path", default="/home/anubis/backups/volumes"
     )
