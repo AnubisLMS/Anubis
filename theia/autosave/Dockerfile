@@ -1,4 +1,4 @@
-FROM python:3.10-alpine
+FROM python:3.13-alpine
 
 RUN adduser -D -u 1001 -h /home/theia anubis \
   && apk add --update --no-cache git bash \

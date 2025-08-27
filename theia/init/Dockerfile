@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:trixie-slim
 
 # Create out directory
 VOLUME /home/anubis/
