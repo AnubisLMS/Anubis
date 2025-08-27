@@ -35,3 +35,4 @@ sqlalchemy<2
 sqlalchemy-json
 tabulate
 termcolor
+werkzeug<3
