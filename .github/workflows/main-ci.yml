@@ -17,7 +17,7 @@ jobs:
         working-directory: api
     strategy:
       matrix:
-        python-version: [ '3.10' ]
+        python-version: [ '3.13' ]
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -59,7 +59,7 @@ jobs:
         working-directory: theia/autograde/
     strategy:
       matrix:
-        python-version: [ '3.7', '3.10' ]
+        python-version: [ '3.10', '3.13' ]
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
