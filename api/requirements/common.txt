@@ -12,7 +12,7 @@ aiohttp==3.12.15
     #   discord-py
 aiosignal==1.4.0
     # via aiohttp
-alembic==1.16.4
+alembic==1.16.5
     # via
     #   -r requirements/common.in
     #   flask-migrate
@@ -63,7 +63,7 @@ discord-py==2.6.2
     # via -r requirements/common.in
 docker==7.1.0
     # via -r requirements/common.in
-flask==3.1.2
+flask==2.3.3
     # via
     #   -r requirements/common.in
     #   flask-caching
@@ -137,7 +137,6 @@ markdown-it-py==4.0.0
     # via rich
 markupsafe==3.0.2
     # via
-    #   flask
     #   jinja2
     #   mako
     #   sentry-sdk

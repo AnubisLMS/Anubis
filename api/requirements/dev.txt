@@ -16,7 +16,7 @@ aiosignal==1.4.0
     # via
     #   -r requirements/common.txt
     #   aiohttp
-alembic==1.16.4
+alembic==1.16.5
     # via
     #   -r requirements/common.txt
     #   flask-migrate
@@ -102,7 +102,7 @@ docker==7.1.0
     # via -r requirements/common.txt
 exceptiongroup==1.3.0
     # via pytest
-flask==3.1.2
+flask==2.3.3
     # via
     #   -r requirements/common.txt
     #   flask-caching
@@ -205,7 +205,6 @@ markdown-it-py==4.0.0
 markupsafe==3.0.2
     # via
     #   -r requirements/common.txt
-    #   flask
     #   jinja2
     #   mako
     #   sentry-sdk

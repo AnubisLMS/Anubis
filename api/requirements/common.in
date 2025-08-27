@@ -6,7 +6,7 @@ colorama
 cryptography
 discord.py
 docker
-flask>=2.0.0
+flask<3
 Flask-Caching
 flask_limiter
 flask_migrate
