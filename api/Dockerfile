@@ -1,4 +1,4 @@
-FROM python:3.10-slim-bullseye
+FROM python:3.13-slim-trixie
 
 ENV DEBUG=0
 ENV MINDEBUG=0
