@@ -204,15 +204,18 @@ def assignment_sync(assignment_data: dict) -> tuple[dict | str, bool]:
     assignment = Assignment.query.filter(Assignment.unique_code == assignment_data["unique_code"]).first()
 
     # Attempt to find the class
-    course_name = assignment_data.get("class", None) or assignment_data.get("course", None)
-    course: Course = Course.query.filter(
-        or_(
-            Course.name == course_name,
-            Course.course_code == course_name,
-        )
-    ).first()
-    if course is None:
-        return "Unable to find course", False
+    if assignment is None:
+        course_name = assignment_data.get("class", None) or assignment_data.get("course", None)
+        course: Course = Course.query.filter(
+            or_(
+                Course.name == course_name,
+                Course.course_code == course_name,
+            )
+        ).first()
+        if course is None:
+            return "Unable to find course", False
+    else:
+        course: Course = Course.query.filter(Course.id == assignment.course_id).first()
 
     assert_course_admin(course.id)
 
