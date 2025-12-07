@@ -561,10 +561,11 @@ class Submission(db.Model):
 
     @property
     def data(self):
+        from anubis.lms.assignments import get_assignment_due_date
         return {
             "id":              self.id,
             "assignment_name": self.assignment.name,
-            "assignment_due":  str(self.assignment.due_date),
+            "assignment_due":  str(get_assignment_due_date(self.owner_id, self.assignment_id)),
             "course_code":     self.assignment.course.course_code,
             "accepted":        self.accepted,
             "commit":          self.commit,
