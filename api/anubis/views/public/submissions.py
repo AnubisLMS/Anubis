@@ -121,11 +121,6 @@ def public_regrade_commit(commit: str):
     # Build submission query
     query = Submission.query.filter(Submission.commit == commit)
 
-    # If the current user is not a superuser, then add a filter
-    # to make sure the submission is owned by the current user.
-    if not current_user.is_superuser:
-        query = query.filter(Submission.owner_id == current_user.id)
-
     # Do query
     submission = query.first()
 
@@ -136,6 +131,11 @@ def public_regrade_commit(commit: str):
     if submission.owner_id != current_user.id:
         # If the user is not the owner, then full stop if
         assert_course_context(submission)
+
+        req_assert(
+            is_course_admin(submission.assignment.course_id, current_user.id),
+            message="submission does not exist",
+        )
 
     # Check that autograde is enabled for the assignment
     req_assert(
