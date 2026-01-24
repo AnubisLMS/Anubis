@@ -1,4 +1,5 @@
 import traceback
+import hashlib
 
 import jinja2
 from googleapiclient.errors import Error
@@ -9,6 +10,30 @@ from anubis.models import db, User, EmailTemplate, EmailEvent
 from anubis.utils.email.smtp import create_message
 from anubis.utils.logging import logger
 from anubis.utils.auth.admin import get_admin_user
+
+
+def make_reference_id(full_reference: str) -> str:
+    """
+    Create a stable reference_id that fits in 36 characters (UUID length).
+    Uses SHA256 hash formatted as UUID-like string.
+
+    Args:
+        full_reference: The full reference string (e.g., function name + timestamp)
+
+    Returns:
+        A 36-character string in UUID format (8-4-4-4-12)
+    """
+    # Create stable hash of the full reference
+    hash_bytes = hashlib.sha256(full_reference.encode()).digest()
+
+    # Format as UUID-like string: 8-4-4-4-12 (36 chars total with hyphens)
+    return '-'.join([
+        hash_bytes[0:4].hex(),      # 8 chars
+        hash_bytes[4:6].hex(),      # 4 chars
+        hash_bytes[6:8].hex(),      # 4 chars
+        hash_bytes[8:10].hex(),     # 4 chars
+        hash_bytes[10:16].hex(),    # 12 chars
+    ])
 
 
 def send_email_event_admin(
@@ -23,10 +48,13 @@ def send_email_event_admin(
     # Limit message to one per hour
     now = datetime.now().replace(minute=0, second=0, microsecond=0)
 
+    # Create a stable, short reference_id that fits in 36 chars
+    short_reference_id = make_reference_id(f'{reference_id} {now}')
+
     # Send email event
     send_email_event(
         user,
-        reference_id=f'{reference_id} {now}',
+        reference_id=short_reference_id,
         reference_type=reference_type,
         template_key=template_key,
         context=context,
