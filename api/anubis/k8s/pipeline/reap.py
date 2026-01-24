@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import pottery
 import kubernetes
-from kubernetes import client
+from kubernetes import client, config
 
 from anubis.k8s.pipeline.get import get_active_pipeline_jobs
 from anubis.models import Submission, db
@@ -73,6 +73,9 @@ def reap_pipeline_jobs():
 
     :return: number of active jobs
     """
+
+    # Load the incluster kubernetes config
+    config.load_incluster_config()
 
     # Get all pipeline jobs in the anubis namespace
     jobs = get_active_pipeline_jobs()
