@@ -97,7 +97,7 @@ def create_theia_k8s_pod_pvc(
     theia_user_id = default_theia_user_id if not webtop else 0
 
     # Get the theia session options
-    if not theia_session.image.webtop:
+    if theia_session.image and not theia_session.image.webtop:
         limits = theia_session.resources.get("limits", THEIA_DEFAULT_OPTIONS['resources']['limits'])
         requests = theia_session.resources.get("requests", THEIA_DEFAULT_OPTIONS['resources']['requests'])
         admin = theia_session.admin
