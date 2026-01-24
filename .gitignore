@@ -16,3 +16,5 @@ yarn-error.log
 
 acme.json
 acme*.json
+
+commit.sh
