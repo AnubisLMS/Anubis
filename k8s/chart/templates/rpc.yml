@@ -25,11 +25,10 @@ rules:
 - apiGroups: [""]
   resources: ["pods", "persistentvolumeclaims", "pods/log"]
   verbs: ["get", "list", "watch", "create", "delete", "deletecollection"]
-{{- if .Values.debug }}
 - apiGroups: [""]
+  resourceNames: ["google-gmail-creds"]
   resources: ["secrets"]
-  verbs: ["get"]
-{{- end}}
+  verbs: ["get", "patch"]
 ---
 
 kind: RoleBinding
