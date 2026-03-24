@@ -22,7 +22,7 @@ def gen_webhook(name, code, username, after=None, before=None, ref="refs/heads/m
     return {
         "ref": ref,
         "repository": {
-            "url": f"https://github.com/{org}/{name}-{code}-{username}",
+            "html_url": f"https://github.com/{org}/{name}-{code}-{username}",
             "name": f"{name}-{code}-{username}",
             "default_branch": default_branch
         },
