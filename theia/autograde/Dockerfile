@@ -7,6 +7,7 @@ RUN set -eux; \
     useradd -m --user-group --uid 1001 anubis; \
     apt update;  \
     apt install -y --no-install-recommends git bash g++; \
+    pip3 install --upgrade pip setuptools wheel; \
     pip3 install --no-cache-dir -r /requirements.txt; \
     mkdir -p /opt/anubis; \
     chmod 755 /opt/anubis; \

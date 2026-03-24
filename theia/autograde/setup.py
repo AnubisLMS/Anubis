@@ -4,7 +4,6 @@
 
 import os
 from setuptools import setup, find_packages
-from pkg_resources import parse_requirements as _parse_requirements
 
 if os.path.exists('README.md'):
     with open('README.md') as readme_file:
@@ -13,12 +12,12 @@ else:
     readme = ''
 
 
-def parse_requirements(s):
-    return [str(r) for r in _parse_requirements(s)]
-
-
-with open('requirements.txt') as requirements_file:
-    requirements = parse_requirements(requirements_file.read())
+# Read requirements line by line, ignoring empty lines and comments
+with open('requirements.txt') as f:
+    requirements = [
+        line.strip() for line in f
+        if line.strip() and not line.startswith('#')
+    ]
 
 setup_requirements = []
 test_requirements = []
