@@ -102,7 +102,7 @@ def admin_lecture_save(lecture_notes_id: str):
     if isinstance(post_time, str):
         try:
             post_time = date_parse(post_time)
-        except:
+        except Exception:
             post_time = None
 
     # Get lecture notes
@@ -170,7 +170,7 @@ def admin_lecture_upload():
     if isinstance(post_time, str):
         try:
             post_time = date_parse(post_time)
-        except:
+        except Exception:
             post_time = None
 
     # If post time is None for whatever reason, then
