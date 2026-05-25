@@ -44,9 +44,10 @@ class EnvConfig(object):
             # cache
             self.CACHE_TYPE = "NullCache"
 
-        # OAuth
-        self.OAUTH_NYU_CONSUMER_KEY = os.environ.get("OAUTH_NYU_CONSUMER_KEY", default="DEBUG")
-        self.OAUTH_NYU_CONSUMER_SECRET = os.environ.get("OAUTH_NYU_CONSUMER_SECRET", default="DEBUG")
+        # OAuth (MS Entra ID)
+        self.OAUTH_ENTRA_CLIENT_ID = os.environ.get("OAUTH_ENTRA_CLIENT_ID", default="DEBUG")
+        self.OAUTH_ENTRA_CLIENT_SECRET = os.environ.get("OAUTH_ENTRA_CLIENT_SECRET", default="DEBUG")
+        self.OAUTH_ENTRA_TENANT_ID = os.environ.get("OAUTH_ENTRA_TENANT_ID", default="DEBUG")
 
         # Github OAuth
         self.OAUTH_GITHUB_CONSUMER_KEY = os.environ.get("OAUTH_GITHUB_CONSUMER_KEY", default="DEBUG")

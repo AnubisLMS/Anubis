@@ -18,3 +18,5 @@ acme.json
 acme*.json
 
 commit.sh
+
+k8s/prod/oauth-entra-secret.yaml

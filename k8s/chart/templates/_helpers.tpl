@@ -90,16 +90,21 @@ API env
     secretKeyRef:
       name: api
       key: secret-key
-- name: "OAUTH_NYU_CONSUMER_KEY"
+- name: "OAUTH_ENTRA_CLIENT_ID"
   valueFrom:
     secretKeyRef:
-      name: oauth
-      key: nyu-consumer-key
-- name: "OAUTH_NYU_CONSUMER_SECRET"
+      name: oauth-entra
+      key: client-id
+- name: "OAUTH_ENTRA_CLIENT_SECRET"
   valueFrom:
     secretKeyRef:
-      name: oauth
-      key: nyu-consumer-secret
+      name: oauth-entra
+      key: client-secret
+- name: "OAUTH_ENTRA_TENANT_ID"
+  valueFrom:
+    secretKeyRef:
+      name: oauth-entra
+      key: tenant-id
 - name: "OAUTH_GITHUB_CONSUMER_KEY"
   valueFrom:
     secretKeyRef:

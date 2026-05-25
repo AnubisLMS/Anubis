@@ -11,7 +11,7 @@ from anubis.env import env
 from anubis.lms.courses import get_course_context
 from anubis.models import User, db, UserSource
 from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_GITHUB as github_provider
-from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_NYU as nyu_provider
+from anubis.utils.auth.oauth import OAUTH_REMOTE_APP_ENTRA as entra_provider
 from anubis.utils.auth.token import create_token
 from anubis.utils.auth.user import current_user, get_current_user
 from anubis.utils.data import is_debug
@@ -30,7 +30,7 @@ github_oauth_ = Blueprint("public-github-oauth", __name__, url_prefix="/public/g
 def public_login():
     if is_debug():
         return "AUTH"
-    return nyu_provider.authorize(callback="https://{}/api/public/oauth".format(NYU_DOMAIN))
+    return entra_provider.authorize(callback="https://{}/api/public/oauth".format(NYU_DOMAIN))
 
 
 @auth_.route("/logout")
@@ -60,7 +60,7 @@ def public_nyu_oauth_workaround():
 @nyu_oauth_.route("/oauth")
 def public_oauth():
     """
-    This is the endpoint NYU oauth sends the user to after
+    This is the endpoint MS Entra ID sends the user to after
     authentication. Here we need to verify the oauth response,
     and log them in on our side.
 
@@ -73,19 +73,33 @@ def public_oauth():
     # Get the next url if it was specified.
     next_url = "/playgrounds"
 
-    # Get the authorized response from NYU oauth
-    resp = nyu_provider.authorized_response()
+    # Get the authorized response from Entra ID
+    resp = entra_provider.authorized_response()
+    import sys
+    print(f"[entra oauth] authorized_response: {json.dumps(resp, default=str)}", file=sys.stderr)
     if resp is None or "access_token" not in resp:
         return "Access Denied"
 
-    # This is the data we get from NYU's oauth. It has basic information
-    # on who is logging in
-    user_data = nyu_provider.get("userinfo?schema=openid", token=(resp["access_token"],))
+    # Call Microsoft Graph to get user profile
+    graph_headers = {
+        "Authorization": f"Bearer {resp['access_token']}",
+        "Content-Type": "application/json",
+    }
+    graph_resp = requests.get("https://graph.microsoft.com/v1.0/me", headers=graph_headers)
+    print(f"[entra oauth] graph /me status={graph_resp.status_code} body={graph_resp.text}", file=sys.stderr)
+    if graph_resp.status_code != 200:
+        logger.error(f"MS Graph /me failed: {graph_resp.status_code} {graph_resp.text}")
+        return "Access Denied"
 
-    # Load the netid name from the response
-    netid = user_data.data["netid"]
-    firstname = user_data.data["firstname"]
-    lastname = user_data.data["lastname"]
+    user_data = graph_resp.json()
+
+    # Extract netid from userPrincipalName (e.g. "netid@nyu.edu" -> "netid")
+    upn = user_data.get("userPrincipalName", "")
+    netid = upn.split("@")[0] if "@" in upn else upn
+
+    # Get display name parts
+    firstname = user_data.get("givenName", "")
+    lastname = user_data.get("surname", "")
     name = f"{firstname} {lastname}".strip()
 
     # Check to see if user already exists
