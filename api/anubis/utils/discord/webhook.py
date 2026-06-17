@@ -60,7 +60,7 @@ def send_webhook(content: str):
             },
             timeout=1.0
         )
-    except:
+    except Exception:
         logger.error(traceback.format_exc())
         return
 
