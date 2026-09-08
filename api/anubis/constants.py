@@ -46,7 +46,7 @@ WEBTOP_DEFAULT_OPTIONS = {
 AUTOGRADE_IDE_DEFAULT_IMAGE = "registry.digitalocean.com/anubis/theia-jepst-test"
 
 # NYU specific variables
-NYU_DOMAIN = 'anubis.osiris.services'
+NYU_DOMAIN = 'anubis-lms.io'
 
 # Database Variables
 DB_COLLATION = "utf8mb4_general_ci"

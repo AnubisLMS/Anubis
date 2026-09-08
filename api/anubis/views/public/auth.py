@@ -118,9 +118,15 @@ def public_oauth():
 
     # Make the response depending on if a next_url was specified
     token = create_token(user.netid)
-    r = make_response(redirect(urlunparse((
-        'https', env.DOMAIN, '/api/public/auth/oauth-workaround', '', f'next={quote(next_url)}&token={quote(token)}', ''
-    ))))
+
+    if token is None:
+        return 'Error', 400
+
+    # Make the response depending on if a next_url was specified
+    r = make_response(redirect(next_url))
+
+    # set the token cookie
+    r.set_cookie("token", token, httponly=True)
 
     return r
 
