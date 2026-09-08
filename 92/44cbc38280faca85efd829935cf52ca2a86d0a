@@ -1,0 +1,14 @@
+web/public/index.html
+  h_b5fa7634886143 14,16-17,54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "9244cbc38280faca85efd829935cf52ca2a86d0a",
+  "prompts": {},
+  "humans": {
+    "h_b5fa7634886143": {
+      "author": "John McCann Cunniff Jr <johncunniff1248@gmail.com>"
+    }
+  }
+}
