@@ -1,0 +1,16 @@
+api/anubis/views/public/auth.py
+  h_b5fa7634886143 121-129
+api/anubis/constants.py
+  h_b5fa7634886143 49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "544c1de0e98323c92d077c21456985f88436e177",
+  "prompts": {},
+  "humans": {
+    "h_b5fa7634886143": {
+      "author": "John McCann Cunniff Jr <johncunniff1248@gmail.com>"
+    }
+  }
+}
