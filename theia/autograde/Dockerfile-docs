@@ -1,5 +1,5 @@
 ARG PYTHON_VERSION=3.10
-FROM python:${PYTHON_VERSION}-slim-bullseye AS build
+FROM python:${PYTHON_VERSION}-slim-trixie AS build
 WORKDIR /build
 
 COPY requirements.txt requirements_dev.txt /build/
