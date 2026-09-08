@@ -1,0 +1,14 @@
+theia/autograde/Dockerfile-docs
+  h_b5fa7634886143 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "cb9e8c937ba14f3efe036718fec73a1eb88e7752",
+  "prompts": {},
+  "humans": {
+    "h_b5fa7634886143": {
+      "author": "John McCann Cunniff Jr <johncunniff1248@gmail.com>"
+    }
+  }
+}
