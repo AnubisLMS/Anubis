@@ -1,4 +1,4 @@
-FROM docker:20.10-dind-rootless
+FROM docker:29.8-dind-rootless
 
 # Docker cannot work off of nfs
 # https://github.com/docker/for-linux/issues/1172
