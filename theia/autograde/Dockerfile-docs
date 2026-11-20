@@ -13,5 +13,5 @@ RUN set -eux; \
 COPY . .
 RUN make docs
 
-FROM nginxinc/nginx-unprivileged:1.23-alpine
+FROM nginxinc/nginx-unprivileged:1.31-alpine
 COPY --from=build /build/docs/html/ /usr/share/nginx/html/
