@@ -2,7 +2,7 @@
 
 if [ "${ANUBIS_RUN_DOCKERD}" = "1" ]; then
     echo 'Starting dockerd'
-    /usr/local/bin/dockerd-entrypoint.sh --authorization-plugin=anubis-authz
+    /usr/local/bin/dockerd-entrypoint.sh --authorization-plugin=anubis-authz --storage-driver=fuse-overlayfs
 else
     echo 'Skipping dockerd'
     while true; do

@@ -13,7 +13,7 @@ ENV DOCKER_HOST="tcp://localhost:2376" \
 USER 0
 RUN set -eux; \
     adduser -D -u 1001 -h /home/docker anubis; \
-    apk add --no-cache supervisor; \
+    apk add --no-cache supervisor fuse-overlayfs; \
     sed -i 's/rootless/anubis/' /etc/subuid /etc/subgid;
 
 VOLUME /certs
